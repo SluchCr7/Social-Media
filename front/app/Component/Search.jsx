@@ -1,0 +1,87 @@
+'use client'
+import React, { useEffect, useState } from 'react'
+import { FiUserPlus, FiX } from "react-icons/fi"
+import { useAuth } from '../Context/AuthContext'
+import Image from 'next/image'
+import Link from 'next/link'
+
+const Search = ({ showSearch, setShowSearch }) => {
+  const { users } = useAuth();
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [search, setSearch] = useState("");
+  
+  useEffect(() => {
+    if (!search.trim()) {
+      setFilteredUsers([]); // Clear results if search is empty
+      return;
+    }
+  
+    if (Array.isArray(users)) {
+      const filtered = users.filter(user =>
+        user.username.toLowerCase().includes(search.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    }
+  }, [search, users]);
+  return (
+    <div className={`fixed inset-0 z-[999] transition-all duration-500 ${showSearch ? 'backdrop-blur-sm bg-black/30' : 'pointer-events-none opacity-0'}`}>
+    <div className={`transform transition-all duration-700 ease-in-out 
+        ${showSearch ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'} 
+        w-[90%] md:w-[60%] lg:w-[70%] max-w-6xl mx-auto
+        bg-lightMode-fg dark:bg-darkMode-fg shadow-2xl rounded-xl p-6 mt-[10vh] relative`}>
+
+        {/* Close Button */}
+        <button
+          onClick={() => setShowSearch(false)}
+          className="text-gray-400 hover:text-gray-200 absolute top-1 right-2"
+          aria-label="Close Search"
+        >
+          <FiX size={22} />
+        </button>
+
+        {/* Search Input */}
+        <input
+          type="search"
+          placeholder="Search users..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full py-2 px-4 my-3 rounded-lg bg-[#2a2a2a] text-white placeholder-gray-400 focus:outline-none mb-4"
+        />
+
+        {/* User Results */}
+        <div className="flex flex-col gap-3">
+          {filteredUsers.length > 0 ? (
+            filteredUsers.map(user => (
+              <Link 
+                href={`/Pages/User/${user._id}`}
+                key={user._id}
+                className="flex justify-between items-center bg-[#252525] p-4 rounded-lg hover:bg-[#2f2f2f] transition"
+              >
+                <div className="flex items-center gap-3">
+                  <Image
+                    src={user.profilePhoto.url}
+                    alt="profile"
+                    width={40}
+                    height={40}
+                    className="rounded-full object-cover w-10 h-10"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-lightMode-text dark:text-darkMode-text font-medium">{user.username}</span>
+                    <span className="text-gray-500 text-sm">{user.profileName}</span>
+                  </div>
+                </div>
+                <button className="text-gray-300 hover:text-white" aria-label="Add User">
+                  <FiUserPlus size={20} />
+                </button>
+              </Link>
+            ))
+          ) : (
+            <div className="text-center py-10 text-gray-500 text-sm">No users found</div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default Search

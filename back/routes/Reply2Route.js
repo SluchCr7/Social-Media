@@ -1,0 +1,16 @@
+const { getAllRepliesonReply, addNewReply, editReply2, deleteReply, getReplyById,likeReplyForward } = require('../Controllers/Reply2Controller')
+const route = require('express').Router()
+const { verifyToken } = require('../Middelwares/verifyToken')
+
+route.route('/')
+    .get(getAllRepliesonReply)
+route.route('/add/:id')
+    .post(verifyToken,addNewReply)
+route.route('/:id')
+    .get(getReplyById)
+    .delete(deleteReply)
+route.route('/like/:id')
+    .put(verifyToken, likeReplyForward)
+route.route('/update/:id')
+    .put(editReply2)
+module.exports = route

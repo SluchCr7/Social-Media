@@ -1,0 +1,164 @@
+'use client';
+import React, { useState } from 'react';
+import {
+  FaMoon,
+  FaSun,
+  FaLock,
+  FaBell,
+  FaUserCog,
+  FaTrashAlt,
+  FaSignInAlt,
+} from 'react-icons/fa';
+import { CiChat1 } from "react-icons/ci";
+import { useAuth } from '@/app/Context/AuthContext';
+
+const SettingsPage = () => {
+  const [darkMode, setDarkMode] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordMessage, setPasswordMessage] = useState('');
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const { user, updatePassword } = useAuth()
+  const languages = [
+    { label: 'English', value: 'en' },
+    { label: 'French', value: 'fr' },
+    { label: 'Spanish', value: 'es' },
+  ]
+  const handleToggleTheme = () => {
+    setDarkMode(!darkMode);
+    document.documentElement.classList.toggle('dark')
+  };
+
+  const handleChangePassword = (e) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage("New passwords do not match.");
+    } else {
+      updatePassword(newPassword);
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    }
+  };
+
+  return (
+    <div className="min-h-screen p-8 text-gray-900 dark:text-white w-full transition-all">
+      <span className="text-sm font-semibold mb-4 pl-2">Hello {user?.username}</span>
+      <h1 className="text-3xl font-bold mb-10">⚙️ Settings</h1>
+      {/* Appearance */}
+      <section className=" bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {darkMode ? <FaMoon className="text-xl" /> : <FaSun className="text-xl" />}
+            <div>
+              <h2 className="text-lg font-semibold">Appearance</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Toggle between light and dark mode</p>
+            </div>
+          </div>
+          <button
+            onClick={handleToggleTheme}
+            className={`w-12 h-6 flex items-center ${darkMode ? 'bg-yellow-400' : 'bg-gray-300'} rounded-full p-1 transition-all`}
+          >
+            <div
+              className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
+                darkMode ? 'translate-x-6' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+      </section>
+      {/* Change Language */}
+      <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
+        <div className="flex items-center gap-4 mb-4">
+          <CiChat1 className="text-xl" />
+          <h2 className="text-lg font-semibold">Change Language</h2>
+          </div>
+        <select className="w-full p-2 rounded border dark:border-gray-700 dark:bg-transparent">
+          {languages.map((language, index) => (
+            <option key={index} value={language.value}>
+              {language.label}
+            </option>
+          ))}
+        </select>
+      </section>
+      {/* Security */}
+      <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
+        <div className="flex items-center gap-4 mb-4">
+          <FaLock className="text-xl" />
+          <h2 className="text-lg font-semibold">Security</h2>
+        </div>
+        <form onSubmit={handleChangePassword} className="grid gap-4">
+          <input
+            type="password"
+            placeholder="Current Password"
+            className="w-full p-2 rounded border dark:border-gray-700 dark:bg-transparent"
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="New Password"
+            className="w-full p-2 rounded border dark:border-gray-700 dark:bg-transparent"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Confirm New Password"
+            className="w-full p-2 rounded border dark:border-gray-700 dark:bg-transparent"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          <button onClick={handleChangePassword} className="self-start bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+            Change Password
+          </button>
+          {passwordMessage && (
+            <p className="text-sm mt-1 text-red-500 dark:text-red-400">{passwordMessage}</p>
+          )}
+        </form>
+      </section>
+
+      {/* Chat Setting */}
+      <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
+        <div className="flex items-center gap-4 mb-4">
+          <CiChat1 className="text-xl" />
+          <h2 className="text-lg font-semibold">Chat Setting</h2>
+        </div>
+      </section>
+      {/* Account */}
+      <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow">
+        <div className="flex items-center gap-4 mb-4">
+          <FaUserCog className="text-xl" />
+          <h2 className="text-lg font-semibold">Account</h2>
+        </div>
+
+        <button
+          onClick={() => setShowConfirmDelete(true)}
+          className="flex items-center gap-2 text-red-600 hover:text-red-700 font-medium"
+        >
+          <FaTrashAlt />
+          Delete Account
+        </button>
+
+        {/* Confirm Delete */}
+        {showConfirmDelete && (
+          <div className="mt-4 p-4 border border-red-600 bg-red-50 dark:bg-red-900/30 rounded">
+            <p className="text-sm mb-3">Are you sure you want to delete your account? This action is irreversible.</p>
+            <div className="flex gap-4">
+              <button className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Yes, Delete</button>
+              <button
+                onClick={() => setShowConfirmDelete(false)}
+                className="px-4 py-2 rounded border dark:border-gray-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
+    </div>
+  );
+};
+
+export default SettingsPage;
