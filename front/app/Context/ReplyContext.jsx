@@ -3,8 +3,8 @@ import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 export const ReplyContext = createContext();
 import { toast , ToastContainer } from "react-toastify";
-import { useAuth } from "./AuthContext";
 import getData from "../utils/getData";
+import { useAuth } from "./AuthContext";
 export const ReplyContextProvider = ({ children }) => {
     const [replies, setReplies] = useState([])
     const {user} = useAuth()

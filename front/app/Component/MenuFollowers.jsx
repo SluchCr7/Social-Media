@@ -6,29 +6,9 @@ import { useAuth } from '../Context/AuthContext';
 import Link from 'next/link';
 import { RiUserFollowLine } from "react-icons/ri";
 import { RiUserUnfollowLine } from "react-icons/ri";
-const followers = [
-  {
-    id: 1,
-    username: 'john_doe',
-    displayName: 'John Doe',
-    avatar: '/Home.jpg',
-  },
-  {
-    id: 2,
-    username: 'jane_smith',
-    displayName: 'Jane Smith',
-    avatar: '/Home.jpg',
-  },
-  {
-    id: 3,
-    username: 'cool_user',
-    displayName: 'Cool User',
-    avatar: '/Home.jpg',
-  },
-];
 
 const MenuFollowers = () => {
-  const {user , users} = useAuth()
+  const {user , users , followUser} = useAuth()
   const [myUser , setMyUser] = React.useState(null)
   useEffect(() => {
     setMyUser(users.find((userobj) => userobj._id === user._id))
@@ -63,7 +43,7 @@ const MenuFollowers = () => {
                 <span className="text-gray-400 text-xs">@{follower?.profileName}</span>
               </div>
             </Link>
-            <button>{follower?.followers?.includes(user?._id) ? <RiUserFollowLine className="text-primary" /> : <RiUserUnfollowLine className="text-primary" />}</button>
+            <button onClick={() => followUser(follower._id)}>{follower?.followers?.includes(user?._id) ? <RiUserFollowLine className="text-primary" /> : <RiUserUnfollowLine className="text-primary" />}</button>
           </div>
         ))}
       </div>

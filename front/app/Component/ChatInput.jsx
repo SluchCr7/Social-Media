@@ -5,11 +5,10 @@ import { IoImage, IoClose } from "react-icons/io5";
 import { useMessage } from '../Context/MessageContext';
 
 const ChatInput = () => {
-  const { AddNewMessage } = useMessage()
+  const { AddNewMessage , backgroundStyle } = useMessage()
   const [message, setMessage] = useState("")
   const [images, setImages] = useState([])
   const fileInputRef = useRef()
-
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files)
     const imagePreviews = files.map(file => ({
@@ -30,7 +29,7 @@ const ChatInput = () => {
   }
 
   return (
-    <div className='w-full flex flex-col gap-2'>
+    <div className='w-full flex flex-col gap-2' style={backgroundStyle}>
       {/* Image preview section */}
       {images.length > 0 && (
         <div className='flex gap-2 flex-wrap'>
@@ -39,7 +38,7 @@ const ChatInput = () => {
               <img src={img.url} alt={`upload-${idx}`} className='w-full h-full object-cover rounded-md' />
               <IoClose
                 onClick={() => removeImage(img.url)}
-                className='absolute top-1 right-1 text-black bg-white dark:text-white dark:bg-black bg-opacity-50 rounded-full p-1 cursor-pointer text-lg'
+                className='absolute top-1 right-1  bg-white  dark:bg-black bg-opacity-50 rounded-full p-1 cursor-pointer text-lg'
               />
             </div>
           ))}
@@ -53,7 +52,7 @@ const ChatInput = () => {
           onChange={(e) => setMessage(e.target.value)}
           type="text"
           placeholder='Type something...'
-          className='w-full py-2 px-4 rounded-lg bg-[#1e1e1e] text-text outline-none'
+          className='w-full py-2 px-4 rounded-lg bg-lightMode-fg dark:bg-darkMode-fg  outline-none'
         />
         <div className='flex items-center gap-3'>
           <input

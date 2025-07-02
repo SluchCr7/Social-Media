@@ -51,9 +51,7 @@ const Adahn = () => {
         });
       } else {
         setNextAdhan({
-          name: 'None',
-          time: '--:--',
-          timeDiff: '',
+          name: 'That is the last prayer of the day',
         });
       }
     }

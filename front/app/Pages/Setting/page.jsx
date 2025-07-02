@@ -11,7 +11,10 @@ import {
 } from 'react-icons/fa';
 import { CiChat1 } from "react-icons/ci";
 import { useAuth } from '@/app/Context/AuthContext';
-
+import { colors } from '@/app/utils/Data';
+import clsx from 'clsx';
+import { useMessage } from '@/app/Context/MessageContext';
+// import { useTranslation } from 'react-i18next';
 const SettingsPage = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
@@ -20,16 +23,29 @@ const SettingsPage = () => {
   const [passwordMessage, setPasswordMessage] = useState('');
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const { user, updatePassword } = useAuth()
-  const languages = [
-    { label: 'English', value: 'en' },
-    { label: 'French', value: 'fr' },
-    { label: 'Spanish', value: 'es' },
-  ]
+  const {backgroundStyle,handleBackgroundChange , backgroundValue} = useMessage()
+  // const { t, i18n } = useTranslation();
+
+  // const changeLanguage = (lng) => {
+  //   i18n.changeLanguage(lng);
+  //   localStorage.setItem("lng", lng); // اختياري لتخزين الاختيار
+  // };
+  // const languages = [
+  //   { label: 'English', value: 'en' },
+  //   { label: 'French', value: 'fr' },
+  //   { label: 'Spanish', value: 'es' },
+  //   { label: 'Arabic', value: 'ar' },
+  // ]
   const handleToggleTheme = () => {
     setDarkMode(!darkMode);
     document.documentElement.classList.toggle('dark')
   };
 
+    // تحقق من وجود تاريخ تسجيل دخول
+    const formattedDate = user?.lastLogin
+    ? new Date(user.lastLogin).toLocaleString()
+    : 'No login history found.';
+  
   const handleChangePassword = (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
@@ -44,8 +60,10 @@ const SettingsPage = () => {
 
   return (
     <div className="min-h-screen p-8 text-gray-900 dark:text-white w-full transition-all">
-      <span className="text-sm font-semibold mb-4 pl-2">Hello {user?.username}</span>
       <h1 className="text-3xl font-bold mb-10">⚙️ Settings</h1>
+      <span className="text-sm font-semibold mb-4 pl-2">Hello {user?.username}</span>
+      
+      
       {/* Appearance */}
       <section className=" bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
         <div className="flex items-center justify-between">
@@ -68,20 +86,27 @@ const SettingsPage = () => {
           </button>
         </div>
       </section>
-      {/* Change Language */}
+
+
+      {/* Change Language
       <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
         <div className="flex items-center gap-4 mb-4">
-          <CiChat1 className="text-xl" />
-          <h2 className="text-lg font-semibold">Change Language</h2>
-          </div>
-        <select className="w-full p-2 rounded border dark:border-gray-700 dark:bg-transparent">
+          <h2 className="text-lg font-semibold">{t("changeLanguage")}</h2>
+        </div>
+        <select
+          className="w-full p-2 rounded border dark:border-gray-700 dark:bg-transparent"
+          onChange={(e) => changeLanguage(e.target.value)}
+          value={i18n.language}
+        >
           {languages.map((language, index) => (
             <option key={index} value={language.value}>
               {language.label}
             </option>
           ))}
         </select>
-      </section>
+      </section> */}
+
+      
       {/* Security */}
       <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
         <div className="flex items-center gap-4 mb-4">
@@ -119,13 +144,58 @@ const SettingsPage = () => {
         </form>
       </section>
 
-      {/* Chat Setting */}
+
+      {/* Chat Colors */}
       <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
         <div className="flex items-center gap-4 mb-4">
           <CiChat1 className="text-xl" />
-          <h2 className="text-lg font-semibold">Chat Setting</h2>
+          <h2 className="text-lg font-semibold">Chat Colors</h2>
         </div>
+        <div className="flex items-start flex-col gap-4 mb-4">
+          <label className="text-base font-semibold text-lightMode-text dark:text-darkMode-text" htmlFor="color">Color Chat</label>
+          {/* Chat Colors */}
+          <div className="flex flex-wrap gap-4 mb-4">
+            {colors.map(({ name, value }) => (
+              <div
+                key={name}
+                title={name}
+                onClick={()=> handleBackgroundChange('color', value)}
+                className={clsx(
+                  'w-10 h-10 rounded-full border-2 cursor-pointer transition-all',
+                  backgroundValue === value
+                    ? 'ring-2 ring-offset-2 ring-blue-500 border-white'
+                    : 'border-gray-300'
+                )}
+                style={{ backgroundColor: value }}
+              ></div>
+            ))}
+          </div>
+        </div>
+
+        {/* Preview or label */}
+        <p className="text-sm text-gray-600">
+          Selected:{" "}
+          <span className="font-semibold" style={{ color: backgroundValue }}>
+            {
+              colors.find((c) => c.value === backgroundValue)?.name ||
+              'Unknown'
+            }
+          </span>
+        </p>
       </section>
+
+      {/* Last Login */}
+      <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
+      <div className="flex items-center gap-4 mb-4">
+        <CiChat1 className="text-xl" />
+        <h2 className="text-lg font-semibold">Last Login History</h2>
+      </div>
+      <p className="text-sm text-gray-600 dark:text-gray-300">
+        Your last login was on: <span className="font-medium text-lightMode-fg dark:text-darkMode-fg">{formattedDate}</span>
+      </p>
+      </section>
+
+
       {/* Account */}
       <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow">
         <div className="flex items-center gap-4 mb-4">
@@ -157,6 +227,8 @@ const SettingsPage = () => {
           </div>
         )}
       </section>
+
+
     </div>
   );
 };

@@ -29,6 +29,7 @@ app.use('/api/reply', require('./routes/ReplyRoute'))
 app.use('/api/reReply', require('./routes/Reply2Route'))
 app.use('/api/community', require('./routes/CommunityRoute'))
 app.use('/api/news', require('./routes/NewsRoute'))
+app.use('/api/story', require('./routes/StoryRoute'))
 app.use(errorhandler)
 
 

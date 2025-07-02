@@ -75,6 +75,8 @@ const LoginUser = asyncHandler(async (req, res) => {
     if (!user) {
         res.status(400).json({message : "Email or Password are not Correct"})
     }
+    user.lastLogin = new Date();
+    await user.save();
     const validPassword = await bcrypt.compare(req.body.password , user.password)
     if (!validPassword) {
         return res.status(400).send("Invalid email or password");
@@ -124,13 +126,20 @@ const getAllUsers = asyncHandler(async (req, res) => {
         path: 'followers',
         select: 'profilePhoto username profileName',
       })
-        .populate("communities" , "Name Picture members")
+        .populate("communities", "Name Picture members")
         .populate({
             path: "pinsPosts",
             populate: {
               path: "owner",
               model: "User",
             },
+        })
+        .populate({
+          path: "stories",
+          populate: {
+            path: "owner",
+            model: "User",
+          },
         })
         .populate({
             path: "pinsPosts",
@@ -325,24 +334,34 @@ const uploadPhoto = asyncHandler(async (req, res) => {
 })
 
 const makeFollow = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.id)
+    const user = await User.findById(req.params.id); // user to be followed
+    const currentUser = await User.findById(req.user._id); // the current logged-in user
+  
     if (!user) {
-        res.status(404)
-        throw new Error('User not found')
+      res.status(404);
+      throw new Error('User not found');
     }
+  
     if (user.followers.includes(req.user._id)) {
-        await User.findByIdAndUpdate(req.params.id, {
-            $pull: { followers: req.user._id },
-        });
-        res.status(200).json({ message: 'Unfollowed' })
+      // Unfollow
+      await User.findByIdAndUpdate(req.params.id, {
+        $pull: { followers: req.user._id },
+      });
+      await User.findByIdAndUpdate(req.user._id, {
+        $pull: { following: req.params.id },
+      });
+      res.status(200).json({ message: 'Unfollowed' });
+    } else {
+      // Follow
+      await User.findByIdAndUpdate(req.params.id, {
+        $push: { followers: req.user._id },
+      });
+      await User.findByIdAndUpdate(req.user._id, {
+        $push: { following: req.params.id },
+      });
+      res.status(200).json({ message: 'Followed' });
     }
-    else {
-        await User.findByIdAndUpdate(req.params.id, {
-            $push: { followers: req.user._id },
-        });
-        res.status(200).json({ message: 'Followed' })
-    }
-})
+});
 
 const savePost = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id)

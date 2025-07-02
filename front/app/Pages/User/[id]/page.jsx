@@ -58,9 +58,7 @@ const Page = ({ params }) => {
             </div>
             <div>
               <h2 className="font-bold text-lg">
-                {
-                  users.filter((u) => u.followers.includes(userSelected._id)).length
-                }
+                  {userSelected?.following?.length}
               </h2>
               <p className="text-sm text-gray-400">Following</p>
             </div>

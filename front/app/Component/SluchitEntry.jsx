@@ -80,15 +80,19 @@ const SluchitEntry = ({ post }) => {
 
         <div className='flex flex-col w-full gap-3'>
           {/* Header Info */}
-          <div className='flex justify-between items-center w-full'>
-            <div>
+          <div className='flex justify-between items-start w-full'>
+            {/* Left: Info */}
+            <div className='flex flex-col gap-0.5'>
               {isCommunityPost && !isInCommunityPage ? (
-                <div className='flex flex-col gap-1'>
-                  <div  className='text-lightMode-fg dark:text-darkMode-fg flex flex-col items-start gap-[.5px] font-semibold'>
-                    <Link href={`/Pages/Community/${post?.community?._id}`}>{post?.community?.Name}</Link>
-                    <span className='text-gray-500 text-xs'>{post?.owner?.username}</span>
-                  </div>
-                </div>
+                <>
+                  <Link
+                    href={`/Pages/Community/${post?.community?._id}`}
+                    className='text-lightMode-fg dark:text-darkMode-fg font-semibold'
+                  >
+                    {post?.community?.Name}
+                  </Link>
+                  <span className='text-gray-500 text-xs'>{post?.owner?.username}</span>
+                </>
               ) : (
                 <Link
                   href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${post?.owner?._id}`}
@@ -100,14 +104,23 @@ const SluchitEntry = ({ post }) => {
                   </span>
                 </Link>
               )}
-            </div>
-            <div className={`${post?.owner?._id === user?._id ? 'flex' : 'hidden'} relative items-center gap-2`}>
               <span className='text-gray-500 text-xs'>
                 {new Date(post?.createdAt).toDateString()}
               </span>
-              <span onClick={() => setShowMenu(!showMenu)}><BsThreeDots /></span>
-              <PostMenu showMenu={showMenu} setShowMenu={setShowMenu} post={post} />
             </div>
+
+            {/* Right: More */}
+            {post?.owner?._id === user?._id && (
+              <div className='relative'>
+                <span
+                  onClick={() => setShowMenu(!showMenu)}
+                  className='cursor-pointer text-xl text-gray-500 hover:text-gray-700 transition'
+                >
+                  <BsThreeDots />
+                </span>
+                <PostMenu showMenu={showMenu} setShowMenu={setShowMenu} post={post} />
+              </div>
+            )}
           </div>
 
           {/* Shared Post Text */}
@@ -146,6 +159,7 @@ const SluchitEntry = ({ post }) => {
             </div>
           )}
 
+          {/* Main Post Text */}
           {!isShared && post?.text && (
             <p className='text-sm text-gray-600 dark:text-gray-200'>{post?.text}</p>
           )}

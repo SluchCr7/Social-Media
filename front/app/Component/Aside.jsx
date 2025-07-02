@@ -22,10 +22,6 @@ const Aside = () => {
     { icon: <FaPlus />, text: "New Post", link: "/Pages/NewPost", hide: true },
     { icon: <LuMessageCircle />, text: "Messanger", link: "/Pages/Messanger", hide: true },
     {
-      icon: <IoIosNotificationsOutline />, text: "Notifications", hide: true,
-      onClick: () => alert("Show Notifications") // Replace with setShowNotifications(true)
-    },
-    {
       icon: <RiUserCommunityLine />,
       text: "Community",
       link: "/Pages/CommunityMain", 

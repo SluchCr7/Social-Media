@@ -55,6 +55,12 @@ const UserSchema = new mongoose.Schema({
             ref: 'User',
         }
     ],
+    following : [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        }
+    ],
     savedPosts : [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -66,7 +72,11 @@ const UserSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref : "Post"
         }
-    ]
+    ], 
+    lastLogin: {
+        type: Date,
+        default: Date.now
+    }
 }, {
     timestamps: true,
     toJSON: { virtuals: true },
@@ -102,6 +112,11 @@ UserSchema.virtual("replies2", {
 
 UserSchema.virtual("communities", {
     ref: "Community",
+    localField: "_id",
+    foreignField: "owner"
+})
+UserSchema.virtual("stories", {
+    ref: "Story",
     localField: "_id",
     foreignField: "owner"
 })

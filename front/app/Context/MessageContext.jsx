@@ -14,7 +14,9 @@ export const MessageContextProvider = ({ children }) => {
     const [messages, setMessages] = useState([])
     const [isMessagesLoading, setIsMessagesLoading] = useState(true)   
     const { AddNotify } = useNotify();
-    const [messagesByUser , setMessagesByUser] = useState([])
+    const [messagesByUser, setMessagesByUser] = useState([])
+    const [backgroundType, setBackgroundType] = useState('color'); // 'color' or 'image'
+    const [backgroundValue, setBackgroundValue] = useState('#f0f0f0'); // color or image URL
     const { user } = useAuth();
     useEffect(() => {
         const fetchUsers = async () => {
@@ -101,6 +103,30 @@ export const MessageContextProvider = ({ children }) => {
         };
         fetchMessagesByUser();
     }, [user]); // run only when user changes
+
+
+    useEffect(() => {
+        // Load from localStorage if saved before
+        const savedType = localStorage.getItem('chatBackgroundType');
+        const savedValue = localStorage.getItem('chatBackgroundValue');
+        if (savedType && savedValue) {
+            setBackgroundType(savedType);
+            setBackgroundValue(savedValue);
+        }
+    }, []);
+
+
+    const handleBackgroundChange = (type, value) => {
+        setBackgroundType(type);
+        setBackgroundValue(value);
+        localStorage.setItem('chatBackgroundType', type);
+        localStorage.setItem('chatBackgroundValue', value);
+    };
+    
+    const backgroundStyle =
+    backgroundType === 'color'
+    ? { color: backgroundValue }
+    : { backgroundImage: `url(${backgroundValue})`, backgroundSize: 'cover', backgroundPosition: 'center' };  
     return (
         <>
             <ToastContainer
@@ -126,7 +152,10 @@ export const MessageContextProvider = ({ children }) => {
                     messages,
                     isMessagesLoading
                     ,AddNewMessage,
-                    messagesByUser
+                    messagesByUser,
+                    backgroundStyle,
+                    handleBackgroundChange,
+                    backgroundValue
                 }}
             >
                 {children}

@@ -1,14 +1,16 @@
 'use client'
 import Image from 'next/image';
 import React, { useEffect } from 'react';
+import { useMessage } from '../Context/MessageContext';
 
 const SenderMessage = ({ message, user }) => {
+  const {backgroundValue , backgroundStyle} = useMessage()
   return (
-    <div className="flex justify-end mb-4">
-      <div className="flex max-w-[80%] gap-2 items-end">
+    <div className="flex justify-end mb-4" style={backgroundStyle}>
+      <div className="flex max-w-[100%] gap-2 items-end">
         {/* Message content */}
         <div className="flex flex-col items-end text-right">
-          <div className="bg-gray-800 text-white px-4 py-2 rounded-lg rounded-br-none">
+          <div className="bg-gray-800 text-white px-4 text-sm  py-2 rounded-lg rounded-br-none">
             {/* If message contains photos */}
             {Array.isArray(message.Photos) && message.Photos.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-2">
@@ -33,13 +35,13 @@ const SenderMessage = ({ message, user }) => {
         </div>
 
         {/* Sender avatar */}
-        <div className="w-10 h-10">
+        <div>
           <Image
             src={user?.profilePhoto?.url}
             alt="Sender"
             width={40}
             height={40}
-            className="rounded-full object-cover"
+            className="rounded-full object-cover w-10 h-10"
           />
         </div>
       </div>

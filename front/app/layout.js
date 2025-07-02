@@ -2,6 +2,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Header from "./Component/Header";
 import { JetBrains_Mono } from "next/font/google";
+// import i18n from "./utils/i18n";
 import LayoutComponent from "./Component/LayoutComponent";
 import { AuthContextProvider } from "./Context/AuthContext";
 import { PostContextProvider } from "./Context/PostContext";
@@ -12,6 +13,7 @@ import { NotifyContextProvider } from "./Context/NotifyContext";
 import { ReplyReplyContextProvider } from "./Context/ReplyReplyContext";
 import { NewsContextProvider } from "./Context/NewsContext";
 import { CommunityContextProvider } from "./Context/CommunityContext";
+import { StoryContextProvider } from "./Context/StoryContext";
 
 const jetBrainsMono = JetBrains_Mono({
   subsets: ["latin"]
@@ -38,11 +40,13 @@ export default function RootLayout({ children }) {
                   <ReplyContextProvider>
                     <ReplyReplyContextProvider>
                       <CommunityContextProvider>
-                        <NewsContextProvider>
-                          <LayoutComponent>
-                            {children}
-                          </LayoutComponent>
-                        </NewsContextProvider>
+                        <StoryContextProvider>
+                          <NewsContextProvider>
+                            <LayoutComponent>
+                              {children}
+                            </LayoutComponent>
+                          </NewsContextProvider>
+                        </StoryContextProvider>
                       </CommunityContextProvider>
                     </ReplyReplyContextProvider>
                   </ReplyContextProvider>

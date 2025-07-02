@@ -16,7 +16,7 @@ const Menu = () => {
         <>
           {/* Uncomment if needed */}
           {/* <MenuFollowing /> */}
-          <Adahn/>
+          {/* <Adahn/> */}
           {/* <News/> */}
           <Communities/>
           <HashtagsMenu />

@@ -19,7 +19,7 @@ const UserCard = ({ user, isOnline, onSelect }) => {
                     <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-darkMode-bg rounded-full"></span>
                 )}
             </div>
-            <div className="flex flex-col">
+            <div className="hidden flex-col md:flex">
                 <span className="text-dark dark:text-white font-medium text-sm">{user.username}</span>
                 <span className="text-gray-800 dark:text-gray-400 text-xs">{user.profileName}</span>
             </div>

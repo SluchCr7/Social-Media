@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { FiX } from "react-icons/fi"
 import { useAuth } from '../Context/AuthContext'
+import { toast } from 'react-toastify'
 
 const UpdateProfile = ({ update, setUpdate }) => {
   const [username, setUserName] = useState('')
@@ -9,11 +10,10 @@ const UpdateProfile = ({ update, setUpdate }) => {
   const [profileName, setProfileName] = useState('')
 
   const { updateProfile } = useAuth()
+
   const handleUpdate = (e) => {
     e.preventDefault()
-  
     const updatedFields = {}
-  
     if (username.trim()) updatedFields.username = username.trim()
     if (description.trim()) updatedFields.description = description.trim()
     if (profileName.trim()) updatedFields.profileName = profileName.trim()
@@ -21,59 +21,68 @@ const UpdateProfile = ({ update, setUpdate }) => {
       toast.error("Please fill at least one field.")
       return
     }
-  
     updateProfile(updatedFields)
+    setUpdate(false)
   }
-  
 
   return (
-    <div className={`${update ? 'fixed inset-0 bg-white/60 dark:bg-black/60 z-50' : 'hidden'}`}>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-xl bg-lightMode-menu dark:bg-darkMode-menu rounded-2xl shadow-lg p-6 space-y-6">
-        <div className="flex justify-between items-center border-b border-lightMode-fg dark:border-darkMode-fg pb-2">
-          <h2 className="text-lg font-semibold text-lightMode-fg dark:text-darkMode-fg">Update Profile</h2>
-          <FiX onClick={() => setUpdate(false)} className="text-lightMode-fg dark:text-darkMode-fg cursor-pointer hover:opacity-75" size={20} />
-        </div>
+    <div className={`${update ? 'fixed inset-0 bg-black/60 z-50 flex items-center justify-center' : 'hidden'}`}>
+      <div className="bg-[#181818] text-white w-[90%] max-w-lg rounded-2xl shadow-2xl p-6 relative animate-fade-in">
+        
+        {/* زر الإغلاق */}
+        <button
+          onClick={() => setUpdate(false)}
+          className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl transition"
+        >
+          <FiX />
+        </button>
 
-        <form onSubmit={handleUpdate} className="space-y-4">
+        {/* العنوان */}
+        <h2 className="text-2xl font-bold text-center mb-6 border-b pb-2 border-gray-700">
+          Update Profile
+        </h2>
+
+        <form onSubmit={handleUpdate} className="space-y-5">
+          {/* اسم المستخدم */}
           <div>
-            <label htmlFor="name" className="block text-sm font-semibold text-lightMode-fg dark:text-darkMode-fg mb-1">Username</label>
+            <label className="block text-sm font-semibold mb-1 text-gray-300">اسم المستخدم</label>
             <input
+              type="text"
               value={username}
               onChange={(e) => setUserName(e.target.value)}
-              id="name"
-              type="text"
-              placeholder="Leave empty to skip"
-              className="w-full py-2 px-4 rounded-lg bg-[#1e1e1e] text-text outline-none"
+              placeholder="Username"
+              className="w-full py-2 px-4 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-green-500 outline-none transition"
             />
           </div>
 
+          {/* البايو */}
           <div>
-            <label htmlFor="desc" className="block text-sm font-semibold text-lightMode-fg dark:text-darkMode-fg mb-1">Description</label>
+            <label className="block text-sm font-semibold mb-1 text-gray-300">الوصف</label>
             <input
+              type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              id="desc"
-              type="text"
-              placeholder="Leave empty to skip"
-              className="w-full py-2 px-4 rounded-lg bg-[#1e1e1e] text-text outline-none"
+              placeholder="Description"
+              className="w-full py-2 px-4 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-green-500 outline-none transition"
             />
           </div>
 
+          {/* الاسم المعروض */}
           <div>
-            <label htmlFor="profileName" className="block text-sm font-semibold text-lightMode-fg dark:text-darkMode-fg mb-1">Profile Name</label>
+            <label className="block text-sm font-semibold mb-1 text-gray-300">الاسم المعروض</label>
             <input
+              type="text"
               value={profileName}
               onChange={(e) => setProfileName(e.target.value)}
-              id="profileName"
-              type="text"
-              placeholder="Leave empty to skip"
-              className="w-full py-2 px-4 rounded-lg bg-[#1e1e1e] text-text outline-none"
+              placeholder="Nickname"
+              className="w-full py-2 px-4 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-green-500 outline-none transition"
             />
           </div>
 
+          {/* زر التحديث */}
           <button
             type="submit"
-            className="w-full py-2 px-4 rounded-lg bg-lightMode-fg text-lightMode-bg dark:bg-darkMode-fg dark:text-darkMode-bg hover:bg-opacity-80 transition-colors font-semibold"
+            className="w-full py-2 px-4 rounded-lg bg-green-600 hover:bg-green-500 transition text-white font-semibold text-lg shadow-md"
           >
             Update
           </button>

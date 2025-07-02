@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 // import MainChat from './MainChat';
 import ChatInput from './ChatInput';
 import ChatHeader from './ChatHeader';
@@ -7,11 +7,13 @@ import { useAuth } from '../Context/AuthContext';
 import { useMessage } from '../Context/MessageContext';
 import SenderMessage from './SenderMessage';
 import ReceiverMessage from './ReceiverMessage';
+import {useRef} from 'react'
 
 const Chat = () => {
   const { user } = useAuth();
-  const { selectedUser, messages } = useMessage();
-
+  const { selectedUser, messages , backgroundStyle } = useMessage();
+  const ContainerMessageRef = useRef(null)
+  
   // --- Group messages by date ---
   const groupMessagesByDate = (messages) => {
     return messages.reduce((groups, message) => {
@@ -38,8 +40,18 @@ const Chat = () => {
     (a, b) => new Date(a).getTime() - new Date(b).getTime()
   );
 
+  useEffect(() => {
+    if (ContainerMessageRef.current && messages) {
+      // ContainerMessageRef.current.scrollTop = ContainerMessageRef.current.scrollHeight;
+      ContainerMessageRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+    else {
+      ContainerMessageRef.current = null;
+    }
+  }, [messages]);
+
   return (
-    <div className='flex flex-col w-full h-full bg-lightMode-bg dark:bg-darkMode-bg rounded-lg overflow-hidden shadow-md'>
+    <div className='flex flex-col w-full h-full bg-lightMode-bg dark:bg-darkMode-bg rounded-lg overflow-hidden shadow-md' >
 
       {/* Chat Header */}
       <div className="border-b border-gray-700 px-4 py-3">
@@ -47,12 +59,12 @@ const Chat = () => {
       </div>
 
       {/* Message Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-2 space-y-6 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+      <div className="flex-1 overflow-y-auto px-4 bg-lightMode-bg dark:bg-darkMode-bg py-2 space-y-6 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800" style={backgroundStyle}>
         {sortedDates.map((dateKey) => (
-          <div key={dateKey}>
+          <div key={dateKey} ref={ContainerMessageRef}>
             {/* Date separator */}
             <div className="flex justify-center my-4">
-              <div className="text-gray-300 text-xs bg-gray-600/30 px-4 py-1 rounded-full backdrop-blur-sm shadow-sm">
+              <div className=" text-xs  px-4 py-1 rounded-full backdrop-blur-sm shadow-sm">
                 {getDisplayDate(dateKey)}
               </div>
             </div>

@@ -6,10 +6,10 @@ import { useMessage } from '../Context/MessageContext';
 import { useAuth } from '../Context/AuthContext';
 
 const ChatHeader = () => {
-  const { selectedUser, setSelectedUser } = useMessage();
+  const { selectedUser, setSelectedUser , backgroundStyle } = useMessage();
   const { onlineUsers } = useAuth();
   return (
-    <div className='w-full flex items-center justify-between px-2 py-1'>
+    <div className='w-full flex items-center justify-between px-2 py-1' style={backgroundStyle}>
       {/* Left: Profile Info */}
       <div className='flex items-center gap-3'>
         <Image
@@ -20,7 +20,7 @@ const ChatHeader = () => {
           className='rounded-full w-10 h-10 object-cover'
         />
         <div className='flex flex-col'>
-          <span className='font-medium text-sm text-gray-700 dark:text-gray-200'>
+          <span className='font-medium text-sm'>
             {selectedUser?.username}
           </span>
           <span className={`text-xs ${onlineUsers?.includes(selectedUser?._id) ? 'text-green-400' : 'text-gray-500'}`}>
