@@ -1,17 +1,21 @@
-'use client'
+'use client';
 import Image from 'next/image';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useMessage } from '../Context/MessageContext';
+import { BsCheck, BsCheckAll } from 'react-icons/bs';
 
 const SenderMessage = ({ message, user }) => {
-  const {backgroundValue , backgroundStyle} = useMessage()
+  const { backgroundStyle } = useMessage();
+
+  const isRead = message.isRead;
+
   return (
-    <div className="flex justify-end mb-4" style={backgroundStyle}>
-      <div className="flex max-w-[100%] gap-2 items-end">
-        {/* Message content */}
+    <div className="flex justify-end px-4 py-2" style={backgroundStyle}>
+      <div className="flex max-w-[80%] gap-2 items-end">
+        {/* محتوى الرسالة */}
         <div className="flex flex-col items-end text-right">
-          <div className="bg-gray-800 text-white px-4 text-sm  py-2 rounded-lg rounded-br-none">
-            {/* If message contains photos */}
+          <div className="bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-br-sm shadow-md">
+            {/* الصور */}
             {Array.isArray(message.Photos) && message.Photos.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-2">
                 {message.Photos.map((img, index) => (
@@ -26,15 +30,23 @@ const SenderMessage = ({ message, user }) => {
                 ))}
               </div>
             )}
-            {/* Message text */}
-            <p>{message.text}</p>
+
+            {/* النص */}
+            {message.text && <p className="text-sm">{message.text}</p>}
           </div>
-          <span className="text-xs text-lightMode-text dark:text-darkMode-text mt-1">
-            {new Date(message.createdAt).toLocaleTimeString()}
-          </span>
+
+          {/* التوقيت + حالة القراءة */}
+          <div className="flex items-center gap-1 mt-1 text-xs text-gray-400">
+            <span>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            {isRead ? (
+              <BsCheckAll className="text-blue-400" title="Seen" />
+            ) : (
+              <BsCheck className="text-gray-400" title="Sent" />
+            )}
+          </div>
         </div>
 
-        {/* Sender avatar */}
+        {/* صورة البروفايل */}
         <div>
           <Image
             src={user?.profilePhoto?.url}

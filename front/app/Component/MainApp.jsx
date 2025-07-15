@@ -1,29 +1,38 @@
-'use client'
-import React, { useState } from 'react'
-import Sluchits from './Sluchits'
-import Stories from './Stories'
-import { IoIosNotificationsOutline } from "react-icons/io"
-import NotificationMenu from './NotificationMenu'
+'use client';
+import React, { useState } from 'react';
+import Sluchits from './Sluchits';
+import Stories from './Stories';
+import NotificationMenu from './NotificationMenu';
+import { useNotify } from '../Context/NotifyContext';
+import Link from 'next/link';
+import { useMessage } from '../Context/MessageContext';
+import Header from './Header';
 
 const MainApp = () => {
-  const [showNotifications, setShowNotifications] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false);
+  const {
+    markAllAsRead,
+    unreadCount
+  } = useNotify();
+
+  const { unReadedMessage } = useMessage();
+
   return (
-    <div className='w-[100%] h-full px-3'>
-        <div className='w-full flex items-center justify-between'>
-          <span className='text-lightMode-text dark:text-darkMode-text font-bold text-xl tracking-[3px] uppercase'>Home</span>
-          <IoIosNotificationsOutline onClick={() => setShowNotifications(true)} className='text-2xl text-lightMode-text dark:text-darkMode-text cursor-pointer'/>
-        </div>
-        <Stories/>
+    <div className="w-full h-full px-3">
+      {/* Header */}
+      <Header unReadedMessage={unReadedMessage} setShowNotifications={setShowNotifications} unreadCount={unreadCount} markAllAsRead={markAllAsRead}/>
+      {/* Content */}
+      <Stories />
       <Sluchits />
-      {
-        showNotifications &&
+
+      {showNotifications && (
         <NotificationMenu
           showNotifications={showNotifications}
           setShowNotifications={setShowNotifications}
         />
-      }
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default MainApp
+export default MainApp;

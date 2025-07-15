@@ -1,4 +1,4 @@
-const {getAllPosts , addPost , deletePost , getPostById , likePost , savePost  , sharePost , editPost} = require('../Controllers/PostController')
+const {getAllPosts ,makeCommentsOff, addPost , deletePost , getPostById , likePost , savePost  , sharePost , editPost} = require('../Controllers/PostController')
 const route = require('express').Router()
 const { verifyToken } = require('../Middelwares/verifyToken')
 const photoUpload = require('../Middelwares/uploadPhoto')
@@ -19,15 +19,11 @@ route.route('/like/:id')
 route.route('/save/:id')
     .put(verifyToken, savePost)
 
-// route.route('/love/:id')
-//     .put(verifyToken, lovePost)
-
-// route.route('/haha/:id')
-//     .put(verifyToken, hahaPost)
-
 route.route('/share/:id')
     .post(verifyToken, sharePost)
+route.route('/edit/:id')
+    .put(verifyToken, photoUpload.array('newPhotos', 9), editPost)
 
-route.route('/update/:id')
-    .put(editPost)
+route.route('/commentsOff/:id')
+    .put(verifyToken, makeCommentsOff)
 module.exports = route

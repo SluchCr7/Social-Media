@@ -23,7 +23,7 @@ const HashtagsMenu = () => {
     .slice(0, 5); // top 5
 
   return (
-    <div className="w-full bg-lightMode-menu dark:bg-darkMode-menu rounded-xl shadow-lg flex flex-col max-h-[500px]">
+    <div className="w-full bg-white dark:bg-[#16181c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col max-h-[500px]">
       {/* Header */}
       <div className="flex justify-between items-center px-4 py-3 border-b  border-lightMode-fg/40 dark:border-darkMode-fg/40">
         <h2 className="text-lightMode-fg dark:text-darkMode-fg text-lg font-semibold">Hashtags in your Country</h2>
@@ -44,7 +44,7 @@ const HashtagsMenu = () => {
                 className="flex items-center p-3 justify-between w-full hover:underline cursor-pointer"
               >
                 <div className="flex items-center gap-2 text-lightMode-fg dark:text-darkMode-fg text-sm">
-                  <Link href={`/Pages/Hashtag/${encodeURIComponent(tag)}`}>{tag}</Link>
+                  <Link href={`/Pages/Hashtag/${encodeURIComponent(tag)}`}>#{tag}</Link>
                   <span className="text-lightMode-fg dark:text-darkMode-fg/60">({count} posts)</span>
                 </div>
                 <div className="flex items-center">

@@ -1,36 +1,46 @@
-import React from 'react';
+import React, { useState } from 'react';
 import MenuFollowers from './MenuFollowers';
 import MenuMessagesFromMe from './MenuMessagesFromMe';
 import { useAuth } from '../Context/AuthContext';
-import News from './News';
 import HashtagsMenu from './HashtagsMenu';
-import Adahn from './Adahn';
 import Communities from './Communities';
+import Link from 'next/link';
+import News from './News';
+import MenuAllNews from './MenuAllNews';
 
 const Menu = () => {
   const { user, isLogin } = useAuth();
-
+  const [showAllNews ,setShowAllNews] = useState(false)
   return (
-    <div className="hidden lg:flex items-center flex-col gap-6 w-[40%] h-[100vh] bg-lightMode-bg dark:bg-darkMode-bg pl-4">
+    <div className="hidden lg:flex flex-col items-start gap-4 w-[35%] min-h-screen bg-lightMode-bg dark:bg-darkMode-bg px-6 py-8">
       {isLogin ? (
         <>
-          {/* Uncomment if needed */}
-          {/* <MenuFollowing /> */}
-          {/* <Adahn/> */}
-          {/* <News/> */}
-          <Communities/>
           <HashtagsMenu />
+          <News showAllNews={showAllNews} setShowAllNews={setShowAllNews} />
           <MenuMessagesFromMe />
+          <Communities />
           <MenuFollowers />
-          <div className="border-t border-gray-500 p-3 w-full">
-            <p className="text-sm text-gray-500">Version 1.0.0 . &copy; 2025 Sluchit . All rights reserved</p>
+          <MenuAllNews showAllNews={showAllNews} setShowAllNews={setShowAllNews} />
+          <div className="mt-auto border-t pt-4 w-full border-gray-300 dark:border-gray-700">
+            <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
+              Sluchit v1.0.0 — © 2025 All rights reserved.<br />
+              Built with passion for communities & real connections.
+            </p>
+            <div className="mt-3 flex justify-center gap-4 text-xs text-gray-400 dark:text-gray-500">
+              <Link href="/Pages/Privacy" className="hover:underline">Privacy Policy</Link>
+              <span>•</span>
+              <Link href="/Pages/Terms" className="hover:underline">Terms of Service</Link>
+            </div>
           </div>
         </>
       ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center text-center px-4">
-          <div className="bg-darkMode-secondary p-6 rounded-xl shadow-lg">
-            <h2 className="text-xl font-semibold text-darkMode-text mb-2">You're not logged in</h2>
-            <p className="text-darkMode-muted mb-4">Please log in to see your followers, messages, and more personalized content.</p>
+        <div className="w-full h-full flex flex-col items-center justify-center text-center px-6">
+          <div className="bg-darkMode-menu p-8 rounded-2xl shadow-xl border border-darkMode-border">
+            <h2 className="text-2xl font-semibold text-darkMode-text mb-3">Welcome to Sluchit</h2>
+            <p className="text-darkMode-muted text-sm leading-relaxed">
+              You're currently not logged in. Please sign in to explore your network,
+              receive messages, follow hashtags, and connect with communities that matter to you.
+            </p>
           </div>
         </div>
       )}

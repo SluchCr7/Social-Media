@@ -25,11 +25,11 @@ app.use('/api/message', require('./routes/MessageRoute'))
 app.use('/api/notification', require('./routes/NotificationRoute'))
 app.use('/api/post', require('./routes/PostRoute'))
 app.use('/api/comment', require('./routes/CommentRoute'))
-app.use('/api/reply', require('./routes/ReplyRoute'))
-app.use('/api/reReply', require('./routes/Reply2Route'))
 app.use('/api/community', require('./routes/CommunityRoute'))
 app.use('/api/news', require('./routes/NewsRoute'))
 app.use('/api/story', require('./routes/StoryRoute'))
+app.use('/api/password', require('./routes/PasswordRoute'))
+app.use('/api/report', require('./routes/ReportRoute'))
 app.use(errorhandler)
 
 

@@ -1,5 +1,5 @@
 const route = require('express').Router()
-const { DeleteUser ,makeUserAdmin , getAllUsers , getUserById , RegisterNewUser , LoginUser, verifyAccount, uploadPhoto , makeFollow , updatePassword , updateProfile , savePost , pinPost} = require('../Controllers/UserController')
+const { DeleteUser ,updateLinksSocial,blockOrUnblockUser,makeUserAdmin , getAllUsers , getUserById , RegisterNewUser , LoginUser, verifyAccount, uploadPhoto , makeFollow , updatePassword , updateProfile , savePost , pinPost} = require('../Controllers/UserController')
 const photoUpload = require('../Middelwares/uploadPhoto')
 const {verifyToken} = require('../Middelwares/verifyToken')
 route.route("/")
@@ -38,4 +38,8 @@ route.route("/update/pass")
 route.route('/pin/:id')
     .put(verifyToken, pinPost)
     
+route.route("/block/:id")
+    .put(verifyToken, blockOrUnblockUser)
+route.route('/social')
+    .put(verifyToken, updateLinksSocial)
 module.exports = route

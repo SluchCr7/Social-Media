@@ -1,54 +1,108 @@
-import React, { useEffect } from 'react';
+'use client';
+import React, { useEffect, useRef, useState } from 'react';
 import { CiEdit, CiMapPin } from 'react-icons/ci';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { MdOutlineReport } from 'react-icons/md';
 import { useAuth } from '../Context/AuthContext';
 import { usePost } from '../Context/PostContext';
-
+import { useReport } from '../Context/ReportContext';
+import { FaRegCommentDots } from 'react-icons/fa';
+import { MdContentCopy } from "react-icons/md";
 
 const PostMenu = ({ showMenu, setShowMenu, post }) => {
-  const { user , pinPost , users} = useAuth();
-  const {deletePost} = usePost()
-  const isOwner = post?.owner?._id === user?._id; 
-  const [myUser , setMyUser] = React.useState(null)
+  const { user, pinPost, users } = useAuth();
+  const { deletePost, setPostIsEdit, setShowPostModelEdit, displayOrHideComments  , copyPostLink , blockOrUnblockUser} = usePost();
+  const { setIsPostId } = useReport();
+
+  const menuRef = useRef();
+  const isOwner = post?.owner?._id === user?._id;
+  const [myUser, setMyUser] = useState(null);
+
+  // إغلاق القائمة عند النقر خارجها
   useEffect(() => {
-    setMyUser(users.find((userobj) => userobj._id === user._id))
-  }, [users])
-  // useEffect(()=> console.log(myUser) , [myUser])
-  // useEffect(()=> console.log(myUser?.pinsPosts?.includes(post._id)) , [myUser , post])
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
+
+  useEffect(() => {
+    setMyUser(users.find((userobj) => userobj._id === user._id));
+  }, [users]);
+
   const ownerOptions = [
     {
-      icon: <CiMapPin />,
-      text: myUser?.pinsPosts?.some(p => p.id === post._id) ? 'Unpin Post' : 'Pin Post',
-
-      action: ()=> pinPost(post._id),
+      icon: <CiMapPin size={20} />,
+      text: myUser?.pinsPosts?.some((p) => p.id === post._id) ? 'Unpin Post' : 'Pin Post',
+      action: () => pinPost(post._id),
     },
     {
-      icon: <CiEdit />,
+      icon: <CiEdit size={20} />,
       text: 'Edit Post',
-      action: () => console.log('Editing post...'),
+      action: () => {
+        setPostIsEdit(post);
+        setShowPostModelEdit(true);
+      },
     },
     {
-      icon: <AiOutlineDelete />,
+      icon: <AiOutlineDelete size={20} />,
       text: 'Delete Post',
       action: () => deletePost(post._id),
-      className: 'text-red-500',
+      className: 'text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30',
+    },
+    {
+      icon: <FaRegCommentDots size={20} />,
+      text: post?.commentOff ? 'Enable Comments' : 'Disable Comments',
+      action: () => displayOrHideComments(post._id),
+      className: post?.commentOff
+        ? 'text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30'
+        : 'text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/30',
     },
   ];
+
   const visitorOptions = [
     {
-      icon: <MdOutlineReport />,
+      icon: <MdOutlineReport size={20} />,
       text: 'Report Post',
-      action: () => console.log('Reporting post...'),
-      className: 'text-red-400',
+      action: () => {
+        setIsPostId(post._id);
+        setShowMenu(false); // نغلق المينيو ثم نظهر نموذج البلاغ
+      },
+      className: 'text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30',
     },
+    {
+      icon: <MdContentCopy size={20} />, 
+      text: 'Copy Link',
+      action: () => copyPostLink(post._id),
+      className: 'text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30',
+    },
+    {
+      icon: <AiOutlineDelete size={20} />,
+      text: user?.blockedUsers?.includes(post?.owner?._id) ? 'Unblock User' : 'Block User',
+      action: () => blockOrUnblockUser(post?.owner?._id),
+      className: user?.blockedUsers?.includes(post?.owner?._id)
+        ? 'text-green-500 hover:bg-green-100 dark:hover:bg-green-900/30'
+        : 'text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30',
+    }
   ];
+
   const optionsToShow = isOwner ? ownerOptions : visitorOptions;
+
   return (
     <div
+      ref={menuRef}
       className={`${
-        showMenu ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      } absolute top-10 right-0 transition-opacity duration-500 flex flex-col w-[250px] bg-lightMode-menu dark:bg-darkMode-menu rounded-lg shadow-lg z-50`}
+        showMenu ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
+      } absolute top-12 right-2 transition-all duration-200 origin-top-right z-50 w-60 rounded-xl bg-white dark:bg-[#1f1f1f] shadow-xl border border-gray-200 dark:border-gray-700`}
     >
       {optionsToShow.map((option, index) => (
         <div
@@ -57,11 +111,13 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
             option.action();
             setShowMenu(false);
           }}
-          className={`flex items-center gap-2 w-full px-4 py-3 cursor-pointer transition-all duration-200 ${
-            option.className || 'text-lightMode-fg dark:text-darkMode-fg'
+          className={`flex items-center gap-3 px-4 py-3 cursor-pointer group rounded-xl transition duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 ${
+            option.className || 'text-gray-800 dark:text-gray-100'
           }`}
         >
-          <span className="text-xl">{option.icon}</span>
+          <div className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 group-hover:scale-110 transition">
+            {option.icon}
+          </div>
           <span className="text-sm font-medium">{option.text}</span>
         </div>
       ))}

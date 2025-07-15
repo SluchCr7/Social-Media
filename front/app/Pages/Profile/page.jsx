@@ -9,6 +9,7 @@ import Loading from '@/app/Component/Loading'
 import UpdateProfile from '../../Component/UpdateProfile'
 import { FaUserEdit } from 'react-icons/fa'
 import AddStoryModel from '@/app/Component/AddStoryModel'
+import { FaPhone, FaGlobe, FaLinkedin, FaGithub, FaMapMarkerAlt } from 'react-icons/fa'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -21,8 +22,9 @@ const ProfilePage = () => {
   const { posts } = usePost()
   const [update, setUpdate] = useState(false)
   const [isStory, setIsStory] = useState(false)
+
   useEffect(() => {
-    const matchedUser = users.find((User) => user._id === User._id)
+    const matchedUser = users.find((u) => user._id === u._id)
     if (matchedUser) setUserData(matchedUser)
   }, [users])
 
@@ -42,28 +44,10 @@ const ProfilePage = () => {
     <>
       {loading ? (
         <div className="w-full flex flex-col items-center pt-8 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen">
-          {/* ✅ قسم البروفايل العلوي */}
-          <div className="relative flex flex-col items-center w-full max-w-xl px-4 py-6 rounded-xl">
-            {/* زر تعديل الحساب */}
-            <button
-              className="absolute top-4 right-4 text-2xl text-gray-300 hover:text-white transition"
-              onClick={() => setUpdate(true)}
-              title="Edit Profile"
-            >
-              <FaUserEdit />
-            </button>
-
-            {/* زر إضافة ستوري */}
-            <button
-              className="absolute top-4 left-4 text-3xl text-green-400 hover:text-green-300 transition"
-              onClick={() => setIsStory(true)}
-              title="Add Story"
-            >
-              ➕
-            </button>
-
-            {/* صورة البروفايل */}
-            <div className="relative w-32 h-32 group cursor-pointer mt-2">
+          {/* ✅ القسم العلوي للبروفايل */}
+          <div className="relative flex flex-col items-center w-full max-w-2xl px-4 py-6 rounded-xl">
+            {/* صورة البروفايل + تعديل */}
+            <div className="relative group cursor-pointer mt-2 w-32 h-32">
               <Image
                 src={
                   image
@@ -72,9 +56,15 @@ const ProfilePage = () => {
                 }
                 alt="profile"
                 fill
-                className="rounded-full object-cover border-4 border-gray-700 group-hover:opacity-80 transition"
+                className="rounded-full object-cover border-4 border-gray-700"
                 onClick={() => document.getElementById('fileInput')?.click()}
               />
+              <div
+                className="absolute bottom-2 right-2 bg-gray-800 p-1 rounded-full text-white text-xs group-hover:opacity-100 opacity-0 transition"
+                onClick={() => document.getElementById('fileInput')?.click()}
+              >
+                🖊️
+              </div>
               <input
                 type="file"
                 id="fileInput"
@@ -85,13 +75,31 @@ const ProfilePage = () => {
             </div>
 
             {/* معلومات المستخدم */}
-            <h1 className="text-2xl font-bold mt-4">{user?.username || 'Username'}</h1>
-            <span className="text-gray-400">{user?.profileName || 'Profile Name'}</span>
-            <p className="text-center text-gray-300 w-[80%] max-w-md mt-2">
-              {user?.description || 'No bio provided.'}
-            </p>
+            <div className="text-center mt-4">
+              <h1 className="text-2xl font-bold">{user?.username || 'Username'}</h1>
+              <span className="text-sm text-gray-400">{user?.profileName || 'Profile Name'}</span>
+              <p className="text-sm text-gray-300 mt-1 max-w-md">
+                {user?.description || 'No bio provided.'}
+              </p>
+            </div>
 
-            {/* الإحصائيات */}
+            {/* أزرار تعديل و ستوري */}
+            <div className="flex flex-wrap justify-center gap-4 mt-4">
+              <button
+                onClick={() => setUpdate(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-1 rounded-md flex items-center gap-2"
+              >
+                <FaUserEdit /> Edit Profile
+              </button>
+              <button
+                onClick={() => setIsStory(true)}
+                className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-1 rounded-md"
+              >
+                ➕ Add Story
+              </button>
+            </div>
+
+            {/* إحصائيات */}
             <div className="flex gap-8 text-center mt-6">
               <div>
                 <h2 className="font-bold text-lg">{userData?.posts?.length}</h2>
@@ -106,18 +114,69 @@ const ProfilePage = () => {
                 <p className="text-sm text-gray-400">Following</p>
               </div>
             </div>
+
+            <div className="mt-8 w-full rounded-2xl bg-lightMode-menu dark:bg-darkMode-menu shadow-xl p-6">
+              <h2 className="text-2xl font-bold mb-6 text-lightMode-text2 dark:text-darkMode-text2">About</h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-lightMode-text dark:text-darkMode-text">
+                {userData?.phone && (
+                  <div className="flex items-center space-x-3">
+                    <FaPhone className="text-blue-400" />
+                    <span><span className="font-semibold">Phone:</span> {userData.phone}</span>
+                  </div>
+                )}
+
+                {userData?.country && (
+                  <div className="flex items-center space-x-3">
+                    <FaMapMarkerAlt className="text-green-400" />
+                    <span><span className="font-semibold">Country:</span> {userData.country}</span>
+                  </div>
+                )}
+
+                {/* Social Icons Row */}
+                {(userData?.socialLinks && Object.keys(userData.socialLinks).length > 0) && (
+                  <div className="sm:col-span-2 flex items-center gap-5 mt-2">
+                    {userData.socialLinks.github && (
+                      <a href={userData.socialLinks.github} target="_blank" rel="noopener noreferrer" title="GitHub">
+                        <FaGithub className="text-2xl text-gray-300 dark:text-white hover:text-white transition" />
+                      </a>
+                    )}
+                    {userData.socialLinks.linkedin && (
+                      <a href={userData.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" title="LinkedIn">
+                        <FaLinkedin className="text-2xl text-blue-500 hover:text-blue-600 transition" />
+                      </a>
+                    )}
+                    {userData.socialLinks.website && (
+                      <a href={userData.socialLinks.website} target="_blank" rel="noopener noreferrer" title="Website">
+                        <FaGlobe className="text-2xl text-purple-400 hover:text-purple-500 transition" />
+                      </a>
+                    )}
+                  </div>
+                )}
+
+                {userData?.interests?.length > 0 && (
+                  <div className="sm:col-span-2">
+                    <p>
+                      <span className="font-semibold">Interests:</span>{' '}
+                      {userData.interests.join(', ')}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
           </div>
 
-          {/* ✅ Tabs */}
-          <div className="flex justify-center gap-10 mt-6 border-t border-gray-700 w-[90%] pt-4">
+          {/* ✅ التبويبات */}
+          <div className="flex justify-center gap-4 mt-6 border-t border-gray-700 w-full px-3 pt-4 flex-wrap">
             {tabs.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`font-semibold px-4 py-1 rounded-md transition ${
+                className={`font-semibold px-4 py-1 rounded-md transition text-sm ${
                   activeTab === tab
-                    ? 'bg-gray-700 text-lightMode-text dark:text-darkMode-text'
-                    : 'text-gray-400 hover:text-lightMode-text dark:text-darkMode-text'
+                    ? 'bg-gray-700 text-white'
+                    : 'text-gray-400 hover:text-white'
                 }`}
               >
                 {tab}
@@ -126,7 +185,7 @@ const ProfilePage = () => {
           </div>
 
           {/* ✅ محتوى التبويبات */}
-          <div className="w-[90%] mt-6 flex items-start flex-col gap-4">
+          <div className="w-full mt-6 flex flex-col gap-4 px-4">
             {activeTab === 'Posts' && (
               <>
                 {(() => {
@@ -168,13 +227,10 @@ const ProfilePage = () => {
                       key={comment._id}
                       className="w-full bg-gray-900/70 rounded-xl p-5 shadow-md flex flex-col gap-4"
                     >
-                      {/* Comment Header */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Image
-                            src={
-                              comment.owner?.profilePhoto?.url || '/default-profile.png'
-                            }
+                            src={comment.owner?.profilePhoto?.url || '/default-profile.png'}
                             alt="Commenter"
                             width={36}
                             height={36}
@@ -190,18 +246,15 @@ const ProfilePage = () => {
                         </span>
                       </div>
 
-                      {/* Comment Text */}
                       <p className="text-sm text-gray-300 pl-1 border-l-2 border-gray-600">
                         {comment.text}
                       </p>
 
-                      {/* Related Post */}
                       {comment.postId && (
                         <div className="flex gap-3 items-start border-t border-gray-700 pt-4">
                           <Image
                             src={
-                              comment.postId?.owner?.profilePhoto?.url ||
-                              '/default-profile.png'
+                              comment.postId?.owner?.profilePhoto?.url || '/default-profile.png'
                             }
                             alt="Post Owner"
                             width={36}
@@ -243,7 +296,7 @@ const ProfilePage = () => {
         <Loading />
       )}
 
-      {/* ✅ مودال تعديل البروفايل */}
+      {/* Modals */}
       <UpdateProfile update={update} setUpdate={setUpdate} />
       <AddStoryModel setIsStory={setIsStory} isStory={isStory} />
     </>

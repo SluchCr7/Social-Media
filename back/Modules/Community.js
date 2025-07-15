@@ -31,6 +31,12 @@ const communitySchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
+    Admins: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        }
+    ],
     Category : {
         type : String,
         required : true
@@ -38,7 +44,7 @@ const communitySchema = new mongoose.Schema({
     Cover: {
         type : Object, 
         default:{
-            url: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.flaticon.com%2Ffree-icon%2Fgroup_268547&psig=AOvVaw3YybDBffOVibIf3Jw_Kxlw&ust=1750944947868000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCIDM9Z3YjI4DFQAAAAAdAAAAABAd",
+            url: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
             publicId : null
         }
     },
@@ -55,7 +61,7 @@ const ValidateCommunity = (obj) => {
         isPrivate: joi.boolean(),
         Category : joi.string().required()
     })
-    return schema.validate(obj, {
+    return schema.validate(obj, {    
         abortEarly: false
     })
 }

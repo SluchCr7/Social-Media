@@ -1,32 +1,67 @@
 const mongoose = require('mongoose');
-const joi = require('joi');
+const Joi = require('joi');
 
-const notificationSchema = new mongoose.Schema({
-    content : {
-        type: String,
-        required: true
+// Notification Schema
+const notificationSchema = new mongoose.Schema(
+  {
+    content: {
+      type: String,
+      required: true,
     },
-    sender : {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
+    type: {
+      type: String,
+      enum: ['comment', 'message', 'like', 'follow', 'mention', 'custom'],
+      default: 'custom',
+      required: true,
     },
-    receiver : {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-    }
-}, {
+    sender: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    receiver: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    actionRef: {
+      // مثلاً يمكن أن يكون هذا الـ ID الخاص بالكومنت أو الرسالة
+      type: mongoose.Schema.Types.ObjectId,
+      refPath: 'actionModel', // تحديد النموذج المرتبط ديناميكياً
+    },
+    actionModel: {
+      // اسم الموديل المرتبط بـ actionRef (مثل Comment أو Message)
+      type: String,
+      enum: ['Comment', 'Message', 'Post'],
+    },
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
     timestamps: true,
-})
+  }
+);
 
-const Notification = mongoose.model('Notification', notificationSchema)
+// Model
+const Notification = mongoose.model('Notification', notificationSchema);
 
-const ValidateNotification = (notification) => {
-    const schema = joi.object({
-        content: joi.string().required(),
-    })
-    return schema.validate(notification)
-}
+// Joi Validation
+const validateNotification = (notification) => {
+  const schema = Joi.object({
+    content: Joi.string().required(),
+    type: Joi.string().valid('comment', 'message', 'like', 'follow', 'mention', 'custom').required(),
+    sender: Joi.string().required(),
+    receiver: Joi.string().required(),
+    actionRef: Joi.string().optional(),
+    actionModel: Joi.string().valid('Comment', 'Message', 'Post').optional(),
+  });
 
-module.exports = { Notification, ValidateNotification }
+  return schema.validate(notification);
+};
+
+module.exports = {
+  Notification,
+  validateNotification,
+};

@@ -1,20 +1,31 @@
-const { getAllComments, addNewComment,updateComment, deleteComment, getCommentById , likeComment} = require('../Controllers/CommentController')
-const route = require('express').Router()
+const express = require('express');
+const route = express.Router();
+const {
+  getAllComments,
+  addNewComment,
+  updateComment,
+  deleteComment,
+  getCommentById,
+  likeComment,
+} = require('../Controllers/CommentController');
 const { verifyToken } = require('../Middelwares/verifyToken')
 
-route.route('/')
-    .get(getAllComments)
+// Get all comments of a specific post (as nested tree)
+route.get('/post/:postId', getAllComments);
 
-route.route('/add/:id')
-    .post(verifyToken,addNewComment)
+// Create comment or reply
+route.post('/:postId', verifyToken, addNewComment);
 
-route.route('/:id')
-    .get(getCommentById)
-    .delete(deleteComment)
+// Like / Unlike comment
+route.put('/like/:id', verifyToken, likeComment);
 
-route.route('/like/:id')
-    .put(verifyToken, likeComment)
-    
-route.route('/update/:id')
-    .put(verifyToken,updateComment)
-module.exports = route
+// Update comment
+route.put('/update/:id', verifyToken, updateComment);
+
+// Get single comment
+route.get('/:id', getCommentById);
+
+// Delete comment
+route.delete('/:id', verifyToken, deleteComment);
+
+module.exports = route;

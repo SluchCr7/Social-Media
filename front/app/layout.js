@@ -14,6 +14,8 @@ import { ReplyReplyContextProvider } from "./Context/ReplyReplyContext";
 import { NewsContextProvider } from "./Context/NewsContext";
 import { CommunityContextProvider } from "./Context/CommunityContext";
 import { StoryContextProvider } from "./Context/StoryContext";
+import { AlertContextProvider } from "./Context/AlertContext";
+import { ReportContextProvider } from "./Context/ReportContext";
 
 const jetBrainsMono = JetBrains_Mono({
   subsets: ["latin"]
@@ -32,29 +34,29 @@ export default function RootLayout({ children }) {
       <body
         className={`antialiased bg-lightMode-bg dark:bg-darkMode-bg transition-all duration-500  ${jetBrainsMono.className}`}
       >
-        <AuthContextProvider>
-          <NotifyContextProvider>
-            <MessageContextProvider>
-              <PostContextProvider>
-                <CommentContextProvider>
-                  <ReplyContextProvider>
-                    <ReplyReplyContextProvider>
-                      <CommunityContextProvider>
-                        <StoryContextProvider>
-                          <NewsContextProvider>
+        <AlertContextProvider>
+          <AuthContextProvider>
+            <NotifyContextProvider>
+              <MessageContextProvider>
+                <PostContextProvider>
+                  <CommentContextProvider>
+                    <CommunityContextProvider>
+                      <StoryContextProvider>
+                        <NewsContextProvider>
+                          <ReportContextProvider>
                             <LayoutComponent>
-                              {children}
+                                {children}
                             </LayoutComponent>
-                          </NewsContextProvider>
-                        </StoryContextProvider>
-                      </CommunityContextProvider>
-                    </ReplyReplyContextProvider>
-                  </ReplyContextProvider>
-                </CommentContextProvider>
-              </PostContextProvider>
-            </MessageContextProvider>
-          </NotifyContextProvider>
-        </AuthContextProvider>
+                          </ReportContextProvider>
+                        </NewsContextProvider>
+                      </StoryContextProvider>
+                    </CommunityContextProvider>
+                  </CommentContextProvider>
+                </PostContextProvider>
+              </MessageContextProvider>
+            </NotifyContextProvider>
+          </AuthContextProvider>
+        </AlertContextProvider>
       </body>
     </html>
   );

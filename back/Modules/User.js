@@ -33,17 +33,20 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default : false
     },
+    verifyAt : {
+        type: Date
+    },
     description : {
         type: String,
         default : "Profile Description"
     },
-    country : {
+    country: {
         type: String,
-        default : "India"
+        default: "Unknown"
     },
     phone : {
         type: String,
-        default : "0000000000"
+        default : ""
     },
     followersCount: {
         type: Number,
@@ -67,6 +70,12 @@ const UserSchema = new mongoose.Schema({
             ref : "Post"
         }
     ],
+    blockedUsers: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ],
     pinsPosts: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -76,6 +85,35 @@ const UserSchema = new mongoose.Schema({
     lastLogin: {
         type: Date,
         default: Date.now
+    },
+    accountStatus: {
+        type: String,
+        enum: ['active', 'banned', 'suspended'],
+        default: 'active'
+    }, 
+    userLevelRank : {
+        type: String,
+        enum: ["Junior", "Intermediate", "Advanced", "Pro"],
+        default: "Junior"
+    },
+    userLevelPoints : {
+        type: Number,
+        default: 0
+    },
+    socialLinks: {
+        github: { type: String, default: "" },
+        twitter: { type: String, default: "" },
+        linkedin: { type: String, default: "" },
+        facebook: { type: String, default: "" },
+        website: { type: String, default: "" },
+    },
+    lastActiveAt: {
+        type: Date,
+        default: Date.now
+    },
+    interests: {
+        type: [String],
+        default: ""
     }
 }, {
     timestamps: true,
@@ -120,6 +158,18 @@ UserSchema.virtual("stories", {
     localField: "_id",
     foreignField: "owner"
 })
+UserSchema.virtual("reports", {
+    ref: "Report",
+    localField: "_id",
+    foreignField: "owner"
+})
+
+UserSchema.methods.updateLevelRank = function () {
+  if (this.userLevelPoints >= 2000) this.userLevelRank = "Pro";
+  else if (this.userLevelPoints >= 1000) this.userLevelRank = "Advanced";
+  else if (this.userLevelPoints >= 500) this.userLevelRank = "Intermediate";
+  else this.userLevelRank = "Junior";
+};
 
 const User = mongoose.model('User', UserSchema)
 
@@ -142,13 +192,25 @@ const ValidateUser = (user) => {
 
 
 const validateUserUpdate = (user) => {
-    const schema = joi.object({
-        username: joi.string(),
-        description: joi.string(),
-        profileName : joi.string(),
-    })
-    return schema.validate(user)
+  const schema = joi.object({
+    username: joi.string().min(3).max(30),
+    description: joi.string().max(500).allow('', null),
+    profileName: joi.string().min(3).max(50).allow('', null),
+    country: joi.string().max(50).allow('', null),
+    phone: joi.string().pattern(/^\+?[0-9\s\-]{7,20}$/).allow('', null),
+    interests: joi.array().items(joi.string().max(50)).allow(null),
+    socialLinks: joi.object({
+      github: joi.string().uri().allow('', null),
+      twitter: joi.string().uri().allow('', null),
+      linkedin: joi.string().uri().allow('', null),
+      facebook: joi.string().uri().allow('', null),
+      website: joi.string().uri().allow('', null),
+    }).default({}),
+  })
+
+  return schema.validate(user)
 }
+
 
 const validatePasswordUpdate = (user) => {
     const schema = joi.object({
@@ -156,4 +218,27 @@ const validatePasswordUpdate = (user) => {
     })
     return schema.validate(user)
 }
-module.exports = {User, LoginValidate, ValidateUser, validateUserUpdate, validatePasswordUpdate}
+
+
+const validateEmail = (user) => {
+    const schema = joi.object({
+        email: joi.string().email().required(),
+    });
+    return schema.validate(user);
+}
+
+const validateUserLinks = (user) => {
+  const schema = joi.object({
+    socialLinks: joi.object({
+      github: joi.string().uri().allow(""),
+      twitter: joi.string().uri().allow(""),
+      linkedin: joi.string().uri().allow(""),
+      facebook: joi.string().uri().allow(""),
+      website: joi.string().uri().allow(""),
+    }),
+    // باقي الحقول الأخرى...
+  });
+  return schema.validate(user);
+};
+
+module.exports = {User,validateUserLinks, LoginValidate,validateEmail, ValidateUser, validateUserUpdate, validatePasswordUpdate}

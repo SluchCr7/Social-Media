@@ -9,12 +9,13 @@ import { BsThreeDots } from 'react-icons/bs'
 import { usePost } from '../Context/PostContext'
 import { useAuth } from '../Context/AuthContext'
 import PostMenu from './PostMenu'
+import EditPostModal from './EditPostModel'
+import { useReport } from '../Context/ReportContext'
 
 const SluchitEntry = ({ post }) => {
-  const { likePost, savePost, sharePost } = usePost()
-  const { user } = useAuth()
+  const { likePost, savePost, sharePost , setPostIsEdit } = usePost()
   const [showMenu, setShowMenu] = useState(false)
-
+  const { user } = useAuth()
   const isShared = post?.isShared && post?.originalPost
   const original = post?.originalPost
   const isCommunityPost = post?.community !== null
@@ -79,49 +80,62 @@ const SluchitEntry = ({ post }) => {
         </div>
 
         <div className='flex flex-col w-full gap-3'>
-          {/* Header Info */}
-          <div className='flex justify-between items-start w-full'>
-            {/* Left: Info */}
-            <div className='flex flex-col gap-0.5'>
-              {isCommunityPost && !isInCommunityPage ? (
-                <>
-                  <Link
-                    href={`/Pages/Community/${post?.community?._id}`}
-                    className='text-lightMode-fg dark:text-darkMode-fg font-semibold'
-                  >
-                    {post?.community?.Name}
-                  </Link>
-                  <span className='text-gray-500 text-xs'>{post?.owner?.username}</span>
-                </>
-              ) : (
+        {/* Header Info */}
+          <div className="flex justify-between items-center w-full">
+          {/* Left Side */}
+          <div className="flex items-center gap-3">
+            {/* Owner Info */}
+            {isCommunityPost && !isInCommunityPage ? (
+              <div className="flex flex-col leading-tight">
+                <Link
+                  href={`/Pages/Community/${post?.community?._id}`}
+                  className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline"
+                >
+                  {post?.community?.Name}
+                </Link>
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <span>@{post?.owner?.username}</span>
+                  <span className="w-1 h-1 bg-gray-400 rounded-full" />
+                  <span>{new Date(post?.createdAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col leading-tight">
                 <Link
                   href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${post?.owner?._id}`}
-                  className='text-lightMode-fg dark:text-darkMode-fg font-semibold'
+                  className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline"
                 >
-                  {post?.owner?.username}{' '}
-                  <span className='text-gray-500 text-sm font-normal'>
-                    ({post?.owner?.profileName})
-                  </span>
+                  {post?.owner?.username}
                 </Link>
-              )}
-              <span className='text-gray-500 text-xs'>
-                {new Date(post?.createdAt).toDateString()}
-              </span>
-            </div>
-
-            {/* Right: More */}
-            {post?.owner?._id === user?._id && (
-              <div className='relative'>
-                <span
-                  onClick={() => setShowMenu(!showMenu)}
-                  className='cursor-pointer text-xl text-gray-500 hover:text-gray-700 transition'
-                >
-                  <BsThreeDots />
-                </span>
-                <PostMenu showMenu={showMenu} setShowMenu={setShowMenu} post={post} />
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <span>{post?.owner?.profileName}</span>
+                  <span className="w-1 h-1 bg-gray-400 rounded-full" />
+                  <span>{new Date(post?.createdAt).toLocaleDateString()}</span>
+                </div>
               </div>
             )}
           </div>
+
+          {/* Right Side - Menu */}
+          { 
+            <div className="relative">
+          <span
+            onClick={() => setShowMenu(!showMenu)}
+            className="cursor-pointer text-xl text-gray-500 hover:text-gray-700 transition"
+          >
+            <BsThreeDots />
+          </span>
+
+          <PostMenu
+            post={post}
+            showMenu={showMenu}
+            setShowMenu={setShowMenu}
+          />
+        </div>
+
+          }
+        </div>
+
 
           {/* Shared Post Text */}
           {isShared && post?.text && (
@@ -193,7 +207,7 @@ const SluchitEntry = ({ post }) => {
 
           {/* Post Actions */}
           <div className='flex items-center gap-6 pt-4'>
-            <div onClick={() => likePost(post?._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
+            <div onClick={() => likePost(post?._id , post?.owner._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
               {post?.likes?.includes(user?._id) ? (
                 <IoIosHeart className='text-red-500 text-2xl' />
               ) : (
@@ -201,12 +215,15 @@ const SluchitEntry = ({ post }) => {
               )}
               <span className='text-gray-400 text-sm font-medium'>{post?.likes?.length}</span>
             </div>
-
-            <Link href={`/Pages/Post/${post?._id}`} className='flex items-center gap-2 transition-all hover:scale-110'>
-              <FaRegCommentDots className='text-gray-500 text-xl' />
-              <span className='text-gray-400 text-sm font-medium'>{post?.comments?.length}</span>
-            </Link>
-
+            {
+              !post?.isCommentOff &&
+              (
+                <Link href={`/Pages/Post/${post?._id}`} className='flex items-center gap-2 transition-all hover:scale-110'>
+                  <FaRegCommentDots className='text-gray-500 text-xl' />
+                  <span className='text-gray-400 text-sm font-medium'>{post?.comments?.length}</span>
+                </Link>
+              )
+            }
             <div onClick={() => sharePost(post?.originalPost ? post?.originalPost?._id : post?._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
               <IoIosShareAlt className='text-gray-500 text-2xl' />
               <span className='text-gray-400 text-sm font-medium'>{post?.shares?.length}</span>

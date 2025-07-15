@@ -3,17 +3,22 @@ const { Message, ValidateMessage } = require('../Modules/Message');
 const { v2 } = require('cloudinary');
 const fs = require('fs');
 const { getReceiverSocketId, io } = require('../Config/socket');
+const asyncHandler= require('express-async-handler')
 
-// Get all users except the logged-in one
 const getUsersInSideBar = async (req, res) => {
   try {
-    const loggedUser = req.user._id;
-    const users = await User.find({ _id: { $ne: loggedUser } })
+    const loggedUserId = req.user._id;
+    const loggedUser = await User.findById(loggedUserId).select("following");
+
+    const users = await User.find({ _id: { $in: loggedUser.following } })
+      .select("username profileImage name"); // فقط البيانات المهمة
+
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Get messages between logged-in user and another user
 const getMessages = async (req, res) => {
@@ -35,6 +40,7 @@ const getMessages = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Send a new message (text and/or image)
 const sendMessage = async (req, res) => {
@@ -105,9 +111,18 @@ const getMessagesByUser = async(req,res) =>{
   }
 }
 
+const makeAllMessagesIsReadBetweenUsers = asyncHandler(async (req, res) => {
+  await Message.updateMany(
+    { receiver: req.user._id, sender : req.params.id , isRead: false },
+    { $set: { isRead: true } }
+  );  
+  res.status(200).json({ message: 'All Messages marked as read' });
+})
+
 module.exports = {
   getUsersInSideBar,
   getMessages,
   sendMessage,
-  getMessagesByUser
+  getMessagesByUser,
+  makeAllMessagesIsReadBetweenUsers
 };

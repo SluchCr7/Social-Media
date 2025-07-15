@@ -31,7 +31,12 @@ const PostSchema = new mongoose.Schema({
         type: String,
       },
     ],
-    community: { type: mongoose.Schema.Types.ObjectId, ref: 'Community', default: null }, // Add this
+    community: { type: mongoose.Schema.Types.ObjectId, ref: 'Community', default: null }, 
+    isCommentOff : {
+        type : Boolean,
+        default : false
+    },
+    
   }, {
     timestamps: true,
     toJSON: { virtuals: true },
@@ -44,7 +49,11 @@ const PostSchema = new mongoose.Schema({
     localField: "_id",
     foreignField: "postId"
   });
-  
+  PostSchema.virtual("reports", {
+    ref: "Report",
+    localField: "_id",
+    foreignField: "postId"
+  })
 const Post = mongoose.model('Post', PostSchema)
 
 

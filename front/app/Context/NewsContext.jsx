@@ -1,30 +1,37 @@
-'use client'
+'use client';
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
-import getData from "../utils/getData";
+
 export const NewsContext = createContext();
 
-export const  NewsContextProvider = ({ children }) => {
-    const [news, setNews] = useState([])
-    useEffect(() => {
-        const fetchAllNews = async () => {
-            await axios.get(`http://localhost:3001/api/news`).then((res) => { 
-                setNews(res.data.data)
-            }).catch((err) => {
-                console.log(err)
-            })
-        }
-        fetchAllNews()
-    }, [])
-    return(
-        <NewsContext.Provider value={{
-            news
-        }}> 
-            {children}
-        </NewsContext.Provider>
-    )
+export const NewsContextProvider = ({ children }) => {
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true); // إضافة حالة تحميل
+  const [error, setError] = useState(null);     // إضافة حالة خطأ
+
+  const fetchAllNews = async (params = {}) => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:3001/api/news', { params });
+      setNews(response.data.articles || []);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching news:', err);
+      setError('Failed to load news');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllNews(); // أول تحميل
+  }, []);
+
+  return (
+    <NewsContext.Provider value={{ news, loading, error, fetchAllNews }}>
+      {children}
+    </NewsContext.Provider>
+  );
 };
 
-export const useNews = () => {
-    return useContext(NewsContext)
-};
+export const useNews = () => useContext(NewsContext);

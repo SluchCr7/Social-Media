@@ -1,27 +1,54 @@
-'use client'
-import React from 'react';
+'use client';
+
+import React, { useEffect } from 'react';
 import ChatSlider from './../../Component/ChatSlider';
 import Chat from './../../Component/Chat';
-import { useMessage } from '@/app/Context/MessageContext';
 import NoChat from './../../Component/NoChat';
+import { useMessage } from '@/app/Context/MessageContext';
+import { useSearchParams } from 'next/navigation';
+import axios from 'axios';
 
 const MessangerSluchit = () => {
-    const { selectedUser , backgroundStyle } = useMessage();
-    return (
-        <div className={`z-[999] transition-all w-full duration-500`}>
-            <div className={`transform transition-all duration-700 ease-in-out w-full mx-auto min-h-[60vh] shadow-2xl rounded-xl relative`}>
-                {/* Content Area */}
-                <div className='flex flex-col md:flex-row items-start h-[100vh]'>
-                    <div className='w-[20%] md:w-[25%] h-full'>
-                        <ChatSlider />
-                    </div>
-                    <div className='flex-1 h-full overflow-auto'>
-                        {selectedUser ? <Chat /> : <NoChat />}
-                    </div>
-                </div>
+  const { selectedUser, setSelectedUser } = useMessage();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const userId = searchParams.get('userId');
+    if (userId && !selectedUser) {
+      // Fetch user data from backend and set selectedUser
+      axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/${userId}`)
+        .then((res) => {
+          setSelectedUser(res.data);
+        })
+        .catch((err) => {
+          console.error('Failed to fetch user for chat:', err);
+        });
+    }
+  }, [searchParams, setSelectedUser, selectedUser]);
+
+  return (
+    <div className="w-full h-screen overflow-hidden bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text">
+      <div className="flex h-full w-full m-0 p-0 ">
+
+        {/* Sidebar */}
+        <aside className="w-[100%] md:w-[300px] lg:w-[280px] h-full border-r border-gray-300 dark:border-gray-700 bg-white dark:bg-darkMode-menu">
+          <ChatSlider />
+        </aside>
+
+        {/* Main Chat Area */}
+        <main className="flex-1 w-full h-full bg-lightMode-bg dark:bg-darkMode-bg">
+          {selectedUser ? (
+            <Chat />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <NoChat />
             </div>
-        </div>
-    );
+          )}
+        </main>
+        
+      </div>
+    </div>
+  );
 };
 
 export default MessangerSluchit;

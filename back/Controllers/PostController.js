@@ -4,6 +4,7 @@ const fs = require('fs');
 const { v2 } = require('cloudinary');
 const {User} = require('../Modules/User')
 const {Community} = require('../Modules/Community'); // Import Community model
+const cloudinary = require('cloudinary').v2;
 
 
 const getAllPosts = asyncHandler(async (req, res) => {
@@ -11,6 +12,14 @@ const getAllPosts = asyncHandler(async (req, res) => {
       .sort({ createdAt: -1 })
       .populate('owner', 'username profileName profilePhoto')
       .populate('community', 'Name Picture members')
+      .populate({
+        path: "reports",
+        populate: {
+          path: "owner",
+          model: "User",
+          select: "username profileName profilePhoto", // Optional: limit fields
+        },
+      })
       .populate({
         path: 'originalPost',
         populate: {
@@ -24,29 +33,6 @@ const getAllPosts = asyncHandler(async (req, res) => {
           path: 'owner',
           select: 'username profileName profilePhoto'
         }
-      })
-      .populate({
-          path: 'comments',
-          populate: {
-            path: 'replies',
-            populate: {
-              path: 'owner',
-              select: 'username profileName profilePhoto'
-            }
-          }
-      })
-      .populate({
-          path: 'comments',
-          populate: {
-            path: 'replies',
-            populate: {
-              path: 'repliesForward',
-              populate: {
-                path: 'owner',
-                select: 'username profileName profilePhoto'
-              }
-            }
-          }
       })
     res.status(200).json(posts);
   });
@@ -101,7 +87,11 @@ const addPost = async (req, res) => {
         Hashtags,
         community: communityDoc ? communityDoc._id : null
       });
-  
+      // زيادة النقاط وحفظ البوست
+      const user = await User.findById(userId);
+      user.userLevelPoints += 5;
+      user.updateLevelRank();
+      await user.save();
       await post.save();
       res.status(201).json(post);
     } catch (error) {
@@ -131,7 +121,7 @@ const getPostById = asyncHandler(async (req, res) => {
 })
 
 const likePost = asyncHandler(async (req, res) => {
-    const post = await Post.findById(req.params.id)
+    let post = await Post.findById(req.params.id)
     if (!post) {
         res.status(404)
         throw new Error('Post not found')
@@ -170,7 +160,7 @@ const likePost = asyncHandler(async (req, res) => {
 // })
 
 const savePost = asyncHandler(async (req, res) => {
-    const post = await Post.findById(req.params.id)
+    let post = await Post.findById(req.params.id)
     if (!post) {
         res.status(404)
         throw new Error('Post not found')
@@ -242,17 +232,87 @@ const sharePost = asyncHandler(async (req, res) => {
   });
   
 const editPost = asyncHandler(async (req, res) => {
-    const { error } = ValidatePost(req.body)
-    if (error) {
-        return res.status(400).json({ message: error.details[0].message });
+  // ✅ لا تفكك مباشرة – استخرج يدويًا
+  let text = req.body.text;
+  let community = req.body.community;
+  let Hashtags = req.body.Hashtags;
+  let existingPhotos = req.body.existingPhotos;
+
+  // ✅ تأكد من وجود البيانات
+  if (!text) return res.status(400).json({ message: 'Text is required' });
+
+  // ✅ Parse JSON fields
+  try {
+    existingPhotos = existingPhotos ? JSON.parse(existingPhotos) : [];
+    Hashtags = Hashtags ? JSON.parse(Hashtags) : [];
+  } catch (err) {
+    return res.status(400).json({ message: 'Invalid JSON in existingPhotos or Hashtags' });
+  }
+
+  // Validate
+  const { error } = ValidatePost({ text, community, Hashtags });
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
+  const post = await Post.findById(req.params.id);
+  if (!post) {
+    return res.status(404).json({ message: 'Post not found' });
+  }
+
+  // حذف الصور التي تم إزالتها
+  const removedPhotos = post.Photos.filter(
+    img => !existingPhotos.some(existing => existing.public_id === img.public_id)
+  );
+  for (const photo of removedPhotos) {
+    if (photo.public_id) {
+      await cloudinary.uploader.destroy(photo.public_id);
     }
-    await Post.findByIdAndUpdate(req.params.id, {
-        $set: {
-            text : req.body.text
-        }
-    },{new : true})
-    res.status(200).json({message : "Post Updated Successfully"})
-})
+  }
+
+  // رفع الصور الجديدة
+  const newUploadedPhotos = [];
+  const newFiles = req.files || [];
+  for (const file of newFiles) {
+    const result = await cloudinary.uploader.upload(file.path, {
+      folder: 'posts',
+    });
+    newUploadedPhotos.push({
+      url: result.secure_url,
+      public_id: result.public_id,
+    });
+    fs.unlinkSync(file.path);
+  }
+
+  // التحديث
+  post.text = text;
+  post.community = community || null;
+  post.Hashtags = Hashtags;
+  post.Photos = [...existingPhotos, ...newUploadedPhotos];
+
+  await post.save();
+
+  res.status(200).json({ message: 'Post updated successfully', post });
+});
 
 
-module.exports = {getAllPosts , addPost , deletePost , getPostById , likePost , savePost , sharePost , editPost}
+const makeCommentsOff = asyncHandler(async (req, res) => {
+  const post = await Post.findById(req.params.id);
+  
+  if (!post) {
+    res.status(404);
+    throw new Error('Post not found');
+  }
+
+  post.isCommentOff = !post.isCommentOff;
+  await post.save();
+
+  const message = post.isCommentOff
+    ? 'Comments are now off for this post.'
+    : 'Comments are now on for this post';
+
+  res.status(200).json({message : message});
+});
+
+
+module.exports = {getAllPosts ,makeCommentsOff, addPost , deletePost , getPostById , likePost , savePost , sharePost , editPost}

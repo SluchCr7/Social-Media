@@ -81,6 +81,12 @@ const Login = () => {
             </div>
           </div>
 
+          
+          <p className="text-sm text-right text-blue-500 hover:underline cursor-pointer mt-2">
+            <a href="/Pages/Forgot">Forgot your password?</a>
+          </p>
+
+
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
           <button

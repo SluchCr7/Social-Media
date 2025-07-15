@@ -1,91 +1,113 @@
-'use client'
-import axios from "axios";
-import { createContext, useContext, useEffect, useState } from "react";
-export const CommentContext = createContext();
-import { toast , ToastContainer } from "react-toastify";
-import { useAuth } from "./AuthContext";
-import getData from "../utils/getData";
-import { useNotify } from "./NotifyContext";
-export const CommentContextProvider = ({ children }) => {
-    const [comments, setcomments] = useState([])
-  const { user } = useAuth()
-  const {AddNotify} = useNotify()
-    useEffect(() => { 
-        getData('comment' , setcomments)
-    }, [comments])
-    const AddComment = async (text, postId , userId) => {
-        try {
-          await axios.post(
-            `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/add/${postId}`,
-            {
-              text,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${user.token}`,
-              },
-            }
-          );
-          toast.success("Comment added successfully.");
-          AddNotify(`${user.username} Commented On Your Post` , userId);
-        } catch (err) {
-          toast.error(err?.response?.data?.message || "Failed to upload comment.");
-        }
-      };      
-    const deleteComment = async (id) => {
-        try {
-            const res = await axios.delete(`${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/${id}` , {headers : {authorization : `Bearer ${user.token}`}})
-          toast.success(res.data.message);
-        } catch (err) {
-            console.log(err)
-        }
-    }
-    const updateComment = async (id , text) => {
-        try {
-            const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/update/${id}` , {text} , {headers : {authorization : `Bearer ${user.token}`}}) 
-            toast.success("Comment updated successfully.");
-        } catch (err) {
-            console.log(err)
-        }
-    }
-    const likeComment = async(id)=>{
-        await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/like/${id}` , {} , {headers : {authorization : `Bearer ${user.token}`}})
-        .then((res) => {
-          toast.success(res.data.message);
-        })
-        .catch((err) => {
-            console.log(err)
-        })
-    }
-    return (
-        <>
-        <ToastContainer
-            position="top-center"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="dark"
-            className="custom-toast-container"
-            toastClassName="custom-toast"
-        />
-        <CommentContext.Provider value={{
-            comments,
-            setcomments,
-            AddComment,
-            deleteComment, 
-            likeComment
-        }}>
-        {children}
-        </CommentContext.Provider>
-        </>
-    );
-};
+'use client';
 
-export const useComment = () => {
-    return useContext(CommentContext)
-}
+import axios from 'axios';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { useAuth } from './AuthContext';
+import { useNotify } from './NotifyContext';
+import { useAlert } from './AlertContext';
+
+export const CommentContext = createContext();
+export const useComment = () => useContext(CommentContext);
+
+export const CommentContextProvider = ({ children }) => {
+  const [comments, setcomments] = useState([]);
+  const { user } = useAuth();
+  const { addNotify } = useNotify();
+  const { showAlert } = useAlert();
+
+  const fetchCommentsByPostId = async (postId) => {
+    try {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/post/${postId}`);
+      setcomments(res.data);
+    } catch (err) {
+      console.error('Error fetching comments:', err);
+    }
+  };
+
+  const AddComment = async (text, postId, receiverId, parent = null) => {
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/${postId}`,
+        { text, parent },
+        {
+          headers: { Authorization: `Bearer ${user.token}` },
+        }
+      );
+
+      showAlert('Comment added successfully.');
+
+      if (user._id !== receiverId) {
+        await addNotify({
+          content: `${user.username} commented on your post`,
+          type: 'comment',
+          receiverId,
+          actionRef: res.data.comment?._id,
+          actionModel: 'Comment',
+        });
+      }
+
+      return res.data;
+    } catch (err) {
+      showAlert(err?.response?.data?.message || 'Failed to upload comment.');
+      throw err;
+    }
+  };
+
+  const deleteComment = async (id) => {
+    try {
+      const res = await axios.delete(`${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/${id}`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      showAlert(res.data.message);
+      setcomments((prev) => prev.filter((c) => c._id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const updateComment = async (id, text) => {
+    try {
+      await axios.put(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/update/${id}`,
+        { text },
+        {
+          headers: { Authorization: `Bearer ${user.token}` },
+        }
+      );
+      showAlert('Comment updated successfully.');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const likeComment = async (id) => {
+    try {
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/like/${id}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${user.token}` },
+        }
+      );
+      showAlert(res.data.message);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <CommentContext.Provider
+      value={{
+        comments,
+        setcomments,
+        AddComment,
+        deleteComment,
+        likeComment,
+        updateComment,
+        fetchCommentsByPostId,
+      }}
+    >
+      {children}
+    </CommentContext.Provider>
+  );
+};
