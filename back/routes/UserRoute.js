@@ -1,9 +1,12 @@
 const route = require('express').Router()
-const { DeleteUser ,updateLinksSocial,blockOrUnblockUser,makeUserAdmin , getAllUsers , getUserById , RegisterNewUser , LoginUser, verifyAccount, uploadPhoto , makeFollow , updatePassword , updateProfile , savePost , pinPost} = require('../Controllers/UserController')
+const { DeleteUser,getSuggestedUsers ,updateLinksSocial,blockOrUnblockUser,makeUserAdmin , getAllUsers , getUserById , RegisterNewUser , LoginUser, verifyAccount, uploadPhoto , makeFollow , updatePassword , updateProfile , savePost , pinPost} = require('../Controllers/UserController')
 const photoUpload = require('../Middelwares/uploadPhoto')
 const {verifyToken} = require('../Middelwares/verifyToken')
 route.route("/")
     .get(getAllUsers)
+
+route.route('/suggested')
+    .get(verifyToken, getSuggestedUsers)
 
 route.route("/:id")
     .get(getUserById)

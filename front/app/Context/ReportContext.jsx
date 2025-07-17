@@ -8,7 +8,7 @@ const ReportContext = createContext();
 export const ReportContextProvider = ({ children }) => {
   const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [showMenu, setShowMenu] = useState(false);
+    const [showMenuReport, setShowMenuReport] = useState(false);
     const [isPostId , setIsPostId] = useState(null)
     const {user} = useAuth()
   const getAllReports = async () => {
@@ -63,7 +63,7 @@ export const ReportContextProvider = ({ children }) => {
         getAllReports,
         addReport,
         deleteReport,
-        showMenu, setShowMenu,
+        showMenuReport, setShowMenuReport,
         isPostId , setIsPostId
       }}
     >

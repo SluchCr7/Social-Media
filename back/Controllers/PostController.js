@@ -41,13 +41,12 @@ const addPost = async (req, res) => {
     try {
       const { text, Hashtags, community } = req.body;
       const userId = req.user._id;
-  
+
       // ✅ Validate the post body
       const { error } = ValidatePost(req.body);
       if (error) {
         return res.status(400).json({ message: error.details[0].message });
       }
-  
       // ✅ Validate community if provided
       let communityDoc = null;
       if (community) {

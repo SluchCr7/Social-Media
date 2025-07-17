@@ -8,6 +8,8 @@ import { usePost } from '../../Context/PostContext';
 import { useCommunity } from '../../Context/CommunityContext';
 import { useAuth } from '@/app/Context/AuthContext';
 import EmojiPicker from 'emoji-picker-react';
+import { generateMeta } from '@/app/utils/MetaDataHelper';
+
 
 const NewPostPage = () => {
   const [postText, setPostText] = useState('');

@@ -9,16 +9,17 @@ import { usePost } from '../Context/PostContext'
 import EditPostModal from './EditPostModel'
 import { useReport } from '../Context/ReportContext'
 import AddNewReport from './AddNewReport'
+import ViewImage from './ViewImage'
 
 const LayoutComponent = ({ children }) => {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showMessanger, setShowMessanger] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [showNewSluchit, setShowNewSluchit] = useState(false)
-  const {showPostModelEdit,setShowPostModelEdit , postIsEdit , setPostIsEdit} = usePost()
+  const {showPostModelEdit,setShowPostModelEdit , postIsEdit , setPostIsEdit , imageView , setImageView} = usePost()
   const { isLogin, isAuthChecked } = useAuth()
   const pathname = usePathname()
-  const {showMenu, setShowMenu , isPostId} = useReport()
+  const {showMenuReport, setShowMenuReport, isPostId} = useReport()
   const hideLayout =
     pathname === '/Pages/Login' ||
     pathname === '/Pages/Register' ||
@@ -63,10 +64,15 @@ const LayoutComponent = ({ children }) => {
             />
           )}
           {
-            showMenu && (
+            showMenuReport && (
               <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50">
                 <AddNewReport postId={isPostId} onClose={() => setShowMenu(false)}/>
               </div>
+            )
+          }
+          {
+            imageView && (
+              <ViewImage imageView={imageView} setImageView={setImageView}/>
             )
           }
         </div>

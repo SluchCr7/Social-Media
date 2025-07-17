@@ -7,7 +7,6 @@ const AddNewReport = ({ postId, onClose }) => {
   const { addReport } = useReport();
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleSubmit = async (e) => {
@@ -17,14 +16,11 @@ const AddNewReport = ({ postId, onClose }) => {
       setErrorMsg('Please enter a report.');
       return;
     }
-
     setLoading(true);
     setErrorMsg('');
-    setSuccessMsg('');
 
     try {
       await addReport(postId, text);
-      setSuccessMsg('Report added successfully.');
       setText('');
       if (onClose) {
         setTimeout(() => {
@@ -62,10 +58,7 @@ const AddNewReport = ({ postId, onClose }) => {
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
-
           {errorMsg && <p className="text-red-600 text-sm">{errorMsg}</p>}
-          {successMsg && <p className="text-green-600 text-sm">{successMsg}</p>}
-
           <button
             type="submit"
             disabled={loading}

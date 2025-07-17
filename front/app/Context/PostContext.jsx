@@ -13,13 +13,13 @@ export const PostContextProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const { showAlert } = useAlert();
-
+  const [imageView , setImageView] = useState(null);
   const [showPostModelEdit, setShowPostModelEdit] = useState(false);
   const [postIsEdit, setPostIsEdit] = useState(null);
 
   useEffect(() => {
     getData("post", setPosts);
-  }, []);
+  }, [posts]);
 
   const AddPost = async (content, images, Hashtags, communityId) => {
     const formData = new FormData();
@@ -204,7 +204,8 @@ export const PostContextProvider = ({ children }) => {
         postIsEdit,
         setPostIsEdit,
         displayOrHideComments,
-        copyPostLink
+        copyPostLink,
+        imageView , setImageView
       }}
     >
       {children}

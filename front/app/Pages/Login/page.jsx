@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/app/Context/AuthContext';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { generateMeta } from '@/app/utils/MetaDataHelper';
+
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -88,7 +90,7 @@ const Login = () => {
 
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
-
+          
           <button
             type="submit"
             disabled={loading}

@@ -10,9 +10,9 @@ import { FaRegCommentDots } from 'react-icons/fa';
 import { MdContentCopy } from "react-icons/md";
 
 const PostMenu = ({ showMenu, setShowMenu, post }) => {
-  const { user, pinPost, users } = useAuth();
-  const { deletePost, setPostIsEdit, setShowPostModelEdit, displayOrHideComments  , copyPostLink , blockOrUnblockUser} = usePost();
-  const { setIsPostId } = useReport();
+  const { user, pinPost, users , blockOrUnblockUser} = useAuth();
+  const { deletePost, setPostIsEdit, setShowPostModelEdit, displayOrHideComments  , copyPostLink} = usePost();
+  const { setIsPostId , showMenuReport, setShowMenuReport } = useReport();
 
   const menuRef = useRef();
   const isOwner = post?.owner?._id === user?._id;
@@ -61,9 +61,9 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
     },
     {
       icon: <FaRegCommentDots size={20} />,
-      text: post?.commentOff ? 'Enable Comments' : 'Disable Comments',
+      text: post?.isCommentOff ? 'Enable Comments' : 'Disable Comments',
       action: () => displayOrHideComments(post._id),
-      className: post?.commentOff
+      className: post?.isCommentOff
         ? 'text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30'
         : 'text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/30',
     },
@@ -75,7 +75,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
       text: 'Report Post',
       action: () => {
         setIsPostId(post._id);
-        setShowMenu(false); // نغلق المينيو ثم نظهر نموذج البلاغ
+        setShowMenuReport(true);
       },
       className: 'text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30',
     },
@@ -102,7 +102,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
       ref={menuRef}
       className={`${
         showMenu ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
-      } absolute top-12 right-2 transition-all duration-200 origin-top-right z-50 w-60 rounded-xl bg-white dark:bg-[#1f1f1f] shadow-xl border border-gray-200 dark:border-gray-700`}
+      } absolute top-12 right-2 z-[2000] transition-all duration-200 origin-top-right w-60 rounded-xl bg-white dark:bg-[#1f1f1f] shadow-xl border border-gray-200 dark:border-gray-700`}
     >
       {optionsToShow.map((option, index) => (
         <div

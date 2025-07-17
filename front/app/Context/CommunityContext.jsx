@@ -43,16 +43,15 @@ export const CommunityContextProvider = ({ children }) => {
       showAlert('Error joining community.');
     }
   };
-
   const editCommunity = async (id, updatedData) => {
-    try {
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/edit/${id}`, updatedData, config);
-      showAlert('Community updated.');
-      return res.data;
-    } catch (err) {
-      console.error(err);
-      showAlert('Failed to update community.');
-    }
+      try {
+        const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/edit/${id}`, updatedData, config);
+        showAlert('Community updated.');
+        return res.data;
+      } catch (err) {
+        console.error(err);
+        showAlert('Failed to update community.');
+      }
   };
 
   const updateCommunityPicture = async (id, file) => {
@@ -62,12 +61,12 @@ export const CommunityContextProvider = ({ children }) => {
 
       const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update/${id}`, formData, {
         headers: {
-          ...config.headers,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      showAlert(res.data.message);
+      showAlert(res.data.message || 'Picture updated.');
       return res.data.url;
     } catch (err) {
       console.error(err);
@@ -82,12 +81,12 @@ export const CommunityContextProvider = ({ children }) => {
 
       const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update-cover/${id}`, formData, {
         headers: {
-          ...config.headers,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      showAlert(res.data.message);
+      showAlert(res.data.message || 'Cover updated.');
       return res.data.url;
     } catch (err) {
       console.error(err);

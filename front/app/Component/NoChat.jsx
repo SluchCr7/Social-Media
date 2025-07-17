@@ -17,7 +17,7 @@ const NoChat = () => {
       </Link>
 
       <h1 className="text-2xl font-semibold text-darkMode-text dark:text-lightMode-text">
-        Welcome to Sluchit!
+        Welcome to {process.env.WEBSITE_NAME || "Zocial"}!
       </h1>
 
       <p className="mt-2 text-sm text-gray-500 max-w-sm">

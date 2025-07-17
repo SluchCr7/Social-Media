@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/app/Context/AuthContext';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { generateMeta } from '@/app/utils/MetaDataHelper';
 
 const Register = () => {
   const [formData, setFormData] = useState({ email: '', password: '', username: '' });

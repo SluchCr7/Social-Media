@@ -2,17 +2,22 @@
 import React from 'react';
 import { useMessage } from '../Context/MessageContext';
 import Image from 'next/image';
+import { useAuth } from '../Context/AuthContext';
 
 const MenuFrinds = () => {
-  const { users } = useMessage(); // users = [{ _id, username, profileImage }]
+  const { users , suggestedUsers } = useAuth(); // users = [{ _id, username, profileImage }]
 
   return (
-    <div className="fixed top-20 right-4 z-50 w-16 p-2 rounded-2xl bg-white dark:bg-darkMode-menu shadow-lg flex flex-col items-center gap-4 border dark:border-gray-700">
-      {users?.length > 0 ? (
-        users.map((user) => (
-          <div key={user._id} className="group relative cursor-pointer">
+    <div className="w-full bg-white dark:bg-[#16181c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col max-h-[500px]">
+      {/* Header */}
+      <div className="flex justify-between items-center px-4 py-3 border-b border-lightMode-fg/40 dark:border-darkMode-fg/40">
+        <h2 className="text-lightMode-fg dark:text-darkMode-fg text-lg font-semibold">Friends Recommendations</h2>
+      </div>
+      {suggestedUsers?.length > 0 ? (
+        suggestedUsers.map((user) => (
+          <div key={user._id} className="group relative px-4 py-2 cursor-pointer">
             <Image
-              src={user.profileImage || '/default-avatar.png'}
+              src={user.profilePhoto.url || '/default-avatar.png'}
               alt={user.username}
               width={48}
               height={48}
@@ -24,7 +29,7 @@ const MenuFrinds = () => {
           </div>
         ))
       ) : (
-        <div className="text-gray-400 text-sm">No friends</div>
+        <div className="text-gray-400 text-sm px-4 py-2">No friends to show</div>
       )}
     </div>
   );

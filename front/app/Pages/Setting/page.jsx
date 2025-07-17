@@ -14,7 +14,9 @@ import { useAuth } from '@/app/Context/AuthContext';
 import { colors } from '@/app/utils/Data';
 import clsx from 'clsx';
 import { useMessage } from '@/app/Context/MessageContext';
+import { generateMeta } from '@/app/utils/MetaDataHelper';
 // import { useTranslation } from 'react-i18next';
+
 const SettingsPage = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [oldPassword, setOldPassword] = useState('');

@@ -1,6 +1,8 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/app/Context/AuthContext';
+import { generateMeta } from '@/app/utils/MetaDataHelper';
+
 
 const Login = () => {
   const [email, setEmail] = useState("");

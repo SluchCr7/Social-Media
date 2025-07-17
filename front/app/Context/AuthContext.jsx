@@ -20,7 +20,7 @@ export const AuthContextProvider = ({ children }) => {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [verifyStatus, setVerifyStatus] = useState(false);
   const { showAlert } = useAlert();
-
+  const [suggestedUsers , setSuggestedUsers] = useState([])
   // ------------------- AUTH ACTIONS -------------------
 
   const login = async (email, password) => {
@@ -233,6 +233,23 @@ export const AuthContextProvider = ({ children }) => {
     }
   }
 
+  useEffect(() => {
+    const getSuggestedUsers = async () => {
+      if (!user?.token) return;
+
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/suggested`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+        setSuggestedUsers(res.data);
+      } catch (err) {
+        console.error("Error fetching suggested users:", err.response?.data || err.message);
+      }
+    };
+    getSuggestedUsers();
+  }, [user?.token]); // ✅ سيتم التشغيل فقط عند تغير user.token
   // ------------------- SOCKET -------------------
 
   const connectSocket = (user) => {
@@ -295,6 +312,7 @@ export const AuthContextProvider = ({ children }) => {
         userToken,
         onlineUsers,
         blockOrUnblockUser
+        , suggestedUsers
       }}
     >
       {children}

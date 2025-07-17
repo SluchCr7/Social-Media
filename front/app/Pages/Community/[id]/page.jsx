@@ -8,6 +8,7 @@ import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 import { FaPlus, FaEdit, FaUsers, FaTrashAlt, FaCrown } from 'react-icons/fa';
 import EditCommunityMenu from '@/app/Component/EditCommunityMenu';
+import { generateMeta } from '@/app/utils/MetaDataHelper';
 
 const Page = ({ params }) => {
   const id = params?.id;

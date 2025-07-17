@@ -10,8 +10,10 @@ import UpdateProfile from '../../Component/UpdateProfile'
 import { FaUserEdit } from 'react-icons/fa'
 import AddStoryModel from '@/app/Component/AddStoryModel'
 import { FaPhone, FaGlobe, FaLinkedin, FaGithub, FaMapMarkerAlt } from 'react-icons/fa'
+import { generateMeta } from '@/app/utils/MetaDataHelper'
 
 const tabs = ['Posts', 'Saved', 'Comments']
+
 
 const ProfilePage = () => {
   const { user, users, updatePhoto } = useAuth()
@@ -87,13 +89,13 @@ const ProfilePage = () => {
             <div className="flex flex-wrap justify-center gap-4 mt-4">
               <button
                 onClick={() => setUpdate(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-1 rounded-md flex items-center gap-2"
+                className="border border-lightMode-text dark:border-darkMode-text text-lightMode-text dark:text-darkMode-text text-sm px-4 py-1 rounded-md flex items-center gap-2"
               >
                 <FaUserEdit /> Edit Profile
               </button>
               <button
                 onClick={() => setIsStory(true)}
-                className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-1 rounded-md"
+                className="border border-lightMode-text dark:border-darkMode-text text-lightMode-text dark:text-darkMode-text text-sm px-4 py-1 rounded-md"
               >
                 ➕ Add Story
               </button>

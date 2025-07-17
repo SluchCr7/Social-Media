@@ -589,5 +589,66 @@ const updateLinksSocial = asyncHandler(async (req, res) => {
   });
 });
 
+const getSuggestedUsers = asyncHandler(async (req, res) => {
+  const currentUserId = req.user._id;
 
-module.exports = {DeleteUser ,blockOrUnblockUser  ,makeUserAdmin , getAllUsers , getUserById , RegisterNewUser , LoginUser, verifyAccount, uploadPhoto , makeFollow , updatePassword , updateProfile , savePost , pinPost , updateLinksSocial}
+  // جلب بيانات المستخدم الحالي
+  const currentUser = await User.findById(currentUserId)
+    .select('interests country following blockedUsers communities')
+    .populate('communities', '_id') // لجلب المجتمعات
+    .lean(); // لتحويل البيانات إلى JSON
+
+  if (!currentUser) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  // استخراج المعرفات
+  const followingIds = currentUser.following.map(id => id.toString());
+  const blockedIds = currentUser.blockedUsers.map(id => id.toString());
+  const communityIds = currentUser.communities.map(c => c._id.toString());
+
+  // جلب كل المستخدمين باستثناء: المتابعين والمُحظورين والمستخدم الحالي
+  const allUsers = await User.find({
+    _id: {
+      $ne: currentUserId, // غير المستخدم الحالي
+      $nin: [...followingIds, ...blockedIds]  // غير المتابعين والمحظورين
+    },
+    accountStatus: 'active',
+  })
+    .select('_id username profilePhoto interests country communities')
+    .populate('communities', '_id') // مجتمعاتهم
+    .lean();
+
+  // ترتيب المستخدمين بناء على النقاط
+  const suggestions = allUsers.map(user => {
+    let score = 0;
+
+    // ✅ الاهتمامات المشتركة
+    const sharedInterests = user.interests?.filter(interest => currentUser.interests.includes(interest)) || [];
+    score += sharedInterests.length * 10;
+
+    // ✅ نفس الدولة
+    if (user.country === currentUser.country && user.country !== 'Unknown') {
+      score += 15;
+    }
+
+    // ✅ المجتمعات المشتركة
+    const userCommunities = user.communities.map(c => c._id.toString());
+    const commonCommunities = userCommunities.filter(cid => communityIds.includes(cid));
+    score += commonCommunities.length * 10;
+
+    return { user, score };
+  });
+
+  // تصفية وترتيب النتائج النهائية
+  const topSuggestions = suggestions
+    .filter(s => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10) // حد أقصى 10 مستخدمين
+
+  res.status(200).json(topSuggestions.map(s => s.user));
+});
+
+
+
+module.exports = {DeleteUser, getSuggestedUsers ,blockOrUnblockUser  ,makeUserAdmin , getAllUsers , getUserById , RegisterNewUser , LoginUser, verifyAccount, uploadPhoto , makeFollow , updatePassword , updateProfile , savePost , pinPost , updateLinksSocial}

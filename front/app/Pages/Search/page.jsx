@@ -4,6 +4,8 @@ import { FiUserPlus, FiX } from "react-icons/fi"
 import { useAuth } from '../../Context/AuthContext'
 import Image from 'next/image'
 import Link from 'next/link'
+import { generateMeta } from '@/app/utils/MetaDataHelper'
+
 
 const Search = () => {
   const { users, user } = useAuth();

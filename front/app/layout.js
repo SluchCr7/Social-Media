@@ -7,10 +7,8 @@ import LayoutComponent from "./Component/LayoutComponent";
 import { AuthContextProvider } from "./Context/AuthContext";
 import { PostContextProvider } from "./Context/PostContext";
 import { CommentContextProvider } from "./Context/CommentContext";
-import { ReplyContextProvider } from "./Context/ReplyContext";
 import { MessageContextProvider } from "./Context/MessageContext";
 import { NotifyContextProvider } from "./Context/NotifyContext";
-import { ReplyReplyContextProvider } from "./Context/ReplyReplyContext";
 import { NewsContextProvider } from "./Context/NewsContext";
 import { CommunityContextProvider } from "./Context/CommunityContext";
 import { StoryContextProvider } from "./Context/StoryContext";
@@ -24,7 +22,7 @@ const jetBrainsMono = JetBrains_Mono({
 })
 
 export const metadata = {
-  title: "Slucht - Home",
+  title: `${process.env.WEBSITE_NAME} - Home`,
   description: "Share your thoughts with the world and connect with others", 
 };
 

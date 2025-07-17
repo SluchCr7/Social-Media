@@ -7,6 +7,7 @@ import NoChat from './../../Component/NoChat';
 import { useMessage } from '@/app/Context/MessageContext';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
+import { generateMeta } from '@/app/utils/MetaDataHelper';
 
 const MessangerSluchit = () => {
   const { selectedUser, setSelectedUser } = useMessage();

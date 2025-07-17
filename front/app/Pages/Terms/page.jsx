@@ -1,5 +1,8 @@
 'use client';
+import { generateMeta } from '@/app/utils/MetaDataHelper';
 import React from 'react';
+
+
 
 const TermsOfServicePage = () => {
   return (

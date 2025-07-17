@@ -88,8 +88,9 @@ const Aside = () => {
       {/* ===== Desktop Aside ===== */}
       <aside className="hidden lg:flex flex-col items-center lg:items-start border-r w-[15%] bg-lightMode-menu dark:bg-darkMode-menu pr-3 pl-5 py-10 min-h-screen fixed z-40 left-0 gap-6">
         {/* Logo */}
-        <div className="w-full flex justify-center lg:justify-start">
-          <Image src="/Logo.png" alt="logo" width={40} height={40} className="rounded-full w-16 h-16  object-cover" />
+        <div className="w-full px-4 py-2 flex justify-center lg:justify-start">
+          {/* <Image src="/Logo.png" alt="logo" width={40} height={40} className="rounded-full w-16 h-16  object-cover" /> */}
+          <span className='text-lg font-bold text-lightMode-text dark:text-darkMode-text'>{process.env.NEXT_PUBLIC_WEBSITE_NAME || "Zocial"}</span>
         </div>
 
         {/* Links */}
@@ -105,7 +106,11 @@ const Aside = () => {
           <aside className="w-64 bg-lightMode-menu dark:bg-darkMode-menu p-6 flex flex-col gap-6 min-h-screen">
             {/* Close Button */}
             <div className="flex justify-between items-center w-full mb-4">
-              <Image src="/Logo.png" alt="logo" width={40} height={40} className="rounded-full w-12 h-12 object-cover" />
+              {/* Logo */}
+              <div className="w-full px-4 py-2 flex justify-center lg:justify-start">
+                {/* <Image src="/Logo.png" alt="logo" width={40} height={40} className="rounded-full w-16 h-16  object-cover" /> */}
+                <span className='text-lg font-bold text-lightMode-text dark:text-darkMode-text'>{process.env.NEXT_PUBLIC_WEBSITE_NAME}</span>
+              </div>
               <button onClick={() => setIsMobileMenuOpen(false)}>
                 <MdClose className="text-3xl text-lightMode-text dark:text-darkMode-text" />
               </button>

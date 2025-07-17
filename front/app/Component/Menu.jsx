@@ -7,6 +7,7 @@ import Communities from './Communities';
 import Link from 'next/link';
 import News from './News';
 import MenuAllNews from './MenuAllNews';
+import MenuFrinds from './MenuFrinds';
 
 const Menu = () => {
   const { user, isLogin } = useAuth();
@@ -19,7 +20,8 @@ const Menu = () => {
           <News showAllNews={showAllNews} setShowAllNews={setShowAllNews} />
           <MenuMessagesFromMe />
           <Communities />
-          <MenuFollowers />
+          {/* <MenuFollowers /> */}
+          <MenuFrinds/>
           <MenuAllNews showAllNews={showAllNews} setShowAllNews={setShowAllNews} />
           <div className="mt-auto border-t pt-4 w-full border-gray-300 dark:border-gray-700">
             <p className="text-xs text-gray-400 dark:text-gray-500 text-center">

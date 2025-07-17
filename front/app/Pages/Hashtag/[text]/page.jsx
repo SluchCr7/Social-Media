@@ -3,6 +3,7 @@ import SluchitEntry from '@/app/Component/SluchitEntry'
 import { usePost } from '@/app/Context/PostContext'
 import React, { useEffect, useState } from 'react'
 
+
 const Page = ({params}) => {
   const [postsRelated , setPostsRelated] = useState([])
   // const text = "#" + params.text.slice(3); // only if you're slicing out a prefix (like "tag" from "tagNature")

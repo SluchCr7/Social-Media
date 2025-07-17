@@ -13,14 +13,13 @@ import EditPostModal from './EditPostModel'
 import { useReport } from '../Context/ReportContext'
 
 const SluchitEntry = ({ post }) => {
-  const { likePost, savePost, sharePost , setPostIsEdit } = usePost()
+  const { likePost, savePost, sharePost , setPostIsEdit , imageView , setImageView} = usePost()
   const [showMenu, setShowMenu] = useState(false)
   const { user } = useAuth()
   const isShared = post?.isShared && post?.originalPost
   const original = post?.originalPost
   const isCommunityPost = post?.community !== null
   const isInCommunityPage = typeof window !== 'undefined' && window.location.href.includes('/Pages/Community/')
-
   return (
     <div className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-gray-200 dark:border-gray-700 w-full p-6 rounded-2xl flex flex-col gap-5 shadow-2xl transition-all duration-300 hover:scale-[1.01]">
 
@@ -159,14 +158,19 @@ const SluchitEntry = ({ post }) => {
               {original?.Photos && (
                 <div className={original?.Photos.length > 1 ? 'grid grid-cols-2 gap-2' : ''}>
                   {original?.Photos.map((photo, index) => (
-                    <Image
+                    <div
                       key={index}
-                      src={photo?.url}
-                      alt={`original-photo-${index}`}
-                      width={500}
-                      height={500}
-                      className={`${original?.Photos.length > 1 ? 'w-full' : 'w-[500px]'} h-[500px] object-cover rounded-lg`}
-                    />
+                      onClick={() => setImageView({ url: photo?.url, postId: original?._id })}
+                      className="cursor-pointer"
+                    >
+                      <Image
+                        src={photo?.url}
+                        alt={`original-photo-${index}`}
+                        width={500}
+                        height={500}
+                        className={`${original?.Photos.length > 1 ? 'w-full' : 'w-[500px]'} h-[500px] object-cover rounded-lg`}
+                      />
+                    </div>
                   ))}
                 </div>
               )}
@@ -193,14 +197,19 @@ const SluchitEntry = ({ post }) => {
           {!isShared && post?.Photos && (
             <div className={post?.Photos.length > 1 ? 'grid grid-cols-2 gap-2' : ''}>
               {post?.Photos.map((photo, i) => (
-                <Image
+                <div
                   key={i}
-                  src={photo?.url}
-                  alt={`photo-${i}`}
-                  width={500}
-                  height={500}
-                  className={`${post?.Photos.length > 1 ? 'w-full' : 'w-[500px]'} h-[500px] object-cover rounded-lg`}
-                />
+                  onClick={() => setImageView({ url: photo?.url, postId: post?._id })}
+                  className="cursor-pointer"
+                >
+                  <Image
+                    src={photo?.url}
+                    alt={`photo-${i}`}
+                    width={500}
+                    height={500}
+                    className={`${post?.Photos.length > 1 ? 'w-full' : 'w-[500px]'} h-[500px] object-cover rounded-lg`}
+                  />
+                </div>
               ))}
             </div>
           )}

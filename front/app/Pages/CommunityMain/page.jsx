@@ -5,6 +5,9 @@ import { useAuth } from '@/app/Context/AuthContext';
 import { FaPlus, FaFilter } from 'react-icons/fa';
 import Image from 'next/image';
 import Link from 'next/link';
+import { generateMeta } from '@/app/utils/MetaDataHelper';
+
+
 
 const CommunityPage = () => {
   const { communities, addCommunity } = useCommunity();

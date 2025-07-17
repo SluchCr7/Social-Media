@@ -33,7 +33,14 @@ const MenuAllNews = ({showAllNews ,setShowAllNews}) => {
       <div className="bg-white dark:bg-[#121212] w-full max-w-3xl rounded-xl p-3 overflow-hidden shadow-xl">
         <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-bold text-gray-800 dark:text-white">📰 All News</h2>
-          <span onClick={()=> setShowAllNews(false)}><FiX/></span>
+          <span onClick={() => {
+            setShowAllNews(false);
+            setFilters({
+              category: 'general',
+              country: 'us',
+              lang: 'en',
+            });
+          }}><FiX /></span>
         </div>
 
         {/* الفلاتر */}
