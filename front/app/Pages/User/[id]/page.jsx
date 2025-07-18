@@ -16,7 +16,7 @@ const Page = ({ params }) => {
   const id = params.id
   const { users, followUser, user , blockOrUnblockUser  } = useAuth()
   const { posts } = usePost()
-
+  const [isBlockedByMe, setIsBlockedByMe] = useState(false);
   const [userSelected, setUserSelected] = useState({})
   const [activeTab, setActiveTab] = useState('Posts')
 
@@ -24,9 +24,12 @@ const Page = ({ params }) => {
     const matchedUser = users.find((u) => u._id === id)
     if (matchedUser) setUserSelected(matchedUser)
   }, [id, users])
-
+  useEffect(() => {
+    if (user && userSelected?._id) {
+      setIsBlockedByMe(user.blockedUsers?.includes(userSelected._id));
+    }
+  }, [user, userSelected]);
   const isFollowing = userSelected?.followers?.some(f => f._id === user._id)
-  const isBlockedByMe = user?.blockedUsers?.includes(userSelected?._id);
 
   const renderPosts = () => {
     const pinnedPosts = userSelected?.pinsPosts || []

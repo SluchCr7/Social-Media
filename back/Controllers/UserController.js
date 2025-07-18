@@ -526,8 +526,8 @@ const pinPost = asyncHandler(async (req, res) => {
 })
 
 const blockOrUnblockUser = async (req, res) => {
-  const currentUserId = req.user._id; // معرف المستخدم الذي يقوم بالحظر (مثلاً من التوكن)
-  const targetUserId = req.params.id; // معرف المستخدم الذي سيتم حظره أو إلغاء حظره
+  const currentUserId = req.user._id;
+  const targetUserId = req.params.id;
 
   if (currentUserId === targetUserId) {
     return res.status(400).json({ message: "You can't block or unblock yourself." });
@@ -544,20 +544,33 @@ const blockOrUnblockUser = async (req, res) => {
     const isBlocked = currentUser.blockedUsers.includes(targetUserId);
 
     if (isBlocked) {
+      // Unblock user
       currentUser.blockedUsers = currentUser.blockedUsers.filter(
         (id) => id.toString() !== targetUserId
       );
       await currentUser.save();
-      return res.status(200).json({ message: "You have successfully unblocked the user." });
+      return res.status(200).json({ message: "User has been unblocked." });
     } else {
+      // Block user
       currentUser.blockedUsers.push(targetUserId);
+
+      // Optional: Remove mutual follow if desired
+      await User.findByIdAndUpdate(currentUserId, {
+        $pull: { following: targetUserId },
+      });
+      await User.findByIdAndUpdate(targetUserId, {
+        $pull: { followers: currentUserId, following: currentUserId },
+      });
+
       await currentUser.save();
-      return res.status(200).json({ message: "You have successfully blocked the user." });
+      return res.status(200).json({ message: "User has been blocked." });
     }
   } catch (err) {
-    return res.status(500).json({ message: "حدث خطأ ما.", error: err.message });
+    console.error("Block/Unblock Error:", err);
+    return res.status(500).json({ message: "An error occurred.", error: err.message });
   }
 };
+
 
 const updateLinksSocial = asyncHandler(async (req, res) => {
   // ✅ Validate the input using Joi

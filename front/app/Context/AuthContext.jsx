@@ -204,14 +204,32 @@ export const AuthContextProvider = ({ children }) => {
 
   const blockOrUnblockUser = async (id) => {
     try {
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/block/${id}`, {}, {
-        headers: { authorization: `Bearer ${user.token}` }
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/block/${id}`,
+        {},
+        {
+          headers: { authorization: `Bearer ${user.token}` }
+        }
+      );
+
+      // تحديث حالة blockedUsers داخل user
+      setUser((prevUser) => {
+        const isBlocked = prevUser.blockedUsers.includes(id);
+
+        return {
+          ...prevUser,
+          blockedUsers: isBlocked
+            ? prevUser.blockedUsers.filter((blockedId) => blockedId !== id)
+            : [...prevUser.blockedUsers, id]
+        };
       });
+
       showAlert(res.data.message);
     } catch (err) {
       console.error(err);
     }
-  }
+  };
+
   const verifyAccount = async (id, token) => {
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/${id}/verify/${token}`);

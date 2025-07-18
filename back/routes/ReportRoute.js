@@ -7,7 +7,7 @@ route.route('/')
 route.route('/add')
     .post(verifyToken , addNewReport)
 
-route.route('/add/:id')
+route.route('/delete/:id')
     .delete(verifyToken , deleteReport)
 
 module.exports = route
