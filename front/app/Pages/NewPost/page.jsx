@@ -88,7 +88,7 @@ const NewPost = () => {
 
           {/* Community Selector */}
           <div className="w-64">
-            {community.filter(com => com?.members?.includes(user?._id)).length > 0 ? (
+            {Array.isArray(community) && community.filter(com => com?.members?.includes(user?._id)).length > 0 ? (
               <select
                 value={selectedCommunity}
                 onChange={(e) => setSelectedCommunity(e.target.value)}
@@ -107,6 +107,7 @@ const NewPost = () => {
               <span className="text-sm text-gray-500 dark:text-gray-400">You haven’t joined any communities.</span>
             )}
           </div>
+
         </div>
 
         {/* Textarea */}

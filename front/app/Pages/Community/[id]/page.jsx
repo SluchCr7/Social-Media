@@ -16,6 +16,7 @@ import {
   FaCrown,
   FaUser,
 } from 'react-icons/fa'
+import Loading from '@/app/Component/Loading'
 
 const Page = ({ params }) => {
   const id = params?.id
@@ -43,7 +44,7 @@ const Page = ({ params }) => {
   if (!CommunitySelected) {
     return (
       <div className="flex justify-center items-center min-h-[100vh] text-gray-500">
-        Loading community...
+        <Loading/>
       </div>
     )
   }
@@ -66,7 +67,7 @@ const Page = ({ params }) => {
   )
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="max-w-5xl flex flex-col text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen">
       {/* Cover */}
       <div className="relative w-full">
         <Image
