@@ -40,7 +40,7 @@ const Menu = () => {
           <div className="bg-darkMode-menu p-8 rounded-2xl shadow-xl border border-darkMode-border">
             <h2 className="text-2xl font-semibold text-darkMode-text mb-3">Welcome to Sluchit</h2>
             <p className="text-darkMode-muted text-sm leading-relaxed">
-              You're currently not logged in. Please sign in to explore your network,
+              You`&apos;`re currently not logged in. Please sign in to explore your network,
               receive messages, follow hashtags, and connect with communities that matter to you.
             </p>
           </div>

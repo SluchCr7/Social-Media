@@ -6,7 +6,7 @@ import SluchitEntry from '@/app/Component/SluchitEntry'
 import { usePost } from '@/app/Context/PostContext'
 import { useState, useEffect } from 'react'
 import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri"
-import { FaPhone, FaGlobe, FaLinkedin, FaGithub, FaMapMarkerAlt } from 'react-icons/fa'
+import { FaPhone, FaGlobe, FaLinkedin, FaGithub, FaMapMarkerAlt, FaTwitter, FaFacebook } from 'react-icons/fa'
 import { generateMeta } from '@/app/utils/MetaDataHelper'
 
 const tabs = ['Posts', 'Saved', 'Comments']

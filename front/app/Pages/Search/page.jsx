@@ -76,7 +76,7 @@ const Search = () => {
         ) : (
           search.trim() && (
             <div className="col-span-full text-center text-gray-500 text-base py-20">
-              No users found matching <span className="font-semibold text-white">"{search}"</span>
+              No users found matching <span className="font-semibold text-white">`&apos;`{search}`&apos;`</span>
             </div>
           )
         )}

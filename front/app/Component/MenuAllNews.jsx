@@ -19,7 +19,7 @@ const MenuAllNews = ({showAllNews ,setShowAllNews}) => {
   const [numNews , setNumNews] = useState(10)
   useEffect(() => {
     fetchAllNews(filters);
-  }, [filters]);
+  }, [filters , numNews]);
 
   const handleChange = (e) => {
     setFilters(prev => ({
