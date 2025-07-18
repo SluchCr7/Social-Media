@@ -12,7 +12,9 @@ connectDB()
 
 // Middlewares
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors({
+    origin: process.env.DOMAIN_NAME,
+}));
 app.use(express.json());
 app.use(cookieParser())
 
