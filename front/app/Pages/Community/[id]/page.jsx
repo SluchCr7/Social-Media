@@ -124,7 +124,7 @@ const Page = ({ params }) => {
           </div>
         </div>
 
-        <p className='text-sm text-gray-600 dark:text-gray-300 max-w-2xl w-[70%]'>
+        <p className='text-sm text-gray-600 dark:text-gray-300 w-[50%]'>
           {CommunitySelected?.description}
         </p>
         <div className='flex items-start flex-col gap-3'>
