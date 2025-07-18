@@ -526,7 +526,7 @@ const pinPost = asyncHandler(async (req, res) => {
 })
 
 const blockOrUnblockUser = async (req, res) => {
-  const currentUserId = req.user.id; // معرف المستخدم الذي يقوم بالحظر (مثلاً من التوكن)
+  const currentUserId = req.user._id; // معرف المستخدم الذي يقوم بالحظر (مثلاً من التوكن)
   const targetUserId = req.params.id; // معرف المستخدم الذي سيتم حظره أو إلغاء حظره
 
   if (currentUserId === targetUserId) {

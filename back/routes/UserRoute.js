@@ -8,6 +8,8 @@ route.route("/")
 route.route('/suggested')
     .get(verifyToken, getSuggestedUsers)
 
+route.route("/block/:id")
+    .put(verifyToken, blockOrUnblockUser)
 route.route("/:id")
     .get(getUserById)
     .delete(DeleteUser)
@@ -41,8 +43,7 @@ route.route("/update/pass")
 route.route('/pin/:id')
     .put(verifyToken, pinPost)
     
-route.route("/block/:id")
-    .put(verifyToken, blockOrUnblockUser)
+
 route.route('/social')
     .put(verifyToken, updateLinksSocial)
 module.exports = route
