@@ -16,7 +16,7 @@ export const CommunityContextProvider = ({ children }) => {
 
   useEffect(() => {
     getData('community', setCommunities);
-  }, []);
+  }, [communities]);
 
   const config = {
     headers: {
@@ -61,7 +61,7 @@ export const CommunityContextProvider = ({ children }) => {
 
       const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update/${id}`, formData, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${user?.token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
@@ -81,7 +81,7 @@ export const CommunityContextProvider = ({ children }) => {
 
       const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update-cover/${id}`, formData, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${user?.token}`,
           'Content-Type': 'multipart/form-data',
         },
       });

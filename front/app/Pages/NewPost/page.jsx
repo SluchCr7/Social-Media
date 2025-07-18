@@ -11,7 +11,7 @@ import EmojiPicker from 'emoji-picker-react';
 import { generateMeta } from '@/app/utils/MetaDataHelper';
 
 
-const NewPostPage = () => {
+const NewPost = () => {
   const [postText, setPostText] = useState('');
   const [images, setImages] = useState([]);
   const [selectedCommunity, setSelectedCommunity] = useState('');
@@ -180,4 +180,4 @@ const NewPostPage = () => {
   );
 };
 
-export default NewPostPage;
+export default NewPost;

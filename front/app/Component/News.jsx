@@ -12,7 +12,7 @@ const News = ({showAllNews ,setShowAllNews}) => {
     <div className="w-full bg-white dark:bg-[#16181c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white">What`&apos;`s happening</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white">What is happening</h2>
       </div>
 
       <ul className="flex flex-col divide-y divide-gray-100 dark:divide-gray-700">

@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { FaPlus, FaEdit, FaUsers, FaTrashAlt, FaCrown } from 'react-icons/fa';
 import EditCommunityMenu from '@/app/Component/EditCommunityMenu';
 import { generateMeta } from '@/app/utils/MetaDataHelper';
+import { FaUser } from "react-icons/fa";
 
 const Page = ({ params }) => {
   const id = params?.id;
@@ -123,12 +124,13 @@ const Page = ({ params }) => {
           </div>
         </div>
 
-        <p className='text-sm text-gray-600 dark:text-gray-300 max-w-2xl'>
+        <p className='text-sm text-gray-600 dark:text-gray-300 max-w-2xl w-[70%]'>
           {CommunitySelected?.description}
         </p>
         <div className='flex items-start flex-col gap-3'>
-          <p className='text-sm text-gray-500'>
-            👥 {CommunitySelected?.members?.length || 0} Members
+          <p className='text-sm text-gray-500 flex items-center gap-1'>
+            <span><FaUser /></span>
+            {CommunitySelected?.members?.length || 0} Members
           </p>
           <div className='flex items-center gap-2'>
             {
