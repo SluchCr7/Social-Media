@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useState } from 'react'
 import Aside from './Aside'
 import Menu from './Menu'
@@ -16,22 +17,28 @@ const LayoutComponent = ({ children }) => {
   const [showMessanger, setShowMessanger] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [showNewSluchit, setShowNewSluchit] = useState(false)
-  const {showPostModelEdit,setShowPostModelEdit , postIsEdit , setPostIsEdit , imageView , setImageView} = usePost()
-  const { isLogin, isAuthChecked } = useAuth()
-  const pathname = usePathname()
-  const {showMenuReport, setShowMenuReport, isPostId} = useReport()
-  const hideLayout =
-    pathname === '/Pages/Login' ||
-    pathname === '/Pages/Register' ||
-    pathname === '/Pages/Messanger'
 
-  // ✅ لا تعرض المحتوى حتى يتم التأكد من حالة المستخدم
+  const { showPostModelEdit, setShowPostModelEdit, postIsEdit, setPostIsEdit, imageView, setImageView } = usePost()
+  const { isLogin, isAuthChecked } = useAuth()
+  const { showMenuReport, setShowMenuReport, isPostId } = useReport()
+  const pathname = usePathname()
+
+  const hideLayout = [
+    '/Pages/Login',
+    '/Pages/Register',
+    '/Pages/Messanger',
+    '/Pages/Forgot',
+    '/Pages/ResetPassword',
+    '/Pages/ResetPassword/[id]/[token]',
+    '/Pages/UserVerify/[id]/verify/[token]',
+  ].includes(pathname)
+
   if (!isAuthChecked) return null
 
   return (
     <div>
       <div className={`flex items-start gap-3 w-full ${hideLayout ? '' : 'py-5'}`}>
-        {!hideLayout && (
+        {!hideLayout && isLogin && (
           <Aside
             showNotifications={showNotifications}
             setShowNotifications={setShowNotifications}
@@ -43,9 +50,16 @@ const LayoutComponent = ({ children }) => {
             setShowSearch={setShowSearch}
           />
         )}
-        <div className={`w-full flex items-start ${hideLayout ? '' : 'pl-[15%]'}`}>
-          <Alert/>
+
+        <div
+          className={`flex items-start transition-all duration-300 ${
+            hideLayout ? 'w-full' : isLogin ? 'w-full pl-[15%]' : 'w-[70%] mx-auto'
+          }`}
+        >
+          <Alert />
+
           {children}
+
           {isLogin && !hideLayout && (
             <Menu
               showNotifications={showNotifications}
@@ -54,27 +68,26 @@ const LayoutComponent = ({ children }) => {
               setShowMessanger={setShowMessanger}
             />
           )}
+
           {showPostModelEdit && (
             <EditPostModal
               post={postIsEdit}
               onClose={() => {
-                setPostIsEdit(null);
-                setShowPostModelEdit(false);
+                setPostIsEdit(null)
+                setShowPostModelEdit(false)
               }}
             />
           )}
-          {
-            showMenuReport && (
-              <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50">
-                <AddNewReport postId={isPostId} onClose={() => setShowMenuReport(false)}/>
-              </div>
-            )
-          }
-          {
-            imageView && (
-              <ViewImage imageView={imageView} setImageView={setImageView}/>
-            )
-          }
+
+          {showMenuReport && (
+            <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50">
+              <AddNewReport postId={isPostId} onClose={() => setShowMenuReport(false)} />
+            </div>
+          )}
+
+          {imageView && (
+            <ViewImage imageView={imageView} setImageView={setImageView} />
+          )}
         </div>
       </div>
     </div>

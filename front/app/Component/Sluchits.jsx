@@ -22,10 +22,10 @@ const Sluchits = () => {
 
   return (
     <div className="w-full flex items-start flex-col gap-8">
-      {/* {isLoading
-        ? Array.from({ length: 4 }).map((_, i) => <PostSkeleton key={i} />) */}
-        {sortedPosts?.map((post) => <SluchitEntry key={post?._id} post={post} />)}
-      {/* } */}
+      {isLoading
+        ? Array.from({ length: 4 }).map((_, i) => <PostSkeleton key={i} />)
+        : sortedPosts?.map((post) => <SluchitEntry key={post?._id} post={post} />)
+      }
     </div>
   );
 };

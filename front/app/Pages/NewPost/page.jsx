@@ -20,7 +20,7 @@ const NewPost = () => {
 
   const { user } = useAuth();
   const { AddPost } = usePost();
-  const { community } = useCommunity();
+  const { communities } = useCommunity();
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -74,7 +74,7 @@ const NewPost = () => {
 
   return (
     <main className="flex items-center justify-center w-full py-6 px-4">
-      <div className="w-full max-w-3xl bg-white dark:bg-darkMode-fg rounded-2xl shadow-2xl overflow-hidden relative transition-all duration-500">
+      <div className="w-full bg-white dark:bg-darkMode-fg rounded-2xl shadow-2xl overflow-hidden relative transition-all duration-500">
 
         {/* Header */}
         <div className="flex items-center justify-between w-full p-6 border-b border-gray-200 dark:border-gray-700">
@@ -88,14 +88,14 @@ const NewPost = () => {
 
           {/* Community Selector */}
           <div className="w-64">
-            {Array.isArray(community) && community.filter(com => com?.members?.includes(user?._id)).length > 0 ? (
+            {Array.isArray(communities) && communities.filter(com => com?.members?.includes(user?._id)).length > 0 ? (
               <select
                 value={selectedCommunity}
                 onChange={(e) => setSelectedCommunity(e.target.value)}
                 className="w-full appearance-none p-2 pl-3 pr-10 bg-gray-100 dark:bg-darkMode-bg border dark:border-gray-600 rounded-md text-sm text-gray-800 dark:text-white focus:outline-none"
               >
                 <option value="">Select a Community</option>
-                {community
+                {communities
                   .filter(com => com?.members?.includes(user?._id))
                   .map((com) => (
                     <option key={com._id} value={com._id}>
