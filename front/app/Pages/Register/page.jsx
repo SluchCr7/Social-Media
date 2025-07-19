@@ -2,10 +2,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/app/Context/AuthContext';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
-import { generateMeta } from '@/app/utils/MetaDataHelper';
 
 const Register = () => {
   const [formData, setFormData] = useState({ email: '', password: '', username: '' });
+  const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -20,9 +20,16 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
     setTimeout(() => {
       setLoading(false);
       const { email, password, username } = formData;
+
+      if (!agreeTerms) {
+        setError('You must agree to the Terms and Conditions to register.');
+        return;
+      }
+
       if (email && password && username) {
         registerNewUser(username, email, password);
       } else {
@@ -57,6 +64,7 @@ const Register = () => {
               className="w-full px-4 py-3 rounded-lg bg-white/80 dark:bg-white/10 text-black dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
           <div>
             <label htmlFor="username" className="block text-sm mb-1 text-lightMode-text2 dark:text-darkMode-text2">
               Username
@@ -93,6 +101,22 @@ const Register = () => {
             >
               {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
             </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="terms"
+              checked={agreeTerms}
+              onChange={() => setAgreeTerms(!agreeTerms)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="terms" className="text-sm text-lightMode-text2 dark:text-darkMode-text2">
+              I agree to the{' '}
+              <a href="/Pages/Terms" className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">
+                Terms and Conditions
+              </a>
+            </label>
           </div>
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
