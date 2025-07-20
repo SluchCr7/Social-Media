@@ -51,7 +51,7 @@ const Header = ({ unReadedMessage, setShowNotifications }) => {
             )}
           </Link>
           {
-            isLogin && (
+            !isLogin && (
               <Link href="/Pages/Login">
                 <IoIosLogIn className="text-[24px] text-lightMode-text dark:text-darkMode-text hover:text-lightMode-text2 dark:hover:text-darkMode-text cursor-pointer" />
               </Link>
