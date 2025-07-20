@@ -88,7 +88,7 @@ const NewPost = () => {
 
           {/* Community Selector */}
           <div className="w-64">
-            {Array.isArray(communities) && communities.filter(com => com?.members?.includes(user?._id)).length > 0 ? (
+            {communities.filter(com => com?.members?.includes(user?._id)).length > 0 ? (
               <select
                 value={selectedCommunity}
                 onChange={(e) => setSelectedCommunity(e.target.value)}
