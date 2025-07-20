@@ -11,6 +11,7 @@ import { FaUserEdit } from 'react-icons/fa'
 import AddStoryModel from '@/app/Component/AddStoryModel'
 import { FaPhone, FaGlobe, FaLinkedin, FaGithub, FaMapMarkerAlt } from 'react-icons/fa'
 import { generateMeta } from '@/app/utils/MetaDataHelper'
+import { IoAdd } from "react-icons/io5";
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -97,7 +98,7 @@ const ProfilePage = () => {
                 onClick={() => setIsStory(true)}
                 className="border border-lightMode-text dark:border-darkMode-text text-lightMode-text dark:text-darkMode-text text-sm px-4 py-1 rounded-md"
               >
-                ➕ Add Story
+                <IoAdd/> Add Story
               </button>
             </div>
 

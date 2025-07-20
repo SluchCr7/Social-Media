@@ -12,7 +12,7 @@ export const NewsContextProvider = ({ children }) => {
   const fetchAllNews = async (params = {}) => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3001/api/news', { params });
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/news`, { params });
       setNews(response.data.articles || []);
       setError(null);
     } catch (err) {
