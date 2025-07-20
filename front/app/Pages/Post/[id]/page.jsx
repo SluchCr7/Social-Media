@@ -26,7 +26,7 @@ const Page = ({ params }) => {
 
   // الحصول على البوست الحالي
   useEffect(() => {
-    const matchedPost = posts.find((post) => post._id === id);
+    const matchedPost = posts.find((post) => post?._id === id);
     if (matchedPost) {
       setPost(matchedPost);
     }
@@ -35,14 +35,14 @@ const Page = ({ params }) => {
   // عند تعيين البوست، اجلب التعليقات الخاصة به
   useEffect(() => {
     if (post?._id) {
-      fetchCommentsByPostId(post._id);
+      fetchCommentsByPostId(post?._id);
       setLoading(true);
     }
   }, [post]);
 
   const handleAddComment = () => {
     if (!commentText.trim()) return;
-    AddComment(commentText, post._id, post?.owner?._id); // parent = null
+    AddComment(commentText, post?._id, post?.owner?._id); // parent = null
     setCommentText('');
   };
 
@@ -119,9 +119,9 @@ const Page = ({ params }) => {
             <p className="text-sm text-gray-300">{post.originalPost?.text}</p>
             {post.originalPost?.Photos?.length > 0 && (
               <div
-                className={post.originalPost.Photos.length > 1 ? 'grid grid-cols-2 gap-2' : ''}
+                className={post?.originalPost?.Photos?.length > 1 ? 'grid grid-cols-2 gap-2' : ''}
               >
-                {post.originalPost.Photos.map((photo, index) => (
+                {post?.originalPost?.Photos.map((photo, index) => (
                   <div
                     key={index}
                     onClick={() => setImageView({ url: photo?.url, postId: post?._id })}
@@ -149,17 +149,17 @@ const Page = ({ params }) => {
       <div className="flex justify-around border-y border-gray-800 py-4">
         <ActionIcon
           onClick={() => likePost(post?._id, post?.owner?._id)}
-          Icon={post?.likes?.includes(user._id) ? IoIosHeart : CiHeart}
+          Icon={post?.likes?.includes(user?._id) ? IoIosHeart : CiHeart}
           count={post?.likes?.length}
-          className={post?.likes?.includes(user._id) ? 'text-red-500' : 'text-gray-500'}
+          className={post?.likes?.includes(user?._id) ? 'text-red-500' : 'text-gray-500'}
         />
         <ActionIcon Icon={FaRegCommentDots} count={comments?.length} />
-        <ActionIcon onClick={() => sharePost(post._id)} Icon={IoIosShareAlt} count={post?.shares?.length} />
+        <ActionIcon onClick={() => sharePost(post?._id)} Icon={IoIosShareAlt} count={post?.shares?.length} />
         <ActionIcon
-          onClick={() => savePost(post._id)}
+          onClick={() => savePost(post?._id)}
           Icon={CiBookmark}
           count={post?.saved?.length}
-          className={post?.saved?.includes(user._id) ? 'text-red-500' : 'text-gray-500'}
+          className={post?.saved?.includes(user?._id) ? 'text-red-500' : 'text-gray-500'}
         />
       </div>
 
@@ -187,7 +187,7 @@ const Page = ({ params }) => {
         :
           <div className="flex flex-col gap-4 border-t border-gray-800 pt-4">
             {comments?.map((comment) => (
-              <Comment key={comment._id} comment={comment} />
+              <Comment key={comment?._id} comment={comment} />
             ))}
           </div>
       }

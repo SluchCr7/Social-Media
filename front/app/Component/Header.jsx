@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, MessageCircle } from 'lucide-react';
 import { useNotify } from '../Context/NotifyContext';
 import { useAuth } from '../Context/AuthContext'
+import { IoIosLogIn, IoIosLogOut } from "react-icons/io"
 const Header = ({ unReadedMessage, setShowNotifications }) => {
   const { unreadCount, markAllAsRead } = useNotify();
   const [localUnread, setLocalUnread] = useState(unreadCount);
@@ -49,6 +50,13 @@ const Header = ({ unReadedMessage, setShowNotifications }) => {
               </span>
             )}
           </Link>
+          {
+            isLogin && (
+              <Link href="/Pages/Login">
+                <IoIosLogIn className="text-[24px] text-lightMode-text dark:text-darkMode-text hover:text-lightMode-text2 dark:hover:text-darkMode-text cursor-pointer" />
+              </Link>
+            )
+          }
         </div>
         )
       }

@@ -27,7 +27,7 @@ const ProfilePage = () => {
   const [isStory, setIsStory] = useState(false)
 
   useEffect(() => {
-    const matchedUser = users.find((u) => user._id === u._id)
+    const matchedUser = users.find((u) => user?._id === u?._id)
     if (matchedUser) setUserData(matchedUser)
   }, [users])
 
@@ -193,16 +193,16 @@ const ProfilePage = () => {
               <>
                 {(() => {
                   const pinnedPosts = userData?.pinsPosts || []
-                  const pinnedPostIds = new Set(pinnedPosts.map((post) => post._id))
+                  const pinnedPostIds = new Set(pinnedPosts.map((post) => post?._id))
                   const regularPosts = (userData?.posts || []).filter(
-                    (post) => !pinnedPostIds.has(post._id)
+                    (post) => !pinnedPostIds.has(post?._id)
                   )
                   const combinedPosts = [
                     ...pinnedPosts.map((post) => ({ ...post, isPinned: true })),
                     ...regularPosts.map((post) => ({ ...post, isPinned: false })),
                   ]
                   return combinedPosts.map((post) => (
-                    <SluchitEntry key={post._id} post={post} />
+                    <SluchitEntry key={post?._id} post={post} />
                   ))
                 })()}
               </>
@@ -210,10 +210,10 @@ const ProfilePage = () => {
 
             {activeTab === 'Saved' && (
               <div className="grid grid-cols-1 gap-4 w-full">
-                {posts?.filter((post) => post.saved.includes(userData._id)).length > 0 ? (
+                {posts?.filter((post) => post.saved.includes(userData?._id)).length > 0 ? (
                   posts
-                    .filter((post) => post.saved.includes(userData._id))
-                    .map((post) => <SluchitEntry key={post._id} post={post} />)
+                    .filter((post) => post.saved.includes(userData?._id))
+                    .map((post) => <SluchitEntry key={post?._id} post={post} />)
                 ) : (
                   <div className="col-span-full text-center text-gray-500 py-10">
                     You haven’t saved any posts yet.
@@ -227,7 +227,7 @@ const ProfilePage = () => {
                 {userData?.comments?.length > 0 ? (
                   userData.comments.map((comment) => (
                     <div
-                      key={comment._id}
+                      key={comment?._id}
                       className="w-full bg-gray-900/70 rounded-xl p-5 shadow-md flex flex-col gap-4"
                     >
                       <div className="flex items-center justify-between">

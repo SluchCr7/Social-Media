@@ -14,38 +14,38 @@ const tabs = ['Posts', 'Saved', 'Comments']
 
 const Page = ({ params }) => {
   const id = params.id
-  const { users, followUser, user , blockOrUnblockUser  } = useAuth()
+  const { users, followUser, user , blockOrUnblockUser, isLogin,isAuthChecked } = useAuth()
   const { posts } = usePost()
   const [isBlockedByMe, setIsBlockedByMe] = useState(false);
   const [userSelected, setUserSelected] = useState({})
   const [activeTab, setActiveTab] = useState('Posts')
 
   useEffect(() => {
-    const matchedUser = users.find((u) => u._id === id)
+    const matchedUser = users.find((u) => u?._id === id)
     if (matchedUser) setUserSelected(matchedUser)
   }, [id, users])
   useEffect(() => {
     if (user && userSelected?._id) {
-      setIsBlockedByMe(user.blockedUsers?.includes(userSelected._id));
+      setIsBlockedByMe(user.blockedUsers?.includes(userSelected?._id));
     }
   }, [user, userSelected]);
-  const isFollowing = userSelected?.followers?.some(f => f._id === user._id)
+  const isFollowing = userSelected?.followers?.some(f => f?._id === user?._id)
 
   const renderPosts = () => {
     const pinnedPosts = userSelected?.pinsPosts || []
-    const pinnedIds = new Set(pinnedPosts.map(p => p._id))
-    const regularPosts = (userSelected?.posts || []).filter(p => !pinnedIds.has(p._id))
+    const pinnedIds = new Set(pinnedPosts.map(p => p?._id))
+    const regularPosts = (userSelected?.posts || []).filter(p => !pinnedIds.has(p?._id))
 
     return [
       ...pinnedPosts.map(p => ({ ...p, isPinned: true })),
       ...regularPosts.map(p => ({ ...p, isPinned: false })),
-    ].map(post => <SluchitEntry key={post._id} post={post} />)
+    ].map(post => <SluchitEntry key={post?._id} post={post} />)
   }
 
   const renderSaved = () => {
-    const savedPosts = posts?.filter(p => p.saved.includes(userSelected._id)) || []
+    const savedPosts = posts?.filter(p => p.saved.includes(userSelected?._id)) || []
     return savedPosts.length > 0 ? (
-      savedPosts.map(post => <SluchitEntry key={post._id} post={post} />)
+      savedPosts.map(post => <SluchitEntry key={post?._id} post={post} />)
     ) : (
       <div className="text-center text-gray-500 py-10">You haven’t saved any posts yet.</div>
     )
@@ -55,7 +55,7 @@ const Page = ({ params }) => {
     const comments = userSelected?.comments || []
     return comments.length > 0 ? (
       comments.map(comment => (
-        <div key={comment._id} className="w-full bg-gray-900/70 rounded-xl p-5 shadow-md flex flex-col gap-4">
+        <div key={comment?._id} className="w-full bg-gray-900/70 rounded-xl p-5 shadow-md flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -71,12 +71,12 @@ const Page = ({ params }) => {
                   <p className="text-xs text-gray-400">{comment.owner?.profileName}</p>
                 </div>
               </div>
-              <span className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleDateString()}</span>
+              <span className="text-xs text-gray-500">{new Date(comment?.createdAt).toLocaleDateString()}</span>
             </div>
-            <p className="text-sm text-gray-300 pl-1 border-l-2 border-gray-600">{comment.text}</p>
+            <p className="text-sm text-gray-300 pl-1 border-l-2 border-gray-600">{comment?.text}</p>
           </div>
 
-          {comment.postId && (
+          {comment?.postId && (
             <div className="flex gap-3 items-start border-t border-gray-700 pt-4">
               <Image
                 src={comment.postId?.owner?.profilePhoto?.url || '/default-profile.png'}
@@ -138,9 +138,9 @@ const Page = ({ params }) => {
         </div>
 
         {/* Follow Button */}
-        {user && user._id !== userSelected._id && (
+        {isLogin && user?._id !== userSelected?._id && (
           <button
-            onClick={() => followUser(userSelected._id)}
+            onClick={() => followUser(userSelected?._id)}
             className={`flex items-center gap-2 mt-4 px-4 py-2 rounded-full border text-sm font-medium transition-all duration-300
               ${isFollowing
                 ? 'text-red-600 border-red-600 hover:bg-red-600 hover:text-white'
@@ -157,7 +157,7 @@ const Page = ({ params }) => {
           <h2 className="text-2xl font-bold mb-4">You have blocked this user</h2>
           <p className="text-sm text-gray-400 mb-6">Unblock them to see their profile again.</p>
           <button
-            onClick={() => blockOrUnblockUser(userSelected._id)}
+            onClick={() => blockOrUnblockUser(userSelected?._id)}
             className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full transition"
           >
             Unblock User
