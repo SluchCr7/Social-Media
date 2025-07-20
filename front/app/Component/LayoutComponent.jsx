@@ -1,28 +1,39 @@
-'use client'
+'use client';
 
-import React, { useState } from 'react'
-import Aside from './Aside'
-import Menu from './Menu'
-import { usePathname } from 'next/navigation'
-import { useAuth } from '../Context/AuthContext'
-import Alert from './Alert'
-import { usePost } from '../Context/PostContext'
-import EditPostModal from './EditPostModel'
-import { useReport } from '../Context/ReportContext'
-import AddNewReport from './AddNewReport'
-import ViewImage from './ViewImage'
+import React, { useEffect, useState } from 'react';
+import Aside from './Aside';
+import Menu from './Menu';
+import { usePathname } from 'next/navigation';
+import { useAuth } from '../Context/AuthContext';
+import Alert from './Alert';
+import { usePost } from '../Context/PostContext';
+import EditPostModal from './EditPostModel';
+import { useReport } from '../Context/ReportContext';
+import AddNewReport from './AddNewReport';
+import ViewImage from './ViewImage';
+import Loader from './Loader';
 
 const LayoutComponent = ({ children }) => {
-  const [showNotifications, setShowNotifications] = useState(false)
-  const [showMessanger, setShowMessanger] = useState(false)
-  const [showSearch, setShowSearch] = useState(false)
-  const [showNewSluchit, setShowNewSluchit] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showMessanger, setShowMessanger] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [showNewSluchit, setShowNewSluchit] = useState(false);
+  const [loading, setLoading] = useState(true); // للتحكم في الـ Loader
 
-  const { showPostModelEdit, setShowPostModelEdit, postIsEdit, setPostIsEdit, imageView, setImageView } = usePost()
-  const { isLogin, isAuthChecked } = useAuth()
-  const { showMenuReport, setShowMenuReport, isPostId } = useReport()
-  const pathname = usePathname()
+  const {
+    showPostModelEdit,
+    setShowPostModelEdit,
+    postIsEdit,
+    setPostIsEdit,
+    imageView,
+    setImageView
+  } = usePost();
 
+  const { isLogin, isAuthChecked } = useAuth();
+  const { showMenuReport, setShowMenuReport, isPostId } = useReport();
+  const pathname = usePathname();
+
+  // الصفحات التي لا يظهر فيها Aside أو Menu
   const hideLayout = [
     '/Pages/Login',
     '/Pages/Register',
@@ -31,9 +42,29 @@ const LayoutComponent = ({ children }) => {
     '/Pages/ResetPassword',
     '/Pages/ResetPassword/[id]/[token]',
     '/Pages/UserVerify/[id]/verify/[token]',
-  ].includes(pathname)
+  ].includes(pathname);
 
-  if (!isAuthChecked) return null
+  // تشغيل الـ Loader فقط في أول مرة يدخل فيها المستخدم الموقع
+  useEffect(() => {
+    const hasVisited = sessionStorage.getItem("hasVisited");
+    if (hasVisited) {
+      setLoading(false);
+    } else {
+      sessionStorage.setItem("hasVisited", "true");
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 2000); // مدة التحميل
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  if (!isAuthChecked || loading) {
+    return (
+      <div className="flex items-center justify-center w-screen h-screen bg-white dark:bg-black">
+        <Loader />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -53,7 +84,11 @@ const LayoutComponent = ({ children }) => {
 
         <div
           className={`flex items-start transition-all duration-300 ${
-            hideLayout ? 'w-full' : isLogin ? 'w-full pl-[5%] md:pl-[15%]' : 'w-[70%] mx-auto'
+            hideLayout
+              ? 'w-full'
+              : isLogin
+              ? 'w-full pl-[5%] md:pl-[15%]'
+              : 'w-[70%] mx-auto'
           }`}
         >
           <Alert />
@@ -73,8 +108,8 @@ const LayoutComponent = ({ children }) => {
             <EditPostModal
               post={postIsEdit}
               onClose={() => {
-                setPostIsEdit(null)
-                setShowPostModelEdit(false)
+                setPostIsEdit(null);
+                setShowPostModelEdit(false);
               }}
             />
           )}
@@ -91,7 +126,7 @@ const LayoutComponent = ({ children }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LayoutComponent
+export default LayoutComponent;
