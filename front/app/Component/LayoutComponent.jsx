@@ -53,7 +53,7 @@ const LayoutComponent = ({ children }) => {
       sessionStorage.setItem("hasVisited", "true");
       const timer = setTimeout(() => {
         setLoading(false);
-      }, 2000); // مدة التحميل
+      }, 1000); // مدة التحميل
       return () => clearTimeout(timer);
     }
   }, []);
