@@ -71,7 +71,10 @@ const NewPost = () => {
       textareaRef.current.selectionEnd = cursorPos + emojiData.emoji.length;
     }, 0);
   };
-
+  useEffect(() => {
+    // userSelected?.followers?.some(f => f._id === user._id)
+    console.log(communities.filter((com)=> com?.members.some((member)=> member._id === user._id)).length)
+  },[communities])
   return (
     <main className="flex items-center justify-center w-full py-6 px-4">
       <div className="w-full bg-white dark:bg-darkMode-fg rounded-2xl shadow-2xl overflow-hidden relative transition-all duration-500">
@@ -88,7 +91,7 @@ const NewPost = () => {
 
           {/* Community Selector */}
           <div className="w-64">
-            {communities.filter(com => com?.members?.includes(user?._id)).length > 0 ? (
+            {communities.filter(com => com?.members.some((member)=> member._id === user._id)).length > 0 ? (
               <select
                 value={selectedCommunity}
                 onChange={(e) => setSelectedCommunity(e.target.value)}
@@ -96,7 +99,7 @@ const NewPost = () => {
               >
                 <option value="">Select a Community</option>
                 {communities
-                  .filter(com => com?.members?.includes(user?._id))
+                  .filter(com => com.members.some((member) => member._id === user._id))
                   .map((com) => (
                     <option key={com._id} value={com._id}>
                       {com.Name}
