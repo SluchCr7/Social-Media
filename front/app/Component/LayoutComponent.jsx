@@ -53,7 +53,7 @@ const LayoutComponent = ({ children }) => {
 
         <div
           className={`flex items-start transition-all duration-300 ${
-            hideLayout ? 'w-full' : isLogin ? 'w-full pl-[15%]' : 'w-[70%] mx-auto'
+            hideLayout ? 'w-full' : isLogin ? 'w-full pl-[5%] md:pl-[15%]' : 'w-[70%] mx-auto'
           }`}
         >
           <Alert />

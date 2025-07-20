@@ -5,23 +5,23 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  darkMode: 'class', // or 'media' if you want to use system preference
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
         lightMode: {
-          bg: "#ffffff",    // Background: white
-          fg: "#000000",    // Foreground elements: black
-          text: "#8b4513",  // Primary text: warm dark tone inspired by #ffb703
-          text2: "#a65e00", // Secondary text: slightly deeper tone of #ffba08
-          menu: "#f0f0f0"   // Menu: very light gray for contrast with white bg
+          bg: "#ffffff",
+          fg: "#000000",
+          text: "#1f2937",     // gray-800
+          text2: "#374151",    // gray-700
+          menu: "#f9fafb"      // gray-50
         },
         darkMode: {
           bg: "#000000",
           fg: "#ffffff",
-          text: "#ffb703",
-          text2: "#ffba08",
-          menu : "#0a0a0a"
+          text: "#fbbf24",     // amber-400
+          text2: "#facc15",    // yellow-400
+          menu: "#111827"      // gray-900
         },
       },
     },

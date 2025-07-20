@@ -11,10 +11,11 @@ import { RiUserCommunityLine } from 'react-icons/ri'
 import { FiMenu } from "react-icons/fi"
 import { MdClose } from "react-icons/md"
 import { useAuth } from '../Context/AuthContext'
+import { LuMessagesSquare } from "react-icons/lu";
 
 const Aside = () => {
   const pathname = usePathname()
-  const { Logout, isLogin, isAuthChecked } = useAuth()
+  const { Logout, isLogin, isAuthChecked  , user} = useAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   if (!isAuthChecked) return null;
@@ -25,7 +26,8 @@ const Aside = () => {
     { icon: <FaPlus />, text: "New Post", link: "/Pages/NewPost", hideForGuests: true },
     { icon: <RiUserCommunityLine />, text: "Community", link: "/Pages/CommunityMain", hideForGuests: true },
     { icon: <CiSettings />, text: "Settings", link: "/Pages/Setting", hideForGuests: true },
-    { icon: <CiUser />, text: "Profile", link: "/Pages/Profile", hideForGuests: true },
+    { icon: <CiUser />, img : user?.profilePhoto?.url, text: "Profile", link: "/Pages/Profile", hideForGuests: true },
+    {icon: <LuMessagesSquare/> , text: "Messanger" , link:"/Pages/Messanger" , hideForGuests : true}
   ];
 
   const baseStyle = `flex items-center gap-4 px-4 py-2 rounded-lg text-sm font-medium w-full cursor-pointer transition-all duration-300`;
@@ -36,7 +38,7 @@ const Aside = () => {
     <div className="flex flex-col gap-3 w-full">
       {navItems
         .filter(item => isLogin || !item.hideForGuests)
-        .map(({ icon, text, link }) => {
+        .map(({ icon, text, link , img }) => {
           const isActive = pathname === link;
           return (
             <Link
@@ -45,7 +47,13 @@ const Aside = () => {
               className={`${baseStyle} ${isActive ? activeStyle : inactiveStyle}`}
               onClick={() => setIsMobileMenuOpen(false)} // يغلق القائمة في الجوال
             >
-              <span className="text-xl">{icon}</span>
+              {
+                img ? 
+                  <Image src={img} width={500} height={500} 
+                    className='w-12 h-12 rounded-full' alt='profilePhoto' />
+                  :
+                  <span className="text-xl">{icon}</span>
+              }
               <span className="">{text}</span>
             </Link>
           );

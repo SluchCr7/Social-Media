@@ -81,7 +81,7 @@ const Page = ({ params }) => {
   const isJoined = CommunitySelected.members?.some((m) => m._id === user._id)
 
   return (
-    <div className="w-[70%] max-w-5xl mx-auto text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen">
+    <div className="w-[100%] md:w-[70%] max-w-5xl mx-auto text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen">
       {/* Cover Section */}
       <div className="relative w-full">
         <Image
