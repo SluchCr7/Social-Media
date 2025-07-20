@@ -50,7 +50,7 @@ const Aside = () => {
               {
                 img ? 
                   <Image src={img} width={500} height={500} 
-                    className='w-7 h-7 rounded-full' alt='profilePhoto' />
+                    className='w-6 h-6 rounded-full' alt='profilePhoto' />
                   :
                   <span className="text-xl">{icon}</span>
               }
