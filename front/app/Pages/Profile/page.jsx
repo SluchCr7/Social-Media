@@ -96,7 +96,7 @@ const ProfilePage = () => {
               </button>
               <button
                 onClick={() => setIsStory(true)}
-                className="border border-lightMode-text dark:border-darkMode-text text-lightMode-text dark:text-darkMode-text text-sm px-4 py-1 rounded-md"
+                className="border border-lightMode-text dark:border-darkMode-text text-lightMode-text dark:text-darkMode-text text-sm px-4 py-1 rounded-md flex items-center gap-2"
               >
                 <IoAdd/> Add Story
               </button>

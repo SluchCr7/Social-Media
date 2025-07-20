@@ -67,7 +67,7 @@ export const AuthContextProvider = ({ children }) => {
         localStorage.removeItem('user');
         localStorage.removeItem('loginState');
         disconnectSocket();
-        window.location.href = '/Pages/Login';
+        // window.location.href = '/Pages/Login';
       }
     });
   };

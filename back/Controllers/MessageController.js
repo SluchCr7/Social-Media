@@ -11,7 +11,7 @@ const getUsersInSideBar = async (req, res) => {
     const loggedUser = await User.findById(loggedUserId).select("following");
 
     const users = await User.find({ _id: { $in: loggedUser.following } })
-      .select("username profileImage name"); // فقط البيانات المهمة
+      .select("username profilePhoto name"); // فقط البيانات المهمة
 
     res.status(200).json(users);
   } catch (error) {
