@@ -48,7 +48,7 @@ const Page = ({ params }) => {
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
-    const matched = communities?.find((c) => c._id === id)
+    const matched = communities?.find((c) => c?._id === id)
     if (matched) setCommunitySelected(matched)
   }, [communities, id])
 
@@ -78,7 +78,7 @@ const Page = ({ params }) => {
       m?.profileName?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const isJoined = CommunitySelected.members?.some((m) => m._id === user._id)
+  const isJoined = CommunitySelected.members?.some((m) => m?._id === user?._id)
 
   return (
     <div className="w-[100%] md:w-[70%] max-w-5xl mx-auto text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen">
@@ -128,7 +128,7 @@ const Page = ({ params }) => {
             )}
             {!isOwner(user?._id) && (
               <ActionButton
-                onClick={() => joinToCommunity(CommunitySelected._id)}
+                onClick={() => joinToCommunity(CommunitySelected?._id)}
                 variant={isJoined ? 'danger' : 'primary'}
               >
                 <FaPlus /> {isJoined ? 'Leave' : 'Join'}
@@ -152,7 +152,7 @@ const Page = ({ params }) => {
           <div className="flex -space-x-3">
             {CommunitySelected?.members?.slice(0, 5).map((member) => (
               <Image
-                key={member._id}
+                key={member?._id}
                 src={member?.profilePhoto?.url || '/default-avatar.png'}
                 alt="Member"
                 width={30}
@@ -170,7 +170,7 @@ const Page = ({ params }) => {
       {/* Posts Section */}
       <div className="px-4 flex flex-col gap-6 pb-10">
         {postsFiltered?.length > 0 ? (
-          postsFiltered.map((post) => <SluchitEntry post={post} key={post._id} />)
+          postsFiltered.map((post) => <SluchitEntry post={post} key={post?._id} />)
         ) : (
           <div className="text-center text-gray-400 text-sm py-12 bg-gray-100 dark:bg-darkMode-menu rounded-lg">
             This community has no posts yet.
@@ -213,11 +213,11 @@ const Page = ({ params }) => {
             <div className="max-h-[500px] overflow-y-auto space-y-4 pr-2">
               {filteredMembers?.map((member) => {
                 if (!member) return null;
-                const isMemberAdmin = isAdmin(member._id);
-                const isCurrentOwner = isOwner(member._id);
+                const isMemberAdmin = isAdmin(member?._id);
+                const isCurrentOwner = isOwner(member?._id);
                 return (
                   <div
-                    key={member._id}
+                    key={member?._id}
                     className="flex items-center justify-between p-3 bg-gray-50 dark:bg-darkMode-bg rounded-lg shadow-sm"
                   >
                     <div className="flex items-center gap-4">
@@ -246,17 +246,17 @@ const Page = ({ params }) => {
                       </div>
                     </div>
 
-                    {(isOwner(user._id) || isAdmin(user._id)) && !isCurrentOwner && (
+                    {(isOwner(user?._id) || isAdmin(user?._id)) && !isCurrentOwner && (
                       <div className="flex gap-3 items-center">
                         <button
-                          onClick={() => makeAdmin(CommunitySelected._id, member._id)}
+                          onClick={() => makeAdmin(CommunitySelected?._id, member?._id)}
                           title={isMemberAdmin ? 'Remove Admin' : 'Make Admin'}
                           className="text-yellow-500 hover:text-yellow-600 transition transform hover:scale-110"
                         >
                           <FaCrown size={18} />
                         </button>
                         <button
-                          onClick={() => removeMember(CommunitySelected._id, member._id)}
+                          onClick={() => removeMember(CommunitySelected?._id, member?._id)}
                           className="text-red-500 hover:text-red-600 transition transform hover:scale-110"
                           title="Remove Member"
                         >
