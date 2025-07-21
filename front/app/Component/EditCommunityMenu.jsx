@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { IoClose, IoCamera } from 'react-icons/io5';
 import { useCommunity } from '../Context/CommunityContext';
 import Image from 'next/image';
+import { useAlert } from '../Context/AlertContext';
 
 const EditCommunityMenu = ({ community, onClose }) => {
   const [name, setName] = useState(community?.Name || '');
@@ -11,11 +12,15 @@ const EditCommunityMenu = ({ community, onClose }) => {
   const [previewPicture, setPreviewPicture] = useState(community?.Picture?.url || '/default-profile.png');
   const [previewCover, setPreviewCover] = useState(community?.Cover?.url || '/default-cover.png');
 
+  const { showAlert } = useAlert();
   const { editCommunity, updateCommunityPicture, updateCommunityCover } = useCommunity();
 
   const handleImageChange = async (e, type) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file || !(file instanceof File)) {
+      showAlert('Invalid file selected.');
+      return;
+    }
 
     const url = URL.createObjectURL(file);
 
@@ -23,17 +28,23 @@ const EditCommunityMenu = ({ community, onClose }) => {
       if (type === 'picture') {
         setPreviewPicture(url);
         await updateCommunityPicture(community._id, file);
-      } else {
+        showAlert('Profile picture updated successfully.');
+      } else if (type === 'cover') {
         setPreviewCover(url);
         await updateCommunityCover(community._id, file);
+        showAlert('Cover image updated successfully.');
+      } else {
+        showAlert('Unsupported image type.');
       }
     } catch (err) {
-      console.error("Image Upload Error:", err);
+      console.error('Image Upload Error:', err);
       const message =
-        err?.response?.data?.message || err?.message || 'حدث خطأ أثناء رفع الصورة.';
-      alert(message); // يمكنك استبداله بـ showAlert(message) إن كانت متاحة
+        err?.response?.data?.message ||
+        err?.message ||
+        'An error occurred while uploading the image.';
+      showAlert(message);
     } finally {
-      URL.revokeObjectURL(url); // تنظيف الرابط المؤقت من الذاكرة
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
     }
   };
 
@@ -47,10 +58,11 @@ const EditCommunityMenu = ({ community, onClose }) => {
     if (Object.keys(updatedData).length > 0) {
       try {
         await editCommunity(community._id, updatedData);
+        showAlert('Community details updated successfully.');
       } catch (err) {
         const message =
-          err?.response?.data?.message || err?.message || 'فشل في تعديل البيانات';
-        alert(message);
+          err?.response?.data?.message || err?.message || 'Failed to update community data.';
+        showAlert(message);
       }
     }
 

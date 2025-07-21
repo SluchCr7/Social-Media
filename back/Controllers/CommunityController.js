@@ -93,38 +93,43 @@ const editCommunity = asyncHandler(async(req,res)=>{
  */
 
 const updateCommunityPicture = asyncHandler(async (req, res) => {
-    const { id } = req.params; // community ID
+  try {
+    const { id } = req.params;
     const community = await Community.findById(id);
     if (!community) {
-        return res.status(404).json({ message: "Community not found" });
+      return res.status(404).json({ message: "Community not found" });
     }
 
     if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded" });
+      return res.status(400).json({ message: "No file uploaded" });
     }
 
     const imagePath = path.join(__dirname, `../images/${req.file.filename}`);
     const result = await cloudUpload(imagePath);
 
-    // Remove old image if exists
     if (community.Picture.publicId) {
-        await cloudRemove(community.Picture.publicId);
+      await cloudRemove(community.Picture.publicId);
     }
 
     community.Picture = {
-        url: result.secure_url,
-        publicId: result.public_id,
+      url: result.secure_url,
+      publicId: result.public_id,
     };
 
     await community.save();
-    fs.unlinkSync(imagePath); // remove local file
+    fs.unlinkSync(imagePath);
 
     res.status(200).json({
-        message: "Community picture updated successfully",
-        url: result.secure_url,
-        publicId: result.public_id,
+      message: "Community picture updated successfully",
+      url: result.secure_url,
+      publicId: result.public_id,
     });
+  } catch (error) {
+    console.error("❌ Server Error:", error);
+    res.status(500).json({ message: "Internal server error during image update." });
+  }
 });
+
 
 /**
  * @desc update Community Cover
