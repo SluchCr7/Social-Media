@@ -188,53 +188,56 @@ const Page = ({ params }) => {
 
       {/* Members Modal */}
       {showMembers && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center">
-          <div className="bg-white dark:bg-darkMode-menu rounded-lg p-6 w-full max-w-md relative">
+        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-darkMode-menu rounded-2xl p-6 w-full max-w-2xl relative shadow-lg border dark:border-gray-700">
+            
             <button
               onClick={() => setShowMembers(false)}
-              className="absolute top-2 right-3 text-xl text-gray-500 hover:text-red-500"
+              className="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-2xl transition"
             >
               &times;
             </button>
-            <h3 className="text-lg font-semibold text-center mb-4">
+
+            <h3 className="text-2xl font-bold text-center text-gray-800 dark:text-white mb-6">
               Community Members
             </h3>
 
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search members..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full mb-4 p-2 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-darkMode-bg"
+              className="w-full mb-6 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-darkMode-bg focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
 
-            <div className="max-h-96 overflow-y-auto flex flex-col gap-4">
+            <div className="max-h-[500px] overflow-y-auto space-y-4 pr-2">
               {filteredMembers?.map((member) => {
-                const isMemberAdmin = isAdmin(member._id)
-                if (!member) return null
+                if (!member) return null;
+                const isMemberAdmin = isAdmin(member._id);
+                const isCurrentOwner = isOwner(member._id);
                 return (
                   <div
                     key={member._id}
-                    className="flex items-center justify-between gap-3"
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-darkMode-bg rounded-lg shadow-sm"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       <Image
                         src={member?.profilePhoto?.url || '/default-avatar.png'}
                         alt="Member"
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 rounded-full object-cover"
+                        width={48}
+                        height={48}
+                        className="w-12 h-12 rounded-full object-cover ring-2 ring-blue-400"
                       />
                       <div>
-                        <p className="text-sm font-medium text-gray-800 dark:text-white flex items-center gap-2">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                           {member?.username}
-                          {isOwner(member._id) && (
-                            <span className="text-xs bg-yellow-400 text-white px-2 py-0.5 rounded-full">
+                          {isCurrentOwner && (
+                            <span className="text-xs bg-yellow-500 text-white px-2 py-0.5 rounded-full">
                               Owner
                             </span>
                           )}
-                          {isMemberAdmin && !isOwner(member._id) && (
-                            <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full">
+                          {isMemberAdmin && !isCurrentOwner && (
+                            <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">
                               Admin
                             </span>
                           )}
@@ -243,27 +246,26 @@ const Page = ({ params }) => {
                       </div>
                     </div>
 
-                    {(isOwner(user._id) || isAdmin(user._id)) && !isOwner(member._id) && (
-                      <div className="flex gap-2 items-center">
+                    {(isOwner(user._id) || isAdmin(user._id)) && !isCurrentOwner && (
+                      <div className="flex gap-3 items-center">
                         <button
                           onClick={() => makeAdmin(CommunitySelected._id, member._id)}
                           title={isMemberAdmin ? 'Remove Admin' : 'Make Admin'}
+                          className="text-yellow-500 hover:text-yellow-600 transition transform hover:scale-110"
                         >
-                          <FaCrown
-                            className={`hover:scale-110 transition ${
-                              isMemberAdmin ? 'text-yellow-600' : 'text-yellow-400'
-                            }`}
-                          />
+                          <FaCrown size={18} />
                         </button>
                         <button
                           onClick={() => removeMember(CommunitySelected._id, member._id)}
+                          className="text-red-500 hover:text-red-600 transition transform hover:scale-110"
+                          title="Remove Member"
                         >
-                          <FaTrashAlt className="text-red-500 hover:text-red-600" />
+                          <FaTrashAlt size={16} />
                         </button>
                       </div>
                     )}
                   </div>
-                )
+                );
               })}
             </div>
           </div>
