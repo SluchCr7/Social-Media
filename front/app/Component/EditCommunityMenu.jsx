@@ -15,38 +15,34 @@ const EditCommunityMenu = ({ community, onClose }) => {
   const { showAlert } = useAlert();
   const { editCommunity, updateCommunityPicture, updateCommunityCover } = useCommunity();
 
-  const handleImageChange = async (e, type) => {
-    const file = e.target.files[0];
-    if (!file || !(file instanceof File)) {
-      showAlert('Invalid file selected.');
-      return;
-    }
+const handleImageChange = async (e, type) => {
+  const file = e.target.files[0];
+  if (!file || !(file instanceof File)) {
+    showAlert('Invalid file selected.');
+    return;
+  }
 
-    const url = URL.createObjectURL(file);
-
-    try {
-      if (type === 'picture') {
-        setPreviewPicture(url);
-        await updateCommunityPicture(community._id, file);
-        showAlert('Profile picture updated successfully.');
-      } else if (type === 'cover') {
-        setPreviewCover(url);
-        await updateCommunityCover(community._id, file);
-        showAlert('Cover image updated successfully.');
-      } else {
-        showAlert('Unsupported image type.');
-      }
-    } catch (err) {
-      console.error('Image Upload Error:', err);
-      const message =
-        err?.response?.data?.message ||
-        err?.message ||
-        'An error occurred while uploading the image.';
-      showAlert(message);
-    } finally {
-      setTimeout(() => URL.revokeObjectURL(url), 3000);
+  try {
+    if (type === 'picture') {
+      const result = await updateCommunityPicture(community._id, file);
+      if (result?.url) setPreviewPicture(result.url);
+      showAlert('Profile picture updated successfully.');
+    } else if (type === 'cover') {
+      const result = await updateCommunityCover(community._id, file);
+      if (result?.url) setPreviewCover(result.url);
+      showAlert('Cover image updated successfully.');
+    } else {
+      showAlert('Unsupported image type.');
     }
-  };
+  } catch (err) {
+    console.error('Image Upload Error:', err);
+    const message =
+      err?.response?.data?.message ||
+      err?.message ||
+      'An error occurred while uploading the image.';
+    showAlert(message);
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();

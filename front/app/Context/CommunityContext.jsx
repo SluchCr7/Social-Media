@@ -68,21 +68,29 @@ const updateCommunityPicture = async (id, file) => {
     const formData = new FormData();
     formData.append('image', file);
 
-    const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update/${id}`, formData, {
-      headers: {
-        Authorization: `Bearer ${user?.token}`,
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update/${id}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
 
     showAlert(res.data.message || 'Picture updated.');
-    window.location.reload();
+    
+    // ✅ أرجع البيانات الفعلية من السيرفر (الرابط الجديد)
+    return res.data;
   } catch (err) {
     console.error("Full Error:", JSON.stringify(err, null, 2));
 
     const message =
       err?.response?.data?.message || err?.message || 'Failed to update picture.';
     showAlert(message);
+
+    return null;
   }
 };
 
@@ -91,24 +99,31 @@ const updateCommunityCover = async (id, file) => {
     const formData = new FormData();
     formData.append('image', file);
 
-    const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update-cover/${id}`, formData, {
-      headers: {
-        Authorization: `Bearer ${user?.token}`,
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update-cover/${id}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
 
     showAlert(res.data.message || 'Cover updated.');
-    window.location.reload();
+    
+    // ✅ أرجع البيانات الفعلية من السيرفر (الرابط الجديد)
+    return res.data;
   } catch (err) {
     console.error("Full Error:", JSON.stringify(err, null, 2));
 
     const message =
       err?.response?.data?.message || err?.message || 'Failed to update cover.';
     showAlert(message);
+
+    return null;
   }
 };
-
 
   const removeMember = async (communityId, userId) => {
     try {
