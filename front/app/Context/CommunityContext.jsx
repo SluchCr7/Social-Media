@@ -24,15 +24,7 @@ export const CommunityContextProvider = ({ children }) => {
     },
   };
 
-  const addCommunity = async (Name, Category, description) => {
-    try {
-      await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/add`, { Name, Category, description }, config);
-      showAlert('Community created successfully.');
-    } catch (err) {
-      console.error(err);
-      showAlert('Error creating community.');
-    }
-  };
+
 
   const joinToCommunity = async (id) => {
     try {
@@ -43,6 +35,24 @@ export const CommunityContextProvider = ({ children }) => {
       showAlert('Error joining community.');
     }
   };
+const addCommunity = async (Name, Category, description) => {
+  try {
+    const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/add`, { Name, Category, description }, config);
+
+    const communityId = res.data._id;
+
+    if (communityId) {
+      await joinToCommunity(communityId);
+    } else {
+      console.log('Failed to create community.');
+    }
+
+  } catch (err) {
+    console.error(err);
+    showAlert('Error creating community.');
+  }
+};
+
   const editCommunity = async (id, updatedData) => {
       try {
         const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/edit/${id}`, updatedData, config);

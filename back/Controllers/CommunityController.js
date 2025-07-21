@@ -18,19 +18,27 @@ const getCommunityByCategory = asyncHandler(async (req, res) => {
 })
 
 const addNewCommunity = asyncHandler(async (req, res) => {
-    const { error } = ValidateCommunity(req.body)
+    const { error } = ValidateCommunity(req.body);
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
+
     const community = new Community({
         Name: req.body.Name,
         Category: req.body.Category,
         description: req.body.description,
         owner: req.user._id,
-    })
-    await community.save()
-    res.status(201).json(community)
-})
+        members: [req.user._id], // ✅ إضافة صاحب الجروب كعضو
+    });
+
+    await community.save();
+
+    res.status(201).json({
+        message: 'Community created successfully',
+        _id: community._id,
+    });
+});
+
 
 const deleteCommunity = asyncHandler(async (req, res) => {
     const community = await Community.findById(req.params.id)
@@ -53,7 +61,7 @@ const joinTheCommunity = asyncHandler(async (req, res) => {
     if (community.owner.toString() === req.user._id.toString()) {
       return res.status(400).json({ message: "Owner can't join or leave their own community" });
     }
-  
+
     if (community.members.includes(req.user._id)) {
       community = await Community.findByIdAndUpdate(
         req.params.id,
