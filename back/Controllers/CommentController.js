@@ -27,21 +27,6 @@ const getAllComments = asyncHandler(async (req, res) => {
 });
 
 
-// const addNewComment = asyncHandler(async (req, res) => {
-//   const { error } = ValidateComment({ ...req.body, postId: req.params.postId });
-//   if (error) return res.status(400).json({ message: error.details[0].message });
-
-//   const comment = new Comment({
-//     text: req.body.text,
-//     owner: req.user._id,
-//     postId: req.params.postId,
-//     parent: req.body.parent || null,
-//   });
-  
-//   await comment.save();
-//   res.status(201).json({ message: "Comment added", comment });
-// });
-
 const addNewComment = asyncHandler(async (req, res) => {
   const { error } = ValidateComment({ ...req.body, postId: req.params.postId });
   if (error) return res.status(400).json({ message: error.details[0].message });

@@ -18,7 +18,7 @@ const Page = ({ params }) => {
   const id = params.id;
   const [post, setPost] = useState({});
   const [commentText, setCommentText] = useState('');
-  const { user } = useAuth();
+  const { user , isLogin } = useAuth();
   const { posts, likePost, savePost, sharePost  , setImageView} = usePost();
   const { comments, AddComment, fetchCommentsByPostId } = useComment();
   const [loading, setLoading] = useState(false);
@@ -164,7 +164,7 @@ const Page = ({ params }) => {
       </div>
 
       {/* Comment input */}
-      {!post?.isCommentOff && (
+      {!post?.isCommentOff && isLogin && (
         <div className="flex items-center gap-4 mt-2">
           <input
             type="text"

@@ -53,21 +53,19 @@ export const CommunityContextProvider = ({ children }) => {
         showAlert('Failed to update community.');
       }
   };
-
   const updateCommunityPicture = async (id, file) => {
     try {
       const formData = new FormData();
       formData.append('image', file);
 
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update/${id}`, formData, {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update/${id}`, formData, {
         headers: {
           Authorization: `Bearer ${user?.token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
-
       showAlert(res.data.message || 'Picture updated.');
-      return res.data.url;
+      window.location.reload();
     } catch (err) {
       console.error(err);
       showAlert('Failed to update picture.');
@@ -79,15 +77,14 @@ export const CommunityContextProvider = ({ children }) => {
       const formData = new FormData();
       formData.append('image', file);
 
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update-cover/${id}`, formData, {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update-cover/${id}`, formData, {
         headers: {
           Authorization: `Bearer ${user?.token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
-
       showAlert(res.data.message || 'Cover updated.');
-      return res.data.url;
+      window.location.reload();
     } catch (err) {
       console.error(err);
       showAlert('Failed to update cover.');

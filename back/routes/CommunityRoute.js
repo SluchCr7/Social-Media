@@ -19,9 +19,9 @@ route.route('/join/:id')
     .put(verifyToken, joinTheCommunity)
 
 route.route('/update/:id')
-    .put(verifyToken, photoUpload.single("image"), updateCommunityPicture)
+    .post(verifyToken, photoUpload.single("image"), updateCommunityPicture)
 route.route('/update-cover/:id')
-    .put(verifyToken, photoUpload.single("image"), updateCommunityCover)
+    .post(verifyToken, photoUpload.single("image"), updateCommunityCover)
 route.route('/edit/:id')
     .put(verifyToken, editCommunity)
 
