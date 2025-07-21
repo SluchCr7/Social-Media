@@ -19,15 +19,23 @@ const EditCommunityMenu = ({ community, onClose }) => {
 
     const url = URL.createObjectURL(file);
 
-    if (type === 'picture') {
-      setPreviewPicture(url);
-      await updateCommunityPicture(community._id, file);
-    } else {
-      setPreviewCover(url);
-      await updateCommunityCover(community._id, file);
+    try {
+      if (type === 'picture') {
+        setPreviewPicture(url);
+        await updateCommunityPicture(community._id, file);
+      } else {
+        setPreviewCover(url);
+        await updateCommunityCover(community._id, file);
+      }
+    } catch (err) {
+      console.error("Image Upload Error:", err);
+      const message =
+        err?.response?.data?.message || err?.message || 'حدث خطأ أثناء رفع الصورة.';
+      alert(message); // يمكنك استبداله بـ showAlert(message) إن كانت متاحة
+    } finally {
+      URL.revokeObjectURL(url); // تنظيف الرابط المؤقت من الذاكرة
     }
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,7 +45,13 @@ const EditCommunityMenu = ({ community, onClose }) => {
     if (description !== community.description) updatedData.description = description;
 
     if (Object.keys(updatedData).length > 0) {
-      await editCommunity(community._id, updatedData);
+      try {
+        await editCommunity(community._id, updatedData);
+      } catch (err) {
+        const message =
+          err?.response?.data?.message || err?.message || 'فشل في تعديل البيانات';
+        alert(message);
+      }
     }
 
     onClose();
@@ -46,7 +60,6 @@ const EditCommunityMenu = ({ community, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-darkMode-bg rounded-xl p-6 w-full max-w-2xl relative shadow-lg overflow-y-auto max-h-[95vh]">
-
         {/* Close button */}
         <button
           onClick={onClose}
