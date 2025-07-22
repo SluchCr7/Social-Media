@@ -1,21 +1,17 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FaMoon,
   FaSun,
   FaLock,
-  FaBell,
   FaUserCog,
   FaTrashAlt,
-  FaSignInAlt,
 } from 'react-icons/fa';
 import { CiChat1 } from "react-icons/ci";
 import { useAuth } from '@/app/Context/AuthContext';
 import { colors } from '@/app/utils/Data';
 import clsx from 'clsx';
 import { useMessage } from '@/app/Context/MessageContext';
-import { generateMeta } from '@/app/utils/MetaDataHelper';
-// import { useTranslation } from 'react-i18next';
 
 const SettingsPage = () => {
   const [darkMode, setDarkMode] = useState(false);
@@ -24,30 +20,33 @@ const SettingsPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMessage, setPasswordMessage] = useState('');
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const { user, updatePassword,deleteUser } = useAuth()
-  const {backgroundStyle,handleBackgroundChange , backgroundValue} = useMessage()
-  // const { t, i18n } = useTranslation();
+  const { user, updatePassword, deleteUser } = useAuth();
+  const { backgroundStyle, handleBackgroundChange, backgroundValue } = useMessage();
 
-  // const changeLanguage = (lng) => {
-  //   i18n.changeLanguage(lng);
-  //   localStorage.setItem("lng", lng); // اختياري لتخزين الاختيار
-  // };
-  // const languages = [
-  //   { label: 'English', value: 'en' },
-  //   { label: 'French', value: 'fr' },
-  //   { label: 'Spanish', value: 'es' },
-  //   { label: 'Arabic', value: 'ar' },
-  // ]
+  // ✅ 1. Load dark mode from localStorage on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('darkMode');
+    if (savedTheme === 'true') {
+      setDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      setDarkMode(false);
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  // ✅ 2. Toggle dark mode and save to localStorage
   const handleToggleTheme = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle('dark')
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    localStorage.setItem('darkMode', newMode.toString());
+    document.documentElement.classList.toggle('dark', newMode);
   };
 
-    // تحقق من وجود تاريخ تسجيل دخول
-    const formattedDate = user?.lastLogin
+  const formattedDate = user?.lastLogin
     ? new Date(user.lastLogin).toLocaleString()
     : 'No login history found.';
-  
+
   const handleChangePassword = (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
@@ -57,23 +56,25 @@ const SettingsPage = () => {
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      setPasswordMessage('');
     }
   };
 
   return (
-    <div className="min-h-screen p-8 text-gray-900 dark:text-white w-full transition-all">
+    <div className="min-h-screen p-8 text-gray-900 dark:text-white transition-all">
       <h1 className="text-3xl font-bold mb-10">⚙️ Settings</h1>
       <span className="text-sm font-semibold mb-4 pl-2">Hello {user?.username}</span>
-      
-      
+
       {/* Appearance */}
-      <section className=" bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
+      <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {darkMode ? <FaMoon className="text-xl" /> : <FaSun className="text-xl" />}
             <div>
               <h2 className="text-lg font-semibold">Appearance</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Toggle between light and dark mode</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Toggle between light and dark mode
+              </p>
             </div>
           </div>
           <button
@@ -89,24 +90,6 @@ const SettingsPage = () => {
         </div>
       </section>
 
-
-      {/* Change Language
-      <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
-        <div className="flex items-center gap-4 mb-4">
-          <h2 className="text-lg font-semibold">{t("changeLanguage")}</h2>
-        </div>
-        <select
-          className="w-full p-2 rounded border dark:border-gray-700 dark:bg-transparent"
-          onChange={(e) => changeLanguage(e.target.value)}
-          value={i18n.language}
-        >
-          {languages.map((language, index) => (
-            <option key={index} value={language.value}>
-              {language.label}
-            </option>
-          ))}
-        </select>
-      </section> */}
 
       
       {/* Security */}
