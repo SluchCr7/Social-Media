@@ -312,8 +312,8 @@ const DeleteUser = asyncHandler(async (req, res) => {
     await Post.deleteMany({ owner: req.user._id })
     await Comment.deleteMany({ owner: req.user._id })
     await Story.deleteMany({ owner: req.user._id })
-    await Report.deleteMany({ userId: req.user._id })
-    await Community.deleteMany({ owner: userId });
+    await Report.deleteMany({ owner: req.user._id })
+    await Community.deleteMany({ owner: req.user._id });
     await User.findByIdAndDelete(req.user._id)
     res.status(200).json({message : "User Deleted Successfully"})
 })
@@ -668,6 +668,15 @@ const getSuggestedUsers = asyncHandler(async (req, res) => {
   res.status(200).json(topSuggestions.map(s => s.user));
 });
 
+const deleteAllUsers = asyncHandler(async (req, res) => {
+    await User.deleteMany({});
+    await Post.deleteMany({ })
+    await Comment.deleteMany({ })
+    await Story.deleteMany({ })
+    await Report.deleteMany({ })
+    await Community.deleteMany({ });
+  res.status(200).json({ message: "All users deleted successfully" });
+});
 
+module.exports = { DeleteUser, getSuggestedUsers, blockOrUnblockUser, makeUserAdmin, getAllUsers, getUserById, RegisterNewUser, LoginUser, verifyAccount, uploadPhoto, makeFollow, updatePassword, updateProfile, savePost, pinPost, updateLinksSocial }
 
-module.exports = {DeleteUser, getSuggestedUsers ,blockOrUnblockUser  ,makeUserAdmin , getAllUsers , getUserById , RegisterNewUser , LoginUser, verifyAccount, uploadPhoto , makeFollow , updatePassword , updateProfile , savePost , pinPost , updateLinksSocial}
