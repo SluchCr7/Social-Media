@@ -7,6 +7,7 @@ import { useNotify } from '../Context/NotifyContext';
 import Link from 'next/link';
 import { useMessage } from '../Context/MessageContext';
 import Header from './Header';
+import { useAuth } from '../Context/AuthContext';
 
 const MainApp = () => {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -14,7 +15,7 @@ const MainApp = () => {
     markAllAsRead,
     unreadCount
   } = useNotify();
-
+  const { isLogin } = useAuth();
   const { unReadedMessage } = useMessage();
 
   return (
@@ -22,7 +23,11 @@ const MainApp = () => {
       {/* Header */}
       <Header unReadedMessage={unReadedMessage} setShowNotifications={setShowNotifications} unreadCount={unreadCount} markAllAsRead={markAllAsRead}/>
       {/* Content */}
-      <Stories />
+      {
+        isLogin && (
+          <Stories />
+        )
+      }
       <Sluchits />
 
       {showNotifications && (
