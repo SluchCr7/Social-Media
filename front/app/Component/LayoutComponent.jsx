@@ -58,7 +58,7 @@ const LayoutComponent = ({ children }) => {
     }
   }, []);
 
-  if (!isAuthChecked || loading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center w-screen h-screen bg-white dark:bg-black">
         <Loader />

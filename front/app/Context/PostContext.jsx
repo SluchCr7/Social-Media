@@ -18,8 +18,21 @@ export const PostContextProvider = ({ children }) => {
   const [postIsEdit, setPostIsEdit] = useState(null);
 
   useEffect(() => {
-    getData("post", setPosts);
-  }, [posts]);
+    const fetchPosts = async () => {
+      setIsLoading(true);
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post`);
+        setPosts(res.data);
+      } catch (err) {
+        console.error("Error fetching posts", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
 
   const AddPost = async (content, images, Hashtags, communityId) => {
     const formData = new FormData();
