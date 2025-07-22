@@ -19,7 +19,13 @@ const Sluchits = () => {
 
       return new Date(b?.createdAt) - new Date(a?.createdAt);
     });
-
+    if (posts.length === 0) {
+      return (
+        <div className="w-full flex items-start flex-col gap-8">
+          {Array.from({ length: 4 }).map((_, i) => <PostSkeleton key={i} />)}
+        </div>
+      );
+    }
   return (
     <div className="w-full flex items-start flex-col gap-8">
       {isLoading
