@@ -194,7 +194,7 @@ const Page = ({ params }) => {
               <Comment key={comment._id} comment={comment} />
             ))
           ) : (
-            <p className="text-gray-500 text-sm text-center py-4">لا توجد تعليقات بعد.</p>
+            <p className="text-gray-500 text-sm text-center py-4">No comments Found</p>
           )}
         </div>
 
