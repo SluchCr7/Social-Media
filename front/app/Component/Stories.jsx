@@ -27,9 +27,11 @@ const Stories = () => {
     <div>
         {
           isLoading
-          ?
-            Array.from({ length: 6 }).map((_, i) => <StorySkeleton key={i} />)
-          :
+          ?(
+            <div className="w-full overflow-x-auto flex gap-4 pt-4 rounded-lg">
+              {Array.from({ length: 6 }).map((_, i) => <StorySkeleton key={i} />)}
+            </div>)
+          :(
             <div className="w-full overflow-x-auto flex gap-4 pt-4 rounded-lg">
               {groupedArray.map((group, index) => (
                 <div
@@ -61,7 +63,7 @@ const Stories = () => {
             {viewerStories && (
                 <StoryViewer stories={viewerStories} onClose={() => setViewerStories(null)} />
             )}
-            </div>
+            </div>)
         }
     </div>
   )
