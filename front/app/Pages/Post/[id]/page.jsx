@@ -12,6 +12,7 @@ import { useAuth } from '@/app/Context/AuthContext';
 import Loading from '@/app/Component/Loading';
 import PostMenu from '@/app/Component/PostMenu';
 import { generateMeta } from '@/app/utils/MetaDataHelper';
+import CommentSkeleton from '@/app/Skeletons/CommentSkeleton';
 
 
 const Page = ({ params }) => {
@@ -20,7 +21,7 @@ const Page = ({ params }) => {
   const [commentText, setCommentText] = useState('');
   const { user , isLogin } = useAuth();
   const { posts, likePost, savePost, sharePost  , setImageView} = usePost();
-  const { comments, AddComment, fetchCommentsByPostId } = useComment();
+  const { comments, AddComment, fetchCommentsByPostId , isLoading} = useComment();
   const [loading, setLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
@@ -185,11 +186,18 @@ const Page = ({ params }) => {
             <div className="text-sm text-gray-500">Comments are currently disabled</div>
           </div>
         :
-          <div className="flex flex-col gap-4 border-t border-gray-800 pt-4">
-            {comments?.map((comment) => (
-              <Comment key={comment?._id} comment={comment} />
-            ))}
-          </div>
+        <div className="flex flex-col gap-4 border-t border-gray-800 pt-4">
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => <CommentSkeleton key={i} />)
+          ) : comments.length > 0 ? (
+            comments.map((comment) => (
+              <Comment key={comment._id} comment={comment} />
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm text-center py-4">لا توجد تعليقات بعد.</p>
+          )}
+        </div>
+
       }
     </div>
   ) : (

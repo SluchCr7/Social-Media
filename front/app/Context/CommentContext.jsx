@@ -14,15 +14,19 @@ export const CommentContextProvider = ({ children }) => {
   const { user } = useAuth();
   const { addNotify } = useNotify();
   const { showAlert } = useAlert();
-
+  const [isLoading , setIsLoading] = useState(false)
   const fetchCommentsByPostId = async (postId) => {
+    setIsLoading(true);
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/post/${postId}`);
       setcomments(res.data);
     } catch (err) {
       console.error('Error fetching comments:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
+
 
   const AddComment = async (text, postId, receiverId, parent = null) => {
     try {
@@ -105,6 +109,7 @@ export const CommentContextProvider = ({ children }) => {
         likeComment,
         updateComment,
         fetchCommentsByPostId,
+        isLoading
       }}
     >
       {children}

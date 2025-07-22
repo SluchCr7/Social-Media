@@ -3,7 +3,7 @@ import React from 'react';
 
 const PostSkeleton = () => {
   return (
-    <div className="animate-pulse bg-white dark:bg-darkMode-card rounded-xl p-4 shadow w-full mb-6">
+    <div className="animate-pulse bg-lightMode-menu dark:bg-darkMode-menu rounded-xl p-4 shadow w-full mb-6">
       {/* Header */}
       <div className="flex items-center gap-4 mb-4">
         <div className="w-12 h-12 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
