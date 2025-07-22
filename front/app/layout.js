@@ -22,7 +22,7 @@ const jetBrainsMono = JetBrains_Mono({
 })
 
 export const metadata = {
-  title: `${process.env.WEBSITE_NAME} - Home`,
+  title: `${process.env.NEXT_PUBLIC_WEBSITE_NAME} - Home`,
   description: "Share your thoughts with the world and connect with others", 
 };
 
