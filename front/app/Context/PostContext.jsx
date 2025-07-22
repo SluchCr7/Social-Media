@@ -31,7 +31,7 @@ export const PostContextProvider = ({ children }) => {
     };
 
     fetchPosts();
-  }, []);
+  }, [posts]);
 
 
   const AddPost = async (content, images, Hashtags, communityId) => {
