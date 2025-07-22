@@ -252,6 +252,7 @@ export const AuthContextProvider = ({ children }) => {
   }
 
   useEffect(() => {
+
     const getSuggestedUsers = async () => {
       if (!user?.token) return;
 
@@ -268,6 +269,22 @@ export const AuthContextProvider = ({ children }) => {
     };
     getSuggestedUsers();
   }, [user?.token]); // ✅ سيتم التشغيل فقط عند تغير user.token
+
+  const deleteUser = async () => {
+    try {
+      const res = await axios.delete(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/delete`, {
+        headers: { authorization: `Bearer ${user.token}` }
+      });
+      showAlert(res.data.message);
+      localStorage.removeItem('user');
+      localStorage.removeItem('loginState');
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 2000);
+    } catch (err) {
+      console.error(err);
+    }
+  }
   // ------------------- SOCKET -------------------
 
   const connectSocket = (user) => {
@@ -330,7 +347,8 @@ export const AuthContextProvider = ({ children }) => {
         userToken,
         onlineUsers,
         blockOrUnblockUser
-        , suggestedUsers
+        , suggestedUsers,
+        deleteUser
       }}
     >
       {children}

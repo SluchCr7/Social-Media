@@ -12,7 +12,9 @@ route.route("/block/:id")
     .put(verifyToken, blockOrUnblockUser)
 route.route("/:id")
     .get(getUserById)
-    .delete(DeleteUser)
+
+route.route("/delete")
+    .delete(verifyToken, DeleteUser)
 
 route.route("/login")
     .post(LoginUser)

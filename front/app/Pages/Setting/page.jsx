@@ -24,7 +24,7 @@ const SettingsPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMessage, setPasswordMessage] = useState('');
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const { user, updatePassword } = useAuth()
+  const { user, updatePassword,deleteUser } = useAuth()
   const {backgroundStyle,handleBackgroundChange , backgroundValue} = useMessage()
   // const { t, i18n } = useTranslation();
 
@@ -218,7 +218,9 @@ const SettingsPage = () => {
           <div className="mt-4 p-4 border border-red-600 bg-red-50 dark:bg-red-900/30 rounded">
             <p className="text-sm mb-3">Are you sure you want to delete your account? This action is irreversible.</p>
             <div className="flex gap-4">
-              <button className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Yes, Delete</button>
+              <button
+                onClick={deleteUser}
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Yes, Delete</button>
               <button
                 onClick={() => setShowConfirmDelete(false)}
                 className="px-4 py-2 rounded border dark:border-gray-600"
