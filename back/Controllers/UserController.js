@@ -10,10 +10,11 @@ const { cloudUpload, cloudRemove } = require('../Config/cloudUpload')
 const fs = require('fs')
 const {v2} = require('cloudinary')
 const {Post, ValidatePost} = require('../Modules/Post')
-
-
-
-
+const { Comment } = require('../Modules/Comment')
+const {Community} = require('../Modules/Community')
+const { Notification } = require('../Modules/Notification');
+const { Report, ValidateReport } = require('../Modules/Report')
+const { validateStory, Story } = require("../Modules/Story");
 /**
  * @desc Register New User
  * @route POST /api/auth/register
@@ -308,6 +309,11 @@ const DeleteUser = asyncHandler(async (req, res) => {
     if (!user) {
         return res.status(404).json({ message: "User Not Found" })
     }
+    await Post.deleteMany({ owner: req.user._id })
+    await Comment.deleteMany({ owner: req.user._id })
+    await Story.deleteMany({ owner: req.user._id })
+    await Report.deleteMany({ userId: req.user._id })
+    await Community.deleteMany({ owner: userId });
     await User.findByIdAndDelete(req.user._id)
     res.status(200).json({message : "User Deleted Successfully"})
 })

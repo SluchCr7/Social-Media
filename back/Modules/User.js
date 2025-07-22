@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose')
 const joi = require('joi')
 
@@ -130,20 +131,6 @@ UserSchema.virtual("posts", {
 // Add virtual property Posts
 UserSchema.virtual("comments", {
     ref: "Comment",
-    localField: "_id",
-    foreignField: "owner"
-})
-
-// Add virtual property Posts
-UserSchema.virtual("replies", {
-    ref: "Reply",
-    localField: "_id",
-    foreignField: "owner"
-})
-
-// Add virtual property Posts
-UserSchema.virtual("replies2", {
-    ref: "Reply2",
     localField: "_id",
     foreignField: "owner"
 })
