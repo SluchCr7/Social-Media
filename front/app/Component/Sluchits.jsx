@@ -18,14 +18,7 @@ const Sluchits = () => {
       if (!isAFollowed && isBFollowed) return 1;
 
       return new Date(b?.createdAt) - new Date(a?.createdAt);
-    });
-    if (posts.length === 0) {
-      return (
-        <div className="w-full flex items-center flex-col gap-8 justify-center min-h-[100vh]">
-          <span className='text-lightMode-text dark:text-darkMode-text font-bold text-lg'>No Posts Found</span>
-        </div>
-      );
-    }
+  });
   return (
     <div className="w-full flex items-start flex-col gap-8">
       {isLoading
