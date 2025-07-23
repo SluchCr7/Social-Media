@@ -162,7 +162,9 @@ const updateProfile = async (fields) => {
     localStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
     showAlert('Profile Updated Successfully.');
-    window.location.reload();
+    setTimeout(() => {
+      window.location.reload();
+    },2000)
   } catch (err) {
     console.error(err);
   }
