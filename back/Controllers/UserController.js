@@ -481,7 +481,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     description,
     profileName,
     country,
-    city
+    city,
     phone,
     socialLinks,
     interests,
