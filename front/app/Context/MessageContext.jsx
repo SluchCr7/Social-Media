@@ -65,42 +65,52 @@ export const MessageContextProvider = ({ children }) => {
         getMessagesBetweenUsers();
     }, [selectedUser, user]);
 
-    const AddNewMessage = async (message, images) => {
-        if (!selectedUser || !user?.token) return;
+    const AddNewMessage = async (text, images) => {
+    if (!selectedUser || !user?.token) return;
 
-        const formData = new FormData();
-        if (images.length > 0) {
-            images.forEach(img => formData.append('image', img));
+    const formData = new FormData();
+    if (images?.length > 0) {
+        images.forEach(img => formData.append('image', img));
+    }
+    formData.append('text', text);
+
+    try {
+        const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/message/send/${selectedUser._id}`,
+        formData,
+        { headers: { authorization: `Bearer ${user.token}` } }
+        );
+
+        const newMessage = res.data.message || res.data;
+
+        // تحقق أن الرسالة تحتوي على createdAt وصالحة للعرض
+        if (typeof newMessage === 'object' && newMessage?.createdAt) {
+        setMessages(prev => [...prev, newMessage]); // 👈 الإضافة الفورية هنا فقط
+        } else {
+        console.warn("Invalid new message:", newMessage);
         }
-        formData.append('text', message);
 
-        try {
-            const res = await axios.post(
-                `${process.env.NEXT_PUBLIC_BACK_URL}/api/message/send/${selectedUser._id}`,
-                formData,
-                { headers: { authorization: `Bearer ${user.token}` } }
-            );
+        // إظهار تنبيه
+        showAlert("Message Sent");
 
-            showAlert(res.data.message || "Message Sent");
+        // إرسال إشعار للمستلم
+        await addNotify({
+        content: `${user.username} sent you a message`,
+        type: "message",
+        receiverId: selectedUser._id,
+        actionRef: newMessage._id,
+        actionModel: "Message"
+        });
 
-            const newMessage = res.data.message || res.data;
-            setMessages(prev => [...prev, newMessage]);
+        // ❌ لا داعي لاستدعاء fetchMessages هنا لأنه سيعيد تحميل كل شيء ويمسح الرسالة الجديدة
+        // await fetchMessagesByUser();
 
-            await fetchMessagesByUser();
-
-            await addNotify({
-                content: `${user.username} sent you a message`,
-                type: "message",
-                receiverId: selectedUser._id,
-                actionRef: newMessage._id,
-                actionModel: "Message"
-            });
-
-        } catch (err) {
-            console.error('Error sending message:', err);
-            showAlert("Failed to send message.");
-        }
+    } catch (err) {
+        console.error('Error sending message:', err);
+        showAlert("Failed to send message.");
+    }
     };
+
 
     const fetchMessagesByUser = async () => {
         if (!user || !user._id || !user.token) return;
