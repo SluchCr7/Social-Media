@@ -28,7 +28,7 @@ const Stories = () => {
         {
           isLoading
           ?(
-            <div className="w-full overflow-x-auto flex gap-4 pt-4 rounded-lg">
+            <div className="w-full overflow-x-auto flex gap-4 py-4 rounded-lg">
               {Array.from({ length: 6 }).map((_, i) => <StorySkeleton key={i} />)}
             </div>)
           :(

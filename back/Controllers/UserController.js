@@ -481,6 +481,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     description,
     profileName,
     country,
+    city
     phone,
     socialLinks,
     interests,
@@ -488,7 +489,6 @@ const updateProfile = asyncHandler(async (req, res) => {
     dateOfBirth,
     relationshipStatus,
     partner,
-    city
   } = req.body;
 
   // تحقق من وجود الشريك إذا تم إدخاله

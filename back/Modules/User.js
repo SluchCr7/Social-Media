@@ -211,7 +211,7 @@ const validateUserUpdate = (user) => {
     interests: joi.array().items(joi.string().max(50)).allow(null),
     dateOfBirth: joi.date().less('now').allow(null),  
     gender: joi.string().valid('Male', 'Female', 'Other').allow(null),
-
+    city : joi.string().max(50).allow(null),
     socialLinks: joi.object({
         github: joi.string().uri().allow('', null),
         twitter: joi.string().uri().allow('', null),

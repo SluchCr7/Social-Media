@@ -145,24 +145,26 @@ const Page = ({ params }) => {
           </div>
         )}
       </div>
-
-      {/* Actions */}
-      <div className="flex justify-around border-y border-gray-800 py-4">
-        <ActionIcon
-          onClick={() => likePost(post?._id, post?.owner?._id)}
-          Icon={post?.likes?.includes(user?._id) ? IoIosHeart : CiHeart}
-          count={post?.likes?.length}
-          className={post?.likes?.includes(user?._id) ? 'text-red-500' : 'text-gray-500'}
-        />
-        <ActionIcon Icon={FaRegCommentDots} count={comments?.length} />
-        <ActionIcon onClick={() => sharePost(post?._id)} Icon={IoIosShareAlt} count={post?.shares?.length} />
-        <ActionIcon
-          onClick={() => savePost(post?._id)}
-          Icon={CiBookmark}
-          count={post?.saved?.length}
-          className={post?.saved?.includes(user?._id) ? 'text-red-500' : 'text-gray-500'}
-        />
-      </div>
+      {
+        isLogin && (
+          <div className="flex justify-around border-y border-gray-800 py-4">
+            <ActionIcon
+              onClick={() => likePost(post?._id, post?.owner?._id)}
+              Icon={post?.likes?.includes(user?._id) ? IoIosHeart : CiHeart}
+              count={post?.likes?.length}
+              className={post?.likes?.includes(user?._id) ? 'text-red-500' : 'text-gray-500'}
+            />
+            <ActionIcon Icon={FaRegCommentDots} count={comments?.length} />
+            <ActionIcon onClick={() => sharePost(post?._id)} Icon={IoIosShareAlt} count={post?.shares?.length} />
+            <ActionIcon
+              onClick={() => savePost(post?._id)}
+              Icon={CiBookmark}
+              count={post?.saved?.length}
+              className={post?.saved?.includes(user?._id) ? 'text-red-500' : 'text-gray-500'}
+            />
+          </div>
+        )
+      }
 
       {/* Comment input */}
       {!post?.isCommentOff && isLogin && (

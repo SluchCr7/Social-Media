@@ -64,7 +64,7 @@ const SluchitEntry = ({ post }) => {
               alt='community-profile'
               width={40}
               height={40}
-              className='rounded-full w-10 h-10 object-cover'
+              className="rounded-full w-10 h-10 min-w-10 aspect-square object-cover"
             />
           ) : (
             <Image
@@ -72,7 +72,7 @@ const SluchitEntry = ({ post }) => {
               alt='user-profile'
               width={40}
               height={40}
-              className='rounded-full w-10 h-10 object-cover'
+              className="rounded-full w-10 h-10 min-w-10 aspect-square object-cover"
             />
           )}
           <div className='border border-gray-600 h-[80px] w-[1px] mt-2'></div>
@@ -157,7 +157,7 @@ const SluchitEntry = ({ post }) => {
               </div>
               <p className='text-sm text-gray-300'>{original?.text}</p>
               {original?.Photos && (
-                <div className={original?.Photos.length > 1 ? 'grid grid-cols-2 gap-2' : ''}>
+                <div className={`grid gap-2 ${original?.Photos.length > 1 ? 'grid-cols-2 sm:grid-cols-2' : ''}`}>
                   {original?.Photos.map((photo, index) => (
                     <div
                       key={index}
@@ -166,10 +166,10 @@ const SluchitEntry = ({ post }) => {
                     >
                       <Image
                         src={photo?.url}
-                        alt={`original-photo-${index}`}
+                        alt={`photo-${i}`}
                         width={500}
                         height={500}
-                        className={`${original?.Photos.length > 1 ? 'w-full' : 'w-[500px]'} h-[500px] object-cover rounded-lg`}
+                        className="w-full max-h-[500px] object-cover rounded-lg"
                       />
                     </div>
                   ))}
@@ -196,7 +196,7 @@ const SluchitEntry = ({ post }) => {
 
           {/* Post Photos */}
           {!isShared && post?.Photos && (
-            <div className={post?.Photos.length > 1 ? 'grid grid-cols-2 gap-2' : ''}>
+            <div className={`grid gap-2 ${post?.Photos.length > 1 ? 'grid-cols-2 sm:grid-cols-2' : ''}`}>
               {post?.Photos.map((photo, i) => (
                 <div
                   key={i}
@@ -208,7 +208,7 @@ const SluchitEntry = ({ post }) => {
                     alt={`photo-${i}`}
                     width={500}
                     height={500}
-                    className={`${post?.Photos.length > 1 ? 'w-full' : 'w-[500px]'} h-[500px] object-cover rounded-lg`}
+                    className="w-full max-h-[500px] object-cover rounded-lg"
                   />
                 </div>
               ))}

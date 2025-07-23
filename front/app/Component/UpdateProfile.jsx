@@ -232,7 +232,7 @@ const UpdateProfile = ({ update, setUpdate }) => {
     interests: '',
     dateOfBirth: '',
     gender: '',
-    city : "",
+    city: '',
     socialLinks: {
       github: '',
       linkedin: '',
@@ -264,7 +264,6 @@ const UpdateProfile = ({ update, setUpdate }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-
     const payload = {}
 
     if (formData.username?.trim()) payload.username = formData.username.trim()
@@ -305,6 +304,8 @@ const UpdateProfile = ({ update, setUpdate }) => {
     setUpdate(false)
   }
 
+  const inputStyle = "w-full py-3 px-4 text-sm text-white bg-[#1f1f1f] border border-gray-700 rounded-xl placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+
   return (
     <div className={`${update ? 'fixed inset-0 bg-black/60 z-50 flex items-center justify-center' : 'hidden'}`}>
       <div className="bg-[#181818] text-white w-[95%] max-w-2xl rounded-2xl shadow-2xl p-6 relative animate-fade-in space-y-6 max-h-[90vh] overflow-y-auto">
@@ -318,36 +319,36 @@ const UpdateProfile = ({ update, setUpdate }) => {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300">Username</label>
-              <input name="username" value={formData.username} onChange={handleChange} className="input" placeholder="Enter username" />
+              <label className="block text-sm font-medium text-gray-300 mb-1">Username</label>
+              <input name="username" value={formData.username} onChange={handleChange} className={inputStyle} placeholder="Enter username" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300">Profile Name</label>
-              <input name="profileName" value={formData.profileName} onChange={handleChange} className="input" placeholder="Display name" />
+              <label className="block text-sm font-medium text-gray-300 mb-1">Profile Name</label>
+              <input name="profileName" value={formData.profileName} onChange={handleChange} className={inputStyle} placeholder="Display name" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300">Bio</label>
-              <input name="description" value={formData.description} onChange={handleChange} className="input" placeholder="Short bio" />
+              <label className="block text-sm font-medium text-gray-300 mb-1">Bio</label>
+              <input name="description" value={formData.description} onChange={handleChange} className={inputStyle} placeholder="Short bio" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300">Country</label>
-              <input name="country" value={formData.country} onChange={handleChange} className="input" placeholder="Your country" />
+              <label className="block text-sm font-medium text-gray-300 mb-1">Country</label>
+              <input name="country" value={formData.country} onChange={handleChange} className={inputStyle} placeholder="Your country" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300">City</label>
-              <input name="city" value={formData.city} onChange={handleChange} className="input" placeholder="Your City" />
+              <label className="block text-sm font-medium text-gray-300 mb-1">City</label>
+              <input name="city" value={formData.city} onChange={handleChange} className={inputStyle} placeholder="Your City" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300">Phone</label>
-              <input name="phone" value={formData.phone} onChange={handleChange} className="input" placeholder="+20 10xxx" />
+              <label className="block text-sm font-medium text-gray-300 mb-1">Phone</label>
+              <input name="phone" value={formData.phone} onChange={handleChange} className={inputStyle} placeholder="+20 10xxx" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300">Date of Birth</label>
-              <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className="input" />
+              <label className="block text-sm font-medium text-gray-300 mb-1">Date of Birth</label>
+              <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputStyle} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300">Gender</label>
-              <select name="gender" value={formData.gender} onChange={handleChange} className="input">
+              <label className="block text-sm font-medium text-gray-300 mb-1">Gender</label>
+              <select name="gender" value={formData.gender} onChange={handleChange} className={inputStyle}>
                 <option value="">Select</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -355,8 +356,8 @@ const UpdateProfile = ({ update, setUpdate }) => {
               </select>
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-300">Interests</label>
-              <input name="interests" value={formData.interests} onChange={handleChange} className="input" placeholder="e.g. Programming, Music" />
+              <label className="block text-sm font-medium text-gray-300 mb-1">Interests</label>
+              <input name="interests" value={formData.interests} onChange={handleChange} className={inputStyle} placeholder="e.g. Programming, Music" />
               <p className="text-xs text-gray-500 mt-1">Separate with commas (,)</p>
             </div>
           </div>
@@ -379,14 +380,14 @@ const UpdateProfile = ({ update, setUpdate }) => {
                     value={formData.socialLinks[name]}
                     onChange={handleChange}
                     placeholder={`${label} URL`}
-                    className="flex-1 py-2 px-4 bg-gray-800 rounded-lg outline-none focus:ring-2 focus:ring-green-500"
+                    className="flex-1 py-3 px-4 text-sm text-white bg-[#1f1f1f] border border-gray-700 rounded-xl placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
                   />
                 </div>
               ))}
             </div>
           </div>
 
-          <button type="submit" className="w-full mt-6 py-2 px-4 rounded-lg bg-green-600 hover:bg-green-500 transition text-white font-semibold text-lg shadow-lg">
+          <button type="submit" className="w-full mt-6 py-3 px-4 rounded-xl bg-green-600 hover:bg-green-500 transition text-white font-semibold text-lg shadow-lg">
             Save Changes
           </button>
         </form>
