@@ -8,7 +8,8 @@ const sendEmail = require('../utils/sendMail')
 const path = require('path')
 const { cloudUpload, cloudRemove } = require('../Config/cloudUpload')
 const fs = require('fs')
-const {v2} = require('cloudinary')
+const { v2 } = require('cloudinary')
+
 const {Post, ValidatePost} = require('../Modules/Post')
 const { Comment } = require('../Modules/Comment')
 const {Community} = require('../Modules/Community')
@@ -398,29 +399,44 @@ const verifyAccount = asyncHandler(async (req, res) => {
 
 const uploadPhoto = asyncHandler(async (req, res) => {
     if (!req.file) {
-        return res.status(400).json({message : "No file uploaded"})
+        return res.status(400).json({ message: "No file uploaded" });
     }
-    // Get image 
-    const imagePath = path.join(__dirname, `../images/${req.file.filename}`)
-    // Upload Image
-    const result = await cloudUpload(imagePath)
-    // Get Player
-    const user = await User.findById(req.user._id)
-    if(user.profilePhoto.publicId !== null){
-        await cloudRemove(user.profilePhoto.publicId)
+
+    const imagePath = path.join(__dirname, `../images/${req.file.filename}`);
+
+    try {
+        const result = await cloudUpload(imagePath);
+
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (user.profilePhoto && user.profilePhoto.publicId) {
+            await cloudRemove(user.profilePhoto.publicId);
+        }
+
+        user.profilePhoto = {
+            url: result.secure_url,
+            publicId: result.public_id,
+        };
+
+        await user.save();
+
+        res.status(200).json({
+            url: result.secure_url,
+            publicId: result.public_id,
+        });
+    } catch (error) {
+        console.error("Upload error:", error);
+        res.status(500).json({ message: "Error uploading image" });
+    } finally {
+        fs.unlink(imagePath, (err) => {
+            if (err) console.error("Failed to delete temp image:", err);
+        });
     }
-    user.profilePhoto = {
-        url: result.secure_url,
-        publicId: result.public_id
-    }
-    await user.save()
-    // console.log(result)
-    res.status(200).json({
-            url: result.secure_url
-            , publicId: result.public_id
-    })
-    fs.unlinkSync(imagePath)
-})
+});
+
 
 const makeFollow = asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id); // user to be followed
@@ -488,7 +504,6 @@ const updateProfile = asyncHandler(async (req, res) => {
     city,
     phone,
     socialLinks,
-    interests,
     gender,
     dateOfBirth,
     relationshipStatus,
@@ -530,7 +545,6 @@ const updateProfile = asyncHandler(async (req, res) => {
     country,
     phone,
     socialLinks,
-    interests,
     gender,
     dateOfBirth,
     relationshipStatus,

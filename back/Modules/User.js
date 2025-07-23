@@ -126,10 +126,6 @@ const UserSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    interests: {
-        type: [String],
-        default: ""
-    },
     dateOfBirth: {
         type : Date,
         default : null
@@ -208,7 +204,6 @@ const validateUserUpdate = (user) => {
     profileName: joi.string().min(3).max(50).allow('', null),
     country: joi.string().max(50).allow('', null),
     phone: joi.string().pattern(/^\+?[0-9\s\-]{7,20}$/).allow('', null),
-    interests: joi.array().items(joi.string().max(50)).allow(null),
     dateOfBirth: joi.date().less('now').allow(null),  
     gender: joi.string().valid('Male', 'Female', 'Other').allow(null),
     city : joi.string().max(50).allow(null),

@@ -95,25 +95,39 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  const updatePhoto = async (photo) => {
-    const formData = new FormData();
-    formData.append('image', photo);
-    try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/photo`, formData, {
+const updatePhoto = async (photo) => {
+  const formData = new FormData();
+  formData.append('image', photo);
+
+  try {
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/photo`,
+      formData,
+      {
         headers: {
           authorization: `Bearer ${user?.token}`,
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      showAlert('Photo Updated Successfully');
-      const updatedUser = { ...user, profilePhoto: res.data };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      setUser(updatedUser);
-      window.location.reload();
-    } catch (err) {
-      console.error(err);
-    }
-  };
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    showAlert('Photo Updated Successfully');
+
+    const updatedUser = { ...user, profilePhoto: res.data };
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+    window.location.reload();
+  } catch (err) {
+    console.error(err);
+
+    const message =
+      err?.response?.data?.message ||
+      err?.message ||
+      'Failed to update profile photo. Please try again.';
+
+    showAlert(message); // ✅ هنا سيتم عرض الرسالة الحقيقية
+  }
+
 
   const updateProfile = async (fields) => {
     const payload = {
@@ -123,7 +137,6 @@ export const AuthContextProvider = ({ children }) => {
       country: fields.country ?? user.country,
       city : fields.city ?? user.city,
       phone: fields.phone ?? user.phone,
-      interests: fields.interests ?? user.interests,
       dateOfBirth: fields.dateOfBirth ?? user.dateOfBirth,
       gender: fields.gender ?? user.gender,
       socialLinks: {

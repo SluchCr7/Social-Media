@@ -51,16 +51,6 @@ const InfoAboutUser = ({user}) => {
             </div>
         )}
 
-        {/* الاهتمامات */}
-        {user?.interests?.length > 0 && (
-            <div className="sm:col-span-2">
-            <p>
-                <span className="font-semibold">Interests:</span>{' '}
-                {user.interests.join(', ')}
-            </p>
-            </div>
-        )}
-
         {/* روابط التواصل الاجتماعي */}
         {(user?.socialLinks && Object.values(user.socialLinks).some(link => link?.trim())) && (
             <div className="sm:col-span-2 flex items-center gap-5 mt-2 flex-wrap">

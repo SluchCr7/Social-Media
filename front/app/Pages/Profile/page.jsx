@@ -104,7 +104,7 @@ const ProfilePage = () => {
             </div>
 
             {/* إحصائيات */}
-            <div className="flex gap-8 text-center mt-6">
+            <div className="flex w-full gap-8 text-center mt-6">
               <div>
                 <h2 className="font-bold text-lg">{userData?.posts?.length}</h2>
                 <p className="text-sm text-gray-400">Posts</p>
