@@ -61,7 +61,7 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen p-8 text-gray-900 dark:text-white transition-all">
+    <div className="min-h-screen p-8 text-gray-900 dark:text-white w-full transition-all">
       <h1 className="text-3xl font-bold mb-10">⚙️ Settings</h1>
       <span className="text-sm font-semibold mb-4 pl-2">Hello {user?.username}</span>
 
