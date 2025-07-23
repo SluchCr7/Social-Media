@@ -397,46 +397,32 @@ const verifyAccount = asyncHandler(async (req, res) => {
  */
 
 const uploadPhoto = asyncHandler(async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
-
-  const imagePath = path.join(__dirname, "../images", req.file.filename);
+  if (!req.file) return res.status(400).json({ message: "No image uploaded" });
 
   try {
-    // رفع الصورة إلى Cloudinary
-    const result = await cloudUpload(imagePath);
+    const result = await cloudUpload(req.file); // رفع من buffer مباشرة
 
-    // تحديث المستخدم
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // حذف الصورة السابقة من Cloudinary إن وجدت
     if (user.profilePhoto?.publicId) {
       await cloudRemove(user.profilePhoto.publicId);
     }
 
-    // تحديث بيانات الصورة
     user.profilePhoto = {
       url: result.secure_url,
       publicId: result.public_id,
     };
+
     await user.save();
 
-    // رد نهائي
     res.status(200).json(user.profilePhoto);
   } catch (err) {
-    console.error("Upload error:", err);
+    console.error("Cloud upload failed:", err);
     res.status(500).json({ message: "Error uploading image" });
-  } finally {
-    // حذف الصورة من images/ بعد رفعها
-    fs.unlink(imagePath, (err) => {
-      if (err) console.error("Failed to delete temp image:", err);
-    });
   }
 });
 
-module.exports = { uploadPhoto };
 
 
 const makeFollow = asyncHandler(async (req, res) => {

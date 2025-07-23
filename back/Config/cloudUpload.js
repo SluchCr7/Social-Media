@@ -1,32 +1,41 @@
-const cloudinary = require('cloudinary')
+const cloudinary = require('cloudinary').v2;
+const path = require('path');
+const DatauriParser = require('datauri/parser');
+
+const parser = new DatauriParser();
 
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_NAME,
-    api_key: process.env.API_KEY,
-    api_secret : process.env.API_SECRET_KEY
-})
-// Cloudinary upload image
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET_KEY,
+});
 
-const cloudUpload = async (fileToUpload) =>{
-    try {
-        const data = await cloudinary.uploader.upload(fileToUpload, {
-            resource_type: "auto",
-        });
-        return data
-    } catch (error) {
-        throw new Error(error)
-    }
-}
+// ✅ Cloudinary upload from memory (buffer)
+const cloudUpload = async (file) => {
+  try {
+    const ext = path.extname(file.originalname);
+    const dataUri = parser.format(ext, file.buffer);
 
-// Cloudinary remove image
+    const result = await cloudinary.uploader.upload(dataUri.content, {
+      resource_type: 'auto',
+    });
 
-const cloudRemove = async (imagePuplicID) =>{
-    try {
-        const result = await cloudinary.uploader.destroy(imagePuplicID);
-        return result
-    } catch (error) {
-        throw new Error("Something went wrong")
-    }
-}
+    return result;
+  } catch (error) {
+    console.error("Cloud upload error:", error);
+    throw new Error('Failed to upload image to cloud');
+  }
+};
 
-module.exports = {cloudUpload , cloudRemove}
+// ✅ Cloudinary delete
+const cloudRemove = async (publicId) => {
+  try {
+    const result = await cloudinary.uploader.destroy(publicId);
+    return result;
+  } catch (error) {
+    console.error("Cloud delete error:", error);
+    throw new Error('Failed to delete image from cloud');
+  }
+};
+
+module.exports = { cloudUpload, cloudRemove };
