@@ -262,6 +262,10 @@ const getAllUsers = asyncHandler(async (req, res) => {
         },
       })
       .populate({
+        path: "following",
+        select: "profilePhoto username profileName",
+      })
+      .populate({
         path: 'posts',
         populate: {
           path: 'comments',

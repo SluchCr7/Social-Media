@@ -27,6 +27,7 @@ export const MessageContextProvider = ({ children }) => {
     const [unreadCountPerUser, setUnreadCountPerUser] = useState({});
 
     useEffect(() => {
+        setIsUserLoading(true)
         const fetchUsers = async () => {
             try {
                 const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/message/users`, {

@@ -6,6 +6,7 @@ import { BsThreeDots } from 'react-icons/bs';
 import { useMessage } from '../Context/MessageContext';
 import { useAuth } from '../Context/AuthContext';
 import UserCard from './UserCard';
+import { Users2 } from 'lucide-react';
 
 const ChatSlider = () => {
   const {
@@ -20,10 +21,6 @@ const ChatSlider = () => {
   const { user, onlineUsers } = useAuth();
   const [searchValue, setSearchValue] = useState("");
 
-  const filteredUsers = users.filter(u =>
-    u.username?.toLowerCase().includes(searchValue.toLowerCase()) ||
-    u.profileName?.toLowerCase().includes(searchValue.toLowerCase())
-  );
 
   return (
     <aside
@@ -61,10 +58,10 @@ const ChatSlider = () => {
 
       {/* User List */}
       <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
-        {filteredUsers.length === 0 ? (
+        {Users2.length === 0 ? (
           <div className="text-center text-gray-500 dark:text-gray-400 mt-10 text-sm">No users found.</div>
         ) : (
-          filteredUsers.map(u => (
+          users.map(u => (
             <UserCard
               key={u._id}
               user={u}
