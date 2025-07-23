@@ -56,8 +56,7 @@ const NewPost = () => {
       setPostText('');
       setImages([]);
       setSelectedCommunity('');
-    }, 1000);
-    window.location.href = '/';
+    }, 2000);
   };
 
   const handleEmojiClick = (emojiData) => {
