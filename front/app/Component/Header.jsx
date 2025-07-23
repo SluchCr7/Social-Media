@@ -26,7 +26,7 @@ const Header = ({ unReadedMessage, setShowNotifications }) => {
         Home
       </span>
       {
-        isAuthChecked && (
+        isLogin && (
         <div className="flex items-center gap-4">
           {/* Notifications */}
           <div className="relative">

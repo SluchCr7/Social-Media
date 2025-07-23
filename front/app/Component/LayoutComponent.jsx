@@ -88,7 +88,7 @@ const LayoutComponent = ({ children }) => {
               ? 'w-full'
               : isLogin
               ? 'w-full pl-[5%] md:pl-[15%]'
-              : 'w-[70%] mx-auto'
+              : 'w-[80%] mx-auto'
           }`}
         >
           <Alert />

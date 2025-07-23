@@ -67,7 +67,7 @@ const SettingsPage = () => {
 
       {/* Appearance */}
       <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-start flex-col md:items-center md:flex-row justify-between">
           <div className="flex items-center gap-4">
             {darkMode ? <FaMoon className="text-xl" /> : <FaSun className="text-xl" />}
             <div>

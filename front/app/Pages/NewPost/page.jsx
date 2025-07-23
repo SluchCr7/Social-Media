@@ -80,7 +80,7 @@ const NewPost = () => {
       <div className="w-full bg-white dark:bg-darkMode-fg rounded-2xl shadow-2xl overflow-hidden relative transition-all duration-500">
 
         {/* Header */}
-        <div className="flex items-center justify-between w-full p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex md:items-center flex-col items-start md:flex-row  md:justify-between w-full p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-4">
             <Image src={user?.profilePhoto?.url} alt="profile" width={48} height={48} className="rounded-full w-12 h-12 object-cover" />
             <div className="flex flex-col">

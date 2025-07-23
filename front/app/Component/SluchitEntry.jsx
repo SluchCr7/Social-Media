@@ -145,7 +145,7 @@ const SluchitEntry = ({ post }) => {
           {/* Original Post Content */}
           {isShared && original && (
             <div className='bg-darkMode-bg border border-gray-700 rounded-lg p-3 flex flex-col gap-2'>
-              <div className='flex justify-between items-center'>
+              <div className='flex flex-col items-start md:flex-row md:justify-between md:items-center'>
                 <Link
                   href={user?._id === original?.owner?._id ? '/Pages/Profile' : `/Pages/User/${original?.owner?._id}`}
                   className='text-darkMode-fg font-semibold text-sm'
