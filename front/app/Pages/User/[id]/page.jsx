@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri"
 import { FaPhone, FaGlobe, FaLinkedin, FaGithub, FaMapMarkerAlt, FaTwitter, FaFacebook } from 'react-icons/fa'
 import { generateMeta } from '@/app/utils/MetaDataHelper'
+import InfoAboutUser from '@/app/Component/InfoAboutUser'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -166,95 +167,7 @@ const Page = ({ params }) => {
       ) : (
         <>
           {/* Personal Info */}
-          <div className="mt-8 w-[70%] mx-auto rounded-2xl bg-lightMode-menu dark:bg-darkMode-menu shadow-xl p-6">
-            <h2 className="text-2xl font-bold mb-6 text-lightMode-text2 dark:text-darkMode-text2">About</h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-lightMode-text dark:text-darkMode-text">
-
-              {userSelected?.phone && (
-                <div className="flex items-center space-x-3">
-                  <FaPhone className="text-blue-400" />
-                  <span><span className="font-semibold">Phone:</span> {userSelected.phone}</span>
-                </div>
-              )}
-
-              {userSelected?.country && (
-                <div className="flex items-center space-x-3">
-                  <FaMapMarkerAlt className="text-green-400" />
-                  <span><span className="font-semibold">Country:</span> {userSelected.country}</span>
-                </div>
-                )}
-                
-              {userSelected?.city && (
-                <div className="flex items-center space-x-3">
-                  <FaMapMarkerAlt className="text-green-400" />
-                  <span><span className="font-semibold">City:</span> {userSelected.city}</span>
-                </div>
-              )}
-
-              {userSelected?.gender && (
-                <div className="flex items-center space-x-3">
-                  <span className="text-pink-400 font-bold">♀</span>
-                  <span><span className="font-semibold">Gender:</span> {userSelected.gender}</span>
-                </div>
-              )}
-
-              {userSelected?.dateOfBirth && (
-                <div className="flex items-center space-x-3">
-                  <span className="text-yellow-400 font-bold">🎂</span>
-                  <span>
-                    <span className="font-semibold">Date of Birth:</span>{" "}
-                    {new Date(userSelected.dateOfBirth).toLocaleDateString("en-US", {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </span>
-                </div>
-              )}
-
-              {/* الاهتمامات */}
-              {userSelected?.interests?.length > 0 && (
-                <div className="sm:col-span-2">
-                  <p>
-                    <span className="font-semibold">Interests:</span>{' '}
-                    {userSelected.interests.join(', ')}
-                  </p>
-                </div>
-              )}
-
-              {/* روابط التواصل الاجتماعي */}
-              {(userSelected?.socialLinks && Object.values(userSelected.socialLinks).some(link => link?.trim())) && (
-                <div className="sm:col-span-2 flex items-center gap-5 mt-2 flex-wrap">
-                  {userSelected.socialLinks.github && (
-                    <a href={userSelected.socialLinks.github} target="_blank" rel="noopener noreferrer" title="GitHub">
-                      <FaGithub className="text-2xl text-gray-300 hover:text-white transition" />
-                    </a>
-                  )}
-                  {userSelected.socialLinks.linkedin && (
-                    <a href={userSelected.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" title="LinkedIn">
-                      <FaLinkedin className="text-2xl text-blue-500 hover:text-blue-600 transition" />
-                    </a>
-                  )}
-                  {userSelected.socialLinks.twitter && (
-                    <a href={userSelected.socialLinks.twitter} target="_blank" rel="noopener noreferrer" title="Twitter">
-                      <FaTwitter className="text-2xl text-blue-400 hover:text-blue-500 transition" />
-                    </a>
-                  )}
-                  {userSelected.socialLinks.facebook && (
-                    <a href={userSelected.socialLinks.facebook} target="_blank" rel="noopener noreferrer" title="Facebook">
-                      <FaFacebook className="text-2xl text-blue-600 hover:text-blue-700 transition" />
-                    </a>
-                  )}
-                  {userSelected.socialLinks.website && (
-                    <a href={userSelected.socialLinks.website} target="_blank" rel="noopener noreferrer" title="Website">
-                      <FaGlobe className="text-2xl text-purple-400 hover:text-purple-500 transition" />
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+          <InfoAboutUser user={userSelected} />
           {/* Tabs */}
           <div className="flex justify-center gap-10 mt-6 border-t border-gray-700 w-[90%] pt-4">
             {tabs.map(tab => (
