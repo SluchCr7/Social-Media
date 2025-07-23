@@ -10,11 +10,9 @@ import UpdateProfile from '../../Component/UpdateProfile'
 import { FaUserEdit } from 'react-icons/fa'
 import AddStoryModel from '@/app/Component/AddStoryModel'
 import { FaPhone, FaGlobe, FaLinkedin, FaGithub, FaMapMarkerAlt } from 'react-icons/fa'
-import { generateMeta } from '@/app/utils/MetaDataHelper'
-import { IoAdd } from "react-icons/io5";
+import { IoAdd } from 'react-icons/io5'
 
 const tabs = ['Posts', 'Saved', 'Comments']
-
 
 const ProfilePage = () => {
   const { user, users, updatePhoto } = useAuth()
@@ -25,6 +23,8 @@ const ProfilePage = () => {
   const { posts } = usePost()
   const [update, setUpdate] = useState(false)
   const [isStory, setIsStory] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const [menuType, setMenuType] = useState('followers')
 
   useEffect(() => {
     const matchedUser = users.find((u) => user?._id === u?._id)
@@ -98,7 +98,7 @@ const ProfilePage = () => {
                 onClick={() => setIsStory(true)}
                 className="border border-lightMode-text dark:border-darkMode-text text-lightMode-text dark:text-darkMode-text text-sm px-4 py-1 rounded-md flex items-center gap-2"
               >
-                <IoAdd/> Add Story
+                <IoAdd /> Add Story
               </button>
             </div>
 
@@ -108,16 +108,29 @@ const ProfilePage = () => {
                 <h2 className="font-bold text-lg">{userData?.posts?.length}</h2>
                 <p className="text-sm text-gray-400">Posts</p>
               </div>
-              <div>
+              <div
+                onClick={() => {
+                  setMenuType('followers')
+                  setShowMenu(true)
+                }}
+                className="cursor-pointer"
+              >
                 <h2 className="font-bold text-lg">{userData?.followers?.length}</h2>
                 <p className="text-sm text-gray-400">Followers</p>
               </div>
-              <div>
+              <div
+                onClick={() => {
+                  setMenuType('following')
+                  setShowMenu(true)
+                }}
+                className="cursor-pointer"
+              >
                 <h2 className="font-bold text-lg">{userData?.following?.length}</h2>
                 <p className="text-sm text-gray-400">Following</p>
               </div>
             </div>
 
+            {/* معلومات إضافية */}
             <div className="mt-8 w-full rounded-2xl bg-lightMode-menu dark:bg-darkMode-menu shadow-xl p-6">
               <h2 className="text-2xl font-bold mb-6 text-lightMode-text2 dark:text-darkMode-text2">About</h2>
 
@@ -128,46 +141,38 @@ const ProfilePage = () => {
                     <span><span className="font-semibold">Phone:</span> {userData.phone}</span>
                   </div>
                 )}
-
                 {userData?.country && (
                   <div className="flex items-center space-x-3">
                     <FaMapMarkerAlt className="text-green-400" />
                     <span><span className="font-semibold">Country:</span> {userData.country}</span>
                   </div>
                 )}
-
-                {/* Social Icons Row */}
                 {(userData?.socialLinks && Object.keys(userData.socialLinks).length > 0) && (
                   <div className="sm:col-span-2 flex items-center gap-5 mt-2">
                     {userData.socialLinks.github && (
-                      <a href={userData.socialLinks.github} target="_blank" rel="noopener noreferrer" title="GitHub">
+                      <a href={userData.socialLinks.github} target="_blank" rel="noopener noreferrer">
                         <FaGithub className="text-2xl text-gray-300 dark:text-white hover:text-white transition" />
                       </a>
                     )}
                     {userData.socialLinks.linkedin && (
-                      <a href={userData.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" title="LinkedIn">
+                      <a href={userData.socialLinks.linkedin} target="_blank" rel="noopener noreferrer">
                         <FaLinkedin className="text-2xl text-blue-500 hover:text-blue-600 transition" />
                       </a>
                     )}
                     {userData.socialLinks.website && (
-                      <a href={userData.socialLinks.website} target="_blank" rel="noopener noreferrer" title="Website">
+                      <a href={userData.socialLinks.website} target="_blank" rel="noopener noreferrer">
                         <FaGlobe className="text-2xl text-purple-400 hover:text-purple-500 transition" />
                       </a>
                     )}
                   </div>
                 )}
-
                 {userData?.interests?.length > 0 && (
                   <div className="sm:col-span-2">
-                    <p>
-                      <span className="font-semibold">Interests:</span>{' '}
-                      {userData.interests.join(', ')}
-                    </p>
+                    <p><span className="font-semibold">Interests:</span> {userData.interests.join(', ')}</p>
                   </div>
                 )}
               </div>
             </div>
-
           </div>
 
           {/* ✅ التبويبات */}
@@ -189,24 +194,20 @@ const ProfilePage = () => {
 
           {/* ✅ محتوى التبويبات */}
           <div className="w-full mt-6 flex flex-col gap-4 px-4">
-            {activeTab === 'Posts' && (
-              <>
-                {(() => {
-                  const pinnedPosts = userData?.pinsPosts || []
-                  const pinnedPostIds = new Set(pinnedPosts.map((post) => post?._id))
-                  const regularPosts = (userData?.posts || []).filter(
-                    (post) => !pinnedPostIds.has(post?._id)
-                  )
-                  const combinedPosts = [
-                    ...pinnedPosts.map((post) => ({ ...post, isPinned: true })),
-                    ...regularPosts.map((post) => ({ ...post, isPinned: false })),
-                  ]
-                  return combinedPosts.map((post) => (
-                    <SluchitEntry key={post?._id} post={post} />
-                  ))
-                })()}
-              </>
-            )}
+            {activeTab === 'Posts' && (() => {
+              const pinnedPosts = userData?.pinsPosts || []
+              const pinnedPostIds = new Set(pinnedPosts.map((post) => post?._id))
+              const regularPosts = (userData?.posts || []).filter(
+                (post) => !pinnedPostIds.has(post?._id)
+              )
+              const combinedPosts = [
+                ...pinnedPosts.map((post) => ({ ...post, isPinned: true })),
+                ...regularPosts.map((post) => ({ ...post, isPinned: false })),
+              ]
+              return combinedPosts.map((post) => (
+                <SluchitEntry key={post?._id} post={post} />
+              ))
+            })()}
 
             {activeTab === 'Saved' && (
               <div className="grid grid-cols-1 gap-4 w-full">
@@ -226,10 +227,7 @@ const ProfilePage = () => {
               <div className="flex flex-col gap-6 w-full">
                 {userData?.comments?.length > 0 ? (
                   userData.comments.map((comment) => (
-                    <div
-                      key={comment?._id}
-                      className="w-full bg-gray-900/70 rounded-xl p-5 shadow-md flex flex-col gap-4"
-                    >
+                    <div key={comment?._id} className="w-full bg-gray-900/70 rounded-xl p-5 shadow-md flex flex-col gap-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Image
@@ -248,17 +246,11 @@ const ProfilePage = () => {
                           {new Date(comment.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-
-                      <p className="text-sm text-gray-300 pl-1 border-l-2 border-gray-600">
-                        {comment.text}
-                      </p>
-
+                      <p className="text-sm text-gray-300 pl-1 border-l-2 border-gray-600">{comment.text}</p>
                       {comment.postId && (
                         <div className="flex gap-3 items-start border-t border-gray-700 pt-4">
                           <Image
-                            src={
-                              comment.postId?.owner?.profilePhoto?.url || '/default-profile.png'
-                            }
+                            src={comment.postId?.owner?.profilePhoto?.url || '/default-profile.png'}
                             alt="Post Owner"
                             width={36}
                             height={36}
@@ -297,6 +289,44 @@ const ProfilePage = () => {
         </div>
       ) : (
         <Loading />
+      )}
+
+      {/* ✅ Modal للـ Followers / Following */}
+      {showMenu && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
+          <div className="relative w-full max-w-md mx-auto bg-lightMode-menu dark:bg-darkMode-menu rounded-2xl shadow-2xl p-6 max-h-[80vh] overflow-y-auto">
+            <button
+              onClick={() => setShowMenu(false)}
+              className="absolute top-3 right-4 text-gray-400 hover:text-red-500 text-xl"
+            >
+              &times;
+            </button>
+            <h2 className="text-2xl font-bold mb-4 text-center text-lightMode-text2 dark:text-darkMode-text2">
+              {menuType === 'followers' ? 'Followers' : 'Following'}
+            </h2>
+            {(menuType === 'followers' ? userData?.followers : userData?.following)?.length > 0 ? (
+              <div className="flex flex-col gap-4">
+                {(menuType === 'followers' ? userData.followers : userData.following).map((person) => (
+                  <div key={person._id} className="flex items-center gap-4 p-2 rounded-lg hover:bg-gray-700 transition">
+                    <Image
+                      src={person?.profilePhoto?.url || '/default-profile.png'}
+                      alt={person?.username}
+                      width={40}
+                      height={40}
+                      className="rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold">{person?.username}</p>
+                      <p className="text-xs text-gray-400">{person?.profileName}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-gray-500 py-4">No {menuType} found.</p>
+            )}
+          </div>
+        </div>
       )}
 
       {/* Modals */}
