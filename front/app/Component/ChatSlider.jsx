@@ -38,8 +38,8 @@ const ChatSlider = () => {
             className="rounded-full w-10 h-10 object-cover"
           />
           <div className="flex flex-col">
-            <span className="font-semibold text-dark dark:text-white text-sm">{user?.username}</span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">{user?.profileName}</span>
+            <span className="font-semibold text-black dark:text-white text-sm">{user?.username}</span>
+            <span className="text-xs">{user?.profileName}</span>
           </div>
         </div>
         <BsThreeDots className="text-xl text-gray-700 dark:text-gray-300 cursor-pointer" />

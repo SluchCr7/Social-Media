@@ -30,7 +30,7 @@ const UserCard = ({ user, isOnline, onSelect, unreadCount = 0 }) => {
 
       {/* Info */}
       <div className="hidden md:flex flex-col">
-        <span className="text-dark dark:text-white font-medium text-sm">{user.username}</span>
+        <span className="font-medium text-sm">{user.username}</span>
         <span className="text-gray-800 dark:text-gray-400 text-xs">{user.profileName}</span>
       </div>
 
