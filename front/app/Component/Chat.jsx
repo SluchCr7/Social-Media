@@ -14,18 +14,17 @@ const Chat = () => {
   const { selectedUser, messages , backgroundStyle } = useMessage();
   const ContainerMessageRef = useRef(null)
   
-// --- Group messages by date ---
-const groupMessagesByDate = (messages) => {
-  return messages.reduce((groups, message) => {
-    const date = new Date(message.createdAt);
-    const dayKey = date.toDateString();
-    if (!groups[dayKey]) {
-      groups[dayKey] = [];
-    }
-    groups[dayKey].push(message);
-    return groups;
-  }, {});
-};
+  // --- Group messages by date ---
+  const groupMessagesByDate = (messages) => {
+    return messages.reduce((groups, message) => {
+      if (!message?.createdAt) return groups; // تجاهل الرسائل غير المكتملة
+      const date = new Date(message.createdAt);
+      const dayKey = date.toDateString();
+      if (!groups[dayKey]) groups[dayKey] = [];
+      groups[dayKey].push(message);
+      return groups;
+    }, {});
+  };
 
 // --- Display friendly date labels ---
 const getDisplayDate = (dateString) => {
@@ -41,12 +40,8 @@ const sortedDates = Object.keys(groupedMessages).sort(
   );
   
   useEffect(() => {
-    if (ContainerMessageRef.current && messages) {
-      // ContainerMessageRef.current.scrollTop = ContainerMessageRef.current.scrollHeight;
+    if (ContainerMessageRef.current && messages?.length > 0) {
       ContainerMessageRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-    else {
-      ContainerMessageRef.current = null;
     }
   }, [messages]);
 
@@ -61,7 +56,7 @@ const sortedDates = Object.keys(groupedMessages).sort(
       {/* Message Area */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 bg-lightMode-bg dark:bg-darkMode-bg py-2 space-y-6 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800" style={backgroundStyle}>
         {sortedDates.map((dateKey) => (
-          <div key={dateKey} ref={ContainerMessageRef}>
+          <div key={dateKey}>
             {/* Date separator */}
             <div className="flex justify-center my-4">
               <div className=" text-xs  px-4 py-1 rounded-full backdrop-blur-sm shadow-sm">
@@ -79,6 +74,7 @@ const sortedDates = Object.keys(groupedMessages).sort(
             )}
           </div>
         ))}
+        <div ref={ContainerMessageRef}></div>
       </div>
 
       {/* Chat Input */}
