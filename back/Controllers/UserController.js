@@ -396,46 +396,47 @@ const verifyAccount = asyncHandler(async (req, res) => {
  * @access Public
  */
 
-
 const uploadPhoto = asyncHandler(async (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded" });
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  const imagePath = path.join(__dirname, "../images", req.file.filename);
+
+  try {
+    // رفع الصورة إلى Cloudinary
+    const result = await cloudUpload(imagePath);
+
+    // تحديث المستخدم
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // حذف الصورة السابقة من Cloudinary إن وجدت
+    if (user.profilePhoto?.publicId) {
+      await cloudRemove(user.profilePhoto.publicId);
     }
 
-    const imagePath = path.join(__dirname, `../images/${req.file.filename}`);
+    // تحديث بيانات الصورة
+    user.profilePhoto = {
+      url: result.secure_url,
+      publicId: result.public_id,
+    };
+    await user.save();
 
-    try {
-        const result = await cloudUpload(imagePath);
-
-        const user = await User.findById(req.user._id);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        if (user.profilePhoto && user.profilePhoto.publicId) {
-            await cloudRemove(user.profilePhoto.publicId);
-        }
-
-        user.profilePhoto = {
-            url: result.secure_url,
-            publicId: result.public_id,
-        };
-
-        await user.save();
-
-        res.status(200).json({
-            url: result.secure_url,
-            publicId: result.public_id,
-        });
-    } catch (error) {
-        console.error("Upload error:", error);
-        res.status(500).json({ message: "Error uploading image" });
-    } finally {
-        fs.unlink(imagePath, (err) => {
-            if (err) console.error("Failed to delete temp image:", err);
-        });
-    }
+    // رد نهائي
+    res.status(200).json(user.profilePhoto);
+  } catch (err) {
+    console.error("Upload error:", err);
+    res.status(500).json({ message: "Error uploading image" });
+  } finally {
+    // حذف الصورة من images/ بعد رفعها
+    fs.unlink(imagePath, (err) => {
+      if (err) console.error("Failed to delete temp image:", err);
+    });
+  }
 });
+
+module.exports = { uploadPhoto };
 
 
 const makeFollow = asyncHandler(async (req, res) => {

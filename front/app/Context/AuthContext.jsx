@@ -95,83 +95,86 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  const updatePhoto = async (photo) => {
-    const formData = new FormData();
-    formData.append('image', photo);
-
-    try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/photo`,
-        formData,
-        {
-          headers: {
-            authorization: `Bearer ${user?.token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-
-      showAlert('Photo Updated Successfully');
-
-      const updatedUser = { ...user, profilePhoto: res.data };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      setUser(updatedUser);
-      showAlert('Photo Updated Successfully');
-    } catch (err) {
-      console.error(err);
-
-      const message =
-        err?.response?.data?.message ||
-        err?.message ||
-        'Failed to update profile photo. Please try again.';
-
-      showAlert(message); // ✅ هنا سيتم عرض الرسالة الحقيقية
-    }
-  }
-
-
-const updateProfile = async (fields) => {
-  const payload = {
-    username: fields.username ?? user.username,
-    description: fields.description ?? user.description,
-    profileName: fields.profileName ?? user.profileName,
-    country: fields.country ?? user.country,
-    city: fields.city ?? user.city,
-    phone: fields.phone ?? user.phone,
-    dateOfBirth: fields.dateOfBirth ?? user.dateOfBirth,
-    gender: fields.gender ?? user.gender,
-    socialLinks: {
-      github: fields.socialLinks?.github ?? user.socialLinks?.github ?? '',
-      twitter: fields.socialLinks?.twitter ?? user.socialLinks?.twitter ?? '',
-      linkedin: fields.socialLinks?.linkedin ?? user.socialLinks?.linkedin ?? '',
-      facebook: fields.socialLinks?.facebook ?? user.socialLinks?.facebook ?? '',
-      website: fields.socialLinks?.website ?? user.socialLinks?.website ?? '',
-    }
-  };
+const updatePhoto = async (photo) => {
+  const formData = new FormData();
+  formData.append('image', photo);
 
   try {
-    const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update`, payload, {
-      headers: { authorization: `Bearer ${user.token}` }
-    });
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/photo`,
+      formData,
+      {
+        headers: {
+          authorization: `Bearer ${user?.token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
 
-    const newUserData = res.data.user || res.data;
+    showAlert('Photo Updated Successfully');
 
     const updatedUser = {
       ...user,
-      ...newUserData,
-      token: user.token, // تأكد من الحفاظ على التوكن
+      profilePhoto: res.data?.profilePhoto || res.data, // دعم الحالتين
     };
 
     localStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
-    showAlert('Profile Updated Successfully.');
-    setTimeout(() => {
-      window.location.reload();
-    },2000)
   } catch (err) {
     console.error(err);
+
+    const message =
+      err?.response?.data?.message ||
+      err?.message ||
+      'Failed to update profile photo. Please try again.';
+
+    showAlert(message);
   }
 };
+
+
+  const updateProfile = async (fields) => {
+    const payload = {
+      username: fields.username ?? user.username,
+      description: fields.description ?? user.description,
+      profileName: fields.profileName ?? user.profileName,
+      country: fields.country ?? user.country,
+      city: fields.city ?? user.city,
+      phone: fields.phone ?? user.phone,
+      dateOfBirth: fields.dateOfBirth ?? user.dateOfBirth,
+      gender: fields.gender ?? user.gender,
+      socialLinks: {
+        github: fields.socialLinks?.github ?? user.socialLinks?.github ?? '',
+        twitter: fields.socialLinks?.twitter ?? user.socialLinks?.twitter ?? '',
+        linkedin: fields.socialLinks?.linkedin ?? user.socialLinks?.linkedin ?? '',
+        facebook: fields.socialLinks?.facebook ?? user.socialLinks?.facebook ?? '',
+        website: fields.socialLinks?.website ?? user.socialLinks?.website ?? '',
+      }
+    };
+
+    try {
+      const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update`, payload, {
+        headers: { authorization: `Bearer ${user.token}` }
+      });
+
+      const newUserData = res.data.user || res.data;
+
+      const updatedUser = {
+        ...user,
+        ...newUserData,
+        token: user.token, // تأكد من الحفاظ على التوكن
+      };
+
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      showAlert('Profile Updated Successfully.');
+      setTimeout(() => {
+        window.location.reload();
+      },2000)
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
 
   const updatePassword = async (password) => {
