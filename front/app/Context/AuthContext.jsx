@@ -116,7 +116,7 @@ export const AuthContextProvider = ({ children }) => {
       const updatedUser = { ...user, profilePhoto: res.data };
       localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
-      window.location.reload();
+      showAlert('Photo Updated Successfully');
     } catch (err) {
       console.error(err);
 
@@ -130,39 +130,44 @@ export const AuthContextProvider = ({ children }) => {
   }
 
 
-  const updateProfile = async (fields) => {
-    const payload = {
-      username: fields.username ?? user.username,
-      description: fields.description ?? user.description,
-      profileName: fields.profileName ?? user.profileName,
-      country: fields.country ?? user.country,
-      city : fields.city ?? user.city,
-      phone: fields.phone ?? user.phone,
-      dateOfBirth: fields.dateOfBirth ?? user.dateOfBirth,
-      gender: fields.gender ?? user.gender,
-      socialLinks: {
-        github: fields.socialLinks?.github ?? user.socialLinks?.github ?? '',
-        twitter: fields.socialLinks?.twitter ?? user.socialLinks?.twitter ?? '',
-        linkedin: fields.socialLinks?.linkedin ?? user.socialLinks?.linkedin ?? '',
-        facebook: fields.socialLinks?.facebook ?? user.socialLinks?.facebook ?? '',
-        website: fields.socialLinks?.website ?? user.socialLinks?.website ?? '',
-      }
-    };
-
-    try {
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update`, payload, {
-        headers: { authorization: `Bearer ${user.token}` }
-      });
-
-      const updatedUser = { ...res.data, token: user.token };
-      showAlert('Profile Updated Successfully.');
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      setUser(updatedUser);
-      window.location.reload();
-    } catch (err) {
-      console.error(err);
+const updateProfile = async (fields) => {
+  const payload = {
+    username: fields.username ?? user.username,
+    description: fields.description ?? user.description,
+    profileName: fields.profileName ?? user.profileName,
+    country: fields.country ?? user.country,
+    city: fields.city ?? user.city,
+    phone: fields.phone ?? user.phone,
+    dateOfBirth: fields.dateOfBirth ?? user.dateOfBirth,
+    gender: fields.gender ?? user.gender,
+    socialLinks: {
+      github: fields.socialLinks?.github ?? user.socialLinks?.github ?? '',
+      twitter: fields.socialLinks?.twitter ?? user.socialLinks?.twitter ?? '',
+      linkedin: fields.socialLinks?.linkedin ?? user.socialLinks?.linkedin ?? '',
+      facebook: fields.socialLinks?.facebook ?? user.socialLinks?.facebook ?? '',
+      website: fields.socialLinks?.website ?? user.socialLinks?.website ?? '',
     }
   };
+
+  try {
+    const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update`, payload, {
+      headers: { authorization: `Bearer ${user.token}` }
+    });
+
+    const updatedUser = {
+      ...user,            // نحافظ على التوكن وكل شيء
+      ...res.data         // نحدث فقط الحقول التي رجعت من السيرفر
+    };
+
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+    showAlert('Profile Updated Successfully.');
+    window.location.reload();
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   const updatePassword = async (password) => {
     try {
