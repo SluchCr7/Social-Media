@@ -129,26 +129,65 @@ const ProfilePage = () => {
                 <p className="text-sm text-gray-400">Following</p>
               </div>
             </div>
-
-            {/* معلومات إضافية */}
+            {/* Profile Info */}
             <div className="mt-8 w-full rounded-2xl bg-lightMode-menu dark:bg-darkMode-menu shadow-xl p-6">
               <h2 className="text-2xl font-bold mb-6 text-lightMode-text2 dark:text-darkMode-text2">About</h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-lightMode-text dark:text-darkMode-text">
+
                 {userData?.phone && (
                   <div className="flex items-center space-x-3">
                     <FaPhone className="text-blue-400" />
                     <span><span className="font-semibold">Phone:</span> {userData.phone}</span>
                   </div>
                 )}
+
                 {userData?.country && (
                   <div className="flex items-center space-x-3">
                     <FaMapMarkerAlt className="text-green-400" />
                     <span><span className="font-semibold">Country:</span> {userData.country}</span>
                   </div>
                 )}
-                {(userData?.socialLinks && Object.keys(userData.socialLinks).length > 0) && (
-                  <div className="sm:col-span-2 flex items-center gap-5 mt-2">
+
+                {userData?.city && (
+                  <div className="flex items-center space-x-3">
+                    <FaMapMarkerAlt className="text-green-400" />
+                    <span><span className="font-semibold">City:</span> {userData.city}</span>
+                  </div>
+                )}
+
+                {userData?.gender && (
+                  <div className="flex items-center space-x-3">
+                    <span className="text-pink-400 font-bold">♀</span>
+                    <span><span className="font-semibold">Gender:</span> {userData.gender}</span>
+                  </div>
+                )}
+
+                {userData?.dateOfBirth && (
+                  <div className="flex items-center space-x-3">
+                    <span className="text-yellow-400 font-bold">🎂</span>
+                    <span>
+                      <span className="font-semibold">Date of Birth:</span>{" "}
+                      {new Date(userData.dateOfBirth).toLocaleDateString("en-US", {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                )}
+
+                {userData?.interests?.length > 0 && (
+                  <div className="sm:col-span-2">
+                    <p>
+                      <span className="font-semibold">Interests:</span> {userData.interests.join(', ')}
+                    </p>
+                  </div>
+                )}
+
+                {/* روابط التواصل الاجتماعي */}
+                {(userData?.socialLinks && Object.values(userData.socialLinks).some(link => link?.trim())) && (
+                  <div className="sm:col-span-2 flex items-center gap-5 mt-2 flex-wrap">
                     {userData.socialLinks.github && (
                       <a href={userData.socialLinks.github} target="_blank" rel="noopener noreferrer">
                         <FaGithub className="text-2xl text-gray-300 dark:text-white hover:text-white transition" />
@@ -159,6 +198,16 @@ const ProfilePage = () => {
                         <FaLinkedin className="text-2xl text-blue-500 hover:text-blue-600 transition" />
                       </a>
                     )}
+                    {userData.socialLinks.twitter && (
+                      <a href={userData.socialLinks.twitter} target="_blank" rel="noopener noreferrer">
+                        <FaTwitter className="text-2xl text-blue-400 hover:text-blue-500 transition" />
+                      </a>
+                    )}
+                    {userData.socialLinks.facebook && (
+                      <a href={userData.socialLinks.facebook} target="_blank" rel="noopener noreferrer">
+                        <FaFacebook className="text-2xl text-blue-600 hover:text-blue-700 transition" />
+                      </a>
+                    )}
                     {userData.socialLinks.website && (
                       <a href={userData.socialLinks.website} target="_blank" rel="noopener noreferrer">
                         <FaGlobe className="text-2xl text-purple-400 hover:text-purple-500 transition" />
@@ -166,13 +215,9 @@ const ProfilePage = () => {
                     )}
                   </div>
                 )}
-                {userData?.interests?.length > 0 && (
-                  <div className="sm:col-span-2">
-                    <p><span className="font-semibold">Interests:</span> {userData.interests.join(', ')}</p>
-                  </div>
-                )}
               </div>
             </div>
+
           </div>
 
           {/* ✅ التبويبات */}

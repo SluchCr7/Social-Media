@@ -121,20 +121,25 @@ export const AuthContextProvider = ({ children }) => {
       description: fields.description ?? user.description,
       profileName: fields.profileName ?? user.profileName,
       country: fields.country ?? user.country,
+      city : fields.city ?? user.city,
       phone: fields.phone ?? user.phone,
       interests: fields.interests ?? user.interests,
+      dateOfBirth: fields.dateOfBirth ?? user.dateOfBirth,
+      gender: fields.gender ?? user.gender,
       socialLinks: {
-        github: fields.github ?? user.socialLinks.github,
-        twitter: fields.twitter ?? user.socialLinks.twitter,
-        linkedin: fields.linkedin ?? user.socialLinks.linkedin,
-        facebook: fields.facebook ?? user.socialLinks.facebook,
-        website: fields.website ?? user.socialLinks.website,
+        github: fields.socialLinks?.github ?? user.socialLinks?.github ?? '',
+        twitter: fields.socialLinks?.twitter ?? user.socialLinks?.twitter ?? '',
+        linkedin: fields.socialLinks?.linkedin ?? user.socialLinks?.linkedin ?? '',
+        facebook: fields.socialLinks?.facebook ?? user.socialLinks?.facebook ?? '',
+        website: fields.socialLinks?.website ?? user.socialLinks?.website ?? '',
       }
     };
+
     try {
       const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update`, payload, {
         headers: { authorization: `Bearer ${user.token}` }
       });
+
       const updatedUser = { ...res.data, token: user.token };
       showAlert('Profile Updated Successfully.');
       localStorage.setItem('user', JSON.stringify(updatedUser));

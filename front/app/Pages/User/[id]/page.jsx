@@ -170,6 +170,7 @@ const Page = ({ params }) => {
             <h2 className="text-2xl font-bold mb-6 text-lightMode-text2 dark:text-darkMode-text2">About</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-lightMode-text dark:text-darkMode-text">
+
               {userSelected?.phone && (
                 <div className="flex items-center space-x-3">
                   <FaPhone className="text-blue-400" />
@@ -182,11 +183,49 @@ const Page = ({ params }) => {
                   <FaMapMarkerAlt className="text-green-400" />
                   <span><span className="font-semibold">Country:</span> {userSelected.country}</span>
                 </div>
+                )}
+                
+              {userSelected?.city && (
+                <div className="flex items-center space-x-3">
+                  <FaMapMarkerAlt className="text-green-400" />
+                  <span><span className="font-semibold">City:</span> {userSelected.city}</span>
+                </div>
               )}
 
-              {/* Social Icons Row */}
-              {(userSelected?.socialLinks && Object.keys(userSelected.socialLinks).length > 0) && (
-                <div className="sm:col-span-2 flex items-center gap-5 mt-2">
+              {userSelected?.gender && (
+                <div className="flex items-center space-x-3">
+                  <span className="text-pink-400 font-bold">♀</span>
+                  <span><span className="font-semibold">Gender:</span> {userSelected.gender}</span>
+                </div>
+              )}
+
+              {userSelected?.dateOfBirth && (
+                <div className="flex items-center space-x-3">
+                  <span className="text-yellow-400 font-bold">🎂</span>
+                  <span>
+                    <span className="font-semibold">Date of Birth:</span>{" "}
+                    {new Date(userSelected.dateOfBirth).toLocaleDateString("en-US", {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </span>
+                </div>
+              )}
+
+              {/* الاهتمامات */}
+              {userSelected?.interests?.length > 0 && (
+                <div className="sm:col-span-2">
+                  <p>
+                    <span className="font-semibold">Interests:</span>{' '}
+                    {userSelected.interests.join(', ')}
+                  </p>
+                </div>
+              )}
+
+              {/* روابط التواصل الاجتماعي */}
+              {(userSelected?.socialLinks && Object.values(userSelected.socialLinks).some(link => link?.trim())) && (
+                <div className="sm:col-span-2 flex items-center gap-5 mt-2 flex-wrap">
                   {userSelected.socialLinks.github && (
                     <a href={userSelected.socialLinks.github} target="_blank" rel="noopener noreferrer" title="GitHub">
                       <FaGithub className="text-2xl text-gray-300 hover:text-white transition" />
@@ -214,18 +253,8 @@ const Page = ({ params }) => {
                   )}
                 </div>
               )}
-
-              {userSelected?.interests?.length > 0 && (
-                <div className="sm:col-span-2">
-                  <p>
-                    <span className="font-semibold">Interests:</span>{' '}
-                    {userSelected.interests.join(', ')}
-                  </p>
-                </div>
-              )}
             </div>
           </div>
-
           {/* Tabs */}
           <div className="flex justify-center gap-10 mt-6 border-t border-gray-700 w-[90%] pt-4">
             {tabs.map(tab => (
@@ -238,7 +267,6 @@ const Page = ({ params }) => {
               </button>
             ))}
           </div>
-
           {/* Content */}
           <div className="w-[90%] mt-6 flex items-start flex-col gap-4">
             {activeTab === 'Posts' && renderPosts()}

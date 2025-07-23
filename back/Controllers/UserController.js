@@ -470,33 +470,82 @@ const savePost = asyncHandler(async (req, res) => {
 })
 
 const updateProfile = asyncHandler(async (req, res) => {
-  const { error } = validateUserUpdate(req.body)
+  const { error } = validateUserUpdate(req.body);
   if (error) {
-    return res.status(400).json({ message: error.details[0].message })
+    return res.status(400).json({ message: error.details[0].message });
   }
 
+  const currentUserId = req.user._id;
+  const {
+    username,
+    description,
+    profileName,
+    country,
+    phone,
+    socialLinks,
+    interests,
+    gender,
+    dateOfBirth,
+    relationshipStatus,
+    partner,
+    city
+  } = req.body;
+
+  // تحقق من وجود الشريك إذا تم إدخاله
+  if (partner) {
+    const partnerUser = await User.findById(partner);
+
+    if (!partnerUser) {
+      return res.status(400).json({ message: "Partner user not found" });
+    }
+
+    // تحقق أنه غير مرتبط بشخص آخر
+    if (
+      partnerUser.partner &&
+      partnerUser.partner.toString() !== currentUserId.toString()
+    ) {
+      return res
+        .status(400)
+        .json({ message: "This user is already in a relationship with someone else." });
+    }
+
+    // إذا الحالة "In a Relationship" نربط الطرفين
+    if (relationshipStatus === "In a Relationship") {
+      await User.findByIdAndUpdate(partner, {
+        relationshipStatus: "In a Relationship",
+        partner: currentUserId,
+      });
+    }
+  }
+
+  // البيانات التي سيتم تحديثها
   const updateData = {
-    username: req.body.username,
-    description: req.body.description,
-    profileName: req.body.profileName,
-    country: req.body.country,
-    phone: req.body.phone,
-    socialLinks: req.body.socialLinks,
-    interests: req.body.interests,
-    gender: req.body.gender,              
-    dateOfBirth: req.body.dateOfBirth, 
-    relationshipStatus: req.body.relationshipStatus,
-    partner : req.body.partner
-  }
+    username,
+    description,
+    profileName,
+    country,
+    phone,
+    socialLinks,
+    interests,
+    gender,
+    dateOfBirth,
+    relationshipStatus,
+    partner: partner || null,
+    city
+  };
 
+  // تحديث المستخدم
   const updatedUser = await User.findByIdAndUpdate(
-    req.user._id,
+    currentUserId,
     { $set: updateData },
     { new: true }
-  )
+  );
 
-  res.status(200).json(updatedUser)
-})
+  res.status(200).json({
+    message: "Profile updated successfully",
+    user: updatedUser,
+  });
+});
 
 const updatePassword = asyncHandler(async (req, res) => {
     const { error } = validatePasswordUpdate(req.body)
