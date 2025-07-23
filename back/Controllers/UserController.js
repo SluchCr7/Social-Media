@@ -483,6 +483,10 @@ const updateProfile = asyncHandler(async (req, res) => {
     phone: req.body.phone,
     socialLinks: req.body.socialLinks,
     interests: req.body.interests,
+    gender: req.body.gender,              
+    dateOfBirth: req.body.dateOfBirth, 
+    relationshipStatus: req.body.relationshipStatus,
+    partner : req.body.partner
   }
 
   const updatedUser = await User.findByIdAndUpdate(

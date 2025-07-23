@@ -45,6 +45,20 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: "Unknown"
     },
+    city : {
+        type: String,
+        default : "Unknown"
+    },
+    relationshipStatus: {
+        type: String,
+        enum: ['Single', 'In a Relationship', 'Married', "It's Complicated"],
+        default: 'Single'
+    },
+    partner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+    },
     phone : {
         type: String,
         default : ""
@@ -115,7 +129,16 @@ const UserSchema = new mongoose.Schema({
     interests: {
         type: [String],
         default: ""
-    }
+    },
+    dateOfBirth: {
+        type : Date,
+        default : null
+    },
+    gender: {
+        type: String,
+        enum: ['Male', 'Female', 'Other'],
+        default: 'Other'
+    },
 }, {
     timestamps: true,
     toJSON: { virtuals: true },
@@ -186,13 +209,18 @@ const validateUserUpdate = (user) => {
     country: joi.string().max(50).allow('', null),
     phone: joi.string().pattern(/^\+?[0-9\s\-]{7,20}$/).allow('', null),
     interests: joi.array().items(joi.string().max(50)).allow(null),
+    dateOfBirth: joi.date().less('now').allow(null),  
+    gender: joi.string().valid('Male', 'Female', 'Other').allow(null),
+
     socialLinks: joi.object({
-      github: joi.string().uri().allow('', null),
-      twitter: joi.string().uri().allow('', null),
-      linkedin: joi.string().uri().allow('', null),
-      facebook: joi.string().uri().allow('', null),
-      website: joi.string().uri().allow('', null),
+        github: joi.string().uri().allow('', null),
+        twitter: joi.string().uri().allow('', null),
+        linkedin: joi.string().uri().allow('', null),
+        facebook: joi.string().uri().allow('', null),
+        website: joi.string().uri().allow('', null),
     }).default({}),
+    relationshipStatus: joi.string().valid('Single', 'In a Relationship', 'Married', "It's Complicated").allow(null),
+    partner: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null),
   })
 
   return schema.validate(user)
