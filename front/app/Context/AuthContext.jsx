@@ -154,9 +154,12 @@ const updateProfile = async (fields) => {
       headers: { authorization: `Bearer ${user.token}` }
     });
 
+    const newUserData = res.data.user || res.data;
+
     const updatedUser = {
-      ...user,            // نحافظ على التوكن وكل شيء
-      ...res.data         // نحدث فقط الحقول التي رجعت من السيرفر
+      ...user,
+      ...newUserData,
+      token: user.token, // تأكد من الحفاظ على التوكن
     };
 
     localStorage.setItem('user', JSON.stringify(updatedUser));
