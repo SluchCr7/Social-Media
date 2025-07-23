@@ -32,7 +32,7 @@ const MessangerSluchit = () => {
       <div className="flex h-full w-full m-0 p-0 ">
 
         {/* Sidebar */}
-        <aside className="w-[100%] md:w-[300px] lg:w-[280px] h-full border-r border-gray-300 dark:border-gray-700 bg-white dark:bg-darkMode-menu">
+        <aside className="w-[0%] md:w-[300px] lg:w-[280px] h-full border-r border-gray-300 dark:border-gray-700 bg-white dark:bg-darkMode-menu">
           <ChatSlider />
         </aside>
 
