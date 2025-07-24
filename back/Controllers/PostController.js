@@ -39,50 +39,46 @@ const getAllPosts = asyncHandler(async (req, res) => {
   
 const addPost = async (req, res) => {
   try {
-    const { text, Hashtags, community } = req.body;
+    let { text, Hashtags, community } = req.body;
     const userId = req.user._id;
 
-    // ✅ Validate the post body
-    const { error } = ValidatePost(req.body);
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
+    // ✅ معالجة Hashtags المرسلة كـ form-data مكررة
+    if (typeof Hashtags === 'string') Hashtags = [Hashtags];
+    else if (!Array.isArray(Hashtags)) Hashtags = [];
 
-    // ✅ Validate community if provided
+    // ✅ التحقق من البيانات
+    const { error } = ValidatePost({ text, Hashtags, community });
+    if (error) return res.status(400).json({ message: error.details[0].message });
+
+    // ✅ تحقق من المجتمع
     let communityDoc = null;
     if (community) {
       communityDoc = await Community.findById(community);
-      if (!communityDoc) {
-        return res.status(404).json({ message: "Community not found." });
-      }
-
-      if (!communityDoc.members.includes(userId)) {
-        return res.status(403).json({ message: "You are not a member of this community." });
-      }
+      if (!communityDoc) return res.status(404).json({ message: 'Community not found.' });
+      if (!communityDoc.members.includes(userId)) return res.status(403).json({ message: 'Not a member of this community.' });
     }
 
-    // ✅ Handle optional image upload
+    // ✅ معالجة الصور
     let uploadedImages = [];
-
-    // 👇 THIS IS THE FIX: Access req.files.image
-    if (req.files && req.files.image && req.files.image.length > 0) {
+    if (req.files?.image?.length > 0) {
       uploadedImages = await Promise.all(
-        req.files.image.map(async (image) => {
-          const result = await cloudUpload(image); // ✅ يرفع من buffer مباشرة إذا memoryStorage
+        req.files.image.map(async (img) => {
+          const result = await cloudUpload(img); // تأكد أن cloudUpload يدعم buffer
           return { url: result.secure_url, publicId: result.public_id };
         })
       );
     }
 
-    // ✅ Create and save post
+    // ✅ إنشاء البوست
     const post = new Post({
       text,
-      owner: userId,
       Photos: uploadedImages,
       Hashtags,
-      community: communityDoc ? communityDoc._id : null,
+      owner: userId,
+      community: communityDoc ? communityDoc._id : null
     });
 
+    // ✅ تحديث نقاط المستخدم
     const user = await User.findById(userId);
     user.userLevelPoints += 5;
     user.updateLevelRank();
@@ -90,11 +86,12 @@ const addPost = async (req, res) => {
     await post.save();
 
     res.status(201).json(post);
-  } catch (error) {
-    console.error("Error in addPost:", error);
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    console.error('Error in addPost:', err);
+    res.status(500).json({ message: err.message || 'Internal Server Error' });
   }
 };
+
 
 
 const deletePost = asyncHandler(async (req, res) => {

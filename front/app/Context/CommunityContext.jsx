@@ -81,7 +81,6 @@ const updateCommunityPicture = async (id, file) => {
 
     showAlert(res.data.message || 'Picture updated.');
     
-    // ✅ أرجع البيانات الفعلية من السيرفر (الرابط الجديد)
     return res.data;
   } catch (err) {
     console.error("Full Error:", JSON.stringify(err, null, 2));

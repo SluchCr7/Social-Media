@@ -14,36 +14,37 @@ const EditCommunityMenu = ({ community, onClose }) => {
 
   const { showAlert } = useAlert();
   const { editCommunity, updateCommunityPicture, updateCommunityCover } = useCommunity();
-  const [image, setImage] = useState(null)
-  const [imageCover , setImageCover] = useState(null)
-const handleImageChange = async (e, type) => {
-  const file = e.target.files[0];
-  if (!file || !(file instanceof File)) {
-    showAlert('Invalid file selected.');
-    return;
-  }
 
-  try {
-    if (type === 'picture') {
-      const result = await updateCommunityPicture(community._id, file);
-      if (result?.url) setPreviewPicture(result.url);
-      showAlert('Profile picture updated successfully.');
-    } else if (type === 'cover') {
-      const result = await updateCommunityCover(community._id, file);
-      if (result?.url) setPreviewCover(result.url);
-      showAlert('Cover image updated successfully.');
-    } else {
-      showAlert('Unsupported image type.');
+  const handleImageChange = async (e, type) => {
+    const file = e.target.files[0];
+    if (!file || !(file instanceof File)) {
+      showAlert('Invalid file selected.');
+      return;
     }
-  } catch (err) {
-    console.error('Image Upload Error:', err);
-    const message =
-      err?.response?.data?.message ||
-      err?.message ||
-      'An error occurred while uploading the image.';
-    showAlert(message);
-  }
-};
+
+    const objectURL = URL.createObjectURL(file);
+    
+    try {
+      if (type === 'picture') {
+        setPreviewPicture(objectURL); // Preview مباشرة
+        const result = await updateCommunityPicture(community._id, file);
+        if (result?.url) setPreviewPicture(result.url); // بعد رفعها، نحدث باللينك من السيرفر
+      } else if (type === 'cover') {
+        setPreviewCover(objectURL);
+        const result = await updateCommunityCover(community._id, file);
+        if (result?.url) setPreviewCover(result.url);
+      } else {
+        showAlert('Unsupported image type.');
+      }
+    } catch (err) {
+      console.error('Image Upload Error:', err);
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        'An error occurred while uploading the image.';
+      showAlert(message);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,16 +83,13 @@ const handleImageChange = async (e, type) => {
         {/* Cover Image */}
         <div className="relative w-full h-40 rounded-lg overflow-hidden mb-6">
           <Image
-              src={
-                imageCover
-                  ? URL.createObjectURL(imageCover)
-                  : community?.Cover?.url || '/default-profile.png'
-              }
-              alt="Cover" fill className="object-cover"
-              onClick={() => document.getElementById('fileInput')?.click()}
-            />
+            src={previewCover}
+            alt="Cover"
+            fill
+            className="object-cover"
+          />
           <label className="absolute top-2 right-2 bg-black bg-opacity-60 p-2 rounded-full cursor-pointer text-white">
-            <IoCamera onClick={() => document.getElementById('fileInput')?.click()} />
+            <IoCamera />
             <input
               type="file"
               accept="image/*"
@@ -103,19 +101,14 @@ const handleImageChange = async (e, type) => {
 
         {/* Profile Image */}
         <div className="relative w-28 h-28 mx-auto -mt-16 border-4 border-white dark:border-darkMode-bg rounded-full overflow-hidden">
-            <Image
-              src={
-                image
-                  ? URL.createObjectURL(image)
-                  : community?.Picture?.url || '/default-profile.png'
-              }
-              alt="Photo"
-              fill
-              className="object-cover"
-              onClick={() => document.getElementById('fileInput')?.click()}
-            />
+          <Image
+            src={previewPicture}
+            alt="Photo"
+            fill
+            className="object-cover"
+          />
           <label className="absolute bottom-1 right-1 bg-black bg-opacity-60 p-1 rounded-full cursor-pointer text-white">
-            <IoCamera size={16} onClick={() => document.getElementById('fileInput')?.click()} />
+            <IoCamera size={16} />
             <input
               type="file"
               accept="image/*"

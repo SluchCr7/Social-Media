@@ -58,12 +58,13 @@ const Post = mongoose.model('Post', PostSchema)
 
 
 const ValidatePost = (post) => {
-    const schema = joi.object({
-      text: joi.string(),
-      Hashtags: joi.array(),
-      community: joi.string(),
-    })
-    return schema.validate(post)
-}
+  const schema = joi.object({
+    text: joi.string().allow('', null),
+    Hashtags: joi.array().items(joi.string()).optional(),
+    community: joi.string().optional(),
+    image: joi.any().optional(), // لازم يكون موجود حتى لا يعطي error
+  });
+  return schema.validate(post);
+};
 
 module.exports = {Post, ValidatePost}
