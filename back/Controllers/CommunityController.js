@@ -112,10 +112,11 @@ const updateCommunityPicture = asyncHandler(async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const imagePath = path.join(__dirname, `../images/${req.file.filename}`);
-    const result = await cloudUpload(imagePath);
+    // ✅ مرر req.file مباشرة وليس مسار
+    const result = await cloudUpload(req.file);
 
-    if (community.Picture.publicId) {
+    // ✅ احذف الصورة القديمة إن وجدت
+    if (community.Picture?.publicId) {
       await cloudRemove(community.Picture.publicId);
     }
 
@@ -125,18 +126,18 @@ const updateCommunityPicture = asyncHandler(async (req, res) => {
     };
 
     await community.save();
-    fs.unlinkSync(imagePath);
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Community picture updated successfully",
       url: result.secure_url,
       publicId: result.public_id,
     });
   } catch (error) {
-    console.error("❌ Server Error:", error);
-    res.status(500).json({ message: "Internal server error during image update." });
+    console.error("❌ Server Error:", error.message, error.stack);
+    return res.status(500).json({ message: "Internal server error during image update.", error: error.message });
   }
 });
+
 
 
 /**
