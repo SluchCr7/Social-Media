@@ -42,15 +42,17 @@ const addPost = async (req, res) => {
     let { text, Hashtags, community } = req.body;
     const userId = req.user._id;
 
-    // ✅ معالجة Hashtags المرسلة كـ form-data مكررة
+    console.log("📥 Form Data:", { text, Hashtags, community });
+
+    // ✅ معالجة Hashtags: قد تكون string أو مصفوفة
     if (typeof Hashtags === 'string') Hashtags = [Hashtags];
     else if (!Array.isArray(Hashtags)) Hashtags = [];
 
-    // ✅ التحقق من البيانات
+    // ✅ التحقق من صحة البيانات
     const { error } = ValidatePost({ text, Hashtags, community });
     if (error) return res.status(400).json({ message: error.details[0].message });
 
-    // ✅ تحقق من المجتمع
+    // ✅ التحقق من المجتمع
     let communityDoc = null;
     if (community) {
       communityDoc = await Community.findById(community);
@@ -60,13 +62,36 @@ const addPost = async (req, res) => {
 
     // ✅ معالجة الصور
     let uploadedImages = [];
-    if (req.files?.image?.length > 0) {
+    let imagesArr = [];
+
+    if (Array.isArray(req.files?.image)) {
+      imagesArr = req.files.image;
+    } else if (req.files?.image) {
+      imagesArr = [req.files.image];
+    }
+
+    console.log("🖼 Received Images:", imagesArr.length);
+
+    if (imagesArr.length > 0) {
       uploadedImages = await Promise.all(
-        req.files.image.map(async (img) => {
-          const result = await cloudUpload(img); // تأكد أن cloudUpload يدعم buffer
-          return { url: result.secure_url, publicId: result.public_id };
+        imagesArr.map(async (img, i) => {
+          try {
+            console.log(`🔄 Uploading Image #${i + 1}:`, img.originalname);
+            const result = await cloudUpload(img);
+            console.log(`✅ Uploaded Image #${i + 1}:`, result.secure_url);
+            return {
+              url: result.secure_url,
+              publicId: result.public_id,
+            };
+          } catch (err) {
+            console.error(`❌ Failed to upload image #${i + 1}:`, err.message);
+            return null;
+          }
         })
       );
+
+      // حذف الصور التي فشل رفعها
+      uploadedImages = uploadedImages.filter(Boolean);
     }
 
     // ✅ إنشاء البوست
@@ -75,23 +100,26 @@ const addPost = async (req, res) => {
       Photos: uploadedImages,
       Hashtags,
       owner: userId,
-      community: communityDoc ? communityDoc._id : null
+      community: communityDoc ? communityDoc._id : null,
     });
 
     // ✅ تحديث نقاط المستخدم
     const user = await User.findById(userId);
     user.userLevelPoints += 5;
-    user.updateLevelRank();
+    user.updateLevelRank(); // تأكد أنها موجودة في الـ schema
     await user.save();
+
     await post.save();
 
-    res.status(201).json(post);
+    console.log("✅ Post created:", post._id);
+    console.log("📸 Photos saved:", post.Photos);
+
+    return res.status(201).json(post);
   } catch (err) {
-    console.error('Error in addPost:', err);
-    res.status(500).json({ message: err.message || 'Internal Server Error' });
+    console.error("❌ Error in addPost:", err.message, err.stack);
+    return res.status(500).json({ message: err.message || 'Internal Server Error' });
   }
 };
-
 
 
 const deletePost = asyncHandler(async (req, res) => {
