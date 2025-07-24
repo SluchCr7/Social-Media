@@ -54,8 +54,8 @@ export const PostContextProvider = ({ children }) => {
       );
       showAlert("Post added successfully.");
       setTimeout(() => {
-        window.location.reload();
-      }, 2000);
+        window.location.href = "/";
+      }, 3000);
     } catch (err) {
       console.error(err);
       showAlert(err?.response?.data?.message || "Failed to upload post.");

@@ -52,11 +52,6 @@ const NewPost = () => {
       hashtags,
       selectedCommunity
     );
-    setTimeout(() => {
-      setPostText('');
-      setImages([]);
-      setSelectedCommunity('');
-    }, 2000);
   };
 
   const handleEmojiClick = (emojiData) => {
