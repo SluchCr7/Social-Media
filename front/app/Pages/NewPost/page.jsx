@@ -65,10 +65,6 @@ const NewPost = () => {
       textareaRef.current.selectionEnd = cursorPos + emojiData.emoji.length;
     }, 0);
   };
-  useEffect(() => {
-    // userSelected?.followers?.some(f => f._id === user._id)
-    console.log(communities.filter((com)=> com?.members.some((member)=> member._id === user._id)).length)
-  },[communities])
   return (
     <main className="flex items-center justify-center w-full py-6 px-4">
       <div className="w-full bg-white dark:bg-darkMode-fg rounded-2xl shadow-2xl overflow-hidden relative transition-all duration-500">
@@ -163,9 +159,9 @@ const NewPost = () => {
           </div>
           <button
             onClick={handlePost}
-            disabled={!postText.trim()}
+            disabled={!postText.trim() || images.length === 0}
             className={`px-6 py-2 text-sm font-semibold rounded-lg transition-all ${
-              postText.trim()
+              postText.trim() || images.length > 0
                 ? 'bg-blue-600 hover:bg-blue-700 text-white'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}

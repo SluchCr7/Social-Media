@@ -34,33 +34,36 @@ export const PostContextProvider = ({ children }) => {
   }, []);
 
 
-  const AddPost = async (content, images, Hashtags, communityId) => {
-    const formData = new FormData();
-    formData.append("text", content);
-    images.forEach(img => formData.append("image", img));
-    Hashtags.forEach(tag => formData.append("Hashtags", tag));
-    if (communityId) formData.append("community", communityId);
+const AddPost = async (content, images, Hashtags, communityId) => {
+  const formData = new FormData();
+  formData.append("text", content);
 
-    try {
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/add`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      showAlert("Post added successfully.");
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 3000);
-    } catch (err) {
-      console.error(err);
-      showAlert(err?.response?.data?.message || "Failed to upload post.");
-    }
-  };
+  images.forEach(img => formData.append("image", img.file)); // ✅ استخدم .file فقط
+
+  Hashtags.forEach(tag => formData.append("Hashtags", tag));
+  if (communityId) formData.append("community", communityId);
+
+  try {
+    await axios.post(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/add`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    showAlert("Post added successfully.");
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 3000);
+  } catch (err) {
+    console.error(err);
+    showAlert(err?.response?.data?.message || "Failed to upload post.");
+  }
+};
+
 
   const deletePost = async (id) => {
     try {
