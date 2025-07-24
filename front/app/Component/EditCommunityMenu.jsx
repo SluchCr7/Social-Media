@@ -14,7 +14,8 @@ const EditCommunityMenu = ({ community, onClose }) => {
 
   const { showAlert } = useAlert();
   const { editCommunity, updateCommunityPicture, updateCommunityCover } = useCommunity();
-
+  const [image, setImage] = useState(null)
+  const [imageCover , setImageCover] = useState(null)
 const handleImageChange = async (e, type) => {
   const file = e.target.files[0];
   if (!file || !(file instanceof File)) {
@@ -80,9 +81,17 @@ const handleImageChange = async (e, type) => {
 
         {/* Cover Image */}
         <div className="relative w-full h-40 rounded-lg overflow-hidden mb-6">
-          <Image src={previewCover} alt="Cover" fill className="object-cover" />
+          <Image
+              src={
+                imageCover
+                  ? URL.createObjectURL(imageCover)
+                  : community?.Cover?.url || '/default-profile.png'
+              }
+              alt="Cover" fill className="object-cover"
+              onClick={() => document.getElementById('fileInput')?.click()}
+            />
           <label className="absolute top-2 right-2 bg-black bg-opacity-60 p-2 rounded-full cursor-pointer text-white">
-            <IoCamera />
+            <IoCamera onClick={() => document.getElementById('fileInput')?.click()} />
             <input
               type="file"
               accept="image/*"
@@ -94,9 +103,19 @@ const handleImageChange = async (e, type) => {
 
         {/* Profile Image */}
         <div className="relative w-28 h-28 mx-auto -mt-16 border-4 border-white dark:border-darkMode-bg rounded-full overflow-hidden">
-          <Image src={previewPicture} alt="Profile" fill className="object-cover" />
+            <Image
+              src={
+                image
+                  ? URL.createObjectURL(image)
+                  : community?.Picture?.url || '/default-profile.png'
+              }
+              alt="Photo"
+              fill
+              className="object-cover"
+              onClick={() => document.getElementById('fileInput')?.click()}
+            />
           <label className="absolute bottom-1 right-1 bg-black bg-opacity-60 p-1 rounded-full cursor-pointer text-white">
-            <IoCamera size={16} />
+            <IoCamera size={16} onClick={() => document.getElementById('fileInput')?.click()} />
             <input
               type="file"
               accept="image/*"
