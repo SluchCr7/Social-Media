@@ -1,48 +1,64 @@
-import React from 'react'
-import Image from 'next/image'
+"use client";
+
+import React from "react";
+import { motion } from "framer-motion";
 
 const Loader = () => {
   return (
-    <div className="w-screen h-screen fixed top-0 left-0 bg-lightMode-bg dark:bg-darkMode-bg z-[9999] flex flex-col items-center justify-center space-y-6">
-      {/* Logo
-      <div className="animate-pulse">
-        <Image
-          src="/Logo.png" // استخدم شعارك هنا أو احذف السطر
-          alt="Zocial Logo"
-          width={80}
-          height={80}
-          className="rounded-full"
+    <div className="w-screen h-screen fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-lightMode-bg dark:bg-darkMode-bg overflow-hidden">
+
+      {/* خلفية دوائر متحركة */}
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: [1, 1.2, 1] }}
+        transition={{ repeat: Infinity, duration: 4 }}
+        className="absolute w-[280px] h-[280px] rounded-full bg-gradient-to-tr from-blue-500/20 to-purple-500/20 blur-3xl"
+      />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0.2, 0.5, 0.2] }}
+        transition={{ repeat: Infinity, duration: 3 }}
+        className="absolute w-[180px] h-[180px] rounded-full bg-gradient-to-tr from-pink-500/30 to-yellow-500/30 blur-2xl"
+      />
+
+      {/* Spinner ثلاثي دوائر */}
+      <div className="relative flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+          className="w-14 h-14 border-4 border-t-transparent border-blue-500 dark:border-purple-400 rounded-full"
         />
-      </div> */}
+        <motion.div
+          animate={{ rotate: -360 }}
+          transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+          className="absolute w-10 h-10 border-4 border-b-transparent border-pink-500 dark:border-yellow-400 rounded-full"
+        />
+      </div>
 
-      {/* Brand name */}
-      <h1 className="text-2xl font-bold text-lightMode-text dark:text-darkMode-text animate-bounce tracking-widest">
-        Zocial
-      </h1>
-
-      {/* Spinner */}
-      <div className="w-12 h-12 border-4 border-t-transparent border-lightMode-text dark:border-darkMode-text rounded-full animate-spin"></div>
-
-      {/* Skeleton-style bar (optional)
-      <div className="w-48 h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden relative">
-        <div className="absolute inset-0 w-1/3 bg-gray-400 dark:bg-gray-600 animate-[loader-bar_1.5s_infinite]"></div>
-      </div> */}
-
-      {/* <style jsx>{`
-        @keyframes loader-bar {
-          0% {
-            left: -33%;
-          }
-          50% {
-            left: 100%;
-          }
-          100% {
-            left: -33%;
-          }
-        }
-      `}</style> */}
+      {/* Loading dots */}
+      <div className="flex space-x-1 mt-6 text-gray-500 dark:text-gray-400 text-sm">
+        <span>Loading</span>
+        <motion.span
+          animate={{ opacity: [0, 1, 0] }}
+          transition={{ repeat: Infinity, duration: 1 }}
+        >
+          .
+        </motion.span>
+        <motion.span
+          animate={{ opacity: [0, 1, 0] }}
+          transition={{ repeat: Infinity, duration: 1, delay: 0.3 }}
+        >
+          .
+        </motion.span>
+        <motion.span
+          animate={{ opacity: [0, 1, 0] }}
+          transition={{ repeat: Infinity, duration: 1, delay: 0.6 }}
+        >
+          .
+        </motion.span>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Loader
+export default Loader;

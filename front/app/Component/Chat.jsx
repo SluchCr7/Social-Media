@@ -54,12 +54,12 @@ const sortedDates = Object.keys(groupedMessages).sort(
       </div>
 
       {/* Message Area */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 bg-lightMode-bg dark:bg-darkMode-bg py-2 space-y-6 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800" style={backgroundStyle}>
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 bg-lightMode-bg dark:bg-darkMode-bg shadow-lg py-2 space-y-6 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800" style={backgroundStyle}>
         {sortedDates.map((dateKey) => (
           <div key={dateKey}>
             {/* Date separator */}
             <div className="flex justify-center my-4">
-              <div className=" text-xs  px-4 py-1 rounded-full backdrop-blur-sm shadow-sm">
+              <div className=" text-xs text-lightMode-fg dark:text-darkMode-fg px-4 py-1 rounded-full backdrop-blur-sm shadow-sm">
                 {getDisplayDate(dateKey)}
               </div>
             </div>

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, { useEffect } from 'react';
 import { FiX } from 'react-icons/fi';
 import { useNotify } from '../Context/NotifyContext';
@@ -8,8 +8,7 @@ const NotificationMenu = ({ showNotifications, setShowNotifications }) => {
   const {
     notificationsByUser,
     markAllAsRead,
-    deleteNotify,
-    fetchUserNotifications,
+    clearAllNotifications,
   } = useNotify();
 
   useEffect(() => {
@@ -17,13 +16,6 @@ const NotificationMenu = ({ showNotifications, setShowNotifications }) => {
       markAllAsRead(); // تعليم الكل كمقروء عند الفتح
     }
   }, [showNotifications]);
-
-  const handleClearAll = async () => {
-    for (const notif of notificationsByUser) {
-      await deleteNotify(notif._id);
-    }
-    fetchUserNotifications(); // تحديث الإشعارات بعد الحذف
-  };
 
   return (
     <div className={`fixed inset-0 z-[999] transition-all duration-500 ${showNotifications ? 'backdrop-blur-sm bg-black/30' : 'pointer-events-none opacity-0'}`}>
@@ -58,7 +50,9 @@ const NotificationMenu = ({ showNotifications, setShowNotifications }) => {
                 />
                 <div className="flex-1">
                   <p className="text-base font-medium text-lightMode-fg dark:text-darkMode-fg leading-snug">{notif.content}</p>
-                  <p className="text-xs text-gray-500 mt-1">{new Date(notif.createdAt).toLocaleString()}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {new Date(notif.createdAt).toLocaleString()}
+                  </p>
                 </div>
               </div>
             ))
@@ -73,7 +67,7 @@ const NotificationMenu = ({ showNotifications, setShowNotifications }) => {
         {notificationsByUser.length > 0 && (
           <div className="pt-5 border-t mt-4">
             <button
-              onClick={handleClearAll}
+              onClick={clearAllNotifications}
               className="w-full bg-white dark:bg-black text-black dark:text-white text-sm font-semibold py-3 rounded-xl transition hover:opacity-90"
             >
               Clear All

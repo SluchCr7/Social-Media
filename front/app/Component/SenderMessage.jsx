@@ -1,4 +1,3 @@
-
 'use client';
 import Image from 'next/image';
 import React from 'react';
@@ -7,7 +6,6 @@ import { BsCheck, BsCheckAll } from 'react-icons/bs';
 
 const SenderMessage = ({ message, user }) => {
   const { backgroundStyle } = useMessage();
-
   const isRead = message.isRead;
 
   return (
@@ -15,10 +13,16 @@ const SenderMessage = ({ message, user }) => {
       <div className="flex max-w-[80%] gap-2 items-end">
         {/* محتوى الرسالة */}
         <div className="flex flex-col items-end text-right">
-          <div className="bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-br-sm shadow-md">
+          <div className="bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-2xl rounded-br-sm shadow-md">
             {/* الصور */}
             {Array.isArray(message.Photos) && message.Photos.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-2">
+              <div
+                className={`${
+                  message.Photos.length > 2
+                    ? 'grid grid-cols-2 gap-2 mb-2'
+                    : 'flex flex-wrap gap-2 mb-2'
+                }`}
+              >
                 {message.Photos.map((img, index) => (
                   <Image
                     key={index}
@@ -26,21 +30,28 @@ const SenderMessage = ({ message, user }) => {
                     alt={`image_message_${index}`}
                     width={200}
                     height={200}
-                    className="rounded-lg object-cover"
+                    className="rounded-lg object-cover max-w-[150px] md:max-w-[250px] hover:scale-105 transition"
                   />
                 ))}
               </div>
             )}
 
             {/* النص */}
-            {message.text && <p className="text-sm">{message.text}</p>}
+            {message.text && (
+              <p className="text-sm break-words">{message.text}</p>
+            )}
           </div>
 
           {/* التوقيت + حالة القراءة */}
-          <div className="flex items-center gap-1 mt-1 text-xs text-gray-400">
-            <span>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          <div className="flex items-center gap-1 mt-1 text-[11px] text-gray-400 opacity-70">
+            <span>
+              {new Date(message.createdAt).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </span>
             {isRead ? (
-              <BsCheckAll className="text-blue-400" title="Seen" />
+              <BsCheckAll className="text-blue-500" title="Seen" />
             ) : (
               <BsCheck className="text-gray-400" title="Sent" />
             )}
@@ -48,15 +59,13 @@ const SenderMessage = ({ message, user }) => {
         </div>
 
         {/* صورة البروفايل */}
-        <div>
-          <Image
-            src={user?.profilePhoto?.url}
-            alt="Sender"
-            width={40}
-            height={40}
-            className="rounded-full object-cover w-10 h-10"
-          />
-        </div>
+        <Image
+          src={user?.profilePhoto?.url || '/default.jpg'}
+          alt="Sender"
+          width={32}
+          height={32}
+          className="rounded-full object-cover w-8 h-8"
+        />
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ const MainApp = () => {
   const { unReadedMessage } = useMessage();
 
   return (
-    <div className="w-full h-full px-3 py-8 md:py-0">
+    <div className="w-full h-full px-3 py-12 md:py-0">
       {/* Header */}
       <Header unReadedMessage={unReadedMessage} setShowNotifications={setShowNotifications} unreadCount={unreadCount} markAllAsRead={markAllAsRead}/>
       {/* Content */}

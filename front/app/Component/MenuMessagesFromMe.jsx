@@ -4,10 +4,11 @@ import { useMessage } from '../Context/MessageContext';
 import Image from 'next/image';
 import dayjs from 'dayjs';
 import Link from 'next/link';
+import { useAuth } from '../Context/AuthContext';
 
 const MenuMessagesFromMe = () => {
   const { messagesByUser } = useMessage();
-
+  const {user}= useAuth();
   // Filter messages from last 24 hours
   const recentMessages = useMemo(() => {
     const now = new Date().getTime();

@@ -31,20 +31,26 @@ const ChatInput = () => {
   };
 
   return (
-    <div className="w-full px-3 py-3 border-t border-gray-300 dark:border-gray-700 bg-white dark:bg-darkMode-bg" style={backgroundStyle}>
+    <div
+      className="w-full px-3 py-3 bg-white dark:bg-darkMode-bg"
+      style={backgroundStyle}
+    >
       {/* Images Preview */}
       {images.length > 0 && (
         <div className="flex gap-2 flex-wrap mb-3">
           {images.map((img, idx) => (
-            <div key={idx} className="relative w-20 h-20 rounded-md overflow-hidden shadow-md">
+            <div
+              key={idx}
+              className="relative w-16 h-16 rounded-lg overflow-hidden shadow-sm border border-gray-200 dark:border-gray-600"
+            >
               <img
                 src={img.url}
                 alt={`upload-${idx}`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover hover:scale-105 transition"
               />
               <IoClose
                 onClick={() => removeImage(img.url)}
-                className="absolute top-1 right-1 bg-white dark:bg-black bg-opacity-70 text-red-600 text-xl rounded-full cursor-pointer"
+                className="absolute top-1 right-1 bg-white dark:bg-black bg-opacity-70 text-red-600 text-lg rounded-full cursor-pointer"
               />
             </div>
           ))}
@@ -53,28 +59,29 @@ const ChatInput = () => {
 
       {/* Input Section */}
       <div className="flex items-center gap-2 w-full">
+        {/* Upload */}
         <button
           onClick={() => fileInputRef.current.click()}
-          className="text-xl  transition"
+          className="p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition"
           title="Upload Image"
         >
-          <IoImage />
+          <IoImage className="text-xl text-blue-500" />
         </button>
 
-        {/* Emojis (placeholder) */}
+        {/* Emoji */}
         <button
-          className="text-xl  transition"
+          className="p-2 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900 transition"
           title="Insert Emoji"
         >
-          <IoHappyOutline />
+          <IoHappyOutline className="text-xl text-yellow-500" />
         </button>
-        {/* text-gray-600 dark:text-gray-300 hover:text-red-500 */}
-        {/* Voice Recorder (placeholder) */}
+
+        {/* Mic */}
         <button
-          className="text-xl  transition"
+          className="p-2 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900 transition"
           title="Record Voice"
         >
-          <IoMic />
+          <IoMic className="text-xl text-purple-500" />
         </button>
 
         <input
@@ -86,20 +93,22 @@ const ChatInput = () => {
           className="hidden"
         />
 
+        {/* Message Input */}
         <input
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type your message..."
-          className="flex-1 px-4 py-2 rounded-full bg-gray-100 dark:bg-darkMode-fg text-black dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className="flex-1 px-4 py-2 rounded-xl bg-gray-50 dark:bg-darkMode-menu text-black dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
         />
 
+        {/* Send */}
         <button
           onClick={handleSend}
-          className="text-xl text-green-600 hover:text-green-500 transition"
+          className="p-3 bg-green-500 text-white rounded-full hover:bg-green-600 active:scale-95 transition"
           title="Send Message"
         >
-          <IoIosSend />
+          <IoIosSend className="text-lg" />
         </button>
       </div>
     </div>

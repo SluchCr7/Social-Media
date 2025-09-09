@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -116,7 +117,7 @@ const NewPost = () => {
 
           
 
-          
+  
         </div>
 
         {/* Images Preview */}
@@ -159,7 +160,7 @@ const NewPost = () => {
           </div>
           <button
             onClick={handlePost}
-            disabled={!postText.trim() || images.length === 0}
+            disabled={!postText.trim() && images.length === 0}
             className={`px-6 py-2 text-sm font-semibold rounded-lg transition-all ${
               postText.trim() || images.length > 0
                 ? 'bg-blue-600 hover:bg-blue-700 text-white'

@@ -6,7 +6,8 @@ import { BsThreeDots } from 'react-icons/bs';
 import { useMessage } from '../Context/MessageContext';
 import { useAuth } from '../Context/AuthContext';
 import UserCard from './UserCard';
-import { Users2 } from 'lucide-react';
+import { Users2, Search } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const ChatSlider = () => {
   const {
@@ -15,67 +16,95 @@ const ChatSlider = () => {
     backgroundStyle,
     markAllAsReadBetweenUsers,
     unreadCountPerUser,
-    selectedUser
+    selectedUser,
   } = useMessage();
 
   const { user, onlineUsers } = useAuth();
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState('');
 
+  // فلترة المستخدمين بالبحث
+  const filteredUsers = users.filter((u) =>
+    u.username?.toLowerCase().includes(searchValue.toLowerCase())
+  );
 
   return (
-    <aside
+    <motion.aside
       style={backgroundStyle}
-      className={`w-full h-screen ${selectedUser ? "hidden lg:flex" : "flex"} flex-col border-r border-gray-300 dark:border-gray-700 bg-lightMode-bg dark:bg-darkMode-bg transition-all`}
+      initial={{ x: -300, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className={`w-full h-screen ${
+        selectedUser ? 'hidden lg:flex' : 'flex'
+      } flex-col border-r border-gray-200 dark:border-gray-700 bg-lightMode-bg dark:bg-darkMode-bg`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-darkMode-menu">
         <div className="flex items-center gap-3">
           <Image
-            src={user?.profilePhoto?.url || "/default.jpg"}
+            src={user?.profilePhoto?.url || '/default.jpg'}
             width={40}
             height={40}
             alt="User"
             className="rounded-full w-10 h-10 object-cover"
           />
           <div className="flex flex-col">
-            <span className="font-semibold text-black dark:text-white text-sm">{user?.username}</span>
-            <span className="text-xs">{user?.profileName}</span>
+            <span className="font-semibold text-black dark:text-white text-sm">
+              {user?.username}
+            </span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {user?.profileName}
+            </span>
           </div>
         </div>
-        <BsThreeDots className="text-xl text-gray-700 dark:text-gray-300 cursor-pointer" />
+        <BsThreeDots className="text-xl text-gray-700 dark:text-gray-300 cursor-pointer hover:rotate-90 transition" />
       </div>
 
       {/* Search */}
-      <div className="p-4">
+      <div className="relative p-4 border-b border-gray-200 dark:border-gray-700">
+        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
         <input
           type="search"
           placeholder="Search users..."
-          className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-darkMode-menu text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-darkMode-menu text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary"
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
         />
       </div>
 
       {/* User List */}
-      <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
-        {Users2.length === 0 ? (
-          <div className="text-center text-gray-500 dark:text-gray-400 mt-10 text-sm">No users found.</div>
+      <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-1 custom-scrollbar">
+        {filteredUsers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 mt-10 text-sm">
+            <Users2 className="w-10 h-10 mb-2 opacity-50" />
+            No users found.
+          </div>
         ) : (
-          users.map(u => (
-            <UserCard
+          filteredUsers.map((u) => (
+            <motion.div
               key={u._id}
-              user={u}
-              isOnline={onlineUsers?.includes(u._id)}
-              unreadCount={unreadCountPerUser[u._id] || 0}
-              onSelect={() => {
-                setSelectedUser(u);
-                markAllAsReadBetweenUsers(u?._id);
-              }}
-            />
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <UserCard
+                user={u}
+                isOnline={onlineUsers?.includes(u._id)}
+                unreadCount={unreadCountPerUser[u._id] || 0}
+                onSelect={() => {
+                  setSelectedUser(u);
+                  markAllAsReadBetweenUsers(u?._id);
+                }}
+                className={`p-3 rounded-xl cursor-pointer flex items-center gap-3 transition hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                  selectedUser?._id === u._id
+                    ? 'bg-gray-200 dark:bg-gray-700'
+                    : ''
+                }`}
+              />
+            </motion.div>
           ))
         )}
       </div>
-    </aside>
+    </motion.aside>
   );
 };
 

@@ -78,7 +78,7 @@ const Aside = () => {
           className="flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-medium text-blue-400 hover:text-blue-500 hover:bg-blue-100/5 dark:hover:bg-blue-500/10 transition-all duration-300"
         >
           <IoIosLogIn className="text-2xl" />
-          <span className="hidden lg:inline">Login</span>
+          <span className="">Login</span>
         </Link>
       )}
     </div>

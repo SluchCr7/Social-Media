@@ -20,7 +20,7 @@ const ChatHeader = () => {
           className='rounded-full w-10 h-10 object-cover'
         />
         <div className='flex flex-col'>
-          <span className='font-medium text-sm'>
+          <span className='font-medium text-sm text-gray-600'>
             {selectedUser?.username}
           </span>
           <span className={`text-xs ${onlineUsers?.includes(selectedUser?._id) ? 'text-green-400' : 'text-gray-500'}`}>
