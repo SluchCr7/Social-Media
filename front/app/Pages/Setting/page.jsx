@@ -89,8 +89,6 @@ const SettingsPage = () => {
           </button>
         </div>
       </section>
-
-
       
       {/* Security */}
       <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
