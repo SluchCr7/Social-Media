@@ -98,73 +98,40 @@ const ProfilePage = () => {
   return (
     <>
       <div className="w-full min-h-screen bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text flex flex-col items-center">
-        {/* Cover */}
+        {/* Avatar */}
         <div className="w-full relative">
-          {/* <div className="h-48 w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
-            {(cover || userData?.coverPhoto?.url) && (
-              <div className="absolute inset-0">
-                <Image
-                  src={cover ? URL.createObjectURL(cover) : userData?.coverPhoto?.url}
-                  alt="Cover"
-                  fill
-                  className="object-cover opacity-90"
-                  priority
-                />
-              </div>
-            )}
-
-            <div className="absolute top-4 right-4 z-20">
-              <label
-                htmlFor="coverInput"
-                className="bg-black/60 text-white px-3 py-1 rounded-md text-sm cursor-pointer hover:opacity-90 transition"
+          <div className="w-full flex justify-center mt-4">
+            <div className="relative w-36 h-36 rounded-full border-4 border-white dark:border-gray-900 overflow-hidden shadow-xl">
+              <Image
+                src={
+                  image
+                    ? URL.createObjectURL(image)
+                    : userData?.profilePhoto?.url || '/default-profile.png'
+                }
+                alt="Profile photo"
+                fill
+                className="object-cover"
+                onClick={() => document.getElementById('fileInput')?.click()}
+              />
+              <button
+                onClick={() => document.getElementById('fileInput')?.click()}
+                className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full opacity-0 hover:opacity-100 transition"
               >
-                Edit cover
-              </label>
+                Change
+              </button>
               <input
-                id="coverInput"
+                id="fileInput"
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={handleCoverChange}
+                onChange={handleImageChange}
               />
-            </div>
-          </div> */}
-
-          {/* Avatar */}
-          <div className="w-full max-w-2xl mx-auto relative">
-            <div className="w-full flex justify-center mt-12">
-              <div className="relative w-36 h-36 rounded-full border-4 border-white dark:border-gray-900 overflow-hidden shadow-xl">
-                <Image
-                  src={
-                    image
-                      ? URL.createObjectURL(image)
-                      : userData?.profilePhoto?.url || '/default-profile.png'
-                  }
-                  alt="Profile photo"
-                  fill
-                  className="object-cover"
-                  onClick={() => document.getElementById('fileInput')?.click()}
-                />
-                <button
-                  onClick={() => document.getElementById('fileInput')?.click()}
-                  className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full opacity-0 hover:opacity-100 transition"
-                >
-                  Change
-                </button>
-                <input
-                  id="fileInput"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
-              </div>
             </div>
           </div>
         </div>
 
         {/* Main */}
-        <div className="w-full max-w-2xl px-4 mt-20">
+        <div className="w-full px-4 mt-50">
           {/* Header */}
           <div className="flex flex-col items-center text-center">
             <div className="flex items-center gap-2">
