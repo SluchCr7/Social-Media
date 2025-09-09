@@ -28,34 +28,38 @@ export const CommentContextProvider = ({ children }) => {
   };
 
 
-  const AddComment = async (text, postId, receiverId, parent = null) => {
-    try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/${postId}`,
-        { text, parent },
-        {
-          headers: { Authorization: `Bearer ${user.token}` },
-        }
-      );
-
-      showAlert('Comment added successfully.');
-
-      if (user._id !== receiverId) {
-        await addNotify({
-          content: `${user.username} commented on your post`,
-          type: 'comment',
-          receiverId,
-          actionRef: res.data.comment?._id,
-          actionModel: 'Comment',
-        });
+const AddComment = async (text, postId, receiverId, parent = null) => {
+  try {
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/${postId}`,
+      { text, parent },
+      {
+        headers: { Authorization: `Bearer ${user.token}` },
       }
+    );
 
-      return res.data;
-    } catch (err) {
-      showAlert(err?.response?.data?.message || 'Failed to upload comment.');
-      throw err;
+    const newComment = res.data.comment; // الكومنت بعد الـ populate
+    setcomments((prev) => [newComment, ...prev]); // تحديث الـ state
+
+    showAlert('Comment added successfully.');
+
+    if (user._id !== receiverId) {
+      await addNotify({
+        content: `${user.username} commented on your post`,
+        type: 'comment',
+        receiverId,
+        actionRef: newComment._id,
+        actionModel: 'Comment',
+      });
     }
-  };
+
+    return res.data;
+  } catch (err) {
+    showAlert(err?.response?.data?.message || 'Failed to upload comment.');
+    throw err;
+  }
+};
+
 
   const deleteComment = async (id) => {
     try {
@@ -93,6 +97,13 @@ export const CommentContextProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${user.token}` },
         }
       );
+
+      const updatedComment = res.data.comment;
+
+      setcomments((prev) =>
+        prev.map((c) => (c._id === updatedComment._id ? updatedComment : c))
+      );
+
       showAlert(res.data.message);
     } catch (err) {
       console.error(err);

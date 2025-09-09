@@ -100,7 +100,7 @@ const ProfilePage = () => {
       <div className="w-full min-h-screen bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text flex flex-col items-center">
         {/* Cover */}
         <div className="w-full relative">
-          <div className="h-48 w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
+          {/* <div className="h-48 w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
             {(cover || userData?.coverPhoto?.url) && (
               <div className="absolute inset-0">
                 <Image
@@ -113,7 +113,6 @@ const ProfilePage = () => {
               </div>
             )}
 
-            {/* Edit cover */}
             <div className="absolute top-4 right-4 z-20">
               <label
                 htmlFor="coverInput"
@@ -129,7 +128,7 @@ const ProfilePage = () => {
                 onChange={handleCoverChange}
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Avatar */}
           <div className="w-full max-w-2xl mx-auto relative">
@@ -246,26 +245,26 @@ const ProfilePage = () => {
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {userData?.location && (
-                <InfoRow icon={<FiMapPin />} label="Location" value={userData.location} />
+              {userData?.country && (
+                <InfoRow icon={<FiMapPin />} label="country" value={userData.country} />
               )}
               {userData?.phone && (
                 <InfoRow icon={<FiPhone />} label="Phone" value={userData.phone} />
               )}
-              {userData?.website && (
-                <InfoLink icon={<FiGlobe />} label="Website" href={userData.website} />
+              {userData?.city && (
+                <InfoLink icon={<FiCity />} label="city" href={userData.city} />
               )}
-              {userData?.github && (
+              {userData?.socialLinks.github && (
                 <InfoLink icon={<FiGithub />} label="GitHub" href={userData.github} />
               )}
-              {userData?.linkedin && (
+              {userData?.socialLinks.linkedin && (
                 <InfoLink icon={<FiLinkedin />} label="LinkedIn" href={userData.linkedin} />
               )}
-              {userData?.joinedAt && (
+              {userData?.createdAt && (
                 <InfoRow
                   icon={<FiCalendar />}
                   label="Joined"
-                  value={new Date(userData.joinedAt).toLocaleDateString()}
+                  value={new Date(userData.createdAt).toLocaleDateString()}
                 />
               )}
             </div>

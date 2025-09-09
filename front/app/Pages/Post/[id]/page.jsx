@@ -45,7 +45,7 @@ const Page = ({ params }) => {
 
   return loading ? (
     <motion.div
-      className="w-full max-w-2xl mx-auto px-4 py-6 flex flex-col gap-6"
+      className="w-full max-w-3xl mx-auto px-4 py-6 flex flex-col gap-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
@@ -174,18 +174,18 @@ const Page = ({ params }) => {
         ) : isLoading ? (
           Array.from({ length: 3 }).map((_, i) => <CommentSkeleton key={i} />)
         ) : comments.length > 0 ? (
-          comments.slice(0, 3).map((comment) => (
+          comments.map((comment) => (
             <Comment key={comment._id} comment={comment} />
           ))
         ) : (
           <p className="text-gray-500 text-sm text-center py-4">no comments</p>
         )}
 
-        {comments.length > 3 && (
-          <button className="text-blue-500 text-sm self-center hover:underline">
+        {/* {comments.length > 3 && (
+          <button onClick={() => setShowAllComments(true)} className="text-blue-500 text-sm self-center hover:underline">
             show All Comments
           </button>
-        )}
+        )} */}
       </div>
     </motion.div>
   ) : (
