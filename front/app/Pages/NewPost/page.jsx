@@ -47,6 +47,9 @@ const NewPost = () => {
 
   const handlePost = () => {
     const hashtags = extractHashtags(postText);
+
+    console.log("Images to upload:", images); // ✅ اتأكد إن دي فيها File objects
+
     AddPost(
       postText.replace(/#[\w\u0600-\u06FF]+/g, '').trim(),
       images,
@@ -54,6 +57,7 @@ const NewPost = () => {
       selectedCommunity
     );
   };
+
 
   const handleEmojiClick = (emojiData) => {
     const cursorPos = textareaRef.current.selectionStart;
