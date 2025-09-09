@@ -425,6 +425,7 @@ const AddPost = async (content, images, Hashtags, communityId) => {
         formData.append('Hashtags', JSON.stringify(Hashtags));
       }
       formData.append('existingPhotos', JSON.stringify(existingPhotos));
+
       if (newPhotos && newPhotos.length > 0) {
         newPhotos.forEach(photo => {
           formData.append('newPhotos', photo);
@@ -442,12 +443,14 @@ const AddPost = async (content, images, Hashtags, communityId) => {
         }
       );
 
+      const updatedPost = res.data; // 👈 backend بيرجع post كامل فقط
+
       showAlert("Post edited successfully.");
 
-      // تحديث فوري في state
+      // ✅ تحديث فوري للـ state
       setPosts(prev =>
         prev.map(p =>
-          p._id === id ? res.data : p
+          p._id === id ? updatedPost : p
         )
       );
 
@@ -456,6 +459,7 @@ const AddPost = async (content, images, Hashtags, communityId) => {
       showAlert("Failed to edit the post.");
     }
   };
+
 
   // ✅ إظهار/إخفاء التعليقات
   const displayOrHideComments = async (postId) => {
@@ -477,7 +481,7 @@ const AddPost = async (content, images, Hashtags, communityId) => {
       // تحديث حالة التعليقات في state
       setPosts(prev =>
         prev.map(p =>
-          p._id === postId ? { ...p, commentsOff: !p.commentsOff } : p
+          p._id === postId ? { ...p, isCommentOff: !p.isCommentOff } : p
         )
       );
 

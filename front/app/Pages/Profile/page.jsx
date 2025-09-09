@@ -132,7 +132,7 @@ const ProfilePage = () => {
 
           {/* Avatar */}
           <div className="w-full max-w-2xl mx-auto relative">
-            <div className="absolute -top-16 left-1/2 -translate-x-1/2">
+            <div className="w-full flex justify-center mt-12">
               <div className="relative w-36 h-36 rounded-full border-4 border-white dark:border-gray-900 overflow-hidden shadow-xl">
                 <Image
                   src={

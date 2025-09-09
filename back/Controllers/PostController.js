@@ -573,8 +573,7 @@ const sharePost = asyncHandler(async (req, res) => {
   );
 
   if (!originalPost) {
-    res.status(404);
-    throw new Error("Post not found");
+    return res.status(404).json({ message: "Post not found" });
   }
 
   const { customText } = req.body;
@@ -593,21 +592,10 @@ const sharePost = asyncHandler(async (req, res) => {
     { path: "originalPost", populate: { path: "owner", select: "username profileName profilePhoto" } }
   ]);
 
-res.status(201).json(sharedPost);
-
-  res.status(201).json({
-    _id: sharedPost._id,
-    text: sharedPost.text,
-    owner: sharedPost.owner,
-    Photos: sharedPost.Photos,
-    originalPost: {
-      _id: originalPost._id,
-      text: originalPost.text,
-      Photos: originalPost.Photos,
-      owner: originalPost.owner,
-    },
-  });
+  // ✅ رجع بوست كامل فقط
+  res.status(201).json(sharedPost);
 });
+
 
 // ================== Edit Post ==================
 const editPost = asyncHandler(async (req, res) => {
@@ -625,7 +613,10 @@ const editPost = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Post not found" });
   }
 
-  const newFiles = req.files || [];
+  const newFiles = req.files?.newPhotos
+    ? Array.isArray(req.files.newPhotos) ? req.files.newPhotos : [req.files.newPhotos]
+    : [];
+
   if (!text && existingPhotos.length === 0 && newFiles.length === 0) {
     return res.status(400).json({ message: "Post cannot be empty" });
   }
@@ -635,9 +626,7 @@ const editPost = asyncHandler(async (req, res) => {
     (img) => !existingPhotos.some((existing) => existing.publicId === img.publicId)
   );
   for (const photo of removedPhotos) {
-    if (photo.publicId) {
-      await cloudinary.uploader.destroy(photo.publicId);
-    }
+    if (photo.publicId) await cloudinary.uploader.destroy(photo.publicId);
   }
 
   // ✅ ارفع الصور الجديدة
@@ -648,19 +637,24 @@ const editPost = asyncHandler(async (req, res) => {
   }
 
   // ✅ حدّث الداتا
-  post.text = text ?? post.text; // ← مايحطش undefined
+  post.text = text ?? post.text;
   post.community = community || post.community;
   post.Hashtags = Hashtags;
   post.Photos = [...existingPhotos, ...newUploadedPhotos];
 
   await post.save();
+
+  // ✅ populate كامل زي getAllPosts
   await post.populate([
     { path: "owner", select: "username profileName profilePhoto" },
     { path: "community", select: "Name Picture members" },
+    { path: "originalPost", populate: { path: "owner", select: "username profileName profilePhoto" }},
+    { path: "comments", populate: { path: "owner", select: "username profileName profilePhoto" }},
   ]);
 
-  res.status(200).json({ message: "Post updated successfully", post });
+  res.status(200).json(post);
 });
+
 
 
 // ================== Toggle Comments ==================
