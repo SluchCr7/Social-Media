@@ -611,12 +611,7 @@ res.status(201).json(sharedPost);
 
 // ================== Edit Post ==================
 const editPost = asyncHandler(async (req, res) => {
-  let text = req.body.text;
-  let community = req.body.community;
-  let Hashtags = req.body.Hashtags;
-  let existingPhotos = req.body.existingPhotos;
-
-  // if (!text) return res.status(400).json({ message: "Text is required" });
+  let { text, community, Hashtags, existingPhotos } = req.body;
 
   try {
     existingPhotos = existingPhotos ? JSON.parse(existingPhotos) : [];
@@ -625,14 +620,14 @@ const editPost = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Invalid JSON in existingPhotos or Hashtags" });
   }
 
-  const { error } = ValidatePost({ text, community, Hashtags });
-  if (error) {
-    return res.status(400).json({ message: error.details[0].message });
-  }
-
   const post = await Post.findById(req.params.id);
   if (!post) {
     return res.status(404).json({ message: "Post not found" });
+  }
+
+  const newFiles = req.files || [];
+  if (!text && existingPhotos.length === 0 && newFiles.length === 0) {
+    return res.status(400).json({ message: "Post cannot be empty" });
   }
 
   // ✅ احذف الصور اللي اتشالت
@@ -645,17 +640,16 @@ const editPost = asyncHandler(async (req, res) => {
     }
   }
 
-  // ✅ ارفع الصور الجديدة من buffer
+  // ✅ ارفع الصور الجديدة
   const newUploadedPhotos = [];
-  const newFiles = req.files || [];
   for (const file of newFiles) {
-    const result = await uploadToCloudinary(file.buffer); // ← دي نفس دالة addPost
+    const result = await uploadToCloudinary(file.buffer);
     newUploadedPhotos.push({ url: result.secure_url, publicId: result.public_id });
   }
 
   // ✅ حدّث الداتا
-  post.text = text;
-  post.community = community || null;
+  post.text = text ?? post.text; // ← مايحطش undefined
+  post.community = community || post.community;
   post.Hashtags = Hashtags;
   post.Photos = [...existingPhotos, ...newUploadedPhotos];
 
@@ -667,6 +661,7 @@ const editPost = asyncHandler(async (req, res) => {
 
   res.status(200).json({ message: "Post updated successfully", post });
 });
+
 
 // ================== Toggle Comments ==================
 const makeCommentsOff = asyncHandler(async (req, res) => {
