@@ -252,7 +252,7 @@ const ProfilePage = () => {
                 <InfoRow icon={<FiPhone />} label="Phone" value={userData.phone} />
               )}
               {userData?.city && (
-                <InfoLink icon={<FiCity />} label="city" href={userData.city} />
+                <InfoLink icon={<FiMapPin />} label="city" href={userData.city} />
               )}
               {userData?.socialLinks.github && (
                 <InfoLink icon={<FiGithub />} label="GitHub" href={userData.github} />
