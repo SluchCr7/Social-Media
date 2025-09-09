@@ -100,7 +100,7 @@ const ProfilePage = () => {
       <div className="w-full min-h-screen bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text flex flex-col items-center">
         {/* Avatar */}
         <div className="w-full relative">
-          <div className="w-full flex justify-center mt-4">
+          <div className="w-full flex justify-center mt-10">
             <div className="relative w-36 h-36 rounded-full border-4 border-white dark:border-gray-900 overflow-hidden shadow-xl">
               <Image
                 src={
