@@ -304,7 +304,7 @@ export const MessageContextProvider = ({ children }) => {
         { headers: { authorization: `Bearer ${user.token}` } }
       );
 
-      const newMessage = res.data.message || res.data;
+      const newMessage = res.data; // لأنه السيرفر بيرجع الرسالة نفسها
 
       // 🟢 عدّل الرسالة المؤقتة بالرسالة الحقيقية من السيرفر
       setMessages(prev =>

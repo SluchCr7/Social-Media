@@ -1,34 +1,41 @@
-
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import { CiEdit, CiMapPin } from 'react-icons/ci';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { MdOutlineReport } from 'react-icons/md';
+import { FaRegCommentDots } from 'react-icons/fa';
+import { MdContentCopy } from "react-icons/md";
 import { useAuth } from '../Context/AuthContext';
 import { usePost } from '../Context/PostContext';
 import { useReport } from '../Context/ReportContext';
-import { FaRegCommentDots } from 'react-icons/fa';
-import { MdContentCopy } from "react-icons/md";
+import { motion, AnimatePresence } from 'framer-motion';
 
-const PostMenu = ({ showMenu, setShowMenu, post }) => {
-  const { user, pinPost, users , blockOrUnblockUser} = useAuth();
-  const { deletePost, setPostIsEdit, setShowPostModelEdit, displayOrHideComments  , copyPostLink} = usePost();
-  const { setIsPostId , showMenuReport, setShowMenuReport } = useReport();
+const PostMenu = ({ showMenu, setShowMenu, post, anchorRef }) => {
+  const { user, pinPost, users, blockOrUnblockUser } = useAuth();
+  const { deletePost, setPostIsEdit, setShowPostModelEdit, displayOrHideComments, copyPostLink } = usePost();
+  const { setIsPostId, setShowMenuReport } = useReport();
 
   const menuRef = useRef();
   const isOwner = post?.owner?._id === user?._id;
   const [myUser, setMyUser] = useState(null);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
 
-  
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
+      if (menuRef.current && !menuRef.current.contains(e.target) && !anchorRef?.current?.contains(e.target)) {
         setShowMenu(false);
       }
     };
 
     if (showMenu) {
       document.addEventListener('mousedown', handleClickOutside);
+      if (anchorRef?.current) {
+        const rect = anchorRef.current.getBoundingClientRect();
+        setCoords({
+          top: rect.bottom + 8,
+          left: rect.right - 240, // يفتح القائمة بمحاذاة الزر
+        });
+      }
     }
 
     return () => {
@@ -81,7 +88,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
       className: 'text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30',
     },
     {
-      icon: <MdContentCopy size={20} />, 
+      icon: <MdContentCopy size={20} />,
       text: 'Copy Link',
       action: () => copyPostLink(post?._id),
       className: 'text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30',
@@ -99,30 +106,42 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
   const optionsToShow = isOwner ? ownerOptions : visitorOptions;
 
   return (
-    <div
-      ref={menuRef}
-      className={`${
-        showMenu ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
-      } absolute top-12 right-2 z-[2000] transition-all duration-200 origin-top-right w-60 rounded-xl bg-white dark:bg-[#1f1f1f] shadow-xl border border-gray-200 dark:border-gray-700`}
-    >
-      {optionsToShow.map((option, index) => (
-        <div
-          key={index}
-          onClick={() => {
-            option.action();
-            setShowMenu(false);
+    <AnimatePresence>
+      {showMenu && (
+        <motion.div
+          ref={menuRef}
+          initial={{ opacity: 0, scale: 0.9, y: -10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: -10 }}
+          transition={{ duration: 0.2 }}
+          style={{
+            position: 'fixed',
+            top: coords.top,
+            left: coords.left,
+            zIndex: 2000,
           }}
-          className={`flex items-center gap-3 px-4 py-3 cursor-pointer group rounded-xl transition duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 ${
-            option.className || 'text-gray-800 dark:text-gray-100'
-          }`}
+          className="w-60 rounded-xl bg-white dark:bg-[#1f1f1f] shadow-2xl border border-gray-200 dark:border-gray-700 backdrop-blur-md"
         >
-          <div className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 group-hover:scale-110 transition">
-            {option.icon}
-          </div>
-          <span className="text-sm font-medium">{option.text}</span>
-        </div>
-      ))}
-    </div>
+          {optionsToShow.map((option, index) => (
+            <div
+              key={index}
+              onClick={() => {
+                option.action();
+                setShowMenu(false);
+              }}
+              className={`flex items-center gap-3 px-4 py-3 cursor-pointer group rounded-xl transition duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                option.className || 'text-gray-800 dark:text-gray-100'
+              }`}
+            >
+              <div className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 group-hover:scale-110 transition">
+                {option.icon}
+              </div>
+              <span className="text-sm font-medium">{option.text}</span>
+            </div>
+          ))}
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
