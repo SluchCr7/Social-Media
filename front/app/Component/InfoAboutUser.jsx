@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 import { FaPhone, FaGlobe, FaLinkedin, FaGithub, FaMapMarkerAlt, FaTwitter, FaFacebook } from 'react-icons/fa'
+import { BsCalendar2Date } from "react-icons/bs";
 
 const InfoAboutUser = ({ user }) => {
   return (
@@ -65,6 +66,21 @@ const InfoAboutUser = ({ user }) => {
                 <span>
                   <span className="font-semibold">Date of Birth:</span>{" "}
                   {new Date(user.dateOfBirth).toLocaleDateString("en-US", {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </span>
+              </div>
+            )}
+            {user?.createdAt && (
+              <div className="flex items-center space-x-3 p-3 rounded-lg bg-lightMode-bg dark:bg-darkMode-bg shadow-sm hover:shadow-md transition">
+                <div className="w-8 h-8 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-500 font-bold">
+                  <BsCalendar2Date/>
+                </div>
+                <span>
+                  <span className="font-semibold">Date of Join:</span>{" "}
+                  {new Date(user.createdAt).toLocaleDateString("en-US", {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric'

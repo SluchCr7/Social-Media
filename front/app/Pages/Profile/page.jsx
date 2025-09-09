@@ -13,6 +13,7 @@ import { IoAdd } from 'react-icons/io5'
 import { BsPatchCheckFill } from 'react-icons/bs'
 import { FiGlobe, FiMapPin, FiPhone, FiGithub, FiLinkedin, FiCalendar } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
+import InfoAboutUser from '@/app/Component/InfoAboutUser'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -194,7 +195,7 @@ const ProfilePage = () => {
           </div>
 
           {/* Info About Me (2-column card) */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
@@ -202,7 +203,6 @@ const ProfilePage = () => {
           >
             <h3 className="font-semibold text-base mb-3">About me</h3>
 
-            {/* Bio */}
             {userData?.longBio && (
               <div className="mb-4">
                 <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
@@ -235,8 +235,8 @@ const ProfilePage = () => {
                 />
               )}
             </div>
-          </motion.div>
-
+          </motion.div> */}
+          <InfoAboutUser user={userData} />
           {/* Tabs */}
           <div className="mt-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex gap-6 justify-center">

@@ -97,29 +97,47 @@ const SettingsPage = () => {
           <h2 className="text-lg font-semibold">Security</h2>
         </div>
         <form onSubmit={handleChangePassword} className="grid gap-4">
-          <input
-            type="password"
-            placeholder="Current Password"
-            className="w-full p-2 rounded border dark:border-gray-700 dark:bg-transparent"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="New Password"
-            className="w-full p-2 rounded border dark:border-gray-700 dark:bg-transparent"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Confirm New Password"
-            className="w-full p-2 rounded border dark:border-gray-700 dark:bg-transparent"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-          <button onClick={handleChangePassword} className="self-start bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-            Change Password
+          <div className="relative">
+            <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="password"
+              placeholder="Current Password"
+              className="w-full pl-10 p-2 rounded border dark:border-gray-700 dark:bg-transparent"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="relative">
+            <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="password"
+              placeholder="New Password"
+              className="w-full p-2 rounded border dark:border-gray-700 dark:bg-transparent"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
+              
+          </div>
+          <div className="relative">
+            <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="password"
+              placeholder="Confirm New Password"
+              className="w-full p-2 rounded border dark:border-gray-700 dark:bg-transparent"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          
+          <button 
+            type="submit"
+            className="self-start bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition flex items-center gap-2"
+          >
+            <span>Change Password</span>
           </button>
           {passwordMessage && (
             <p className="text-sm mt-1 text-red-500 dark:text-red-400">{passwordMessage}</p>
