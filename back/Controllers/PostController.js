@@ -635,23 +635,25 @@ const editPost = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Post not found" });
   }
 
+  // ✅ احذف الصور اللي اتشالت
   const removedPhotos = post.Photos.filter(
-    (img) => !existingPhotos.some((existing) => existing.public_id === img.public_id)
+    (img) => !existingPhotos.some((existing) => existing.publicId === img.publicId)
   );
   for (const photo of removedPhotos) {
-    if (photo.public_id) {
-      await cloudinary.uploader.destroy(photo.public_id);
+    if (photo.publicId) {
+      await cloudinary.uploader.destroy(photo.publicId);
     }
   }
 
+  // ✅ ارفع الصور الجديدة من buffer
   const newUploadedPhotos = [];
   const newFiles = req.files || [];
   for (const file of newFiles) {
-    const result = await cloudinary.uploader.upload(file.path, { folder: "posts" });
-    newUploadedPhotos.push({ url: result.secure_url, public_id: result.public_id });
-    fs.unlinkSync(file.path);
+    const result = await uploadToCloudinary(file.buffer); // ← دي نفس دالة addPost
+    newUploadedPhotos.push({ url: result.secure_url, publicId: result.public_id });
   }
 
+  // ✅ حدّث الداتا
   post.text = text;
   post.community = community || null;
   post.Hashtags = Hashtags;
