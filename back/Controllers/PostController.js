@@ -589,7 +589,10 @@ const sharePost = asyncHandler(async (req, res) => {
   await sharedPost.save();
   await sharedPost.populate([
     { path: "owner", select: "username profileName profilePhoto" },
-    { path: "originalPost", populate: { path: "owner", select: "username profileName profilePhoto" } }
+    {
+      path: "originalPost",
+      populate: { path: "owner", select: "username profileName profilePhoto" },
+    },
   ]);
 
   // ✅ رجع بوست كامل فقط

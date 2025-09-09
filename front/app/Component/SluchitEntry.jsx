@@ -13,13 +13,14 @@ import EditPostModal from './EditPostModel'
 import { useReport } from '../Context/ReportContext'
 
 const SluchitEntry = ({ post }) => {
-  const { likePost, savePost, sharePost , setPostIsEdit , imageView , setImageView} = usePost()
+  const { likePost, savePost, sharePost, setPostIsEdit, imageView, setImageView } = usePost()
   const [showMenu, setShowMenu] = useState(false)
   const { user, isLogin } = useAuth()
   const isShared = post?.isShared && post?.originalPost
   const original = post?.originalPost
   const isCommunityPost = post?.community !== null
   const isInCommunityPage = typeof window !== 'undefined' && window.location.href.includes('/Pages/Community/')
+
   return (
     <div className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-gray-200 dark:border-gray-700 w-full p-6 rounded-2xl flex flex-col gap-5 shadow-2xl transition-all duration-300 hover:scale-[1.01]">
 
@@ -79,63 +80,60 @@ const SluchitEntry = ({ post }) => {
         </div>
 
         <div className='flex flex-col w-full gap-3'>
-        {/* Header Info */}
+          {/* Header Info */}
           <div className="flex justify-between items-center w-full">
-          {/* Left Side */}
-          <div className="flex items-center gap-3">
-            {/* Owner Info */}
-            {isCommunityPost && !isInCommunityPage ? (
-              <div className="flex flex-col leading-tight">
-                <Link
-                  href={`/Pages/Community/${post?.community?._id}`}
-                  className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline"
-                >
-                  {post?.community?.Name}
-                </Link>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <span>@{post?.owner?.username}</span>
-                  <span className="w-1 h-1 bg-gray-400 rounded-full" />
-                  <span>{new Date(post?.createdAt).toLocaleDateString()}</span>
+            {/* Left Side */}
+            <div className="flex items-center gap-3">
+              {/* Owner Info */}
+              {isCommunityPost && !isInCommunityPage ? (
+                <div className="flex flex-col leading-tight">
+                  <Link
+                    href={`/Pages/Community/${post?.community?._id}`}
+                    className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline"
+                  >
+                    {post?.community?.Name}
+                  </Link>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span>@{post?.owner?.username}</span>
+                    <span className="w-1 h-1 bg-gray-400 rounded-full" />
+                    <span>{new Date(post?.createdAt).toLocaleDateString()}</span>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="flex flex-col leading-tight">
-                <Link
-                  href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${post?.owner?._id}`}
-                  className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline"
-                >
-                  {post?.owner?.username}
-                </Link>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <span>{post?.owner?.profileName}</span>
-                  <span className="w-1 h-1 bg-gray-400 rounded-full" />
-                  <span>{new Date(post?.createdAt).toLocaleDateString()}</span>
+              ) : (
+                <div className="flex flex-col leading-tight">
+                  <Link
+                    href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${post?.owner?._id}`}
+                    className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline"
+                  >
+                    {post?.owner?.username}
+                  </Link>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span>{post?.owner?.profileName}</span>
+                    <span className="w-1 h-1 bg-gray-400 rounded-full" />
+                    <span>{new Date(post?.createdAt).toLocaleDateString()}</span>
+                  </div>
                 </div>
+              )}
+            </div>
+
+            {/* Right Side - Menu */}
+            {isLogin && (
+              <div className="relative">
+                <span
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="cursor-pointer text-xl text-gray-500 hover:text-gray-700 transition"
+                >
+                  <BsThreeDots />
+                </span>
+
+                <PostMenu
+                  post={post}
+                  showMenu={showMenu}
+                  setShowMenu={setShowMenu}
+                />
               </div>
             )}
           </div>
-
-          {/* Right Side - Menu */}
-          { 
-            isLogin && (
-            <div className="relative">
-              <span
-                onClick={() => setShowMenu(!showMenu)}
-                className="cursor-pointer text-xl text-gray-500 hover:text-gray-700 transition"
-              >
-                <BsThreeDots />
-              </span>
-
-              <PostMenu
-                post={post}
-                showMenu={showMenu}
-                setShowMenu={setShowMenu}
-              />
-            </div>
-            )
-          }
-        </div>
-
 
           {/* Shared Post Text */}
           {isShared && post?.text && (
@@ -166,7 +164,7 @@ const SluchitEntry = ({ post }) => {
                     >
                       <Image
                         src={photo?.url}
-                        alt={`photo-${i}`}
+                        alt={`photo-${index}`}
                         width={500}
                         height={500}
                         className="w-full max-h-[500px] object-cover rounded-lg"
@@ -214,38 +212,35 @@ const SluchitEntry = ({ post }) => {
               ))}
             </div>
           )}
-          {
-            isLogin && (
-              <div className='flex items-center gap-6 pt-4'>
-                <div onClick={() => likePost(post?._id , post?.owner._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
-                  {post?.likes?.includes(user?._id) ? (
-                    <IoIosHeart className='text-red-500 text-2xl' />
-                  ) : (
-                    <CiHeart className='text-gray-500 text-2xl' />
-                  )}
-                  <span className='text-gray-400 text-sm font-medium'>{post?.likes?.length}</span>
-                </div>
-                {
-                  !post?.isCommentOff &&
-                  (
-                    <Link href={`/Pages/Post/${post?._id}`} className='flex items-center gap-2 transition-all hover:scale-110'>
-                      <FaRegCommentDots className='text-gray-500 text-xl' />
-                      <span className='text-gray-400 text-sm font-medium'>{post?.comments?.length}</span>
-                    </Link>
-                  )
-                }
-                <div onClick={() => sharePost(post?.originalPost ? post?.originalPost?._id : post?._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
-                  <IoIosShareAlt className='text-gray-500 text-2xl' />
-                  <span className='text-gray-400 text-sm font-medium'>{post?.shares?.length}</span>
-                </div>
 
-                <div onClick={() => savePost(post?._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
-                  <CiBookmark className={`${post?.saved?.includes(user?._id) ? 'text-yellow-400' : 'text-gray-500'} text-2xl`} />
-                  <span className='text-gray-400 text-sm font-medium'>{post?.saved?.length}</span>
-                </div>
+          {/* Actions */}
+          {isLogin && (
+            <div className='flex items-center gap-6 pt-4'>
+              <div onClick={() => likePost(post?._id, post?.owner._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
+                {post?.likes?.includes(user?._id) ? (
+                  <IoIosHeart className='text-red-500 text-2xl' />
+                ) : (
+                  <CiHeart className='text-gray-500 text-2xl' />
+                )}
+                <span className='text-gray-400 text-sm font-medium'>{post?.likes?.length}</span>
               </div>
-            )
-          }
+              {!post?.isCommentOff && (
+                <Link href={`/Pages/Post/${post?._id}`} className='flex items-center gap-2 transition-all hover:scale-110'>
+                  <FaRegCommentDots className='text-gray-500 text-xl' />
+                  <span className='text-gray-400 text-sm font-medium'>{post?.comments?.length}</span>
+                </Link>
+              )}
+              <div onClick={() => sharePost(post?.originalPost ? post?.originalPost?._id : post?._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
+                <IoIosShareAlt className='text-gray-500 text-2xl' />
+                <span className='text-gray-400 text-sm font-medium'>{post?.shares?.length}</span>
+              </div>
+
+              <div onClick={() => savePost(post?._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
+                <CiBookmark className={`${post?.saved?.includes(user?._id) ? 'text-yellow-400' : 'text-gray-500'} text-2xl`} />
+                <span className='text-gray-400 text-sm font-medium'>{post?.saved?.length}</span>
+              </div>
+            </div>
+          )}
 
           {/* Comment Avatars */}
           {post?.comments?.length > 0 && (
