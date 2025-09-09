@@ -69,7 +69,7 @@ const Page = ({ params }) => {
         <div className="flex items-center gap-3">
           {isLogin && user?._id !== post?.owner?._id && (
             <button className="px-3 py-1 text-sm rounded-full bg-blue-600 text-white hover:bg-blue-500 transition">
-              متابعة
+              Follow
             </button>
           )}
           <div className="relative">
@@ -157,7 +157,7 @@ const Page = ({ params }) => {
             type="text"
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            placeholder="أضف تعليق..."
+            placeholder="Add a comment..."
             className="flex-1 bg-lightMode-bg border border-gray-700 dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text px-4 py-2 rounded-full outline-none focus:ring-2 focus:ring-blue-600"
           />
           <IoIosSend
@@ -170,7 +170,7 @@ const Page = ({ params }) => {
       {/* Comments */}
       <div className="flex flex-col gap-4 border-t border-gray-800 pt-4">
         {post?.isCommentOff ? (
-          <div className="text-sm text-gray-500 text-center">التعليقات مغلقة</div>
+          <div className="text-sm text-gray-500 text-center">comments are off</div>
         ) : isLoading ? (
           Array.from({ length: 3 }).map((_, i) => <CommentSkeleton key={i} />)
         ) : comments.length > 0 ? (
@@ -178,12 +178,12 @@ const Page = ({ params }) => {
             <Comment key={comment._id} comment={comment} />
           ))
         ) : (
-          <p className="text-gray-500 text-sm text-center py-4">لا يوجد تعليقات</p>
+          <p className="text-gray-500 text-sm text-center py-4">no comments</p>
         )}
 
         {comments.length > 3 && (
           <button className="text-blue-500 text-sm self-center hover:underline">
-            عرض كل التعليقات
+            show All Comments
           </button>
         )}
       </div>
