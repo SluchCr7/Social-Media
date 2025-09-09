@@ -616,7 +616,7 @@ const editPost = asyncHandler(async (req, res) => {
   let Hashtags = req.body.Hashtags;
   let existingPhotos = req.body.existingPhotos;
 
-  if (!text) return res.status(400).json({ message: "Text is required" });
+  // if (!text) return res.status(400).json({ message: "Text is required" });
 
   try {
     existingPhotos = existingPhotos ? JSON.parse(existingPhotos) : [];
@@ -660,6 +660,10 @@ const editPost = asyncHandler(async (req, res) => {
   post.Photos = [...existingPhotos, ...newUploadedPhotos];
 
   await post.save();
+  await post.populate([
+    { path: "owner", select: "username profileName profilePhoto" },
+    { path: "community", select: "Name Picture members" },
+  ]);
 
   res.status(200).json({ message: "Post updated successfully", post });
 });
