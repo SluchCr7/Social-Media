@@ -379,6 +379,21 @@ const getAllPosts = asyncHandler(async (req, res) => {
 });
 
 // ================== Add Post ==================
+const streamifier = require("streamifier");
+
+const uploadToCloudinary = (buffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "posts" },
+      (error, result) => {
+        if (result) resolve(result);
+        else reject(error);
+      }
+    );
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
+};
+
 const addPost = async (req, res) => {
   try {
     let { text, Hashtags, community } = req.body;
@@ -407,8 +422,7 @@ const addPost = async (req, res) => {
     if (imagesArr.length > 0) {
       uploadedImages = await Promise.all(
         imagesArr.map(async (img) => {
-          const result = await cloudinary.uploader.upload(img.path, { folder: "posts" });
-          fs.unlinkSync(img.path);
+          const result = await uploadToCloudinary(img.buffer); // ✅ استخدم buffer
           return { url: result.secure_url, publicId: result.public_id };
         })
       );
@@ -437,6 +451,7 @@ const addPost = async (req, res) => {
     return res.status(500).json({ message: err.message || "Internal Server Error" });
   }
 };
+
 
 // ================== Delete Post ==================
 const deletePost = asyncHandler(async (req, res) => {
