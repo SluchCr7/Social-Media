@@ -10,7 +10,7 @@ import { usePost } from '../Context/PostContext';
 import { useReport } from '../Context/ReportContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const PostMenu = ({ showMenu, setShowMenu, post, anchorRef }) => {
+const PostMenu = ({ showMenu, setShowMenu, post }) => {
   const { user, pinPost, users, blockOrUnblockUser } = useAuth();
   const { deletePost, setPostIsEdit, setShowPostModelEdit, displayOrHideComments, copyPostLink } = usePost();
   const { setIsPostId, setShowMenuReport } = useReport();
@@ -18,27 +18,17 @@ const PostMenu = ({ showMenu, setShowMenu, post, anchorRef }) => {
   const menuRef = useRef();
   const isOwner = post?.owner?._id === user?._id;
   const [myUser, setMyUser] = useState(null);
-  const [coords, setCoords] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target) && !anchorRef?.current?.contains(e.target)) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
         setShowMenu(false);
       }
     };
 
     if (showMenu) {
       document.addEventListener('mousedown', handleClickOutside);
-      if (anchorRef?.current && menuRef.current) {
-        const rect = anchorRef.current.getBoundingClientRect();
-        const menuWidth = menuRef.current.offsetWidth;
-        setCoords({
-          top: rect.bottom + 8, // أسفل الزر بـ 8px
-          left: rect.left + rect.width / 2 - menuWidth / 2, // متمركزة في النص
-        });
-      }
     }
-
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -50,12 +40,12 @@ const PostMenu = ({ showMenu, setShowMenu, post, anchorRef }) => {
 
   const ownerOptions = [
     {
-      icon: <CiMapPin size={20} />,
+      icon: <CiMapPin size={18} />,
       text: myUser?.pinsPosts?.some((p) => p?.id === post?._id) ? 'Unpin Post' : 'Pin Post',
       action: () => pinPost(post?._id),
     },
     {
-      icon: <CiEdit size={20} />,
+      icon: <CiEdit size={18} />,
       text: 'Edit Post',
       action: () => {
         setPostIsEdit(post);
@@ -63,44 +53,44 @@ const PostMenu = ({ showMenu, setShowMenu, post, anchorRef }) => {
       },
     },
     {
-      icon: <AiOutlineDelete size={20} />,
+      icon: <AiOutlineDelete size={18} />,
       text: 'Delete Post',
       action: () => deletePost(post?._id),
-      className: 'text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30',
+      className: 'text-red-600 hover:bg-red-100',
     },
     {
-      icon: <FaRegCommentDots size={20} />,
+      icon: <FaRegCommentDots size={18} />,
       text: post?.isCommentOff ? 'Enable Comments' : 'Disable Comments',
       action: () => displayOrHideComments(post?._id),
       className: post?.isCommentOff
-        ? 'text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30'
-        : 'text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/30',
+        ? 'text-green-600 hover:bg-green-100'
+        : 'text-yellow-600 hover:bg-yellow-100',
     },
   ];
 
   const visitorOptions = [
     {
-      icon: <MdOutlineReport size={20} />,
+      icon: <MdOutlineReport size={18} />,
       text: 'Report Post',
       action: () => {
         setIsPostId(post?._id);
         setShowMenuReport(true);
       },
-      className: 'text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30',
+      className: 'text-red-600 hover:bg-red-100',
     },
     {
-      icon: <MdContentCopy size={20} />,
+      icon: <MdContentCopy size={18} />,
       text: 'Copy Link',
       action: () => copyPostLink(post?._id),
-      className: 'text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30',
+      className: 'text-blue-600 hover:bg-blue-100',
     },
     {
-      icon: <AiOutlineDelete size={20} />,
+      icon: <AiOutlineDelete size={18} />,
       text: user?.blockedUsers?.includes(post?.owner?._id) ? 'Unblock User' : 'Block User',
       action: () => blockOrUnblockUser(post?.owner?._id),
       className: user?.blockedUsers?.includes(post?.owner?._id)
-        ? 'text-green-500 hover:bg-green-100 dark:hover:bg-green-900/30'
-        : 'text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30',
+        ? 'text-green-600 hover:bg-green-100'
+        : 'text-red-600 hover:bg-red-100',
     }
   ];
 
@@ -111,35 +101,27 @@ const PostMenu = ({ showMenu, setShowMenu, post, anchorRef }) => {
       {showMenu && (
         <motion.div
           ref={menuRef}
-          initial={{ opacity: 0, scale: 0.9, y: -10 }}
+          initial={{ opacity: 0, scale: 0.95, y: -8 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: -10 }}
+          exit={{ opacity: 0, scale: 0.95, y: -8 }}
           transition={{ duration: 0.2 }}
-          style={{
-            position: 'fixed',
-            top: coords.top,
-            left: coords.left,
-            zIndex: 2000,
-          }}
-          className="w-60 rounded-xl bg-white dark:bg-[#1f1f1f] shadow-2xl border border-gray-200 dark:border-gray-700 backdrop-blur-md"
+          className="absolute right-0 mt-2 w-52 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 overflow-hidden"
         >
-          {optionsToShow.map((option, index) => (
-            <div
-              key={index}
-              onClick={() => {
-                option.action();
-                setShowMenu(false);
-              }}
-              className={`flex items-center gap-3 px-4 py-3 cursor-pointer group rounded-xl transition duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                option.className || 'text-gray-800 dark:text-gray-100'
-              }`}
-            >
-              <div className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 group-hover:scale-110 transition">
+          <div className="flex flex-col">
+            {optionsToShow.map((option, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  option.action();
+                  setShowMenu(false);
+                }}
+                className={`flex items-center gap-3 px-4 py-2 text-sm font-medium text-left transition rounded-md ${option.className || 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+              >
                 {option.icon}
-              </div>
-              <span className="text-sm font-medium">{option.text}</span>
-            </div>
-          ))}
+                <span>{option.text}</span>
+              </button>
+            ))}
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
