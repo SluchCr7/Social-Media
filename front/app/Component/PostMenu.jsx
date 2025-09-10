@@ -29,11 +29,12 @@ const PostMenu = ({ showMenu, setShowMenu, post, anchorRef }) => {
 
     if (showMenu) {
       document.addEventListener('mousedown', handleClickOutside);
-      if (anchorRef?.current) {
+      if (anchorRef?.current && menuRef.current) {
         const rect = anchorRef.current.getBoundingClientRect();
+        const menuWidth = menuRef.current.offsetWidth;
         setCoords({
-          top: rect.bottom + 8,
-          left: rect.right - 240, // يفتح القائمة بمحاذاة الزر
+          top: rect.bottom + 8, // أسفل الزر بـ 8px
+          left: rect.left + rect.width / 2 - menuWidth / 2, // متمركزة في النص
         });
       }
     }

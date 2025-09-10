@@ -11,7 +11,18 @@ const getAllCommunities = asyncHandler(async (req, res) => {
         .populate('Admins', 'username profileName profilePhoto')
     res.status(200).json(communities)
 })
+  const getCommunityById = asyncHandler(async (req, res) => {
+    const community = await Community.findById(req.params.id)
+      .populate('owner', 'username profileName profilePhoto')
+      .populate('members', 'username profileName profilePhoto')
+      .populate('Admins', 'username profileName profilePhoto');
 
+    if (!community) {
+      return res.status(404).json({ message: "Community Not Found" });
+    }
+
+    res.status(200).json(community);
+  });
 const getCommunityByCategory = asyncHandler(async (req, res) => {
     const communities = await Community.find({ Category: req.params.Category })
     res.status(200).json(communities)
@@ -297,5 +308,5 @@ module.exports = {
     deleteCommunity,
     joinTheCommunity,
     editCommunity, updateCommunityPicture, updateCommunityCover,
-    removeMember, makeAdmin
+    removeMember, makeAdmin,getCommunityById
 }

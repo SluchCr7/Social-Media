@@ -1,5 +1,5 @@
 
-const { getAllCommunities, getCommunityByCategory, makeAdmin, joinTheCommunity, removeMember, addNewCommunity, deleteCommunity, editCommunity, updateCommunityPicture, updateCommunityCover } = require('../Controllers/CommunityController')
+const { getAllCommunities,getCommunityById, getCommunityByCategory, makeAdmin, joinTheCommunity, removeMember, addNewCommunity, deleteCommunity, editCommunity, updateCommunityPicture, updateCommunityCover } = require('../Controllers/CommunityController')
 const route = require('express').Router()
 const { verifyToken } = require('../Middelwares/verifyToken')
 const photoUpload = require('../Middelwares/uploadPhoto')
@@ -10,10 +10,11 @@ route.route('/:Category')
     .get(getCommunityByCategory)
 
 route.route('/add')
-    .post(verifyToken, addNewCommunity)
+.post(verifyToken, addNewCommunity)
 
 route.route('/:id')
     .delete(verifyToken, deleteCommunity)
+    .get(getCommunityById)
 
 route.route('/join/:id')
     .put(verifyToken, joinTheCommunity)

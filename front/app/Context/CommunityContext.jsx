@@ -16,7 +16,7 @@ export const CommunityContextProvider = ({ children }) => {
 
   useEffect(() => {
     getData('community', setCommunities);
-  }, [communities]);
+  }, []);
 
   const config = {
     headers: {
@@ -27,31 +27,69 @@ export const CommunityContextProvider = ({ children }) => {
 
 
   const joinToCommunity = async (id) => {
-    try {
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/join/${id}`, {}, config);
-      showAlert(res.data.message);
-    } catch (err) {
-      console.error(err);
-      showAlert('Error joining community.');
-    }
-  };
-const addCommunity = async (Name, Category, description) => {
   try {
-    const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/community/add`, { Name, Category, description }, config);
+    const res = await axios.put(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/join/${id}`,
+      {},
+      config
+    );
+    showAlert(res.data.message);
+
+    // تحديث الـ state المحلي للمجتمعات
+    setCommunities((prev) =>
+      prev.map((c) =>
+        c._id === id
+          ? {
+              ...c,
+              members:
+                res.data.message === "Community Joined"
+                  ? [...c.members, user._id] // انضمام
+                  : c.members.filter((m) => m !== user._id), // خروج
+            }
+          : c
+      )
+    );
+  } catch (err) {
+    console.error(err);
+    showAlert("Error joining community.");
+  }
+  };
+
+ const addCommunity = async (Name, Category, description) => {
+  try {
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/add`,
+      { Name, Category, description },
+      config
+    );
 
     const communityId = res.data._id;
 
     if (communityId) {
+      // انضمام مباشر
       await joinToCommunity(communityId);
-    } else {
-      console.log('Failed to create community.');
-    }
 
+      // استرجاع بيانات الكوميونتي الجديد
+      const communityRes = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/${communityId}`,
+        config
+      );
+
+      const newCommunity = communityRes.data;
+
+      // أضف الكوميونتي للـ state
+      setCommunities((prev) => [...prev, newCommunity]);
+
+      showAlert("Community created successfully");
+    } else {
+      console.log("Failed to create community.");
+    }
   } catch (err) {
     console.error(err);
-    showAlert('Error creating community.');
+    showAlert("Error creating community.");
   }
 };
+
 
   const editCommunity = async (id, updatedData) => {
       try {
@@ -63,66 +101,67 @@ const addCommunity = async (Name, Category, description) => {
         showAlert('Failed to update community.');
       }
   };
-const updateCommunityPicture = async (id, file) => {
-  try {
-    const formData = new FormData();
-    formData.append('image', file);
 
-    const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update/${id}`,
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
+  const updateCommunityPicture = async (id, file) => {
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
 
-    showAlert(res.data.message || 'Picture updated.');
-    
-    return res.data;
-  } catch (err) {
-    console.error("Full Error:", JSON.stringify(err, null, 2));
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update/${id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
 
-    const message =
-      err?.response?.data?.message || err?.message || 'Failed to update picture.';
-    showAlert(message);
+      showAlert(res.data.message || 'Picture updated.');
+      
+      return res.data;
+    } catch (err) {
+      console.error("Full Error:", JSON.stringify(err, null, 2));
 
-    return null;
-  }
-};
+      const message =
+        err?.response?.data?.message || err?.message || 'Failed to update picture.';
+      showAlert(message);
 
-const updateCommunityCover = async (id, file) => {
-  try {
-    const formData = new FormData();
-    formData.append('image', file);
+      return null;
+    }
+  };
 
-    const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update-cover/${id}`,
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
+  const updateCommunityCover = async (id, file) => {
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
 
-    showAlert(res.data.message || 'Cover updated.');
-    
-    // ✅ أرجع البيانات الفعلية من السيرفر (الرابط الجديد)
-    return res.data;
-  } catch (err) {
-    console.error("Full Error:", JSON.stringify(err, null, 2));
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/update-cover/${id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
 
-    const message =
-      err?.response?.data?.message || err?.message || 'Failed to update cover.';
-    showAlert(message);
+      showAlert(res.data.message || 'Cover updated.');
+      
+      // ✅ أرجع البيانات الفعلية من السيرفر (الرابط الجديد)
+      return res.data;
+    } catch (err) {
+      console.error("Full Error:", JSON.stringify(err, null, 2));
 
-    return null;
-  }
-};
+      const message =
+        err?.response?.data?.message || err?.message || 'Failed to update cover.';
+      showAlert(message);
+
+      return null;
+    }
+  };
 
   const removeMember = async (communityId, userId) => {
     try {
@@ -141,13 +180,29 @@ const updateCommunityCover = async (id, file) => {
         { userIdToMakeAdmin },
         config
       );
+
       showAlert(res.data.message);
+
+      setCommunities((prev) =>
+        prev.map((c) =>
+          c._id === communityId
+            ? {
+                ...c,
+                Admins:
+                  res.data.message === "Admin added successfully"
+                    ? [...c.Admins, userIdToMakeAdmin] // أضف الأدمن
+                    : c.Admins.filter((id) => id !== userIdToMakeAdmin), // احذف الأدمن
+              }
+            : c
+        )
+      );
     } catch (err) {
       console.error(err);
       const msg = err.response?.data?.message || "Failed to update admin role";
       showAlert(msg);
     }
   };
+
   
 
   return (
