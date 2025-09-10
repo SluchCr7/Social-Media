@@ -1,3 +1,4 @@
+
 // 'use client'
 
 // import React, { useEffect, useState } from 'react'
@@ -455,205 +456,99 @@
 //   </a>
 // )
 
-
-
 'use client'
-
-import Image from 'next/image'
+import React, { useState } from 'react'
 import { useAuth } from '@/app/Context/AuthContext'
 import { usePost } from '@/app/Context/PostContext'
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { RiUserFollowLine, RiUserUnfollowLine } from 'react-icons/ri'
-import { FaUserEdit, FaPlus } from 'react-icons/fa'
-import InfoAboutUser from '@/app/Component/InfoAboutUser'
-import SluchitEntry from '@/app/Component/SluchitEntry'
+import ProfileHeader from '@/app/Component/UserComponents/ProfileHeader'
+import UserStats from '@/app/Component/UserComponents/UserStats'
+import UserTabs from '@/app/Component/UserComponents/UserTabs'
+import CommentsList from '@/app/Component/UserComponents/CommentsList'
+import FollowersModal from '@/app/Component/UserComponents/FollowersModal'
+import InfoAboutUser from '@/app/Component/UserComponents/InfoAboutUser'
+import Loading from '@/app/Component/Loading'
 
-const tabs = ['Posts', 'Saved', 'Comments']
+const ProfilePage = () => {
+  const { auth } = useAuth()
+  const { posts, savedPosts, comments } = usePost()
 
-const ProfilePage = ({ params }) => {
-  const id = params.id
-  const { users, followUser, blockOrUnblockUser, user, isLogin } = useAuth()
-  const { posts } = usePost()
-  const [userSelected, setUserSelected] = useState({})
   const [activeTab, setActiveTab] = useState('Posts')
-  const [isBlockedByMe, setIsBlockedByMe] = useState(false)
+  const [showFollowers, setShowFollowers] = useState(false)
+  const [showFollowing, setShowFollowing] = useState(false)
 
-  useEffect(() => {
-    const matchedUser = users.find(u => u?._id === id)
-    if (matchedUser) setUserSelected(matchedUser)
-  }, [id, users])
-
-  useEffect(() => {
-    if (user && userSelected?._id) {
-      setIsBlockedByMe(user.blockedUsers?.includes(userSelected._id))
-    }
-  }, [user, userSelected])
-
-  const isOwner = user?._id === userSelected?._id
-  const isFollowing = userSelected?.followers?.some(f => f?._id === user?._id)
-
-  const renderPosts = () => {
-    const pinnedPosts = userSelected?.pinsPosts || []
-    const pinnedIds = new Set(pinnedPosts.map(p => p?._id))
-    const regularPosts = (userSelected?.posts || []).filter(p => !pinnedIds.has(p?._id))
-
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full">
-        {[...pinnedPosts.map(p => ({ ...p, isPinned: true })), ...regularPosts.map(p => ({ ...p, isPinned: false }))].map(post => (
-          <SluchitEntry key={post?._id} post={post} />
-        ))}
-      </div>
-    )
-  }
-
-  const renderSaved = () => {
-    const savedPosts = posts?.filter(p => p.saved.includes(userSelected?._id)) || []
-    return savedPosts.length > 0 ? (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full">
-        {savedPosts.map(post => (
-          <SluchitEntry key={post?._id} post={post} />
-        ))}
-      </div>
-    ) : (
-      <div className="text-center text-gray-500 py-10">No saved posts yet.</div>
-    )
-  }
-
-  const renderComments = () => {
-    const comments = userSelected?.comments || []
-    return comments.length > 0 ? (
-      <div className="flex flex-col gap-4 w-full">
-        {comments.map(comment => (
-          <div key={comment?._id} className="bg-gray-900/70 rounded-xl p-5 shadow-md flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <Image
-                src={comment.owner?.profilePhoto?.url || '/default-profile.png'}
-                alt="Commenter"
-                width={36}
-                height={36}
-                className="rounded-full object-cover"
-              />
-              <div>
-                <p className="text-sm font-semibold">{comment.owner?.username}</p>
-                <p className="text-xs text-gray-400">{comment.owner?.profileName}</p>
-              </div>
-              <span className="ml-auto text-xs text-gray-500">{new Date(comment?.createdAt).toLocaleDateString()}</span>
-            </div>
-            <p className="text-sm text-gray-300">{comment?.text}</p>
-          </div>
-        ))}
-      </div>
-    ) : (
-      <div className="text-center text-gray-500 py-10">No comments yet.</div>
-    )
-  }
+  if (!auth) return <Loading />
 
   return (
-    <div className="w-full min-h-screen bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text pt-10">
-      <div className="max-w-5xl mx-auto px-4">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-start gap-8 pb-8 border-b border-gray-700">
-          {/* Avatar */}
-          <div className="flex justify-center md:justify-start w-full md:w-1/3">
-            <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-gray-700">
-              <Image
-                src={userSelected?.profilePhoto?.url || '/default-profile.png'}
-                alt="Profile"
-                fill
-                className="object-cover"
-              />
-            </div>
+    <div className="flex flex-col items-center w-full min-h-screen py-6">
+      {/* Header */}
+      <ProfileHeader
+        user={auth}
+        isCurrentUser
+        onEdit={() => console.log('Edit profile')}
+        onAddStory={() => console.log('Add story')}
+      />
+
+      {/* Stats */}
+      <UserStats
+        posts={posts?.length}
+        followers={auth?.followers?.length}
+        following={auth?.following?.length}
+        onShowFollowers={() => setShowFollowers(true)}
+        onShowFollowing={() => setShowFollowing(true)}
+      />
+
+      {/* Tabs */}
+      <UserTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      {/* Content */}
+      <div className="mt-6 w-full max-w-3xl">
+        {activeTab === 'Posts' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {posts && posts.length > 0 ? (
+              posts.map((post) => (
+                <div key={post._id} className="w-full aspect-square bg-gray-800 rounded-lg shadow-md" />
+              ))
+            ) : (
+              <div className="col-span-full text-center text-gray-500 py-10">No posts yet.</div>
+            )}
           </div>
+        )}
 
-          {/* Info */}
-          <div className="flex flex-col gap-4 w-full md:w-2/3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
-              <h1 className="text-2xl font-bold">{userSelected?.username || 'Username'}</h1>
-
-              {isOwner ? (
-                <div className="flex gap-3 mt-3 sm:mt-0">
-                  <button className="flex items-center gap-2 px-4 py-2 text-sm border rounded-full hover:bg-gray-700 transition">
-                    <FaUserEdit /> Edit Profile
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 text-sm border rounded-full hover:bg-gray-700 transition">
-                    <FaPlus /> Add Story
-                  </button>
-                </div>
-              ) : (
-                <div className="flex gap-3 mt-3 sm:mt-0">
-                  {isLogin && (
-                    <button
-                      onClick={() => followUser(userSelected?._id)}
-                      className={`flex items-center gap-2 px-4 py-2 text-sm rounded-full border transition
-                        ${isFollowing ? 'text-red-600 border-red-600 hover:bg-red-600 hover:text-white' : 'text-green-600 border-green-600 hover:bg-green-600 hover:text-white'}`}
-                    >
-                      {isFollowing ? <RiUserUnfollowLine /> : <RiUserFollowLine />}
-                      {isFollowing ? 'Unfollow' : 'Follow'}
-                    </button>
-                  )}
-                  {isLogin && (
-                    <button
-                      onClick={() => blockOrUnblockUser(userSelected?._id)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm border rounded-full text-red-500 border-red-500 hover:bg-red-600 hover:text-white transition"
-                    >
-                      {isBlockedByMe ? 'Unblock' : 'Block'}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <p className="text-gray-400 text-sm">{userSelected?.profileName || ''}</p>
-            <p className="text-sm text-gray-300 max-w-lg">{userSelected?.description || 'No bio provided.'}</p>
-
-            {/* Stats */}
-            <div className="flex gap-6 mt-4">
-              <div>
-                <h2 className="text-lg font-bold">{userSelected?.posts?.length || 0}</h2>
-                <p className="text-sm text-gray-400">Posts</p>
-              </div>
-              <div>
-                <h2 className="text-lg font-bold">{userSelected?.followers?.length || 0}</h2>
-                <p className="text-sm text-gray-400">Followers</p>
-              </div>
-              <div>
-                <h2 className="text-lg font-bold">{userSelected?.following?.length || 0}</h2>
-                <p className="text-sm text-gray-400">Following</p>
-              </div>
-            </div>
+        {activeTab === 'Saved' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {savedPosts && savedPosts.length > 0 ? (
+              savedPosts.map((post) => (
+                <div key={post._id} className="w-full aspect-square bg-gray-700 rounded-lg shadow-md" />
+              ))
+            ) : (
+              <div className="col-span-full text-center text-gray-500 py-10">No saved posts yet.</div>
+            )}
           </div>
-        </div>
+        )}
 
-        {/* Info about user */}
-        <InfoAboutUser user={userSelected} />
-
-        {/* Tabs */}
-        <div className="flex justify-center gap-10 mt-6 border-b border-gray-700">
-          {tabs.map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`pb-2 font-semibold transition ${activeTab === tab ? 'border-b-2 border-white text-white' : 'text-gray-400 hover:text-white'}`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* Content */}
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mt-6 flex flex-col gap-4"
-        >
-          {activeTab === 'Posts' && renderPosts()}
-          {activeTab === 'Saved' && renderSaved()}
-          {activeTab === 'Comments' && renderComments()}
-        </motion.div>
+        {activeTab === 'Comments' && <CommentsList comments={comments} />}
       </div>
+
+      {/* Extra info */}
+      <div className="mt-10 w-full max-w-3xl">
+        <InfoAboutUser user={auth} />
+      </div>
+
+      {/* Followers / Following Modals */}
+      {showFollowers && (
+        <FollowersModal
+          title="Followers"
+          users={auth?.followers}
+          onClose={() => setShowFollowers(false)}
+        />
+      )}
+      {showFollowing && (
+        <FollowersModal
+          title="Following"
+          users={auth?.following}
+          onClose={() => setShowFollowing(false)}
+        />
+      )}
     </div>
   )
 }
