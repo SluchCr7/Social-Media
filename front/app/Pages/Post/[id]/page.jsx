@@ -212,6 +212,11 @@ const PostPage = ({ params }) => {
             </div>
           )}
 
+          {/* Main Post Text */}
+          {!isShared && post?.text && (
+            <p className='text-sm text-gray-600 dark:text-gray-200 break-all whitespace-pre-wrap'>{post?.text}</p>
+          )}
+
           {/* Main Post Photos */}
           {!isShared && post?.Photos?.length > 0 && (
             <div className={`grid gap-2 ${post.Photos.length > 1 ? 'grid-cols-2 sm:grid-cols-2' : ''}`}>
@@ -225,7 +230,7 @@ const PostPage = ({ params }) => {
 
           {/* Actions */}
           {isLogin && (
-            <div className="flex items-center gap-6 pt-4">
+            <div className="flex items-center gap-6 pt-4 w-full justify-around">
               <ActionIcon onClick={() => likePost(post._id, post.owner._id)} Icon={post.likes?.includes(user?._id) ? IoIosHeart : CiHeart} count={post.likes?.length} className={post.likes?.includes(user?._id) ? 'text-red-500' : ''} />
               {!post.isCommentOff && <ActionIcon Icon={FaRegCommentDots} count={comments?.length} />}
               <ActionIcon onClick={() => sharePost(post._id)} Icon={IoIosShareAlt} count={post.shares?.length} />
