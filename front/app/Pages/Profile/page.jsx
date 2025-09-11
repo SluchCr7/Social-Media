@@ -623,7 +623,7 @@ import SluchitEntry from '@/app/Component/SluchitEntry'
 import Loading from '@/app/Component/Loading'
 import UpdateProfile from '@/app/Component/UpdateProfile'
 import AddStoryModel from '@/app/Component/AddStoryModel'
-import InfoAboutUser from '@/app/Component/InfoAboutUser'
+import InfoAboutUser from '@/app/Component/UserComponents/InfoAboutUser'
 
 // ---------------- Constants ----------------
 const tabs = ['Posts', 'Saved', 'Comments']
