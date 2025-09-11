@@ -16,7 +16,7 @@ const NewPost = () => {
   const [selectedCommunity, setSelectedCommunity] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const textareaRef = useRef();
-
+  const [errorText , setErrorText] = useState(false)
   const { user } = useAuth();
   const { AddPost } = usePost();
   const { communities } = useCommunity();
@@ -41,12 +41,21 @@ const NewPost = () => {
 
   const handlePost = () => {
     const hashtags = extractHashtags(postText);
-    AddPost(
-      postText.replace(/#[\w\u0600-\u06FF]+/g, '').trim(),
-      images,
-      hashtags,
-      selectedCommunity
-    );
+
+    // ✅ شرط عدد الحروف
+    if (postText.trim().length > 500) {
+      // هنا تعمل action معين زي رسالة خطأ أو alert أو منع النشر
+      setErrorText(true)
+      return;
+    }
+    if (postText.trim()) {
+      AddPost(
+        postText.replace(/#[\w\u0600-\u06FF]+/g, '').trim(),
+        images,
+        hashtags,
+        selectedCommunity
+      );
+    }
   };
 
   const handleEmojiClick = (emojiData) => {
@@ -112,13 +121,27 @@ const NewPost = () => {
           <textarea
             ref={textareaRef}
             value={postText}
-            onChange={(e) => setPostText(e.target.value)}
+            onChange={(e) => {
+              setPostText(e.target.value);
+              if (e.target.value.length <= 500) setErrorText(false); // تصفير الخطأ
+            }}
             rows={5}
             placeholder="What's on your mind? Add #hashtags or 😊 emojis..."
-            className="w-full bg-gray-50 dark:bg-darkMode-bg p-5 text-base text-black dark:text-white rounded-2xl resize-none border border-gray-300 dark:border-gray-600 shadow-inner focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+            className={`w-full p-5 text-base rounded-2xl resize-none border shadow-inner focus:ring-2 transition-all duration-300
+              ${errorText 
+                ? 'border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:ring-red-500' 
+                : 'bg-gray-50 dark:bg-darkMode-bg text-black dark:text-white border-gray-300 dark:border-gray-600 focus:ring-blue-500'}`}
           />
-          <div className="text-right text-xs text-gray-400 mt-1">{postText.length}/500</div>
+          
+          {/* Counter */}
+          <div className="flex justify-between items-center mt-1 text-xs">
+            <span className={`transition ${errorText ? 'text-red-500 font-semibold' : 'text-gray-400'}`}>
+              {postText.length}/500
+            </span>
+            {errorText && <span className="text-red-500">Max 500 characters allowed</span>}
+          </div>
         </div>
+
 
         {/* Images Preview */}
         {images.length > 0 && (
@@ -176,15 +199,16 @@ const NewPost = () => {
 
           <button
             onClick={handlePost}
-            disabled={!postText.trim() && images.length === 0}
+            disabled={(!postText.trim() && images.length === 0) || errorText} // ممنوع النشر مع الخطأ
             className={`px-8 py-2 text-sm font-semibold rounded-full shadow-lg transition-all duration-300 ${
-              postText.trim() || images.length > 0
-                ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              (!postText.trim() && images.length === 0) || errorText
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white'
             }`}
           >
             Post
           </button>
+
         </div>
       </div>
     </main>
