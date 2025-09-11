@@ -37,13 +37,13 @@ const MenuFriends = () => {
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-gray-800 dark:text-gray-100 font-medium">{user.username}</span>
-                  <span className="text-gray-500 dark:text-gray-400 text-sm">Suggested Friend</span>
+                  <span className="text-gray-800 dark:text-gray-100 font-medium text-sm">{user.username}</span>
+                  <span className="text-gray-500 dark:text-gray-400 text-xs">Suggested Friend</span>
                 </div>
               </div>
 
               {/* Follow Button */}
-              <button onClick={()=> followUser(user._id)} className="px-4 py-1 bg-blue-600 hover:bg-blue-700 text-white dark:text-white rounded-full text-sm font-medium shadow transition-all">
+              <button onClick={()=> followUser(user._id)} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white dark:text-white rounded-full text-sm font-medium shadow transition-all">
                 Follow
               </button>
             </div>
