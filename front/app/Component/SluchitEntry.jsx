@@ -425,9 +425,9 @@ const SluchitEntry = ({ post }) => {
               <div className='flex flex-col items-start md:flex-row md:justify-between md:items-center'>
                 <Link
                   href={user?._id === original?.owner?._id ? '/Pages/Profile' : `/Pages/User/${original?.owner?._id}`}
-                  className='text-darkMode-fg font-semibold text-sm hover:underline'
+                  className='text-darkMode-fg font-semibold text-sm hover:underline flex items-center gap-2'
                 >
-                  <Image src={original?.owner?.profilePhoto?.url} alt='Shared_profile_post' width={500} height={500} className='rounded-full w-7 h-7 min-w-10 aspect-square object-cover'/>
+                  <Image src={original?.owner?.profilePhoto?.url} alt='Shared_profile_post' width={500} height={500} className='rounded-full w-7 h-7 aspect-square object-cover'/>
                   <div className='flex items-start flex-col gap-[2px]'>
                     <span className='text-black dark:text-white text-base'>{original?.owner?.username}{' '}</span>
                     <span className='text-gray-500 text-xs'>({original?.owner?.profileName})</span>
