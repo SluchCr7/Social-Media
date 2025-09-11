@@ -56,7 +56,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
       icon: <AiOutlineDelete size={18} />,
       text: 'Delete Post',
       action: () => deletePost(post?._id),
-      className: 'text-red-600 hover:bg-red-100',
+      className: 'text-red-800 hover:bg-red-100',
     },
     {
       icon: <FaRegCommentDots size={18} />,
@@ -64,7 +64,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
       action: () => displayOrHideComments(post?._id),
       className: post?.isCommentOff
         ? 'text-green-600 hover:bg-green-100'
-        : 'text-yellow-600 hover:bg-yellow-100',
+        : 'text-red-600 hover:bg-yellow-100',
     },
   ];
 
