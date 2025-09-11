@@ -84,7 +84,7 @@ const Page = ({ params }) => {
 
       {/* Post content */}
       <div className="bg-dark/40 p-4 rounded-2xl shadow-lg border border-gray-800">
-        <p className="text-lightMode-fg dark:text-darkMode-fg text-base pb-3 leading-relaxed">
+        <p className="text-lightMode-fg dark:text-darkMode-fg text-base pb-3 leading-relaxed break-all whitespace-pre-wrap">
           {post?.text}
         </p>
 
