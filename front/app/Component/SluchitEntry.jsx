@@ -409,7 +409,7 @@ const SluchitEntry = ({ post }) => {
 
           {/* Shared Post Text */}
           {isShared && post?.text && (
-            <p className='text-sm text-gray-600 dark:text-gray-200 w-[70%] break-words whitespace-pre-wrap'>
+            <p className='text-sm text-gray-600 dark:text-gray-200 w-[50%] break-all whitespace-pre-wrap'>
               {post?.text}
             </p>
           )}
@@ -433,7 +433,7 @@ const SluchitEntry = ({ post }) => {
                 <span className='text-gray-500 text-xs'>{new Date(original?.createdAt).toDateString()}</span>
               </div>
 
-              <p className='text-sm text-gray-700 dark:text-gray-300 w-[70%] italic break-words whitespace-pre-wrap'>
+              <p className='text-sm text-gray-700 dark:text-gray-300 w-[50%] italic break-all whitespace-pre-wrap'>
                 {original?.text}
               </p>
 
