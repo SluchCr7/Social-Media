@@ -74,3 +74,9 @@
 .animate-fadeIn {
   animation: fadeIn 0.4s ease-in-out;
 }
+
+.text-custom  {
+  word-break: break-all;
+  white-space: pre-wrap;
+  width: 70%;
+}
