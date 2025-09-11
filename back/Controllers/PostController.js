@@ -468,7 +468,7 @@ const deletePost = asyncHandler(async (req, res) => {
     }
   }
 
-  await post.remove();
+  await Post.findByIdAndDelete(req.params.id);
   res.status(200).json({ message: "Post deleted" });
 });
 
