@@ -74,76 +74,68 @@ const PostPage = ({ params }) => {
         <div className="text-sm text-gray-900 dark:text-gray-300 italic mb-2">
           <Link
             href={user?._id === post.owner?._id ? '/Pages/Profile' : `/Pages/User/${post.owner?._id}`}
-            className="text-lightMode-fg dark:text-darkMode-fg font-semibold"
+            className="font-semibold hover:underline"
           >
             {post.owner.username}
           </Link>{' '}
           shared a post from{' '}
           <Link
             href={user?._id === original?.owner?._id ? '/Pages/Profile' : `/Pages/User/${original?.owner?._id}`}
-            className="text-lightMode-fg dark:text-darkMode-fg font-semibold"
+            className="font-semibold hover:underline"
           >
             {original?.owner?.username}
           </Link>
         </div>
       )}
 
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-4 bg-white dark:bg-black/20 backdrop-blur-xl p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg transition hover:scale-[1.01]">
         {/* Profile Image */}
         <div className="flex flex-col items-center">
-          {isCommunityPost ? (
-            <Image
-              src={post.community?.Picture?.url}
-              alt="community-profile"
-              width={40}
-              height={40}
-              className="rounded-full w-10 h-10 min-w-10 aspect-square object-cover"
-            />
-          ) : (
-            <Image
-              src={post.owner?.profilePhoto?.url}
-              alt="user-profile"
-              width={40}
-              height={40}
-              className="rounded-full w-10 h-10 min-w-10 aspect-square object-cover"
-            />
-          )}
+          <Image
+            src={isCommunityPost ? post.community?.Picture?.url : post.owner?.profilePhoto?.url}
+            alt={isCommunityPost ? "community-profile" : "user-profile"}
+            width={40}
+            height={40}
+            className="rounded-full w-10 h-10 aspect-square object-cover"
+          />
           <div className="border border-gray-600 h-[80px] w-[1px] mt-2"></div>
         </div>
 
         <div className="flex flex-col w-full gap-3">
-          {/* Header Info */}
+          {/* Header */}
           <div className="flex justify-between items-center w-full">
             <div className="flex items-center gap-3">
-              {isCommunityPost ? (
-                <div className="flex flex-col leading-tight">
-                  <Link
-                    href={`/Pages/Community/${post.community?._id}`}
-                    className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline"
-                  >
-                    {post.community?.Name}
-                  </Link>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>@{post.owner?.username}</span>
-                    <span className="w-1 h-1 bg-gray-400 rounded-full" />
-                    <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col leading-tight">
-                  <Link
-                    href={user?._id === post.owner?._id ? '/Pages/Profile' : `/Pages/User/${post.owner?._id}`}
-                    className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline"
-                  >
-                    {post.owner?.username}
-                  </Link>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>{post.owner?.profileName}</span>
-                    <span className="w-1 h-1 bg-gray-400 rounded-full" />
-                    <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              )}
+              <div className="flex flex-col leading-tight">
+                {isCommunityPost ? (
+                  <>
+                    <Link
+                      href={`/Pages/Community/${post.community?._id}`}
+                      className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline"
+                    >
+                      {post.community?.Name}
+                    </Link>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span>@{post.owner?.username}</span>
+                      <span className="w-1 h-1 bg-gray-400 rounded-full" />
+                      <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href={user?._id === post.owner?._id ? '/Pages/Profile' : `/Pages/User/${post.owner?._id}`}
+                      className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline"
+                    >
+                      {post.owner?.username}
+                    </Link>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span>{post.owner?.profileName}</span>
+                      <span className="w-1 h-1 bg-gray-400 rounded-full" />
+                      <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Menu */}
@@ -161,7 +153,7 @@ const PostPage = ({ params }) => {
           </div>
 
           {/* Post Text */}
-          {isShared && post.text && (
+          {post.text && (
             <p className="text-sm text-gray-600 dark:text-gray-200 break-all whitespace-pre-wrap">
               {post.text}
             </p>
@@ -195,35 +187,24 @@ const PostPage = ({ params }) => {
               </p>
 
               {original?.Photos?.length > 0 && (
-                <div className={`grid gap-2 ${original.Photos.length > 1 ? 'grid-cols-2 sm:grid-cols-2' : ''}`}>
+                <div className={`grid gap-2 ${original.Photos.length > 1 ? 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3' : 'grid-cols-1'}`}>
                   {original.Photos.map((photo, i) => (
-                    <div key={i} onClick={() => setImageView({ url: photo?.url, postId: original._id })} className="cursor-pointer">
-                      <Image
-                        src={photo?.url}
-                        alt={`photo-${i}`}
-                        width={500}
-                        height={500}
-                        className="w-full max-h-[500px] object-cover rounded-lg shadow-sm"
-                      />
-                    </div>
+                    <motion.div key={i} onClick={() => setImageView({ url: photo?.url, postId: original._id })} className="cursor-pointer overflow-hidden rounded-xl">
+                      <Image src={photo?.url} alt={`photo-${i}`} width={500} height={500} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                    </motion.div>
                   ))}
                 </div>
               )}
             </div>
           )}
 
-          {/* Main Post Text */}
-          {!isShared && post?.text && (
-            <p className='text-sm text-gray-600 dark:text-gray-200 break-all whitespace-pre-wrap'>{post?.text}</p>
-          )}
-
-          {/* Main Post Photos */}
-          {!isShared && post?.Photos?.length > 0 && (
-            <div className={`grid gap-2 ${post.Photos.length > 1 ? 'grid-cols-2 sm:grid-cols-2' : ''}`}>
+          {/* Post Photos */}
+          {!isShared && post.Photos?.length > 0 && (
+            <div className={`grid gap-2 ${post.Photos.length > 1 ? 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3' : 'grid-cols-1'}`}>
               {post.Photos.map((photo, i) => (
-                <div key={i} onClick={() => setImageView({ url: photo?.url, postId: post._id })} className="cursor-pointer">
-                  <Image src={photo?.url} alt={`photo-${i}`} width={500} height={500} className="w-full max-h-[500px] object-cover rounded-lg" />
-                </div>
+                <motion.div key={i} onClick={() => setImageView({ url: photo?.url, postId: post._id })} className="cursor-pointer overflow-hidden rounded-xl">
+                  <Image src={photo?.url} alt={`photo-${i}`} width={500} height={500} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                </motion.div>
               ))}
             </div>
           )}
