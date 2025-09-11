@@ -72,7 +72,7 @@ const NewPost = () => {
 
   return (
     <main className="flex items-center justify-center w-full py-10 px-4 bg-gray-50 dark:bg-darkMode-bg transition-colors">
-      <div className="w-full max-w-2xl bg-white dark:bg-darkMode-fg rounded-3xl shadow-xl overflow-hidden transition-all duration-500">
+      <div className="w-full max-w-5xl mx-auto bg-white dark:bg-darkMode-fg rounded-3xl shadow-xl overflow-hidden transition-all duration-500">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between w-full p-6 border-b border-gray-200 dark:border-gray-700 gap-4">

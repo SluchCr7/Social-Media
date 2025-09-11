@@ -12,6 +12,8 @@ import { FiMenu } from "react-icons/fi"
 import { MdClose } from "react-icons/md"
 import { useAuth } from '../Context/AuthContext'
 import { LuMessagesSquare } from "react-icons/lu";
+import { MdOutlineOndemandVideo } from "react-icons/md";
+import { IoTrophyOutline } from "react-icons/io5";
 
 const Aside = () => {
   const pathname = usePathname()
@@ -27,7 +29,9 @@ const Aside = () => {
     { icon: <RiUserCommunityLine />, text: "Community", link: "/Pages/CommunityMain", hideForGuests: true },
     { icon: <CiSettings />, text: "Settings", link: "/Pages/Setting", hideForGuests: true },
     { icon: <CiUser />, img : user?.profilePhoto?.url, text: "Profile", link: "/Pages/Profile", hideForGuests: true },
-    {icon: <LuMessagesSquare/> , text: "Messanger" , link:"/Pages/Messanger" , hideForGuests : true}
+    {icon: <LuMessagesSquare/> , text: "Messanger" , link:"/Pages/Messanger" , hideForGuests : true},
+    {icon: <MdOutlineOndemandVideo/> , text: "Video" , link:"/Pages/Videos" , hideForGuests : false},
+    {icon: <IoTrophyOutline/> , text: "Challenge" , link:"/Pages/Challenge" , hideForGuests : true}
   ];
 
   const baseStyle = `flex items-center gap-4 px-4 py-2 rounded-lg text-sm font-medium w-full cursor-pointer transition-all duration-300`;

@@ -19,42 +19,47 @@ const HashtagsMenu = () => {
 
   // Convert to array and sort by popularity
   const topHashtags = Object.entries(hashtagCount)
-    .sort((a, b) => b[1] - a[1]) // sort by count descending
-    .slice(0, 5); // top 5
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5); // top 5 hashtags
 
   return (
-    <div className="w-full bg-white dark:bg-[#16181c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col max-h-[500px]">
+    <div className="w-full max-h-[500px] overflow-y-auto bg-white dark:bg-[#16181c] rounded-xl shadow-md border border-gray-200 dark:border-gray-700 flex flex-col">
+      
       {/* Header */}
-      <div className="flex justify-between items-center px-4 py-3 border-b  border-lightMode-fg/40 dark:border-darkMode-fg/40">
-        <h2 className="text-lightMode-fg dark:text-darkMode-fg text-lg font-semibold">Hashtags in your Country</h2>
+      <div className="flex justify-between items-center px-5 py-3 border-b border-gray-300 dark:border-gray-600">
+        <h2 className="text-gray-900 dark:text-gray-100 text-lg font-semibold">
+          Trending Hashtags
+        </h2>
       </div>
 
       {/* Body */}
-      <div className="flex flex-col items-start w-full px-4 py-2 space-y-2">
+      <div className="flex flex-col w-full px-4 py-3 space-y-2">
         {topHashtags.length === 0 ? (
-          <p className="text-lightMode-fg dark:text-darkMode-fg/60">No trending hashtags yet.</p>
+          <div className="flex items-center justify-center py-10 text-gray-500 dark:text-gray-400 text-sm">
+            No trending hashtags yet.
+          </div>
         ) : (
           topHashtags.map(([tag, count], index) => {
-            // Simulated trend logic: even index trending up, odd index trending down
-            const isTrendingUp = index % 2 === 0;
+            const isTrendingUp = index % 2 === 0; // simple trend simulation
 
             return (
-              <div
+              <Link
                 key={tag}
-                className="flex items-center p-3 justify-between w-full hover:underline cursor-pointer"
+                href={`/Pages/Hashtag/${encodeURIComponent(tag)}`}
+                className="flex justify-between items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
               >
-                <div className="flex items-center gap-2 text-lightMode-fg dark:text-darkMode-fg text-sm">
-                  <Link href={`/Pages/Hashtag/${encodeURIComponent(tag)}`}>#{tag}</Link>
-                  <span className="text-lightMode-fg dark:text-darkMode-fg/60">({count} posts)</span>
+                <div className="flex flex-col">
+                  <span className="text-gray-900 dark:text-gray-100 font-medium">#{tag}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{count} posts</span>
                 </div>
-                <div className="flex items-center">
+                <div className={`flex items-center justify-center w-6 h-6 rounded-full ${isTrendingUp ? 'bg-green-100 dark:bg-green-800' : 'bg-red-100 dark:bg-red-800'}`}>
                   {isTrendingUp ? (
-                    <FaArrowUp className="text-green-500" />
+                    <FaArrowUp className="text-green-600 dark:text-green-400 text-sm" />
                   ) : (
-                    <FaArrowDown className="text-red-500" />
+                    <FaArrowDown className="text-red-600 dark:text-red-400 text-sm" />
                   )}
                 </div>
-              </div>
+              </Link>
             );
           })
         )}

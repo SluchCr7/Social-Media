@@ -53,7 +53,7 @@ const PostPage = ({ params }) => {
 
   return (
     <motion.div
-      className="w-full max-w-3xl mx-auto p-6 flex flex-col gap-5"
+      className="w-full max-w-5xl mx-auto p-6 flex flex-col gap-5"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
@@ -235,17 +235,54 @@ const PostPage = ({ params }) => {
           )}
 
           {/* Comments List */}
-          <div className="flex flex-col gap-4 border-t border-gray-800 pt-4">
+          <div className="flex flex-col gap-4 border-t border-gray-700 pt-6">
             {post.isCommentOff ? (
-              <div className="text-sm text-gray-500 text-center">comments are off</div>
+              <div className="flex flex-col items-center justify-center py-6 bg-gray-800 rounded-lg border border-gray-700">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-10 w-10 text-gray-500 mb-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"
+                  />
+                </svg>
+                <p className="text-gray-400 text-sm font-medium">
+                  Comments are turned off
+                </p>
+              </div>
             ) : isLoading ? (
               Array.from({ length: 3 }).map((_, i) => <CommentSkeleton key={i} />)
             ) : comments?.length > 0 ? (
               comments.map((comment) => <Comment key={comment._id} comment={comment} />)
             ) : (
-              <p className="text-gray-500 text-sm text-center py-4">no comments</p>
+              <div className="flex flex-col items-center justify-center py-6 bg-gray-800 rounded-lg border border-gray-700">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-10 w-10 text-gray-500 mb-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8s-9-3.582-9-8 4.03-8 9-8 9 3.582 9 8z"
+                  />
+                </svg>
+                <p className="text-gray-400 text-sm font-medium">
+                  No comments yet
+                </p>
+              </div>
             )}
           </div>
+
         </div>
       </div>
     </motion.div>

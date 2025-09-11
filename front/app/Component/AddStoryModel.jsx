@@ -1,11 +1,13 @@
 'use client';
 import React, { useState } from 'react';
-import { IoClose } from 'react-icons/io5';
+import { IoClose, IoImage, IoTrash } from 'react-icons/io5';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useStory } from '../Context/StoryContext';
 
 const AddStoryModel = ({ setIsStory, isStory }) => {
   const [storyText, setStoryText] = useState('');
   const [storyImage, setStoryImage] = useState(null);
+  const [error, setError] = useState('');
   const { addNewStory } = useStory();
 
   const handleImageChange = (e) => {
@@ -13,17 +15,19 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
     if (file) {
       setStoryImage(file);
       setStoryText('');
+      setError('');
     }
   };
 
   const handleTextChange = (e) => {
     setStoryText(e.target.value);
     setStoryImage(null);
+    setError('');
   };
 
   const handleSubmit = () => {
     if (!storyText && !storyImage) {
-      alert('You Must Add Image or Text');
+      setError('You must add text or image');
       return;
     }
 
@@ -39,77 +43,100 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
   const clearInput = () => {
     setStoryImage(null);
     setStoryText('');
+    setError('');
   };
 
   return (
-    <div className={`${isStory ? 'flex' : 'hidden'} fixed inset-0 bg-black/70 z-50 items-center justify-center`}>
-      <div className="bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text w-[90%] max-w-md rounded-2xl shadow-xl p-6 relative transition-all duration-300">
-
-        {/* Close */}
-        <button
-          className="absolute top-4 right-4 text-lightMode-text2 dark:text-darkMode-text2 hover:text-red-500 text-2xl"
-          onClick={() => setIsStory(false)}
+    <AnimatePresence>
+      {isStory && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
         >
-          <IoClose />
-        </button>
-
-        {/* Title */}
-        <h2 className="text-center text-2xl font-bold mb-6 text-lightMode-text dark:text-darkMode-text">Add Story</h2>
-
-        {/* Textarea */}
-        {!storyImage && (
-          <textarea
-            value={storyText}
-            onChange={handleTextChange}
-            placeholder="Write your story..."
-            rows={4}
-            className="w-full bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text p-3 rounded-xl mb-4 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
-        )}
-
-        {/* Image Upload */}
-        {!storyText && (
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2 text-lightMode-text2 dark:text-darkMode-text2">Choose Image</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-600 file:text-white hover:file:bg-green-500 transition"
-            />
-          </div>
-        )}
-
-        {/* Preview */}
-        {storyImage && (
-          <div className="mb-4">
-            <img
-              src={URL.createObjectURL(storyImage)}
-              alt="Preview"
-              className="rounded-xl max-h-64 object-contain mx-auto border border-gray-200 dark:border-gray-700"
-            />
-          </div>
-        )}
-
-        {/* Clear Button */}
-        {(storyText || storyImage) && (
-          <button
-            onClick={clearInput}
-            className="block mx-auto text-sm text-red-500 hover:underline mb-4"
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="relative w-[90%] max-w-md bg-white dark:bg-[#1c1c1e] rounded-3xl shadow-2xl p-6 flex flex-col"
           >
-            remove
-          </button>
-        )}
+            {/* Close Button */}
+            <button
+              className="absolute top-4 right-4 text-gray-700 dark:text-gray-300 hover:text-red-500 text-2xl transition"
+              onClick={() => setIsStory(false)}
+            >
+              <IoClose />
+            </button>
 
-        {/* Submit Button */}
-        <button
-          onClick={handleSubmit}
-          className="bg-green-600 hover:bg-green-500 w-full py-2 rounded-xl text-white font-semibold transition text-lg"
-        >
-          Share Story
-        </button>
-      </div>
-    </div>
+            {/* Title */}
+            <h2 className="text-center text-3xl font-extrabold mb-4 text-gray-900 dark:text-gray-100">
+              Add Story
+            </h2>
+            <div className="border-b border-gray-300 dark:border-gray-700 mb-4" />
+
+            {/* Error Message */}
+            {error && (
+              <p className="text-red-500 text-sm text-center mb-2">{error}</p>
+            )}
+
+            {/* Textarea */}
+            {!storyImage && (
+              <textarea
+                value={storyText}
+                onChange={handleTextChange}
+                placeholder="Write your story..."
+                rows={4}
+                className="w-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-4 rounded-2xl mb-4 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+              />
+            )}
+
+            {/* Image Upload */}
+            {!storyText && (
+              <div className="mb-4">
+                <label className="flex items-center justify-center gap-2 w-full cursor-pointer bg-green-600 hover:bg-green-500 text-white font-semibold py-2 px-4 rounded-2xl transition">
+                  <IoImage className="text-xl" />
+                  <span>Upload Image</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            )}
+
+            {/* Image Preview */}
+            {storyImage && (
+              <div className="relative mb-4">
+                <img
+                  src={URL.createObjectURL(storyImage)}
+                  alt="Preview"
+                  className="rounded-2xl max-h-64 w-full object-contain border border-gray-200 dark:border-gray-700"
+                />
+                <button
+                  onClick={clearInput}
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition"
+                  title="Remove Image"
+                >
+                  <IoTrash className="text-sm" />
+                </button>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              onClick={handleSubmit}
+              className="mt-auto bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-500 w-full py-3 rounded-2xl text-white font-bold text-lg transition transform hover:scale-105"
+            >
+              Share Story
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
