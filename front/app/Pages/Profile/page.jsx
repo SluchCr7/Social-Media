@@ -832,8 +832,8 @@ const StatBlock = ({ label, value = 0, onClick }) => (
 )
 
 const Tabs = ({ activeTab, setActiveTab }) => (
-  <div className="mt-6 border-b border-gray-200 dark:border-gray-700">
-    <div className="flex gap-6 justify-center">
+  <div className="mt-6 border-b w-[60%] mx-auto border-gray-200 dark:border-gray-700">
+    <div className="flex gap-6 justify-around w-full">
       {tabs.map((tab) => (
         <button
           key={tab}
@@ -851,10 +851,10 @@ const Tabs = ({ activeTab, setActiveTab }) => (
 )
 
 const TabContent = ({ activeTab, combinedPosts, posts, userData }) => (
-  <div className="mt-6">
+  <div className="mt-6 w-full">
     <AnimatePresence mode="wait" initial={false}>
       {activeTab === 'Posts' && (
-        <motion.div key="posts" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4">
+        <motion.div key="posts" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-full">
           {combinedPosts?.length > 0
             ? combinedPosts.map((post) => <SluchitEntry key={post?._id} post={post} />)
             : <div className="text-center text-gray-500 py-10">No posts yet.</div>}
@@ -862,7 +862,7 @@ const TabContent = ({ activeTab, combinedPosts, posts, userData }) => (
       )}
 
       {activeTab === 'Saved' && (
-        <motion.div key="saved" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
+        <motion.div key="saved" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-full">
           {posts?.filter((p) => p.saved.includes(userData?._id)).length > 0
             ? posts.filter((p) => p.saved.includes(userData?._id)).map((post) => <SluchitEntry key={post?._id} post={post} />)
             : <div className="text-center text-gray-500 py-10">You haven’t saved any posts yet.</div>}
@@ -870,7 +870,7 @@ const TabContent = ({ activeTab, combinedPosts, posts, userData }) => (
       )}
 
       {activeTab === 'Comments' && (
-        <motion.div key="comments" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4">
+        <motion.div key="comments" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-full">
           {userData?.comments?.length > 0
             ? userData.comments.map((comment) => (
               <CommentCard key={comment?._id} comment={comment} />

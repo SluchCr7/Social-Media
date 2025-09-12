@@ -6,7 +6,7 @@ const page = () => {
       <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
         ⚡ Coming Soon!
       </h1>
-      <p className="text-gray-600 dark:text-gray-400 text-sm tracking-widest">
+      <p className="text-gray-600 dark:text-gray-400 text-sm max-w-xl tracking-widest">
         The Challenges feature is under development and will be available soon.  
         Stay tuned for exciting new competitions and activities!
       </p>
