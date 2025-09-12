@@ -111,7 +111,7 @@ const ProfilePage = () => {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="w-full px-4 mt-12 text-center"
+          className="w-full px-4 mt-6 text-center flex flex-col items-center gap-4"
         >
           <div className="flex items-center justify-center gap-2">
             <h1 className="text-3xl font-bold">{userData?.username || 'Username'}</h1>
@@ -122,7 +122,7 @@ const ProfilePage = () => {
               />
             )}
           </div>
-          <span className="text-gray-400 text-sm -mt-1 block">
+          <span className="text-gray-400 text-sm block">
             {userData?.profileName || ''}
           </span>
           <p className="text-base text-gray-500 mt-2 max-w-xl mx-auto line-clamp-3">
