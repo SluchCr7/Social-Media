@@ -14,6 +14,7 @@ import CommentCard from '@/app/Component/UserComponents/CommentCard'
 import TabsContent from '@/app/Component/UserComponents/TabsContent'
 import Tabs from '@/app/Component/UserComponents/Tabs'
 import StatBlock from '@/app/Component/UserComponents/StatBlock'
+import FollowModal from '@/app/Component/UserComponents/FollowModal'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
