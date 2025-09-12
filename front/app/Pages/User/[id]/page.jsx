@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import CommentCard from '@/app/Component/UserComponents/CommentCard'
 import TabsContent from '@/app/Component/UserComponents/TabsContent'
 import Tabs from '@/app/Component/UserComponents/Tabs'
+import StatBlock from '@/app/Component/UserComponents/StatBlock'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -24,7 +25,8 @@ const Page = ({ params }) => {
   const [isBlockedByMe, setIsBlockedByMe] = useState(false);
   const [userSelected, setUserSelected] = useState({})
   const [activeTab, setActiveTab] = useState('Posts')
-
+  const [showMenu, setShowMenu] = useState(false)
+  const [menuType, setMenuType] = useState('followers')
   useEffect(() => {
     const matchedUser = users.find((u) => u?._id === id)
     if (matchedUser) setUserSelected(matchedUser)
@@ -63,7 +65,7 @@ const Page = ({ params }) => {
         <p className="text-sm text-center text-gray-300 max-w-md px-4">{userSelected?.description || 'No bio provided.'}</p>
 
         {/* Stats */}
-        <div className="flex gap-8 text-center mt-4">
+        {/* <div className="flex gap-8 text-center mt-4">
           <div>
             <h2 className="text-lg font-bold">{userSelected?.posts?.length || 0}</h2>
             <p className="text-sm text-gray-400">Posts</p>
@@ -76,8 +78,12 @@ const Page = ({ params }) => {
             <h2 className="text-lg font-bold">{userSelected?.following?.length || 0}</h2>
             <p className="text-sm text-gray-400">Following</p>
           </div>
+        </div> */}
+        <div className="flex justify-center gap-10 mt-6">
+          <StatBlock label="Posts" value={userData?.posts?.length} />
+          <StatBlock label="Followers" value={userData?.followers?.length} onClick={() => { setMenuType('followers'); setShowMenu(true) }} />
+          <StatBlock label="Following" value={userData?.following?.length} onClick={() => { setMenuType('following'); setShowMenu(true) }} />
         </div>
-
         {/* Follow Button */}
         {isLogin && user?._id !== userSelected?._id && (
           <button
@@ -119,7 +125,7 @@ const Page = ({ params }) => {
           <TabsContent activeTab={activeTab} combinedPosts={combinedPosts} posts={posts} userSelected={userSelected} />
         </>
       )}
-      
+      <FollowModal visible={showMenu} onClose={() => setShowMenu(false)} type={menuType} list={menuType === 'followers' ? userSelected?.followers : userSelected?.following} />
     </div>
   )
 }
