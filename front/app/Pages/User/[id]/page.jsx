@@ -52,34 +52,44 @@ const Page = ({ params }) => {
     <div className="w-full flex flex-col items-center pt-10 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen">
       {/* Profile Info */}
       <div className="flex flex-col items-center gap-4">
-        <div className="relative w-32 h-32 rounded-full border-4 border-gray-700 overflow-hidden">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="relative w-36 h-36 rounded-full overflow-hidden shadow-lg"
+        >
           <Image
             src={userSelected?.profilePhoto?.url || '/default-profile.png'}
             alt="Profile"
             fill
-            className="object-cover transition duration-300 hover:opacity-90"
+            className="object-cover transition-transform duration-300 hover:scale-105"
           />
-        </div>
+        </motion.div>
 
-        <h1 className="text-2xl font-bold">{userSelected?.username || 'Username'}</h1>
-        <span className="text-gray-400">{userSelected?.profileName || 'Profile Name'}</span>
-        <p className="text-sm text-center text-gray-300 max-w-md px-4">{userSelected?.description || 'No bio provided.'}</p>
 
+        {/* اسم المستخدم + الاسم الكامل */}
+        <motion.h1
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="text-3xl font-bold"
+        >
+          {userSelected?.username || 'Username'}
+        </motion.h1>
+        <span className="text-gray-400 -mt-2">
+          {userSelected?.profileName || 'Profile Name'}
+        </span>
+
+        {/* Bio */}
+        <motion.p
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="text-base text-center text-gray-500 max-w-lg px-4 line-clamp-3"
+        >
+          {userSelected?.description || 'No bio provided.'}
+        </motion.p>
         {/* Stats */}
-        {/* <div className="flex gap-8 text-center mt-4">
-          <div>
-            <h2 className="text-lg font-bold">{userSelected?.posts?.length || 0}</h2>
-            <p className="text-sm text-gray-400">Posts</p>
-          </div>
-          <div>
-            <h2 className="text-lg font-bold">{userSelected?.followers?.length || 0}</h2>
-            <p className="text-sm text-gray-400">Followers</p>
-          </div>
-          <div>
-            <h2 className="text-lg font-bold">{userSelected?.following?.length || 0}</h2>
-            <p className="text-sm text-gray-400">Following</p>
-          </div>
-        </div> */}
         <div className="flex justify-center gap-10 mt-6">
           <StatBlock label="Posts" value={userSelected?.posts?.length} />
           <StatBlock label="Followers" value={userSelected?.followers?.length} onClick={() => { setMenuType('followers'); setShowMenu(true) }} />
@@ -87,9 +97,15 @@ const Page = ({ params }) => {
         </div>
         {/* Follow Button */}
         {isLogin && user?._id !== userSelected?._id && (
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="flex gap-3 mt-4"
+        >
           <button
             onClick={() => followUser(userSelected?._id)}
-            className={`flex items-center gap-2 mt-4 px-4 py-2 rounded-full border text-sm font-medium transition-all duration-300
+            className={`flex items-center gap-2 px-6 py-2 rounded-xl border text-sm font-medium transition-all duration-300
               ${isFollowing
                 ? 'text-red-600 border-red-600 hover:bg-red-600 hover:text-white'
                 : 'text-green-600 border-green-600 hover:bg-green-600 hover:text-white'
@@ -98,6 +114,15 @@ const Page = ({ params }) => {
             {isFollowing ? <RiUserUnfollowLine className="text-lg" /> : <RiUserFollowLine className="text-lg" />}
             {isFollowing ? 'Unfollow' : 'Follow'}
           </button>
+
+          {/* زر خيارات إضافية */}
+          <button
+            onClick={() => setShowMenu(true)}
+            className="px-4 py-2 border rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          >
+            ⋯
+          </button>
+        </motion.div>
         )}
       </div>
       {isBlockedByMe ? (
@@ -130,11 +155,6 @@ const Page = ({ params }) => {
     </div>
   )
 }
-
-
-
-
-
 
 
 export default Page
