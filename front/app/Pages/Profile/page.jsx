@@ -745,7 +745,7 @@ const ProfilePage = () => {
         <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {/* Tab Content */}
-        <TabsContent activeTab={activeTab} combinedPosts={combinedPosts} posts={posts} userData={userData} />
+        <TabsContent activeTab={activeTab} combinedPosts={combinedPosts} posts={posts} userSelected={userData} />
       </div>
 
       {/* Modals */}
