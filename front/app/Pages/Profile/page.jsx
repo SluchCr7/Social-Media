@@ -24,7 +24,6 @@ import FollowModal from '@/app/Component/UserComponents/FollowModal'
 // ---------------- Constants ----------------
 const tabs = ['Posts', 'Saved', 'Comments']
 
-// ---------------- Components ----------------
 
 
 // ---------------- Main Page ----------------
