@@ -22,13 +22,13 @@ const MenuFriends = () => {
               key={user._id}
               className="flex items-center justify-between px-5 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-[#1f2124] transition-all rounded-xl group"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <div className="relative">
                   <Image
                     src={user.profilePhoto?.url || '/default-avatar.png'}
                     alt={user.username}
-                    width={52}
-                    height={52}
+                    width={42}
+                    height={42}
                     className="rounded-full border border-gray-300 dark:border-gray-600 group-hover:ring-2 group-hover:ring-green-500 transition-transform duration-200"
                   />
                   {/* Tooltip */}
