@@ -624,6 +624,9 @@ import Loading from '@/app/Component/Loading'
 import UpdateProfile from '@/app/Component/UpdateProfile'
 import AddStoryModel from '@/app/Component/AddStoryModel'
 import InfoAboutUser from '@/app/Component/UserComponents/InfoAboutUser'
+import CommentCard from '@/app/Component/UserComponents/CommentCard'
+import TabsContent from '@/app/Component/UserComponents/TabsContent'
+import Tabs from '@/app/Component/UserComponents/Tabs'
 
 // ---------------- Constants ----------------
 const tabs = ['Posts', 'Saved', 'Comments']
@@ -812,7 +815,7 @@ const ProfilePage = () => {
         <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {/* Tab Content */}
-        <TabContent activeTab={activeTab} combinedPosts={combinedPosts} posts={posts} userData={userData} />
+        <TabsContent activeTab={activeTab} combinedPosts={combinedPosts} posts={posts} userData={userData} />
       </div>
 
       {/* Modals */}
@@ -831,88 +834,7 @@ const StatBlock = ({ label, value = 0, onClick }) => (
   </div>
 )
 
-const Tabs = ({ activeTab, setActiveTab }) => (
-  <div className="mt-6 border-b w-[60%] mx-auto border-gray-200 dark:border-gray-700">
-    <div className="flex gap-6 justify-around w-full">
-      {tabs.map((tab) => (
-        <button
-          key={tab}
-          onClick={() => setActiveTab(tab)}
-          className={`py-3 relative font-semibold text-sm ${activeTab === tab ? 'text-purple-600 dark:text-purple-400' : 'text-gray-500'}`}
-        >
-          {tab}
-          {activeTab === tab && (
-            <motion.span layoutId="underline" className="absolute -bottom-[1px] left-0 right-0 h-1 bg-purple-500 rounded" />
-          )}
-        </button>
-      ))}
-    </div>
-  </div>
-)
 
-const TabContent = ({ activeTab, combinedPosts, posts, userData }) => (
-  <div className="mt-6 w-full">
-    <AnimatePresence mode="wait" initial={false}>
-      {activeTab === 'Posts' && (
-        <motion.div key="posts" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-[90%] mx-auto">
-          {combinedPosts?.length > 0
-            ? combinedPosts.map((post) => <SluchitEntry key={post?._id} post={post} />)
-            : <div className="text-center text-gray-500 py-10">No posts yet.</div>}
-        </motion.div>
-      )}
 
-      {activeTab === 'Saved' && (
-        <motion.div key="saved" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-[90%] mx-auto">
-          {posts?.filter((p) => p.saved.includes(userData?._id)).length > 0
-            ? posts.filter((p) => p.saved.includes(userData?._id)).map((post) => <SluchitEntry key={post?._id} post={post} />)
-            : <div className="text-center text-gray-500 py-10">You haven’t saved any posts yet.</div>}
-        </motion.div>
-      )}
-
-      {activeTab === 'Comments' && (
-        <motion.div key="comments" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-[90%] mx-auto">
-          {userData?.comments?.length > 0
-            ? userData.comments.map((comment) => (
-              <CommentCard key={comment?._id} comment={comment} />
-            ))
-            : <div className="text-center text-gray-500 py-10">You haven’t commented yet.</div>}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  </div>
-)
-
-const CommentCard = ({ comment }) => (
-  <div className="w-full bg-gray-900/70 rounded-xl p-5 shadow-md flex flex-col gap-4">
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <Image src={comment.owner?.profilePhoto?.url || '/default-profile.png'} alt="Commenter" width={36} height={36} className="rounded-full object-cover" />
-        <div>
-          <p className="text-sm font-semibold">{comment.owner?.username}</p>
-          <p className="text-xs text-gray-400">{comment.owner?.profileName}</p>
-        </div>
-      </div>
-      <span className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleDateString()}</span>
-    </div>
-
-    <p className="text-sm text-gray-300 pl-1 border-l-2 border-gray-600">{comment.text}</p>
-
-    {comment.postId && (
-      <div className="flex gap-3 items-start border-t border-gray-700 pt-4">
-        <Image src={comment.postId?.owner?.profilePhoto?.url || '/default-profile.png'} alt="Post owner" width={36} height={36} className="rounded-full object-cover mt-1" />
-        <div className="flex flex-col bg-gray-800/50 px-4 py-3 rounded-lg w-full">
-          <div className="flex justify-between items-center mb-1">
-            <div>
-              <p className="text-sm font-semibold">{comment.postId?.owner?.username}</p>
-              <p className="text-xs text-gray-400">{comment.postId?.owner?.profileName}</p>
-            </div>
-            <span className="text-xs text-gray-500">{new Date(comment.postId?.createdAt).toLocaleDateString()}</span>
-          </div>
-          <p className="text-sm text-gray-300">{comment.postId?.text || 'No post content available.'}</p>
-        </div>
-      </div>
-    )}
-  </div>
-)
 
 export default ProfilePage
