@@ -854,7 +854,7 @@ const TabContent = ({ activeTab, combinedPosts, posts, userData }) => (
   <div className="mt-6 w-full">
     <AnimatePresence mode="wait" initial={false}>
       {activeTab === 'Posts' && (
-        <motion.div key="posts" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-full">
+        <motion.div key="posts" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-[90%]">
           {combinedPosts?.length > 0
             ? combinedPosts.map((post) => <SluchitEntry key={post?._id} post={post} />)
             : <div className="text-center text-gray-500 py-10">No posts yet.</div>}
@@ -862,7 +862,7 @@ const TabContent = ({ activeTab, combinedPosts, posts, userData }) => (
       )}
 
       {activeTab === 'Saved' && (
-        <motion.div key="saved" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-full">
+        <motion.div key="saved" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-[90%]">
           {posts?.filter((p) => p.saved.includes(userData?._id)).length > 0
             ? posts.filter((p) => p.saved.includes(userData?._id)).map((post) => <SluchitEntry key={post?._id} post={post} />)
             : <div className="text-center text-gray-500 py-10">You haven’t saved any posts yet.</div>}
@@ -870,7 +870,7 @@ const TabContent = ({ activeTab, combinedPosts, posts, userData }) => (
       )}
 
       {activeTab === 'Comments' && (
-        <motion.div key="comments" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-full">
+        <motion.div key="comments" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-[90%]">
           {userData?.comments?.length > 0
             ? userData.comments.map((comment) => (
               <CommentCard key={comment?._id} comment={comment} />
