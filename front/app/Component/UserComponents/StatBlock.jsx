@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 const AnimatedCounter = ({ value = 0, duration = 0.8, className = '' }) => {
   const [display, setDisplay] = useState(0)
