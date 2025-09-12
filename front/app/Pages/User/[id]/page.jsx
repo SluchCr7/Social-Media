@@ -81,9 +81,9 @@ const Page = ({ params }) => {
           </div>
         </div> */}
         <div className="flex justify-center gap-10 mt-6">
-          <StatBlock label="Posts" value={userData?.posts?.length} />
-          <StatBlock label="Followers" value={userData?.followers?.length} onClick={() => { setMenuType('followers'); setShowMenu(true) }} />
-          <StatBlock label="Following" value={userData?.following?.length} onClick={() => { setMenuType('following'); setShowMenu(true) }} />
+          <StatBlock label="Posts" value={userSelected?.posts?.length} />
+          <StatBlock label="Followers" value={userSelected?.followers?.length} onClick={() => { setMenuType('followers'); setShowMenu(true) }} />
+          <StatBlock label="Following" value={userSelected?.following?.length} onClick={() => { setMenuType('following'); setShowMenu(true) }} />
         </div>
         {/* Follow Button */}
         {isLogin && user?._id !== userSelected?._id && (
