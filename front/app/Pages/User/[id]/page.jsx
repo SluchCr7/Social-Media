@@ -105,6 +105,14 @@ const Page = ({ params }) => {
     )
   }
 
+  const pinnedPosts = userSelected?.pinsPosts || []
+  const pinnedIds = new Set(pinnedPosts.map((p) => p?._id))
+  const regularPosts = (userSelected?.posts || []).filter((p) => !pinnedIds.has(p?._id))
+  const combinedPosts = [
+    ...pinnedPosts.map((post) => ({ ...post, isPinned: true })),
+    ...regularPosts.map((post) => ({ ...post, isPinned: false })),
+  ]
+
   return (
     <div className="w-full flex flex-col items-center pt-10 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen">
       {/* Profile Info */}
