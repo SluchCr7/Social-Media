@@ -1,192 +1,289 @@
-import React from 'react'
+'use client';
+
+import React, { useState } from 'react';
 import {
   FaMoon,
   FaSun,
   FaLock,
   FaUserCog,
   FaTrashAlt,
+  FaHistory,
 } from 'react-icons/fa';
-import { CiChat1 } from "react-icons/ci";
+import { CiChat1 } from 'react-icons/ci';
+import clsx from 'clsx';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const tabs = [
+  { id: 'appearance', label: 'Appearance', icon: <FaSun /> },
+  { id: 'security', label: 'Security', icon: <FaLock /> },
+  { id: 'chat', label: 'Chat Colors', icon: <CiChat1 /> },
+  { id: 'history', label: 'Login History', icon: <FaHistory /> },
+  { id: 'account', label: 'Account', icon: <FaUserCog /> },
+];
 
 const SettingPageFront = ({
-    darkMode, user, handleToggleTheme, handleChangePassword, oldPassword,setOldPassword , newPassword , setNewPassword , confirmPassword , setConfirmPassword
-    ,passwordMessage,colors,handleBackgroundChange,setShowConfirmDelete,deleteUser,showConfirmDelete,formattedDate
-    ,backgroundValue
+  darkMode,
+  user,
+  handleToggleTheme,
+  handleChangePassword,
+  oldPassword,
+  setOldPassword,
+  newPassword,
+  setNewPassword,
+  confirmPassword,
+  setConfirmPassword,
+  passwordMessage,
+  colors,
+  handleBackgroundChange,
+  setShowConfirmDelete,
+  deleteUser,
+  showConfirmDelete,
+  formattedDate,
+  backgroundValue,
 }) => {
+  const [activeTab, setActiveTab] = useState('appearance');
+
   return (
-    <div className="min-h-screen p-8 text-gray-900 dark:text-white w-full transition-all">
-      <h1 className="text-3xl font-bold mb-10">⚙️ Settings</h1>
-      <span className="text-sm font-semibold mb-4 pl-2">Hello {user?.username}</span>
-
-      {/* Appearance */}
-      <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
-        <div className="flex items-start flex-col md:items-center md:flex-row justify-between">
-          <div className="flex items-center gap-4">
-            {darkMode ? <FaMoon className="text-xl" /> : <FaSun className="text-xl" />}
-            <div>
-              <h2 className="text-lg font-semibold">Appearance</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Toggle between light and dark mode
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={handleToggleTheme}
-            className={`w-12 h-6 flex items-center ${darkMode ? 'bg-yellow-400' : 'bg-gray-300'} rounded-full p-1 transition-all`}
-          >
-            <div
-              className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                darkMode ? 'translate-x-6' : 'translate-x-0'
-              }`}
-            />
-          </button>
-        </div>
-      </section>
-      
-      {/* Security */}
-      <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
-        <div className="flex items-center gap-4 mb-4">
-          <FaLock className="text-xl" />
-          <h2 className="text-lg font-semibold">Security</h2>
-        </div>
-        <form onSubmit={handleChangePassword} className="grid gap-4">
-          <div className="relative">
-            <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="password"
-              placeholder="Current Password"
-              className="w-full pl-10 p-2 rounded border dark:border-gray-700 dark:bg-transparent"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              required
-            />
-          </div>
-          <div className="relative">
-            <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="password"
-              placeholder="New Password"
-              className="w-full p-2 rounded border dark:border-gray-700 dark:bg-transparent"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-            />
-              
-          </div>
-          <div className="relative">
-            <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="password"
-              placeholder="Confirm New Password"
-              className="w-full p-2 rounded border dark:border-gray-700 dark:bg-transparent"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          
-          <button 
-            type="submit"
-            className="self-start bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition flex items-center gap-2"
-          >
-            <span>Change Password</span>
-          </button>
-          {passwordMessage && (
-            <p className="text-sm mt-1 text-red-500 dark:text-red-400">{passwordMessage}</p>
-          )}
-        </form>
-      </section>
-
-
-      {/* Chat Colors */}
-      <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
-        <div className="flex items-center gap-4 mb-4">
-          <CiChat1 className="text-xl" />
-          <h2 className="text-lg font-semibold">Chat Colors</h2>
-        </div>
-        <div className="flex items-start flex-col gap-4 mb-4">
-          <label className="text-base font-semibold text-lightMode-text dark:text-darkMode-text" htmlFor="color">Color Chat</label>
-          {/* Chat Colors */}
-          <div className="flex flex-wrap gap-4 mb-4">
-            {colors.map(({ name, value }) => (
-              <div
-                key={name}
-                title={name}
-                onClick={()=> handleBackgroundChange('color', value)}
+    <div className="w-full min-h-screen flex flex-col md:flex-row bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors">
+      {/* Sidebar */}
+      <aside className="w-full md:w-72 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+        <div className="p-6">
+          <h1 className="text-2xl font-bold mb-2">⚙️ Settings</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            Hello <span className="font-medium">{user?.username}</span>
+          </p>
+          <nav className="flex md:flex-col gap-2 overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
                 className={clsx(
-                  'w-10 h-10 rounded-full border-2 cursor-pointer transition-all',
-                  backgroundValue === value
-                    ? 'ring-2 ring-offset-2 ring-blue-500 border-white'
-                    : 'border-gray-300'
+                  'flex items-center gap-3 px-4 py-2 rounded-lg transition font-medium',
+                  activeTab === tab.id
+                    ? 'bg-blue-600 text-white shadow'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                 )}
-                style={{ backgroundColor: value }}
-              ></div>
-            ))}
-          </div>
-        </div>
-
-        {/* Preview or label */}
-        <p className="text-sm text-gray-600">
-          Selected:{" "}
-          <span className="font-semibold" style={{ color: backgroundValue }}>
-            {
-              colors.find((c) => c.value === backgroundValue)?.name ||
-              'Unknown'
-            }
-          </span>
-        </p>
-      </section>
-
-      {/* Last Login */}
-      <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow mb-6">
-      <div className="flex items-center gap-4 mb-4">
-        <CiChat1 className="text-xl" />
-        <h2 className="text-lg font-semibold">Last Login History</h2>
-      </div>
-      <p className="text-sm text-gray-600 dark:text-gray-300">
-        Your last login was on: <span className="font-medium text-lightMode-fg dark:text-darkMode-fg">{formattedDate}</span>
-      </p>
-      </section>
-
-
-      {/* Account */}
-      <section className="bg-lightMode-menu dark:bg-darkMode-menu p-6 rounded-2xl shadow">
-        <div className="flex items-center gap-4 mb-4">
-          <FaUserCog className="text-xl" />
-          <h2 className="text-lg font-semibold">Account</h2>
-        </div>
-
-        <button
-          onClick={() => setShowConfirmDelete(true)}
-          className="flex items-center gap-2 text-red-600 hover:text-red-700 font-medium"
-        >
-          <FaTrashAlt />
-          Delete Account
-        </button>
-
-        {/* Confirm Delete */}
-        {showConfirmDelete && (
-          <div className="mt-4 p-4 border border-red-600 bg-red-50 dark:bg-red-900/30 rounded">
-            <p className="text-sm mb-3">Are you sure you want to delete your account? This action is irreversible.</p>
-            <div className="flex gap-4">
-              <button
-                onClick={deleteUser}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Yes, Delete</button>
-              <button
-                onClick={() => setShowConfirmDelete(false)}
-                className="px-4 py-2 rounded border dark:border-gray-600"
               >
-                Cancel
+                <span className="text-lg">{tab.icon}</span>
+                <span>{tab.label}</span>
               </button>
-            </div>
-          </div>
-        )}
-      </section>
+            ))}
+          </nav>
+        </div>
+      </aside>
 
+      {/* Content */}
+      <main className="flex-1 p-6">
+        <AnimatePresence mode="wait">
+          {/* Appearance */}
+          {activeTab === 'appearance' && (
+            <motion.section
+              key="appearance"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+              className="max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow p-6"
+            >
+              <header className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-4">
+                  {darkMode ? (
+                    <FaMoon className="text-xl" />
+                  ) : (
+                    <FaSun className="text-xl" />
+                  )}
+                  <div>
+                    <h2 className="text-lg font-semibold">Appearance</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Switch between Light and Dark theme
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleToggleTheme}
+                  className={`w-14 h-7 flex items-center rounded-full p-1 transition-all ${
+                    darkMode ? 'bg-yellow-400' : 'bg-gray-300'
+                  }`}
+                >
+                  <div
+                    className={`bg-white w-5 h-5 rounded-full shadow transform transition-transform ${
+                      darkMode ? 'translate-x-7' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </header>
+            </motion.section>
+          )}
 
+          {/* Security */}
+          {activeTab === 'security' && (
+            <motion.section
+              key="security"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+              className="max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow p-6"
+            >
+              <header className="flex items-center gap-4 mb-4">
+                <FaLock className="text-xl" />
+                <h2 className="text-lg font-semibold">Security</h2>
+              </header>
+              <form onSubmit={handleChangePassword} className="grid gap-4">
+                <input
+                  type="password"
+                  placeholder="Current Password"
+                  className="w-full p-3 rounded border border-gray-300 dark:border-gray-700 dark:bg-gray-800"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  className="w-full p-3 rounded border border-gray-300 dark:border-gray-700 dark:bg-gray-800"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="Confirm New Password"
+                  className="w-full p-3 rounded border border-gray-300 dark:border-gray-700 dark:bg-gray-800"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="submit"
+                  className="self-start bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+                >
+                  Change Password
+                </button>
+                {passwordMessage && (
+                  <p className="text-sm mt-1 text-red-500 dark:text-red-400">
+                    {passwordMessage}
+                  </p>
+                )}
+              </form>
+            </motion.section>
+          )}
+
+          {/* Chat Colors */}
+          {activeTab === 'chat' && (
+            <motion.section
+              key="chat"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+              className="max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow p-6"
+            >
+              <header className="flex items-center gap-4 mb-4">
+                <CiChat1 className="text-xl" />
+                <h2 className="text-lg font-semibold">Chat Colors</h2>
+              </header>
+              <div className="flex flex-wrap gap-4 mb-4">
+                {colors.map(({ name, value }) => (
+                  <div
+                    key={name}
+                    title={name}
+                    onClick={() => handleBackgroundChange('color', value)}
+                    className={clsx(
+                      'w-10 h-10 rounded-full border-2 cursor-pointer transition-all',
+                      backgroundValue === value
+                        ? 'ring-2 ring-offset-2 ring-blue-500 border-white'
+                        : 'border-gray-300'
+                    )}
+                    style={{ backgroundColor: value }}
+                  />
+                ))}
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Selected:{' '}
+                <span
+                  className="font-semibold"
+                  style={{ color: backgroundValue }}
+                >
+                  {colors.find((c) => c.value === backgroundValue)?.name ||
+                    'Unknown'}
+                </span>
+              </p>
+            </motion.section>
+          )}
+
+          {/* Login History */}
+          {activeTab === 'history' && (
+            <motion.section
+              key="history"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+              className="max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow p-6"
+            >
+              <header className="flex items-center gap-4 mb-4">
+                <FaHistory className="text-xl" />
+                <h2 className="text-lg font-semibold">Last Login</h2>
+              </header>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Your last login was on:{' '}
+                <span className="font-medium text-gray-900 dark:text-gray-100">
+                  {formattedDate}
+                </span>
+              </p>
+            </motion.section>
+          )}
+
+          {/* Account */}
+          {activeTab === 'account' && (
+            <motion.section
+              key="account"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+              className="max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow p-6"
+            >
+              <header className="flex items-center gap-4 mb-4">
+                <FaUserCog className="text-xl" />
+                <h2 className="text-lg font-semibold">Account</h2>
+              </header>
+              <button
+                onClick={() => setShowConfirmDelete(true)}
+                className="flex items-center gap-2 text-red-600 hover:text-red-700 font-medium"
+              >
+                <FaTrashAlt />
+                Delete Account
+              </button>
+              {showConfirmDelete && (
+                <div className="mt-4 p-4 border border-red-600 bg-red-50 dark:bg-red-900/30 rounded-lg">
+                  <p className="text-sm mb-3">
+                    Are you sure you want to delete your account? This action
+                    cannot be undone.
+                  </p>
+                  <div className="flex gap-4">
+                    <button
+                      onClick={deleteUser}
+                      className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                    >
+                      Yes, Delete
+                    </button>
+                    <button
+                      onClick={() => setShowConfirmDelete(false)}
+                      className="px-4 py-2 rounded border dark:border-gray-600"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.section>
+          )}
+        </AnimatePresence>
+      </main>
     </div>
-  )
-}
+  );
+};
 
-export default SettingPageFront
+export default SettingPageFront;

@@ -19,7 +19,7 @@ export const AuthContextProvider = ({ children }) => {
   const [verifyStatus, setVerifyStatus] = useState(false);
   const { showAlert } = useAlert();
   const [suggestedUsers, setSuggestedUsers] = useState([]);
-
+  const [showAllSuggestedUsers , setShowAllSuggestedUsers] = useState(false)
   // ------------------- AUTH ACTIONS -------------------
 
   const login = async (email, password) => {
@@ -360,7 +360,7 @@ export const AuthContextProvider = ({ children }) => {
         onlineUsers,
         blockOrUnblockUser,
         suggestedUsers,
-        deleteUser
+        deleteUser,showAllSuggestedUsers , setShowAllSuggestedUsers
       }}
     >
       {children}

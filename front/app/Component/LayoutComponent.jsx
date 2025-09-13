@@ -12,6 +12,7 @@ import { useReport } from '../Context/ReportContext';
 import AddNewReport from './AddNewReport';
 import ViewImage from './ViewImage';
 import Loader from './Loader';
+import MenuAllSuggestedFriends from './MenuAllSuggestedFreinds';
 
 const LayoutComponent = ({ children }) => {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -39,6 +40,7 @@ const LayoutComponent = ({ children }) => {
     '/Pages/Register',
     '/Pages/Messanger',
     '/Pages/Forgot',
+    '/Pages/Setting',
     '/Pages/ResetPassword',
     '/Pages/ResetPassword/[id]/[token]',
     '/Pages/UserVerify/[id]/verify/[token]',
@@ -123,6 +125,7 @@ const LayoutComponent = ({ children }) => {
           {imageView && (
             <ViewImage imageView={imageView} setImageView={setImageView} />
           )}
+          <MenuAllSuggestedFriends/>
         </div>
       </div>
     </div>

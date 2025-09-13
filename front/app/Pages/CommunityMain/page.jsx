@@ -1,220 +1,322 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import { useCommunity } from '@/app/Context/CommunityContext';
-import { useAuth } from '@/app/Context/AuthContext';
-import { FaPlus, FaFilter, FaUsers, FaSearch } from 'react-icons/fa';
-import Image from 'next/image';
-import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+'use client'
 
-const CommunityPage = () => {
-  const { communities, addCommunity } = useCommunity();
-  const { user } = useAuth();
+import React, { useEffect, useMemo, useState, useCallback } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
+import { FaPlus, FaFilter, FaUsers, FaSearch } from 'react-icons/fa'
+import { useCommunity } from '@/app/Context/CommunityContext'
+import { useAuth } from '@/app/Context/AuthContext'
 
-  const [filterCategory, setFilterCategory] = useState('All');
-  const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState('Newest');
-  const [showModal, setShowModal] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    category: 'Technology',
-  });
+const CATEGORY_OPTIONS = [
+  'All',
+  'Technology',
+  'Art',
+  'Science',
+  'Gaming',
+  'Music',
+  'Food',
+  'Travel',
+  'Health',
+  'Business',
+  'Politics',
+  'Sports',
+  'Other',
+]
 
-  const categories = [...new Set(communities.map(c => c.Category))];
+const SORT_OPTIONS = ['Newest', 'Most Members', 'A-Z']
 
-  const handleCreate = (e) => {
-    e.preventDefault();
-    addCommunity(formData.name, formData.category, formData.description);
-    setFormData({ name: '', description: '', category: 'Technology' });
-    setShowModal(false);
-  };
+const Badge = ({ children, className = '' }) => (
+  <span className={`inline-block text-xs px-2 py-1 rounded-full ${className}`}>{children}</span>
+)
 
-  const filtered = communities
-    .filter(c =>
-      (filterCategory === 'All' || c.Category === filterCategory) &&
-      (c.Name.toLowerCase().includes(search.toLowerCase()) ||
-        c.description.toLowerCase().includes(search.toLowerCase()))
-    )
-    .sort((a, b) => {
-      if (sortBy === 'Most Members') {
-        return (b.members?.length || 0) - (a.members?.length || 0);
-      } else if (sortBy === 'A-Z') {
-        return a.Name.localeCompare(b.Name);
-      } else {
-        return new Date(b.createdAt) - new Date(a.createdAt);
+export default function CommunityPage() {
+  const { communities, addCommunity, joinCommunity } = useCommunity()
+  const { user } = useAuth()
+
+  // UI state
+  const [activeCategory, setActiveCategory] = useState('All')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [sortBy, setSortBy] = useState('Newest')
+  const [showCreateModal, setShowCreateModal] = useState(false)
+
+  // form
+  const [form, setForm] = useState({ name: '', description: '', category: 'Technology' })
+  const [isCreating, setIsCreating] = useState(false)
+
+  // local optimistic joined state: { [communityId]: true }
+  const [joinedLocal, setJoinedLocal] = useState({})
+
+  // Debounce searchTerm -> debouncedSearch
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 300)
+    return () => clearTimeout(t)
+  }, [searchTerm])
+
+  // derived categories from communities (keeps 'All')
+  const categories = useMemo(() => {
+    const cats = new Set(communities.map((c) => c.Category || c.category || 'Other'))
+    return ['All', ...Array.from(cats).slice(0, 12)]
+  }, [communities])
+
+  // Filter + search + sort using useMemo for performance
+  const filtered = useMemo(() => {
+    const s = debouncedSearch.toLowerCase()
+    const results = communities
+      .filter((c) => (activeCategory === 'All' ? true : (c.Category || c.category) === activeCategory))
+      .filter((c) => {
+        if (!s) return true
+        const name = (c.Name || c.name || '').toLowerCase()
+        const desc = (c.description || '').toLowerCase()
+        const cat = ((c.Category || c.category) || '').toLowerCase()
+        return name.includes(s) || desc.includes(s) || cat.includes(s)
+      })
+      .map((c) => ({ ...c, _membersCount: (c.members || []).length }))
+
+    if (sortBy === 'Most Members') {
+      results.sort((a, b) => b._membersCount - a._membersCount)
+    } else if (sortBy === 'A-Z') {
+      results.sort((a, b) => (a.Name || a.name || '').localeCompare(b.Name || b.name || ''))
+    } else {
+      results.sort((a, b) => new Date(b.createdAt || b.createdAt) - new Date(a.createdAt || a.createdAt))
+    }
+
+    return results
+  }, [communities, activeCategory, debouncedSearch, sortBy])
+
+  // create handler
+  const handleCreate = async (e) => {
+    e.preventDefault()
+    if (!form.name.trim() || !form.description.trim()) return
+    try {
+      setIsCreating(true)
+      await addCommunity?.(form.name.trim(), form.category, form.description.trim())
+      setForm({ name: '', description: '', category: 'Technology' })
+      setShowCreateModal(false)
+    } catch (err) {
+      console.error('Create community error', err)
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
+  // join handler with optimistic UI
+  const handleJoin = useCallback(
+    async (commId) => {
+      // toggle local state immediately
+      setJoinedLocal((prev) => ({ ...prev, [commId]: !prev[commId] }))
+      try {
+        await joinCommunity?.(commId) // if context provides it
+      } catch (err) {
+        // rollback on error
+        setJoinedLocal((prev) => ({ ...prev, [commId]: !prev[commId] }))
+        console.error('Join community failed', err)
       }
-    });
+    },
+    [joinCommunity]
+  )
+
+  // helper to check joined (context not guaranteed). Prefer server truth if available
+  const isJoined = (comm) => {
+    const joinedInServer = comm.members?.includes?.(user?._id)
+    if (typeof joinedInServer === 'boolean') return joinedInServer
+    return Boolean(joinedLocal[comm._id])
+  }
 
   return (
-    <div className="w-full px-6 py-10 space-y-16">
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl text-white p-12 overflow-hidden shadow-lg">
-        <h1 className="text-5xl font-bold mb-4">🌐 Community Hub</h1>
-        <p className="text-lg opacity-90 max-w-2xl">
-          Discover, create, and grow your passions with like-minded people.
-        </p>
-        <button
-          onClick={() => setShowModal(true)}
-          className="mt-6 px-6 py-3 bg-white text-blue-600 font-semibold rounded-xl shadow hover:scale-105 transition"
-        >
-          <FaPlus className="inline mr-2" /> Create Community
-        </button>
+    <div className="w-full px-6 py-10 space-y-10">
+      {/* HERO */}
+      <div className="relative bg-gradient-to-r from-sky-500 to-indigo-600 rounded-2xl text-white p-8 overflow-hidden shadow-lg">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-extrabold">🌐 Community Hub</h1>
+            <p className="mt-2 text-sm md:text-base opacity-95 max-w-xl">
+              Discover, create and join active groups around your interests. Follow communities to keep up with
+              conversations and meet like-minded people.
+            </p>
+            <div className="mt-4 flex items-center gap-3">
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="inline-flex items-center gap-2 bg-white text-sky-600 px-4 py-2 rounded-xl font-semibold shadow hover:scale-105 transition-transform"
+                aria-label="Create Community"
+              >
+                <FaPlus /> Create Community
+              </button>
+              <Link href="#communities">
+                <a className="inline-flex items-center gap-2 text-sm text-white/90 hover:underline">Browse communities</a>
+              </Link>
+            </div>
+          </div>
+
+          <div className="hidden md:block w-48 h-48 rounded-xl bg-white/10 p-4 flex items-center justify-center">
+            {/* simple illustration placeholder */}
+            <div className="text-center text-white/90">
+              <div className="text-2xl font-bold">👥</div>
+              <div className="text-xs mt-1">Find your people</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Filter & Search Section */}
-      <div className="bg-white p-6 rounded-xl shadow flex flex-wrap items-center gap-4">
-        <div className="flex items-center gap-2 text-gray-600">
-          <FaFilter /> <span className="text-sm">Filter by:</span>
-        </div>
-        <select
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          className="p-2 rounded-lg border text-gray-700"
-        >
-          <option value="All">All Categories</option>
-          {categories.map((cat, idx) => (
-            <option key={idx}>{cat}</option>
-          ))}
-        </select>
+      {/* Controls */}
+      <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+        {/* Chips + search */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 text-gray-600">
+            <FaFilter />
+            <span className="text-sm">Filter</span>
+          </div>
 
-        <div className="flex items-center flex-1 min-w-[200px] bg-gray-100 rounded-lg px-3">
-          <FaSearch className="text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search communities..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="bg-transparent p-2 w-full focus:outline-none"
-          />
+          <div className="flex gap-2 flex-wrap">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`text-xs px-3 py-1.5 rounded-full border transition select-none whitespace-nowrap shadow-sm
+                  ${activeCategory === cat ? 'bg-sky-600 text-white border-sky-600' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700'}`}
+                aria-pressed={activeCategory === cat}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="p-2 rounded-lg border text-gray-700"
-        >
-          <option value="Newest">Newest</option>
-          <option value="Most Members">Most Members</option>
-          <option value="A-Z">A-Z</option>
-        </select>
-      </div>
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 min-w-[220px]">
+            <FaSearch className="text-gray-500" />
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search communities..."
+              className="bg-transparent outline-none text-sm w-full"
+              aria-label="Search communities"
+            />
+          </div>
 
-      {/* Community Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filtered.map((comm) => (
-          <motion.div
-            key={comm._id}
-            whileHover={{ scale: 1.02 }}
-            className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition"
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="p-2 rounded-lg border text-sm bg-white dark:bg-gray-900"
+            aria-label="Sort communities"
           >
-            <Link href={`/Pages/Community/${comm._id}`}>
-              <div className="relative w-full h-32">
-                <Image
-                  src={comm?.Cover?.url || '/placeholder-cover.png'}
-                  alt={comm.Name}
-                  layout="fill"
-                  objectFit="cover"
-                />
-                <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
+            {SORT_OPTIONS.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Cards */}
+      <section id="communities" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filtered.length === 0 ? (
+          <div className="col-span-full p-8 bg-white dark:bg-gray-900 rounded-2xl shadow flex flex-col items-center justify-center gap-4">
+            <div className="w-32 h-32 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">📭</div>
+            <h3 className="text-lg font-semibold">No communities found</h3>
+            <p className="text-sm text-gray-500">Try a different filter or create a new community.</p>
+            <button onClick={() => setShowCreateModal(true)} className="mt-3 px-4 py-2 bg-sky-600 text-white rounded-lg">Create community</button>
+          </div>
+        ) : (
+          filtered.map((comm) => (
+            <motion.article
+              key={comm._id}
+              whileHover={{ y: -6 }}
+              className="bg-white dark:bg-gray-900 rounded-2xl shadow-md overflow-hidden border border-transparent hover:shadow-lg transition"
+            >
+              <Link href={`/Pages/Community/${comm._id}`}>
+                <a className="block relative w-full h-36">
                   <Image
-                    src={comm?.Picture?.url || '/placeholder-avatar.png'}
+                    src={comm?.Cover?.url || comm?.cover?.url || '/placeholder-cover.png'}
                     alt={comm.Name}
-                    width={72}
-                    height={72}
-                    className="rounded-full border-4 border-white"
+                    fill
+                    style={{ objectFit: 'cover' }}
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
+                </a>
+              </Link>
+
+              <div className="pt-10 pb-6 px-5 text-center">
+                <div className="-mt-14 mx-auto w-20 h-20 relative rounded-full overflow-hidden shadow-md">
+                  <Image
+                    src={comm?.Picture?.url || comm?.picture?.url || '/placeholder-avatar.png'}
+                    alt={comm.Name}
+                    fill
+                    style={{ objectFit: 'cover' }}
                   />
                 </div>
-              </div>
-            </Link>
 
-            <div className="pt-12 pb-6 px-4 text-center space-y-3">
-              <h3 className="text-lg font-semibold text-gray-800">{comm.Name}</h3>
-              <p className="text-sm text-gray-600 line-clamp-2">{comm.description}</p>
-              <div className="flex justify-center items-center gap-2 text-sm text-gray-500">
-                <span className="flex items-center gap-1">
-                  <FaUsers /> {comm.members?.length || 0}
-                </span>
-                <span className="px-2 py-1 bg-gray-100 rounded-full text-xs">{comm.Category}</span>
-                <span className="px-2 py-1 bg-gray-100 rounded-full text-xs">
-                  {comm.isPrivate ? 'Private' : 'Public'}
-                </span>
-              </div>
-              <div className="flex justify-center gap-3 mt-3">
-                <Link href={`/Pages/Community/${comm._id}`}>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                    View
+                <h3 className="mt-3 text-lg font-semibold text-gray-800 dark:text-gray-100">{comm.Name}</h3>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{comm.description}</p>
+
+                <div className="mt-3 flex items-center justify-center gap-2">
+                  <Badge className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">{comm.Category || comm.Category}</Badge>
+                  <Badge className={`${comm.isPrivate ? 'bg-red-100 text-red-700 dark:bg-red-900/30' : 'bg-green-100 text-green-700 dark:bg-green-900/30'}`}>{comm.isPrivate ? 'Private' : 'Public'}</Badge>
+                  <span className="flex items-center gap-1 text-sm text-gray-500"><FaUsers /> {comm.members?.length || 0}</span>
+                </div>
+
+                <div className="mt-4 flex items-center justify-center gap-3">
+                  <Link href={`/Pages/Community/${comm._id}`}>
+                    <a className="px-4 py-2 rounded-lg border border-sky-600 text-sky-600">View</a>
+                  </Link>
+
+                  <button
+                    onClick={() => handleJoin(comm._id)}
+                    className={`px-4 py-2 rounded-lg font-medium shadow-sm transition ${isJoined(comm) ? 'bg-green-600 text-white' : 'bg-sky-600 text-white'}`}
+                  >
+                    {isJoined(comm) ? 'Joined' : 'Join'}
                   </button>
-                </Link>
-                <button className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition">
-                  Join
-                </button>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+            </motion.article>
+          ))
+        )}
+      </section>
 
-      {/* Modal for Create Community */}
+      {/* Create Modal */}
       <AnimatePresence>
-        {showModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex justify-center items-center z-50"
-          >
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              className="bg-white rounded-2xl shadow-lg w-full max-w-lg p-8 space-y-6"
-            >
-              <h2 className="text-2xl font-bold text-blue-600 flex items-center gap-2">
-                <FaPlus /> Create New Community
-              </h2>
-              <form onSubmit={handleCreate} className="space-y-4">
-                <input
-                  type="text"
-                  required
-                  placeholder="Community Name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full p-3 rounded-lg border"
-                />
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full p-3 rounded-lg border"
-                >
-                  <option disabled>-- Choose Category --</option>
-                  {[ 'Technology', 'Art', 'Science', 'Gaming', 'Music', 'Food', 'Travel', 'Health', 'Business', 'Politics', 'Sports', 'Other' ].map((cat, i) => (
-                    <option key={i} value={cat}>{cat}</option>
-                  ))}
-                </select>
-                <textarea
-                  required
-                  placeholder="Description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full p-3 rounded-lg border"
-                  rows={4}
-                />
-                <div className="flex justify-end gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-100"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
-                  >
-                    Create
-                  </button>
+        {showCreateModal && (
+          <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div initial={{ y: 10, scale: 0.98 }} animate={{ y: 0, scale: 1 }} exit={{ y: 10, scale: 0.98 }} transition={{ type: 'spring', stiffness: 200 }} className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-xl p-6 shadow-xl">
+              <h3 className="text-xl font-semibold text-sky-600 flex items-center gap-2"><FaPlus /> Create community</h3>
+
+              <form onSubmit={handleCreate} className="mt-4 space-y-4">
+                <div>
+                  <label className="text-sm text-gray-600 dark:text-gray-300">Name</label>
+                  <input
+                    value={form.name}
+                    onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                    required
+                    className="w-full mt-1 p-3 rounded-lg border bg-white dark:bg-gray-800"
+                    placeholder="e.g. Frontend Devs"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm text-gray-600 dark:text-gray-300">Category</label>
+                  <select value={form.category} onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))} className="w-full mt-1 p-3 rounded-lg border bg-white dark:bg-gray-800">
+                    {CATEGORY_OPTIONS.filter(Boolean).map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-sm text-gray-600 dark:text-gray-300">Description</label>
+                  <textarea
+                    value={form.description}
+                    onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+                    required
+                    rows={4}
+                    className="w-full mt-1 p-3 rounded-lg border bg-white dark:bg-gray-800"
+                    placeholder="Short description about what the community is for"
+                  />
+                </div>
+
+                <div className="flex justify-end items-center gap-3">
+                  <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 rounded-lg border">Cancel</button>
+                  <button type="submit" disabled={isCreating} className="px-6 py-2 rounded-lg bg-sky-600 text-white font-semibold">{isCreating ? 'Creating...' : 'Create'}</button>
                 </div>
               </form>
             </motion.div>
@@ -222,7 +324,5 @@ const CommunityPage = () => {
         )}
       </AnimatePresence>
     </div>
-  );
-};
-
-export default CommunityPage;
+  )
+}

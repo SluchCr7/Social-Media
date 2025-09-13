@@ -12,6 +12,7 @@ import EditCommunityMenu from '@/app/Component/EditCommunityMenu'
 import Loading from '@/app/Component/Loading'
 import { FaPlus, FaEdit, FaUsers, FaTrashAlt, FaCrown, FaUser } from 'react-icons/fa'
 import { HiOutlineDotsVertical } from 'react-icons/hi'
+import Link from 'next/link'
 
 // Small reusable action button
 const ActionButton = ({ children, onClick, variant = 'primary', className = '' }) => {
@@ -272,7 +273,7 @@ const Page = ({ params }) => {
 
                   return (
                     <div key={member?._id} className="flex items-center justify-between p-3 bg-gray-100 rounded-lg shadow-sm">
-                      <div className="flex items-center gap-4">
+                      <Link href={user?._id === member?._id ? '/Pages/Profile' : `/Pages/User/${member?._id}`} className="flex items-center gap-4">
                         <Image src={member?.profilePhoto?.url || '/default-avatar.png'} alt="Member" width={48} height={48} className="w-12 h-12 rounded-full object-cover ring-2 ring-blue-400" loading="lazy" />
                         <div>
                           <p className="text-sm font-semibold text-gray-900 flex items-center gap-2">
@@ -282,7 +283,7 @@ const Page = ({ params }) => {
                           </p>
                           <p className="text-xs text-gray-500">{member?.profileName}</p>
                         </div>
-                      </div>
+                      </Link>
 
                       {(isOwner(user?._id) || isAdmin(user?._id)) && !currentIsOwner && (
                         <div className="flex gap-3 items-center">
