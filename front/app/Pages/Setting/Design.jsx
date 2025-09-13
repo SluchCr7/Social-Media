@@ -50,7 +50,7 @@ const SettingPageFront = ({
         <div className="p-6">
           <h1 className="text-2xl font-bold mb-2">⚙️ Settings</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-            Hello <span className="font-medium">{user?.username}</span>
+            Hello <span className="font-medium text-black dark:text-white">{user?.username}</span>
           </p>
           <nav className="flex md:flex-col gap-2 overflow-x-auto">
             {tabs.map((tab) => (

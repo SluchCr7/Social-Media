@@ -150,10 +150,15 @@ export default function CommunityPage() {
             </div>
           </div>
 
-          <div className="hidden md:block w-48 h-48 rounded-xl bg-white/10 p-4 flex items-center justify-center">
+          <div className="hidden md:block w-48 h-48 rounded-xl bg-white/10 p-4 items-center justify-center">
             {/* simple illustration placeholder */}
             <div className="text-center text-white/90">
-              <div className="text-2xl font-bold">👥</div>
+              <Image
+                src={"/Find.svg"}
+                alt='find_img'
+                width={500}
+                height={500}
+                className='w-full h-full'/>
               <div className="text-xs mt-1">Find your people</div>
             </div>
           </div>
