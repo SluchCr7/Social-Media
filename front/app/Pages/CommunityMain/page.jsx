@@ -159,7 +159,6 @@ export default function CommunityPage() {
                 width={500}
                 height={500}
                 className='w-full h-full'/>
-              <div className="text-xs mt-1">Find your people</div>
             </div>
           </div>
         </div>
