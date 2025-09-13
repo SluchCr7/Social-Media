@@ -170,6 +170,12 @@ UserSchema.virtual("reports", {
     foreignField: "owner"
 })
 
+UserSchema.virtual("notifications", {
+  ref: "Notification",      
+  localField: "_id",         
+  foreignField: "receiver",  
+});
+
 UserSchema.methods.updateLevelRank = function () {
   if (this.userLevelPoints >= 2000) this.userLevelRank = "Pro";
   else if (this.userLevelPoints >= 1000) this.userLevelRank = "Advanced";

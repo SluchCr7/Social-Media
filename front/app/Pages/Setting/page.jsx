@@ -4,7 +4,7 @@ import { useAuth } from '@/app/Context/AuthContext';
 import { colors } from '@/app/utils/Data';
 import clsx from 'clsx';
 import { useMessage } from '@/app/Context/MessageContext';
-import SettingPageFront from './design';
+import SettingPageFront from './Design';
 
 const SettingsPage = () => {
   const [darkMode, setDarkMode] = useState(false);

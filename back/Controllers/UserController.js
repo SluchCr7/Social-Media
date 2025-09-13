@@ -196,6 +196,14 @@ const getAllUsers = asyncHandler(async (req, res) => {
             },
         })
         .populate({
+          path: "notifications",
+          populate: {
+            path: "sender",
+            select: "username profilePhoto", // عشان تجيب بيانات المرسل كمان
+          },
+          options: { sort: { createdAt: -1 } },
+        })
+        .populate({
           path: "stories",
           populate: {
             path: "owner",
