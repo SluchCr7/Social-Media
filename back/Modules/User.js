@@ -246,7 +246,6 @@ const validateUserLinks = (user) => {
       facebook: joi.string().uri().allow(""),
       website: joi.string().uri().allow(""),
     }),
-    // باقي الحقول الأخرى...
   });
   return schema.validate(user);
 };

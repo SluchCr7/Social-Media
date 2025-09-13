@@ -442,7 +442,10 @@ const makeFollow = asyncHandler(async (req, res) => {
       await User.findByIdAndUpdate(req.user._id, {
         $pull: { following: req.params.id },
       });
-      res.status(200).json({ message: 'Unfollowed' });
+      return res.status(200).json({
+            message: `unFollowed`,
+            user,
+        });
     } else {
       // Follow
       await User.findByIdAndUpdate(req.params.id, {
@@ -451,13 +454,15 @@ const makeFollow = asyncHandler(async (req, res) => {
       await User.findByIdAndUpdate(req.user._id, {
         $push: { following: req.params.id },
       });
-      res.status(200).json({ message: 'Followed' });
+      return res.status(200).json({
+            message: `Followed`,
+            user,
+        });
     }
 });
 
 const savePost = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id)
-    const post = await Post.findById(req.params.id)
     if (!user) {
         res.status(404)
         throw new Error('User not found')
@@ -566,7 +571,10 @@ const updatePassword = asyncHandler(async (req, res) => {
             password : req.body.password
         }
     }, { new: true })
-    res.status(200).json({message : "Password Updated Successfully"})
+    return res.status(200).json({
+        message: `Password Updated Successfully`,
+        updateUserPass,
+    })
 })
 
 const pinPost = asyncHandler(async (req, res) => {

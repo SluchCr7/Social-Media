@@ -142,12 +142,6 @@ const Page = ({ params }) => {
           <InfoAboutUser user={userSelected} />
           {/* Tabs */}
           <Tabs activeTab={activeTab} setActiveTab={setActiveTab}/>
-          {/* Content */}
-          {/* <div className="w-[90%] mt-6 flex items-start flex-col gap-4">
-            {activeTab === 'Posts' && renderPosts()}
-            {activeTab === 'Saved' && renderSaved()}
-            {activeTab === 'Comments' && renderComments()}
-          </div> */}
           <TabsContent activeTab={activeTab} combinedPosts={combinedPosts} posts={posts} userSelected={userSelected} />
         </>
       )}
