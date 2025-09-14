@@ -40,6 +40,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default : "Profile Description"
     },
+    isAccountWithPremiumVerify : {
+        type: Boolean,
+        default : false
+    },
     country: {
         type: String,
         default: "Unknown"

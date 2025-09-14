@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { FaUserEdit } from 'react-icons/fa'
 import { IoAdd } from 'react-icons/io5'
 import { BsPatchCheckFill } from 'react-icons/bs'
@@ -10,23 +10,16 @@ import { BsPatchCheckFill } from 'react-icons/bs'
 import { useAuth } from '@/app/Context/AuthContext'
 import { usePost } from '@/app/Context/PostContext'
 
-import SluchitEntry from '@/app/Component/SluchitEntry'
 import Loading from '@/app/Component/Loading'
 import UpdateProfile from '@/app/Component/UpdateProfile'
 import AddStoryModel from '@/app/Component/AddStoryModel'
 import InfoAboutUser from '@/app/Component/UserComponents/InfoAboutUser'
-import CommentCard from '@/app/Component/UserComponents/CommentCard'
 import TabsContent from '@/app/Component/UserComponents/TabsContent'
 import Tabs from '@/app/Component/UserComponents/Tabs'
 import StatBlock from '@/app/Component/UserComponents/StatBlock'
 import FollowModal from '@/app/Component/UserComponents/FollowModal'
 
-// ---------------- Constants ----------------
 const tabs = ['Posts', 'Saved', 'Comments']
-
-
-
-// ---------------- Main Page ----------------
 
 const ProfilePage = () => {
   const { user, users, updatePhoto } = useAuth()
@@ -41,7 +34,6 @@ const ProfilePage = () => {
   const [showMenu, setShowMenu] = useState(false)
   const [menuType, setMenuType] = useState('followers')
 
-  // Hydrate userData
   useEffect(() => {
     const matchedUser = users?.find((u) => user?._id === u?._id)
     setUserData(matchedUser || user || {})
@@ -51,7 +43,6 @@ const ProfilePage = () => {
     if (user) setLoading(true)
   }, [user])
 
-  // Handle profile image change
   const handleImageChange = async (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -60,7 +51,6 @@ const ProfilePage = () => {
     }
   }
 
-  // Arrange posts (pinned first)
   const pinnedPosts = userData?.pinsPosts || []
   const pinnedIds = new Set(pinnedPosts.map((p) => p?._id))
   const regularPosts = (userData?.posts || []).filter((p) => !pinnedIds.has(p?._id))
@@ -73,15 +63,15 @@ const ProfilePage = () => {
 
   return (
     <>
-      <div className="w-full md:w-[75%] max-w-5xl mx-auto min-h-screen bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text flex flex-col items-center">
+      <div className="w-full max-w-5xl mx-auto min-h-screen bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text flex flex-col items-center px-4 sm:px-6 lg:px-8">
         
         {/* Avatar */}
-        <div className="w-full flex justify-center mt-10">
+        <div className="w-full flex justify-center mt-8">
           <motion.div
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="relative w-36 h-36 rounded-full overflow-hidden shadow-xl"
+            className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden shadow-xl"
           >
             <Image
               src={image ? URL.createObjectURL(image) : userData?.profilePhoto?.url || '/default-profile.png'}
@@ -111,21 +101,19 @@ const ProfilePage = () => {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="w-full px-4 mt-6 text-center flex flex-col items-center gap-4"
+          className="w-full mt-6 text-center flex flex-col items-center gap-3"
         >
-          <div className="flex items-center justify-center gap-2">
-            <h1 className="text-3xl font-bold">{userData?.username || 'Username'}</h1>
-            {userData?.isVerify && (
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <h1 className="text-2xl sm:text-3xl font-bold break-words">{userData?.username || 'Username'}</h1>
+            {userData?.isAccountWithPremiumVerify && (
               <BsPatchCheckFill
                 className="text-blue-500 text-xl"
                 title="Verified account"
               />
             )}
           </div>
-          <span className="text-gray-400 text-sm block">
-            {userData?.profileName || ''}
-          </span>
-          <p className="text-base text-gray-500 mt-2 max-w-xl mx-auto line-clamp-3">
+          <span className="text-gray-400 text-sm">{userData?.profileName || ''}</span>
+          <p className="text-sm sm:text-base text-gray-500 mt-2 max-w-xl mx-auto break-words whitespace-pre-wrap">
             {userData?.description || 'No bio yet.'}
           </p>
         </motion.div>
@@ -135,24 +123,24 @@ const ProfilePage = () => {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          className="flex justify-center gap-3 mt-4 flex-wrap"
+          className="flex justify-center gap-3 mt-4 flex-wrap w-full"
         >
           <button
             onClick={() => setUpdate(true)}
-            className="flex items-center gap-2 border px-6 py-2 rounded-xl text-sm font-medium hover:shadow-md transition"
+            className="flex items-center gap-2 border px-4 sm:px-6 py-2 rounded-xl text-sm font-medium hover:shadow-md transition w-full sm:w-auto justify-center"
           >
             <FaUserEdit /> Edit profile
           </button>
           <button
             onClick={() => setIsStory(true)}
-            className="flex items-center gap-2 border px-6 py-2 rounded-xl text-sm font-medium hover:shadow-md transition"
+            className="flex items-center gap-2 border px-4 sm:px-6 py-2 rounded-xl text-sm font-medium hover:shadow-md transition w-full sm:w-auto justify-center"
           >
             <IoAdd /> Add story
           </button>
         </motion.div>
 
         {/* Stats */}
-        <div className="flex justify-center gap-10 mt-6">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-6 sm:gap-10 mt-6 w-full">
           <StatBlock label="Posts" value={userData?.posts?.length} />
           <StatBlock label="Followers" value={userData?.followers?.length} onClick={() => { setMenuType('followers'); setShowMenu(true) }} />
           <StatBlock label="Following" value={userData?.following?.length} onClick={() => { setMenuType('following'); setShowMenu(true) }} />
@@ -175,7 +163,5 @@ const ProfilePage = () => {
     </>
   )
 }
-
-
 
 export default ProfilePage

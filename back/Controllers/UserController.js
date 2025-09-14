@@ -744,6 +744,21 @@ const getSuggestedUsers = asyncHandler(async (req, res) => {
   res.status(200).json(topSuggestions.map(s => s.user));
 });
 
+const MakeAccountPreimumVerify = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id)
+  if (!user) {
+    return res.status(400).json({ message: "This User not be found" });
+  }
+  await User.findByIdAndUpdate(req.user._id, {
+      $set :{
+          isAccountWithPremiumVerify : true
+      }
+  }, { new: true })
+  return res.status(200).json({
+      message: "Account Become Verify "
+  })
+})
+
 const deleteAllUsers = asyncHandler(async (req, res) => {
     await User.deleteMany({});
     await Post.deleteMany({ })
@@ -754,5 +769,5 @@ const deleteAllUsers = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "All users deleted successfully" });
 });
 
-module.exports = { DeleteUser,deleteAllUsers, getSuggestedUsers, blockOrUnblockUser, makeUserAdmin, getAllUsers, getUserById, RegisterNewUser, LoginUser, verifyAccount, uploadPhoto, makeFollow, updatePassword, updateProfile, savePost, pinPost, updateLinksSocial}
+module.exports = {MakeAccountPreimumVerify, DeleteUser,deleteAllUsers, getSuggestedUsers, blockOrUnblockUser, makeUserAdmin, getAllUsers, getUserById, RegisterNewUser, LoginUser, verifyAccount, uploadPhoto, makeFollow, updatePassword, updateProfile, savePost, pinPost, updateLinksSocial}
 
