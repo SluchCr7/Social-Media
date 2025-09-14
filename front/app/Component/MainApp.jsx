@@ -25,7 +25,7 @@ const MainApp = () => {
       />
 
       {/* محتوى الصفحة */}
-      <div className="max-w-2xl mx-auto w-full px-3 pt-16 md:pt-6">
+      <div className="w-full px-3 pt-16 md:pt-6">
         {isLogin && <Stories />}
         <Sluchits />
       </div>
