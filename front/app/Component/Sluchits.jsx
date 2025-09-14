@@ -50,15 +50,28 @@ const Sluchits = () => {
   }, [sortedPosts, suggestedUsers, communities])
 
   return (
-    <div className="w-full flex flex-col gap-6">
+    <div className="w-full flex flex-col gap-8">
       {isLoading ? (
         Array.from({ length: 4 }).map((_, i) => (
           <PostSkeleton key={i} className="animate-pulse" />
         ))
       ) : combinedItems.length > 0 ? (
         combinedItems.map((item, i) => {
-          if (item.type === 'post') return <SluchitEntry key={item.data._id} post={item.data} />
-          return <SuggestionRow key={`suggestion-${i}`} type={item.type} data={item.data} />
+          if (item.type === 'post') {
+            return <SluchitEntry key={item.data._id} post={item.data} />
+          }
+
+          // --- إضافة النص التوضيحي قبل الـ Suggestions ---
+          return (
+            <div key={`suggestion-${i}`} className="flex flex-col gap-3">
+              <h2 className="text-base font-semibold text-gray-700 dark:text-gray-200 px-1">
+                {item.type === 'user'
+                  ? '✨ Suggested Users to Follow'
+                  : '🌐 Discover New Communities'}
+              </h2>
+              <SuggestionRow type={item.type} data={item.data} />
+            </div>
+          )
         })
       ) : (
         <p className="text-gray-500 dark:text-gray-400 text-center py-10 text-sm">
