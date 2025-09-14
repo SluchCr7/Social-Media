@@ -143,23 +143,42 @@
 // }
 
 // export default Aside
-
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { GoHome, GoSearch } from "react-icons/go"
 import { CiUser, CiSettings } from "react-icons/ci"
 import { FaPlus } from "react-icons/fa6"
 import { RiUserCommunityLine } from 'react-icons/ri'
-import { LuMessagesSquare } from "react-icons/lu";
-import { MdOutlineOndemandVideo } from "react-icons/md";
-import { IoTrophyOutline } from "react-icons/io5";
-import { SlCalender } from "react-icons/sl";
+import { LuMessagesSquare } from "react-icons/lu"
+import { MdOutlineOndemandVideo } from "react-icons/md"
+import { IoTrophyOutline } from "react-icons/io5"
+import { SlCalender } from "react-icons/sl"
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi"
+import { useAuth } from '../Context/AuthContext'
+import Image from 'next/image'
 
 const Aside = () => {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const {user}= useAuth()
+  // ✅ detect if mobile
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
+
+  useEffect(() => {
+    if (isMobile) {
+      setIsCollapsed(true) // always collapsed on mobile
+    }
+  }, [isMobile])
 
   const navSections = [
     {
@@ -189,24 +208,30 @@ const Aside = () => {
     }
   ]
 
-  const baseStyle = `relative flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300`;
-  const activeStyle = `bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md`;
-  const inactiveStyle = `hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 text-lightMode-text dark:text-darkMode-text`;
+  const baseStyle = `relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300`
+  const activeStyle = `bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md`
+  const inactiveStyle = `hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 text-lightMode-text dark:text-darkMode-text`
 
   return (
-    <aside className={`flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r transition-all duration-500 ${isCollapsed ? "w-20" : "w-64"} p-4`}>
-      
+    <aside 
+      className={`flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r transition-all duration-500 
+      ${isCollapsed ? "w-16" : "w-56"} p-3`}
+    >
       {/* ===== Logo + Collapse Button ===== */}
       <div className="flex items-center justify-between mb-6">
-        <span className={`text-xl font-bold text-lightMode-text dark:text-darkMode-text transition-all duration-300 ${isCollapsed ? "opacity-0 w-0" : "opacity-100"}`}>
-          {process.env.NEXT_PUBLIC_WEBSITE_NAME || "Zocial"}
-        </span>
-        <button 
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="text-xl p-1 rounded hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10"
-        >
-          {isCollapsed ? "➡️" : "⬅️"}
-        </button>
+        {!isCollapsed && (
+          <span className="text-lg font-bold text-lightMode-text dark:text-darkMode-text truncate">
+            {process.env.NEXT_PUBLIC_WEBSITE_NAME || "Zocial"}
+          </span>
+        )}
+        {!isMobile && (
+          <button 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="text-xl p-1 rounded hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10"
+          >
+            {isCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
+          </button>
+        )}
       </div>
 
       {/* ===== Nav Sections ===== */}
@@ -214,13 +239,13 @@ const Aside = () => {
         {navSections.map(section => (
           <div key={section.title}>
             {!isCollapsed && (
-              <h4 className="px-4 mb-2 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              <h4 className="px-3 mb-2 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 {section.title}
               </h4>
             )}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               {section.items.map(({ icon, text, link, badge }) => {
-                const isActive = pathname === link;
+                const isActive = pathname === link
                 return (
                   <Link 
                     key={text}
@@ -236,10 +261,6 @@ const Aside = () => {
                         {badge}
                       </span>
                     )}
-                    {/* Active Indicator */}
-                    {isActive && (
-                      <span className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500 rounded-r-lg"></span>
-                    )}
                   </Link>
                 )
               })}
@@ -250,12 +271,12 @@ const Aside = () => {
 
       {/* ===== Footer (User / Auth) ===== */}
       <div className={`mt-auto border-t pt-4 ${isCollapsed ? "text-center" : ""}`}>
-        <div className="flex items-center gap-3 cursor-pointer hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 px-3 py-2 rounded-lg">
-          <img src="/profile.png" alt="User" className="w-8 h-8 rounded-full" />
+        <div className="flex items-center gap-3 cursor-pointer hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 px-2 py-2 rounded-lg">
+          <Image src={user?.profilePhoto?.url} alt="User Profile" width={100} height={100} className="w-8 h-8 rounded-full" />
           {!isCollapsed && (
             <div>
-              <p className="text-sm font-medium">John Doe</p>
-              <p className="text-xs text-gray-500">@johndoe</p>
+              <p className="text-sm font-medium">{user?.username || "User Name"}</p>
+              <p className="text-xs text-gray-500">@{user?.profileName || "user_name"}</p>
             </div>
           )}
         </div>
