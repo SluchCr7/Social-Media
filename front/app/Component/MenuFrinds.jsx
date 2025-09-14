@@ -43,21 +43,31 @@ const MenuFriends = () => {
                     <div className="flex flex-col">
                       <span className="text-gray-800 dark:text-gray-100 font-medium text-sm">{userData.username}</span>
                       <span className="text-gray-500 dark:text-gray-400 text-xs">
-                        {userData.following?.includes(user._id) && userData.followers?.includes(user._id)
+                        {userData.following?.includes(user?._id) && userData.followers?.includes(user?._id)
                           ? "You are friends"
-                          : (new Date() - new Date(userData.createdAt)) / (1000 * 60 * 60 * 24) < 7
-                          ? "New here – welcome!"
                           : (() => {
-                              const myFollowing = user.following || [];
-                              const hisFollowing = userData.following || [];
+                              // check new user (created < 7 days ago)
+                              const createdAt = userData.createdAt ? new Date(userData.createdAt) : null;
+                              const isNew = createdAt ? ((Date.now() - createdAt) / (1000 * 60 * 60 * 24) < 7) : false;
+
+                              if (isNew) return "New here – welcome!";
+
+                              // mutual friends
+                              const myFollowing = Array.isArray(user?.following) ? user.following : [];
+                              const hisFollowing = Array.isArray(userData.following) ? userData.following : [];
                               const mutualFriends = myFollowing.filter((id) => hisFollowing.includes(id));
-  
-                              return mutualFriends.length > 0
-                                ? `${mutualFriends.length} mutual friends`
-                                : userData.posts.length > 50
-                                ? "Active member"
-                                : "Suggested for you";
-                            })()}
+
+                              if (mutualFriends.length > 0) return `${mutualFriends.length} mutual friends`;
+
+                              // active member check
+                              const posts = Array.isArray(userData.posts) ? userData.posts : [];
+                              if (posts.length > 50) return "Active member";
+
+                              // fallback
+                              return "Suggested for you";
+                            })()
+                        }
+
                       </span>
                     </div>
                   </div>

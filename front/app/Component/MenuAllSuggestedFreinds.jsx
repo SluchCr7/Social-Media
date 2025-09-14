@@ -40,24 +40,33 @@ const MenuAllSuggestedFriends = () => {
 
             {/* List */}
             <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-thumb-rounded-full px-2">
-              {suggestedUsers.length > 0 ? (
+              {Array.isArray(suggestedUsers) && suggestedUsers.length > 0 ? (
                 suggestedUsers.map((userData) => {
                   const isFriend =
-                    userData.following?.includes(user._id) && userData.followers?.includes(user._id)
+                    userData.following?.includes(user?._id) &&
+                    userData.followers?.includes(user?._id)
 
-                  const mutualFriends = (() => {
-                    const myFollowing = user.following || []
-                    const hisFollowing = userData.following || []
-                    return myFollowing.filter((id) => hisFollowing.includes(id))
-                  })()
+                  // mutual friends safely
+                  const myFollowing = Array.isArray(user?.following) ? user.following : []
+                  const hisFollowing = Array.isArray(userData.following) ? userData.following : []
+                  const mutualFriends = myFollowing.filter((id) => hisFollowing.includes(id))
+
+                  // new user check safely
+                  const createdAt = userData.createdAt ? new Date(userData.createdAt) : null
+                  const isNew =
+                    createdAt &&
+                    (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24) < 7
+
+                  // posts check safely
+                  const posts = Array.isArray(userData.posts) ? userData.posts : []
 
                   const statusMessage = isFriend
                     ? 'You are friends'
-                    : (new Date() - new Date(userData.createdAt)) / (1000 * 60 * 60 * 24) < 7
+                    : isNew
                     ? 'New here – welcome!'
                     : mutualFriends.length > 0
                     ? `${mutualFriends.length} mutual friends`
-                    : userData.posts.length > 50
+                    : posts.length > 50
                     ? 'Active member'
                     : 'Suggested for you'
 
@@ -81,7 +90,9 @@ const MenuAllSuggestedFriends = () => {
                           <span className="text-sm font-medium text-lightMode-fg dark:text-darkMode-fg">
                             {userData.username}
                           </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">{statusMessage}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {statusMessage}
+                          </span>
                         </div>
                       </div>
 
