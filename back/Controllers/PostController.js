@@ -364,7 +364,7 @@ const getAllPosts = asyncHandler(async (req, res) => {
     .populate({
       path: "reports",
       populate: { path: "owner", model: "User", select: "username profileName profilePhoto" },
-    })
+    }).populate("mentions","username profileName profilePhoto")
     .populate({
       path: "originalPost",
       populate: { path: "owner", select: "username profileName profilePhoto" },
@@ -396,13 +396,24 @@ const uploadToCloudinary = (buffer) => {
 
 const addPost = async (req, res) => {
   try {
-    let { text, Hashtags, community } = req.body;
+    let { text, Hashtags, community, mentions } = req.body;
     const userId = req.user._id;
 
     if (typeof Hashtags === "string") Hashtags = [Hashtags];
     else if (!Array.isArray(Hashtags)) Hashtags = [];
 
-    const { error } = ValidatePost({ text, Hashtags, community });
+    // ✅ mentions: خليها Array من userIds
+    if (typeof mentions === "string") {
+      try {
+        mentions = JSON.parse(mentions); // لو جايه كـ JSON string
+      } catch {
+        mentions = [mentions]; // أو مجرد string واحد
+      }
+    } else if (!Array.isArray(mentions)) {
+      mentions = [];
+    }
+
+    const { error } = ValidatePost({ text, Hashtags, community, mentions });
     if (error) return res.status(400).json({ message: error.details[0].message });
 
     let communityDoc = null;
@@ -422,7 +433,7 @@ const addPost = async (req, res) => {
     if (imagesArr.length > 0) {
       uploadedImages = await Promise.all(
         imagesArr.map(async (img) => {
-          const result = await uploadToCloudinary(img.buffer); // ✅ استخدم buffer
+          const result = await uploadToCloudinary(img.buffer);
           return { url: result.secure_url, publicId: result.public_id };
         })
       );
@@ -432,9 +443,32 @@ const addPost = async (req, res) => {
       text,
       Photos: uploadedImages,
       Hashtags,
+      mentions, // ✅ هنا هتتحفظ الـ mentions
       owner: userId,
       community: communityDoc ? communityDoc._id : null,
     });
+
+    // ✨ ممكن كمان تبعت إشعارات لكل mentioned users
+    if (mentions.length > 0) {
+      for (const mentionedUserId of mentions) {
+        if (mentionedUserId.toString() !== userId.toString()) {
+          const newNotify = new Notification({
+            content: "mentioned you in a post",
+            type: "mention",
+            sender: userId,
+            receiver: mentionedUserId,
+            actionRef: post._id,
+            actionModel: "Post",
+          });
+          await newNotify.save();
+
+          const receiverSocketId = getReceiverSocketId(mentionedUserId);
+          if (receiverSocketId) {
+            io.to(receiverSocketId).emit("notification", newNotify);
+          }
+        }
+      }
+    }
 
     const user = await User.findById(userId);
     user.userLevelPoints += 5;
@@ -445,6 +479,7 @@ const addPost = async (req, res) => {
     await post.populate([
       { path: "owner", select: "username profileName profilePhoto" },
       { path: "community", select: "Name Picture members" },
+      { path: "mentions", select: "username profileName profilePhoto" }, // ✅ populate للمنشن
     ]);
     return res.status(201).json(post);
   } catch (err) {
@@ -602,13 +637,25 @@ const sharePost = asyncHandler(async (req, res) => {
 
 // ================== Edit Post ==================
 const editPost = asyncHandler(async (req, res) => {
-  let { text, community, Hashtags, existingPhotos } = req.body;
+  let { text, community, Hashtags, existingPhotos, mentions } = req.body;
 
   try {
     existingPhotos = existingPhotos ? JSON.parse(existingPhotos) : [];
     Hashtags = Hashtags ? JSON.parse(Hashtags) : [];
+
+    // ✅ Parse mentions لو جايه كـ string
+    if (typeof mentions === "string") {
+      try {
+        mentions = JSON.parse(mentions);
+      } catch {
+        mentions = [mentions];
+      }
+    } else if (!Array.isArray(mentions)) {
+      mentions = [];
+    }
+
   } catch (err) {
-    return res.status(400).json({ message: "Invalid JSON in existingPhotos or Hashtags" });
+    return res.status(400).json({ message: "Invalid JSON in body fields" });
   }
 
   const post = await Post.findById(req.params.id);
@@ -644,6 +691,7 @@ const editPost = asyncHandler(async (req, res) => {
   post.community = community || post.community;
   post.Hashtags = Hashtags;
   post.Photos = [...existingPhotos, ...newUploadedPhotos];
+  post.mentions = mentions || post.mentions; // 🎯 تحديث mentions
 
   await post.save();
 
@@ -653,10 +701,12 @@ const editPost = asyncHandler(async (req, res) => {
     { path: "community", select: "Name Picture members" },
     { path: "originalPost", populate: { path: "owner", select: "username profileName profilePhoto" }},
     { path: "comments", populate: { path: "owner", select: "username profileName profilePhoto" }},
+    { path: "mentions", select: "username profileName profilePhoto" }, // 🎯 populate للمنشن
   ]);
 
   res.status(200).json(post);
 });
+
 
 
 

@@ -13,7 +13,7 @@ const Sluchits = () => {
   const { communities } = useCommunity()
   const following = Array.isArray(user?.following) ? user.following : []
 
-  // ترتيب البوستات
+  // ترتيب البوستات: المتابعين أولًا
   const sortedPosts = useMemo(() => {
     if (!Array.isArray(posts)) return []
     return posts
@@ -27,7 +27,7 @@ const Sluchits = () => {
       })
   }, [posts, following])
 
-  // خلط البوستات مع suggestions
+  // خلط البوستات مع suggestions بشكل محسّن
   const combinedItems = useMemo(() => {
     if (!Array.isArray(sortedPosts)) return []
 
@@ -38,11 +38,13 @@ const Sluchits = () => {
     sortedPosts.forEach((post, index) => {
       if (post) items.push({ type: 'post', data: post })
 
-      // أولوية: المجتمعات عند 6، غير كده يجي الـ users عند 3
-      if ((index + 1) % 6 === 0 && communityList.length > 0) {
-        items.push({ type: 'community', data: communityList.slice(0, 5) })
-      } else if ((index + 1) % 3 === 0 && userList.length > 0) {
-        items.push({ type: 'user', data: userList.slice(0, 5) })
+      // اقتراح المستخدمين كل 5 منشورات
+      if ((index + 1) % 5 === 0 && userList.length > 0) {
+        items.push({ type: 'user', data: userList.slice(0, 3) })
+      }
+      // اقتراح المجتمعات كل 10 منشورات
+      if ((index + 1) % 10 === 0 && communityList.length > 0) {
+        items.push({ type: 'community', data: communityList.slice(0, 3) })
       }
     })
 
@@ -61,10 +63,10 @@ const Sluchits = () => {
             return <SluchitEntry key={item.data._id} post={item.data} />
           }
 
-          // --- إضافة النص التوضيحي قبل الـ Suggestions ---
+          // --- النص التوضيحي قبل الـ Suggestions ---
           return (
-            <div key={`suggestion-${i}`} className="flex flex-col gap-3">
-              <h2 className="text-base font-semibold text-gray-700 dark:text-gray-200 px-1">
+            <div key={`suggestion-${i}`} className="flex flex-col gap-3 px-1">
+              <h2 className="text-base font-semibold text-gray-700 dark:text-gray-200">
                 {item.type === 'user'
                   ? '✨ Suggested Users to Follow'
                   : '🌐 Discover New Communities'}

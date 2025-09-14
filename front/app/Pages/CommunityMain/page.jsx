@@ -8,21 +8,9 @@ import { FaPlus, FaFilter, FaUsers, FaSearch } from 'react-icons/fa'
 import { useCommunity } from '@/app/Context/CommunityContext'
 import { useAuth } from '@/app/Context/AuthContext'
 
-
 const CATEGORY_OPTIONS = [
-  'All',
-  'Technology',
-  'Art',
-  'Science',
-  'Gaming',
-  'Music',
-  'Food',
-  'Travel',
-  'Health',
-  'Business',
-  'Politics',
-  'Sports',
-  'Other',
+  'All', 'Technology', 'Art', 'Science', 'Gaming', 'Music', 
+  'Food', 'Travel', 'Health', 'Business', 'Politics', 'Sports', 'Other'
 ]
 
 const SORT_OPTIONS = ['Newest', 'Most Members', 'A-Z']
@@ -61,7 +49,7 @@ export default function CommunityPage() {
     return ['All', ...Array.from(cats).slice(0, 12)]
   }, [communities])
 
-  // Filter + search + sort using useMemo for performance
+  // Filter + search + sort
   const filtered = useMemo(() => {
     const s = debouncedSearch.toLowerCase()
     const results = communities
@@ -102,15 +90,13 @@ export default function CommunityPage() {
     }
   }
 
-  // join handler with optimistic UI
+  // join handler
   const handleJoin = useCallback(
     async (commId) => {
-      // toggle local state immediately
       setJoinedLocal((prev) => ({ ...prev, [commId]: !prev[commId] }))
       try {
-        await joinCommunity?.(commId) // if context provides it
+        await joinCommunity?.(commId)
       } catch (err) {
-        // rollback on error
         setJoinedLocal((prev) => ({ ...prev, [commId]: !prev[commId] }))
         console.error('Join community failed', err)
       }
@@ -118,7 +104,6 @@ export default function CommunityPage() {
     [joinCommunity]
   )
 
-  // helper to check joined (context not guaranteed). Prefer server truth if available
   const isJoined = (comm) => {
     const joinedInServer = comm.members?.includes?.(user?._id)
     if (typeof joinedInServer === 'boolean') return joinedInServer
@@ -126,17 +111,17 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="w-full md:w-[75%] max-w-5xl mx-auto px-6 py-10 space-y-10">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-10 space-y-10">
       {/* HERO */}
-      <div className="relative bg-gradient-to-r from-sky-500 to-indigo-600 rounded-2xl text-white p-8 overflow-hidden shadow-lg">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div>
+      <div className="relative bg-gradient-to-r from-sky-500 to-indigo-600 rounded-2xl text-white p-6 md:p-8 overflow-hidden shadow-lg">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="w-full md:w-2/3">
             <h1 className="text-3xl md:text-4xl font-extrabold">🌐 Community Hub</h1>
-            <p className="mt-2 text-sm md:text-base opacity-95 max-w-xl">
+            <p className="mt-2 text-sm md:text-base opacity-95 max-w-full">
               Discover, create and join active groups around your interests. Follow communities to keep up with
               conversations and meet like-minded people.
             </p>
-            <div className="mt-4 flex items-center gap-3">
+            <div className="mt-4 flex flex-wrap gap-3">
               <button
                 onClick={() => setShowCreateModal(true)}
                 className="inline-flex items-center gap-2 bg-white text-sky-600 px-4 py-2 rounded-xl font-semibold shadow hover:scale-105 transition-transform"
@@ -145,51 +130,44 @@ export default function CommunityPage() {
                 <FaPlus /> Create Community
               </button>
               <Link href="#communities">
-                <a className="inline-flex items-center gap-2 text-sm text-white/90 hover:underline">Browse communities</a>
+                <span className="inline-flex items-center gap-2 text-sm text-white/90 hover:underline cursor-pointer">Browse communities</span>
               </Link>
             </div>
           </div>
 
-          <div className="hidden md:block w-48 h-48 rounded-xl bg-white/10 p-4 items-center justify-center">
-            {/* simple illustration placeholder */}
-            <div className="text-center text-white/90">
+          <div className="w-full md:w-1/3 flex justify-center md:justify-end">
+            <div className="w-48 h-48 rounded-xl bg-white/10 p-4 flex items-center justify-center overflow-hidden">
               <Image
                 src={"/Find.svg"}
                 alt='find_img'
                 width={500}
                 height={500}
-                className='w-full h-full'/>
+                className='w-full h-full object-contain'
+              />
             </div>
           </div>
         </div>
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between">
-        {/* Chips + search */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 text-gray-600">
-            <FaFilter />
-            <span className="text-sm">Filter</span>
-          </div>
-
-          <div className="flex gap-2 flex-wrap">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`text-xs px-3 py-1.5 rounded-full border transition select-none whitespace-nowrap shadow-sm
-                  ${activeCategory === cat ? 'bg-sky-600 text-white border-sky-600' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700'}`}
-                aria-pressed={activeCategory === cat}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between flex-wrap">
+        {/* Chips */}
+        <div className="flex gap-2 flex-wrap">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`text-xs px-3 py-1.5 rounded-full border transition select-none whitespace-nowrap shadow-sm
+                ${activeCategory === cat ? 'bg-sky-600 text-white border-sky-600' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700'}`}
+              aria-pressed={activeCategory === cat}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 min-w-[220px]">
+        <div className="flex gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
+          <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 flex-1 min-w-[160px]">
             <FaSearch className="text-gray-500" />
             <input
               value={searchTerm}
@@ -203,7 +181,7 @@ export default function CommunityPage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="p-2 rounded-lg border text-sm bg-white dark:bg-gray-900"
+            className="p-2 rounded-lg border text-sm bg-white dark:bg-gray-900 min-w-[120px]"
             aria-label="Sort communities"
           >
             {SORT_OPTIONS.map((s) => (
@@ -254,13 +232,13 @@ export default function CommunityPage() {
                 <h3 className="mt-3 text-lg font-semibold text-gray-800 dark:text-gray-100">{comm.Name}</h3>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{comm.description}</p>
 
-                <div className="mt-3 flex items-center justify-center gap-2">
+                <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
                   <Badge className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">{comm.Category || comm.Category}</Badge>
                   <Badge className={`${comm.isPrivate ? 'bg-red-100 text-red-700 dark:bg-red-900/30' : 'bg-green-100 text-green-700 dark:bg-green-900/30'}`}>{comm.isPrivate ? 'Private' : 'Public'}</Badge>
                   <span className="flex items-center gap-1 text-sm text-gray-500"><FaUsers /> {comm.members?.length || 0}</span>
                 </div>
 
-                <div className="mt-4 flex items-center justify-center gap-3">
+                <div className="mt-4 flex items-center justify-center gap-3 flex-wrap">
                   <Link href={`/Pages/Community/${comm._id}`}>
                     <a className="px-4 py-2 rounded-lg border border-sky-600 text-sky-600">View</a>
                   </Link>
@@ -282,7 +260,7 @@ export default function CommunityPage() {
       <AnimatePresence>
         {showCreateModal && (
           <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <motion.div initial={{ y: 10, scale: 0.98 }} animate={{ y: 0, scale: 1 }} exit={{ y: 10, scale: 0.98 }} transition={{ type: 'spring', stiffness: 200 }} className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-xl p-6 shadow-xl">
+            <motion.div initial={{ y: 10, scale: 0.98 }} animate={{ y: 0, scale: 1 }} exit={{ y: 10, scale: 0.98 }} transition={{ type: 'spring', stiffness: 200 }} className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg p-6 mx-4 sm:mx-0 shadow-xl">
               <h3 className="text-xl font-semibold text-sky-600 flex items-center gap-2"><FaPlus /> Create community</h3>
 
               <form onSubmit={handleCreate} className="mt-4 space-y-4">
@@ -318,7 +296,7 @@ export default function CommunityPage() {
                   />
                 </div>
 
-                <div className="flex justify-end items-center gap-3">
+                <div className="flex justify-end items-center gap-3 flex-wrap">
                   <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 rounded-lg border">Cancel</button>
                   <button type="submit" disabled={isCreating} className="px-6 py-2 rounded-lg bg-sky-600 text-white font-semibold">{isCreating ? 'Creating...' : 'Create'}</button>
                 </div>

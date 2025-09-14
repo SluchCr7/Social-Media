@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
 import {
@@ -13,48 +13,17 @@ import {
   FaCalendarAlt,
   FaRegStar,
 } from "react-icons/fa";
-import { useAuth } from "@/app/Context/AuthContext";
+import { useEvent } from "@/app/Context/EventContext";
 
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(dayjs());
-  const [events, setEvents] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [newEvent, setNewEvent] = useState({
-    title: "",
-    description: "",
-    type: "custom",
-  });
-  const [loading, setLoading] = useState(false);
-  const [showDayEvents, setShowDayEvents] = useState(null); // لعرض كل الأحداث داخل يوم معين
-  const { user } = useAuth();
+  const [newEvent, setNewEvent] = useState({ title: "", description: "", type: "custom" });
+  const [showDayEvents, setShowDayEvents] = useState(null);
 
-  const fetchEvents = async () => {
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/events`,
-        {
-          headers: {
-            Authorization: `Bearer ${user?.token}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (data.success) {
-        setEvents(data.events);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const { events, loading, addEvent, updateEvent, deleteEvent } = useEvent();
 
-  useEffect(() => {
-    if (user?.token) {
-      fetchEvents();
-    }
-  }, [user]);
-
-  // 📌 Map icons by type
   const typeIcons = {
     birthday: <FaBirthdayCake />,
     meeting: <FaUsers />,
@@ -69,101 +38,25 @@ const Calendar = () => {
     custom: "bg-gray-200 text-gray-800",
   };
 
-  // 📌 إضافة حدث جديد
   const handleAddEvent = async () => {
     if (!newEvent.title) return;
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/events`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user?.token}`,
-          },
-          body: JSON.stringify({
-            title: newEvent.title,
-            description: newEvent.description,
-            date: selectedDate.format("YYYY-MM-DD"),
-            type: newEvent.type,
-          }),
-        }
-      );
-      const data = await res.json();
-      if (data.success) {
-        setEvents([...events, data.event]);
-        setNewEvent({ title: "", description: "", type: "custom" });
-        setSelectedDate(null);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    const event = { ...newEvent, date: selectedDate.format("YYYY-MM-DD") };
+    await addEvent(event);
+    setNewEvent({ title: "", description: "", type: "custom" });
+    setSelectedDate(null);
   };
 
-  // 📌 تحديث حدث
   const handleUpdateEvent = async () => {
     if (!selectedEvent.title) return;
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/events/${selectedEvent._id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user?.token}`,
-          },
-          body: JSON.stringify({
-            title: selectedEvent.title,
-            description: selectedEvent.description,
-            date: selectedEvent.date,
-            type: selectedEvent.type,
-          }),
-        }
-      );
-      const data = await res.json();
-      if (data.success) {
-        setEvents(
-          events.map((ev) => (ev._id === data.event._id ? data.event : ev))
-        );
-        setSelectedEvent(null);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    await updateEvent(selectedEvent);
+    setSelectedEvent(null);
   };
 
-  // 📌 حذف حدث
   const handleDeleteEvent = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/events/${selectedEvent._id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${user?.token}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (data.success) {
-        setEvents(events.filter((ev) => ev._id !== selectedEvent._id));
-        setSelectedEvent(null);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    await deleteEvent(selectedEvent._id);
+    setSelectedEvent(null);
   };
 
-  // 📌 حساب الأيام لعرض الشبكة
   const startOfMonth = currentDate.startOf("month");
   const endOfMonth = currentDate.endOf("month");
   const startDate = startOfMonth.startOf("week");
@@ -184,7 +77,7 @@ const Calendar = () => {
       <div className="flex justify-between items-center mb-6">
         <button
           onClick={() => setCurrentDate(currentDate.subtract(1, "month"))}
-          className="p-2 rounded-full hover:bg-gray-200"
+          className="p-2 rounded-full hover:bg-gray-200 transition"
         >
           <FaChevronLeft />
         </button>
@@ -193,7 +86,7 @@ const Calendar = () => {
         </h2>
         <button
           onClick={() => setCurrentDate(currentDate.add(1, "month"))}
-          className="p-2 rounded-full hover:bg-gray-200"
+          className="p-2 rounded-full hover:bg-gray-200 transition"
         >
           <FaChevronRight />
         </button>
@@ -207,15 +100,10 @@ const Calendar = () => {
       </div>
 
       {/* Days Grid */}
-      <motion.div
-        layout
-        className="grid grid-cols-7 gap-1 sm:gap-2 text-xs sm:text-sm"
-      >
+      <motion.div layout className="grid grid-cols-7 gap-1 sm:gap-2 text-xs sm:text-sm">
         {days.map((day, idx) => {
           const dayEvents = events.filter(
-            (ev) =>
-              dayjs(ev.date).format("YYYY-MM-DD") ===
-              day.format("YYYY-MM-DD")
+            (ev) => dayjs(ev.date).format("YYYY-MM-DD") === day.format("YYYY-MM-DD")
           );
 
           return (
@@ -264,7 +152,7 @@ const Calendar = () => {
         })}
       </motion.div>
 
-      {/* Add Event Panel */}
+      {/* Add Event Modal */}
       {selectedDate && !selectedEvent && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <motion.div
@@ -280,24 +168,18 @@ const Calendar = () => {
               placeholder="Event Title"
               className="w-full border p-2 rounded mb-3"
               value={newEvent.title}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, title: e.target.value })
-              }
+              onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
             />
             <textarea
               placeholder="Description"
               className="w-full border p-2 rounded mb-3"
               value={newEvent.description}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, description: e.target.value })
-              }
+              onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
             />
             <select
               className="w-full border p-2 rounded mb-3"
               value={newEvent.type}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, type: e.target.value })
-              }
+              onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })}
             >
               <option value="birthday">🎂 Birthday</option>
               <option value="meeting">👥 Meeting</option>
@@ -305,10 +187,7 @@ const Calendar = () => {
               <option value="custom">⭐ Custom</option>
             </select>
             <div className="flex justify-end gap-2">
-              <button
-                className="px-4 py-2 rounded bg-gray-200"
-                onClick={() => setSelectedDate(null)}
-              >
+              <button className="px-4 py-2 rounded bg-gray-200" onClick={() => setSelectedDate(null)}>
                 Cancel
               </button>
               <button
@@ -316,15 +195,14 @@ const Calendar = () => {
                 onClick={handleAddEvent}
                 disabled={loading}
               >
-                <FaPlus />
-                {loading ? "Saving..." : "Add"}
+                <FaPlus /> {loading ? "Saving..." : "Add"}
               </button>
             </div>
           </motion.div>
         </div>
       )}
 
-      {/* Event Details Panel */}
+      {/* Event Details Modal */}
       {selectedEvent && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <motion.div
@@ -345,10 +223,7 @@ const Calendar = () => {
               className="w-full border p-2 rounded mb-3"
               value={selectedEvent.description}
               onChange={(e) =>
-                setSelectedEvent({
-                  ...selectedEvent,
-                  description: e.target.value,
-                })
+                setSelectedEvent({ ...selectedEvent, description: e.target.value })
               }
             />
             <select
@@ -367,10 +242,7 @@ const Calendar = () => {
               Date: {dayjs(selectedEvent.date).format("DD MMM YYYY")}
             </p>
             <div className="flex justify-between">
-              <button
-                className="px-4 py-2 rounded bg-gray-200"
-                onClick={() => setSelectedEvent(null)}
-              >
+              <button className="px-4 py-2 rounded bg-gray-200" onClick={() => setSelectedEvent(null)}>
                 Close
               </button>
               <div className="flex gap-2">
@@ -420,10 +292,7 @@ const Calendar = () => {
               </div>
             ))}
             <div className="flex justify-end">
-              <button
-                className="px-4 py-2 rounded bg-gray-200"
-                onClick={() => setShowDayEvents(null)}
-              >
+              <button className="px-4 py-2 rounded bg-gray-200" onClick={() => setShowDayEvents(null)}>
                 Close
               </button>
             </div>
