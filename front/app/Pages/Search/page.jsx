@@ -152,7 +152,7 @@
 import React, { useEffect, useState } from 'react';
 import { FiSearch, FiX, FiUserPlus } from 'react-icons/fi';
 import { useAuth } from '../../Context/AuthContext';
-import { usePost } from '../Context/PostContext';
+import { usePost } from '../../Context/PostContext';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
