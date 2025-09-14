@@ -12,10 +12,13 @@ const Calendar = () => {
   const [newEvent, setNewEvent] = useState({ title: "", description: "" });
   const [loading, setLoading] = useState(false);
 
-  // 📌 جلب الأحداث من API
-  const fetchEvents = async () => {
+const fetchEvents = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACK_URL}/api/events`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACK_URL}/api/events`, {
+        headers: {
+          Authorization: `Bearer ${user?.token}`, // ✅ هنا
+        },
+      });
       const data = await res.json();
       if (data.success) {
         setEvents(data.events);
@@ -26,8 +29,10 @@ const Calendar = () => {
   };
 
   useEffect(() => {
-    fetchEvents();
-  }, []);
+    if (user?.token) {
+      fetchEvents();
+    }
+  }, [user]);
 
   // 📌 إضافة حدث جديد
   const handleAddEvent = async () => {
@@ -36,7 +41,10 @@ const Calendar = () => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACK_URL}/api/events`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.token}`, // ✅ هنا
+        },
         body: JSON.stringify({
           title: newEvent.title,
           description: newEvent.description,
@@ -63,7 +71,10 @@ const Calendar = () => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACK_URL}/api/events/${selectedEvent._id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.token}`, // ✅ هنا
+        },
         body: JSON.stringify({
           title: selectedEvent.title,
           description: selectedEvent.description,
@@ -88,6 +99,9 @@ const Calendar = () => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACK_URL}/api/events/${selectedEvent._id}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${user?.token}`, // ✅ هنا
+        },
       });
       const data = await res.json();
       if (data.success) {
@@ -115,7 +129,6 @@ const Calendar = () => {
   }
 
   const isToday = (d) => dayjs().isSame(d, "day");
-
   return (
     <div className="p-6 w-full">
       {/* Header */}
