@@ -7,6 +7,7 @@ import NoChat from './../../Component/NoChat';
 import { useMessage } from '@/app/Context/MessageContext';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
+import { FaBars } from 'react-icons/fa'; // 👈 أيقونة الهامبرجر
 
 const MessangerSluchit = () => {
   const { selectedUser, setSelectedUser } = useMessage();
@@ -57,6 +58,14 @@ const MessangerSluchit = () => {
 
         {/* Main Chat Area */}
         <main className="flex-1 w-full h-full relative">
+          {/* زر الهامبرجر يظهر فقط في الموبايل */}
+          <button
+            onClick={() => setShowSidebar(true)}
+            className="absolute top-4 left-4 z-10 p-2 rounded-md bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text shadow md:hidden"
+          >
+            <FaBars size={20} />
+          </button>
+
           {selectedUser ? (
             <Chat onBack={() => setShowSidebar(true)} />
           ) : (

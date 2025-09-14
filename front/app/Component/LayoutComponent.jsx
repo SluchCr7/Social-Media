@@ -70,7 +70,7 @@ const LayoutComponent = ({ children }) => {
 
   return (
     <div>
-      <div className={`flex items-start gap-3 w-full ${hideLayout ? '' : 'py-5'}`}>
+      <div className={`flex items-start gap-3 w-full`}>
         {!hideLayout && isLogin && (
           <Aside
             showNotifications={showNotifications}
