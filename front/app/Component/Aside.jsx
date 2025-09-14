@@ -14,6 +14,7 @@ import { useAuth } from '../Context/AuthContext'
 import { LuMessagesSquare } from "react-icons/lu";
 import { MdOutlineOndemandVideo } from "react-icons/md";
 import { IoTrophyOutline } from "react-icons/io5";
+import { SlCalender } from "react-icons/sl";
 
 const Aside = () => {
   const pathname = usePathname()
@@ -31,7 +32,8 @@ const Aside = () => {
     { icon: <CiUser />, img : user?.profilePhoto?.url, text: "Profile", link: "/Pages/Profile", hideForGuests: true },
     {icon: <LuMessagesSquare/> , text: "Messanger" , link:"/Pages/Messanger" , hideForGuests : true},
     {icon: <MdOutlineOndemandVideo/> , text: "Video" , link:"/Pages/Videos" , hideForGuests : false},
-    {icon: <IoTrophyOutline/> , text: "Challenge" , link:"/Pages/Challenge" , hideForGuests : true}
+    {icon: <IoTrophyOutline/> , text: "Challenge" , link:"/Pages/Challenge" , hideForGuests : true},
+    {icon: <SlCalender/> , text: "Calender" , link:"/Pages/Calender" , hideForGuests : true}
   ];
 
   const baseStyle = `flex items-center gap-4 px-4 py-2 rounded-lg text-sm font-medium w-full cursor-pointer transition-all duration-300`;
@@ -39,7 +41,7 @@ const Aside = () => {
   const inactiveStyle = `hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 text-lightMode-text dark:text-darkMode-text`;
 
   const renderLinks = () => (
-    <div className="flex flex-col gap-3 w-full">
+    <div className="flex flex-col gap-2 w-full">
       {navItems
         .filter(item => isLogin || !item.hideForGuests)
         .map(({ icon, text, link , img }) => {

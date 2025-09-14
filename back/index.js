@@ -32,6 +32,7 @@ app.use('/api/news', require('./routes/NewsRoute'))
 app.use('/api/story', require('./routes/StoryRoute'))
 app.use('/api/password', require('./routes/PasswordRoute'))
 app.use('/api/report', require('./routes/ReportRoute'))
+app.use('/api/events', require('./routes/EventRoute'))
 app.use(errorhandler)
 
 
