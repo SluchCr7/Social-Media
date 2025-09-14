@@ -15,7 +15,7 @@ const Calendar = () => {
   // 📌 جلب الأحداث من API
   const fetchEvents = async () => {
     try {
-      const res = await fetch("/api/events");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACK_URL}/api/events`);
       const data = await res.json();
       if (data.success) {
         setEvents(data.events);
@@ -34,7 +34,7 @@ const Calendar = () => {
     if (!newEvent.title) return;
     setLoading(true);
     try {
-      const res = await fetch("/api/events", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACK_URL}/api/events`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -61,7 +61,7 @@ const Calendar = () => {
     if (!selectedEvent.title) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/events/${selectedEvent._id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACK_URL}/api/events/${selectedEvent._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -86,7 +86,7 @@ const Calendar = () => {
   const handleDeleteEvent = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/events/${selectedEvent._id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACK_URL}/api/events/${selectedEvent._id}`, {
         method: "DELETE",
       });
       const data = await res.json();
@@ -117,7 +117,7 @@ const Calendar = () => {
   const isToday = (d) => dayjs().isSame(d, "day");
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-6 w-full">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <button
