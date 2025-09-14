@@ -1,10 +1,9 @@
+'use client'
 import React from "react";
 import Image from "next/image";
-import { useAuth } from "../Context/AuthContext";
 
 export const SuggestionRow = ({ type, data }) => {
   if (!data || data.length === 0) return null;
-  const {followUser} = useAuth()
   return (
     <div className="flex gap-6 overflow-x-auto pb-3">
       {data.map((item) => (
