@@ -193,8 +193,8 @@ const Aside = () => {
       title: "Community",
       items: [
         { icon: <FaPlus />, text: "New Post", link: "/Pages/NewPost" },
-        { icon: <RiUserCommunityLine />, text: "Community", link: "/Pages/CommunityMain", badge: 3 },
-        { icon: <LuMessagesSquare />, text: "Messenger", link: "/Pages/Messanger", badge: 5 },
+        { icon: <RiUserCommunityLine />, text: "Community", link: "/Pages/CommunityMain"},
+        { icon: <LuMessagesSquare />, text: "Messenger", link: "/Pages/Messanger" },
       ]
     },
     {

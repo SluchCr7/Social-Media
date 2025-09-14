@@ -50,7 +50,7 @@ const Sluchits = () => {
   }, [sortedPosts, suggestedUsers, communities])
 
   return (
-    <div className="w-full flex flex-col gap-6 px-4 md:px-6 lg:px-8">
+    <div className="w-full flex flex-col gap-6 px-4">
       {isLoading ? (
         Array.from({ length: 4 }).map((_, i) => (
           <PostSkeleton key={i} className="animate-pulse" />
