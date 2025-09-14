@@ -41,7 +41,7 @@ export const SuggestionRow = ({ type, data }) => {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
                   @{item.profileName || "guest"}
                 </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400 flex-1 line-clamp-3 leading-relaxed">
+                <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-3">
                   {item.description || "This user hasn’t written a bio yet."}
                 </p>
 
@@ -62,7 +62,7 @@ export const SuggestionRow = ({ type, data }) => {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
                   {item.members?.length || 0} members
                 </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400 flex-1 line-clamp-3 leading-relaxed">
+                <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-3">
                   {item.description || "Join our community and start engaging."}
                 </p>
 

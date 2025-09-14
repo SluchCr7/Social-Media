@@ -58,7 +58,7 @@ import { SuggestionRow } from './SuggestedRow'
 
 const Sluchits = () => {
 const { posts, isLoading } = usePost()
-const { user, suggestedUser } = useAuth()
+const { user, suggestedUsers } = useAuth()
 const { communities } = useCommunity()
 const following = Array.isArray(user?.following) ? user.following : []
 
@@ -79,7 +79,7 @@ const combinedItems = useMemo(() => {
   if (!Array.isArray(sortedPosts)) return []
 
   const items = []
-  const userList = Array.isArray(suggestedUser) ? suggestedUser : []
+  const userList = Array.isArray(suggestedUsers) ? suggestedUsers : []
   const communityList = Array.isArray(communities) ? communities : []
 
   sortedPosts.forEach((post, index) => {
@@ -95,7 +95,7 @@ const combinedItems = useMemo(() => {
   })
 
   return items
-}, [sortedPosts, suggestedUser, communities])
+}, [sortedPosts, suggestedUsers, communities])
   return (
     <div className="w-full flex flex-col gap-6 px-4 md:px-6 lg:px-8">
       {isLoading ? (
