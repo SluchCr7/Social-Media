@@ -1,36 +1,72 @@
-import React from 'react'
+import React from "react";
+import Image from "next/image";
+import { useAuth } from "../Context/AuthContext";
 
 export const SuggestionRow = ({ type, data }) => {
-  if (!data || data.length === 0) return null
-
+  if (!data || data.length === 0) return null;
+  const {followUser} = useAuth()
   return (
-    <div className="flex gap-4 overflow-x-auto pb-2">
+    <div className="flex gap-6 overflow-x-auto pb-3">
       {data.map((item) => (
         <div
           key={item._id || item.id}
-          className="min-w-[180px] flex-shrink-0 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md flex flex-col items-center text-center border border-gray-200 dark:border-gray-700"
+          className="min-w-[200px] flex-shrink-0 p-5 bg-white dark:bg-gray-900 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 flex flex-col items-center text-center transition-transform duration-300 hover:scale-105 hover:shadow-xl"
         >
-          {type === 'user' && (
+          {/* ✅ User Card */}
+          {type === "user" && (
             <>
-              <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-600 mb-2" />
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                {item.profileName || item.username}
+              <div className="relative w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 mb-3">
+                {item.profilePhoto ? (
+                  <Image
+                    src={item?.profilePhoto?.url}
+                    alt={item.username || "User"}
+                    width={64}
+                    height={64}
+                    className="rounded-full object-cover w-full h-full"
+                  />
+                ) : (
+                  <div className="w-full h-full rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-lg font-bold text-gray-700 dark:text-gray-300">
+                    {item.username?.[0] || "U"}
+                  </div>
+                )}
+              </div>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
+                {item.username}
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">@{item.username}</p>
-              <button className="mt-2 px-3 py-1 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                @{item.profileName || "guest"}
+              </p>
+              <button className="px-4 py-1.5 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full text-sm font-medium hover:opacity-90 transition">
                 Follow
               </button>
             </>
           )}
-
-          {type === 'community' && (
+{/*  onClick={()=> followUser(item._id)} */}
+          {/* ✅ Community Card */}
+          {type === "community" && (
             <>
-              <div className="w-12 h-12 rounded-full bg-blue-300 dark:bg-blue-700 mb-2 flex items-center justify-center text-white font-bold text-lg">
-                {item.name[0]}
+              <div className="relative w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-green-400 via-blue-400 to-purple-500 mb-3">
+                {item.image ? (
+                  <Image
+                    src={item?.Picture?.url}
+                    alt={item?.Name || "Community"}
+                    width={64}
+                    height={64}
+                    className="rounded-full object-cover w-full h-full"
+                  />
+                ) : (
+                  <div className="w-full h-full rounded-full bg-blue-300 dark:bg-blue-700 flex items-center justify-center text-lg font-bold text-white">
+                    {item?.Name?.[0] || "C"}
+                  </div>
+                )}
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">{item.name}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{item.members?.length || 0} members</p>
-              <button className="mt-2 px-3 py-1 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
+                {item?.Name || "Unnamed"}
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                {item.members?.length || 0} members
+              </p>
+              <button className="px-4 py-1.5 bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-full text-sm font-medium hover:opacity-90 transition">
                 Join
               </button>
             </>
@@ -38,8 +74,7 @@ export const SuggestionRow = ({ type, data }) => {
         </div>
       ))}
     </div>
-  )
-}
+  );
+};
 
-
-export default SuggestedRow
+export default SuggestionRow;
