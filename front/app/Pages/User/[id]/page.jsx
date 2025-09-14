@@ -49,7 +49,7 @@ const Page = ({ params }) => {
   ]
 
   return (
-    <div className="w-full flex flex-col items-center pt-10 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen">
+    <div className="w-full md:w-[75%] max-w-5xl mx-auto flex flex-col items-center pt-10 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen">
       {/* Profile Info */}
       <div className="flex flex-col items-center gap-4">
         <motion.div

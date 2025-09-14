@@ -126,7 +126,7 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="w-full px-6 py-10 space-y-10">
+    <div className="w-full md:w-[75%] max-w-5xl mx-auto px-6 py-10 space-y-10">
       {/* HERO */}
       <div className="relative bg-gradient-to-r from-sky-500 to-indigo-600 rounded-2xl text-white p-8 overflow-hidden shadow-lg">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">

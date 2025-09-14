@@ -73,7 +73,7 @@ const ProfilePage = () => {
 
   return (
     <>
-      <div className="w-full min-h-screen bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text flex flex-col items-center">
+      <div className="w-full md:w-[75%] max-w-5xl mx-auto min-h-screen bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text flex flex-col items-center">
         
         {/* Avatar */}
         <div className="w-full flex justify-center mt-10">
