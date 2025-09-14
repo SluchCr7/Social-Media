@@ -17,7 +17,7 @@ const Header = ({ unReadedMessage, setShowNotifications }) => {
 
   return (
     <header className="sticky top-0 z-50 bg-white dark:bg-darkMode-bg shadow-sm">
-      <div className="w-full flex items-center justify-between px-4 py-3 md:px-6">
+      <div className="w-full flex items-center justify-between py-3 md:px-6">
         {/* Title */}
         <span className="text-lightMode-text dark:text-darkMode-text font-bold text-lg md:text-xl tracking-[3px] uppercase">
           Home
