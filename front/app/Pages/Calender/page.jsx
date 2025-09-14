@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
 import { FaChevronLeft, FaChevronRight, FaPlus, FaTrash, FaEdit } from "react-icons/fa";
+import { useAuth } from "@/app/Context/AuthContext";
 
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(dayjs());
@@ -11,7 +12,7 @@ const Calendar = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [newEvent, setNewEvent] = useState({ title: "", description: "" });
   const [loading, setLoading] = useState(false);
-
+  const {user} = useAuth()
 const fetchEvents = async () => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACK_URL}/api/events`, {
