@@ -9,6 +9,8 @@ const path = require('path')
 const { cloudUpload, cloudRemove } = require('../Config/cloudUpload')
 const fs = require('fs')
 const { v2 } = require('cloudinary')
+const speakeasy = require("speakeasy");
+const qrcode = require("qrcode");
 
 const {Post, ValidatePost} = require('../Modules/Post')
 const { Comment } = require('../Modules/Comment')
@@ -752,5 +754,5 @@ const deleteAllUsers = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "All users deleted successfully" });
 });
 
-module.exports = { DeleteUser,deleteAllUsers, getSuggestedUsers, blockOrUnblockUser, makeUserAdmin, getAllUsers, getUserById, RegisterNewUser, LoginUser, verifyAccount, uploadPhoto, makeFollow, updatePassword, updateProfile, savePost, pinPost, updateLinksSocial }
+module.exports = { DeleteUser,deleteAllUsers, getSuggestedUsers, blockOrUnblockUser, makeUserAdmin, getAllUsers, getUserById, RegisterNewUser, LoginUser, verifyAccount, uploadPhoto, makeFollow, updatePassword, updateProfile, savePost, pinPost, updateLinksSocial}
 

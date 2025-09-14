@@ -125,49 +125,100 @@ const SettingPageFront = ({
               transition={{ duration: 0.25 }}
               className="max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow p-6"
             >
-              <header className="flex items-center gap-4 mb-4">
+              <header className="flex items-center gap-4 mb-6">
                 <FaLock className="text-xl" />
                 <h2 className="text-lg font-semibold">Security</h2>
               </header>
-              <form onSubmit={handleChangePassword} className="grid gap-4">
-                <input
-                  type="password"
-                  placeholder="Current Password"
-                  className="w-full p-3 rounded border border-gray-300 dark:border-gray-700 dark:bg-gray-800"
-                  value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
-                  required
-                />
-                <input
-                  type="password"
-                  placeholder="New Password"
-                  className="w-full p-3 rounded border border-gray-300 dark:border-gray-700 dark:bg-gray-800"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                />
-                <input
-                  type="password"
-                  placeholder="Confirm New Password"
-                  className="w-full p-3 rounded border border-gray-300 dark:border-gray-700 dark:bg-gray-800"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                />
-                <button
-                  type="submit"
-                  className="self-start bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
-                >
-                  Change Password
+
+              {/* Change Password */}
+              <div className="mb-8">
+                <h3 className="font-medium mb-2">Change Password</h3>
+                <form onSubmit={handleChangePassword} className="grid gap-4">
+                  <div>
+                    <label className="text-sm mb-1 block">Current Password</label>
+                    <input
+                      type="password"
+                      className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800"
+                      value={oldPassword}
+                      onChange={(e) => setOldPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm mb-1 block">New Password</label>
+                    <input
+                      type="password"
+                      className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Must be at least 8 characters, include a number & a capital letter.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm mb-1 block">Confirm New Password</label>
+                    <input
+                      type="password"
+                      className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="self-start bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+                  >
+                    Update Password
+                  </button>
+                  {passwordMessage && (
+                    <p className="text-sm mt-1 text-red-500 dark:text-red-400">
+                      {passwordMessage}
+                    </p>
+                  )}
+                </form>
+              </div>
+
+              {/* Two Factor Authentication */}
+              <div className="mb-8">
+                <h3 className="font-medium mb-2">Two-Factor Authentication</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                  Add an extra layer of security to your account by enabling 2FA.
+                </p>
+                <button className="px-4 py-2 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition">
+                  Enable 2FA
                 </button>
-                {passwordMessage && (
-                  <p className="text-sm mt-1 text-red-500 dark:text-red-400">
-                    {passwordMessage}
-                  </p>
-                )}
-              </form>
+              </div>
+
+              {/* Active Sessions */}
+              <div className="mb-8">
+                <h3 className="font-medium mb-2">Active Sessions</h3>
+                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  <li>Chrome on Windows 10 · Cairo, Egypt · Active now</li>
+                  <li>Safari on iPhone 14 · Giza, Egypt · 2 hours ago</li>
+                </ul>
+                <button className="mt-3 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition">
+                  Log out from all devices
+                </button>
+              </div>
+
+              {/* Security Alerts */}
+              <div>
+                <h3 className="font-medium mb-2">Security Alerts</h3>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" className="rounded" defaultChecked />
+                  Email me when a new device logs in
+                </label>
+                <label className="flex items-center gap-2 text-sm mt-2">
+                  <input type="checkbox" className="rounded" />
+                  Notify me of failed login attempts
+                </label>
+              </div>
             </motion.section>
           )}
+
 
           {/* Chat Colors */}
           {activeTab === 'chat' && (

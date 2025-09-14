@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose')
 const joi = require('joi')
 
@@ -141,13 +140,13 @@ const UserSchema = new mongoose.Schema({
     toObject : {virtuals: true}
 });
 
-// Add virtual property Posts
+// 🔹 Virtuals
 UserSchema.virtual("posts", {
     ref: "Post",
     localField: "_id",
     foreignField: "owner"
 })
-// Add virtual property Posts
+
 UserSchema.virtual("comments", {
     ref: "Comment",
     localField: "_id",
@@ -159,11 +158,13 @@ UserSchema.virtual("communities", {
     localField: "_id",
     foreignField: "owner"
 })
+
 UserSchema.virtual("stories", {
     ref: "Story",
     localField: "_id",
     foreignField: "owner"
 })
+
 UserSchema.virtual("reports", {
     ref: "Report",
     localField: "_id",
@@ -176,6 +177,7 @@ UserSchema.virtual("notifications", {
   foreignField: "receiver",  
 });
 
+// 🔹 Update Level Rank
 UserSchema.methods.updateLevelRank = function () {
   if (this.userLevelPoints >= 2000) this.userLevelRank = "Pro";
   else if (this.userLevelPoints >= 1000) this.userLevelRank = "Advanced";
@@ -185,6 +187,7 @@ UserSchema.methods.updateLevelRank = function () {
 
 const User = mongoose.model('User', UserSchema)
 
+// ================== Joi Validations ==================
 const LoginValidate = (user) => {
     const schema = joi.object({
         email: joi.string().required(),
@@ -201,7 +204,6 @@ const ValidateUser = (user) => {
     })
     return schema.validate(user)
 }
-
 
 const validateUserUpdate = (user) => {
   const schema = joi.object({
@@ -227,14 +229,12 @@ const validateUserUpdate = (user) => {
   return schema.validate(user)
 }
 
-
 const validatePasswordUpdate = (user) => {
     const schema = joi.object({
         password: joi.string().required(),
     })
     return schema.validate(user)
 }
-
 
 const validateEmail = (user) => {
     const schema = joi.object({
@@ -256,4 +256,12 @@ const validateUserLinks = (user) => {
   return schema.validate(user);
 };
 
-module.exports = {User,validateUserLinks, LoginValidate,validateEmail, ValidateUser, validateUserUpdate, validatePasswordUpdate}
+module.exports = {
+  User,
+  validateUserLinks,
+  LoginValidate,
+  validateEmail,
+  ValidateUser,
+  validateUserUpdate,
+  validatePasswordUpdate
+}

@@ -2,114 +2,117 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { IoClose, IoChevronBack, IoChevronForward } from "react-icons/io5"
 import Image from 'next/image'
+import { useSwipeable } from 'react-swipeable'
 
 const StoryViewer = ({ stories, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
   const timeoutRef = useRef(null)
+
+  const story = stories[currentIndex]
+
+  const startAutoAdvance = () => {
+    clearTimeout(timeoutRef.current)
+    if (isPaused) return
+    timeoutRef.current = setTimeout(() => {
+      if (currentIndex < stories.length - 1) setCurrentIndex(prev => prev + 1)
+      else onClose()
+    }, 5000)
+  }
 
   useEffect(() => {
     startAutoAdvance()
     return () => clearTimeout(timeoutRef.current)
-  }, [currentIndex])
-
-  const startAutoAdvance = () => {
-    clearTimeout(timeoutRef.current)
-    timeoutRef.current = setTimeout(() => {
-      if (currentIndex < stories.length - 1) {
-        setCurrentIndex((prev) => prev + 1)
-      } else {
-        onClose()
-      }
-    }, 5000)
-  }
+  }, [currentIndex, isPaused])
 
   const handleNext = () => {
-    if (currentIndex < stories.length - 1) {
-      setCurrentIndex(currentIndex + 1)
-    } else {
-      onClose()
-    }
+    if (currentIndex < stories.length - 1) setCurrentIndex(currentIndex + 1)
+    else onClose()
   }
 
   const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1)
-    }
+    if (currentIndex > 0) setCurrentIndex(currentIndex - 1)
   }
 
-  const story = stories[currentIndex]
+  const handlers = useSwipeable({
+    onSwipedLeft: handleNext,
+    onSwipedRight: handlePrev,
+    trackMouse: true,
+  })
 
   return (
-    <div className="fixed inset-0 bg-black/90 z-[999] flex items-center justify-center">
+    <div className="fixed inset-0 z-[999] flex items-center justify-center backdrop-blur-sm bg-black/70">
+      
       {/* زر الإغلاق */}
       <button
         onClick={onClose}
-        className="absolute top-6 right-6 text-white text-3xl z-50 hover:opacity-80"
+        className="absolute top-6 right-6 p-2 rounded-full bg-black/40 hover:bg-black/60 transition z-50"
       >
-        <IoClose />
+        <IoClose className="text-white text-3xl" />
       </button>
 
       {/* أسهم التنقل */}
       {currentIndex > 0 && (
         <button
           onClick={handlePrev}
-          className="absolute left-4 md:left-10 text-white text-4xl z-40 hover:opacity-80"
+          className="absolute left-4 md:left-10 p-2 rounded-full bg-black/30 hover:bg-black/50 transition z-40"
         >
-          <IoChevronBack />
+          <IoChevronBack className="text-white text-4xl" />
         </button>
       )}
       {currentIndex < stories.length - 1 && (
         <button
           onClick={handleNext}
-          className="absolute right-4 md:right-10 text-white text-4xl z-40 hover:opacity-80"
+          className="absolute right-4 md:right-10 p-2 rounded-full bg-black/30 hover:bg-black/50 transition z-40"
         >
-          <IoChevronForward />
+          <IoChevronForward className="text-white text-4xl" />
         </button>
       )}
 
-      {/* تقسيم الواجهة للنقر */}
-      <div
-        className="absolute inset-0 z-30 flex"
-        onClick={(e) => {
-          const width = window.innerWidth
-          if (e.clientX < width / 2) {
-            handlePrev()
-          } else {
-            handleNext()
-          }
-        }}
-      >
-        <div className="w-1/2 h-full" />
-        <div className="w-1/2 h-full" />
-      </div>
-
       {/* محتوى الستوري */}
-      <div className="relative max-w-md w-full rounded-xl overflow-hidden bg-white text-black shadow-lg flex items-center justify-center h-[70vh] p-4 z-20">
-        {story.Photo[0] ? (
+      <div
+        {...handlers}
+        onMouseDown={() => setIsPaused(true)}
+        onMouseUp={() => setIsPaused(false)}
+        className="relative max-w-lg w-full rounded-xl overflow-hidden shadow-lg flex flex-col items-center justify-center h-[70vh] p-4 z-20 bg-black"
+      >
+        {/* معلومات صاحب الستوري */}
+        <div className="absolute top-4 left-4 flex items-center gap-2 z-30">
+          <div className="w-10 h-10 rounded-full bg-gray-300" />
+          <span className="text-white font-semibold">{story.ownerName || 'Unknown'}</span>
+        </div>
+
+        {/* عرض الصورة أو النص */}
+        {story.Photo?.[0] ? (
           <Image
             src={story.Photo[0]}
             alt="story"
             fill
-            className="object-contain"
+            className="object-cover transition-all duration-500"
           />
         ) : (
-          <div className="bg-gradient-to-br from-[#2c2c2c] to-[#444] w-full h-full flex items-center justify-center px-6 text-center rounded-xl">
-            <p className="text-2xl md:text-3xl font-semibold text-white leading-snug">
+          <div className="bg-black/40 w-full h-full flex items-center justify-center px-6 text-center rounded-xl">
+            <p className="text-2xl md:text-3xl font-semibold text-white drop-shadow-lg leading-snug">
               {story.text}
             </p>
           </div>
         )}
-    </div>
+      </div>
 
-      {/* مؤشرات الستوري */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1 z-40">
+      {/* Progress bar */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-2 z-40 w-11/12 max-w-lg">
         {stories.map((_, idx) => (
-          <div
-            key={idx}
-            className={`h-1 w-14 rounded-full ${
-              idx <= currentIndex ? 'bg-white' : 'bg-white/30'
-            } transition-all duration-300`}
-          />
+          <div key={idx} className="flex-1 h-1 rounded-full bg-white/30 overflow-hidden">
+            <div
+              className="h-full bg-white transition-all duration-500"
+              style={{
+                width:
+                  idx < currentIndex ? '100%' :
+                  idx === currentIndex ? `${isPaused ? 50 : 100}%` :
+                  '0%',
+              }}
+            />
+          </div>
         ))}
       </div>
     </div>
