@@ -28,7 +28,7 @@ const Search = () => {
   }, [search, users]);
 
   return (
-    <div className="w-full min-h-screen px-4 sm:px-8 py-12 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#1e1f22] dark:to-[#2b2d31] transition">
+    <div className="w-full min-h-screen px-4 sm:px-8 py-12 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg transition">
       
       {/* Hero Section */}
       <div className="text-center mb-10">

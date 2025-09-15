@@ -315,6 +315,46 @@ export const AuthContextProvider = ({ children }) => {
     }
   }
 
+  // داخل AuthContextProvider
+const togglePrivateAccount = async () => {
+  if (!user?.token) return showAlert('You must be logged in');
+  try {
+    const res = await axios.put(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/account/private`,
+      {},
+      { headers: { Authorization: `Bearer ${user.token}` } }
+    );
+
+    // تحديث حالة الحساب المحليًا
+    setUser((prev) => ({ ...prev, isPrivate: !prev.isPrivate }));
+
+    showAlert(res.data.message);
+  } catch (err) {
+    console.error(err);
+    showAlert(err.response?.data?.message || 'Failed to update privacy');
+  }
+};
+
+const makeAccountPremiumVerify = async () => {
+  if (!user?.token) return showAlert('You must be logged in');
+  try {
+    const res = await axios.put(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/verify`,
+      {},
+      { headers: { Authorization: `Bearer ${user.token}` } }
+    );
+
+    // تحديث حالة الحساب المحليًا
+    setUser((prev) => ({ ...prev, isAccountWithPremiumVerify: true }));
+
+    showAlert(res.data.message || 'Account verified successfully');
+  } catch (err) {
+    console.error(err);
+    showAlert(err.response?.data?.message || 'Failed to verify account');
+  }
+};
+
+
   // ------------------- INIT -------------------
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -360,7 +400,8 @@ export const AuthContextProvider = ({ children }) => {
         onlineUsers,
         blockOrUnblockUser,
         suggestedUsers,
-        deleteUser,showAllSuggestedUsers , setShowAllSuggestedUsers
+        deleteUser, showAllSuggestedUsers, setShowAllSuggestedUsers
+        ,togglePrivateAccount,makeAccountPremiumVerify
       }}
     >
       {children}

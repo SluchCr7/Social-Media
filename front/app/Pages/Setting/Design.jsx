@@ -49,6 +49,8 @@ const SettingPageFront = ({
   showConfirmDelete,
   formattedDate,
   backgroundValue,
+  togglePrivateAccount,
+  makeAccountPremiumVerify
 }) => {
   const [activeTab, setActiveTab] = useState('appearance');
   const [sidebarOpen, setSidebarOpen] = useState(false); // For mobile drawer
@@ -295,6 +297,8 @@ const SettingPageFront = ({
             </motion.section>
           )}
 
+          
+
           {/* Account */}
           {activeTab === 'account' && (
             <motion.section
@@ -303,12 +307,14 @@ const SettingPageFront = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.25 }}
-              className="w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 mb-6"
+              className="w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 mb-6 space-y-4"
             >
               <header className="flex items-center gap-4 mb-4">
                 <FaUserCog className="text-2xl" />
                 <h2 className="text-xl font-semibold">Account</h2>
               </header>
+
+              {/* Delete Account */}
               <button
                 onClick={() => setShowConfirmDelete(true)}
                 className="flex items-center gap-2 text-red-600 hover:text-red-700 font-medium"
@@ -337,8 +343,45 @@ const SettingPageFront = ({
                   </div>
                 </div>
               )}
+
+              {/* Private Account Toggle */}
+              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm flex justify-between items-center">
+                <div>
+                  <h3 className="font-semibold">Private Account</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Only approved followers can see your posts and profile.
+                  </p>
+                </div>
+                <button
+                  onClick={togglePrivateAccount}
+                  className={`w-14 h-7 flex items-center rounded-full p-1 transition-all ${user?.isPrivate ? 'bg-blue-500' : 'bg-gray-300'}`}
+                >
+                  <div
+                    className={`bg-white w-5 h-5 rounded-full shadow transform transition-transform ${user?.isPrivate ? 'translate-x-7' : 'translate-x-0'}`}
+                  />
+                </button>
+              </div>
+
+              {/* Premium Verified Account Toggle */}
+              <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm flex justify-between items-center">
+                <div>
+                  <h3 className="font-semibold">Verified Account</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Activate premium verification to get a verified badge.
+                  </p>
+                </div>
+                <button
+                  onClick={makeAccountPremiumVerify}
+                  className={`w-14 h-7 flex items-center rounded-full p-1 transition-all ${user?.isAccountWithPremiumVerify ? 'bg-yellow-400' : 'bg-gray-300'}`}
+                >
+                  <div
+                    className={`bg-white w-5 h-5 rounded-full shadow transform transition-transform ${user?.isAccountWithPremiumVerify ? 'translate-x-7' : 'translate-x-0'}`}
+                  />
+                </button>
+              </div>
             </motion.section>
           )}
+
         </AnimatePresence>
       </main>
     </div>

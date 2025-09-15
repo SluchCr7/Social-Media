@@ -19,7 +19,8 @@ const {
   updateProfile,
   savePost,
   pinPost,
-  MakeAccountPreimumVerify
+  MakeAccountPreimumVerify,
+  togglePrivateAccount
 } = require('../Controllers/UserController');
 
 const photoUpload = require('../Middelwares/uploadPhoto');
@@ -43,5 +44,5 @@ route.route('/pin/:id').put(verifyToken, pinPost);
 route.route('/social').put(verifyToken, updateLinksSocial);
 route.route('/deleteAll').delete(deleteAllUsers);
 route.route('/verify').put(verifyToken , MakeAccountPreimumVerify);
-
+route.route('/account/private').put( verifyToken, togglePrivateAccount);
 module.exports = route;

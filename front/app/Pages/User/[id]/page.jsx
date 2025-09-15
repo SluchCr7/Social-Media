@@ -52,19 +52,25 @@ const Page = ({ params }) => {
     <div className="w-full md:w-[75%] max-w-5xl mx-auto pt-10 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6">
       {/* Profile Info */}
       <div className="flex flex-col items-center lg:items-start justify-start gap-6">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="relative w-36 h-36 rounded-full overflow-hidden shadow-lg"
-        >
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className={`relative w-36 h-36 rounded-full shadow-lg cursor-pointer p-1
+          ${userSelected?.stories?.length > 0 ? 'bg-gradient-to-tr from-pink-500 via-yellow-400 to-purple-600' : 'bg-transparent'}
+        `}
+        onClick={() => document.getElementById('fileInput')?.click()}
+      >
+        <div className="w-full h-full rounded-full overflow-hidden">
           <Image
             src={userSelected?.profilePhoto?.url || '/default-profile.png'}
             alt="Profile"
             fill
-            className="object-cover transition-transform duration-300 hover:scale-105"
+            className="object-cover transition-transform duration-300 hover:scale-105 rounded-full"
           />
-        </motion.div>
+        </div>
+      </motion.div>
+
 
 
         {/* اسم المستخدم + الاسم الكامل */}

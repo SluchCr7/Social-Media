@@ -118,7 +118,7 @@ const Page = ({ params }) => {
   }
 
   return (
-    <div className="w-full md:w-[75%] max-w-5xl mx-auto text-gray-900 bg-gray-50 min-h-screen pb-12">
+    <div className="w-full md:w-[75%] max-w-5xl mx-auto text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen pb-12">
       <Head>
         <title>{CommunitySelected?.Name} — Community</title>
         <meta name="description" content={CommunitySelected?.description || `${CommunitySelected?.Name} community`} />
@@ -221,7 +221,7 @@ const Page = ({ params }) => {
         {postsFiltered?.length > 0 ? (
           postsFiltered.map((post) => <SluchitEntry post={post} key={post?._id} />)
         ) : (
-          <div className="text-center text-gray-400 text-sm py-12 bg-white rounded-lg shadow-sm">
+          <div className="text-center text-sm py-12  rounded-lg shadow-sm">
             This community has no posts yet.
           </div>
         )}

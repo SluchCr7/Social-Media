@@ -138,6 +138,14 @@ const UserSchema = new mongoose.Schema({
         enum: ['Male', 'Female', 'Other'],
         default: 'Other'
     },
+    isPrivate: {
+        type: Boolean,
+        default: false
+    },
+    acceptedTerms : {
+        type : Boolean,
+        default : false
+    }
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

@@ -745,7 +745,7 @@ const getSuggestedUsers = asyncHandler(async (req, res) => {
 });
 
 const MakeAccountPreimumVerify = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id)
+  const user = await User.findById(req.user._id)
   if (!user) {
     return res.status(400).json({ message: "This User not be found" });
   }
@@ -759,6 +759,28 @@ const MakeAccountPreimumVerify = asyncHandler(async (req, res) => {
   })
 })
 
+const togglePrivateAccount = async (req, res) => {
+    try {
+        const userId = req.user._id; // نفترض أنك تستخدم auth middleware لتخزين user
+        const user = await User.findById(userId);
+
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        // عكس القيمة الحالية
+        user.isPrivate = !user.isPrivate;
+        await user.save();
+
+        return res.status(200).json({
+            message: `Account is now ${user.isPrivate ? 'private' : 'public'}`,
+            isPrivate: user.isPrivate
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+
+
 const deleteAllUsers = asyncHandler(async (req, res) => {
     await User.deleteMany({});
     await Post.deleteMany({ })
@@ -769,5 +791,5 @@ const deleteAllUsers = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "All users deleted successfully" });
 });
 
-module.exports = {MakeAccountPreimumVerify, DeleteUser,deleteAllUsers, getSuggestedUsers, blockOrUnblockUser, makeUserAdmin, getAllUsers, getUserById, RegisterNewUser, LoginUser, verifyAccount, uploadPhoto, makeFollow, updatePassword, updateProfile, savePost, pinPost, updateLinksSocial}
+module.exports = {MakeAccountPreimumVerify,togglePrivateAccount, DeleteUser,deleteAllUsers, getSuggestedUsers, blockOrUnblockUser, makeUserAdmin, getAllUsers, getUserById, RegisterNewUser, LoginUser, verifyAccount, uploadPhoto, makeFollow, updatePassword, updateProfile, savePost, pinPost, updateLinksSocial}
 

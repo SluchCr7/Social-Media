@@ -13,7 +13,7 @@ const SettingsPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMessage, setPasswordMessage] = useState('');
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const { user, updatePassword, deleteUser } = useAuth();
+  const { user, updatePassword, deleteUser, togglePrivateAccount,makeAccountPremiumVerify } = useAuth();
   const { backgroundStyle, handleBackgroundChange, backgroundValue } = useMessage();
 
   // ✅ 1. Load dark mode from localStorage on mount
@@ -62,6 +62,7 @@ const SettingsPage = () => {
         setOldPassword={setOldPassword} setNewPassword={setNewPassword} passwordMessage={passwordMessage} setConfirmPassword={setConfirmPassword} setShowConfirmDelete={setShowConfirmDelete} showConfirmDelete={showConfirmDelete}
         darkMode={darkMode}  handleToggleTheme={handleToggleTheme} deleteUser={deleteUser} colors={colors}
         formattedDate={formattedDate} backgroundValue={backgroundValue} handleBackgroundChange={handleBackgroundChange}
+        togglePrivateAccount={togglePrivateAccount} makeAccountPremiumVerify={makeAccountPremiumVerify}
       />
     </>
   );
