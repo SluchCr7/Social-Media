@@ -37,7 +37,7 @@ const Page = ({ params }) => {
 
   const isFollowing = userSelected?.followers?.some(f => f?._id === user?._id)
   const isOwner = user?._id === userSelected?._id
-  const canSeePrivateContent = isOwner || isFollowing
+  const canSeePrivateContent = !userSelected?.isPrivate || isOwner || isFollowing;
 
   // فلترة البوستات فقط إذا الحساب public أو متابع
   const pinnedPosts = userSelected?.pinsPosts || []
