@@ -169,7 +169,7 @@ const Aside = () => {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const { user } = useAuth()
+  const { user , Logout} = useAuth()
 
   // ✅ detect mobile
   useEffect(() => {
@@ -267,24 +267,36 @@ const Aside = () => {
       </div>
 
       <div className={`mt-auto border-t pt-4 ${isCollapsed ? "text-center" : ""}`}>
-        <div className="flex items-center gap-3 cursor-pointer hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 px-2 py-2 rounded-lg">
-          <div className={`relative p-[2px] rounded-full ${user?.stories?.length > 0 ? 'bg-gradient-to-tr from-indigo-500 to-purple-500 animate-pulse' : ''}`}>
-            <Image
-              src={user?.profilePhoto?.url || '/default-profile.png'}
-              alt="User Profile"
-              width={100}
-              height={100}
-              className="w-8 h-8 rounded-full object-cover"
-            />
-          </div>
-          {!isCollapsed && (
-            <div>
-              <p className="text-sm font-medium">{user?.username || "User Name"}</p>
-              <p className="text-xs text-gray-500">@{user?.profileName || "user_name"}</p>
+        <div className="flex flex-col gap-3">
+          {/* User Info */}
+          <div className="flex items-center gap-3 cursor-pointer hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 px-2 py-2 rounded-lg">
+            <div className={`relative p-[2px] rounded-full ${user?.stories?.length > 0 ? 'bg-gradient-to-tr from-indigo-500 to-purple-500 animate-pulse' : ''}`}>
+              <Image
+                src={user?.profilePhoto?.url || '/default-profile.png'}
+                alt="User Profile"
+                width={100}
+                height={100}
+                className="w-8 h-8 rounded-full object-cover"
+              />
             </div>
-          )}
+            {!isCollapsed && (
+              <div>
+                <p className="text-sm font-medium">{user?.username || "User Name"}</p>
+                <p className="text-xs text-gray-500">@{user?.profileName || "user_name"}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Logout Button */}
+          <button
+            onClick={() => Logout}
+            className="flex items-center justify-center gap-2 w-full px-4 py-2 mt-2 text-sm font-medium text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition"
+          >
+            Logout
+          </button>
         </div>
       </div>
+
     </aside>
   )
 }
