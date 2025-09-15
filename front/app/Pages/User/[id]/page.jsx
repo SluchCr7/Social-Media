@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import { useAuth } from '@/app/Context/AuthContext'
-import SluchitEntry from '@/app/Component/SluchitEntry'
 import { usePost } from '@/app/Context/PostContext'
 import { useState, useEffect } from 'react'
 import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri"
@@ -40,16 +39,20 @@ const Page = ({ params }) => {
   const isOwner = user?._id === userSelected?._id
   const canSeePrivateContent = isOwner || isFollowing
 
+  // فلترة البوستات فقط إذا الحساب public أو متابع
   const pinnedPosts = userSelected?.pinsPosts || []
   const pinnedIds = new Set(pinnedPosts.map((p) => p?._id))
   const regularPosts = (userSelected?.posts || []).filter((p) => !pinnedIds.has(p?._id))
-  const combinedPosts = [
-    ...pinnedPosts.map((post) => ({ ...post, isPinned: true })),
-    ...regularPosts.map((post) => ({ ...post, isPinned: false })),
-  ]
+  const combinedPosts = canSeePrivateContent
+    ? [
+        ...pinnedPosts.map((post) => ({ ...post, isPinned: true })),
+        ...regularPosts.map((post) => ({ ...post, isPinned: false })),
+      ]
+    : []
 
   return (
     <div className="w-full md:w-[75%] max-w-5xl mx-auto pt-10 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6">
+      
       {/* Profile Info */}
       <div className="flex flex-col items-center lg:items-start justify-start gap-6">
         <motion.div
@@ -92,14 +95,12 @@ const Page = ({ params }) => {
         </motion.p>
 
         {/* Stats */}
-        {canSeePrivateContent ? (
+        {canSeePrivateContent && (
           <div className="flex justify-center gap-10 mt-6">
             <StatBlock label="Posts" value={userSelected?.posts?.length} />
             <StatBlock label="Followers" value={userSelected?.followers?.length} onClick={() => { setMenuType('followers'); setShowMenu(true) }} />
             <StatBlock label="Following" value={userSelected?.following?.length} onClick={() => { setMenuType('following'); setShowMenu(true) }} />
           </div>
-        ) : (
-          <p className="text-center text-gray-500 mt-6">This account is private. Follow to see posts, stats, and more details.</p>
         )}
 
         {/* Follow Button */}
@@ -133,6 +134,7 @@ const Page = ({ params }) => {
         )}
       </div>
 
+      {/* Main Content */}
       {isBlockedByMe ? (
         <div className="min-h-screen flex flex-col items-center justify-center text-center text-red-500 py-20 px-4">
           <h2 className="text-2xl font-bold mb-4">You have blocked this user</h2>
@@ -146,7 +148,6 @@ const Page = ({ params }) => {
         </div>
       ) : (
         <div className='flex flex-col gap-6 w-full'>
-          {/* Show detailed info only if owner or follower */}
           {canSeePrivateContent ? (
             <>
               <InfoAboutUser user={userSelected} />
