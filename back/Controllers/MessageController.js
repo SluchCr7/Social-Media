@@ -114,10 +114,30 @@ const makeAllMessagesIsReadBetweenUsers = asyncHandler(async (req, res) => {
   res.status(200).json({ message: 'All Messages marked as read' });
 })
 
+const getUnreadMessages = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const unreadMessages = await Message.find({
+      receiver: userId,
+      isRead: false,
+    })
+      .populate('sender', 'username profilePhoto _id')
+      .populate('receiver', 'username profilePhoto _id')
+      .sort({ createdAt: -1 }); // الأحدث أولاً
+
+    res.status(200).json(unreadMessages);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
 module.exports = {
   getUsersInSideBar,
   getMessages,
   sendMessage,
   getMessagesByUser,
-  makeAllMessagesIsReadBetweenUsers
+  makeAllMessagesIsReadBetweenUsers,
+  getUnreadMessages
 };

@@ -199,15 +199,28 @@ export const AuthContextProvider = ({ children }) => {
   };
 
   const pinPost = async (id) => {
-    try {
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/pin/${id}`, {}, {
-        headers: { authorization: `Bearer ${user.token}` }
-      });
-      showAlert(res.data.message);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  try {
+    const res = await axios.put(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/pin/${id}`,
+      {},
+      { headers: { Authorization: `Bearer ${user.token}` } }
+    );
+
+    showAlert(res.data.message);
+
+    // تحديث الـ posts في الـ state
+    setPosts((prev) =>
+      prev.map((post) =>
+        post._id === id
+          ? { ...post, isPinned: res.data.message === "Ponst Pin" } // ضيف فلاغ isPinned
+          : post
+      )
+    );
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   const savePost = async (id) => {
     try {

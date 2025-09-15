@@ -55,10 +55,10 @@ const Chat = ({ onBack }) => {
       {/* Messages Area */}
       <div
         className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-3 space-y-6 
-                   bg-lightMode-bg dark:bg-darkMode-bg 
-                   scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 
-                   scrollbar-track-transparent"
-        style={backgroundStyle}
+          bg-lightMode-bg dark:bg-darkMode-bg 
+          scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 
+          scrollbar-track-transparent"
+        // style={backgroundStyle}
       >
         {sortedDates.map((dateKey) => (
           <div key={dateKey}>

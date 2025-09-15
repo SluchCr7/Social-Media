@@ -33,7 +33,7 @@ const ChatInput = () => {
   return (
     <div
       className="w-full px-3 py-3 bg-white dark:bg-darkMode-bg"
-      style={backgroundStyle}
+      // style={backgroundStyle}
     >
       {/* Images Preview */}
       {images.length > 0 && (

@@ -16,7 +16,7 @@ const Header = ({ unReadedMessage, setShowNotifications }) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white dark:bg-darkMode-bg shadow-sm">
+    <header className="sticky top-0 z-50 bg-white/70 dark:bg-darkMode-bg/70 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm">
       <div className="w-full flex items-center justify-between py-3 md:px-6">
         {/* Title */}
         <span className="text-lightMode-text dark:text-darkMode-text font-bold text-lg md:text-xl tracking-[3px] uppercase">
@@ -30,11 +30,12 @@ const Header = ({ unReadedMessage, setShowNotifications }) => {
               {/* Notifications */}
               <div className="relative">
                 <Bell
+                  aria-label="Notifications"
                   onClick={handleBellClick}
-                  className="text-[22px] md:text-[24px] text-lightMode-text dark:text-darkMode-text cursor-pointer hover:text-lightMode-text2 dark:hover:text-darkMode-text transition"
+                  className="w-6 h-6 text-lightMode-text dark:text-darkMode-text cursor-pointer hover:text-lightMode-text2 dark:hover:text-darkMode-text hover:scale-110 transition-transform"
                 />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center animate-bounce">
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
@@ -42,9 +43,12 @@ const Header = ({ unReadedMessage, setShowNotifications }) => {
 
               {/* Messages */}
               <Link href="/Pages/Messanger" className="relative">
-                <MessageCircle className="text-[22px] md:text-[24px] text-lightMode-text dark:text-darkMode-text hover:text-lightMode-text2 dark:hover:text-darkMode-text cursor-pointer transition" />
+                <MessageCircle
+                  aria-label="Messages"
+                  className="w-6 h-6 text-lightMode-text dark:text-darkMode-text hover:text-lightMode-text2 dark:hover:text-darkMode-text hover:scale-110 transition-transform"
+                />
                 {unReadedMessage > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full min-w-[20px] h-5 px-1 flex items-center justify-center animate-pulse">
+                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full min-w-[20px] h-5 px-1 flex items-center justify-center animate-bounce">
                     {unReadedMessage > 99 ? '99+' : unReadedMessage}
                   </span>
                 )}
@@ -52,12 +56,16 @@ const Header = ({ unReadedMessage, setShowNotifications }) => {
             </>
           ) : (
             <Link href="/Pages/Login">
-              <IoIosLogIn className="text-[22px] md:text-[24px] text-lightMode-text dark:text-darkMode-text hover:text-lightMode-text2 dark:hover:text-darkMode-text cursor-pointer" />
+              <IoIosLogIn
+                aria-label="Login"
+                className="w-6 h-6 text-lightMode-text dark:text-darkMode-text hover:text-lightMode-text2 dark:hover:text-darkMode-text hover:scale-110 transition-transform"
+              />
             </Link>
           )}
         </div>
       </div>
     </header>
+
   );
 };
 

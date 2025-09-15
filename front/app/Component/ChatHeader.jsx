@@ -9,7 +9,10 @@ const ChatHeader = () => {
   const { selectedUser, setSelectedUser , backgroundStyle } = useMessage();
   const { onlineUsers } = useAuth();
   return (
-    <div className='w-full flex items-center justify-between px-2 py-1' style={backgroundStyle}>
+    <div
+      className='w-full flex items-center justify-between px-2 py-1'
+      // style={backgroundStyle}
+    >
       {/* Left: Profile Info */}
       <div className='flex items-center gap-3'>
         <Image
