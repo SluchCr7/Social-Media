@@ -16,8 +16,8 @@ const sendEmail = async(useremail , subject , htmlTemplet) => {
             html: htmlTemplet
         })
     } catch (error) {
-        console.log(error)
-        throw new Error("Server Error (nodeMail)")
+        console.error("Nodemailer Error:", error); // يطبع الخطأ كامل
+        throw error; // رجّع الخطأ زي ما هو عشان توصلك الرسالة الحقيقية
     }
 }
 
