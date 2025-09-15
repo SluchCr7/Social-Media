@@ -146,34 +146,37 @@ export const EventProvider = ({ children }) => {
   // ---------------------------
   // Fetch all events
   // ---------------------------
-  const fetchEvents = async () => {
-    if (!user?.token) return;
-    setLoading(true);
-    try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/events`, {
+const fetchEvents = async () => {
+  if (!user?.token) return;
+  setLoading(true);
+  try {
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/events/user/${user._id}`,
+      {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
-      });
-      if (res.data.success) {
-        // تعديل الأحداث السنوية لتظهر في السنة الحالية
-        const eventsWithCurrentYear = res.data.events.map((event) => {
-          if (event.repeatYearly) {
-            const originalDate = dayjs(event.date);
-            const currentYearDate = originalDate.year(dayjs().year());
-            return { ...event, date: currentYearDate.toDate() };
-          }
-          return event;
-        });
-
-        setEvents(eventsWithCurrentYear);
       }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+    );
+
+    if (res.data.success) {
+      const eventsWithCurrentYear = res.data.events.map((event) => {
+        if (event.repeatYearly) {
+          const originalDate = dayjs(event.date);
+          const currentYearDate = originalDate.year(dayjs().year());
+          return { ...event, date: currentYearDate.toDate() };
+        }
+        return event;
+      });
+
+      setEvents(eventsWithCurrentYear);
     }
-  };
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ---------------------------
   // Check upcoming events and show alerts

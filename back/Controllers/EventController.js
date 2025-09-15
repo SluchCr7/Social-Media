@@ -53,6 +53,31 @@ exports.getEventById = async (req, res) => {
   }
 };
 
+const Event = require("../models/Event");
+
+// جلب جميع الأحداث الخاصة بالمستخدم
+exports.getEventsByUser = async (req, res) => {
+  try {
+    const userId = req.params.id; // id المستخدم من الراوت
+
+    // جلب الأحداث التي أنشأها المستخدم أو التي تمت دعوته إليها
+    const events = await Event.find({
+      $or: [
+        { createdBy: userId },             // أحداث من صنعه
+        { invitedUsers: userId }           // أحداث تمت دعوته إليها
+      ]
+    }).populate("invitedUsers", "username profileName profilePhoto")
+      .populate("createdBy", "username profileName profilePhoto")
+      .sort({ date: 1 }); // ترتيب حسب التاريخ
+
+    return res.status(200).json({ success: true, events });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+
 // 📌 تحديث حدث
 exports.updateEvent = async (req, res) => {
   try {

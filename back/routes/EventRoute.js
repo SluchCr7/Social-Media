@@ -9,5 +9,5 @@ router.get("/", verifyToken, EventController.getEvents);         // جلب كل 
 router.get("/:id", verifyToken, EventController.getEventById);   // جلب حدث واحد
 router.put("/:id", verifyToken, EventController.updateEvent);    // تحديث حدث
 router.delete("/:id", verifyToken, EventController.deleteEvent); // حذف حدث
-
+router.get("/user/:id", verifyToken, EventController.getEventsByUser);
 module.exports = router;
