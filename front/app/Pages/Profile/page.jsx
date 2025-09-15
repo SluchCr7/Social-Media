@@ -248,7 +248,7 @@ const ProfilePage = () => {
               src={image ? URL.createObjectURL(image) : userData?.profilePhoto?.url || '/default-profile.png'}
               alt="Profile photo"
               fill
-              className="object-cover transition-transform duration-300 hover:scale-105"
+              className={`object-cover transition-transform duration-300 hover:scale-105`}
             />
             <button
               onClick={() => document.getElementById('fileInput')?.click()}

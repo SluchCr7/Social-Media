@@ -147,37 +147,40 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { GoHome, GoSearch } from "react-icons/go"
-import { CiUser, CiSettings } from "react-icons/ci"
+import Image from 'next/image'
+import {
+  GoHome,
+  GoSearch
+} from "react-icons/go"
+import {
+  CiUser,
+  CiSettings
+} from "react-icons/ci"
 import { FaPlus } from "react-icons/fa6"
 import { RiUserCommunityLine } from 'react-icons/ri'
 import { LuMessagesSquare } from "react-icons/lu"
 import { MdOutlineOndemandVideo } from "react-icons/md"
 import { IoTrophyOutline } from "react-icons/io5"
 import { SlCalender } from "react-icons/sl"
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi"
+import { FiChevronLeft } from "react-icons/fi"
 import { useAuth } from '../Context/AuthContext'
-import Image from 'next/image'
 
 const Aside = () => {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const {user}= useAuth()
-  // ✅ detect if mobile
+  const { user } = useAuth()
+
+  // ✅ detect mobile
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
     handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
   useEffect(() => {
-    if (isMobile) {
-      setIsCollapsed(true) // always collapsed on mobile
-    }
+    if (isMobile) setIsCollapsed(true)
   }, [isMobile])
 
   const navSections = [
@@ -208,15 +211,13 @@ const Aside = () => {
     }
   ]
 
-  const baseStyle = `relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300`
+  const baseStyle = `relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out`
   const activeStyle = `bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md`
   const inactiveStyle = `hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 text-lightMode-text dark:text-darkMode-text`
 
   return (
-    <aside 
-      className={`flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r transition-all duration-500 
-      ${isCollapsed ? "w-16" : "w-56"} p-3`}
-    >
+    <aside className={`flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r transition-all duration-500 ${isCollapsed ? "w-16" : "w-56"} p-3`}>
+      
       {/* ===== Logo + Collapse Button ===== */}
       <div className="flex items-center justify-between mb-6">
         {!isCollapsed && (
@@ -225,29 +226,27 @@ const Aside = () => {
           </span>
         )}
         {!isMobile && (
-          <button 
+          <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="text-xl p-1 rounded hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10"
+            className="text-xl p-1 rounded hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 transform transition-transform duration-300"
           >
-            {isCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
+            <FiChevronLeft className={`${isCollapsed ? "rotate-180" : ""}`} />
           </button>
         )}
       </div>
 
       {/* ===== Nav Sections ===== */}
-      <div className="flex-1 overflow-y-auto space-y-6">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 space-y-6">
         {navSections.map(section => (
           <div key={section.title}>
             {!isCollapsed && (
-              <h4 className="px-3 mb-2 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                {section.title}
-              </h4>
+              <h4 className="px-3 mb-2 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{section.title}</h4>
             )}
             <div className="flex flex-col gap-1">
               {section.items.map(({ icon, text, link, badge }) => {
                 const isActive = pathname === link
                 return (
-                  <Link 
+                  <Link
                     key={text}
                     href={link}
                     className={`${baseStyle} ${isActive ? activeStyle : inactiveStyle}`}
@@ -257,9 +256,7 @@ const Aside = () => {
                       <span className="flex-1">{text}</span>
                     )}
                     {badge && !isCollapsed && (
-                      <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                        {badge}
-                      </span>
+                      <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{badge}</span>
                     )}
                   </Link>
                 )
@@ -272,7 +269,15 @@ const Aside = () => {
       {/* ===== Footer (User / Auth) ===== */}
       <div className={`mt-auto border-t pt-4 ${isCollapsed ? "text-center" : ""}`}>
         <div className="flex items-center gap-3 cursor-pointer hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 px-2 py-2 rounded-lg">
-          <Image src={user?.profilePhoto?.url} alt="User Profile" width={100} height={100} className="w-8 h-8 rounded-full" />
+          < className={`relative p-[2px] rounded-full ${user?.stories?.length > 0 ? 'bg-gradient-to-tr from-indigo-500 to-purple-500 animate-pulse' : ''}`}>
+            <Image
+              src={user?.profilePhoto?.url || '/default-profile.png'}
+              alt="User Profile"
+              width={100}
+              height={100}
+              className="w-8 h-8 rounded-full object-cover"
+            />
+          </>
           {!isCollapsed && (
             <div>
               <p className="text-sm font-medium">{user?.username || "User Name"}</p>

@@ -14,11 +14,6 @@ const StorySchema = new mongoose.Schema({
         required: true
     },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    // createdAt: {
-    //     type: Date,
-    //     default: Date.now,
-    //     expires: 60 * 60 * 24 // 24 ساعة بالثواني = 86400
-    // }
 }, { timestamps: true })
 
 const Story = mongoose.model('Story', StorySchema)

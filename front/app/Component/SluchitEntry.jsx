@@ -340,11 +340,11 @@ const SluchitEntry = ({ post }) => {
             />
           ) : (
             <Image
-              src={post?.owner?.profilePhoto?.url}
-              alt='user-profile'
-              width={40}
-              height={40}
-              className="rounded-full w-10 h-10 min-w-10 aspect-square object-cover"
+                src={post?.owner?.profilePhoto?.url}
+                alt='user-profile'
+                width={40}
+                height={40}
+                className={` ${post?.owner?.stories.length > 0 ? 'animate-pulse' : ''} rounded-full w-10 h-10 min-w-10 aspect-square object-cover `}
             />
           )}
           <div className='border border-gray-600 h-[80px] w-[1px] mt-2'></div>
