@@ -360,12 +360,6 @@ const selectMention = (user) => {
       setSelectedMentions([]);
     }
   };
-  useEffect(()=>{
-    console.log(user)
-    console.log(mentionSearch)
-    console.log(filteredMentions)
-    console.log(selectedMentions)
-  },[mentionSearch, filteredMentions, selectedMentions])
   return (
     <main className="flex items-center justify-center w-full py-10 px-4 bg-gray-50 dark:bg-darkMode-bg transition-colors">
       <div className="w-full max-w-5xl mx-auto bg-white dark:bg-darkMode-fg rounded-3xl shadow-xl overflow-hidden transition-all duration-500">
