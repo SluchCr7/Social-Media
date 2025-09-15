@@ -52,49 +52,49 @@ const RegisterNewUser = async (req, res) => {
     await user.save();
 
     // ✅ Create verification token
-    const VerificationToken = new Verification({
-      userId: user._id,
-      tokenVer: crypto.randomBytes(32).toString("hex"),
-    });
-    await VerificationToken.save();
+    // const VerificationToken = new Verification({
+    //   userId: user._id,
+    //   tokenVer: crypto.randomBytes(32).toString("hex"),
+    // });
+    // await VerificationToken.save();
 
-    // ✅ Prepare verification link
-    const link = `${process.env.DOMAIN_NAME}/Pages/UserVerify/${user._id}/verify/${VerificationToken.tokenVer}`;
+    // // ✅ Prepare verification link
+    // const link = `${process.env.DOMAIN_NAME}/Pages/UserVerify/${user._id}/verify/${VerificationToken.tokenVer}`;
 
-    const htmlTemp = `
-      <div style="font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 40px;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-          <tr>
-            <td style="padding: 30px;">
-              <h2 style="color: #333333;">Welcome to Sluchitt, ${user.username}!</h2>
-              <p style="font-size: 16px; color: #555555; line-height: 1.6;">
-                Thank you for signing up. To complete your registration, please verify your email address by clicking the button below.
-              </p>
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${link}" style="background-color: #28a745; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
-                  Verify My Email
-                </a>
-              </div>
-              <p style="font-size: 14px; color: #999999;">
-                If you didn’t sign up for this account, feel free to ignore this email. Your information will remain secure.
-              </p>
-              <p style="font-size: 14px; margin-top: 30px; color: #555555;">
-                Best regards,<br />
-                <strong>Sluchitt Team</strong>
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 20px; text-align: center; font-size: 12px; color: #aaaaaa;">
-              &copy; ${new Date().getFullYear()} Sluchitt. All rights reserved.
-            </td>
-          </tr>
-        </table>
-      </div>
-    `;
+    // const htmlTemp = `
+    //   <div style="font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 40px;">
+    //     <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    //       <tr>
+    //         <td style="padding: 30px;">
+    //           <h2 style="color: #333333;">Welcome to Sluchitt, ${user.username}!</h2>
+    //           <p style="font-size: 16px; color: #555555; line-height: 1.6;">
+    //             Thank you for signing up. To complete your registration, please verify your email address by clicking the button below.
+    //           </p>
+    //           <div style="text-align: center; margin: 30px 0;">
+    //             <a href="${link}" style="background-color: #28a745; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
+    //               Verify My Email
+    //             </a>
+    //           </div>
+    //           <p style="font-size: 14px; color: #999999;">
+    //             If you didn’t sign up for this account, feel free to ignore this email. Your information will remain secure.
+    //           </p>
+    //           <p style="font-size: 14px; margin-top: 30px; color: #555555;">
+    //             Best regards,<br />
+    //             <strong>Sluchitt Team</strong>
+    //           </p>
+    //         </td>
+    //       </tr>
+    //       <tr>
+    //         <td style="padding: 20px; text-align: center; font-size: 12px; color: #aaaaaa;">
+    //           &copy; ${new Date().getFullYear()} Sluchitt. All rights reserved.
+    //         </td>
+    //       </tr>
+    //     </table>
+    //   </div>
+    // `;
 
-    // ✅ Send verification email
-    await sendEmail(user.email, "Verify your Email", htmlTemp);
+    // // ✅ Send verification email
+    // await sendEmail(user.email, "Verify your Email", htmlTemp);
 
     return res.status(201).json({
       message:
@@ -125,60 +125,60 @@ const LoginUser = asyncHandler(async (req, res) => {
       return res.status(400).json({ message: "Email or Password are not correct" });
   }
 
-  // Check email verification
-  if (!user.isVerify) {
-      let verificationToken = await Verification.findOne({ userId: user._id });
-      if (!verificationToken) {
-          verificationToken = new Verification({
-              userId: user._id,
-              tokenVer: crypto.randomBytes(32).toString('hex'),
-          });
-          await verificationToken.save();
-      }
+  // // Check email verification
+  // if (!user.isVerify) {
+  //     let verificationToken = await Verification.findOne({ userId: user._id });
+  //     if (!verificationToken) {
+  //         verificationToken = new Verification({
+  //             userId: user._id,
+  //             tokenVer: crypto.randomBytes(32).toString('hex'),
+  //         });
+  //         await verificationToken.save();
+  //     }
 
-      const link = `${process.env.DOMAIN_NAME}/Pages/UserVerify/${user._id}/verify/${verificationToken.tokenVer}`;
-      const htmlTemp = `
-      <div style="font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 40px;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-          <tr>
-            <td style="padding: 30px;">
-              <h2 style="color: #333333;">Welcome to Sluchitt, ${user.username}!</h2>
-              <p style="font-size: 16px; color: #555555; line-height: 1.6;">
-                Thank you for signing up. To complete your registration, please verify your email address by clicking the button below.
-              </p>
+  //     const link = `${process.env.DOMAIN_NAME}/Pages/UserVerify/${user._id}/verify/${verificationToken.tokenVer}`;
+  //     const htmlTemp = `
+  //     <div style="font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 40px;">
+  //       <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+  //         <tr>
+  //           <td style="padding: 30px;">
+  //             <h2 style="color: #333333;">Welcome to Sluchitt, ${user.username}!</h2>
+  //             <p style="font-size: 16px; color: #555555; line-height: 1.6;">
+  //               Thank you for signing up. To complete your registration, please verify your email address by clicking the button below.
+  //             </p>
     
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${link}" style="background-color: #28a745; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
-                  Verify My Email
-                </a>
-              </div>
+  //             <div style="text-align: center; margin: 30px 0;">
+  //               <a href="${link}" style="background-color: #28a745; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
+  //                 Verify My Email
+  //               </a>
+  //             </div>
     
-              <p style="font-size: 14px; color: #999999;">
-                If you didn’t sign up for this account, feel free to ignore this email. Your information will remain secure.
-              </p>
+  //             <p style="font-size: 14px; color: #999999;">
+  //               If you didn’t sign up for this account, feel free to ignore this email. Your information will remain secure.
+  //             </p>
     
-              <p style="font-size: 14px; margin-top: 30px; color: #555555;">
-                Best regards,<br />
-                <strong>Sluchitt Team</strong>
-              </p>
-            </td>
-          </tr>
+  //             <p style="font-size: 14px; margin-top: 30px; color: #555555;">
+  //               Best regards,<br />
+  //               <strong>Sluchitt Team</strong>
+  //             </p>
+  //           </td>
+  //         </tr>
     
-          <tr>
-            <td style="padding: 20px; text-align: center; font-size: 12px; color: #aaaaaa;">
-              &copy; ${new Date().getFullYear()} Slucitt. All rights reserved.
-            </td>
-          </tr>
-        </table>
-      </div>
-    `;
-      await sendEmail(user.email, 'Verify Email', htmlTemp);
+  //         <tr>
+  //           <td style="padding: 20px; text-align: center; font-size: 12px; color: #aaaaaa;">
+  //             &copy; ${new Date().getFullYear()} Slucitt. All rights reserved.
+  //           </td>
+  //         </tr>
+  //       </table>
+  //     </div>
+  //   `;
+  //     await sendEmail(user.email, 'Verify Email', htmlTemp);
 
-      return res.status(401).json({
-          message: "Your email is not verified. A new verification email has been sent.",
-          emailSent: true
-      });
-  }
+  //     return res.status(401).json({
+  //         message: "Your email is not verified. A new verification email has been sent.",
+  //         emailSent: true
+  //     });
+  // }
 
   // Email is verified: update last login & return token
   user.lastLogin = new Date();
