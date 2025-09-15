@@ -24,68 +24,88 @@ const { validateStory, Story } = require("../Modules/Story");
  * @access Public
  */
 
-const RegisterNewUser = asyncHandler(async (req, res) => {
-    const { error } = ValidateUser(req.body)
+const RegisterNewUser = async (req, res) => {
+  try {
+    // ✅ Validate user input
+    const { error } = ValidateUser(req.body);
     if (error) {
-        return res.status(400).json({message : error.details[0].message})
+      return res.status(400).json({ message: error.details[0].message });
     }
-    const userExist = await User.findOne({ email: req.body.email })
-    if (userExist) return res.status(400).send("User already exists");
+
+    // ✅ Check if user exists
+    const userExist = await User.findOne({ email: req.body.email });
+    if (userExist) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // ✅ Hash password
     const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(req.body.password, salt)
+    const hashPassword = await bcrypt.hash(req.body.password, salt);
+
+    // ✅ Create user
     const user = new User({
-        username: req.body.username,
-        email: req.body.email,
-        password: hashPassword,
-    })
+      username: req.body.username,
+      email: req.body.email,
+      password: hashPassword,
+    });
 
-    await user.save()
+    await user.save();
+
+    // ✅ Create verification token
     const VerificationToken = new Verification({
-        userId: user._id,
-        tokenVer: crypto.randomBytes(32).toString('hex'),
-    })
-    await VerificationToken.save()
+      userId: user._id,
+      tokenVer: crypto.randomBytes(32).toString("hex"),
+    });
+    await VerificationToken.save();
 
-    const link = `${process.env.DOMAIN_NAME}/Pages/UserVerify/${user._id}/verify/${VerificationToken.tokenVer}`
+    // ✅ Prepare verification link
+    const link = `${process.env.DOMAIN_NAME}/Pages/UserVerify/${user._id}/verify/${VerificationToken.tokenVer}`;
+
     const htmlTemp = `
       <div style="font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 40px;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-        <tr>
-          <td style="padding: 30px;">
-            <h2 style="color: #333333;">Welcome to Sluchitt, ${user.username}!</h2>
-            <p style="font-size: 16px; color: #555555; line-height: 1.6;">
-              Thank you for signing up. To complete your registration, please verify your email address by clicking the button below.
-            </p>
-  
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${link}" style="background-color: #28a745; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
-                Verify My Email
-              </a>
-            </div>
-  
-            <p style="font-size: 14px; color: #999999;">
-              If you didn’t sign up for this account, feel free to ignore this email. Your information will remain secure.
-            </p>
-  
-            <p style="font-size: 14px; margin-top: 30px; color: #555555;">
-              Best regards,<br />
-              <strong>Sluchitt Team</strong>
-            </p>
-          </td>
-        </tr>
-  
-        <tr>
-          <td style="padding: 20px; text-align: center; font-size: 12px; color: #aaaaaa;">
-            &copy; ${new Date().getFullYear()} Slucitt. All rights reserved.
-          </td>
-        </tr>
-      </table>
-    </div>
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+          <tr>
+            <td style="padding: 30px;">
+              <h2 style="color: #333333;">Welcome to Sluchitt, ${user.username}!</h2>
+              <p style="font-size: 16px; color: #555555; line-height: 1.6;">
+                Thank you for signing up. To complete your registration, please verify your email address by clicking the button below.
+              </p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${link}" style="background-color: #28a745; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
+                  Verify My Email
+                </a>
+              </div>
+              <p style="font-size: 14px; color: #999999;">
+                If you didn’t sign up for this account, feel free to ignore this email. Your information will remain secure.
+              </p>
+              <p style="font-size: 14px; margin-top: 30px; color: #555555;">
+                Best regards,<br />
+                <strong>Sluchitt Team</strong>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px; text-align: center; font-size: 12px; color: #aaaaaa;">
+              &copy; ${new Date().getFullYear()} Sluchitt. All rights reserved.
+            </td>
+          </tr>
+        </table>
+      </div>
     `;
-    await sendEmail(user.email , "Verify your Email" , htmlTemp)
 
-    res.status(201).json({ message: "User Created Successfully and we sent an email now , go to verify your email" });
-})
+    // ✅ Send verification email
+    await sendEmail(user.email, "Verify your Email", htmlTemp);
+
+    return res.status(201).json({
+      message:
+        "User Created Successfully and we sent an email now, go to verify your email",
+    });
+  } catch (error) {
+    console.error("Register Error:", error);
+    return res.status(500).json({ message: error.message || "Server Error" });
+  }
+};
+
 
 const LoginUser = asyncHandler(async (req, res) => {
   const { error } = LoginValidate(req.body);
