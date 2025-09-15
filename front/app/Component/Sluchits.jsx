@@ -42,8 +42,7 @@ const Sluchits = () => {
       if ((index + 1) % 5 === 0 && userList.length > 0) {
         items.push({ type: 'user', data: userList.slice(0, 3) })
       }
-      // اقتراح المجتمعات كل 10 منشورات
-      if ((index + 1) % 10 === 0 && communityList.length > 0) {
+      else if((index + 1) % 10 === 0 && communityList.length > 0) {
         items.push({ type: 'community', data: communityList.slice(0, 3) })
       }
     })
