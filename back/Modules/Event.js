@@ -26,6 +26,10 @@ const EventSchema = new mongoose.Schema(
         ref: "User"
       }
     ],
+    repeatYearly: {
+      type: Boolean,
+      default: false
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

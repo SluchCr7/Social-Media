@@ -9,7 +9,8 @@ exports.createEvent = async (req, res) => {
       date: req.body.date,
       type: req.body.type || "custom",
       createdBy: req.user._id, // يفترض عندك auth middleware
-      invitedUsers: req.body.invitedUsers || []
+      invitedUsers: req.body.invitedUsers || [],
+      repeatYearly: req.body.repeatYearly || false  
     });
 
     res.status(201).json({

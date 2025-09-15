@@ -36,16 +36,17 @@ export const PostContextProvider = ({ children }) => {
   }, []);
 
   // ✅ إضافة بوست جديد
-const AddPost = async (content, images, Hashtags, communityId) => {
+const AddPost = async (content, images, Hashtags, communityId, mentions = []) => {
   const formData = new FormData();
   formData.append("text", content);
 
-  // ✅ إرسال الصور بالطريقة الصحيحة
   images.forEach(img => formData.append("image", img.file));
-
   Hashtags.forEach(tag => formData.append("Hashtags", tag));
 
   if (communityId) formData.append("community", communityId);
+
+  // ✅ إضافة mentions كـ JSON string
+  if (mentions.length > 0) formData.append("mentions", JSON.stringify(mentions));
 
   try {
     const res = await axios.post(
@@ -61,12 +62,12 @@ const AddPost = async (content, images, Hashtags, communityId) => {
 
     showAlert("Post added successfully.");
     setPosts(prev => [res.data, ...prev]); 
-    console.log("Success");
   } catch (err) {
     console.error(err);
     showAlert(err?.response?.data?.message || "Failed to upload post.");
   }
 };
+
 
 
   // ✅ حذف بوست
@@ -177,7 +178,7 @@ const AddPost = async (content, images, Hashtags, communityId) => {
   };
 
   // ✅ تعديل بوست
-  const editPost = async (id, { text, community, Hashtags, existingPhotos, newPhotos }) => {
+  const editPost = async (id, { text, community, Hashtags, existingPhotos, newPhotos, mentions = [] }) => {
     try {
       const formData = new FormData();
       formData.append('text', text);
@@ -186,6 +187,9 @@ const AddPost = async (content, images, Hashtags, communityId) => {
         formData.append('Hashtags', JSON.stringify(Hashtags));
       }
       formData.append('existingPhotos', JSON.stringify(existingPhotos));
+
+      // ✅ mentions
+      if (mentions.length > 0) formData.append('mentions', JSON.stringify(mentions));
 
       if (newPhotos && newPhotos.length > 0) {
         newPhotos.forEach(photo => {
@@ -204,11 +208,9 @@ const AddPost = async (content, images, Hashtags, communityId) => {
         }
       );
 
-      const updatedPost = res.data; // 👈 backend بيرجع post كامل فقط
-
+      const updatedPost = res.data;
       showAlert("Post edited successfully.");
 
-      // ✅ تحديث فوري للـ state
       setPosts(prev =>
         prev.map(p =>
           p._id === id ? updatedPost : p
@@ -220,6 +222,7 @@ const AddPost = async (content, images, Hashtags, communityId) => {
       showAlert("Failed to edit the post.");
     }
   };
+
 
 
   // ✅ إظهار/إخفاء التعليقات
