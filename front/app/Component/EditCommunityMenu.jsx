@@ -9,8 +9,13 @@ import { useAlert } from '../Context/AlertContext';
 const EditCommunityMenu = ({ community, onClose }) => {
   const [name, setName] = useState(community?.Name || '');
   const [description, setDescription] = useState(community?.description || '');
-  const [previewPicture, setPreviewPicture] = useState(community?.Picture?.url || '/default-profile.png');
-  const [previewCover, setPreviewCover] = useState(community?.Cover?.url || '/default-cover.png');
+  const [isPrivate, setIsPrivate] = useState(community?.isPrivate || false);
+  const [previewPicture, setPreviewPicture] = useState(
+    community?.Picture?.url || '/default-profile.png'
+  );
+  const [previewCover, setPreviewCover] = useState(
+    community?.Cover?.url || '/default-cover.png'
+  );
 
   const { showAlert } = useAlert();
   const { editCommunity, updateCommunityPicture, updateCommunityCover } = useCommunity();
@@ -23,12 +28,12 @@ const EditCommunityMenu = ({ community, onClose }) => {
     }
 
     const objectURL = URL.createObjectURL(file);
-    
+
     try {
       if (type === 'picture') {
-        setPreviewPicture(objectURL); // Preview مباشرة
+        setPreviewPicture(objectURL);
         const result = await updateCommunityPicture(community._id, file);
-        if (result?.url) setPreviewPicture(result.url); // بعد رفعها، نحدث باللينك من السيرفر
+        if (result?.url) setPreviewPicture(result.url);
       } else if (type === 'cover') {
         setPreviewCover(objectURL);
         const result = await updateCommunityCover(community._id, file);
@@ -52,6 +57,7 @@ const EditCommunityMenu = ({ community, onClose }) => {
     const updatedData = {};
     if (name !== community.Name) updatedData.Name = name;
     if (description !== community.description) updatedData.description = description;
+    if (isPrivate !== community.isPrivate) updatedData.isPrivate = isPrivate;
 
     if (Object.keys(updatedData).length > 0) {
       try {
@@ -82,12 +88,7 @@ const EditCommunityMenu = ({ community, onClose }) => {
 
         {/* Cover Image */}
         <div className="relative w-full h-40 rounded-lg overflow-hidden mb-6">
-          <Image
-            src={previewCover}
-            alt="Cover"
-            fill
-            className="object-cover"
-          />
+          <Image src={previewCover} alt="Cover" fill className="object-cover" />
           <label className="absolute top-2 right-2 bg-black bg-opacity-60 p-2 rounded-full cursor-pointer text-white">
             <IoCamera />
             <input
@@ -101,12 +102,7 @@ const EditCommunityMenu = ({ community, onClose }) => {
 
         {/* Profile Image */}
         <div className="relative w-28 h-28 mx-auto -mt-16 border-4 border-white dark:border-darkMode-bg rounded-full overflow-hidden">
-          <Image
-            src={previewPicture}
-            alt="Photo"
-            fill
-            className="object-cover"
-          />
+          <Image src={previewPicture} alt="Photo" fill className="object-cover" />
           <label className="absolute bottom-1 right-1 bg-black bg-opacity-60 p-1 rounded-full cursor-pointer text-white">
             <IoCamera size={16} />
             <input
@@ -138,6 +134,20 @@ const EditCommunityMenu = ({ community, onClose }) => {
               className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={4}
             />
+          </div>
+
+          {/* isPrivate Checkbox */}
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="isPrivate"
+              checked={isPrivate}
+              onChange={(e) => setIsPrivate(e.target.checked)}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label htmlFor="isPrivate" className="font-medium cursor-pointer">
+              Private Community
+            </label>
           </div>
 
           <button

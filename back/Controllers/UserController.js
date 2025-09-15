@@ -93,7 +93,9 @@ const LoginUser = asyncHandler(async (req, res) => {
       return res.status(400).json({ message: error.details[0].message });
   }
 
-  const user = await User.findOne({ email: req.body.email });
+  const user = await User.findOne({ email: req.body.email })
+    .populate("following", "username profileName profilePhoto")
+    .populate("followers", "username profileName profilePhoto");
   if (!user) {
       return res.status(400).json({ message: "Email or Password are not correct" });
   }

@@ -49,6 +49,17 @@ const communitySchema = new mongoose.Schema({
             publicId : null
         }
     },
+    rules: {
+        type: [String],
+        default: []
+    },
+    joinRequests: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }
+    ]
+
 }, {
     timestamps: true
 })

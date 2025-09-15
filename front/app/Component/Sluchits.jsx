@@ -32,12 +32,16 @@ const Sluchits = () => {
   // فلترة الـ suggestions قبل الدمج
   const filteredUsers = useMemo(() => {
     if (!Array.isArray(suggestedUsers)) return []
-    return suggestedUsers.filter(u => !following.includes(u._id)) // استبعد اللي متابعهم
+    return suggestedUsers.filter(
+      u => !following?.some(f => f._id === u._id) // استبعد اللي أنا متابعه بالفعل
+    )
   }, [suggestedUsers, following])
 
   const filteredCommunities = useMemo(() => {
     if (!Array.isArray(communities)) return []
-    return communities.filter(c => !c.members?.includes(userId)) // استبعد اللي انا عضو فيها
+    return communities.filter(
+      c => !c.members?.some(member => member._id === userId) // استبعد اللي انا عضو فيها
+    )
   }, [communities, userId])
 
   // خلط البوستات مع suggestions

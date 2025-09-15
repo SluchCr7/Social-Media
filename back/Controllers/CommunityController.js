@@ -274,39 +274,143 @@ const makeAdmin = asyncHandler(async (req, res) => {
   });
   
 
+/**
+ * @desc Send join request to a community
+ * @route POST /api/community/join-request/:id
+ * @access Private
+ */
+const sendJoinRequest = asyncHandler(async (req, res) => {
+  const { id } = req.params; // communityId
+  const userId = req.user._id;
 
-// const makeAdmin = asyncHandler(async (req, res) => {
-//     const { id } = req.params; // community ID
-//     const { userIdToMakeAdmin } = req.body; // ID of user to promote
-//     const community = await Community.findById(id);
+  const community = await Community.findById(id);
+  if (!community) {
+    return res.status(404).json({ message: "Community not found" });
+  }
 
-//     if (!community) {
-//         return res.status(404).json({ message: "Community not found" });
-//     }
+  if (!community.isPrivate) {
+    return res.status(400).json({ message: "Community is public, join directly" });
+  }
 
-//     // Only owner can add admins
-//     if (!community.owner.equals(req.user._id)) {
-//         return res.status(403).json({ message: "Only the community owner can assign admins" });
-//     }
+  if (community.members.includes(userId)) {
+    return res.status(400).json({ message: "You are already a member of this community" });
+  }
 
-//     // Check if user is already an admin
-//     if (community.Admins.includes(userIdToMakeAdmin)) {
-//         return res.status(400).json({ message: "User is already an admin" });
-//     }
+  if (community.joinRequests.includes(userId)) {
+    return res.status(400).json({ message: "You have already requested to join" });
+  }
 
-//     community.Admins.push(userIdToMakeAdmin);
-//     await community.save();
+  community.joinRequests.push(userId);
+  await community.save();
 
-//     res.status(200).json({ message: "Admin added successfully" });
-// });
+  res.status(200).json({ message: "Join request sent successfully" });
+});
+
+/**
+ * @desc Approve join request
+ * @route PUT /api/community/join-request/approve/:communityId/:userId
+ * @access Private (Owner or Admins)
+ */
+const approveJoinRequest = asyncHandler(async (req, res) => {
+  const { communityId, userId } = req.params;
+
+  const community = await Community.findById(communityId);
+  if (!community) {
+    return res.status(404).json({ message: "Community not found" });
+  }
+
+  // Check permissions
+  if (
+    !community.owner.equals(req.user._id) &&
+    !community.Admins.includes(req.user._id)
+  ) {
+    return res.status(403).json({ message: "Not authorized" });
+  }
+
+  if (!community.joinRequests.includes(userId)) {
+    return res.status(400).json({ message: "This user has not requested to join" });
+  }
+
+  community.joinRequests.pull(userId);
+  community.members.push(userId);
+  await community.save();
+
+  res.status(200).json({ message: "User added to community" });
+});
+
+/**
+ * @desc Reject join request
+ * @route PUT /api/community/join-request/reject/:communityId/:userId
+ * @access Private (Owner or Admins)
+ */
+const rejectJoinRequest = asyncHandler(async (req, res) => {
+  const { communityId, userId } = req.params;
+
+  const community = await Community.findById(communityId);
+  if (!community) {
+    return res.status(404).json({ message: "Community not found" });
+  }
+
+  // Check permissions
+  if (
+    !community.owner.equals(req.user._id) &&
+    !community.Admins.includes(req.user._id)
+  ) {
+    return res.status(403).json({ message: "Not authorized" });
+  }
+
+  if (!community.joinRequests.includes(userId)) {
+    return res.status(400).json({ message: "This user has not requested to join" });
+  }
+
+  community.joinRequests.pull(userId);
+  await community.save();
+
+  res.status(200).json({ message: "Join request rejected" });
+});
+
+/**
+ * @desc Add or update community rules
+ * @route PUT /api/community/rules/:id
+ * @access Private (Owner/Admins)
+ */
+const updateCommunityRules = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { rules } = req.body;
+
+  const community = await Community.findById(id);
+  if (!community) {
+    return res.status(404).json({ message: "Community not found" });
+  }
+
+  if (
+    !community.owner.equals(req.user._id) &&
+    !community.Admins.includes(req.user._id)
+  ) {
+    return res.status(403).json({ message: "Not authorized" });
+  }
+
+  community.rules = rules || [];
+  await community.save();
+
+  res.status(200).json({ message: "Community rules updated", rules: community.rules });
+});
 
 
 module.exports = {
-    getAllCommunities,
-    getCommunityByCategory,
-    addNewCommunity,
-    deleteCommunity,
-    joinTheCommunity,
-    editCommunity, updateCommunityPicture, updateCommunityCover,
-    removeMember, makeAdmin,getCommunityById
-}
+  getAllCommunities,
+  getCommunityByCategory,
+  addNewCommunity,
+  deleteCommunity,
+  joinTheCommunity,
+  editCommunity,
+  updateCommunityPicture,
+  updateCommunityCover,
+  removeMember,
+  makeAdmin,
+  getCommunityById,
+  sendJoinRequest,
+  approveJoinRequest,
+  rejectJoinRequest,
+  updateCommunityRules,
+};
