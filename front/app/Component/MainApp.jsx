@@ -25,7 +25,7 @@ const MainApp = () => {
       />
 
       {/* محتوى الصفحة */}
-      <div className="w-full px-3 pt-10 md:pt-6 pb-5">
+      <div className="w-full pt-10 md:pt-6 pb-5">
         {isLogin && <Stories />}
         <Sluchits />
       </div>
