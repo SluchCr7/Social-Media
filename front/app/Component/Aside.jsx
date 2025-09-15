@@ -289,7 +289,7 @@ const Aside = () => {
 
           {/* Logout Button */}
           <button
-            onClick={() => Logout}
+            onClick={Logout}
             className="flex items-center justify-center gap-2 w-full px-4 py-2 mt-2 text-sm font-medium text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition"
           >
             Logout
