@@ -87,24 +87,25 @@ export const AuthContextProvider = ({ children }) => {
 
       showAlert(res.data.message);
 
-      // تحديث الـ users في الـ Context
       setUsers((prev) =>
-        prev.map((u) =>
-          u._id === id
-            ? {
-                ...u,
-                followers:
-                  res.data.message === "Followed"
-                    ? [...u.followers, user._id]
-                    : u.followers.filter((f) => f !== user._id),
-              }
-            : u
-        )
+        prev.map((u) => {
+          if (u._id === id) {
+            return {
+              ...u,
+              followers:
+                res.data.message === "Followed"
+                  ? [...u.followers, { _id: user._id }] // أضف object زي اللي راجع من السيرفر
+                  : u.followers.filter((f) => f._id !== user._id), // شيل الـ object كامل بناءً على _id
+            };
+          }
+          return u;
+        })
       );
     } catch (err) {
       console.error(err);
     }
   };
+
   const updatePhoto = async (photo) => {
     const formData = new FormData();
     formData.append('image', photo);
