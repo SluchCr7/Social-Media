@@ -266,10 +266,9 @@ const Aside = () => {
         ))}
       </div>
 
-      {/* ===== Footer (User / Auth) ===== */}
       <div className={`mt-auto border-t pt-4 ${isCollapsed ? "text-center" : ""}`}>
         <div className="flex items-center gap-3 cursor-pointer hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 px-2 py-2 rounded-lg">
-          < className={`relative p-[2px] rounded-full ${user?.stories?.length > 0 ? 'bg-gradient-to-tr from-indigo-500 to-purple-500 animate-pulse' : ''}`}>
+          <div className={`relative p-[2px] rounded-full ${user?.stories?.length > 0 ? 'bg-gradient-to-tr from-indigo-500 to-purple-500 animate-pulse' : ''}`}>
             <Image
               src={user?.profilePhoto?.url || '/default-profile.png'}
               alt="User Profile"
@@ -277,7 +276,7 @@ const Aside = () => {
               height={100}
               className="w-8 h-8 rounded-full object-cover"
             />
-          </>
+          </div>
           {!isCollapsed && (
             <div>
               <p className="text-sm font-medium">{user?.username || "User Name"}</p>
