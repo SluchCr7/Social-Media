@@ -49,9 +49,9 @@ const Page = ({ params }) => {
   ]
 
   return (
-    <div className="w-full md:w-[75%] max-w-5xl mx-auto flex flex-col items-center pt-10 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen">
+    <div className="w-full md:w-[75%] max-w-5xl mx-auto pt-10 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6">
       {/* Profile Info */}
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center lg:items-start justify-start gap-6">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -137,13 +137,13 @@ const Page = ({ params }) => {
           </button>
         </div>
       ) : (
-        <>
+        <div className='flex flex-col gap-6 w-full'>
           {/* Personal Info */}
           <InfoAboutUser user={userSelected} />
           {/* Tabs */}
           <Tabs activeTab={activeTab} setActiveTab={setActiveTab}/>
           <TabsContent activeTab={activeTab} combinedPosts={combinedPosts} posts={posts} userSelected={userSelected} />
-        </>
+        </div>
       )}
       <FollowModal visible={showMenu} onClose={() => setShowMenu(false)} type={menuType} list={menuType === 'followers' ? userSelected?.followers : userSelected?.following} />
     </div>
