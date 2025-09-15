@@ -234,7 +234,7 @@ const ProfilePage = () => {
       <div className="w-full max-w-7xl mx-auto min-h-screen bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6">
         
         {/* Left Column: Avatar + Info + Stats + Actions */}
-        <div className="flex flex-col items-center lg:items-start gap-6">
+        <div className="flex flex-col items-center lg:items-start justify-start gap-6">
           
           {/* Avatar */}
           <motion.div
@@ -310,7 +310,7 @@ const ProfilePage = () => {
         </div>
 
         {/* Main Column: Tabs + Posts */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
+        <div className="flex flex-col gap-6">
           <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
           <TabsContent activeTab={activeTab} combinedPosts={combinedPosts} posts={posts} userSelected={userData} />
         </div>
