@@ -414,12 +414,14 @@ const selectMention = (user) => {
             onChange={handleTextareaChange}
             rows={5}
             placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
+            dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'} // اتجاه الكتابة ديناميكي
             className={`w-full p-5 text-base rounded-2xl resize-none border shadow-inner focus:ring-2 transition-all duration-300
               ${errorText 
                 ? 'border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:ring-red-500' 
-                : 'bg-gray-50 dark:bg-darkMode-bg text-black dark:text-white border-gray-300 dark:border-gray-600 focus:ring-blue-500'}`}
+                : 'bg-gray-50 dark:bg-darkMode-bg text-black dark:text-white border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+              }`}
+            style={{ textAlign: /[\u0600-\u06FF]/.test(postText) ? 'right' : 'left' }} // محاذاة النص تلقائيًا
           />
-
           {/* Counter */}
           <div className="flex justify-between items-center mt-1 text-xs">
             <span className={`transition ${errorText ? 'text-red-500 font-semibold' : 'text-gray-400'}`}>

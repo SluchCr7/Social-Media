@@ -66,7 +66,19 @@ const Comment = ({ comment }) => {
               />
             )}
           </div>
-          <p className="text-gray-800 dark:text-gray-200 text-sm md:text-base leading-relaxed">{comment.text}</p>
+          {comment.text && (() => {
+            const isArabic = /[\u0600-\u06FF]/.test(comment.text);
+            return (
+              <p
+                className={`text-sm md:text-base leading-relaxed ${
+                  isArabic ? 'text-right' : 'text-left'
+                } text-gray-800 dark:text-gray-200`}
+                dir={isArabic ? 'rtl' : 'ltr'}
+              >
+                {comment.text}
+              </p>
+            );
+          })()}
         </div>
 
         {/* Actions */}
@@ -100,6 +112,7 @@ const Comment = ({ comment }) => {
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendReply()}
+              dir={/[\u0600-\u06FF]/.test(replyText) ? 'rtl' : 'ltr'}
               className="flex-1 bg-gray-100 dark:bg-gray-800 text-black dark:text-white px-4 py-2 rounded-full outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             />
             <IoIosSend

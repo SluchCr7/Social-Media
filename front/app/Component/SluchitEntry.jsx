@@ -408,11 +408,19 @@ const SluchitEntry = ({ post }) => {
           </div>
 
           {/* Shared Post Text */}
-          {isShared && post?.text && (
-            <p className='text-sm text-gray-600 dark:text-gray-200 break-all whitespace-pre-wrap'>
-              {post?.text}
-            </p>
-          )}
+          {isShared && post?.text && (() => {
+            const isArabic = /[\u0600-\u06FF]/.test(post.text);
+            return (
+              <p
+                className={`text-sm break-all whitespace-pre-wrap ${
+                  isArabic ? 'text-right' : 'text-left'
+                } text-gray-600 dark:text-gray-200`}
+                dir={isArabic ? 'rtl' : 'ltr'}
+              >
+                {post.text}
+              </p>
+            );
+          })()}
 
           {/* Original Post Content */}
           {isShared && original && (
@@ -436,9 +444,19 @@ const SluchitEntry = ({ post }) => {
                 <span className='text-gray-500 text-xs'>{new Date(original?.createdAt).toDateString()}</span>
               </div>
 
-              <p className='text-sm text-gray-700 dark:text-gray-300 italic break-all whitespace-pre-wrap'>
-                {original?.text}
-              </p>
+            {original?.text && (() => {
+              const isArabic = /[\u0600-\u06FF]/.test(original.text);
+              return (
+                <p
+                  className={`text-sm italic break-all whitespace-pre-wrap ${
+                    isArabic ? 'text-right' : 'text-left'
+                  } text-gray-700 dark:text-gray-300`}
+                  dir={isArabic ? 'rtl' : 'ltr'}
+                >
+                  {original.text}
+                </p>
+              );
+            })()}
 
               {original?.Photos && (
                 <div className={`grid gap-2 ${original?.Photos.length > 1 ? 'grid-cols-2 sm:grid-cols-2' : ''}`}>
@@ -462,10 +480,19 @@ const SluchitEntry = ({ post }) => {
             </div>
           )}
 
-          {/* Main Post Text */}
-          {!isShared && post?.text && (
-            <p className='text-sm text-gray-600 dark:text-gray-200 break-all whitespace-pre-wrap'>{post?.text}</p>
-          )}
+        {!isShared && post?.text && (() => {
+            const isArabic = /[\u0600-\u06FF]/.test(post.text);
+            return (
+              <p
+                className={`text-sm break-all whitespace-pre-wrap ${
+                  isArabic ? 'text-right' : 'text-left'
+                } text-gray-600 dark:text-gray-200`}
+                dir={isArabic ? 'rtl' : 'ltr'}
+              >
+                {post.text}
+              </p>
+            );
+          })()}
 
           {/* Hashtags */}
           {post?.Hashtags?.length > 0 && (
