@@ -5,7 +5,7 @@ import { BsCalendar2Date } from "react-icons/bs";
 
 const InfoAboutUser = ({ user }) => {
   return (
-    <div className="mt-8 w-full max-w-3xl mx-auto rounded-2xl bg-lightMode-menu dark:bg-darkMode-menu shadow-xl p-8">
+    <div className="mt-8 w-full rounded-2xl bg-lightMode-menu dark:bg-darkMode-menu shadow-xl p-8">
       
       {/* عنوان */}
       <h2 className="text-3xl font-bold mb-8 text-lightMode-text2 dark:text-darkMode-text2 border-b border-gray-300 dark:border-gray-700 pb-3">

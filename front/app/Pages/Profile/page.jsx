@@ -310,7 +310,7 @@ const ProfilePage = () => {
         </div>
 
         {/* Main Column: Tabs + Posts */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 w-full">
           <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
           <TabsContent activeTab={activeTab} combinedPosts={combinedPosts} posts={posts} userSelected={userData} />
         </div>
