@@ -142,7 +142,7 @@ export const EventProvider = ({ children }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
   const { showAlert } = useAlert();
-
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
   // ---------------------------
   // Fetch all events
   // ---------------------------
@@ -184,8 +184,7 @@ export const EventProvider = ({ children }) => {
       const eventDate = dayjs(event.date);
       const diff = eventDate.diff(today, "day");
       if (diff === 1) {
-        showAlert(`Reminder: "${event.title}" is tomorrow!`);
-        // هنا يمكنك إضافة push notification أو email لاحقًا
+        setUpcomingEvents((prev) => [...prev, event]);
       }
     });
   };
@@ -299,7 +298,7 @@ export const EventProvider = ({ children }) => {
 
   return (
     <EventContext.Provider
-      value={{ events, loading, fetchEvents, addEvent, updateEvent, deleteEvent }}
+      value={{ events, loading, fetchEvents, addEvent, updateEvent, deleteEvent ,upcomingEvents}}
     >
       {children}
     </EventContext.Provider>

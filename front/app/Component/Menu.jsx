@@ -8,6 +8,7 @@ import Link from 'next/link';
 import News from './News';
 import MenuAllNews from './MenuAllNews';
 import MenuFrinds from './MenuFrinds';
+import MenuUpComingEvents from './MenuUpComingEvents';
 
 const Menu = () => {
   const { user, isLogin } = useAuth();
@@ -16,6 +17,7 @@ const Menu = () => {
     <div className="hidden lg:flex flex-col items-start gap-4 w-[35%] min-h-screen bg-lightMode-bg dark:bg-darkMode-bg px-6 py-8">
       {isLogin ? (
         <>
+          <MenuUpComingEvents/>
           <HashtagsMenu />
           <News showAllNews={showAllNews} setShowAllNews={setShowAllNews} />
           <MenuMessagesFromMe />

@@ -220,14 +220,14 @@
 'use client';
 
 import Image from 'next/image';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { IoImage, IoHappyOutline } from 'react-icons/io5';
 import { FiX } from 'react-icons/fi';
 import { FaUsers } from 'react-icons/fa';
 import EmojiPicker from 'emoji-picker-react';
 import { usePost } from '../../Context/PostContext';
 import { useCommunity } from '../../Context/CommunityContext';
-import { useAuth } from '@/app/Context/AuthContext';
+import { useAuth } from '../../Context/AuthContext';
 
 const NewPost = () => {
   const [postText, setPostText] = useState('');
@@ -360,7 +360,12 @@ const selectMention = (user) => {
       setSelectedMentions([]);
     }
   };
-
+  useEffect(()=>{
+    console.log(user)
+    console.log(mentionSearch)
+    console.log(filteredMentions)
+    console.log(selectedMentions)
+  },[mentionSearch, filteredMentions, selectedMentions])
   return (
     <main className="flex items-center justify-center w-full py-10 px-4 bg-gray-50 dark:bg-darkMode-bg transition-colors">
       <div className="w-full max-w-5xl mx-auto bg-white dark:bg-darkMode-fg rounded-3xl shadow-xl overflow-hidden transition-all duration-500">
