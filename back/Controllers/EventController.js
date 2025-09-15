@@ -53,9 +53,6 @@ exports.getEventById = async (req, res) => {
   }
 };
 
-const Event = require("../models/Event");
-
-// جلب جميع الأحداث الخاصة بالمستخدم
 exports.getEventsByUser = async (req, res) => {
   try {
     const userId = req.params.id; // id المستخدم من الراوت
