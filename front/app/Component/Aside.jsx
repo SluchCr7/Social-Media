@@ -172,7 +172,7 @@ const Aside = () => {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const { user , Logout ,onlineUsers} = useAuth()
+  const { user, Logout, onlineUsers } = useAuth()
 
   // Detect mobile
   useEffect(() => {
@@ -199,7 +199,7 @@ const Aside = () => {
       title: "Community",
       items: [
         { icon: <FaPlus />, text: "New Post", link: "/Pages/NewPost" },
-        { icon: <RiUserCommunityLine />, text: "Community", link: "/Pages/CommunityMain"},
+        { icon: <RiUserCommunityLine />, text: "Community", link: "/Pages/CommunityMain" },
         { icon: <LuMessagesSquare />, text: "Messenger", link: "/Pages/Messanger" },
       ]
     },
@@ -224,7 +224,6 @@ const Aside = () => {
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       className="flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r p-3"
     >
-      
       {/* Logo + Collapse Button */}
       <div className="flex items-center justify-between mb-6">
         {!isCollapsed && (
@@ -254,20 +253,21 @@ const Aside = () => {
               {section.items.map(({ icon, text, link, badge }) => {
                 const isActive = pathname === link
                 return (
-                  <Tooltip key={text} id={text} place="right" content={text} disable={!isCollapsed}>
-                    <Link
-                      href={link}
-                      className={`${baseStyle} ${isActive ? activeStyle : inactiveStyle}`}
-                    >
-                      <span className="text-xl">{icon}</span>
-                      {!isCollapsed && (
-                        <span className="flex-1">{text}</span>
-                      )}
-                      {badge && !isCollapsed && (
-                        <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{badge}</span>
-                      )}
-                    </Link>
-                  </Tooltip>
+                  <Link
+                    key={text}
+                    href={link}
+                    data-tooltip-id="sidebar-tooltip"
+                    data-tooltip-content={text}
+                    className={`${baseStyle} ${isActive ? activeStyle : inactiveStyle}`}
+                  >
+                    <span className="text-xl">{icon}</span>
+                    {!isCollapsed && (
+                      <span className="flex-1">{text}</span>
+                    )}
+                    {badge && !isCollapsed && (
+                      <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{badge}</span>
+                    )}
+                  </Link>
                 )
               })}
             </div>
@@ -288,11 +288,9 @@ const Aside = () => {
                 className="w-8 h-8 rounded-full object-cover"
               />
               {/* Online Indicator */}
-              {
-                onlineUsers?.includes(user?._id) && (
-                  <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-gray-900"></span>
-                )
-              }
+              {onlineUsers?.includes(user?._id) && (
+                <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-gray-900"></span>
+              )}
             </div>
             {!isCollapsed && (
               <div className="flex flex-col">
@@ -311,6 +309,11 @@ const Aside = () => {
           </button>
         </div>
       </div>
+
+      {/* Tooltip */}
+      {isCollapsed && (
+        <Tooltip id="sidebar-tooltip" place="right" />
+      )}
     </motion.aside>
   )
 }
