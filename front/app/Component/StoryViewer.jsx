@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { IoClose, IoChevronBack, IoChevronForward } from "react-icons/io5"
+import { FaHeart } from "react-icons/fa"
 import Image from 'next/image'
 import { useSwipeable } from 'react-swipeable'
 import { useStory } from '../Context/StoryContext'
@@ -11,20 +12,19 @@ const StoryViewer = ({ stories, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [progress, setProgress] = useState(0)
-  const { viewStory } = useStory()
+  const { viewStory, toggleLove } = useStory()
   const { user } = useAuth()
   const story = stories[currentIndex]
 
-  // ➕ تسجيل المشاهدة عند الانتقال لأي ستوري
+  // تسجيل المشاهدة عند تغيير الستوري
   useEffect(() => {
     if (story?._id) viewStory(story._id)
   }, [currentIndex, story])
 
-  // ➕ التحكم بالـ progress bar
+  // progress bar تلقائي
   useEffect(() => {
     if (!story) return
     setProgress(0)
-
     if (isPaused) return
 
     const interval = 50
@@ -59,10 +59,13 @@ const StoryViewer = ({ stories, onClose }) => {
     trackMouse: true,
   })
 
-  // ✅ تأكد من أن Photo رابط صحيح
+  // رابط الصورة (إذا موجودة)
   const photoUrl = Array.isArray(story?.Photo)
     ? story.Photo.find(url => url) || null
     : story?.Photo || null
+
+  // تحقق إذا المستخدم أحب الستوري
+  const userLiked = story?.loves?.includes(user?._id)
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center backdrop-blur-sm bg-black/70">
@@ -111,13 +114,6 @@ const StoryViewer = ({ stories, onClose }) => {
           />
           <span className="text-white font-semibold">{story?.owner?.username || 'Unknown'}</span>
         </div>
-        
-        {/* عدد المشاهدات لصاحب الستوري */}
-        {user?._id === story?.owner?._id && (
-          <div className="absolute top-4 right-4 text-white text-xs z-50">
-            {story?.views?.length || 0} مشاهدة
-          </div>
-        )}
 
         {/* عرض الصورة أو النص */}
         {photoUrl ? (
@@ -132,6 +128,24 @@ const StoryViewer = ({ stories, onClose }) => {
             <p className="text-2xl md:text-3xl font-semibold text-white drop-shadow-lg leading-snug">
               {story.text}
             </p>
+          </div>
+        )}
+
+        {/* زر الحب للأشخاص الآخرين فقط */}
+        {user?._id !== story?.owner?._id && (
+          <button
+            onClick={() => toggleLove(story._id)}
+            className={`absolute bottom-16 right-6 text-2xl ${userLiked ? 'text-red-500' : 'text-white'}`}
+          >
+            <FaHeart />
+          </button>
+        )}
+
+        {/* عرض عدد المشاهدات وعدد الـ loves فقط لصاحب الستوري */}
+        {user?._id === story?.owner?._id && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white text-sm flex gap-4 z-50">
+            <span>{story?.views?.length || 0} مشاهدة</span>
+            <span>{story?.loves?.length || 0} إعجاب</span>
           </div>
         )}
       </div>

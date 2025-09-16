@@ -48,7 +48,7 @@ const addNewStory = asyncHandler(async (req, res) => {
 
 const getAllStories = asyncHandler(async (req, res) => {
   const stories = await Story.find().populate('owner', 'username profilePhoto')
-    .populate('likes', 'username profilePhoto')
+    .populate('loves', 'username profilePhoto')
     .populate('views', 'username profilePhoto');
   res.status(200).json(stories);
 });
@@ -77,7 +77,7 @@ const deleteStory = asyncHandler(async (req, res) => {
 const getStoriesById = asyncHandler(async (req, res) => {
   const story = await Story.findById(req.params.id)
     .populate('owner', 'username profilePhoto')
-    .populate('likes', 'username profilePhoto')
+    .populate('loves', 'username profilePhoto')
     .populate('views', 'username profilePhoto');
 
   if (!story) {
@@ -94,7 +94,7 @@ const getStoriesById = asyncHandler(async (req, res) => {
   // إعادة تحميل الستوري بعد إضافة المشاهدة
   const updatedStory = await Story.findById(req.params.id)
     .populate('owner', 'username profilePhoto')
-    .populate('likes', 'username profilePhoto')
+    .populate('loves', 'username profilePhoto')
     .populate('views', 'username profilePhoto');
 
   res.status(200).json(updatedStory);
@@ -122,12 +122,35 @@ const viewStory = asyncHandler(async (req, res) => {
     { new: true }
   )
     .populate('owner', 'username profilePhoto')
-    .populate('likes', 'username profilePhoto')
+    .populate('loves', 'username profilePhoto')
     .populate('views', 'username profilePhoto');
 
   res.status(200).json({
     story: updatedStory
   });
+});
+
+
+const toggleLoveStory = asyncHandler(async (req, res) => {
+  const story = await Story.findById(req.params.id);
+  if (!story) {
+    return res.status(404).json({ message: "Story not found" });
+  }
+
+  const userId = req.user._id;
+
+  // إذا كان المستخدم قد أحب الستوري مسبقًا، يتم إزالة الحب
+  if (story.loves.includes(userId)) {
+    story.loves.pull(userId);
+    await story.save();
+    return res.status(200).json({ message: "Love removed", story });
+  }
+
+  // إذا لم يكن المستخدم قد أحب الستوري بعد، يتم الإضافة
+  story.loves.push(userId);
+  await story.save();
+
+  res.status(200).json({ message: "Love added", story });
 });
 
 
@@ -146,5 +169,5 @@ module.exports = {
     getAllStories,
     deleteStory,
   getStoriesById, getRecentStories,
-  viewStory
+  viewStory, toggleLoveStory
 };

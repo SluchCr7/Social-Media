@@ -296,7 +296,9 @@ export const MessageContextProvider = ({ children }) => {
   // 🟢 عداد الرسائل الغير مقروءة
   const [unReadedMessage, setUnReadedMessage] = useState(0);
   const [unreadCountPerUser, setUnreadCountPerUser] = useState({});
-
+  useEffect(()=>{
+    console.log(unReadedMessage)
+  },[unReadedMessage])
   // ----------------- Fetch Users -----------------
   useEffect(() => {
     setIsUserLoading(true);
@@ -424,13 +426,13 @@ export const MessageContextProvider = ({ children }) => {
       // إجمالي الرسائل الغير مقروءة
       setUnReadedMessage(unreadMessages.length);
 
-      // لكل مستخدم
-      const unreadBySender = {};
-      unreadMessages.forEach(msg => {
-        unreadBySender[msg.sender._id] =
-          (unreadBySender[msg.sender._id] || 0) + 1;
-      });
-      setUnreadCountPerUser(unreadBySender);
+      // // لكل مستخدم
+      // const unreadBySender = {};
+      // unreadMessages.forEach(msg => {
+      //   unreadBySender[msg.sender._id] =
+      //     (unreadBySender[msg.sender._id] || 0) + 1;
+      // });
+      // setUnreadCountPerUser(unreadBySender);
 
     } catch (err) {
       console.error("Error fetching unread messages:", err);
