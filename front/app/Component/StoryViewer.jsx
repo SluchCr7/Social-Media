@@ -11,7 +11,7 @@ const StoryViewer = ({ stories, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [progress, setProgress] = useState(0)
-  const { viewStory } = useStory() // ✅ تسجيل المشاهدة
+  const { viewStory } = useStory()
   const { user } = useAuth()
   const story = stories[currentIndex]
 
@@ -23,12 +23,12 @@ const StoryViewer = ({ stories, onClose }) => {
   // ➕ التحكم بالـ progress bar
   useEffect(() => {
     if (!story) return
-    setProgress(0) // إعادة تعيين عند تغيير الستوري
+    setProgress(0)
 
     if (isPaused) return
 
-    const interval = 50 // تحديث كل 50ms
-    const duration = 5000 // مدة الستوري بالمللي ثانية
+    const interval = 50
+    const duration = 5000
     const increment = (interval / duration) * 100
 
     const timer = setInterval(() => {
@@ -58,6 +58,11 @@ const StoryViewer = ({ stories, onClose }) => {
     onSwipedRight: handlePrev,
     trackMouse: true,
   })
+
+  // ✅ تأكد من أن Photo رابط صحيح
+  const photoUrl = Array.isArray(story?.Photo)
+    ? story.Photo.find(url => url) || null
+    : story?.Photo || null
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center backdrop-blur-sm bg-black/70">
@@ -107,7 +112,7 @@ const StoryViewer = ({ stories, onClose }) => {
           <span className="text-white font-semibold">{story?.owner?.username || 'Unknown'}</span>
         </div>
         
-        {/* عدد المشاهدات */}
+        {/* عدد المشاهدات لصاحب الستوري */}
         {user?._id === story?.owner?._id && (
           <div className="absolute top-4 right-4 text-white text-xs z-50">
             {story?.views?.length || 0} مشاهدة
@@ -115,9 +120,9 @@ const StoryViewer = ({ stories, onClose }) => {
         )}
 
         {/* عرض الصورة أو النص */}
-        {story.Photo ? (
+        {photoUrl ? (
           <Image
-            src={story.Photo}
+            src={photoUrl}
             alt="story"
             fill
             className="object-cover transition-all duration-500"
