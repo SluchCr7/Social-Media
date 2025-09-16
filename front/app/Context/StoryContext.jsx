@@ -57,21 +57,23 @@ export const StoryContextProvider = ({ children }) => {
   }, []);
 
 // ➕ تسجيل مشاهدة الستوري
-  const viewStory = async (storyId) => {
+   const viewStory = async (storyId) => {
     if (!user) return;
     try {
-      const { data } = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/${storyId}`,
+      // استدعاء API مخصص لتسجيل المشاهدة
+      const { data } = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/view/${storyId}`,
+        {},
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
 
+      // تحديث الستوري داخل state
       setStories((prev) =>
-        prev.map((story) => (story._id === storyId ? data : story))
+        prev.map((story) => (story._id === storyId ? data.story : story))
       );
     } catch (err) {
       console.error(err);
     }
-  };
   return (
     <StoryContext.Provider
       value={{

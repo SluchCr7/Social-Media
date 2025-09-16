@@ -101,6 +101,36 @@ const getStoriesById = asyncHandler(async (req, res) => {
 });
 
 
+/**
+ * @desc Mark a story as viewed by the current user
+ * @route POST /api/stories/view/:id
+ * @access Private
+ */
+const viewStory = asyncHandler(async (req, res) => {
+  const storyId = req.params.id;
+
+  // البحث عن الستوري
+  const story = await Story.findById(storyId);
+  if (!story) {
+    return res.status(404).json({ message: "Story not found" });
+  }
+
+  // إضافة المستخدم الحالي لقائمة المشاهدات إذا لم يكن موجوداً مسبقاً
+  const updatedStory = await Story.findByIdAndUpdate(
+    storyId,
+    { $addToSet: { views: req.user._id } }, // $addToSet يمنع التكرار
+    { new: true }
+  )
+    .populate('owner', 'username profilePhoto')
+    .populate('likes', 'username profilePhoto')
+    .populate('views', 'username profilePhoto');
+
+  res.status(200).json({
+    story: updatedStory
+  });
+});
+
+
 const getRecentStories = asyncHandler(async (req, res) => {
   
   const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -115,5 +145,6 @@ module.exports = {
   addNewStory,
     getAllStories,
     deleteStory,
-  getStoriesById, getRecentStories
+  getStoriesById, getRecentStories,
+  viewStory
 };
