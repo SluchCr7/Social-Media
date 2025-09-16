@@ -279,13 +279,13 @@ const Aside = () => {
       <div className={`mt-auto border-t pt-4 ${isCollapsed ? "text-center" : ""}`}>
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3 cursor-pointer hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 px-2 py-2 rounded-lg relative">
-            <div className={`relative p-[2px] rounded-full ${user?.stories?.length > 0 ? 'bg-gradient-to-tr from-indigo-500 to-purple-500 animate-pulse' : ''}`}>
+            <div className={`relative p-[2px] rounded-full ${user?.stories?.length > 0 ? 'border border-red-500' : ''}`}>
               <Image
                 src={user?.profilePhoto?.url || '/default-profile.png'}
                 alt="User Profile"
                 width={100}
                 height={100}
-                className="w-8 h-8 rounded-full object-cover"
+                className="w-5 h-5 md:w-8 md:h-8 rounded-full object-cover"
               />
               {/* Online Indicator */}
               {onlineUsers?.includes(user?._id) && (
@@ -303,7 +303,7 @@ const Aside = () => {
           {/* Logout Button */}
           <button
             onClick={Logout}
-            className="flex items-center justify-center gap-2 w-full px-4 py-2 mt-2 text-sm font-medium text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition"
+            className="flex items-center justify-center gap-2 w-full px-4 py-2 mt-2 text-[10px] md:text-sm font-medium text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition"
           >
             Logout
           </button>

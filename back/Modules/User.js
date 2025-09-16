@@ -244,10 +244,12 @@ const validateUserUpdate = (user) => {
     }).default({}),
     relationshipStatus: joi.string().valid('Single', 'In a Relationship', 'Married', "It's Complicated").allow(null),
     partner: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null),
+    interests: joi.array().items(joi.string()).allow(null),
   })
 
   return schema.validate(user)
 }
+
 
 const validatePasswordUpdate = (user) => {
     const schema = joi.object({
