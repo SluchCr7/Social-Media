@@ -7,7 +7,7 @@ const ReceiverMessage = ({ message, user }) => {
   const { backgroundStyle } = useMessage();
 
   return (
-    <div className="flex justify-start px-4 py-2" style={backgroundStyle}>
+    <div className="flex justify-start px-4 py-2">
       <div className="flex max-w-[80%] gap-2 items-end">
         {/* صورة المستلم */}
         <Image

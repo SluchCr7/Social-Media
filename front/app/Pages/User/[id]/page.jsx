@@ -49,7 +49,37 @@ const Page = ({ params }) => {
         ...regularPosts.map((post) => ({ ...post, isPinned: false })),
       ]
     : []
+  // ✅ تحقق من حالة الحساب
+  if (userSelected?.accountStatus === 'banned') {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-center px-6">
+        <div className="max-w-md">
+          <h1 className="text-2xl font-bold text-red-600">This account has been banned</h1>
+          <p className="text-gray-500 mt-2">
+            account is permanently disabled due to policy violations.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
+  if (userSelected?.accountStatus === 'suspended') {
+    const until = userSelected?.suspendedUntil
+      ? new Date(userSelected.suspendedUntil).toLocaleDateString()
+      : 'a future date'
+
+    return (
+      <div className="flex items-center justify-center min-h-screen text-center px-6">
+        <div className="max-w-md">
+          <h1 className="text-2xl font-bold text-yellow-500">This account is suspended</h1>
+          <p className="text-gray-500 mt-2">
+            You cannot View This Page{' '}
+            <span className="font-semibold">{until}</span>.
+          </p>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="w-full md:w-[75%] max-w-5xl mx-auto pt-10 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6">
       

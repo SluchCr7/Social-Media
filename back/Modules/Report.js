@@ -22,6 +22,7 @@ const reportSchema = new mongoose.Schema({
 
 const Report = mongoose.model('Report', reportSchema)
 
+
 const ValidateReport = (data) => {
     const schema = joi.object({
         text: joi.string().required(),

@@ -27,7 +27,7 @@ const MenuMessagesFromMe = () => {
       <ul className="flex flex-col w-full text-sm text-text px-4 py-2 gap-4 max-h-60 overflow-y-auto">
         {recentMessages.length > 0 ? (
           recentMessages.map((msg, index) => (
-            <Link href={`/Pages/Messanger?userId=${user._id}`} key={index} className="flex items-start gap-3 w-full bg-darkMode-bgSecondary p-3 rounded-lg hover:bg-darkMode-bgHover transition">
+            <Link href={`/Pages/Messanger?userId=${msg?.sender?._id}`} key={index} className="flex items-start gap-3 w-full bg-darkMode-bgSecondary p-3 rounded-lg hover:bg-darkMode-bgHover transition">
               <Image
                 src={msg?.sender?.profilePhoto?.url || '/default-avatar.png'}
                 alt="avatar"

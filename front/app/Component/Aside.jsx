@@ -146,8 +146,11 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import Image from 'next/image'
+import { usePathname } from 'next/navigation'
+import { motion } from 'framer-motion'
+import { Tooltip } from 'react-tooltip'
+import 'react-tooltip/dist/react-tooltip.css'
 import {
   GoHome,
   GoSearch
@@ -169,9 +172,9 @@ const Aside = () => {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const { user , Logout} = useAuth()
+  const { user , Logout ,onlineUsers} = useAuth()
 
-  // ✅ detect mobile
+  // Detect mobile
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
     handleResize()
@@ -216,9 +219,13 @@ const Aside = () => {
   const inactiveStyle = `hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 text-lightMode-text dark:text-darkMode-text`
 
   return (
-    <aside className={`flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r transition-all duration-500 ${isCollapsed ? "w-16" : "w-56"} p-3`}>
+    <motion.aside
+      animate={{ width: isCollapsed ? 64 : 224 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      className="flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r p-3"
+    >
       
-      {/* ===== Logo + Collapse Button ===== */}
+      {/* Logo + Collapse Button */}
       <div className="flex items-center justify-between mb-6">
         {!isCollapsed && (
           <span className="text-lg font-bold text-lightMode-text dark:text-darkMode-text truncate">
@@ -229,13 +236,14 @@ const Aside = () => {
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="text-xl p-1 rounded hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 transform transition-transform duration-300"
+            aria-label="Toggle Sidebar"
           >
             <FiChevronLeft className={`${isCollapsed ? "rotate-180" : ""}`} />
           </button>
         )}
       </div>
 
-      {/* ===== Nav Sections ===== */}
+      {/* Nav Sections */}
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 space-y-6">
         {navSections.map(section => (
           <div key={section.title}>
@@ -246,19 +254,20 @@ const Aside = () => {
               {section.items.map(({ icon, text, link, badge }) => {
                 const isActive = pathname === link
                 return (
-                  <Link
-                    key={text}
-                    href={link}
-                    className={`${baseStyle} ${isActive ? activeStyle : inactiveStyle}`}
-                  >
-                    <span className="text-xl">{icon}</span>
-                    {!isCollapsed && (
-                      <span className="flex-1">{text}</span>
-                    )}
-                    {badge && !isCollapsed && (
-                      <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{badge}</span>
-                    )}
-                  </Link>
+                  <Tooltip key={text} id={text} place="right" content={text} disable={!isCollapsed}>
+                    <Link
+                      href={link}
+                      className={`${baseStyle} ${isActive ? activeStyle : inactiveStyle}`}
+                    >
+                      <span className="text-xl">{icon}</span>
+                      {!isCollapsed && (
+                        <span className="flex-1">{text}</span>
+                      )}
+                      {badge && !isCollapsed && (
+                        <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{badge}</span>
+                      )}
+                    </Link>
+                  </Tooltip>
                 )
               })}
             </div>
@@ -266,10 +275,10 @@ const Aside = () => {
         ))}
       </div>
 
+      {/* User Info + Logout */}
       <div className={`mt-auto border-t pt-4 ${isCollapsed ? "text-center" : ""}`}>
         <div className="flex flex-col gap-3">
-          {/* User Info */}
-          <div className="flex items-center gap-3 cursor-pointer hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 px-2 py-2 rounded-lg">
+          <div className="flex items-center gap-3 cursor-pointer hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 px-2 py-2 rounded-lg relative">
             <div className={`relative p-[2px] rounded-full ${user?.stories?.length > 0 ? 'bg-gradient-to-tr from-indigo-500 to-purple-500 animate-pulse' : ''}`}>
               <Image
                 src={user?.profilePhoto?.url || '/default-profile.png'}
@@ -278,11 +287,17 @@ const Aside = () => {
                 height={100}
                 className="w-8 h-8 rounded-full object-cover"
               />
+              {/* Online Indicator */}
+              {
+                onlineUsers?.includes(user?._id) && (
+                  <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-gray-900"></span>
+                )
+              }
             </div>
             {!isCollapsed && (
-              <div>
+              <div className="flex flex-col">
                 <p className="text-sm font-medium">{user?.username || "User Name"}</p>
-                <p className="text-xs text-gray-500">@{user?.profileName || "user_name"}</p>
+                <p className="text-xs text-gray-500">{user?.profileName || "user_name"}</p>
               </div>
             )}
           </div>
@@ -296,8 +311,7 @@ const Aside = () => {
           </button>
         </div>
       </div>
-
-    </aside>
+    </motion.aside>
   )
 }
 

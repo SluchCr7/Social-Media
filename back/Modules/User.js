@@ -109,6 +109,10 @@ const UserSchema = new mongoose.Schema({
         enum: ['active', 'banned', 'suspended'],
         default: 'active'
     }, 
+    suspendedUntil: {
+        type: Date, // التاريخ اللي هينتهي عنده الـ suspension
+        default: null
+    },
     userLevelRank : {
         type: String,
         enum: ["Junior", "Intermediate", "Advanced", "Pro"],
@@ -145,6 +149,10 @@ const UserSchema = new mongoose.Schema({
     acceptedTerms : {
         type : Boolean,
         default : false
+    },
+    interests : {
+        type : [String],
+        default : []
     }
 }, {
     timestamps: true,

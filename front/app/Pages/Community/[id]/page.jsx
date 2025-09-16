@@ -162,11 +162,11 @@ const Page = ({ params }) => {
               </ActionButton>
             )}
 
-            <div className="bg-white/10 p-2 rounded-md shadow hidden sm:block">
+            {/* <div className="bg-white/10 p-2 rounded-md shadow hidden sm:block">
               <button title="More" className="p-2 rounded-md hover:bg-white/5">
                 <HiOutlineDotsVertical />
               </button>
-            </div>
+            </div> */}
           </div>
         </motion.div>
       </div>
@@ -308,3 +308,4 @@ const Page = ({ params }) => {
 }
 
 export default Page
+

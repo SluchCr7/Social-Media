@@ -9,7 +9,7 @@ const SenderMessage = ({ message, user }) => {
   const isRead = message.isRead;
 
   return (
-    <div className="flex justify-end px-4 py-2" style={backgroundStyle}>
+    <div className="flex justify-end px-4 py-2">
       <div className="flex max-w-[80%] gap-2 items-end">
         {/* محتوى الرسالة */}
         <div className="flex flex-col items-end text-right">

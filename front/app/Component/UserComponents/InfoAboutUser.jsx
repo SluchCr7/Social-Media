@@ -21,7 +21,6 @@ const InfoAboutUser = ({ user }) => {
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-lightMode-text dark:text-darkMode-text">
-
             {user?.phone && (
               <div className="flex items-center space-x-3 p-3 rounded-lg bg-lightMode-bg dark:bg-darkMode-bg shadow-sm hover:shadow-md transition">
                 <div className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-500">
@@ -73,6 +72,7 @@ const InfoAboutUser = ({ user }) => {
                 </span>
               </div>
             )}
+
             {user?.createdAt && (
               <div className="flex items-center space-x-3 p-3 rounded-lg bg-lightMode-bg dark:bg-darkMode-bg shadow-sm hover:shadow-md transition">
                 <div className="w-8 h-8 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-500 font-bold">
@@ -88,11 +88,29 @@ const InfoAboutUser = ({ user }) => {
                 </span>
               </div>
             )}
-
           </div>
         </div>
 
-        {/* القسم الثاني: روابط التواصل */}
+        {/* القسم الثاني: الاهتمامات */}
+        {user?.interests?.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-lightMode-text2 dark:text-darkMode-text2">
+              Interests
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {user.interests.map((interest, index) => (
+                <span
+                  key={index}
+                  className="px-4 py-2 rounded-full bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text shadow-sm hover:shadow-md transition text-sm font-medium"
+                >
+                  {interest}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* القسم الثالث: روابط التواصل */}
         {(user?.socialLinks && Object.values(user.socialLinks).some(link => link?.trim())) && (
           <div>
             <h3 className="text-lg font-semibold mb-4 text-lightMode-text2 dark:text-darkMode-text2">

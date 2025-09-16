@@ -15,10 +15,36 @@ const addNewReport = asyncHandler(async (req, res) => {
     res.status(201).json({message : "Report Send Successfully"})
 })
 
-const getReports = asyncHandler(async(req,res)=>{
-    const reports = await Report.find({}).populate('owner', 'username profileName profilePhoto')
-    res.status(200).json(reports)
-})
+const getReports = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 20, sortBy = 'createdAt', order = 'desc' } = req.query;
+  const skip = (page - 1) * limit;
+  const sortOrder = order === 'desc' ? -1 : 1;
+
+  const reports = await Report.find({})
+    .populate('owner', 'username profileName profilePhoto') // صاحب البلاغ
+    .populate({
+      path: 'postId', // المنشور المبلغ عنه
+      select: 'text Photos owner',
+      populate: {
+        path: 'owner', // صاحب المنشور
+        select: 'username profileName profilePhoto'
+      }
+    })
+    .sort({ [sortBy]: sortOrder })
+    .skip(Number(skip))
+    .limit(Number(limit))
+    .lean();
+
+  const totalReports = await Report.countDocuments();
+
+  res.status(200).json({
+    total: totalReports,
+    page: Number(page),
+    limit: Number(limit),
+    reports,
+  });
+});
+
 
 const deleteReport = asyncHandler(async (req, res) => { 
     const report = await Report.findById(req.params.id)

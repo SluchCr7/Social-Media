@@ -153,6 +153,7 @@ export const AuthContextProvider = ({ children }) => {
       phone: fields.phone ?? user.phone,
       dateOfBirth: fields.dateOfBirth ?? user.dateOfBirth,
       gender: fields.gender ?? user.gender,
+      interests: fields.interests ?? user.interests ?? [],
       socialLinks: {
         github: fields.socialLinks?.github ?? user.socialLinks?.github ?? '',
         twitter: fields.socialLinks?.twitter ?? user.socialLinks?.twitter ?? '',
@@ -212,7 +213,7 @@ export const AuthContextProvider = ({ children }) => {
     setPosts((prev) =>
       prev.map((post) =>
         post._id === id
-          ? { ...post, isPinned: res.data.message === "Ponst Pin" } // ضيف فلاغ isPinned
+          ? { ...post, isPinned: res.data.message === "Post Pin" } // ضيف فلاغ isPinned
           : post
       )
     );
@@ -256,6 +257,33 @@ export const AuthContextProvider = ({ children }) => {
       console.error(err);
     }
   };
+
+const makeUserAdmin = async (userId) => {
+  if (!user?.token) return showAlert('You must be logged in as an admin');
+
+  try {
+    const res = await axios.put(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/admin/${userId}`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${user.token}` },
+      }
+    );
+
+    // تحديث حالة المستخدم محليًا
+    setUsers((prev) =>
+      prev.map((u) =>
+        u._id === userId ? { ...u, isAdmin: true } : u
+      )
+    );
+
+    showAlert(res.data.message || 'User is now an Admin');
+  } catch (err) {
+    console.error(err);
+    showAlert(err.response?.data?.message || 'Failed to make user Admin');
+  }
+};
+
 
   const blockOrUnblockUser = async (id) => {
     try {
@@ -369,6 +397,46 @@ const makeAccountPremiumVerify = async () => {
 };
 
 
+// ------------------- NEW FUNCTION: Update Account Status -------------------
+const updateAccountStatus = async (userId, status, days = null) => {
+  if (!user?.token) return showAlert('You must be logged in as an admin');
+
+  try {
+    const body = { accountStatus: status };
+    if (status === "suspended" && days) {
+      body.days = days; // نضيف مدة التعليق لو فيه
+    }
+
+    const res = await axios.put(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/status/${userId}`,
+      body,
+      {
+        headers: { Authorization: `Bearer ${user.token}` },
+      }
+    );
+
+    // تحديث الـ users في الـ state لو عندك لستة users
+    setUsers((prev) =>
+      prev.map((u) =>
+        u._id === userId ? { ...u, accountStatus: status } : u
+      )
+    );
+
+    // لو بتعدل نفسك كـ user (حالة خاصة)
+    if (user._id === userId) {
+      const updatedUser = { ...user, accountStatus: status };
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+    }
+
+    showAlert(res.data.message || `Account status updated to ${status}`);
+  } catch (err) {
+    console.error(err);
+    showAlert(err.response?.data?.message || 'Failed to update account status');
+  }
+};
+
+
   // ------------------- INIT -------------------
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -415,7 +483,7 @@ const makeAccountPremiumVerify = async () => {
         blockOrUnblockUser,
         suggestedUsers,
         deleteUser, showAllSuggestedUsers, setShowAllSuggestedUsers
-        ,togglePrivateAccount,makeAccountPremiumVerify
+        ,togglePrivateAccount,makeAccountPremiumVerify, makeUserAdmin,updateAccountStatus
       }}
     >
       {children}

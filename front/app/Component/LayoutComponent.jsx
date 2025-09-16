@@ -41,6 +41,7 @@ const LayoutComponent = ({ children }) => {
     '/Pages/Messanger',
     '/Pages/Forgot',
     '/Pages/Setting',
+    '/Pages/Privacy',
     '/Pages/ResetPassword',
     '/Pages/ResetPassword/[id]/[token]',
     '/Pages/UserVerify/[id]/verify/[token]',

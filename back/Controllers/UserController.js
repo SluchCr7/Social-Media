@@ -356,35 +356,6 @@ const DeleteUser = asyncHandler(async (req, res) => {
 })
 
 /**
- * @desc Make User Admin
- * @route PUT /api/admin/:id
- * @access Public
- */
-const makeUserAdmin = async (req, res) => {
-    try {
-        const userId = req.params.id; // Get user ID from the request parameters
-
-        // Find the user by ID
-        const user = await User.findById(userId);
-
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        // Toggle the isAdmin property
-        user.isAdmain = !user.isAdmain;
-        // Save the updated user
-        await user.save();
-        return res.status(200).json({
-            message: `User's admin status updated successfully`,
-            user,
-        });
-    } catch (error) {
-        console.error('Error toggling admin status:', error);
-        return res.status(500).json({ message: 'An error occurred while updating admin status' });
-    }
-};
-
-/**
  * @desc verify Account
  * @route PUT /api/auth/:id/verify/:token
  * @access Public
@@ -532,6 +503,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     dateOfBirth,
     relationshipStatus,
     partner,
+    interests
   } = req.body;
 
   // تحقق من وجود الشريك إذا تم إدخاله
@@ -573,6 +545,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     dateOfBirth,
     relationshipStatus,
     partner: partner || null,
+    interests,
     city
   };
 
@@ -625,7 +598,7 @@ const pinPost = asyncHandler(async (req, res) => {
         await User.findByIdAndUpdate(req.user._id, {
             $push: { pinsPosts: req.params.id },
         });
-        res.status(200).json({ message: 'Ponst Pin' })
+        res.status(200).json({ message: 'Post Pin' })
     }
 })
 
@@ -709,39 +682,39 @@ const updateLinksSocial = asyncHandler(async (req, res) => {
 const getSuggestedUsers = asyncHandler(async (req, res) => {
   const currentUserId = req.user._id;
 
-  // جلب بيانات المستخدم الحالي
   const currentUser = await User.findById(currentUserId)
-    .select('interests country following blockedUsers communities')
-    .populate('communities', '_id') // لجلب المجتمعات
-    .lean(); // لتحويل البيانات إلى JSON
+    .select('interests country following blockedUsers communities lastActiveAt')
+    .populate('communities', '_id')
+    .lean();
 
   if (!currentUser) {
     return res.status(404).json({ message: 'User not found' });
   }
 
-  // استخراج المعرفات
   const followingIds = currentUser.following.map(id => id.toString());
   const blockedIds = currentUser.blockedUsers.map(id => id.toString());
   const communityIds = currentUser.communities.map(c => c._id.toString());
 
-  // جلب كل المستخدمين باستثناء: المتابعين والمُحظورين والمستخدم الحالي
-  const allUsers = await User.find({
-    _id: {
-      $ne: currentUserId, // غير المستخدم الحالي
-      $nin: [...followingIds, ...blockedIds]  // غير المتابعين والمحظورين
-    },
+  // المرشحين الأساسيين
+  const candidates = await User.find({
+    _id: { $ne: currentUserId, $nin: [...followingIds, ...blockedIds] },
     accountStatus: 'active',
+    isPrivate: false,
+    acceptedTerms: true,
   })
-    .select('_id username profilePhoto interests country communities')
-    .populate('communities', '_id') // مجتمعاتهم
+    .select('_id username profilePhoto interests country communities lastActiveAt')
+    .populate('communities', '_id')
     .lean();
 
-  // ترتيب المستخدمين بناء على النقاط
-  const suggestions = allUsers.map(user => {
+  const now = new Date();
+
+  const suggestions = candidates.map(user => {
     let score = 0;
 
     // ✅ الاهتمامات المشتركة
-    const sharedInterests = user.interests?.filter(interest => currentUser.interests.includes(interest)) || [];
+    const sharedInterests = user.interests?.filter(interest =>
+      currentUser.interests.includes(interest)
+    ) || [];
     score += sharedInterests.length * 10;
 
     // ✅ نفس الدولة
@@ -751,20 +724,30 @@ const getSuggestedUsers = asyncHandler(async (req, res) => {
 
     // ✅ المجتمعات المشتركة
     const userCommunities = user.communities.map(c => c._id.toString());
-    const commonCommunities = userCommunities.filter(cid => communityIds.includes(cid));
-    score += commonCommunities.length * 10;
+    const commonCommunities = userCommunities.filter(cid =>
+      communityIds.includes(cid)
+    );
+    score += commonCommunities.length * 8;
+
+    // ✅ النشاط الأخير (آخر 7 أيام)
+    if (
+      user.lastActiveAt &&
+      now - new Date(user.lastActiveAt) < 7 * 24 * 60 * 60 * 1000
+    ) {
+      score += 20;
+    }
 
     return { user, score };
   });
 
-  // تصفية وترتيب النتائج النهائية
   const topSuggestions = suggestions
-    .filter(s => s.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 10) // حد أقصى 10 مستخدمين
+    .filter(s => s.score > 0) // بس اللي عندهم صلة
+    .sort((a, b) => b.score - a.score) // ترتيب تنازلي
+    .slice(0, 10); // أفضل 10 فقط
 
   res.status(200).json(topSuggestions.map(s => s.user));
 });
+
 
 const MakeAccountPreimumVerify = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id)
@@ -803,6 +786,82 @@ const togglePrivateAccount = async (req, res) => {
 };
 
 
+// @desc    Make a user an Admin
+// @route   PUT /api/admin/users/:id/make-admin
+// @access  Admin only
+const makeUserAdmin = asyncHandler(async (req, res) => {
+  const userId = req.params.id;
+
+  // العثور على المستخدم
+  const user = await User.findById(userId);
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  // تحقق إذا كان المستخدم بالفعل Admin
+  if (user.isAdmin) {
+    return res.status(400).json({ message: 'User is already an admin' });
+  }
+
+  // تحديث الصلاحية
+  user.isAdmin = true;
+  await user.save();
+
+  res.status(200).json({
+    message: `${user.username} is now an Admin`,
+    user: {
+      _id: user._id,
+      username: user.username,
+      isAdmin: user.isAdmin,
+    },
+  });
+});
+
+// تحديث الحالة
+const updateAccountStatus = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { accountStatus, days } = req.body;
+
+    if (!["active", "banned", "suspended"].includes(accountStatus)) {
+      return res.status(400).json({ message: "Invalid account status value" });
+    }
+
+    let updateFields = { accountStatus };
+
+    // لو Suspended خلي فيه مدة
+    if (accountStatus === "suspended") {
+      if (!days || days <= 0) {
+        return res.status(400).json({ message: "Suspension days must be greater than 0" });
+      }
+      const suspendedUntil = new Date();
+      suspendedUntil.setDate(suspendedUntil.getDate() + days);
+      updateFields.suspendedUntil = suspendedUntil;
+    } else {
+      // لو رجع Active أو Banned شيل التاريخ القديم
+      updateFields.suspendedUntil = null;
+    }
+
+    const user = await User.findByIdAndUpdate(userId, updateFields, { new: true });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      message:
+        accountStatus === "suspended"
+          ? `User suspended for ${days} days`
+          : `User status updated to ${accountStatus}`,
+      user,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error updating account status", error });
+  }
+};
+
 const deleteAllUsers = asyncHandler(async (req, res) => {
     await User.deleteMany({});
     await Post.deleteMany({ })
@@ -813,5 +872,5 @@ const deleteAllUsers = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "All users deleted successfully" });
 });
 
-module.exports = {MakeAccountPreimumVerify,togglePrivateAccount, DeleteUser,deleteAllUsers, getSuggestedUsers, blockOrUnblockUser, makeUserAdmin, getAllUsers, getUserById, RegisterNewUser, LoginUser, verifyAccount, uploadPhoto, makeFollow, updatePassword, updateProfile, savePost, pinPost, updateLinksSocial}
+module.exports = {updateAccountStatus,makeUserAdmin,MakeAccountPreimumVerify,togglePrivateAccount, DeleteUser,deleteAllUsers, getSuggestedUsers, blockOrUnblockUser, getAllUsers, getUserById, RegisterNewUser, LoginUser, verifyAccount, uploadPhoto, makeFollow, updatePassword, updateProfile, savePost, pinPost, updateLinksSocial}
 

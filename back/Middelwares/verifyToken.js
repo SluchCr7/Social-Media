@@ -1,46 +1,53 @@
 const jwt = require("jsonwebtoken");
 
+// Verify token middleware
 const verifyToken = (req, res, next) => {
-    const authHeader = req.headers.authorization
-    if (authHeader) {
-        const token = authHeader.split(' ')[1]
-        try {
-            const decoded = jwt.verify(token, process.env.TOKEN_SECRET)
-            req.user = decoded
-            next()
-        } catch (error) {
-            return res.status(401).json({ message: "Invalid token" })
-        }
-    } else {
-        return res.status(401).json({ message: "No token" })
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(' ')[1];
+    try {
+      const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+      req.user = decoded;
+      next();
+    } catch (error) {
+      return res.status(401).json({ message: "Invalid token" });
     }
-}
+  } else {
+    return res.status(401).json({ message: "No token provided" });
+  }
+};
 
-const verifyAdmain = async (req, res, next) => {
-    verifyToken(req, res, next);
-    if (!req.user.isAdmin) {
-        next();
+// Verify admin
+const verifyAdmin = (req, res, next) => {
+  verifyToken(req, res, () => {
+    if (req.user.isAdmin) {
+      next();
     } else {
-        return res.status(403).json("You are not administrator!");
+      return res.status(403).json({ message: "You are not an administrator!" });
     }
-}
+  });
+};
 
-const verifyUser = async (req, res, next) => {
-    verifyToken(req, res, next);
+// Verify same user
+const verifyUser = (req, res, next) => {
+  verifyToken(req, res, () => {
     if (req.user._id === req.params.id) {
-        next();
+      next();
     } else {
-        return res.status(403).json("You are not User");
+      return res.status(403).json({ message: "You are not this user!" });
     }
-}
+  });
+};
 
-const verifyAdmainUser = async (req, res, next) => {
-    verifyAdmain(req, res, next);
-    if (req.user.id === req.params.id || req.user.isAdmin) {
-        next();
+// Verify admin or same user
+const verifyAdminOrUser = (req, res, next) => {
+  verifyToken(req, res, () => {
+    if (req.user.isAdmin || req.user._id === req.params.id) {
+      next();
     } else {
-        return res.status(403).json("You are not User or Administrator");
+      return res.status(403).json({ message: "You are not authorized!" });
     }
-}
+  });
+};
 
-module.exports = { verifyToken, verifyAdmain, verifyUser, verifyAdmainUser }
+module.exports = { verifyToken, verifyAdmin, verifyUser, verifyAdminOrUser };
