@@ -47,7 +47,9 @@ const addNewStory = asyncHandler(async (req, res) => {
  */
 
 const getAllStories = asyncHandler(async (req, res) => {
-  const stories = await Story.find().populate('owner');
+  const stories = await Story.find().populate('owner', 'username profilePhoto')
+    .populate('likes', 'username profilePhoto')
+    .populate('views', 'username profilePhoto');
   res.status(200).json(stories);
 });
 
@@ -74,11 +76,29 @@ const deleteStory = asyncHandler(async (req, res) => {
 
 const getStoriesById = asyncHandler(async (req, res) => {
   const story = await Story.findById(req.params.id)
+    .populate('owner', 'username profilePhoto')
+    .populate('likes', 'username profilePhoto')
+    .populate('views', 'username profilePhoto');
+
   if (!story) {
-      return res.status(404).json({ message: "Story Not Found" })
+      return res.status(404).json({ message: "Story Not Found" });
   }
-  res.status(200).json(story)
-})
+
+  // إضافة المستخدم الحالي إلى المشاهدات إذا لم يكن موجودًا مسبقًا
+  await Story.findByIdAndUpdate(
+    req.params.id,
+    { $addToSet: { views: req.user._id } }, // يمنع التكرار
+    { new: true }
+  );
+
+  // إعادة تحميل الستوري بعد إضافة المشاهدة
+  const updatedStory = await Story.findById(req.params.id)
+    .populate('owner', 'username profilePhoto')
+    .populate('likes', 'username profilePhoto')
+    .populate('views', 'username profilePhoto');
+
+  res.status(200).json(updatedStory);
+});
 
 
 const getRecentStories = asyncHandler(async (req, res) => {

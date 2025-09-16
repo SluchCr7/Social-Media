@@ -14,6 +14,7 @@ const StorySchema = new mongoose.Schema({
         required: true
     },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    views: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 }, { timestamps: true })
 
 const Story = mongoose.model('Story', StorySchema)

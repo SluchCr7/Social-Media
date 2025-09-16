@@ -56,12 +56,29 @@ export const StoryContextProvider = ({ children }) => {
     fetchStories();
   }, []);
 
+// ➕ تسجيل مشاهدة الستوري
+  const viewStory = async (storyId) => {
+    if (!user) return;
+    try {
+      const { data } = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/${storyId}`,
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+
+      setStories((prev) =>
+        prev.map((story) => (story._id === storyId ? data : story))
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
   return (
     <StoryContext.Provider
       value={{
         addNewStory,
         stories,
         isLoading,
+        viewStory
       }}
     >
       {children}

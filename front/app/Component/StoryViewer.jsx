@@ -3,14 +3,22 @@ import React, { useState, useEffect, useRef } from 'react'
 import { IoClose, IoChevronBack, IoChevronForward } from "react-icons/io5"
 import Image from 'next/image'
 import { useSwipeable } from 'react-swipeable'
+import { useStory } from '../Context/StoryContext'
 
 const StoryViewer = ({ stories, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const timeoutRef = useRef(null)
+  const { viewStory } = useStory() // ✅ تسجيل المشاهدة
 
   const story = stories[currentIndex]
 
+  // ➕ تسجيل المشاهدة عند الانتقال لأي ستوري
+  useEffect(() => {
+    if (story?._id) viewStory(story._id)
+  }, [currentIndex, story])
+
+  // ➕ التحكم بالانتقال التلقائي
   const startAutoAdvance = () => {
     clearTimeout(timeoutRef.current)
     if (isPaused) return
@@ -42,7 +50,7 @@ const StoryViewer = ({ stories, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center backdrop-blur-sm bg-black/70">
-      
+
       {/* زر الإغلاق */}
       <button
         onClick={onClose}
@@ -78,8 +86,19 @@ const StoryViewer = ({ stories, onClose }) => {
       >
         {/* معلومات صاحب الستوري */}
         <div className="absolute top-4 left-4 flex items-center gap-2 z-30">
-          <div className="w-10 h-10 rounded-full bg-gray-300" />
-          <span className="text-white font-semibold">{story.ownerName || 'Unknown'}</span>
+          <Image
+            src={story?.owner?.profilePhoto?.url || '/default-profile.png'}
+            alt="avatar"
+            width={40}
+            height={40}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+          <span className="text-white font-semibold">{story?.owner?.username || 'Unknown'}</span>
+        </div>
+
+        {/* عدد المشاهدات */}
+        <div className="absolute top-4 right-4 text-white text-xs z-50">
+          {story?.views?.length || 0} مشاهدة
         </div>
 
         {/* عرض الصورة أو النص */}
@@ -91,7 +110,7 @@ const StoryViewer = ({ stories, onClose }) => {
             className="object-cover transition-all duration-500"
           />
         ) : (
-          <div className="bg-black/40 w-full h-full flex items-center justify-center px-6 text-center rounded-xl">
+          <div className="bg-black/40 w-full h-full flex items-center justify-center px-6 text-center rounded-xl overflow-auto">
             <p className="text-2xl md:text-3xl font-semibold text-white drop-shadow-lg leading-snug">
               {story.text}
             </p>

@@ -5,26 +5,37 @@ import Image from 'next/image'
 import { useStory } from '../Context/StoryContext'
 import StoryViewer from './StoryViewer'
 import StorySkeleton from '../Skeletons/StoriesSkeleton'
+import { useAuth } from '../Context/AuthContext'
 
 const Stories = () => {
-  const { stories, isLoading } = useStory()
+  const { user } = useAuth()
+  const { stories, isLoading, viewStory } = useStory()
   const [viewerStories, setViewerStories] = useState(null)
 
-  // 🧠 تحسين الأداء: Memoize grouping
+  // 🧠 تحسين الأداء: تجميع الستوريز حسب المستخدم
   const groupedArray = useMemo(() => {
     const groupedStories = stories.reduce((acc, story) => {
       const userId = story.owner._id
       if (!acc[userId]) {
-        acc[userId] = {
-          user: story.owner,
-          stories: [],
-        }
+        acc[userId] = { user: story.owner, stories: [] }
       }
       acc[userId].stories.push(story)
       return acc
     }, {})
     return Object.values(groupedStories)
   }, [stories])
+
+  const handleOpenViewer = (userStories) => {
+    setViewerStories(userStories)
+    userStories.forEach(story => viewStory(story._id))
+  }
+
+  const getBorderColor = (userStories) => {
+    const unseen = userStories.some(story => !story.views.includes(user?._id))
+    return unseen
+      ? 'bg-yellow-400 animate-pulse' // ستوري جديد لم يشاهده المستخدم
+      : 'bg-gray-500'                  // شاهد كل الستوريز
+  }
 
   return (
     <div className="w-full">
@@ -40,10 +51,10 @@ const Stories = () => {
             <div
               key={index}
               className="relative cursor-pointer group flex flex-col items-center snap-start"
-              onClick={() => setViewerStories(group.stories)}
+              onClick={() => handleOpenViewer(group.stories)}
             >
-              {/* صورة البروفايل مع إطار متحرك Gradient */}
-              <div className="relative w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-pink-500 via-yellow-400 to-purple-500 animate-spin-slow">
+              {/* صورة البروفايل مع إطار متغير حسب المشاهدة */}
+              <div className={`relative w-16 h-16 rounded-full p-[2px] ${getBorderColor(group.stories)}`}>
                 <div className="w-full h-full rounded-full bg-black p-[2px]">
                   <Image
                     src={group?.user?.profilePhoto?.url || '/default-profile.png'}
@@ -55,7 +66,7 @@ const Stories = () => {
                 </div>
               </div>
 
-              {/* اسم المستخدم مع Tooltip لو طويل */}
+              {/* اسم المستخدم */}
               <p
                 className="text-xs mt-2 text-gray-200 text-center truncate w-16"
                 title={group?.user?.username}
@@ -86,4 +97,3 @@ const Stories = () => {
 }
 
 export default Stories
-
