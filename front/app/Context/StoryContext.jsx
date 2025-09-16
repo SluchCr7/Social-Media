@@ -74,6 +74,7 @@ export const StoryContextProvider = ({ children }) => {
     } catch (err) {
       console.error(err);
     }
+  };
   return (
     <StoryContext.Provider
       value={{
