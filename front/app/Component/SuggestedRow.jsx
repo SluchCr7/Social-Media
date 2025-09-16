@@ -8,9 +8,10 @@ import { useCommunity } from "../Context/CommunityContext";
 import { useAuth } from "../Context/AuthContext";
 
 export const SuggestionRow = ({ type, data }) => {
-  if (!data || data.length === 0) return null;
   const { joinToCommunity } = useCommunity();
   const { followUser } = useAuth();
+  
+  if (!data || data.length === 0) return null;
 
   return (
     <div className="w-full grid gap-6 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
