@@ -7,12 +7,8 @@ import { FiTrash2, FiUserCheck, FiUserX } from 'react-icons/fi';
 const AdminUsersPage = () => {
   const { users, deleteUser, blockOrUnblockUser, makeAccountPremiumVerify } = useAuth();
 
-  useEffect(() => {
-    // users يتم جلبهم مسبقًا من AuthContext
-  }, []);
-
   return (
-    <div className="min-h-screen p-8 bg-lightMode-bg dark:bg-darkMode-bg">
+    <div className="min-h-screen p-8 bg-lightMode-bg dark:bg-darkMode-bg w-full">
       <h1 className="text-3xl font-bold mb-8 text-lightMode-text2 dark:text-darkMode-text2">
         Users Management
       </h1>
@@ -24,33 +20,32 @@ const AdminUsersPage = () => {
             className="bg-white dark:bg-darkMode-card p-6 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700"
           >
             <div className="flex items-center gap-4 mb-4">
-              <Image
-                src={user.profilePhoto?.url || '/default-profile.png'}
-                alt={user.username}
-                width={50}
-                height={50}
-                className="rounded-full object-cover"
-              />
-              <div>
-                <p className="font-semibold text-lightMode-text2 dark:text-darkMode-text2">{user.username}</p>
-                <p className="text-sm text-gray-500">{user.profileName}</p>
-                <p className="text-xs text-gray-400">{user.email}</p>
-              </div>
+                <div className="w-[50px] h-[50px] rounded-full overflow-hidden">
+                    <Image
+                        src={user.profilePhoto?.url || '/default-profile.png'}
+                        alt={user.username}
+                        width={50}
+                        height={50}
+                        className="w-full h-full object-cover"
+                    />
+                </div>
+
+                <div>
+                    <p className="font-semibold text-lightMode-text2 dark:text-darkMode-text2">{user.username}</p>
+                    <p className="text-sm text-gray-500">{user.profileName}</p>
+                    <p className="text-xs text-gray-400">{user.email}</p>
+                </div>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               <div className="text-center">
-                <p className="font-bold">{user.postsCount}</p>
+                <p className="font-bold">{user.posts}</p>
                 <p className="text-xs text-gray-500">Posts</p>
               </div>
               <div className="text-center">
-                <p className="font-bold">{user.commentsCount}</p>
+                <p className="font-bold">{user.comments}</p>
                 <p className="text-xs text-gray-500">Comments</p>
-              </div>
-              <div className="text-center">
-                <p className="font-bold">{user.storiesCount}</p>
-                <p className="text-xs text-gray-500">Stories</p>
               </div>
               <div className="text-center">
                 <p className="font-bold">{user.followers?.length || 0}</p>

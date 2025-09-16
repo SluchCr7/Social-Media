@@ -276,26 +276,33 @@ const Aside = () => {
       </div>
 
       {/* User Info + Logout */}
-      <div className={`mt-auto border-t pt-4 ${isCollapsed ? "text-center" : ""}`}>
+      <div className={`mt-auto border-t pt-4 ${isCollapsed ? "px-0" : "px-2"}`}>
         <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-3 cursor-pointer hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 px-2 py-2 rounded-lg relative">
+          
+          {/* User Profile */}
+          <div className={`flex items-center gap-3 px-2 py-2 rounded-lg transition cursor-pointer 
+            hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10`}>
             <div className={`relative p-[2px] rounded-full ${user?.stories?.length > 0 ? 'border border-red-500' : ''}`}>
               <Image
                 src={user?.profilePhoto?.url || '/default-profile.png'}
                 alt="User Profile"
-                width={100}
-                height={100}
-                className="w-5 h-5 md:w-8 md:h-8 rounded-full object-cover"
+                width={40}
+                height={40}
+                className="w-8 h-8 rounded-full object-cover"
               />
               {/* Online Indicator */}
               {onlineUsers?.includes(user?._id) && (
-                <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-gray-900"></span>
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border border-white dark:border-gray-900"></span>
               )}
             </div>
             {!isCollapsed && (
-              <div className="flex flex-col">
-                <p className="text-sm font-medium">{user?.username || "User Name"}</p>
-                <p className="text-xs text-gray-500">{user?.profileName || "user_name"}</p>
+              <div className="flex flex-col truncate">
+                <p className="text-sm font-semibold text-lightMode-text dark:text-darkMode-text truncate">
+                  {user?.username || "User Name"}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {user?.profileName || "@user_name"}
+                </p>
               </div>
             )}
           </div>
@@ -303,12 +310,19 @@ const Aside = () => {
           {/* Logout Button */}
           <button
             onClick={Logout}
-            className="flex items-center justify-center gap-2 w-full px-4 py-2 mt-2 text-[10px] md:text-sm font-medium text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition"
+            className={`flex items-center justify-center md:justify-start gap-2 px-3 py-2 
+              text-xs md:text-sm font-medium rounded-lg border transition-all
+              ${isCollapsed 
+                ? "mx-auto text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 border-none" 
+                : "text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
+              }`}
           >
-            Logout
+            <span className="text-lg">⎋</span>
+            {!isCollapsed && <span>Logout</span>}
           </button>
         </div>
       </div>
+
 
       {/* Tooltip */}
       {isCollapsed && (

@@ -161,14 +161,14 @@ const AdminReportsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen text-gray-500 dark:text-gray-400">
+      <div className="flex justify-center items-center h-screen text-gray-500 dark:text-gray-400 w-full">
         Loading reports...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-lightMode-bg dark:bg-darkMode-bg p-8">
+    <div className="min-h-screen bg-lightMode-bg dark:bg-darkMode-bg p-8 w-full">
       <h1 className="text-3xl font-bold mb-6 text-lightMode-text2 dark:text-darkMode-text2">
         Admin Panel - Reports
       </h1>
