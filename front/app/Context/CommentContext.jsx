@@ -10,13 +10,13 @@ export const CommentContext = createContext();
 export const useComment = () => useContext(CommentContext);
 
 export const CommentContextProvider = ({ children }) => {
-  const [comments, setcomments] = useState([]);
+  const [comments, setComments] = useState([]);
   const { user } = useAuth();
   const { addNotify } = useNotify();
   const { showAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
 
-  // 🔹 دالة مساعدة: تحقق من حالة الحساب
+  // 🔹 Helper: تحقق من حالة المستخدم قبل أي فعل
   const checkUserStatus = (action = "perform this action") => {
     if (!user || !user.token) {
       showAlert(`You must be logged in to ${action}.`);
@@ -29,12 +29,12 @@ export const CommentContextProvider = ({ children }) => {
     return true;
   };
 
-  // 📌 جلب التعليقات لبوست معين
+  // 📌 جلب التعليقات لأي بوست (يمكن للزوار)
   const fetchCommentsByPostId = async (postId) => {
     setIsLoading(true);
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/post/${postId}`);
-      setcomments(res.data);
+      setComments(res.data);
     } catch (err) {
       console.error('Error fetching comments:', err);
       showAlert(err?.response?.data?.message || "Failed to load comments.");
@@ -43,8 +43,8 @@ export const CommentContextProvider = ({ children }) => {
     }
   };
 
-  // 📌 إضافة كومنت
-  const AddComment = async (text, postId, receiverId, parent = null) => {
+  // 📌 إضافة تعليق (يتطلب تسجيل دخول)
+  const addComment = async (text, postId, receiverId, parent = null) => {
     if (!checkUserStatus("add comments")) return;
 
     try {
@@ -55,7 +55,7 @@ export const CommentContextProvider = ({ children }) => {
       );
 
       const newComment = res.data.comment;
-      setcomments((prev) => [newComment, ...prev]);
+      setComments(prev => [newComment, ...prev]);
       showAlert('Comment added successfully.');
 
       if (user._id !== receiverId) {
@@ -70,12 +70,12 @@ export const CommentContextProvider = ({ children }) => {
 
       return newComment;
     } catch (err) {
-      showAlert(err?.response?.data?.message || 'Failed to upload comment.');
+      showAlert(err?.response?.data?.message || 'Failed to add comment.');
       throw err;
     }
   };
 
-  // 📌 حذف كومنت
+  // 📌 حذف تعليق
   const deleteComment = async (id) => {
     if (!checkUserStatus("delete comments")) return;
 
@@ -83,8 +83,9 @@ export const CommentContextProvider = ({ children }) => {
       const res = await axios.delete(`${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
+
+      setComments(prev => prev.filter(c => c._id !== id));
       showAlert(res.data.message);
-      setcomments((prev) => prev.filter((c) => c._id !== id));
       return res.data;
     } catch (err) {
       console.error(err);
@@ -92,7 +93,7 @@ export const CommentContextProvider = ({ children }) => {
     }
   };
 
-  // 📌 تعديل كومنت
+  // 📌 تعديل تعليق
   const updateComment = async (id, text) => {
     if (!checkUserStatus("update comments")) return;
 
@@ -104,10 +105,7 @@ export const CommentContextProvider = ({ children }) => {
       );
 
       const updatedComment = res.data.comment;
-      setcomments((prev) =>
-        prev.map((c) => (c._id === updatedComment._id ? updatedComment : c))
-      );
-
+      setComments(prev => prev.map(c => c._id === updatedComment._id ? updatedComment : c));
       showAlert('Comment updated successfully.');
       return updatedComment;
     } catch (err) {
@@ -116,7 +114,7 @@ export const CommentContextProvider = ({ children }) => {
     }
   };
 
-  // 📌 لايك على كومنت
+  // 📌 لايك على تعليق
   const likeComment = async (id) => {
     if (!checkUserStatus("like comments")) return;
 
@@ -128,10 +126,7 @@ export const CommentContextProvider = ({ children }) => {
       );
 
       const updatedComment = res.data.comment;
-      setcomments((prev) =>
-        prev.map((c) => (c._id === updatedComment._id ? updatedComment : c))
-      );
-
+      setComments(prev => prev.map(c => c._id === updatedComment._id ? updatedComment : c));
       showAlert(res.data.message);
       return updatedComment;
     } catch (err) {
@@ -144,12 +139,12 @@ export const CommentContextProvider = ({ children }) => {
     <CommentContext.Provider
       value={{
         comments,
-        setcomments,
-        AddComment,
-        deleteComment,
-        likeComment,
-        updateComment,
+        setComments,
         fetchCommentsByPostId,
+        addComment,
+        deleteComment,
+        updateComment,
+        likeComment,
         isLoading
       }}
     >
