@@ -98,7 +98,7 @@ const StoryViewer = ({ stories, onClose }) => {
         {/* معلومات صاحب الستوري */}
         <div className="absolute top-4 left-4 flex items-center gap-2 z-30">
           <Image
-            src={story?.owner?.profilePhoto || '/default-profile.png'}
+            src={story?.owner?.profilePhoto?.url || '/default-profile.png'}
             alt="avatar"
             width={40}
             height={40}

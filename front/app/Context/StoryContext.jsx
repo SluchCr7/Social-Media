@@ -57,7 +57,7 @@ export const StoryContextProvider = ({ children }) => {
   }, []);
 
 // ➕ تسجيل مشاهدة الستوري
-   const viewStory = async (storyId) => {
+  const viewStory = async (storyId) => {
     if (!user) return;
     try {
       // استدعاء API مخصص لتسجيل المشاهدة
