@@ -40,11 +40,11 @@ const AdminUsersPage = () => {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               <div className="text-center">
-                <p className="font-bold">{user.posts}</p>
+                <p className="font-bold">{user.posts?.length || 0}</p>
                 <p className="text-xs text-gray-500">Posts</p>
               </div>
               <div className="text-center">
-                <p className="font-bold">{user.comments}</p>
+                <p className="font-bold">{user.comments?.length || 0}</p>
                 <p className="text-xs text-gray-500">Comments</p>
               </div>
               <div className="text-center">
