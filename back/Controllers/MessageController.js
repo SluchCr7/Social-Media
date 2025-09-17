@@ -49,6 +49,11 @@ const sendMessage = async (req, res) => {
     const userToChatId = req.params.id;
     const sender = req.user._id;
 
+    // ✅ تحقق من صحة ObjectId
+    if (!mongoose.Types.ObjectId.isValid(sender) || !mongoose.Types.ObjectId.isValid(userToChatId)) {
+      return res.status(400).json({ message: "Invalid sender or receiver ID" });
+    }
+
     let photos = req.files?.image || [];
     if (!Array.isArray(photos)) photos = [photos];
 
@@ -78,7 +83,7 @@ const sendMessage = async (req, res) => {
     let message = new Message(messageData);
     await message.save();
 
-    // 🔹 رجع الرسالة مع بيانات الـ sender والـ receiver
+    // 🔹 populate sender و receiver
     message = await message.populate("sender", "username profilePhoto _id");
     message = await message.populate("receiver", "username profilePhoto _id");
 
@@ -87,7 +92,7 @@ const sendMessage = async (req, res) => {
       io.to(receiverSocketId).emit("newMessage", message);
     }
 
-    // 🔹 أرجع الرسالة نفسها بدل "Message Sent"
+    // 🔹 أرجع الرسالة نفسها
     res.status(201).json(message);
 
   } catch (error) {

@@ -265,7 +265,6 @@
 
 // export const useMessage = () => useContext(MessageContext);
 
-
 'use client';
 
 import { createContext, useContext, useEffect, useState } from "react";
@@ -288,17 +287,13 @@ export const MessageContextProvider = ({ children }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [isMessagesLoading, setIsMessagesLoading] = useState(true);
-
   const [messagesByUser, setMessagesByUser] = useState([]);
   const [backgroundType, setBackgroundType] = useState('color');
   const [backgroundValue, setBackgroundValue] = useState('#f0f0f0');
 
-  // 🟢 عداد الرسائل الغير مقروءة
   const [unReadedMessage, setUnReadedMessage] = useState(0);
   const [unreadCountPerUser, setUnreadCountPerUser] = useState({});
-  useEffect(()=>{
-    console.log(unReadedMessage)
-  },[unReadedMessage])
+
   // ----------------- Fetch Users -----------------
   useEffect(() => {
     setIsUserLoading(true);
@@ -314,7 +309,6 @@ export const MessageContextProvider = ({ children }) => {
         setIsUserLoading(false);
       }
     };
-
     if (user?.token) fetchUsers();
   }, [user]);
 
@@ -334,7 +328,6 @@ export const MessageContextProvider = ({ children }) => {
         setIsMessagesLoading(false);
       }
     };
-
     getMessagesBetweenUsers();
   }, [selectedUser, user]);
 
@@ -372,9 +365,7 @@ export const MessageContextProvider = ({ children }) => {
       const newMessage = res.data;
 
       setMessages(prev =>
-        prev.map(m =>
-          m._id === tempId ? { ...newMessage, pending: false } : m
-        )
+        prev.map(m => (m._id === tempId ? { ...newMessage, pending: false } : m))
       );
 
       await addNotify({
@@ -388,9 +379,7 @@ export const MessageContextProvider = ({ children }) => {
       console.error("Error sending message:", err);
 
       setMessages(prev =>
-        prev.map(m =>
-          m._id === tempId ? { ...m, pending: false, error: true } : m
-        )
+        prev.map(m => (m._id === tempId ? { ...m, pending: false, error: true } : m))
       );
 
       showAlert("Failed to send message.");
@@ -423,17 +412,14 @@ export const MessageContextProvider = ({ children }) => {
 
       const unreadMessages = res.data;
 
-      // إجمالي الرسائل الغير مقروءة
       setUnReadedMessage(unreadMessages.length);
 
-      // // لكل مستخدم
-      // const unreadBySender = {};
-      // unreadMessages.forEach(msg => {
-      //   unreadBySender[msg.sender._id] =
-      //     (unreadBySender[msg.sender._id] || 0) + 1;
-      // });
-      // setUnreadCountPerUser(unreadBySender);
-
+      const unreadBySender = {};
+      unreadMessages.forEach(msg => {
+        const senderId = msg.sender?._id || msg.sender;
+        unreadBySender[senderId] = (unreadBySender[senderId] || 0) + 1;
+      });
+      setUnreadCountPerUser(unreadBySender);
     } catch (err) {
       console.error("Error fetching unread messages:", err);
     }
@@ -451,14 +437,12 @@ export const MessageContextProvider = ({ children }) => {
         headers: { authorization: `Bearer ${user.token}` }
       });
 
-      // تحديث العدادات
       setUnReadedMessage(prev => prev - (unreadCountPerUser[otherUserId] || 0));
       setUnreadCountPerUser(prev => {
         const updated = { ...prev };
         delete updated[otherUserId];
         return updated;
       });
-
     } catch (err) {
       console.error('Error marking messages as read:', err);
     }
@@ -466,13 +450,16 @@ export const MessageContextProvider = ({ children }) => {
 
   // ----------------- Update Unread Counters Locally -----------------
   const updateUnreadCounters = (message) => {
-    if (!message || !message.receiver) return;
+    if (!message || !message.receiver || !message.sender) return;
 
-    if (message.receiver === user._id && !message.isRead) {
+    const receiverId = message.receiver?._id || message.receiver;
+    const senderId = message.sender?._id || message.sender;
+
+    if (receiverId === user._id && !message.isRead) {
       setUnReadedMessage(prev => prev + 1);
       setUnreadCountPerUser(prev => ({
         ...prev,
-        [message.sender]: (prev[message.sender] || 0) + 1
+        [senderId]: (prev[senderId] || 0) + 1
       }));
     }
   };
@@ -482,7 +469,8 @@ export const MessageContextProvider = ({ children }) => {
     if (!socket) return;
 
     const handleNewMessage = (message) => {
-      if (selectedUser && message.sender === selectedUser._id) {
+      const senderId = message.sender?._id || message.sender;
+      if (selectedUser && senderId === selectedUser._id) {
         setMessages(prev => [...prev, message]);
       }
       updateUnreadCounters(message);
@@ -514,13 +502,8 @@ export const MessageContextProvider = ({ children }) => {
 
   const backgroundStyle = backgroundType === 'color'
     ? { backgroundColor: backgroundValue }
-    : {
-      backgroundImage: `url(${backgroundValue})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center'
-    };
+    : { backgroundImage: `url(${backgroundValue})`, backgroundSize: 'cover', backgroundPosition: 'center' };
 
-  // ----------------- Return -----------------
   return (
     <MessageContext.Provider
       value={{
