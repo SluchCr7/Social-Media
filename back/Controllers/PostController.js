@@ -519,48 +519,63 @@ const getPostById = asyncHandler(async (req, res) => {
 
 // ================== Like Post ==================
 const likePost = asyncHandler(async (req, res) => {
-  let post = await Post.findById(req.params.id).populate("owner", "_id");
+  // جلب البوست الأساسي
+  const post = await Post.findById(req.params.id);
   if (!post) {
     res.status(404);
     throw new Error("Post not found");
   }
 
+  // إذا كان المستخدم قد أعجب بالبوست مسبقًا → إلغاء اللايك
   if (post.likes.includes(req.user._id)) {
-    // ✅ إلغاء اللايك
-    post = await Post.findByIdAndUpdate(
+    await Post.findByIdAndUpdate(
       req.params.id,
-      { $pull: { likes: req.user._id } },
-      { new: true }
-    ).populate("owner", "username profileName profilePhoto");
-
-    return res.status(200).json(post); // 🔥 رجع البوست كامل
+      { $pull: { likes: req.user._id } }
+    );
   } else {
-    // ✅ إضافة لايك
-    post = await Post.findByIdAndUpdate(
+    // إضافة لايك
+    await Post.findByIdAndUpdate(
       req.params.id,
-      { $push: { likes: req.user._id } },
-      { new: true }
-    ).populate("owner", "username profileName profilePhoto");
+      { $push: { likes: req.user._id } }
+    );
 
-    // 🔔 إشعار لصاحب البوست
-    const newNotify = new Notification({
-      content: "liked your post",
-      type: "like",
-      sender: req.user._id,
-      receiver: post.owner._id,
-      actionRef: post._id,
-      actionModel: "Post",
-    });
-    await newNotify.save();
+    // إنشاء إشعار لصاحب البوست
+// ✅ إرسال إشعار فقط إذا اللايك ليس على بوستك
+    if (!post.owner.equals(req.user._id)) {
+      const newNotify = new Notification({
+        content: "liked your post",
+        type: "like",
+        sender: req.user._id,
+        receiver: post.owner,
+        actionRef: post._id,
+        actionModel: "Post",
+      });
+      await newNotify.save();
 
-    const receiverSocketId = getReceiverSocketId(post.owner._id);
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit("notification", newNotify);
+      // إرسال الإشعار عبر السوكيت إذا كان متصل
+      const receiverSocketId = getReceiverSocketId(post.owner);
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("notification", newNotify);
+      }
     }
-
-    return res.status(200).json(post); // 🔥 رجع البوست كامل
   }
+
+  // جلب البوست كامل بعد التعديل مع كل populate
+  const updatedPost = await Post.findById(req.params.id)
+    .populate("owner", "username profileName profilePhoto")
+    .populate("community", "Name Picture members")
+    .populate({
+      path: "originalPost",
+      populate: { path: "owner", select: "username profileName profilePhoto" },
+    })
+    .populate({
+      path: "comments",
+      populate: { path: "owner", select: "username profileName profilePhoto" },
+    });
+
+  res.status(200).json(updatedPost);
 });
+
 
 
 // ================== Save Post ==================
