@@ -235,18 +235,23 @@ const NewPost = () => {
   const [selectedCommunity, setSelectedCommunity] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [errorText, setErrorText] = useState(false);
-
+  const [selectedUser , setSelectedUser] = useState({})
   const [selectedMentions, setSelectedMentions] = useState([]); // Mentions selected
   const [mentionSearch, setMentionSearch] = useState(''); // Current search after @
   const [showMentionList, setShowMentionList] = useState(false);
 
   const textareaRef = useRef();
-  const { user } = useAuth();
+  const { user ,users } = useAuth();
   const { AddPost } = usePost();
   const { communities } = useCommunity();
 
+  useEffect(() => {
+    const matchedUser = users?.find((u) => user?._id === u?._id)
+    setSelectedUser(matchedUser || user || {})
+  }, [users, user])
+
   // Users you follow
-  const myFollowing = user?.following || [];
+  const myFollowing = selectedUser?.following || [];
 
   // ------------------- Image Upload -------------------
   const handleImageChange = (e) => {
