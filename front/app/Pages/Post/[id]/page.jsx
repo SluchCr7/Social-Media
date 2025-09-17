@@ -15,6 +15,7 @@ import PostMenu from '@/app/Component/PostMenu';
 import Comment from '@/app/Component/Comment';
 import CommentSkeleton from '@/app/Skeletons/CommentSkeleton';
 import Loading from '@/app/Component/Loading';
+import { renderTextWithMentionsAndHashtags } from '@/app/utils/CheckText';
 
 const PostPage = ({ params }) => {
   const id = params.id;
@@ -163,8 +164,11 @@ const PostPage = ({ params }) => {
           </div>
 
           {/* Text */}
-          {post.text && <p className="text-gray-700 dark:text-gray-200 whitespace-pre-wrap">{post.text}</p>}
-
+          {post.text && (
+            <p className="text-gray-700 dark:text-gray-200 whitespace-pre-wrap">
+              {renderTextWithMentionsAndHashtags(post.text, post.mentions || [], post.Hashtags || [])}
+            </p>
+          )}
           {/* Shared Original */}
           {isShared && original && (
             <div className="bg-white/40 dark:bg-black/20 backdrop-blur-md border border-gray-200/40 dark:border-gray-700/40 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300">
@@ -187,7 +191,9 @@ const PostPage = ({ params }) => {
                 </Link>
                 <span className="text-gray-500 text-xs">{new Date(original?.createdAt).toLocaleDateString()}</span>
               </div>
-              <p className="text-gray-700 dark:text-gray-200 italic whitespace-pre-wrap">{original?.text}</p>
+              <p className="text-gray-700 dark:text-gray-200 italic whitespace-pre-wrap">
+                {renderTextWithMentionsAndHashtags(original?.text, original?.mentions || [], original?.Hashtags || [])}
+              </p>
               {original?.Photos?.length > 0 && (
                 <div className={`grid gap-2 ${original.Photos.length === 1 ? 'grid-cols-1' : original.Photos.length === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'}`}>
                   {original.Photos.map((photo, i) => (
