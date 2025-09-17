@@ -423,28 +423,30 @@ const NewPost = () => {
         {/* Textarea with highlights */}
         <div className="relative p-6 pb-2">
           {/* Highlight Layer */}
-          <div
-            className="absolute top-6 left-6 right-6 bottom-2 p-5 whitespace-pre-wrap text-base rounded-2xl overflow-hidden pointer-events-none"
-            style={{ color: "transparent", textShadow: "0 0 0 gray" }}
-          >
-            {renderHighlightedText(postText)}
-          </div>
+          <div className="relative">
+            {/* Highlight Layer */}
+            <div
+              className="absolute top-0 left-0 w-full h-full p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed"
+            >
+              {renderHighlightedText(postText)}
+            </div>
 
-          {/* Actual Textarea */}
-          <textarea
-            ref={textareaRef}
-            value={postText}
-            onChange={handleTextareaChange}
-            rows={5}
-            placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
-            dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
-            className={`relative w-full p-5 text-base rounded-2xl resize-none border shadow-inner focus:ring-2 bg-transparent caret-blue-600 z-10
-              ${errorText 
-                ? 'border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:ring-red-500' 
-                : 'bg-gray-50 dark:bg-darkMode-bg text-black dark:text-white border-gray-300 dark:border-gray-600 focus:ring-blue-500'
-              }`}
-            style={{ textAlign: /[\u0600-\u06FF]/.test(postText) ? 'right' : 'left' }}
-          />
+            {/* Transparent Textarea */}
+            <textarea
+              ref={textareaRef}
+              value={postText}
+              onChange={handleTextareaChange}
+              rows={5}
+              placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
+              dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
+              className={`relative w-full p-5 text-base font-sans leading-relaxed rounded-2xl resize-none border shadow-inner focus:ring-2 bg-transparent caret-blue-600 z-10 text-transparent selection:bg-blue-200 selection:text-black
+                ${errorText 
+                  ? 'border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:ring-red-500' 
+                  : 'bg-gray-50 dark:bg-darkMode-bg border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                }`}
+              style={{ textAlign: /[\u0600-\u06FF]/.test(postText) ? 'right' : 'left' }}
+            />
+          </div>
 
           {/* Counter */}
           <div className="flex justify-between items-center mt-1 text-xs">
