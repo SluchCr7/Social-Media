@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { IoClose, IoImage, IoTrash } from 'react-icons/io5';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStory } from '../Context/StoryContext';
