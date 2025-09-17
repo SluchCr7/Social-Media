@@ -157,7 +157,6 @@
 //     </CommentContext.Provider>
 //   );
 // };
-
 'use client';
 
 import axios from 'axios';
@@ -203,7 +202,7 @@ export const CommentContextProvider = ({ children }) => {
     }
   };
 
-  // 🔹 دالة مساعدة: تحديث كومنت داخل parent recursively
+  // 🔹 دالة مساعدة: تحديث كومنت داخل tree recursively
   const updateCommentInTree = (list, updatedComment) => {
     return list.map(c => {
       if (c._id === updatedComment._id) return updatedComment;
@@ -224,8 +223,23 @@ export const CommentContextProvider = ({ children }) => {
       }));
   };
 
+  // 🔹 دالة مساعدة: إدراج كومنت جديد في الـ tree (nested support)
+  const insertCommentToTree = (tree, comment) => {
+    if (!comment.parent) return [comment, ...tree];
+
+    return tree.map(c => {
+      if (c._id === comment.parent) {
+        return { ...c, replies: [comment, ...(c.replies || [])] };
+      }
+      if (c.replies && c.replies.length > 0) {
+        return { ...c, replies: insertCommentToTree(c.replies, comment) };
+      }
+      return c;
+    });
+  };
+
   // 📌 إضافة كومنت
-  const AddComment = async (text, postId, receiverId, parent = null) => {
+  const addComment = async (text, postId, receiverId, parent = null) => {
     if (!checkUserStatus("add comments")) return;
 
     try {
@@ -237,21 +251,8 @@ export const CommentContextProvider = ({ children }) => {
 
       const newComment = res.data.comment;
 
-      // تحديث الـ state مع مراعاة nested comments
-      if (parent) {
-        setComments(prev =>
-          prev.map(c => {
-            if (c._id === parent) {
-              return { ...c, replies: [newComment, ...(c.replies || [])] };
-            } else if (c.replies && c.replies.length > 0) {
-              return { ...c, replies: updateCommentInTree(c.replies, newComment) };
-            }
-            return c;
-          })
-        );
-      } else {
-        setComments(prev => [newComment, ...prev]);
-      }
+      // إدراج الكومنت الجديد في الـ state مع دعم nested
+      setComments(prev => insertCommentToTree(prev, newComment));
 
       showAlert('Comment added successfully.');
 
@@ -339,7 +340,7 @@ export const CommentContextProvider = ({ children }) => {
       value={{
         comments,
         setComments,
-        AddComment,
+        addComment,
         deleteComment,
         likeComment,
         updateComment,
@@ -351,3 +352,4 @@ export const CommentContextProvider = ({ children }) => {
     </CommentContext.Provider>
   );
 };
+
