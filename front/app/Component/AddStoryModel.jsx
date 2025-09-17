@@ -46,6 +46,9 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
     setError('');
   };
 
+  useEffect(()=>{
+    console.log(storyImage)
+  },[storyImage])
   return (
     <AnimatePresence>
       {isStory && (
