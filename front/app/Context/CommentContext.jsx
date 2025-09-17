@@ -164,7 +164,7 @@ import { createContext, useContext, useState } from 'react';
 import { useAuth } from './AuthContext';
 import { useNotify } from './NotifyContext';
 import { useAlert } from './AlertContext';
-
+import { checkUserStatus } from '../utils/checkUserLog';
 export const CommentContext = createContext();
 export const useComment = () => useContext(CommentContext);
 
@@ -175,18 +175,6 @@ export const CommentContextProvider = ({ children }) => {
   const { showAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
 
-  // 🔹 دالة مساعدة: تحقق من حالة الحساب
-  const checkUserStatus = (action = "perform this action") => {
-    if (!user || !user.token) {
-      showAlert(`You must be logged in to ${action}.`);
-      return false;
-    }
-    if (user?.accountStatus === "banned" || user?.accountStatus === "suspended") {
-      showAlert(`Your account is suspended. You cannot ${action}.`);
-      return false;
-    }
-    return true;
-  };
 
   // 📌 جلب التعليقات لبوست معين
   const fetchCommentsByPostId = async (postId) => {
@@ -240,7 +228,7 @@ export const CommentContextProvider = ({ children }) => {
 
   // 📌 إضافة كومنت
   const addComment = async (text, postId, receiverId, parent = null) => {
-    if (!checkUserStatus("add comments")) return;
+    if (!checkUserStatus("add comments",user)) return;
 
     try {
       const res = await axios.post(
@@ -276,7 +264,7 @@ export const CommentContextProvider = ({ children }) => {
 
   // 📌 حذف كومنت
   const deleteComment = async (id) => {
-    if (!checkUserStatus("delete comments")) return;
+    if (!checkUserStatus("delete comments" , user)) return;
 
     try {
       const res = await axios.delete(`${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/${id}`, {
@@ -293,7 +281,7 @@ export const CommentContextProvider = ({ children }) => {
 
   // 📌 تعديل كومنت
   const updateComment = async (id, text) => {
-    if (!checkUserStatus("update comments")) return;
+    if (!checkUserStatus("update comments" , user)) return;
 
     try {
       const res = await axios.put(
@@ -315,7 +303,7 @@ export const CommentContextProvider = ({ children }) => {
 
   // 📌 لايك على كومنت
   const likeComment = async (id) => {
-    if (!checkUserStatus("like comments")) return;
+    if (!checkUserStatus("like comments" , user)) return;
 
     try {
       const res = await axios.put(

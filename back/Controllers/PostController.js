@@ -744,6 +744,30 @@ const makeCommentsOff = asyncHandler(async (req, res) => {
   res.status(200).json({ message });
 });
 
+const viewPost = asyncHandler(async (req, res) => {
+  const postId = req.params.id;
+
+  // البحث عن البوست
+  const post = await Post.findById(postId);
+  if (!post) {
+    return res.status(404).json({ message: "Post not found" });
+  }
+
+  // إضافة المستخدم الحالي لقائمة المشاهدات إذا لم يكن موجوداً مسبقاً
+  const updatedPost = await Post.findByIdAndUpdate(
+    postId,
+    { $addToSet: { views: req.user._id } }, // $addToSet يمنع التكرار
+    { new: true }
+  )
+    .populate('owner', 'username profilePhoto')
+    .populate('community', 'Name Picture')
+    .populate('views', 'username profilePhoto'); // المستخدمين الذين شاهدوا البوست
+
+  res.status(200).json({
+    post: updatedPost
+  });
+});
+
 module.exports = {
   getAllPosts,
   makeCommentsOff,
@@ -754,4 +778,5 @@ module.exports = {
   savePost,
   sharePost,
   editPost,
+  viewPost
 };

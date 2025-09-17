@@ -1,29 +1,48 @@
-const {getAllPosts ,makeCommentsOff, addPost , deletePost , getPostById , likePost , savePost  , sharePost , editPost} = require('../Controllers/PostController')
-const route = require('express').Router()
-const { verifyToken } = require('../Middelwares/verifyToken')
-const photoUpload = require('../Middelwares/uploadPhoto')
-// .post(photoUpload.fields([{ name: 'image', maxCount: 1 }]),addTeam)
-route.route('/')
-    .get(getAllPosts)
+const {
+  getAllPosts,
+  makeCommentsOff,
+  addPost,
+  deletePost,
+  getPostById,
+  likePost,
+  savePost,
+  sharePost,
+  editPost,
+  viewPost
+} = require('../Controllers/PostController');
 
+const route = require('express').Router();
+const { verifyToken } = require('../Middelwares/verifyToken');
+const photoUpload = require('../Middelwares/uploadPhoto');
+
+// Get all posts
+route.route('/').get(getAllPosts);
+
+// Add post
 route.route('/add')
-    .post(verifyToken, photoUpload.fields([{ name: 'image', maxCount: 9 }]) , addPost)
+  .post(verifyToken, photoUpload.fields([{ name: 'image', maxCount: 9 }]), addPost);
 
+// Get, delete, or view a specific post
 route.route('/:id')
-    .get(getPostById)
-    .delete(verifyToken, deletePost)
+  .get(getPostById)
+  .delete(verifyToken, deletePost);
 
-route.route('/like/:id')
-    .put(verifyToken, likePost)
+// Like a post
+route.route('/like/:id').put(verifyToken, likePost);
 
-route.route('/save/:id')
-    .put(verifyToken, savePost)
+// Save a post
+route.route('/save/:id').put(verifyToken, savePost);
 
-route.route('/share/:id')
-    .post(verifyToken, sharePost)
-route.route('/edit/:id')
-    .put(verifyToken, photoUpload.array('newPhotos', 9), editPost)
+// Share a post
+route.route('/share/:id').post(verifyToken, sharePost);
 
-route.route('/commentsOff/:id')
-    .put(verifyToken, makeCommentsOff)
-module.exports = route
+// Edit a post
+route.route('/edit/:id').put(verifyToken, photoUpload.array('newPhotos', 9), editPost);
+
+// Turn comments off
+route.route('/commentsOff/:id').put(verifyToken, makeCommentsOff);
+
+// View a post
+route.route('/view/:id').put(verifyToken, viewPost);
+
+module.exports = route;

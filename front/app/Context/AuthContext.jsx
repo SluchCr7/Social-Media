@@ -200,39 +200,27 @@ export const AuthContextProvider = ({ children }) => {
   };
 
   const pinPost = async (id) => {
-  try {
-    const res = await axios.put(
-      `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/pin/${id}`,
-      {},
-      { headers: { Authorization: `Bearer ${user.token}` } }
-    );
-
-    showAlert(res.data.message);
-
-    // تحديث الـ posts في الـ state
-    setPosts((prev) =>
-      prev.map((post) =>
-        post._id === id
-          ? { ...post, isPinned: res.data.message === "Post Pin" } // ضيف فلاغ isPinned
-          : post
-      )
-    );
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-
-  const savePost = async (id) => {
     try {
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/save/${id}`, {}, {
-        headers: { authorization: `Bearer ${user.token}` }
-      });
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/pin/${id}`,
+        {},
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+
       showAlert(res.data.message);
+
+      // تحديث الـ posts في الـ state
+      setPosts((prev) =>
+        prev.map((post) =>
+          post._id === id
+            ? { ...post, isPinned: res.data.message === "Post Pin" } // ضيف فلاغ isPinned
+            : post
+        )
+      );
     } catch (err) {
       console.error(err);
     }
-  };
+  };  
 
   const ResetPassword = async (id, token, password) => {
     if (!password) return showAlert('All fields are required');
@@ -258,31 +246,31 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-const makeUserAdmin = async (userId) => {
-  if (!user?.token) return showAlert('You must be logged in as an admin');
+  const makeUserAdmin = async (userId) => {
+    if (!user?.token) return showAlert('You must be logged in as an admin');
 
-  try {
-    const res = await axios.put(
-      `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/admin/${userId}`,
-      {},
-      {
-        headers: { Authorization: `Bearer ${user.token}` },
-      }
-    );
+    try {
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/admin/${userId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${user.token}` },
+        }
+      );
 
-    // تحديث حالة المستخدم محليًا
-    setUsers((prev) =>
-      prev.map((u) =>
-        u._id === userId ? { ...u, isAdmin: true } : u
-      )
-    );
+      // تحديث حالة المستخدم محليًا
+      setUsers((prev) =>
+        prev.map((u) =>
+          u._id === userId ? { ...u, isAdmin: true } : u
+        )
+      );
 
-    showAlert(res.data.message || 'User is now an Admin');
-  } catch (err) {
-    console.error(err);
-    showAlert(err.response?.data?.message || 'Failed to make user Admin');
-  }
-};
+      showAlert(res.data.message || 'User is now an Admin');
+    } catch (err) {
+      console.error(err);
+      showAlert(err.response?.data?.message || 'Failed to make user Admin');
+    }
+  };
 
 
   const blockOrUnblockUser = async (id) => {
@@ -398,43 +386,43 @@ const makeAccountPremiumVerify = async () => {
 
 
 // ------------------- NEW FUNCTION: Update Account Status -------------------
-const updateAccountStatus = async (userId, status, days = null) => {
-  if (!user?.token) return showAlert('You must be logged in as an admin');
+  const updateAccountStatus = async (userId, status, days = null) => {
+    if (!user?.token) return showAlert('You must be logged in as an admin');
 
-  try {
-    const body = { accountStatus: status };
-    if (status === "suspended" && days) {
-      body.days = days; // نضيف مدة التعليق لو فيه
-    }
-
-    const res = await axios.put(
-      `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/status/${userId}`,
-      body,
-      {
-        headers: { Authorization: `Bearer ${user.token}` },
+    try {
+      const body = { accountStatus: status };
+      if (status === "suspended" && days) {
+        body.days = days; // نضيف مدة التعليق لو فيه
       }
-    );
 
-    // تحديث الـ users في الـ state لو عندك لستة users
-    setUsers((prev) =>
-      prev.map((u) =>
-        u._id === userId ? { ...u, accountStatus: status } : u
-      )
-    );
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/status/${userId}`,
+        body,
+        {
+          headers: { Authorization: `Bearer ${user.token}` },
+        }
+      );
 
-    // لو بتعدل نفسك كـ user (حالة خاصة)
-    if (user._id === userId) {
-      const updatedUser = { ...user, accountStatus: status };
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      // تحديث الـ users في الـ state لو عندك لستة users
+      setUsers((prev) =>
+        prev.map((u) =>
+          u._id === userId ? { ...u, accountStatus: status } : u
+        )
+      );
+
+      // لو بتعدل نفسك كـ user (حالة خاصة)
+      if (user._id === userId) {
+        const updatedUser = { ...user, accountStatus: status };
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+
+      showAlert(res.data.message || `Account status updated to ${status}`);
+    } catch (err) {
+      console.error(err);
+      showAlert(err.response?.data?.message || 'Failed to update account status');
     }
-
-    showAlert(res.data.message || `Account status updated to ${status}`);
-  } catch (err) {
-    console.error(err);
-    showAlert(err.response?.data?.message || 'Failed to update account status');
-  }
-};
+  };
 
 
   // ------------------- INIT -------------------
@@ -467,7 +455,6 @@ const updateAccountStatus = async (userId, status, days = null) => {
         updatePhoto,
         updateProfile,
         updatePassword,
-        savePost,
         pinPost,
         ResetPassword,
         ForgetEmail,

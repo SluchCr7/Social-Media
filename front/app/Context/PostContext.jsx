@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 import { useAlert } from "./AlertContext";
 import { useNotify } from "./NotifyContext";
+import { checkUserStatus } from "../utils/checkUserLog";
 
 export const PostContext = createContext();
 
@@ -88,6 +89,7 @@ export const PostContextProvider = ({ children }) => {
 
   // ✅ لايك
   const likePost = async (postId, postOwnerId) => {
+    if (!checkUserStatus("like Post",user)) return;
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/like/${postId}`,
@@ -126,6 +128,7 @@ export const PostContextProvider = ({ children }) => {
 
   // ✅ حفظ بوست
   const savePost = async (id) => {
+    if (!checkUserStatus("Save Post",user)) return;
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/save/${id}`,
@@ -147,17 +150,7 @@ export const PostContextProvider = ({ children }) => {
 
   // ✅ مشاركة بوست
   const sharePost = async (id, postOwnerId) => {
-    // 🚫 تحقق من تسجيل الدخول
-    if (!user || !user.token) {
-      showAlert("You must be logged in to Share a post.");
-      return;
-    }
-
-    // 🚫 تحقق من حالة الحساب
-    if (user?.accountStatus === "banned" || user?.accountStatus === "suspended") {
-      showAlert("Your account is suspended. You cannot like posts.");
-      return;
-    }
+    if (!checkUserStatus("Share Post",user)) return;
     try {
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/share/${id}`,
@@ -278,6 +271,31 @@ export const PostContextProvider = ({ children }) => {
       });
   };
 
+  // ✅ تسجيل مشاهدة بوست
+  const viewPost = async (postId) => {
+    try {
+
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/view/${postId}`,
+        {},
+        { Authorization: `Bearer ${user.token}` }
+      );
+
+      // تحديث الـstate مباشرة لإظهار المشاهدات الجديدة
+      setPosts(prev =>
+        prev.map(p =>
+          p._id === postId ? res.data.post : p
+        )
+      );
+
+      return res.data.post;
+    } catch (err) {
+      console.error("Failed to register post view:", err);
+      showAlert("Failed to register post view.");
+    }
+  };
+
+
   return (
     <PostContext.Provider
       value={{
@@ -295,7 +313,7 @@ export const PostContextProvider = ({ children }) => {
         setPostIsEdit,
         displayOrHideComments,
         copyPostLink,
-        imageView , setImageView
+        imageView , setImageView, viewPost
       }}
     >
       {children}

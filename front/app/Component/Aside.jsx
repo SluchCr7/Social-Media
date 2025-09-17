@@ -310,7 +310,7 @@ const Aside = () => {
           {/* Logout Button */}
           <button
             onClick={Logout}
-            className={`flex items-center justify-center md:justify-start gap-2 px-3 py-2 
+            className={`flex items-center justify-center gap-2 px-3 py-2 
               text-xs md:text-sm font-medium rounded-lg border transition-all
               ${isCollapsed 
                 ? "mx-auto text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 border-none" 

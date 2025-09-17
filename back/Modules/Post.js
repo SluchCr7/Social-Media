@@ -16,7 +16,10 @@ const PostSchema = new mongoose.Schema({
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   saved: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   shares: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-
+  views: [{ 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User' 
+  }],
   // New fields for sharing
   originalPost: {
     type: mongoose.Schema.Types.ObjectId,

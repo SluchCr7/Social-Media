@@ -7,7 +7,6 @@ import { toast } from 'react-toastify';
 import { FiMoreVertical, FiTrash2, FiUserX, FiSlash, FiAlertCircle } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
-
 // ✅ Dropdown Actions Component
 const DropdownActions = ({ onDeleteReport, onDeletePost, onSuspend, onBan, onResolve }) => {
   const [open, setOpen] = useState(false);
@@ -67,73 +66,54 @@ const DropdownActions = ({ onDeleteReport, onDeletePost, onSuspend, onBan, onRes
   );
 };
 
-
 // ✅ Confirm Modal Component
-const ConfirmModal = ({ open, onClose, onConfirm, title, message }) => {
-  return (
-    <AnimatePresence>
-      {open && (
+const ConfirmModal = ({ open, onClose, onConfirm, title, message }) => (
+  <AnimatePresence>
+    {open && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+      >
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.8, opacity: 0 }}
+          className="bg-white dark:bg-darkMode-card rounded-2xl shadow-xl p-6 w-[90%] max-w-md"
         >
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            className="bg-white dark:bg-darkMode-card rounded-2xl shadow-xl p-6 w-[90%] max-w-md"
-          >
-            <h2 className="text-lg font-bold mb-2 text-lightMode-text2 dark:text-darkMode-text2">{title}</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">{message}</p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => { onConfirm(); onClose(); }}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-500 transition"
-              >
-                Confirm
-              </button>
-            </div>
-          </motion.div>
+          <h2 className="text-lg font-bold mb-2 text-lightMode-text2 dark:text-darkMode-text2">{title}</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{message}</p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => { onConfirm(); onClose(); }}
+              className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-500 transition"
+            >
+              Confirm
+            </button>
+          </div>
         </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
 
-
-// ✅ Main Page
+// ✅ Admin Reports Page
 const AdminReportsPage = () => {
-  const { reports, loading, getAllReports, deleteReport } = useReport();
+  const { reports, loading, getAllReports, deleteReport, currentPage, limit, totalReports } = useReport();
   const { user } = useAuth();
-  const [page, setPage] = useState(1);
-  const [limit] = useState(10);
-  const [totalPages, setTotalPages] = useState(1);
-
-  // Modal state
   const [modal, setModal] = useState({ open: false, action: null, id: null });
 
-  const fetchReports = async (p = 1) => {
-    try {
-      const res = await getAllReports(p, limit);
-      setTotalPages(Math.ceil(res.total / limit));
-      setPage(res.page);
-    } catch (err) {
-      console.error(err);
-      toast.error("Error fetching reports");
-    }
-  };
-
+  // Fetch reports whenever page changes
   useEffect(() => {
-    fetchReports();
-  }, []);
+    getAllReports(currentPage, limit);
+  }, [currentPage, limit]);
 
   const handleAction = async () => {
     switch (modal.action) {
@@ -156,16 +136,10 @@ const AdminReportsPage = () => {
       default:
         break;
     }
-    fetchReports(page);
+    getAllReports(currentPage, limit);
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen text-gray-500 dark:text-gray-400 w-full">
-        Loading reports...
-      </div>
-    );
-  }
+  if (loading) return <div className="flex justify-center items-center h-screen text-gray-500 dark:text-gray-400 w-full">Loading reports...</div>;
 
   return (
     <div className="min-h-screen bg-lightMode-bg dark:bg-darkMode-bg p-8 w-full">
@@ -190,8 +164,6 @@ const AdminReportsPage = () => {
             <tbody>
               {reports.map((report) => (
                 <tr key={report._id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                  
-                  {/* Reporter */}
                   <td className="py-3 px-4 flex items-center gap-2">
                     <Image
                       src={report.owner?.profilePhoto?.url || '/default-profile.png'}
@@ -206,10 +178,8 @@ const AdminReportsPage = () => {
                     </div>
                   </td>
 
-                  {/* Report Text */}
                   <td className="py-3 px-4">{report.text}</td>
 
-                  {/* Post Owner */}
                   <td className="py-3 px-4 flex items-center gap-2">
                     {report.postId?.owner && (
                       <>
@@ -228,7 +198,6 @@ const AdminReportsPage = () => {
                     )}
                   </td>
 
-                  {/* Post Content */}
                   <td className="py-3 px-4">
                     {report.postId?.text || 'No text content'}
                     {report.postId?.Photos?.length > 0 && (
@@ -247,7 +216,6 @@ const AdminReportsPage = () => {
                     )}
                   </td>
 
-                  {/* Actions */}
                   <td className="py-3 px-4 flex justify-center">
                     <DropdownActions
                       onDeleteReport={() => setModal({ open: true, action: "deleteReport", id: report._id })}
@@ -257,7 +225,6 @@ const AdminReportsPage = () => {
                       onResolve={() => setModal({ open: true, action: "resolve", id: report._id })}
                     />
                   </td>
-
                 </tr>
               ))}
             </tbody>
@@ -266,19 +233,19 @@ const AdminReportsPage = () => {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {totalReports > limit && (
         <div className="flex justify-center mt-6 gap-3">
           <button
-            disabled={page === 1}
-            onClick={() => fetchReports(page - 1)}
+            disabled={currentPage === 1}
+            onClick={() => getAllReports(currentPage - 1, limit)}
             className="px-3 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition disabled:opacity-50"
           >
             Prev
           </button>
-          <span className="px-3 py-1 rounded-lg bg-gray-100 dark:bg-gray-800">{page}</span>
+          <span className="px-3 py-1 rounded-lg bg-gray-100 dark:bg-gray-800">{currentPage}</span>
           <button
-            disabled={page === totalPages}
-            onClick={() => fetchReports(page + 1)}
+            disabled={currentPage === Math.ceil(totalReports / limit)}
+            onClick={() => getAllReports(currentPage + 1, limit)}
             className="px-3 py-1 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition disabled:opacity-50"
           >
             Next
