@@ -24,7 +24,12 @@ const commentSchema = new mongoose.Schema({
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-  }]
+  }],
+  privacy: {
+    type: String,
+    enum: ['public', 'friends', 'private', 'community'],
+    default: 'public'
+  }
 }, {
   timestamps: true,
   toJSON: { virtuals: true },

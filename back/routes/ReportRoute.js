@@ -1,13 +1,23 @@
-const route = require('express').Router()
-const { getReports, addNewReport, deleteReport } = require('../Controllers/ReportController')
-const { verifyToken } = require('../Middelwares/verifyToken')
-route.route('/')
-    .get(getReports)
+const route = require('express').Router();
+const { 
+  getReports, 
+  addNewReport, 
+  deleteReport, 
+  updateReportStatus 
+} = require('../Controllers/ReportController');
 
-route.route('/add')
-    .post(verifyToken , addNewReport)
+const { verifyToken, verifyAdmin } = require('../Middelwares/verifyToken');
 
-route.route('/delete/:id')
-    .delete(verifyToken , deleteReport)
+// 📝 Add new report (any logged-in user can report)
+route.post('/add', verifyToken, addNewReport);
 
-module.exports = route
+// 📋 Get all reports (Admin only)
+route.get('/', verifyToken, getReports);
+
+// 🗑 Delete report (Admin only)
+route.delete('/delete/:id', verifyToken,  deleteReport);
+
+// 🔄 Update report status (Admin only)
+route.patch('/status/:id', verifyToken, updateReportStatus);
+
+module.exports = route;
