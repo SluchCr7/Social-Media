@@ -33,16 +33,16 @@ const PostPage = ({ params }) => {
   }, [id, posts]);
 
   useEffect(() => {
-    if (post?._id) {
-      fetchCommentsByPostId(post._id); // هذا يعدّل isLoading داخليًا
-    }
-  }, [post]);
+    if (!post) return;
+    fetchCommentsByPostId(post._id);
+  }, [post?._id]); // ✅ فقط الـid، لا تضع post كامل
+
 
   useEffect(() => {
     if (post?._id) {
       viewPost(post._id);
     }
-  }, [post]);
+  }, [post?._id]); // فقط الـid
   const handleAddComment = () => {
     if (!commentText.trim()) return;
     AddComment(commentText, post._id, post.owner._id);
