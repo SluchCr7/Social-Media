@@ -282,7 +282,7 @@ import { useAuth } from '../Context/AuthContext'
 import PostMenu from './PostMenu'
 import EditPostModal from './EditPostModel'
 import { useReport } from '../Context/ReportContext'
-
+import { renderTextWithMentionsAndHashtags } from '../utils/CheckText'
 const SluchitEntry = ({ post }) => {
   const { likePost, savePost, sharePost, setPostIsEdit, imageView, setImageView } = usePost()
   const [showMenu, setShowMenu] = useState(false)
@@ -417,10 +417,11 @@ const SluchitEntry = ({ post }) => {
                 } text-gray-600 dark:text-gray-200`}
                 dir={isArabic ? 'rtl' : 'ltr'}
               >
-                {post.text}
+                {renderTextWithMentionsAndHashtags(post.text, post?.mentions || [], post?.Hashtags || [])}
               </p>
             );
           })()}
+
 
           {/* Original Post Content */}
           {isShared && original && (
@@ -444,19 +445,21 @@ const SluchitEntry = ({ post }) => {
                 <span className='text-gray-500 text-xs'>{new Date(original?.createdAt).toDateString()}</span>
               </div>
 
-            {original?.text && (() => {
-              const isArabic = /[\u0600-\u06FF]/.test(original.text);
-              return (
-                <p
-                  className={`text-sm italic break-all whitespace-pre-wrap ${
-                    isArabic ? 'text-right' : 'text-left'
-                  } text-gray-700 dark:text-gray-300`}
-                  dir={isArabic ? 'rtl' : 'ltr'}
-                >
-                  {original.text}
-                </p>
-              );
-            })()}
+              {/* Original Post Content */}
+              {original?.text && (() => {
+                const isArabic = /[\u0600-\u06FF]/.test(original.text);
+                return (
+                  <p
+                    className={`text-sm italic break-all whitespace-pre-wrap ${
+                      isArabic ? 'text-right' : 'text-left'
+                    } text-gray-700 dark:text-gray-300`}
+                    dir={isArabic ? 'rtl' : 'ltr'}
+                  >
+                    {renderTextWithMentionsAndHashtags(original.text, original?.mentions || [], original?.Hashtags || [])}
+                  </p>
+                );
+              })()}
+
 
               {original?.Photos && (
                 <div className={`grid gap-2 ${original?.Photos.length > 1 ? 'grid-cols-2 sm:grid-cols-2' : ''}`}>
@@ -480,7 +483,8 @@ const SluchitEntry = ({ post }) => {
             </Link>
           )}
 
-        {!isShared && post?.text && (() => {
+          {/* Normal Post Text */}
+          {!isShared && post?.text && (() => {
             const isArabic = /[\u0600-\u06FF]/.test(post.text);
             return (
               <p
@@ -489,10 +493,11 @@ const SluchitEntry = ({ post }) => {
                 } text-gray-600 dark:text-gray-200`}
                 dir={isArabic ? 'rtl' : 'ltr'}
               >
-                {post.text}
+                {renderTextWithMentionsAndHashtags(post.text, post?.mentions || [], post?.Hashtags || [])}
               </p>
             );
           })()}
+
 
           {/* Hashtags */}
           {post?.Hashtags?.length > 0 && (
