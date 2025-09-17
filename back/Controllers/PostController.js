@@ -761,8 +761,11 @@ const viewPost = asyncHandler(async (req, res) => {
   )
     .populate('owner', 'username profilePhoto')
     .populate('community', 'Name Picture')
-    .populate('views', 'username profilePhoto'); // المستخدمين الذين شاهدوا البوست
-
+    .populate('views', 'username profilePhoto') // المستخدمين الذين شاهدوا البوست
+    .populate({
+      path: "originalPost",
+      populate: { path: "owner", select: "username profileName profilePhoto" },
+    })
   res.status(200).json({
     post: updatedPost
   });
