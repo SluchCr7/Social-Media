@@ -37,7 +37,6 @@ export const PostContextProvider = ({ children }) => {
 
   // ✅ إضافة بوست جديد
   const AddPost = async (content, images, Hashtags, communityId, mentions = []) => {
-    
     const formData = new FormData();
     formData.append("text", content);
 
@@ -46,7 +45,7 @@ export const PostContextProvider = ({ children }) => {
 
     if (communityId) formData.append("community", communityId);
 
-    // ✅ إضافة mentions كـ JSON string
+    // ✅ إضافة mentions
     if (mentions.length > 0) formData.append("mentions", JSON.stringify(mentions));
 
     try {
@@ -61,15 +60,28 @@ export const PostContextProvider = ({ children }) => {
         }
       );
 
+      const newPost = res.data;
+
       showAlert("Post added successfully.");
-      setPosts(prev => [res.data, ...prev]);
+      setPosts(prev => [newPost, ...prev]);
+
+      // ✅ إرسال Notifications لليوزرز المذكورين
+      if (mentions.length > 0) {
+        mentions.forEach(m => {
+          addNotify({
+            content: `${user.username} mentioned you in a post`,
+            type: "mention",
+            receiverId: m._id,   // لازم يكون عندك الـ _id مش بس username
+            actionRef: newPost._id,
+            actionModel: "Post",
+          });
+        });
+      }
     } catch (err) {
       console.error(err);
       showAlert(err?.response?.data?.message || "Failed to upload post.");
     }
   };
-
-
 
   // ✅ حذف بوست
   const deletePost = async (id) => {
