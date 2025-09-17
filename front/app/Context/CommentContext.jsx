@@ -212,24 +212,26 @@ export const CommentContextProvider = ({ children }) => {
       }));
   };
 
-  // 🔹 دالة مساعدة: إدراج كومنت جديد في الـ tree (nested support)
   const insertCommentToTree = (tree, comment) => {
-    if (!comment.parent) return [comment, ...tree];
+    const replies = Array.isArray(comment.replies) ? comment.replies : [];
+
+    if (!comment.parent) return [{ ...comment, replies }, ...tree];
 
     return tree.map(c => {
+      const cReplies = Array.isArray(c.replies) ? c.replies : [];
       if (c._id === comment.parent) {
-        return { ...c, replies: [comment, ...(c.replies || [])] };
+        return { ...c, replies: [{ ...comment, replies }, ...cReplies] };
       }
-      if (c.replies && c.replies.length > 0) {
-        return { ...c, replies: insertCommentToTree(c.replies, comment) };
+      if (cReplies.length > 0) {
+        return { ...c, replies: insertCommentToTree(cReplies, comment) };
       }
       return c;
     });
   };
 
-  // 📌 إضافة كومنت
-  const addComment = async (text, postId, receiverId, parent = null) => {
-    if (!checkUserStatus("add comments",user)) return;
+  // إضافة كومنت
+  const AddComment = async (text, postId, receiverId, parent = null) => {
+    if (!checkUserStatus("add comments", user)) return;
 
     try {
       const res = await axios.post(
@@ -238,14 +240,12 @@ export const CommentContextProvider = ({ children }) => {
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
 
-      const newComment = res.data.comment;
+      const newComment = { ...res.data.comment, replies: res.data.comment.replies || [] };
 
-      // إدراج الكومنت الجديد في الـ state مع دعم nested
       setComments(prev => insertCommentToTree(prev, newComment));
 
       showAlert('Comment added successfully.');
 
-      // إرسال إشعار إذا ليس كومنت على نفسك
       if (user._id !== receiverId) {
         await addNotify({
           content: `${user.username} commented on your post`,
@@ -329,7 +329,7 @@ export const CommentContextProvider = ({ children }) => {
       value={{
         comments,
         setComments,
-        addComment,
+        AddComment,
         deleteComment,
         likeComment,
         updateComment,

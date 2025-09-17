@@ -247,16 +247,17 @@ const addNewComment = asyncHandler(async (req, res) => {
       populate: { path: 'owner', select: 'username profilePhoto profileName' },
     });
 
-  if (comment.parent) {
-    const parentComment = await Comment.findById(comment.parent)
-      .populate('owner', 'username profilePhoto profileName')
-      .populate({
-        path: 'replies',
-        populate: { path: 'owner', select: 'username profilePhoto profileName' },
-      });
+    if (comment.parent) {
+      const parentComment = await Comment.findById(comment.parent)
+        .populate('owner', 'username profilePhoto profileName')
+        .populate({
+          path: 'replies',
+          populate: { path: 'owner', select: 'username profilePhoto profileName' },
+        });
 
-    return res.status(201).json({ message: 'Comment added', comment: populatedComment, parentComment });
-  }
+      return res.status(201).json({ message: 'Comment added', comment: populatedComment, parentComment });
+    }
+
 
   res.status(201).json({ message: 'Comment added', comment: populatedComment });
 });
