@@ -90,7 +90,7 @@ const LayoutComponent = ({ children }) => {
             hideLayout
               ? 'w-full'
               : isLogin
-              ? 'w-full py-5'
+              ? 'w-full'
               : 'w-[80%] mx-auto'
           }`}
         >
