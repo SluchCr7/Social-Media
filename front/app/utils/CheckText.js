@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 // Helper function لتلوين mentions و hashtags
 export const renderTextWithMentionsAndHashtags = (text, mentions = [], hashtags = []) => {
   if (!text) return null;
