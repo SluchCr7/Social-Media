@@ -75,25 +75,25 @@ export const StoryContextProvider = ({ children }) => {
       console.error(err);
     }
   };
-const toggleLove = async (storyId) => {
-  if (!user) return;
+  const toggleLove = async (storyId) => {
+    if (!user) return;
 
-  try {
-    const { data } = await axios.post(
-      `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/love/${storyId}`,
-      {},
-      { headers: { Authorization: `Bearer ${user.token}` } }
-    );
+    try {
+      const { data } = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/love/${storyId}`,
+        {},
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
 
-    // تحديث الستوري داخل state
-    setStories(prev =>
-      prev.map(story => (story._id === storyId ? data.story : story))
-    );
-  } catch (err) {
-    console.error(err);
-    showAlert("Failed to toggle love");
-  }
-};
+      // تحديث الستوري داخل state
+      setStories(prev =>
+        prev.map(story => (story._id === storyId ? data.story : story))
+      );
+    } catch (err) {
+      console.error(err);
+      showAlert("Failed to toggle love");
+    }
+  };
   return (
     <StoryContext.Provider
       value={{

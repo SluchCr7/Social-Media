@@ -10,7 +10,7 @@ const notificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['comment', 'message', 'like', 'follow', 'mention', 'custom'],
+      enum: ['comment', 'message', 'like', 'follow', 'mention', 'custom', "love"],
       default: 'custom',
       required: true,
     },
@@ -32,7 +32,7 @@ const notificationSchema = new mongoose.Schema(
     actionModel: {
       // اسم الموديل المرتبط بـ actionRef (مثل Comment أو Message)
       type: String,
-      enum: ['Comment', 'Message', 'Post'],
+      enum: ['Comment', 'Message', 'Post', "Story"],
     },
     isRead: {
       type: Boolean,
