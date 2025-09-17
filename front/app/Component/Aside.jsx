@@ -20,13 +20,13 @@ import { IoTrophyOutline } from "react-icons/io5"
 import { SlCalender } from "react-icons/sl"
 import { FiChevronLeft, FiMenu, FiX } from "react-icons/fi"
 import { useAuth } from '../Context/AuthContext'
+import { useAside } from '../Context/AsideContext'
 
 const Aside = () => {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { user, Logout, onlineUsers } = useAuth()
+  const {isMobile,setIsMobile,isMobileMenuOpen,setIsMobileMenuOpen} = useAside()
 
   // Detect mobile
   useEffect(() => {
@@ -182,7 +182,7 @@ const Aside = () => {
       </motion.aside>
 
       {/* ===== Mobile Hamburger ===== */}
-      {isMobile && (
+      {/* {isMobile && (
         <div className="fixed top-4 left-4 z-50 lg:hidden">
           <button
             onClick={() => setIsMobileMenuOpen(true)}
@@ -191,7 +191,7 @@ const Aside = () => {
             <FiMenu className="text-2xl text-lightMode-text dark:text-darkMode-text" />
           </button>
         </div>
-      )}
+      )} */}
 
       {/* ===== Mobile Drawer ===== */}
       {isMobileMenuOpen && (

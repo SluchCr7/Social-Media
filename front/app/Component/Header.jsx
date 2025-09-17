@@ -6,11 +6,13 @@ import { Bell, MessageCircle } from 'lucide-react';
 import { useNotify } from '../Context/NotifyContext';
 import { useAuth } from '../Context/AuthContext';
 import { IoIosLogIn } from "react-icons/io";
-import { FiChevronLeft, FiMenu, FiX } from "react-icons/fi"
+import { FiMenu} from "react-icons/fi"
+import { useAside } from '../Context/AsideContext';
 
 const Header = ({ unReadedMessage, setShowNotifications }) => {
   const { unreadCount } = useNotify();
   const { isLogin } = useAuth();
+  const {isMobile,setIsMobileMenuOpen} = useAside()
 
   const handleBellClick = () => {
     setShowNotifications(true);
@@ -54,6 +56,16 @@ const Header = ({ unReadedMessage, setShowNotifications }) => {
                   </span>
                 )}
               </Link>
+              {isMobile && (
+                <div className="fixed top-4 left-4 z-50 lg:hidden">
+                  <button
+                    onClick={() => setIsMobileMenuOpen(true)}
+                    className="p-2 rounded-md bg-lightMode-bg/20 dark:bg-darkMode-bg/20"
+                  >
+                    <FiMenu className="text-2xl text-lightMode-text dark:text-darkMode-text" />
+                  </button>
+                </div>
+              )}
             </>
           ) : (
             <Link href="/Pages/Login">

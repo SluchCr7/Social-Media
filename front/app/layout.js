@@ -16,6 +16,7 @@ import { AlertContextProvider } from "./Context/AlertContext";
 import { ReportContextProvider } from "./Context/ReportContext";
 import {SocketProvider} from "./Context/SocketContext";
 import { EventProvider } from "./Context/EventContext";
+import { AsideContextProvider } from "./Context/AsideContext";
 const jetBrainsMono = JetBrains_Mono({
   subsets: ["latin"]
   , weight: ["100", "200", "300", "400"]
@@ -45,9 +46,11 @@ export default function RootLayout({ children }) {
                           <NewsContextProvider>
                             <ReportContextProvider>
                               <EventProvider>
-                                <LayoutComponent>
-                                    {children}
-                                </LayoutComponent>
+                                <AsideContextProvider>  
+                                  <LayoutComponent>
+                                      {children}
+                                  </LayoutComponent>
+                                </AsideContextProvider>
                               </EventProvider>
                             </ReportContextProvider>
                           </NewsContextProvider>
