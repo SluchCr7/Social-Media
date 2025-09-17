@@ -373,6 +373,9 @@ const getAllPosts = asyncHandler(async (req, res) => {
       path: "comments",
       populate: { path: "owner", select: "username profileName profilePhoto" },
     })
+    .populate(
+      { path: "mentions", select: "username profileName profilePhoto" }
+    )
     .lean();
 
   res.status(200).json(posts);
