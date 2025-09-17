@@ -216,7 +216,6 @@
 // };
 
 // export default NewPost;
-
 'use client';
 
 import Image from 'next/image';
@@ -235,9 +234,9 @@ const NewPost = () => {
   const [selectedCommunity, setSelectedCommunity] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [errorText, setErrorText] = useState(false);
-  const [selectedUser , setSelectedUser] = useState({})
-  const [selectedMentions, setSelectedMentions] = useState([]); // Mentions selected
-  const [mentionSearch, setMentionSearch] = useState(''); // Current search after @
+  const [selectedUser , setSelectedUser] = useState({});
+  const [selectedMentions, setSelectedMentions] = useState([]);
+  const [mentionSearch, setMentionSearch] = useState('');
   const [showMentionList, setShowMentionList] = useState(false);
 
   const textareaRef = useRef();
@@ -274,59 +273,56 @@ const NewPost = () => {
   };
 
   // ------------------- Mentions Handling -------------------
-// ------------------- Mentions Handling -------------------
-const handleTextareaChange = (e) => {
-  const value = e.target.value;
-  setPostText(value);
-  if (value.length <= 500) setErrorText(false);
+  const handleTextareaChange = (e) => {
+    const value = e.target.value;
+    setPostText(value);
+    if (value.length <= 500) setErrorText(false);
 
-  const cursorPos = e.target.selectionStart;
-  const lastAt = value.lastIndexOf('@', cursorPos - 1);
+    const cursorPos = e.target.selectionStart;
+    const lastAt = value.lastIndexOf('@', cursorPos - 1);
 
-  if (lastAt >= 0) {
-    const wordAfterAt = value.slice(lastAt + 1, cursorPos);
-    if (!wordAfterAt.includes(' ')) {
-      setMentionSearch(wordAfterAt);
-      setShowMentionList(true);
+    if (lastAt >= 0) {
+      const wordAfterAt = value.slice(lastAt + 1, cursorPos);
+      if (!wordAfterAt.includes(' ')) {
+        setMentionSearch(wordAfterAt);
+        setShowMentionList(true);
+      } else {
+        setShowMentionList(false);
+      }
     } else {
       setShowMentionList(false);
     }
-  } else {
+  };
+
+  const filteredMentions = myFollowing.filter(u => {
+    if (!u || typeof u?.username !== 'string') return false;
+    const usernameMatch = u.username.toLowerCase().includes((mentionSearch || '').toLowerCase());
+    const notAlreadySelected = !selectedMentions.some(m => m?._id === u?._id);
+    return usernameMatch && notAlreadySelected;
+  });
+
+  const selectMention = (user) => {
+    if (!user || typeof user.username !== 'string') return;
+
+    const cursorPos = textareaRef.current.selectionStart;
+    const textBeforeCursor = postText.slice(0, cursorPos);
+    const lastAt = textBeforeCursor.lastIndexOf('@');
+    const textAfterCursor = postText.slice(cursorPos);
+
+    const newText =
+      textBeforeCursor.slice(0, lastAt) +
+      `@${user.username} ` +
+      textAfterCursor;
+
+    setPostText(newText);
+    setSelectedMentions(prev => [...prev, user]);
     setShowMentionList(false);
-  }
-};
 
-// Filtered mentions safely
-const filteredMentions = myFollowing.filter(u => {
-  if (!u || typeof u?.username !== 'string') return false; // تجاهل أي عنصر غير صحيح
-  const usernameMatch = u.username.toLowerCase().includes((mentionSearch || '').toLowerCase());
-  const notAlreadySelected = !selectedMentions.some(m => m?._id === u?._id);
-  return usernameMatch && notAlreadySelected;
-});
-
-const selectMention = (user) => {
-  if (!user || typeof user.username !== 'string') return;
-
-  const cursorPos = textareaRef.current.selectionStart;
-  const textBeforeCursor = postText.slice(0, cursorPos);
-  const lastAt = textBeforeCursor.lastIndexOf('@');
-  const textAfterCursor = postText.slice(cursorPos);
-
-  const newText =
-    textBeforeCursor.slice(0, lastAt) +
-    `@${user.username} ` +
-    textAfterCursor;
-
-  setPostText(newText);
-  setSelectedMentions(prev => [...prev, user]);
-  setShowMentionList(false);
-
-  setTimeout(() => {
-    textareaRef.current.focus();
-    textareaRef.current.selectionStart = textareaRef.current.selectionEnd = lastAt + user.username.length + 2;
-  }, 0);
-};
-
+    setTimeout(() => {
+      textareaRef.current.focus();
+      textareaRef.current.selectionStart = textareaRef.current.selectionEnd = lastAt + user.username.length + 2;
+    }, 0);
+  };
 
   // ------------------- Emoji Picker -------------------
   const handleEmojiClick = (emojiData) => {
@@ -356,15 +352,28 @@ const selectMention = (user) => {
         images,
         hashtags,
         selectedCommunity,
-        selectedMentions.map(u => u._id) // send mentions as userIds
+        selectedMentions.map(u => u._id)
       );
 
-      // Reset state
       setPostText('');
       setImages([]);
       setSelectedMentions([]);
     }
   };
+
+  // ------------------- Highlight Text (mentions + hashtags) -------------------
+  const renderHighlightedText = (text) => {
+    return text.split(/(\s+)/).map((part, idx) => {
+      if (part.startsWith('@')) {
+        return <span key={idx} className="text-blue-500 font-semibold">{part}</span>;
+      }
+      if (part.startsWith('#')) {
+        return <span key={idx} className="text-purple-600 font-semibold">{part}</span>;
+      }
+      return part;
+    });
+  };
+
   return (
     <main className="flex items-center justify-center w-full py-10 px-4 bg-gray-50 dark:bg-darkMode-bg transition-colors">
       <div className="w-full max-w-5xl mx-auto bg-white dark:bg-darkMode-fg rounded-3xl shadow-xl overflow-hidden transition-all duration-500">
@@ -411,22 +420,32 @@ const selectMention = (user) => {
           </div>
         </div>
 
-        {/* Textarea */}
+        {/* Textarea with highlights */}
         <div className="relative p-6 pb-2">
+          {/* Highlight Layer */}
+          <div
+            className="absolute top-6 left-6 right-6 bottom-2 p-5 whitespace-pre-wrap text-base rounded-2xl overflow-hidden pointer-events-none"
+            style={{ color: "transparent", textShadow: "0 0 0 gray" }}
+          >
+            {renderHighlightedText(postText)}
+          </div>
+
+          {/* Actual Textarea */}
           <textarea
             ref={textareaRef}
             value={postText}
             onChange={handleTextareaChange}
             rows={5}
             placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
-            dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'} // اتجاه الكتابة ديناميكي
-            className={`w-full p-5 text-base rounded-2xl resize-none border shadow-inner focus:ring-2 transition-all duration-300
+            dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
+            className={`relative w-full p-5 text-base rounded-2xl resize-none border shadow-inner focus:ring-2 bg-transparent caret-blue-600 z-10
               ${errorText 
                 ? 'border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:ring-red-500' 
                 : 'bg-gray-50 dark:bg-darkMode-bg text-black dark:text-white border-gray-300 dark:border-gray-600 focus:ring-blue-500'
               }`}
-            style={{ textAlign: /[\u0600-\u06FF]/.test(postText) ? 'right' : 'left' }} // محاذاة النص تلقائيًا
+            style={{ textAlign: /[\u0600-\u06FF]/.test(postText) ? 'right' : 'left' }}
           />
+
           {/* Counter */}
           <div className="flex justify-between items-center mt-1 text-xs">
             <span className={`transition ${errorText ? 'text-red-500 font-semibold' : 'text-gray-400'}`}>
@@ -437,14 +456,26 @@ const selectMention = (user) => {
 
           {/* Mentions Dropdown */}
           {showMentionList && filteredMentions.length > 0 && (
-            <div className="absolute z-50 bg-white dark:bg-darkMode-bg shadow-lg rounded-md w-64 max-h-48 overflow-auto mt-1">
+            <div className="absolute top-full left-6 mt-2 z-50 bg-white dark:bg-darkMode-bg shadow-2xl rounded-xl w-72 max-h-60 overflow-auto border border-gray-200 dark:border-gray-600">
               {filteredMentions.map((u) => (
                 <div
                   key={u._id}
-                  className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                  className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
                   onClick={() => selectMention(u)}
                 >
-                  {u.username}
+                  <Image
+                    src={u?.profilePhoto?.url || '/default.png'}
+                    alt={u.username}
+                    width={32}
+                    height={32}
+                    className="rounded-full object-cover"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">@{u.username}</span>
+                    {u.profileName && (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{u.profileName}</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -515,7 +546,6 @@ const selectMention = (user) => {
           >
             Post
           </button>
-
         </div>
       </div>
     </main>
