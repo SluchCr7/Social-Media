@@ -271,17 +271,23 @@ export const PostContextProvider = ({ children }) => {
       });
   };
 
-  // ✅ تسجيل مشاهدة بوست
   const viewPost = async (postId) => {
-    try {
+    if (!user?.token) {
+      showAlert("You must be logged in to view posts.");
+      return;
+    }
 
+    try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/view/${postId}`,
         {},
-        { Authorization: `Bearer ${user.token}` }
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
       );
 
-      // تحديث الـstate مباشرة لإظهار المشاهدات الجديدة
       setPosts(prev =>
         prev.map(p =>
           p._id === postId ? res.data.post : p
@@ -291,7 +297,6 @@ export const PostContextProvider = ({ children }) => {
       return res.data.post;
     } catch (err) {
       console.error("Failed to register post view:", err);
-      showAlert("Failed to register post view.");
     }
   };
 
