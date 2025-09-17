@@ -12,36 +12,40 @@ const { Notification } = require("../Modules/Notification");
  */
 
 const addNewStory = asyncHandler(async (req, res) => {
-    const { text } = req.body;
-  
-    let photoUrl = "";
-  
-    // إذا كانت هناك صورة، قم برفعها إلى Cloudinary
-    if (req.files && req.files.image && req.files.image.length > 0) {
-      const image = req.files.image;
-      const result = await v2.uploader.upload(image[0].path, {
-        resource_type: "image",
-      });
-      photoUrl = result.secure_url;
-    }
+  const { text } = req.body;
+  let photoUrl = "";
 
-    // التأكد أن إما النص أو الصورة موجودين
-    if (!text && !photoUrl) {
-      return res.status(400).json({ message: "يجب إضافة نص أو صورة على الأقل." });
-    }
-  
-    // إنشاء الـ Story
-    const story = new Story({
-      text: text || '',
-      Photo: photoUrl,
-      owner: req.user._id,
+  // ✅ رفع الصورة لو موجودة
+  if (req.files && req.files.image && req.files.image.length > 0) {
+    const image = req.files.image[0]; // خُد أول صورة
+    const result = await v2.uploader.upload(image.path, {
+      resource_type: "image",
     });
-  
-    await story.save();
-  
-    res.status(201).json({ message: "Story added successfully", story });
-  fs.unlinkSync(req.file.path);
+    photoUrl = result.secure_url;
+
+    // بعد الرفع إحذف الملف المحلي
+    fs.unlinkSync(image.path);
+  }
+
+  // ✅ التأكد أن فيه نص أو صورة
+  if (!text && !photoUrl) {
+    return res
+      .status(400)
+      .json({ message: "يجب إضافة نص أو صورة على الأقل." });
+  }
+
+  // ✅ إنشاء وحفظ القصة
+  const story = new Story({
+    text: text || "",
+    Photo: photoUrl,
+    owner: req.user._id,
   });
+
+  await story.save();
+
+  res.status(201).json({ message: "Story added successfully", story });
+});
+
 /**
  * @desc Get all stories
  * @route GET /api/stories
