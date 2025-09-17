@@ -34,8 +34,7 @@ const PostPage = ({ params }) => {
 
   useEffect(() => {
     if (post?._id) {
-      fetchCommentsByPostId(post._id);
-      setLoading(false);
+      fetchCommentsByPostId(post._id); // هذا يعدّل isLoading داخليًا
     }
   }, [post]);
 
@@ -253,6 +252,7 @@ const PostPage = ({ params }) => {
               </div>
             )}
           </div>
+
 
         </div>
       </div>
