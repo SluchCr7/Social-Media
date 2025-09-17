@@ -230,16 +230,18 @@ const PostPage = ({ params }) => {
 
           {/* Add Comment */}
           {!post.isCommentOff && isLogin && (
-            <div className="flex items-center gap-3 mt-3">
-              <Image src={user?.profilePhoto?.url} alt="me" width={35} height={35} className="rounded-full object-cover w-9 h-9" />
-              <input
-                type="text"
+            <div className="flex items-center gap-2 p-2 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+              <Image src={user?.profilePhoto?.url} alt="me" width={32} height={32} className="rounded-full" />
+              <textarea
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Add a comment..."
-                className="flex-1 bg-white/20 dark:bg-black/20 border border-gray-700 text-gray-900 dark:text-gray-100 px-4 py-2 rounded-full outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Write a comment..."
+                className="flex-1 bg-transparent text-sm resize-none outline-none placeholder-gray-400 dark:placeholder-gray-500"
+                rows={1}
               />
-              <IoIosSend onClick={handleAddComment} className="text-blue-500 hover:text-blue-400 transition-all text-2xl cursor-pointer" />
+              <button onClick={handleAddComment} className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition">
+                <IoIosSend className="text-white text-lg" />
+              </button>
             </div>
           )}
 

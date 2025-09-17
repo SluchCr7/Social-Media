@@ -424,7 +424,7 @@ const SluchitEntry = ({ post }) => {
 
           {/* Original Post Content */}
           {isShared && original && (
-            <div className='bg-white/40 dark:bg-white/5 backdrop-blur-md 
+            <Link href={`/Pages/Post/${original?._id}`} className='bg-white/40 dark:bg-white/5 backdrop-blur-md 
                             border border-gray-200/40 dark:border-gray-700/40 
                             rounded-xl p-4 flex flex-col gap-3 
                             shadow-md hover:shadow-lg transition-all duration-300 
@@ -436,9 +436,9 @@ const SluchitEntry = ({ post }) => {
                   className='text-darkMode-fg font-semibold text-sm hover:underline flex items-center gap-2'
                 >
                   <Image src={original?.owner?.profilePhoto?.url} alt='Shared_profile_post' width={500} height={500} className='rounded-full w-7 h-7 aspect-square object-cover'/>
-                  <div className='flex items-start flex-col gap-[2px]'>
+                  <div className='flex items-start flex-col md:items-center md:flex-row gap-[2px] md:gap-[4px]'>
                     <span className='text-black dark:text-white text-base'>{original?.owner?.username}{' '}</span>
-                    <span className='text-gray-500 text-xs'>({original?.owner?.profileName})</span>
+                    <span className='text-gray-500 text-xs'>{original?.owner?.profileName}</span>
                   </div>
                 </Link>
                 <span className='text-gray-500 text-xs'>{new Date(original?.createdAt).toDateString()}</span>
@@ -477,7 +477,7 @@ const SluchitEntry = ({ post }) => {
                   ))}
                 </div>
               )}
-            </div>
+            </Link>
           )}
 
         {!isShared && post?.text && (() => {
