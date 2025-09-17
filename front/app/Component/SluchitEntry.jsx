@@ -293,7 +293,7 @@ const SluchitEntry = ({ post }) => {
   const isInCommunityPage = typeof window !== 'undefined' && window.location.href.includes('/Pages/Community/')
 
   return (
-    <div className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-gray-200 dark:border-gray-700 w-full p-6 rounded-2xl flex flex-col gap-5 shadow-2xl transition-all duration-300 hover:scale-[1.01]">
+    <div className="bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-gray-200 dark:border-gray-700 w-[90%] mx-auto p-6 rounded-2xl flex flex-col gap-5 shadow-2xl transition-all duration-300 hover:scale-[1.01]">
 
       {/* Pinned or Shared Tags */}
       {post?.isPinned && (

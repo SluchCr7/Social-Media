@@ -99,7 +99,7 @@ const ProfilePage = () => {
   // ✅ Active → عرض الصفحة عادي
   return (
     <>
-      <div className="w-full max-w-7xl mx-auto min-h-screen bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6">
+      <div className="w-full min-h-screen bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6">
         
         {/* Left Column: Avatar + Info + Stats + Actions */}
         <div className="flex flex-col items-center lg:items-start justify-start gap-6">
