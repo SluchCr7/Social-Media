@@ -33,7 +33,7 @@ const LayoutComponent = ({ children }) => {
   const { isLogin, isAuthChecked } = useAuth();
   const { showMenuReport, setShowMenuReport, isPostId } = useReport();
   const pathname = usePathname();
-
+  const [showAside , setShowAside] = useState(false)
   // الصفحات التي لا يظهر فيها Aside أو Menu
   const hideLayout = [
     '/Pages/Login',
@@ -90,7 +90,7 @@ const LayoutComponent = ({ children }) => {
             hideLayout
               ? 'w-full'
               : isLogin
-              ? 'w-full '
+              ? 'w-full py-5'
               : 'w-[80%] mx-auto'
           }`}
         >

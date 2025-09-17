@@ -6,6 +6,7 @@ import { Bell, MessageCircle } from 'lucide-react';
 import { useNotify } from '../Context/NotifyContext';
 import { useAuth } from '../Context/AuthContext';
 import { IoIosLogIn } from "react-icons/io";
+import { FiChevronLeft, FiMenu, FiX } from "react-icons/fi"
 
 const Header = ({ unReadedMessage, setShowNotifications }) => {
   const { unreadCount } = useNotify();
