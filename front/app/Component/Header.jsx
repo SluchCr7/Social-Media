@@ -57,7 +57,7 @@ const Header = ({ unReadedMessage, setShowNotifications }) => {
                 )}
               </Link>
               {isMobile && (
-                <div className="fixed top-4 left-4 z-50 lg:hidden">
+                <div className="flex lg:hidden">
                   <button
                     onClick={() => setIsMobileMenuOpen(true)}
                     className="p-2 rounded-md bg-lightMode-bg/20 dark:bg-darkMode-bg/20"
