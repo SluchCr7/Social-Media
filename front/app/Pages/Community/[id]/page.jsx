@@ -148,7 +148,7 @@ const Page = ({ params }) => {
   }
 
   return (
-    <div className="w-full md:w-[75%] max-w-5xl mx-auto text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen pb-12">
+    <div className="w-full text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen pb-12">
       <Head>
         <title>{CommunitySelected?.Name} — Community</title>
         <meta name="description" content={CommunitySelected?.description || `${CommunitySelected?.Name} community`} />

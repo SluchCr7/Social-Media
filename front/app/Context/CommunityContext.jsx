@@ -231,6 +231,7 @@ import axios from 'axios';
 import getData from '../utils/getData';
 import { useAuth } from './AuthContext';
 import { useAlert } from './AlertContext';
+import { useNotify } from './NotifyContext';
 
 export const CommunityContext = createContext();
 export const useCommunity = () => useContext(CommunityContext);
@@ -239,7 +240,7 @@ export const CommunityContextProvider = ({ children }) => {
   const [communities, setCommunities] = useState([]);
   const { user } = useAuth();
   const { showAlert } = useAlert();
-
+  const {addNotify} = useNotify()
   useEffect(() => {
     if (user?.token) {
       getData('community', setCommunities);
@@ -273,6 +274,7 @@ export const CommunityContextProvider = ({ children }) => {
   };
 
   // 📌 الموافقة على طلب انضمام
+// 📌 الموافقة على طلب انضمام
   const approveJoinRequest = async (communityId, userId) => {
     try {
       const res = await axios.put(
@@ -290,13 +292,23 @@ export const CommunityContextProvider = ({ children }) => {
             : c
         )
       );
+
+      // 📢 إرسال إشعار لصاحب الطلب
+      await addNotify({
+        content: `You have been approved to join the community`,
+        type: 'community',
+        receiverId: userId,
+        actionRef: communityId,
+        actionModel: 'Community',
+      });
+
     } catch (err) {
       console.error(err);
       showAlert('Failed to approve join request.');
     }
   };
 
-  // 📌 رفض طلب انضمام
+// 📌 رفض طلب انضمام
   const rejectJoinRequest = async (communityId, userId) => {
     try {
       const res = await axios.put(
@@ -305,11 +317,22 @@ export const CommunityContextProvider = ({ children }) => {
         config
       );
       showAlert(res.data.message);
+
+      // 📢 إرسال إشعار لصاحب الطلب
+      await addNotify({
+        content: `You have been rejected to join the community`,
+        type: 'community',
+        receiverId: userId,
+        actionRef: communityId,
+        actionModel: 'Community',
+      });
+
     } catch (err) {
       console.error(err);
       showAlert('Failed to reject join request.');
     }
   };
+
 
   // 📌 تحديث القوانين
   const updateCommunityRules = async (id, rules) => {
