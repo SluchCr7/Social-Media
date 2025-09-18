@@ -40,7 +40,7 @@ const Stories = () => {
   }
 
   return (
-    <div className="w-[90%] md:w-full">
+    <div className="w-[90%] mx-auto md:w-full">
       {isLoading ? (
         <div className="w-full overflow-x-auto flex gap-4 py-4 rounded-lg">
           {Array.from({ length: 6 }).map((_, i) => (

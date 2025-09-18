@@ -128,7 +128,7 @@ const StoryViewer = ({ stories, onClose }) => {
           </div>
         )}
 
-        {/* زر الحب للأشخاص الآخرين فقط */}
+        {/* زر الحب للأشخاص الآخرين فقط
         {user?._id !== story?.owner?._id && (
           <button
             onClick={() => toggleLove(story?._id)}
@@ -136,13 +136,13 @@ const StoryViewer = ({ stories, onClose }) => {
           >
             <FaHeart />
           </button>
-        )}
+        )} */}
 
         {/* عرض عدد المشاهدات وعدد الـ loves فقط لصاحب الستوري */}
         {user?._id === story?.owner?._id && (
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white text-sm flex gap-4 z-50">
             <span>{story?.views?.length || 0} مشاهدة</span>
-            <span>{story?.loves?.length || 0} إعجاب</span>
+            {/* <span>{story?.loves?.length || 0} إعجاب</span> */}
           </div>
         )}
       </div>
