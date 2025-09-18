@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import Image from 'next/image'
 import { useStory } from '../Context/StoryContext'
 import StoryViewer from './StoryViewer'
@@ -11,13 +11,15 @@ const Stories = () => {
   const { user } = useAuth()
   const { stories, isLoading, viewStory } = useStory()
   const [viewerStories, setViewerStories] = useState(null)
-
+  useEffect(()=>{
+    console.log(stories)
+  },[stories])
   // 🧠 تحسين الأداء: تجميع الستوريز حسب المستخدم
   const groupedArray = useMemo(() => {
     const groupedStories = stories.reduce((acc, story) => {
-      const userId = story.owner._id
+      const userId = story?.owner?._id
       if (!acc[userId]) {
-        acc[userId] = { user: story.owner, stories: [] }
+        acc[userId] = { user: story?.owner, stories: [] }
       }
       acc[userId].stories.push(story)
       return acc

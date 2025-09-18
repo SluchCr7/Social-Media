@@ -64,9 +64,6 @@ const StoryViewer = ({ stories, onClose }) => {
     ? story.Photo.find(url => url) || null
     : story?.Photo || null
 
-  // تحقق إذا المستخدم أحب الستوري
-  const userLiked = story?.loves?.includes(user?._id)
-
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center backdrop-blur-sm bg-black/70">
 
@@ -134,8 +131,8 @@ const StoryViewer = ({ stories, onClose }) => {
         {/* زر الحب للأشخاص الآخرين فقط */}
         {user?._id !== story?.owner?._id && (
           <button
-            onClick={() => toggleLove(story._id)}
-            className={`absolute bottom-16 right-6 text-2xl ${userLiked ? 'text-red-500' : 'text-white'}`}
+            onClick={() => toggleLove(story?._id)}
+            className={`absolute bottom-16 right-6 text-2xl ${story?.loves?.includes(user?._id) ? 'text-red-500' : 'text-white'}`}
           >
             <FaHeart />
           </button>

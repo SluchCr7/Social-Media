@@ -53,7 +53,7 @@ const addNewStory = asyncHandler(async (req, res) => {
  */
 
 const getAllStories = asyncHandler(async (req, res) => {
-  const stories = await Story.find().populate('owner', 'username profilePhoto')
+  const stories = await Story.find().populate('owner', 'username profileName profilePhoto')
     .populate('loves', 'username profilePhoto')
     .populate('views', 'username profilePhoto');
   res.status(200).json(stories);
@@ -82,9 +82,9 @@ const deleteStory = asyncHandler(async (req, res) => {
 
 const getStoriesById = asyncHandler(async (req, res) => {
   const story = await Story.findById(req.params.id)
-    .populate('owner', 'username profilePhoto')
-    .populate('loves', 'username profilePhoto')
-    .populate('views', 'username profilePhoto');
+    .populate('owner', 'username profileName profilePhoto')
+    .populate('loves', 'username profileName profilePhoto')
+    .populate('views', 'username profileName profilePhoto');
 
   if (!story) {
       return res.status(404).json({ message: "Story Not Found" });
