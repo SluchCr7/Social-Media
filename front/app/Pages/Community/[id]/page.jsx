@@ -10,8 +10,7 @@ import { usePost } from '@/app/Context/PostContext'
 import SluchitEntry from '@/app/Component/SluchitEntry'
 import EditCommunityMenu from '@/app/Component/EditCommunityMenu'
 import Loading from '@/app/Component/Loading'
-import { FaPlus, FaEdit, FaUsers, FaTrashAlt, FaCrown, FaUser } from 'react-icons/fa'
-import { HiOutlineDotsVertical } from 'react-icons/hi'
+import { FaPlus, FaEdit, FaUsers, FaTrashAlt, FaCrown, FaUser, FaCheck, FaTimes } from 'react-icons/fa'
 import Link from 'next/link'
 
 // Small reusable action button
@@ -21,6 +20,7 @@ const ActionButton = ({ children, onClick, variant = 'primary', className = '' }
     danger: 'bg-red-600 hover:bg-red-700',
     warning: 'bg-yellow-500 hover:bg-yellow-600',
     dark: 'bg-gray-800 hover:bg-gray-900',
+    success: 'bg-green-600 hover:bg-green-700',
   }
   return (
     <button
@@ -41,7 +41,15 @@ const SkeletonCover = () => (
 
 const Page = ({ params }) => {
   const id = params?.id
-  const { communities, joinToCommunity, removeMember, makeAdmin } = useCommunity()
+  const {
+    communities,
+    joinToCommunity,
+    sendJoinRequest,
+    approveJoinRequest,
+    rejectJoinRequest,
+    removeMember,
+    makeAdmin,
+  } = useCommunity()
   const { user } = useAuth()
   const { posts } = usePost()
 
@@ -49,6 +57,7 @@ const Page = ({ params }) => {
   const [postsFiltered, setPostsFiltered] = useState([])
   const [showEdit, setShowEdit] = useState(false)
   const [showMembers, setShowMembers] = useState(false)
+  const [showRequests, setShowRequests] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [activeMemberTab, setActiveMemberTab] = useState('all') // all | admins | owner
 
@@ -90,10 +99,15 @@ const Page = ({ params }) => {
   }, [CommunitySelected, searchTerm, activeMemberTab])
 
   const isJoined = CommunitySelected?.members?.some((m) => m?._id === user?._id)
+  const hasPendingRequest = CommunitySelected?.joinRequests?.some((r) => r?._id === user?._id)
 
   const handleJoinToggle = () => {
     if (!CommunitySelected || !user) return
-    joinToCommunity(CommunitySelected._id)
+    if (CommunitySelected.isPrivate) {
+      sendJoinRequest(CommunitySelected._id)
+    } else {
+      joinToCommunity(CommunitySelected._id)
+    }
   }
 
   const handleMakeAdmin = (communityId, memberId) => {
@@ -102,6 +116,14 @@ const Page = ({ params }) => {
 
   const handleRemoveMember = (communityId, memberId) => {
     removeMember(communityId, memberId)
+  }
+
+  const handleApprove = (communityId, memberId) => {
+    approveJoinRequest(communityId, memberId)
+  }
+
+  const handleReject = (communityId, memberId) => {
+    rejectJoinRequest(communityId, memberId)
   }
 
   if (!CommunitySelected) {
@@ -157,16 +179,22 @@ const Page = ({ params }) => {
             )}
 
             {!isOwner(user?._id) && (
-              <ActionButton onClick={handleJoinToggle} variant={isJoined ? 'danger' : 'primary'}>
-                <FaPlus /> {isJoined ? 'Leave' : 'Join'}
-              </ActionButton>
+              <>
+                {isJoined ? (
+                  <ActionButton onClick={handleJoinToggle} variant="danger">
+                    Leave
+                  </ActionButton>
+                ) : hasPendingRequest ? (
+                  <ActionButton variant="dark" onClick={() => {}}>
+                    Pending...
+                  </ActionButton>
+                ) : (
+                  <ActionButton onClick={handleJoinToggle} variant="primary">
+                    <FaPlus /> {CommunitySelected.isPrivate ? 'Request Join' : 'Join'}
+                  </ActionButton>
+                )}
+              </>
             )}
-
-            {/* <div className="bg-white/10 p-2 rounded-md shadow hidden sm:block">
-              <button title="More" className="p-2 rounded-md hover:bg-white/5">
-                <HiOutlineDotsVertical />
-              </button>
-            </div> */}
           </div>
         </motion.div>
       </div>
@@ -192,21 +220,14 @@ const Page = ({ params }) => {
           </p>
 
           <div className="flex items-center gap-2">
-            <div className="flex -space-x-3">
-              {CommunitySelected?.members?.slice(0, 5).map((member) => (
-                <div key={member?._id} className="relative">
-                  <Image
-                    src={member?.profilePhoto?.url || '/default-avatar.png'}
-                    alt={member?.username}
-                    width={36}
-                    height={36}
-                    className="w-9 h-9 rounded-full border-2 border-white object-cover shadow"
-                    loading="lazy"
-                  />
-                </div>
-              ))}
-            </div>
-
+            {(isOwner(user?._id) || isAdmin(user?._id)) && (
+              <button
+                onClick={() => setShowRequests(true)}
+                className="text-sm px-3 py-1 rounded-md bg-yellow-400 hover:bg-yellow-500"
+              >
+                Requests ({CommunitySelected?.joinRequests?.length || 0})
+              </button>
+            )}
             <button onClick={() => setShowMembers(true)} className="text-sm px-3 py-1 rounded-md bg-gray-200 hover:bg-gray-300">
               See all
             </button>
@@ -218,11 +239,17 @@ const Page = ({ params }) => {
 
       {/* Posts Section */}
       <div className="px-4 flex flex-col gap-6 pb-10">
-        {postsFiltered?.length > 0 ? (
-          postsFiltered.map((post) => <SluchitEntry post={post} key={post?._id} />)
+        {isJoined || !CommunitySelected.isPrivate ? (
+          postsFiltered?.length > 0 ? (
+            postsFiltered.map((post) => <SluchitEntry post={post} key={post?._id} />)
+          ) : (
+            <div className="text-center text-sm py-12 rounded-lg shadow-sm">
+              This community has no posts yet.
+            </div>
+          )
         ) : (
-          <div className="text-center text-sm py-12  rounded-lg shadow-sm">
-            This community has no posts yet.
+          <div className="text-center text-sm py-12 text-gray-500">
+            You need to join this private community to view posts.
           </div>
         )}
       </div>
@@ -303,9 +330,52 @@ const Page = ({ params }) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Requests Modal */}
+      <AnimatePresence>
+        {showRequests && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4"
+          >
+            <motion.div initial={{ y: 20 }} animate={{ y: 0 }} exit={{ y: 20 }} className="bg-white rounded-2xl p-6 w-full max-w-2xl relative shadow-lg">
+              <button onClick={() => setShowRequests(false)} className="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-2xl transition">&times;</button>
+
+              <h3 className="text-2xl font-bold text-center text-gray-900 mb-6">Join Requests</h3>
+
+              <div className="max-h-[480px] overflow-y-auto space-y-4 pr-2">
+                {CommunitySelected?.joinRequests?.length > 0 ? (
+                  CommunitySelected.joinRequests.map((req) => (
+                    <div key={req?._id} className="flex items-center justify-between p-3 bg-gray-100 rounded-lg shadow-sm">
+                      <Link href={`/Pages/User/${req?._id}`} className="flex items-center gap-4">
+                        <Image src={req?.profilePhoto?.url || '/default-avatar.png'} alt="Member" width={48} height={48} className="w-12 h-12 rounded-full object-cover ring-2 ring-yellow-400" loading="lazy" />
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">{req?.username}</p>
+                          <p className="text-xs text-gray-500">{req?.profileName}</p>
+                        </div>
+                      </Link>
+                      <div className="flex gap-3 items-center">
+                        <button onClick={() => handleApprove(CommunitySelected._id, req?._id)} className="text-green-500 hover:text-green-600 transition transform hover:scale-110" title="Approve">
+                          <FaCheck size={18} />
+                        </button>
+                        <button onClick={() => handleReject(CommunitySelected._id, req?._id)} className="text-red-500 hover:text-red-600 transition transform hover:scale-110" title="Reject">
+                          <FaTimes size={18} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center text-gray-500 py-12">No pending requests.</div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
 
 export default Page
-

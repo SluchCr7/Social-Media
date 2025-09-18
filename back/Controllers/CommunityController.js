@@ -99,7 +99,8 @@ const editCommunity = asyncHandler(async(req,res)=>{
         $set: {
             Name: req.body.Name,
             Category: req.body.Category,
-            description: req.body.description,
+        description: req.body.description,
+            isPrivate: req.body.isPrivate
         }
     }, { new: true })
     res.status(200).json(community)

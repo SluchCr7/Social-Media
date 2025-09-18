@@ -177,7 +177,7 @@ const SluchitEntry = ({ post }) => {
                     <Image src={original?.owner?.profilePhoto?.url} alt='Shared_profile_post' width={500} height={500} className='rounded-full w-7 h-7 aspect-square object-cover'/>
                     <div className='flex items-start flex-col md:items-center md:flex-row gap-[2px] md:gap-[4px]'>
                       <span className='text-black dark:text-white text-base'>{original?.owner?.username}{' '}</span>
-                      <span className='text-gray-500 text-xs'>{original?.owner?.profileName}</span>
+                      <span className='text-gray-500 text-xs pt-1'>{original?.owner?.profileName}</span>
                     </div>
                   </Link>
                   <span className='text-gray-500 text-xs'>{new Date(original?.createdAt).toDateString()}</span>
@@ -294,11 +294,11 @@ const SluchitEntry = ({ post }) => {
                 className="flex items-center gap-2 cursor-pointer transition-all hover:scale-110"
               >
                 <IoIosShareAlt className="text-gray-500 text-2xl" />
-                <span className="text-gray-400 text-sm font-medium">{post?.shares?.length}</span>
+                {/* <span className="text-gray-400 text-sm font-medium">{post?.shares?.length}</span> */}
               </div>
               <div onClick={() => setOpenModel(true)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
                 <BiRepost className='text-gray-500 text-2xl' />
-                <span className='text-gray-400 text-sm font-medium'>{post?.shares?.length}</span>
+                {/* <span className='text-gray-400 text-sm font-medium'>{post?.shares?.length}</span> */}
               </div>
 
               <div onClick={() => savePost(post?._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>

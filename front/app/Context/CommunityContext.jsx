@@ -241,8 +241,10 @@ export const CommunityContextProvider = ({ children }) => {
   const { showAlert } = useAlert();
 
   useEffect(() => {
-    getData('community', setCommunities);
-  }, []);
+    if (user?.token) {
+      getData('community', setCommunities);
+    }
+  }, [user?.token]);
 
   const config = {
     headers: {
@@ -259,6 +261,11 @@ export const CommunityContextProvider = ({ children }) => {
         config
       );
       showAlert(res.data.message);
+      setCommunities(prev =>
+        prev.map(c =>
+          c._id === id ? { ...c, joinRequests: [...(c.joinRequests || []), user._id] } : c
+        )
+      );
     } catch (err) {
       console.error(err);
       showAlert('Failed to send join request.');
@@ -384,18 +391,34 @@ export const CommunityContextProvider = ({ children }) => {
   // 📌 تعديل مجتمع
   const editCommunity = async (id, updatedData) => {
     try {
+      if (!updatedData || Object.keys(updatedData).length === 0) {
+        showAlert("No changes to update.");
+        return null;
+      }
+
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/edit/${id}`,
         updatedData,
         config
       );
-      showAlert('Community updated.');
+
+      // تحديث الـ state
+      setCommunities(prev =>
+        prev.map(c =>
+          c._id === id ? { ...c, ...res.data } : c
+        )
+      );
+
+      showAlert(res.data.message || "Community updated successfully.");
       return res.data;
     } catch (err) {
       console.error(err);
-      showAlert('Failed to update community.');
+      const msg = err.response?.data?.message || "Failed to update community.";
+      showAlert(msg);
+      return null;
     }
   };
+
 
   // 📌 تحديث صورة المجتمع
   const updateCommunityPicture = async (id, file) => {
