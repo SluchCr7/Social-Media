@@ -161,12 +161,12 @@ export const PostContextProvider = ({ children }) => {
   };
 
   // ✅ مشاركة بوست
-  const sharePost = async (id, postOwnerId) => {
-    if (!checkUserStatus("Share Post",user)) return;
+  const sharePost = async (id, postOwnerId, customText = "") => {
+    if (!checkUserStatus("Share Post", user)) return;
     try {
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/share/${id}`,
-        {},
+        { customText }, // ✅ إضافة النص هنا
         {
           headers: {
             Authorization: `Bearer ${user.token}`,
@@ -176,7 +176,7 @@ export const PostContextProvider = ({ children }) => {
 
       showAlert("Post shared successfully.");
       setPosts(prev => [res.data, ...prev]); // ✅ تحديث فوري
-      // setPosts(prev => [res.data.post, ...prev]);
+
       if (postOwnerId !== user._id) {
         await addNotify({
           content: `${user.username} shared your post`,
@@ -186,12 +186,12 @@ export const PostContextProvider = ({ children }) => {
           actionModel: "Post",
         });
       }
-
     } catch (err) {
       console.log(err);
       showAlert("Failed to share the post.");
     }
   };
+
 
   // ✅ تعديل بوست
   const editPost = async (id, { text, community, Hashtags, existingPhotos, newPhotos, mentions = [] }) => {
