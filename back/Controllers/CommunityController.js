@@ -9,14 +9,15 @@ const getAllCommunities = asyncHandler(async (req, res) => {
     const communities = await Community.find({}).populate('owner', 'username profileName profilePhoto')
         .populate('members', 'username profileName profilePhoto')
         .populate('Admins', 'username profileName profilePhoto')
+        .populate('joinRequests' , 'username profileName profilePhoto')
     res.status(200).json(communities)
 })
   const getCommunityById = asyncHandler(async (req, res) => {
     const community = await Community.findById(req.params.id)
       .populate('owner', 'username profileName profilePhoto')
       .populate('members', 'username profileName profilePhoto')
-      .populate('Admins', 'username profileName profilePhoto');
-
+      .populate('Admins', 'username profileName profilePhoto')
+      .populate('joinRequests' , 'username profileName profilePhoto')
     if (!community) {
       return res.status(404).json({ message: "Community Not Found" });
     }
@@ -24,7 +25,11 @@ const getAllCommunities = asyncHandler(async (req, res) => {
     res.status(200).json(community);
   });
 const getCommunityByCategory = asyncHandler(async (req, res) => {
-    const communities = await Community.find({ Category: req.params.Category })
+  const communities = await Community.find({ Category: req.params.Category })
+      .populate('owner', 'username profileName profilePhoto')
+      .populate('members', 'username profileName profilePhoto')
+      .populate('Admins', 'username profileName profilePhoto')
+      .populate('joinRequests' , 'username profileName profilePhoto')
     res.status(200).json(communities)
 })
 
@@ -74,21 +79,24 @@ const joinTheCommunity = asyncHandler(async (req, res) => {
     }
 
     if (community.members.includes(req.user._id)) {
-      community = await Community.findByIdAndUpdate(
-        req.params.id,
-        { $pull: { members: req.user._id } },
-        { new: true }
-      );
-      res.status(200).json({ message: "Community Left" });
+    community = await Community.findByIdAndUpdate(
+      req.params.id,
+      { $pull: { members: req.user._id } },
+      { new: true }
+    ).populate("owner members Admins joinRequests", "username profileName profilePhoto");
+
+    res.status(200).json({ message: "Community Left", community });
     } else {
       community = await Community.findByIdAndUpdate(
         req.params.id,
         { $push: { members: req.user._id } },
         { new: true }
-      );
-      res.status(200).json({ message: "Community Joined" });
+      ).populate("owner members Admins joinRequests", "username profileName profilePhoto");
+
+      res.status(200).json({ message: "Community Joined", community });
     }
-  });
+
+});
   
 const editCommunity = asyncHandler(async(req,res)=>{
     const { error } = ValidateCommunityUpdate(req.body)
@@ -336,7 +344,10 @@ const approveJoinRequest = asyncHandler(async (req, res) => {
   community.members.push(userId);
   await community.save();
 
-  res.status(200).json({ message: "User added to community" });
+  await community.populate("owner members Admins joinRequests", "username profileName profilePhoto");
+
+  res.status(200).json({ message: "User added to community", community });
+
 });
 
 /**
@@ -363,11 +374,12 @@ const rejectJoinRequest = asyncHandler(async (req, res) => {
   if (!community.joinRequests.includes(userId)) {
     return res.status(400).json({ message: "This user has not requested to join" });
   }
-
   community.joinRequests.pull(userId);
   await community.save();
 
-  res.status(200).json({ message: "Join request rejected" });
+  await community.populate("owner members Admins joinRequests", "username profileName profilePhoto");
+
+  res.status(200).json({ message: "Join request rejected", community });
 });
 
 /**
