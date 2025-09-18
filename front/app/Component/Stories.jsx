@@ -33,10 +33,10 @@ const Stories = () => {
   }
 
   const getBorderColor = (userStories) => {
-    const unseen = userStories.some(story => !story.views.includes(user?._id))
+    const unseen = userStories.some(story => !story?.views.some(view => view?._id === user?._id))
     return unseen
-      ? 'bg-yellow-400 animate-pulse' // ستوري جديد لم يشاهده المستخدم
-      : 'bg-gray-500'                  // شاهد كل الستوريز
+      ? 'bg-yellow-400 animate-pulse'
+      : 'bg-gray-500'                  
   }
 
   return (
