@@ -102,13 +102,21 @@ const Page = ({ params }) => {
   const hasPendingRequest = CommunitySelected?.joinRequests?.some((r) => r?._id === user?._id)
 
   const handleJoinToggle = () => {
-    if (!CommunitySelected || !user) return
-    if (CommunitySelected.isPrivate) {
-      sendJoinRequest(CommunitySelected._id)
+    if (!CommunitySelected || !user) return;
+
+    if (isJoined) {
+      // 🚀 لو هو عضو بالفعل → يخرج
+      joinToCommunity(CommunitySelected._id);
     } else {
-      joinToCommunity(CommunitySelected._id)
+      // 🚀 لو مش عضو
+      if (CommunitySelected.isPrivate) {
+        sendJoinRequest(CommunitySelected._id);
+      } else {
+        joinToCommunity(CommunitySelected._id);
+      }
     }
-  }
+  };
+
 
   const handleMakeAdmin = (communityId, memberId) => {
     makeAdmin(communityId, memberId)
@@ -178,14 +186,18 @@ const Page = ({ params }) => {
               </ActionButton>
             )}
 
-            {!isOwner(user?._id) && (
+            {user && !isOwner(user._id) && (
               <>
                 {isJoined ? (
                   <ActionButton onClick={handleJoinToggle} variant="danger">
                     Leave
                   </ActionButton>
                 ) : hasPendingRequest ? (
-                  <ActionButton variant="dark" onClick={() => {}}>
+                  <ActionButton
+                    variant="dark"
+                    className="opacity-60 cursor-not-allowed"
+                    onClick={null} // منع الضغط
+                  >
                     Pending...
                   </ActionButton>
                 ) : (
@@ -195,6 +207,7 @@ const Page = ({ params }) => {
                 )}
               </>
             )}
+
           </div>
         </motion.div>
       </div>
