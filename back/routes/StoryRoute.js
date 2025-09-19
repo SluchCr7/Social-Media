@@ -5,7 +5,7 @@ const {
   deleteStory, 
   getStoriesById, 
     getRecentStories,
-  viewStory,toggleLoveStory
+  viewStory,toggleLoveStory,getUserStories
 } = require('../Controllers/StoryController');
 const { verifyToken } = require('../Middelwares/verifyToken');
 const photoUpload = require('../Middelwares/uploadPhoto');
@@ -23,6 +23,8 @@ route.route('/delete/:id')
 route.route('/:id')
     .get(getStoriesById);
 
+route.route("/user/:id")
+    .get(getUserStories);
 route.route('/view/:id')
     .post(verifyToken,viewStory);
 

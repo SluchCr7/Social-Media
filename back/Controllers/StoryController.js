@@ -251,10 +251,26 @@ const getRecentStories = asyncHandler(async (req, res) => {
 });
 
 
+// GET /api/story/user/:id
+const getUserStories = asyncHandler(async (req, res) => {
+  const userId = req.params.id;
+
+  const stories = await Story.find({ owner: userId })
+    .populate("owner", "username profilePhoto")
+    .sort({ createdAt: -1 });
+
+  if (!stories.length) {
+    return res.status(404).json({ message: "No stories found" });
+  }
+
+  res.json(stories);
+});
+
+
 module.exports = {
   addNewStory,
     getAllStories,
     deleteStory,
   getStoriesById, getRecentStories,
-  viewStory, toggleLoveStory
+  viewStory, toggleLoveStory,getUserStories
 };

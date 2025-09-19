@@ -51,6 +51,26 @@ export const StoryContextProvider = ({ children }) => {
     }
   };
 
+  // ➕ جلب قصص يوزر معين
+const getUserStories = async (userId) => {
+  if (!userId) return [];
+
+  try {
+    const { data } = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/user/${userId}`,
+      {
+        headers: { Authorization: `Bearer ${user?.token}` },
+      }
+    );
+
+    return data; // بيرجع القصص نفسها
+  } catch (err) {
+    console.error("Failed to fetch user stories:", err);
+    showAlert("Could not load user stories.");
+    return [];
+  }
+};
+
 
   // 📥 جلب القصص
   useEffect(() => {
@@ -109,7 +129,7 @@ export const StoryContextProvider = ({ children }) => {
         addNewStory,
         stories,
         isLoading,
-        viewStory,toggleLove
+        viewStory,toggleLove, getUserStories
       }}
     >
       {children}

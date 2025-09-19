@@ -25,7 +25,6 @@ const tabs = ['Posts', 'Saved', 'Comments']
 const ProfilePage = () => {
   const { user, users, updatePhoto } = useAuth()
   const { posts } = usePost()
-
   const [activeTab, setActiveTab] = useState('Posts')
   const [loading, setLoading] = useState(false)
   const [image, setImage] = useState(null)
@@ -34,8 +33,7 @@ const ProfilePage = () => {
   const [isStory, setIsStory] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [menuType, setMenuType] = useState('followers')
-  const { stories } = useStory()
-  
+  const { stories} = useStory()
   const myStories = stories.filter(story => story?.owner?._id === user?._id)
   // ✅ تحديث بيانات المستخدم من الـ context
   useEffect(() => {

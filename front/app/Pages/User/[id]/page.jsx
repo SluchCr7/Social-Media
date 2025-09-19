@@ -12,38 +12,51 @@ import Tabs from '@/app/Component/UserComponents/Tabs'
 import StatBlock from '@/app/Component/UserComponents/StatBlock'
 import FollowModal from '@/app/Component/UserComponents/FollowModal'
 import { useStory } from '@/app/Context/StoryContext'
+import StoryViewer from '@/app/Component/StoryViewer'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
 const Page = ({ params }) => {
   const id = params.id
-  const { users, followUser, user , blockOrUnblockUser, isLogin } = useAuth()
+  const { users, followUser, user, blockOrUnblockUser, isLogin } = useAuth()
   const { posts } = usePost()
-  const [isBlockedByMe, setIsBlockedByMe] = useState(false);
+  const [isBlockedByMe, setIsBlockedByMe] = useState(false)
   const [userSelected, setUserSelected] = useState({})
   const [activeTab, setActiveTab] = useState('Posts')
   const [showMenu, setShowMenu] = useState(false)
   const [menuType, setMenuType] = useState('followers')
-  const { stories } = useStory()   // ✅ هات الستوريز من الكونتكست
+  const { getUserStories } = useStory()
+  const [userStories, setUserStories] = useState([])
+  const [isViewerOpen, setIsViewerOpen] = useState(false)
 
-  // ✅ فلترة الستوريز الخاصة بالمستخدم اللي بتتفرج عليه
-  const userStories = stories.filter(story => story?.owner?._id === userSelected?._id)
+  // 📌 جلب ستوريز اليوزر عند الضغط على صورته
+  const handleProfileClick = async () => {
+    if (!userSelected?._id) return
+    const fetchedStories = await getUserStories(userSelected._id)
+    if (fetchedStories.length > 0) {
+      setUserStories(fetchedStories)
+      setIsViewerOpen(true)
+    }
+  }
+
+  // 📌 تحديد اليوزر من قائمة الـ users
   useEffect(() => {
     const matchedUser = users.find((u) => u?._id === id)
     if (matchedUser) setUserSelected(matchedUser)
   }, [id, users])
 
+  // 📌 تحديث حالة البلوك
   useEffect(() => {
     if (user && userSelected?._id) {
-      setIsBlockedByMe(user.blockedUsers?.includes(userSelected?._id));
+      setIsBlockedByMe(user.blockedUsers?.includes(userSelected._id))
     }
-  }, [user, userSelected]);
+  }, [user, userSelected])
 
   const isFollowing = userSelected?.followers?.some(f => f?._id === user?._id)
   const isOwner = user?._id === userSelected?._id
-  const canSeePrivateContent = !userSelected?.isPrivate || isOwner || isFollowing;
+  const canSeePrivateContent = !userSelected?.isPrivate || isOwner || isFollowing
 
-  // فلترة البوستات فقط إذا الحساب public أو متابع
+  // 📌 تقسيم البوستات (مثبتة + عادية)
   const pinnedPosts = userSelected?.pinsPosts || []
   const pinnedIds = new Set(pinnedPosts.map((p) => p?._id))
   const regularPosts = (userSelected?.posts || []).filter((p) => !pinnedIds.has(p?._id))
@@ -53,7 +66,8 @@ const Page = ({ params }) => {
         ...regularPosts.map((post) => ({ ...post, isPinned: false })),
       ]
     : []
-  // ✅ تحقق من حالة الحساب
+
+  // 📌 التحقق من حالة الحساب
   if (userSelected?.accountStatus === 'banned') {
     return (
       <div className="flex items-center justify-center min-h-screen text-center px-6">
@@ -84,6 +98,7 @@ const Page = ({ params }) => {
       </div>
     )
   }
+
   return (
     <div className="w-full pt-10 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6">
       
@@ -98,13 +113,7 @@ const Page = ({ params }) => {
               ? 'bg-gradient-to-tr from-pink-500 via-yellow-400 to-purple-600' 
               : 'bg-transparent'}
           `}
-          // ✅ لو فيه ستوري افتح الـ Story Viewer، غير كده مفيش أكشن
-          onClick={() => {
-            if (userStories.length > 0) {
-              // هنا تستدعي ال Story Viewer
-              // مثلاً:
-            }
-          }}
+          onClick={handleProfileClick}
         >
           <div className="w-full h-full rounded-full overflow-hidden">
             <Image
@@ -205,12 +214,21 @@ const Page = ({ params }) => {
         </div>
       )}
 
+      {/* Followers / Following Modal */}
       <FollowModal
         visible={showMenu}
         onClose={() => setShowMenu(false)}
         type={menuType}
         list={menuType === 'followers' ? userSelected?.followers : userSelected?.following}
       />
+
+      {/* Story Viewer */}
+      {isViewerOpen && (
+        <StoryViewer
+          stories={userStories}
+          onClose={() => setIsViewerOpen(false)}
+        />
+      )}
     </div>
   )
 }
