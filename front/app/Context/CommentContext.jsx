@@ -231,7 +231,7 @@ export const CommentContextProvider = ({ children }) => {
 
   // إضافة كومنت
   const AddComment = async (text, postId, receiverId, parent = null) => {
-    if (!checkUserStatus("add comments", user)) return;
+    if (!checkUserStatus("add comments",showAlert,user)) return;
 
     try {
       const res = await axios.post(
@@ -265,7 +265,7 @@ export const CommentContextProvider = ({ children }) => {
 
   // 📌 حذف كومنت
   const deleteComment = async (id) => {
-    if (!checkUserStatus("delete comments" , user)) return;
+    if (!checkUserStatus("delete comments" ,showAlert,user)) return;
 
     try {
       const res = await axios.delete(`${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/${id}`, {
@@ -282,7 +282,7 @@ export const CommentContextProvider = ({ children }) => {
 
   // 📌 تعديل كومنت
   const updateComment = async (id, text) => {
-    if (!checkUserStatus("update comments" , user)) return;
+    if (!checkUserStatus("update comments" ,showAlert,user)) return;
 
     try {
       const res = await axios.put(
@@ -304,7 +304,7 @@ export const CommentContextProvider = ({ children }) => {
 
   // 📌 لايك على كومنت
   const likeComment = async (id) => {
-    if (!checkUserStatus("like comments" , user)) return;
+    if (!checkUserStatus("like comments" ,showAlert,user)) return;
 
     try {
       const res = await axios.put(

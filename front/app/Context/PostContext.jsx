@@ -37,6 +37,7 @@ export const PostContextProvider = ({ children }) => {
 
   // ✅ إضافة بوست جديد
   const AddPost = async (content, images, Hashtags, communityId, mentions = []) => {
+    if (!checkUserStatus("Add Post",showAlert,user)) return;
     const formData = new FormData();
     formData.append("text", content);
 
@@ -101,7 +102,7 @@ export const PostContextProvider = ({ children }) => {
 
   // ✅ لايك
   const likePost = async (postId, postOwnerId) => {
-    if (!checkUserStatus("like Post",user)) return;
+    if (!checkUserStatus("like Post",showAlert,user)) return;
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/like/${postId}`,
@@ -140,7 +141,7 @@ export const PostContextProvider = ({ children }) => {
 
   // ✅ حفظ بوست
   const savePost = async (id) => {
-    if (!checkUserStatus("Save Post",user)) return;
+    if (!checkUserStatus("Save Post",showAlert,user)) return;
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/save/${id}`,
@@ -162,7 +163,7 @@ export const PostContextProvider = ({ children }) => {
 
   // ✅ مشاركة بوست
   const sharePost = async (id, postOwnerId, customText = "") => {
-    if (!checkUserStatus("Share Post", user)) return;
+    if (!checkUserStatus("Share Post",showAlert,user)) return;
     try {
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/share/${id}`,
@@ -285,7 +286,7 @@ export const PostContextProvider = ({ children }) => {
 
   const viewPost = async (postId) => {
     if (!user?.token) {
-      showAlert("You must be logged in to view posts.");
+      console.log("User is not logged in.");
       return;
     }
 

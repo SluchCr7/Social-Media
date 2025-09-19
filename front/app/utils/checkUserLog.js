@@ -1,8 +1,6 @@
 'use client'
-import { useAlert } from "../Context/AlertContext";
 
-export const checkUserStatus = (action = "perform this action", user) => {
-    const {showAlert} = useAlert()
+export const checkUserStatus = (action = "perform this action",showAlert, user) => {
     if (!user || !user.token) {
       showAlert(`You must be logged in to ${action}.`);
       return false;
