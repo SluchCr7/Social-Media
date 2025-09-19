@@ -31,7 +31,6 @@ export const ReelsProvider = ({ children }) => {
       if (newReels.length < 10) setHasMore(false);
     } catch (err) {
       console.error(err);
-      showAlert("Failed to load reels.");
     } finally {
       setIsLoading(false);
     }

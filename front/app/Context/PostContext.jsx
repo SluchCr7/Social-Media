@@ -20,32 +20,30 @@ export const PostContextProvider = ({ children }) => {
   const [postIsEdit, setPostIsEdit] = useState(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-
   const fetchPosts = async (pageNum = 1) => {
-    if (!hasMore && pageNum !== 1) return; // لا تحميل إذا انتهت الصفحات
+    if (!hasMore && pageNum !== 1) return;
 
     setIsLoading(true);
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post?page=${pageNum}&limit=10`);
-      
-      if (res.data.posts.length < 10) setHasMore(false); // إذا أقل من limit، انتهت الصفحات
+      const newPosts = Array.isArray(res.data.posts) ? res.data.posts : [];
 
-      if (pageNum === 1) {
-        setPosts(res.data.posts);
-      } else {
-        setPosts(prev => [...prev, ...res.data.posts]);
-      }
+      // تحديث posts
+      setPosts(prev => (pageNum === 1 ? newPosts : [...prev, ...newPosts]));
 
+      // تحديث hasMore
+      setHasMore(pageNum < res.data.pages);
     } catch (err) {
-      console.error("Error fetching posts", err);
+      console.error("Error fetching posts", err.response?.data || err.message);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // fetch عند mount أو عند تغير page
   useEffect(() => {
-    fetchPosts(1);
-  }, []);
+    fetchPosts(page);
+  }, [page]);
 
 
   // ✅ إضافة بوست جديد

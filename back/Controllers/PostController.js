@@ -364,7 +364,8 @@ const getAllPosts = asyncHandler(async (req, res) => {
     .populate({
       path: "reports",
       populate: { path: "owner", model: "User", select: "username profileName profilePhoto" },
-    }).populate("mentions","username profileName profilePhoto")
+    })
+    .populate("mentions", "username profileName profilePhoto")
     .populate({
       path: "originalPost",
       populate: { path: "owner", select: "username profileName profilePhoto" },
@@ -373,12 +374,17 @@ const getAllPosts = asyncHandler(async (req, res) => {
       path: "comments",
       populate: { path: "owner", select: "username profileName profilePhoto" },
     })
-    .populate(
-      { path: "mentions", select: "username profileName profilePhoto" }
-    )
     .lean();
 
-  res.status(200).json(posts);
+  const total = await Post.countDocuments();
+  const pages = Math.ceil(total / limit);
+
+  res.status(200).json({
+    posts,
+    total,
+    page,
+    pages,
+  });
 });
 
 // ================== Add Post ==================
