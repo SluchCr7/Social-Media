@@ -142,6 +142,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { useAuth } from "./AuthContext";
 import { useSocket } from "./SocketContext";
+import { useAlert } from "./AlertContext";
 
 export const NotifyContext = createContext();
 
@@ -150,7 +151,7 @@ export const NotifyContextProvider = ({ children }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const { user } = useAuth();
   const { socket } = useSocket();
-
+  const {showAlert} = useAlert()
   const tokenHeader = {
     headers: { Authorization: `Bearer ${user?.token}` },
   };
@@ -168,7 +169,6 @@ export const NotifyContextProvider = ({ children }) => {
       console.error(err);
     }
   };
-
   // ✅ حذف إشعار واحد
   const deleteNotify = async (id) => {
     try {
@@ -176,7 +176,6 @@ export const NotifyContextProvider = ({ children }) => {
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/notification/${id}`,
         tokenHeader
       );
-      toast.success(res.data.message);
       setNotificationsByUser(prev => prev.filter(n => n._id !== id));
     } catch (err) {
       console.error(err);
@@ -186,11 +185,10 @@ export const NotifyContextProvider = ({ children }) => {
   // ✅ حذف كل الإشعارات
   const clearAllNotifications = async () => {
     try {
-      const res = await axios.delete(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/notification`,
+       await axios.delete(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/notification/clear`,
         tokenHeader
       );
-      toast.success(res.data.message);
       setNotificationsByUser([]);
       setUnreadCount(0);
     } catch (err) {

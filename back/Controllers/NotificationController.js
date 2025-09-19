@@ -237,6 +237,8 @@ const getAllNotify = asyncHandler(async (req, res) => {
   res.status(200).json(notifications);
 });
 
+
+
 module.exports = {
   addNewNotify,
   getAllNotify,

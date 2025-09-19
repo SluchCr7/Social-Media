@@ -5,7 +5,8 @@ const {
     getAllNotificationsByUser,
     markAsRead,
     markAllAsRead,
-    getUnreadCount,
+  getUnreadCount,
+    clearAllNotifications
   } = require('../Controllers/NotificationController');
   
   const route = require('express').Router();
@@ -33,6 +34,7 @@ const {
   
   // ✅ جميع الإشعارات في النظام (Admin use)
   route.get('/', verifyToken, getAllNotify);
+  route.delete('/clear', verifyToken, clearAllNotifications);
   
   module.exports = route;
   
