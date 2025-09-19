@@ -23,7 +23,7 @@ import { FiChevronLeft, FiX } from "react-icons/fi"
 import { useAuth } from '../Context/AuthContext'
 import { useAside } from '../Context/AsideContext'
 
-const EnhancedAside = () => {
+const Aside = () => {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const { user, Logout, onlineUsers } = useAuth()
@@ -39,7 +39,7 @@ const EnhancedAside = () => {
 
   useEffect(() => {
     if (isMobile) {
-      setIsCollapsed(true)
+      setIsCollapsed(true) // desktop collapse ما يشتغلش على الموبايل
     } else {
       setIsMobileMenuOpen(false)
     }
@@ -75,7 +75,7 @@ const EnhancedAside = () => {
   ]
 
   const baseStyle = `relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out`
-  const activeStyle = `relative text-white`
+  const activeStyle = `bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md`
   const inactiveStyle = `hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 text-lightMode-text dark:text-darkMode-text`
 
   const SidebarContent = ({ mobile = false }) => {
@@ -106,7 +106,7 @@ const EnhancedAside = () => {
               {!collapsed && (
                 <h4 className="px-3 mb-2 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{section.title}</h4>
               )}
-              <div className="flex flex-col gap-1 relative">
+              <div className="flex flex-col gap-1">
                 {section.items.map(({ icon, text, link }) => {
                   const isActive = pathname === link
                   return (
@@ -118,19 +118,8 @@ const EnhancedAside = () => {
                       data-tooltip-content={text}
                       className={`${baseStyle} ${isActive ? activeStyle : inactiveStyle}`}
                     >
-                      <span className="text-xl relative">{icon}
-                        {text === "Messenger" && user?.unreadMessages > 0 && (
-                          <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                        )}
-                      </span>
+                      <span className="text-xl">{icon}</span>
                       {!collapsed && <span className="flex-1">{text}</span>}
-                      {/* Animated active link */}
-                      {isActive && !collapsed && (
-                        <motion.div
-                          layoutId="active-link"
-                          className="absolute inset-0 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 shadow-md z-[-1]"
-                        />
-                      )}
                     </Link>
                   )
                 })}
@@ -143,7 +132,7 @@ const EnhancedAside = () => {
         <div className={`mt-auto border-t pt-4 ${collapsed ? "px-0" : "px-2"}`}>
           <div className="flex flex-col gap-3">
             {/* User Profile */}
-            <div className={`flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 relative group`}>
+            <div className={`flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10`}>
               <div className={`relative p-[2px] rounded-full ${user?.stories?.length > 0 ? 'border border-red-500' : ''}`}>
                 <Image
                   src={user?.profilePhoto?.url || '/default-profile.png'}
@@ -153,10 +142,9 @@ const EnhancedAside = () => {
                   className="w-8 h-8 rounded-full object-cover"
                 />
                 {onlineUsers?.includes(user?._id) && (
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border border-white dark:border-gray-900 animate-pulse"></span>
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border border-white dark:border-gray-900"></span>
                 )}
               </div>
-
               {!collapsed && (
                 <div className="flex flex-col truncate">
                   <p className="text-sm font-semibold text-lightMode-text dark:text-darkMode-text truncate">
@@ -165,18 +153,6 @@ const EnhancedAside = () => {
                   <p className="text-xs text-gray-500 truncate">
                     {user?.profileName || "@user_name"}
                   </p>
-                </div>
-              )}
-
-              {/* Hover profile card on desktop */}
-              {!isMobile && !collapsed && (
-                <div className="absolute left-full top-0 ml-2 w-64 p-4 bg-white dark:bg-gray-800 shadow-lg rounded-xl opacity-0 group-hover:opacity-100 transition-opacity z-50">
-                  <p className="font-semibold">{user?.username}</p>
-                  <p className="text-sm text-gray-500">{user?.profileName}</p>
-                  <div className="flex gap-2 mt-2">
-                    <button className="px-3 py-1 rounded bg-blue-600 text-white text-xs">Follow</button>
-                    <button className="px-3 py-1 rounded border text-xs">Message</button>
-                  </div>
                 </div>
               )}
             </div>
@@ -208,7 +184,7 @@ const EnhancedAside = () => {
       <motion.aside
         animate={{ width: isCollapsed ? 64 : 224 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="hidden lg:flex flex-col h-screen backdrop-blur-md bg-white/20 dark:bg-gray-900/20 border-r p-3"
+        className="hidden lg:flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r p-3"
       >
         <SidebarContent />
       </motion.aside>
@@ -243,4 +219,4 @@ const EnhancedAside = () => {
   )
 }
 
-export default EnhancedAside
+export default Aside
