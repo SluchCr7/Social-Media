@@ -147,7 +147,7 @@ const SluchitEntry = ({ post }) => {
 
             {/* Shared Post Text */}
             {isShared && post?.text && (() => {
-              const isArabic = /[\u0600-\u06FF]/.test(post.text);
+              const isArabic = /[\u0600-\u06FF]/.test(post?.text);
               return (
                 <p
                   className={`text-sm break-all whitespace-pre-wrap ${
@@ -155,7 +155,7 @@ const SluchitEntry = ({ post }) => {
                   } text-gray-600 dark:text-gray-200`}
                   dir={isArabic ? 'rtl' : 'ltr'}
                 >
-                  {renderTextWithMentionsAndHashtags(post.text, post?.mentions || [], post?.Hashtags || [])}
+                  {renderTextWithMentionsAndHashtags(post?.text, post?.mentions || [], post?.Hashtags || [])}
                 </p>
               );
             })()}
@@ -185,7 +185,7 @@ const SluchitEntry = ({ post }) => {
 
                 {/* Original Post Content */}
                 {original?.text && (() => {
-                  const isArabic = /[\u0600-\u06FF]/.test(original.text);
+                  const isArabic = /[\u0600-\u06FF]/.test(original?.text);
                   return (
                     <p
                       className={`text-sm italic break-all whitespace-pre-wrap ${
@@ -193,7 +193,7 @@ const SluchitEntry = ({ post }) => {
                       } text-gray-700 dark:text-gray-300`}
                       dir={isArabic ? 'rtl' : 'ltr'}
                     >
-                      {renderTextWithMentionsAndHashtags(original.text, original?.mentions || [], original?.Hashtags || [])}
+                      {renderTextWithMentionsAndHashtags(original?.text, original?.mentions || [], original?.Hashtags || [])}
                     </p>
                   );
                 })()}
@@ -201,7 +201,7 @@ const SluchitEntry = ({ post }) => {
 
                 {original?.Photos && (
                   <div className={`grid gap-2 ${original?.Photos.length > 1 ? 'grid-cols-2 sm:grid-cols-2' : ''}`}>
-                    {original?.Photos.map((photo, index) => (
+                    {original?.Photos?.map((photo, index) => (
                       <div
                         key={index}
                         onClick={() => setImageView({ url: photo?.url, postId: original?._id })}
@@ -223,7 +223,7 @@ const SluchitEntry = ({ post }) => {
 
             {/* Normal Post Text */}
             {!isShared && post?.text && (() => {
-              const isArabic = /[\u0600-\u06FF]/.test(post.text);
+              const isArabic = /[\u0600-\u06FF]/.test(post?.text);
               return (
                 <p
                   className={`text-sm break-all whitespace-pre-wrap ${
@@ -231,7 +231,7 @@ const SluchitEntry = ({ post }) => {
                   } text-gray-600 dark:text-gray-200`}
                   dir={isArabic ? 'rtl' : 'ltr'}
                 >
-                  {renderTextWithMentionsAndHashtags(post.text, post?.mentions || [], post?.Hashtags || [])}
+                  {renderTextWithMentionsAndHashtags(post?.text, post?.mentions || [], post?.Hashtags || [])}
                 </p>
               );
             })()}

@@ -17,7 +17,7 @@ export const SuggestionRow = ({ type, data }) => {
     <div className="w-full grid gap-6 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
       {data.map((item, idx) => (
         <motion.div
-          key={item._id || item.id || idx}
+          key={item?._id || item.id || idx}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: idx * 0.1 }}
@@ -28,7 +28,7 @@ export const SuggestionRow = ({ type, data }) => {
             {item?.profilePhoto?.url || item?.Picture?.url ? (
               <Image
                 src={item?.profilePhoto?.url || item?.Picture?.url}
-                alt={item.username || item?.Name || "Profile"}
+                alt={item?.username || item?.Name || "Profile"}
                 width={96}
                 height={96}
                 className="rounded-full object-cover w-full h-full"
@@ -47,15 +47,15 @@ export const SuggestionRow = ({ type, data }) => {
           <div className="mt-4 flex-1 flex flex-col justify-between text-center">
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg truncate">
-                {item.username || item?.Name || "Unnamed"}
+                {item?.username || item?.Name || "Unnamed"}
               </h3>
               {type === "user" && (
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  @{item.profileName || "guest"}
+                  @{item?.profileName || "guest"}
                 </p>
               )}
               <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-3 mt-3 leading-relaxed">
-                {item.description ||
+                {item?.description ||
                   (type === "user"
                     ? "This user hasn’t written a bio yet."
                     : "Join our community and start engaging.")}
@@ -65,9 +65,9 @@ export const SuggestionRow = ({ type, data }) => {
             {/* معلومات إضافية */}
             <div className="flex justify-center items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mt-3">
               {type === "user" ? (
-                <span>👥 {item?.followers || 0} Followers</span>
+                <span>👥 {item?.followers.length || 0} Followers</span>
               ) : (
-                <span>👥 {item?.members || 0} Members</span>
+                <span>👥 {item?.members.length || 0} Members</span>
               )}
             </div>
 

@@ -82,10 +82,10 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
                 post?.Photos?.length > 1 ? "grid-cols-2" : ""
               }`}
             >
-              {post.Photos.slice(0, 2).map((photo, i) => (
+              {post?.Photos.slice(0, 2).map((photo, i) => (
                 <Image
                   key={i}
-                  src={photo.url}
+                  src={photo?.url}
                   alt={`Post-${i}`}
                   width={500}
                   height={300}

@@ -12,7 +12,7 @@ const Sluchits = () => {
   const { user, suggestedUsers } = useAuth()
   const { communities } = useCommunity()
 
-  const following = Array.isArray(user?.following) ? user.following : []
+  const following = Array.isArray(user?.following) ? user?.following : []
   const userId = user?._id
 
   // ترتيب البوستات: المتابعين أولًا
@@ -21,8 +21,8 @@ const Sluchits = () => {
     return posts
       .slice()
       .sort((a, b) => {
-        const isAFollowed = following.includes(a?.owner?._id)
-        const isBFollowed = following.includes(b?.owner?._id)
+        const isAFollowed = following?.includes(a?.owner?._id)
+        const isBFollowed = following?.includes(b?.owner?._id)
         if (isAFollowed && !isBFollowed) return -1
         if (!isAFollowed && isBFollowed) return 1
         return new Date(b?.createdAt) - new Date(a?.createdAt)
@@ -33,14 +33,14 @@ const Sluchits = () => {
   const filteredUsers = useMemo(() => {
     if (!Array.isArray(suggestedUsers)) return []
     return suggestedUsers.filter(
-      u => !following?.some(f => f._id === u._id) // استبعد اللي أنا متابعه بالفعل
+      u => !following?.some(f => f?._id === u?._id) // استبعد اللي أنا متابعه بالفعل
     )
   }, [suggestedUsers, following])
 
   const filteredCommunities = useMemo(() => {
     if (!Array.isArray(communities)) return []
     return communities.filter(
-      c => !c.members?.some(member => member._id === userId) // استبعد اللي انا عضو فيها
+      c => !c.members?.some(member => member?._id === userId) // استبعد اللي انا عضو فيها
     )
   }, [communities, userId])
 
@@ -75,7 +75,7 @@ const Sluchits = () => {
       ) : combinedItems.length > 0 ? (
         combinedItems.map((item, i) => {
           if (item.type === 'post') {
-            return <SluchitEntry key={item.data._id} post={item.data} />
+            return <SluchitEntry key={item?.data?._id} post={item?.data} />
           }
 
           // --- النص التوضيحي قبل الـ Suggestions ---
@@ -86,7 +86,7 @@ const Sluchits = () => {
                   ? '✨ Suggested Users to Follow'
                   : '🌐 Discover New Communities'}
               </h2>
-              <SuggestionRow type={item.type} data={item.data} />
+              <SuggestionRow type={item?.type} data={item?.data} />
             </div>
           )
         })
