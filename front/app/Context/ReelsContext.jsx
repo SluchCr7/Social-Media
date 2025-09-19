@@ -22,7 +22,7 @@ export const ReelsProvider = ({ children }) => {
 
     setIsLoading(true);
     try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/reels?page=${pageNum}&limit=10`);
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/reel?page=${pageNum}&limit=10`);
       const newReels = res.data.reels;
 
       if (pageNum === 1) setReels(newReels);
@@ -38,8 +38,9 @@ export const ReelsProvider = ({ children }) => {
 
   // ✅ تحميل أول مرة
   useEffect(() => {
-    fetchReels(1);
-  }, []);
+    fetchReels(page);
+  }, [page]);
+
 
   // 🎥 رفع Reel جديد
   const uploadReel = async (file, caption = "") => {
@@ -54,7 +55,7 @@ export const ReelsProvider = ({ children }) => {
       formData.append("caption", caption);
 
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/reels`,
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/reel`,
         formData,
         {
           headers: {
@@ -78,7 +79,7 @@ export const ReelsProvider = ({ children }) => {
 
     try {
       const res = await axios.delete(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/reels/${id}`,
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/reel/${id}`,
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
       setReels(prev => prev.filter(r => r._id !== id));

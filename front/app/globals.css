@@ -130,3 +130,9 @@
   color: #555;
   line-height: 1.5;
 }
+
+/* Tailwind */
+.hover-expanded:hover {
+  width: 224px; /* same as expanded */
+  transition: width 0.3s;
+}

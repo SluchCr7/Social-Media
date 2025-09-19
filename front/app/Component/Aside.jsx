@@ -182,9 +182,9 @@ const Aside = () => {
     <>
       {/* ===== Desktop Sidebar ===== */}
       <motion.aside
-        animate={{ width: isCollapsed ? 64 : 224 }}
+        animate={{ width: isCollapsed ? 80 : 224 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="hidden lg:flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r p-3"
+        className="hidden lg:flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r p-3 hover-expanded"
       >
         <SidebarContent />
       </motion.aside>
