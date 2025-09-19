@@ -25,7 +25,7 @@ const SluchitEntry = ({ post }) => {
   const isInCommunityPage = typeof window !== 'undefined' && window.location.href.includes('/Pages/Community/')
   const [openModel , setOpenModel] = useState(false)
   return (
-    <div className='relative'>
+    <div className='relative w-full'>
       <ShareModal 
         post={post} 
         isOpen={openModel} 
@@ -270,43 +270,43 @@ const SluchitEntry = ({ post }) => {
             )}
 
             {/* Actions */}
-            {/* {isLogin && ( */}
-            <div className='flex items-center gap-6 pt-4'>
-              <div onClick={() => likePost(post?._id, post?.owner._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
-                {post?.likes?.includes(user?._id) ? (
-                  <IoIosHeart className='text-red-500 text-2xl' />
-                ) : (
-                  <CiHeart className='text-gray-500 text-2xl' />
+            {isLogin && (
+              <div className='flex items-center gap-6 pt-4'>
+                <div onClick={() => likePost(post?._id, post?.owner._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
+                  {post?.likes?.includes(user?._id) ? (
+                    <IoIosHeart className='text-red-500 text-2xl' />
+                  ) : (
+                    <CiHeart className='text-gray-500 text-2xl' />
+                  )}
+                  <span className='text-gray-400 text-sm font-medium'>{post?.likes?.length}</span>
+                </div>
+                {!post?.isCommentOff && (
+                  <Link href={`/Pages/Post/${post?._id}`} className='flex items-center gap-2 transition-all hover:scale-110'>
+                    <FaRegCommentDots className='text-gray-500 text-xl' />
+                    <span className='text-gray-400 text-sm font-medium'>{post?.comments?.length}</span>
+                  </Link>
                 )}
-                <span className='text-gray-400 text-sm font-medium'>{post?.likes?.length}</span>
-              </div>
-              {!post?.isCommentOff && (
-                <Link href={`/Pages/Post/${post?._id}`} className='flex items-center gap-2 transition-all hover:scale-110'>
-                  <FaRegCommentDots className='text-gray-500 text-xl' />
-                  <span className='text-gray-400 text-sm font-medium'>{post?.comments?.length}</span>
-                </Link>
-              )}
-              <div 
-                onClick={() => sharePost(
-                  post?.originalPost ? post?.originalPost?._id : post?._id, 
-                  post?.owner?._id
-                )} 
-                className="flex items-center gap-2 cursor-pointer transition-all hover:scale-110"
-              >
-                <IoIosShareAlt className="text-gray-500 text-2xl" />
-                {/* <span className="text-gray-400 text-sm font-medium">{post?.shares?.length}</span> */}
-              </div>
-              <div onClick={() => setOpenModel(true)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
-                <BiRepost className='text-gray-500 text-2xl' />
-                {/* <span className='text-gray-400 text-sm font-medium'>{post?.shares?.length}</span> */}
-              </div>
+                <div 
+                  onClick={() => sharePost(
+                    post?.originalPost ? post?.originalPost?._id : post?._id, 
+                    post?.owner?._id
+                  )} 
+                  className="flex items-center gap-2 cursor-pointer transition-all hover:scale-110"
+                >
+                  <IoIosShareAlt className="text-gray-500 text-2xl" />
+                  {/* <span className="text-gray-400 text-sm font-medium">{post?.shares?.length}</span> */}
+                </div>
+                <div onClick={() => setOpenModel(true)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
+                  <BiRepost className='text-gray-500 text-2xl' />
+                  {/* <span className='text-gray-400 text-sm font-medium'>{post?.shares?.length}</span> */}
+                </div>
 
-              <div onClick={() => savePost(post?._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
-                <CiBookmark className={`${post?.saved?.includes(user?._id) ? 'text-yellow-400' : 'text-gray-500'} text-2xl`} />
-                <span className='text-gray-400 text-sm font-medium'>{post?.saved?.length}</span>
+                <div onClick={() => savePost(post?._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
+                  <CiBookmark className={`${post?.saved?.includes(user?._id) ? 'text-yellow-400' : 'text-gray-500'} text-2xl`} />
+                  <span className='text-gray-400 text-sm font-medium'>{post?.saved?.length}</span>
+                </div>
               </div>
-            </div>
-            {/* )} */}
+            )} 
 
             {/* Comment Avatars */}
             {post?.comments?.length > 0 && (
