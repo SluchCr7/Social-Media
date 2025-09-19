@@ -11,6 +11,7 @@ import TabsContent from '@/app/Component/UserComponents/TabsContent'
 import Tabs from '@/app/Component/UserComponents/Tabs'
 import StatBlock from '@/app/Component/UserComponents/StatBlock'
 import FollowModal from '@/app/Component/UserComponents/FollowModal'
+import { useStory } from '@/app/Context/StoryContext'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -23,7 +24,10 @@ const Page = ({ params }) => {
   const [activeTab, setActiveTab] = useState('Posts')
   const [showMenu, setShowMenu] = useState(false)
   const [menuType, setMenuType] = useState('followers')
+  const { stories } = useStory()   // ✅ هات الستوريز من الكونتكست
 
+  // ✅ فلترة الستوريز الخاصة بالمستخدم اللي بتتفرج عليه
+  const userStories = stories.filter(story => story?.owner?._id === userSelected?._id)
   useEffect(() => {
     const matchedUser = users.find((u) => u?._id === id)
     if (matchedUser) setUserSelected(matchedUser)
@@ -90,8 +94,17 @@ const Page = ({ params }) => {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
           className={`relative w-36 h-36 rounded-full shadow-lg cursor-pointer p-1
-            ${userSelected?.stories?.length > 0 ? 'bg-gradient-to-tr from-pink-500 via-yellow-400 to-purple-600' : 'bg-transparent'}
+            ${userStories.length > 0 
+              ? 'bg-gradient-to-tr from-pink-500 via-yellow-400 to-purple-600' 
+              : 'bg-transparent'}
           `}
+          // ✅ لو فيه ستوري افتح الـ Story Viewer، غير كده مفيش أكشن
+          onClick={() => {
+            if (userStories.length > 0) {
+              // هنا تستدعي ال Story Viewer
+              // مثلاً:
+            }
+          }}
         >
           <div className="w-full h-full rounded-full overflow-hidden">
             <Image

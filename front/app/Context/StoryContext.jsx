@@ -17,12 +17,19 @@ export const StoryContextProvider = ({ children }) => {
   const addNewStory = async (storyData) => {
     const formData = new FormData();
 
-    if (storyData.type === 'image' && storyData.file) {
-      formData.append('image', storyData.file);
-    } else if (storyData.type === 'text' && storyData.text) {
+    // ✅ إضافة النص لو موجود
+    if (storyData.text) {
       formData.append('text', storyData.text);
-    } else {
-      showAlert("You must provide either an image or text for the story.");
+    }
+
+    // ✅ إضافة الصورة لو موجودة
+    if (storyData.file) {
+      formData.append('image', storyData.file);
+    }
+
+    // ✅ تحقق أنه على الأقل فيه نص أو صورة
+    if (!storyData.text && !storyData.file) {
+      showAlert("You must provide either an image, text, or both for the story.");
       return;
     }
 
@@ -33,6 +40,7 @@ export const StoryContextProvider = ({ children }) => {
         {
           headers: {
             Authorization: `Bearer ${user.token}`,
+            'Content-Type': 'multipart/form-data',
           },
         }
       );
@@ -42,6 +50,7 @@ export const StoryContextProvider = ({ children }) => {
       showAlert("Failed to add story.");
     }
   };
+
 
   // 📥 جلب القصص
   useEffect(() => {

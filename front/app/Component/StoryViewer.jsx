@@ -16,12 +16,12 @@ const StoryViewer = ({ stories, onClose }) => {
   const { user } = useAuth()
   const story = stories[currentIndex]
 
-  // تسجيل المشاهدة عند تغيير الستوري
+  // تسجيل المشاهدة
   useEffect(() => {
     if (story?._id) viewStory(story._id)
   }, [currentIndex, story])
 
-  // progress bar تلقائي
+  // progress bar
   useEffect(() => {
     if (!story) return
     setProgress(0)
@@ -65,12 +65,12 @@ const StoryViewer = ({ stories, onClose }) => {
     : story?.Photo || null
 
   return (
-    <div className="fixed inset-0 z-[999] flex items-center justify-center backdrop-blur-sm bg-black/70">
+    <div className="fixed inset-0 z-[999] flex items-center justify-center backdrop-blur-sm bg-black/80">
 
       {/* زر الإغلاق */}
       <button
         onClick={onClose}
-        className="absolute top-6 right-6 p-2 rounded-full bg-black/40 hover:bg-black/60 transition z-50"
+        className="absolute top-6 right-6 p-2 rounded-full bg-black/50 hover:bg-black/70 transition z-50"
       >
         <IoClose className="text-white text-3xl" />
       </button>
@@ -79,7 +79,7 @@ const StoryViewer = ({ stories, onClose }) => {
       {currentIndex > 0 && (
         <button
           onClick={handlePrev}
-          className="absolute left-4 md:left-10 p-2 rounded-full bg-black/30 hover:bg-black/50 transition z-40"
+          className="absolute left-4 md:left-10 p-2 rounded-full bg-black/40 hover:bg-black/60 transition z-40"
         >
           <IoChevronBack className="text-white text-4xl" />
         </button>
@@ -87,7 +87,7 @@ const StoryViewer = ({ stories, onClose }) => {
       {currentIndex < stories.length - 1 && (
         <button
           onClick={handleNext}
-          className="absolute right-4 md:right-10 p-2 rounded-full bg-black/30 hover:bg-black/50 transition z-40"
+          className="absolute right-4 md:right-10 p-2 rounded-full bg-black/40 hover:bg-black/60 transition z-40"
         >
           <IoChevronForward className="text-white text-4xl" />
         </button>
@@ -98,7 +98,7 @@ const StoryViewer = ({ stories, onClose }) => {
         {...handlers}
         onMouseDown={() => setIsPaused(true)}
         onMouseUp={() => setIsPaused(false)}
-        className="relative max-w-lg w-full rounded-xl overflow-hidden shadow-lg flex flex-col items-center justify-center h-[70vh] p-4 z-20 bg-black"
+        className="relative max-w-lg w-full rounded-xl overflow-hidden shadow-xl flex flex-col items-center justify-center h-[75vh] p-4 z-20 bg-black"
       >
         {/* معلومات صاحب الستوري */}
         <div className="absolute top-4 left-4 flex items-center gap-2 z-30">
@@ -110,39 +110,41 @@ const StoryViewer = ({ stories, onClose }) => {
             className="w-10 h-10 rounded-full object-cover"
           />
           <span className="text-white font-semibold">{story?.owner?.username || 'Unknown'}</span>
+          <span className='text-white text-xs'>{new Date(story?.createdAt).toLocaleString()}</span>
         </div>
 
-        {/* عرض الصورة أو النص */}
+        {/* الصورة + النص أو نص فقط */}
         {photoUrl ? (
-          <Image
-            src={photoUrl}
-            alt="story"
-            fill
-            className="object-cover transition-all duration-500"
-          />
+          <div className="relative w-full h-full">
+            {/* الصورة */}
+            <Image
+              src={photoUrl}
+              alt="story"
+              fill
+              className="object-cover transition-all duration-500"
+            />
+
+            {/* النص فوق الصورة (لو موجود) */}
+            {story.text && (
+              <div className="absolute bottom-24 left-1/2 -translate-x-1/2 w-11/12 text-center">
+                <p className="text-lg md:text-2xl font-semibold text-white drop-shadow-lg bg-black/40 rounded-xl px-4 py-2">
+                  {story.text}
+                </p>
+              </div>
+            )}
+          </div>
         ) : (
-          <div className="bg-black/40 w-full h-full flex items-center justify-center px-6 text-center rounded-xl overflow-auto">
+          <div className="bg-gradient-to-b from-gray-900 to-black w-full h-full flex items-center justify-center px-6 text-center rounded-xl overflow-auto">
             <p className="text-2xl md:text-3xl font-semibold text-white drop-shadow-lg leading-snug">
               {story.text}
             </p>
           </div>
         )}
 
-        {/* زر الحب للأشخاص الآخرين فقط
-        {user?._id !== story?.owner?._id && (
-          <button
-            onClick={() => toggleLove(story?._id)}
-            className={`absolute bottom-16 right-6 text-2xl ${story?.loves?.includes(user?._id) ? 'text-red-500' : 'text-white'}`}
-          >
-            <FaHeart />
-          </button>
-        )} */}
-
-        {/* عرض عدد المشاهدات وعدد الـ loves فقط لصاحب الستوري */}
+        {/* عرض عدد المشاهدات لصاحب الستوري */}
         {user?._id === story?.owner?._id && (
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white text-sm flex gap-4 z-50">
             <span>{story?.views?.length || 0} مشاهدة</span>
-            {/* <span>{story?.loves?.length || 0} إعجاب</span> */}
           </div>
         )}
       </div>

@@ -14,7 +14,8 @@ route.route('/')
     .get(getAllStories);
 
 route.route('/add')
-    .post(verifyToken, photoUpload.fields([{ name: 'image', maxCount: 1 }]), addNewStory);
+    // .post(verifyToken, photoUpload.fields([{ name: 'image', maxCount: 1 }]), addNewStory);
+    .post(verifyToken, photoUpload.single("image"), addNewStory); // عشان الستوري صورة واحده
 
 route.route('/delete/:id')
     .delete(verifyToken, deleteStory);

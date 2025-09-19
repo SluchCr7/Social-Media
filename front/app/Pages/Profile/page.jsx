@@ -18,6 +18,7 @@ import TabsContent from '@/app/Component/UserComponents/TabsContent'
 import Tabs from '@/app/Component/UserComponents/Tabs'
 import StatBlock from '@/app/Component/UserComponents/StatBlock'
 import FollowModal from '@/app/Component/UserComponents/FollowModal'
+import { useStory } from '@/app/Context/StoryContext'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -33,7 +34,9 @@ const ProfilePage = () => {
   const [isStory, setIsStory] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [menuType, setMenuType] = useState('followers')
-
+  const { stories } = useStory()
+  
+  const myStories = stories.filter(story => story?.owner?._id === user?._id)
   // ✅ تحديث بيانات المستخدم من الـ context
   useEffect(() => {
     const matchedUser = users?.find((u) => user?._id === u?._id)
@@ -110,8 +113,8 @@ const ProfilePage = () => {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
             className={`relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden shadow-xl cursor-pointer p-1
-              ${userData?.stories?.length > 0
-                ? 'bg-gradient-to-tr from-pink-500 via-yellow-400 to-purple-600'
+              ${myStories.length > 0 
+                ? 'bg-gradient-to-tr from-pink-500 via-yellow-400 to-purple-600' 
                 : 'bg-transparent'}
             `}
             onClick={() => document.getElementById('fileInput')?.click()}

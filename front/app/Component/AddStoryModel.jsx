@@ -14,14 +14,12 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
     const file = e.target.files[0];
     if (file) {
       setStoryImage(file);
-      setStoryText('');
       setError('');
     }
   };
 
   const handleTextChange = (e) => {
     setStoryText(e.target.value);
-    setStoryImage(null);
     setError('');
   };
 
@@ -31,9 +29,10 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
       return;
     }
 
-    const storyData = storyImage
-      ? { type: 'image', file: storyImage }
-      : { type: 'text', text: storyText };
+    const storyData = {
+      text: storyText || '',
+      file: storyImage || null,
+    };
 
     addNewStory(storyData);
     clearInput();
@@ -46,9 +45,10 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
     setError('');
   };
 
-  useEffect(()=>{
-    console.log(storyImage)
-  },[storyImage])
+  useEffect(() => {
+    console.log(storyImage);
+  }, [storyImage]);
+
   return (
     <AnimatePresence>
       {isStory && (
@@ -85,19 +85,17 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
             )}
 
             {/* Textarea */}
-            {!storyImage && (
-              <textarea
-                value={storyText}
-                onChange={handleTextChange}
-                placeholder="Write your story..."
-                rows={4}
-                className="w-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-4 rounded-2xl mb-4 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
-              />
-            )}
+            <textarea
+              value={storyText}
+              onChange={handleTextChange}
+              placeholder="Write your story..."
+              rows={4}
+              className="w-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-4 rounded-2xl mb-4 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+            />
 
             {/* Image Upload */}
-            {!storyText && (
-              <div className="mb-4">
+            <div className="mb-4">
+              {!storyImage && (
                 <label className="flex items-center justify-center gap-2 w-full cursor-pointer bg-green-600 hover:bg-green-500 text-white font-semibold py-2 px-4 rounded-2xl transition">
                   <IoImage className="text-xl" />
                   <span>Upload Image</span>
@@ -108,8 +106,8 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
                     className="hidden"
                   />
                 </label>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Image Preview */}
             {storyImage && (
@@ -120,7 +118,7 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
                   className="rounded-2xl max-h-64 w-full object-contain border border-gray-200 dark:border-gray-700"
                 />
                 <button
-                  onClick={clearInput}
+                  onClick={() => setStoryImage(null)}
                   className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition"
                   title="Remove Image"
                 >

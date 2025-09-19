@@ -11,12 +11,19 @@ const Stories = () => {
   const { user } = useAuth()
   const { stories, isLoading, viewStory } = useStory()
   const [viewerStories, setViewerStories] = useState(null)
-  useEffect(()=>{
-    console.log(stories)
-  },[stories])
-  // 🧠 تحسين الأداء: تجميع الستوريز حسب المستخدم
+  
   const groupedArray = useMemo(() => {
-    const groupedStories = stories.reduce((acc, story) => {
+    if (!stories?.length) return []
+
+    // فلترة الستوريز عشان يظهروا بس اللي انت متابعهم
+    const filteredStories = stories.filter(
+      story =>
+        story?.owner?._id === user?._id || // ستوريزك الشخصية
+        user?.following?.includes(story?.owner?._id)
+    )
+
+
+    const groupedStories = filteredStories.reduce((acc, story) => {
       const userId = story?.owner?._id
       if (!acc[userId]) {
         acc[userId] = { user: story?.owner, stories: [] }
@@ -24,8 +31,10 @@ const Stories = () => {
       acc[userId].stories.push(story)
       return acc
     }, {})
+
     return Object.values(groupedStories)
-  }, [stories])
+  }, [stories, user?.following])
+
 
   const handleOpenViewer = (userStories) => {
     setViewerStories(userStories)
