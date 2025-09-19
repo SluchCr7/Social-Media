@@ -8,19 +8,27 @@ const ReelCard = forwardRef(({ reel }, ref) => {
   const { deleteReel } = useReels();
   const [isMuted, setIsMuted] = useState(true);
 
-  // autoplay & pause عند ظهور/اختفاء الفيديو
   useEffect(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (videoRef.current) {
-          if (entry.isIntersecting) videoRef.current.play();
-          else videoRef.current.pause();
+        if (entry.isIntersecting) {
+          videoEl.play().catch(() => {}); // منع أي خطأ إذا لم يسمح المتصفح بالتشغيل التلقائي
+        } else {
+          videoEl.pause();
         }
       },
       { threshold: 0.6 }
     );
-    if (videoRef.current) observer.observe(videoRef.current);
-    return () => observer.disconnect();
+
+    observer.observe(videoEl);
+
+    return () => {
+      observer.unobserve(videoEl);
+      observer.disconnect();
+    };
   }, []);
 
   return (
@@ -73,5 +81,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
     </div>
   );
 });
+
+ReelCard.displayName = "ReelCard";
 
 export default ReelCard;
