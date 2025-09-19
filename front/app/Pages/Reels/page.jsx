@@ -9,14 +9,14 @@ const ReelsPage = () => {
   const { reels, isLoading, lastReelRef } = useReels();
 
   return (
-    <div className="w-full h-screen overflow-y-auto bg-black">
+    <div className="w-full h-screen overflow-y-auto bg-lightMode-bg dark:bg-darkMode-bg">
       {reels.map((reel, index) => {
         const isLast = index === reels.length - 1;
         return <ReelCard ref={isLast ? lastReelRef : null} key={reel._id} reel={reel} />;
       })}
       {isLoading && Array.from({ length: 2 }).map((_, i) => <ReelSkeleton key={i} />)}
       {reels.length === 0 && !isLoading && (
-        <p className="text-white text-center py-10">No reels available</p>
+        <p className="text-lightMode-fg dark:text-darkMode-fg text-center py-10">No reels available</p>
       )}
     </div>
   );

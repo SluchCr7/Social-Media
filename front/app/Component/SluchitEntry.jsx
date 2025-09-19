@@ -1,8 +1,8 @@
 
 'use client'
-import Image from 'next/image'
-import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { forwardRef, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { CiHeart, CiBookmark } from 'react-icons/ci'
 import { FaRegCommentDots } from 'react-icons/fa'
 import { IoIosShareAlt, IoIosHeart } from 'react-icons/io'
@@ -15,17 +15,19 @@ import { useReport } from '../Context/ReportContext'
 import { renderTextWithMentionsAndHashtags } from '../utils/CheckText'
 import { BiRepost } from "react-icons/bi";
 import { ShareModal } from './SharePost'
-const SluchitEntry = ({ post }) => {
-  const { likePost, savePost, sharePost, setPostIsEdit, imageView, setImageView } = usePost()
-  const [showMenu, setShowMenu] = useState(false)
-  const { user, isLogin } = useAuth()
-  const isShared = post?.isShared && post?.originalPost
-  const original = post?.originalPost
-  const isCommunityPost = post?.community !== null
-  const isInCommunityPage = typeof window !== 'undefined' && window.location.href.includes('/Pages/Community/')
-  const [openModel , setOpenModel] = useState(false)
+
+const SluchitEntry = forwardRef(({ post }, ref) => {
+  const { likePost, savePost, sharePost, setPostIsEdit, imageView, setImageView } = usePost();
+  const [showMenu, setShowMenu] = useState(false);
+  const { user, isLogin } = useAuth();
+  const [openModel, setOpenModel] = useState(false);
+  const isShared = post?.isShared && post?.originalPost;
+  const original = post?.originalPost;
+  const isCommunityPost = post?.community !== null;
+  const isInCommunityPage = typeof window !== 'undefined' && window.location.href.includes('/Pages/Community/');
+
   return (
-    <div className='relative w-full'>
+    <div ref={ref} className='relative w-full'>
       <ShareModal 
         post={post} 
         isOpen={openModel} 
@@ -331,6 +333,7 @@ const SluchitEntry = ({ post }) => {
       </div>
     </div>
   )
-}
+})
 
+SluchitEntry.displayName = 'SluchitEntry';
 export default SluchitEntry
