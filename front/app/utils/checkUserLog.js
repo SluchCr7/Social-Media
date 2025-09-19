@@ -1,4 +1,3 @@
-'use client'
 
 export const checkUserStatus = (action = "perform this action",showAlert, user) => {
     if (!user || !user.token) {

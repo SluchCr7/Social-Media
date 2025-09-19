@@ -18,22 +18,35 @@ export const PostContextProvider = ({ children }) => {
   const [imageView , setImageView] = useState(null);
   const [showPostModelEdit, setShowPostModelEdit] = useState(false);
   const [postIsEdit, setPostIsEdit] = useState(null);
-  // ✅ تحميل البوستات أول مرة
-  useEffect(() => {
-    const fetchPosts = async () => {
-      setIsLoading(true);
-      try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post`);
-        setPosts(res.data);
-      } catch (err) {
-        console.error("Error fetching posts", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-    fetchPosts();
+  const fetchPosts = async (pageNum = 1) => {
+    if (!hasMore && pageNum !== 1) return; // لا تحميل إذا انتهت الصفحات
+
+    setIsLoading(true);
+    try {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post?page=${pageNum}&limit=10`);
+      
+      if (res.data.posts.length < 10) setHasMore(false); // إذا أقل من limit، انتهت الصفحات
+
+      if (pageNum === 1) {
+        setPosts(res.data.posts);
+      } else {
+        setPosts(prev => [...prev, ...res.data.posts]);
+      }
+
+    } catch (err) {
+      console.error("Error fetching posts", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts(1);
   }, []);
+
 
   // ✅ إضافة بوست جديد
   const AddPost = async (content, images, Hashtags, communityId, mentions = []) => {
@@ -331,7 +344,7 @@ export const PostContextProvider = ({ children }) => {
         setPostIsEdit,
         displayOrHideComments,
         copyPostLink,
-        imageView , setImageView, viewPost
+        imageView , setImageView, viewPost,fetchPosts,hasMore, setPage
       }}
     >
       {children}

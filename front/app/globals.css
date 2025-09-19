@@ -88,3 +88,45 @@
 .animate-spin-slow {
   animation: spin-slow 6s linear infinite;
 }
+
+/* زر التأكيد (Logout) */
+.swal-btn-confirm {
+  background-color: #ff4d4f !important;
+  /* أحمر احترافي */
+  color: #fff !important;
+  font-weight: bold;
+  border-radius: 8px !important;
+  /* زوايا مدورة */
+  padding: 10px 25px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease-in-out;
+}
+
+.swal-btn-confirm:hover {
+  background-color: #ff7875 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* زر الإلغاء (Cancel) */
+.swal-btn-cancel {
+  background-color: #f0f0f0 !important;
+  /* رمادي هادئ */
+  color: #333 !important;
+  border-radius: 8px !important;
+  padding: 10px 25px !important;
+  font-weight: bold;
+  transition: all 0.2s ease-in-out;
+}
+
+.swal-btn-cancel:hover {
+  background-color: #d9d9d9 !important;
+  transform: translateY(-2px);
+}
+
+/* نص SweetAlert */
+.swal-text {
+  font-size: 15px;
+  color: #555;
+  line-height: 1.5;
+}

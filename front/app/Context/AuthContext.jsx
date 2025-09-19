@@ -51,21 +51,39 @@ export const AuthContextProvider = ({ children }) => {
 
   const Logout = () => {
     swal({
-      title: 'Are you sure?',
-      text: 'You are going to logout from your account!',
-      icon: 'warning',
-      buttons: true,
+      title: "Are you sure you want to logout?",
+      text: "You will be logged out from your account and need to login again to access your data.",
+      icon: "warning",
+      buttons: {
+        cancel: {
+          text: "Cancel",
+          value: null,
+          visible: true,
+          className: "swal-btn-cancel",
+          closeModal: true,
+        },
+        confirm: {
+          text: "Logout",
+          value: true,
+          visible: true,
+          className: "swal-btn-confirm",
+          closeModal: true,
+        },
+      },
       dangerMode: true,
+      closeOnClickOutside: false,
+      closeOnEsc: false,
     }).then((willLogout) => {
       if (willLogout) {
         setUser(null);
         setIsLogin(false);
-        localStorage.removeItem('user');
-        localStorage.removeItem('loginState');
-        window.location.href = '/Pages/Login';
+        localStorage.removeItem("user");
+        localStorage.removeItem("loginState");
+        window.location.href = "/Pages/Login";
       }
     });
   };
+
 
   const registerNewUser = async (username, email, password) => {
     try {

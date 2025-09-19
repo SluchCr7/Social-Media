@@ -17,6 +17,7 @@ import { ReportContextProvider } from "./Context/ReportContext";
 import {SocketProvider} from "./Context/SocketContext";
 import { EventProvider } from "./Context/EventContext";
 import { AsideContextProvider } from "./Context/AsideContext";
+import { ReelsProvider } from "./Context/ReelsContext";
 const jetBrainsMono = JetBrains_Mono({
   subsets: ["latin"]
   , weight: ["100", "200", "300", "400"]
@@ -45,13 +46,15 @@ export default function RootLayout({ children }) {
                         <StoryContextProvider>
                           <NewsContextProvider>
                             <ReportContextProvider>
-                              <EventProvider>
-                                <AsideContextProvider>  
-                                  <LayoutComponent>
-                                      {children}
-                                  </LayoutComponent>
-                                </AsideContextProvider>
-                              </EventProvider>
+                              <ReelsProvider>
+                                <EventProvider>
+                                  <AsideContextProvider>  
+                                    <LayoutComponent>
+                                        {children}
+                                    </LayoutComponent>
+                                  </AsideContextProvider>
+                                </EventProvider>
+                              </ReelsProvider>
                             </ReportContextProvider>
                           </NewsContextProvider>
                         </StoryContextProvider>

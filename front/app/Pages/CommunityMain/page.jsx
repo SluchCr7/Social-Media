@@ -374,7 +374,7 @@ export default function CommunityPage() {
       .map((c) => ({ ...c, _membersCount: (c.members || []).length }))
 
     if (sortBy === 'Most Members') {
-      results.sort((a, b) => b._membersCount - a._membersCount)
+      results.sort((a, b) => b._members - a._members)
     } else if (sortBy === 'A-Z') {
       results.sort((a, b) => (a.Name || a.name || '').localeCompare(b.Name || b.name || ''))
     } else {
@@ -400,19 +400,6 @@ export default function CommunityPage() {
     }
   }
 
-  // Join handler
-  const handleJoin = useCallback(
-    async (commId) => {
-      setJoinedLocal((prev) => ({ ...prev, [commId]: !prev[commId] }))
-      try {
-        await joinCommunity?.(commId)
-      } catch (err) {
-        setJoinedLocal((prev) => ({ ...prev, [commId]: !prev[commId] }))
-        console.error('Join community failed', err)
-      }
-    },
-    [joinCommunity]
-  )
 
   const isJoined = (comm) => {
     const joinedInServer = comm.members?.includes?.(user?._id)
@@ -449,13 +436,6 @@ export default function CommunityPage() {
               >
                 <FaPlus /> Create Community
               </button>
-              {/* Featured communities example */}
-              {filtered.slice(0, 3).map((c) => (
-                <button key={c._id} onClick={() => handleJoin(c._id)}
-                  className={`px-3 py-1 rounded-lg border font-medium ${isJoined(c) ? 'bg-green-600 text-white' : 'bg-white text-sky-600 border-sky-600'} transition`}>
-                  {isJoined(c) ? `Joined ${c.Name}` : `Join ${c.Name}`}
-                </button>
-              ))}
             </div>
           </div>
 
@@ -556,13 +536,6 @@ export default function CommunityPage() {
                   <Link href={`/Pages/Community/${comm._id}`}>
                     <a className="px-4 py-2 rounded-lg border border-sky-600 text-sky-600">View</a>
                   </Link>
-                  <motion.button
-                    onClick={() => handleJoin(comm._id)}
-                    whileTap={{ scale: 0.95 }}
-                    className={`px-4 py-2 rounded-lg font-medium shadow-sm transition ${isJoined(comm) ? 'bg-green-600 text-white' : 'bg-sky-600 text-white'}`}
-                  >
-                    {isJoined(comm) ? 'Joined' : 'Join'}
-                  </motion.button>
                 </div>
               </div>
             </motion.article>
