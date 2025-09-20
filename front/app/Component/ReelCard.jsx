@@ -106,7 +106,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
       {/* Video */}
       <video
         ref={videoRef}
-        src={reel.videoUrl}
+        src={reel?.videoUrl}
         className="w-full h-full object-cover"
         loop
         muted={isMuted}
@@ -128,13 +128,13 @@ const ReelCard = forwardRef(({ reel }, ref) => {
       <div className="absolute bottom-5 left-5 text-white max-w-[70%]">
         <div className="flex items-center gap-2">
           <img
-            src={reel.owner.profilePhoto.url}
-            alt={reel.owner.username}
+            src={reel?.owner?.profilePhoto?.url}
+            alt={reel?.owner?.username}
             className="w-10 h-10 rounded-full border border-white"
           />
-          <span className="font-bold text-lg">{reel.owner.username}</span>
+          <span className="font-bold text-lg">{reel?.owner?.username}</span>
         </div>
-        <p className="mt-2 text-sm line-clamp-3">{reel.caption}</p>
+        <p className="mt-2 text-sm line-clamp-3">{reel?.caption}</p>
       </div>
 
       {/* Right side actions */}
@@ -151,13 +151,13 @@ const ReelCard = forwardRef(({ reel }, ref) => {
           className={`flex flex-col items-center transition-transform ${reel?.likes?.includes(user?._id) ? "scale-125 text-red-500" : "hover:scale-110"}`}
         >
           <FaHeart size={26} />
-          <span className="text-xs">{reel.likes?.length || 0}</span>
+          <span className="text-xs">{reel?.likes?.length || 0}</span>
         </button>
 
         {/* Comment */}
         <button onClick={() => setShowComments(true)} className="flex flex-col items-center hover:scale-110 transition-transform">
           <FaRegCommentDots size={26} />
-          <span className="text-xs">{reel.comments?.length || 0}</span>
+          <span className="text-xs">{reel?.comments?.length || 0}</span>
         </button>
 
         {/* Share */}
@@ -166,10 +166,10 @@ const ReelCard = forwardRef(({ reel }, ref) => {
         </button>
 
         {/* Delete */}
-        {reel.owner._id === user?._id && (
+        {reel?.owner._id === user?._id && (
           <button
             className="flex flex-col items-center text-red-500 hover:scale-110 transition-transform"
-            onClick={() => deleteReel(reel._id)}
+            onClick={() => deleteReel(reel?._id)}
           >
             <FaTrash size={24} />
           </button>
