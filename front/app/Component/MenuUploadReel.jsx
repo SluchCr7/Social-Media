@@ -41,7 +41,7 @@ const ReelUploadModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+    <div className="fixed inset-0 z-[1000] bg-black bg-opacity-70 flex justify-center items-center">
       <div className="bg-white dark:bg-gray-900 rounded-xl w-full max-w-md p-6 relative">
         {/* Close Button */}
         <button

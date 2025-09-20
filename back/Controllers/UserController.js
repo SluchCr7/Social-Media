@@ -335,7 +335,15 @@ const getAllUsers = asyncHandler(async (req, res) => {
  */
 
 const getUserById = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.id).populate('comments').populate('posts')
+  const user = await User.findById(req.params.id).populate('comments').populate('posts')
+    .populate({
+        path: 'reels',
+        populate: {
+          path: 'owner',
+          model: 'User',
+          select: 'username profilePhoto profileName', // Optional: limit fields
+        },
+      })
     if (!user) {
         return res.status(404).json({ message: "User Not Found" })
     }

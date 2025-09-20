@@ -26,10 +26,10 @@ export const ReelsProvider = ({ children }) => {
       const newReels = Array.isArray(res.data.reels) ? res.data.reels : [];
 
       setReels(prev => (pageNum === 1 ? newReels : [...prev, ...newReels]));
-      // تحديث hasMore
       setHasMore(pageNum < res.data.pages);
     } catch (err) {
       console.error(err);
+      showAlert("Failed to fetch reels.");
     } finally {
       setIsLoading(false);
     }
@@ -39,7 +39,6 @@ export const ReelsProvider = ({ children }) => {
   useEffect(() => {
     fetchReels(page);
   }, [page]);
-
 
   // 🎥 رفع Reel جديد
   const uploadReel = async (file, caption = "") => {
@@ -59,7 +58,7 @@ export const ReelsProvider = ({ children }) => {
         {
           headers: {
             Authorization: `Bearer ${user.token}`,
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         }
       );
@@ -89,20 +88,59 @@ export const ReelsProvider = ({ children }) => {
     }
   };
 
-  // 🔍 Infinite Scroll: مراقبة العنصر الأخير
+  // ❤️ لايك / أنلايك على Reel
+  const likeReel = async (id) => {
+    if (!user?.token) return;
+
+    try {
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/reel/${id}/like`,
+        {},
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+      const updated = res.data.reel;
+      setReels(prev => prev.map(r => (r._id === id ? updated : r)));
+      showAlert(res.data.message || "Reel updated.");
+    } catch (err) {
+      console.error(err);
+      showAlert("Failed to like reel.");
+    }
+  };
+
+  // 👁️ زيادة المشاهدات
+  const viewReel = async (id) => {
+    if (!user?.token) return;
+
+    try {
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/reel/${id}/view`,
+        {},
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+      const updated = res.data.reel;
+      setReels(prev => prev.map(r => (r._id === id ? updated : r)));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // 🔍 Infinite Scroll
   const observer = useRef();
-  const lastReelRef = useCallback(node => {
-    if (isLoading) return;
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore) {
-        const nextPage = page + 1;
-        setPage(nextPage);
-        fetchReels(nextPage);
-      }
-    });
-    if (node) observer.current.observe(node);
-  }, [isLoading, hasMore, page]);
+  const lastReelRef = useCallback(
+    (node) => {
+      if (isLoading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          const nextPage = page + 1;
+          setPage(nextPage);
+          fetchReels(nextPage);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [isLoading, hasMore, page]
+  );
 
   return (
     <ReelsContext.Provider
@@ -111,9 +149,12 @@ export const ReelsProvider = ({ children }) => {
         fetchReels,
         uploadReel,
         deleteReel,
+        likeReel,
+        viewReel,
+        getSingleReel,
         isLoading,
         hasMore,
-        lastReelRef
+        lastReelRef,
       }}
     >
       {children}

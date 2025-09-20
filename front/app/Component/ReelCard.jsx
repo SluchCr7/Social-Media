@@ -18,12 +18,15 @@ import {
 const ReelCard = forwardRef(({ reel }, ref) => {
   const videoRef = useRef(null);
   const { user } = useAuth();
-  const { deleteReel } = useReels();
+  const { deleteReel, likeReel, viewReel } = useReels();
+  const [showComments, setShowComments] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [progress, setProgress] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
+  const [viewed, setViewed] = useState(false); // علشان مايحصلش تكرار للمشاهدة
 
+  // ✅ Auto play / pause + تسجيل مشاهدة
   useEffect(() => {
     const videoEl = videoRef.current;
     if (!videoEl) return;
@@ -32,6 +35,10 @@ const ReelCard = forwardRef(({ reel }, ref) => {
       ([entry]) => {
         if (entry.isIntersecting) {
           videoEl.play().catch(() => {});
+          if (!viewed && user) {
+            viewReel(reel._id);
+            setViewed(true);
+          }
         } else {
           videoEl.pause();
         }
@@ -44,9 +51,9 @@ const ReelCard = forwardRef(({ reel }, ref) => {
       observer.unobserve(videoEl);
       observer.disconnect();
     };
-  }, []);
+  }, [reel._id, viewReel, viewed, user]);
 
-  // Progress bar
+  // ✅ Progress bar
   useEffect(() => {
     const videoEl = videoRef.current;
     if (!videoEl) return;
@@ -62,11 +69,23 @@ const ReelCard = forwardRef(({ reel }, ref) => {
     };
   }, []);
 
-  // Double-tap like
+  // ✅ Double-tap like
   const handleDoubleClick = () => {
-    setIsLiked(true);
+    if (!isLiked) {
+      handleLike();
+    }
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 800);
+  };
+
+  // ✅ Like function
+  const handleLike = async () => {
+    try {
+      await likeReel(reel._id);
+      setIsLiked(!isLiked);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -127,7 +146,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
 
         {/* Like */}
         <button
-          onClick={() => setIsLiked(!isLiked)}
+          onClick={handleLike}
           className={`flex flex-col items-center transition-transform ${isLiked ? "scale-125 text-red-500" : "hover:scale-110"}`}
         >
           <FaHeart size={26} />
@@ -135,7 +154,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
         </button>
 
         {/* Comment */}
-        <button className="flex flex-col items-center hover:scale-110 transition-transform">
+        <button onClick={() => setShowComments(true)} className="flex flex-col items-center hover:scale-110 transition-transform">
           <FaRegCommentDots size={26} />
           <span className="text-xs">{reel.comments?.length || 0}</span>
         </button>
@@ -156,7 +175,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
         )}
       </div>
 
-      {/* Mute/Unmute (top right) */}
+      {/* Mute/Unmute */}
       <button
         className="absolute top-5 right-5 bg-black/40 p-2 rounded-full text-white hover:bg-black/60 transition"
         onClick={() => setIsMuted(prev => !prev)}
@@ -171,6 +190,11 @@ const ReelCard = forwardRef(({ reel }, ref) => {
           style={{ width: `${progress}%` }}
         />
       </div>
+      <CommentsPopup
+        reelId={reel._id}
+        isOpen={showComments}
+        onClose={() => setShowComments(false)}
+      />
     </div>
   );
 });
