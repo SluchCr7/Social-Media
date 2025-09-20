@@ -156,6 +156,9 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
+import { useNews } from '@/app/Context/NewsContext';
+import { usePost } from '@/app/Context/PostContext';
+import { filterHashtags } from '@/app/utils/filterHashtags';
 
 const trendingHashtags = ['#React', '#NextJS', '#OpenAI', '#WebDev', '#TailwindCSS'];
 const newsItems = [
@@ -170,7 +173,12 @@ const Search = () => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('Users');
+  const { news } = useNews();
+  const { posts } = usePost();
 
+  // Collect all hashtags from all posts
+  const hashtagCount = {};
+  filterHashtags(posts, hashtagCount);
   // Debounce search
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -208,6 +216,8 @@ const Search = () => {
     mobile: { breakpoint: { max: 464, min: 0 }, items: 1 },
   };
 
+  const topHashtags = Object.entries(hashtagCount)
+  .sort((a, b) => b[1] - a[1])
   return (
     <div className="w-full min-h-screen px-4 sm:px-8 py-8 text-lightMode-text dark:text-darkMode-text bg-gradient-to-b from-gray-50 to-white dark:from-[#1f1f1f] dark:to-[#2b2d31] transition">
       {/* Header */}
@@ -367,24 +377,50 @@ const Search = () => {
 
           {activeTab === 'Hashtags' && (
             <motion.div
-              key="hashtags"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-              className="flex flex-wrap gap-3"
-            >
-              {trendingHashtags.map((tag) => (
-                <motion.span
-                  whileHover={{ scale: 1.05 }}
-                  key={tag}
-                  className="px-4 py-2 bg-indigo-100 dark:bg-indigo-800/50 text-indigo-700 dark:text-indigo-200 rounded-full text-sm cursor-pointer hover:bg-indigo-200 dark:hover:bg-indigo-700 transition"
-                >
-                  {tag}
-                </motion.span>
-              ))}
+                key="hashtags"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col gap-3"
+              >
+              {topHashtags.map(([tag, count], index) => {
+                const isTrendingUp = index % 2 === 0; // محاكاة بسيطة للاتجاه
+
+                return (
+                  <Link
+                    key={tag}
+                    href={`/Pages/Hashtag/${encodeURIComponent(tag)}`}
+                    className="flex justify-between items-center p-3 rounded-xl bg-white dark:bg-[#2b2d31] hover:bg-gray-100 dark:hover:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-gray-900 dark:text-gray-100 font-semibold text-sm sm:text-base">
+                        #{tag}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {count} posts
+                      </span>
+                    </div>
+
+                    <div
+                      className={`flex items-center justify-center w-6 h-6 rounded-full ${
+                        isTrendingUp
+                          ? 'bg-green-100 dark:bg-green-800'
+                          : 'bg-red-100 dark:bg-red-800'
+                      }`}
+                    >
+                      {isTrendingUp ? (
+                        <FaArrowUp className="text-green-600 dark:text-green-400 text-sm" />
+                      ) : (
+                        <FaArrowDown className="text-red-600 dark:text-red-400 text-sm" />
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
             </motion.div>
           )}
+
 
           {activeTab === 'News' && (
             <motion.div
@@ -395,15 +431,34 @@ const Search = () => {
               transition={{ duration: 0.3 }}
               className="flex flex-col gap-3"
             >
-              {newsItems.map((item, index) => (
-                <Link
-                  key={index}
-                  href={item.link}
-                  className="flex items-center gap-2 p-3 bg-indigo-50 dark:bg-indigo-900/50 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800 transition text-sm text-indigo-600 dark:text-indigo-300"
-                >
-                  <FiTrendingUp />
-                  {item.title}
-                </Link>
+              {news.map((item, index) => (
+                <div key={index}>
+                  <Link
+                    href={item?.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex gap-4 p-4 hover:bg-gray-100 dark:hover:bg-[#1e2025] transition"
+                  >
+                    <div className="flex-1">
+                      <h3 className="text-sm break-all whitespace-pre-wra font-semibold text-gray-800 dark:text-gray-100 leading-snug">
+                        {item?.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {new Date(item?.publishedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden bg-gray-200 dark:bg-gray-800">
+                      <Image
+                        src={item?.image}
+                        alt="news"
+                        width={64}
+                        height={64}
+                        className="w-full h-full object-cover"
+                        unoptimized
+                      />
+                    </div>
+                  </Link>
+                </div>
               ))}
             </motion.div>
           )}

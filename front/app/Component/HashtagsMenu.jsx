@@ -2,20 +2,14 @@ import React from 'react';
 import { usePost } from '../Context/PostContext';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import Link from 'next/link';
+import { filterHashtags } from '../utils/filterHashtags';
 
 const HashtagsMenu = () => {
   const { posts } = usePost();
 
   // Collect all hashtags from all posts
   const hashtagCount = {};
-  posts.forEach((post) => {
-    if (Array.isArray(post.Hashtags)) {
-      const uniqueTagsInPost = [...new Set(post.Hashtags.map(tag => tag.toLowerCase()))];
-      uniqueTagsInPost.forEach((tag) => {
-        hashtagCount[tag] = (hashtagCount[tag] || 0) + 1;
-      });
-    }
-  });
+  filterHashtags(posts, hashtagCount);
 
   // Convert to array and sort by popularity
   const topHashtags = Object.entries(hashtagCount)
