@@ -72,7 +72,7 @@ const Page = ({ params }) => {
   useEffect(()=>{
     console.log(userStories)
     console.log(userSelected)
-  },[user ,  userSelected])
+  },[userStories ,  userSelected])
   // 📌 التحقق من حالة الحساب
   if (userSelected?.accountStatus === 'banned') {
     return (
