@@ -100,9 +100,9 @@ export const ReelsProvider = ({ children }) => {
         {},
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
-      const updated = res.data.reel;
-      setReels(prev => prev.map(r => (r._id === id ? updated : r)));
-      showAlert(res.data.message || "Reel updated.");
+      const updated = res.data;
+      setReels(prev => prev.map(r => (r?._id === id ? updated : r)));
+      showAlert(res.data.message || "You like this Reel ");
     } catch (err) {
       console.error(err);
       showAlert("Failed to like reel.");
@@ -116,10 +116,11 @@ export const ReelsProvider = ({ children }) => {
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/reel/view/${id}`,
-        {},
+        {}, // لا حاجة لإرسال أي بيانات إضافية
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
-      const updated = res.data.reel;
+
+      const updated = res.data; // ملاحظة: السيرفر يرجع الـ reel مباشرة
       setReels(prev => prev.map(r => (r?._id === id ? updated : r)));
     } catch (err) {
       console.error(err);
