@@ -29,6 +29,7 @@ const Page = ({ params }) => {
   const [userStories, setUserStories] = useState([])
   const [isViewerOpen, setIsViewerOpen] = useState(false)
 
+ 
   // 📌 جلب ستوريز اليوزر عند الضغط على صورته
   const handleProfileClick = async () => {
     if (!userSelected?._id) return
@@ -67,6 +68,11 @@ const Page = ({ params }) => {
       ]
     : []
 
+
+  useEffect(()=>{
+    console.log(userStories)
+    console.log(user)
+  },[user ,  userStories])
   // 📌 التحقق من حالة الحساب
   if (userSelected?.accountStatus === 'banned') {
     return (
