@@ -151,7 +151,6 @@ export const ReelsProvider = ({ children }) => {
         deleteReel,
         likeReel,
         viewReel,
-        getSingleReel,
         isLoading,
         hasMore,
         lastReelRef,
