@@ -60,6 +60,10 @@ const getAllReels = async (req, res) => {
 
     const reels = await Reel.find()
       .populate('owner', 'username profileName profilePhoto')
+      .populate({
+        path: 'originalPost',
+        populate: { path: 'owner', select: 'username profileName profilePhoto' },
+      })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -157,4 +161,35 @@ const viewReel = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = { createReel, deleteReel, getAllReels,likeReel,viewReel };
+const shareReel = asyncHandler(async (req, res) => {
+  const originalPost = await Reel.findById(req.params.id).populate(
+    "owner",
+    "username profileName profilePhoto"
+  );
+
+  if (!originalPost) {
+    return res.status(404).json({ message: "Reel not found" });
+  }
+
+  const sharedReel = new Reel({
+      videoUrl: originalPost.videoUrl,
+      thumbnailUrl: originalPost.thumbnailUrl,
+      caption: originalPost.caption,
+      originalPost: originalPost._id,
+      owner: req.user._id,
+  });
+
+  await sharedReel.save();
+  await sharedReel.populate([
+    { path: "owner", select: "username profileName profilePhoto" },
+    {
+      path: "originalPost",
+      populate: { path: "owner", select: "username profileName profilePhoto" },
+    },
+  ]);
+
+  // ✅ رجع بوست كامل فقط
+  res.status(201).json(sharedReel);
+});
+
+module.exports = { createReel, deleteReel, getAllReels,likeReel,viewReel,shareReel };

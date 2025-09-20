@@ -29,6 +29,15 @@ const ReelSchema = new mongoose.Schema({
       ref: "User",
     },
   ],
+  originalPost: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Reel',
+    default: null,
+  },
+  isShared: {
+    type: Boolean,
+    default: false,
+  },
 }, {
   timestamps: true,
 });
