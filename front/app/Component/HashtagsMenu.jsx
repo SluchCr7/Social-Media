@@ -26,7 +26,7 @@ const HashtagsMenu = () => {
     <div className="w-full max-h-[500px] overflow-y-auto bg-white dark:bg-[#16181c] rounded-xl shadow-md border border-gray-200 dark:border-gray-700 flex flex-col">
       
       {/* Header */}
-      <div className="flex justify-between items-center px-5 py-3 border-b border-gray-300 dark:border-gray-600">
+      <div className="flex justify-between items-center px-5 py-3 border-b border-gray-300 dark:border-gray-600 bg-gradient-to-r from-blue-600 to-purple-600">
         <h2 className="text-gray-900 dark:text-gray-100 text-lg font-semibold">
           Trending Hashtags
         </h2>
