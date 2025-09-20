@@ -349,11 +349,14 @@ const ReelCard = forwardRef(({ reel }, ref) => {
             <Link href={`/Pages/User/${reel?.owner?._id}`} className="font-bold text-lg hover:underline">
               {reel?.owner?.username}
             </Link>
-            {reel?.originalPost && (
+            {reel?.originalPost && reel?.originalPost?.owner && (
               <span className="text-xs text-gray-300 flex items-center gap-1">
                 🔄 Reposted from{" "}
-                <Link href={`/Pages/User/${reel?.originalPost?.owner?._id}`} className="font-semibold hover:underline">
-                  @{reel?.originalPost?.owner?.username}
+                <Link
+                  href={`/Pages/User/${reel.originalPost.owner._id}`}
+                  className="font-semibold hover:underline"
+                >
+                  @{reel.originalPost.owner.username}
                 </Link>
               </span>
             )}
