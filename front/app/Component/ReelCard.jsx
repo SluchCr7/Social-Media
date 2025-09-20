@@ -251,7 +251,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
         if (entry.isIntersecting) {
           videoEl.play().catch(() => {});
           if (!viewed && user) {
-            viewReel(reel._id);
+            viewReel(reel?._id);
             setViewed(true);
           }
         } else {
@@ -266,7 +266,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
       observer.unobserve(videoEl);
       observer.disconnect();
     };
-  }, [reel._id, viewReel, viewed, user]);
+  }, [reel?._id, viewReel, viewed, user]);
 
   // ✅ Progress bar
   useEffect(() => {
@@ -296,7 +296,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
   // ✅ Like function
   const handleLike = async () => {
     try {
-      await likeReel(reel._id);
+      await likeReel(reel?._id);
       setIsLiked(!isLiked);
     } catch (err) {
       console.error(err);
@@ -305,7 +305,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
 
   // ✅ Copy link
   const handleCopyLink = () => {
-    const link = `${window.location.origin}/Pages/Reel/${reel._id}`;
+    const link = `${window.location.origin}/Pages/Reel/${reel?._id}`;
     navigator.clipboard.writeText(link);
     alert("✅ Link copied!");
   };
@@ -357,10 +357,10 @@ const ReelCard = forwardRef(({ reel }, ref) => {
               <span className="text-xs text-gray-300 flex items-center gap-1">
                 🔄 Reposted from{" "}
                 <Link
-                  href={`/Pages/User/${reel.originalPost.owner._id}`}
+                  href={`/Pages/User/${reel?.originalPost?.owner?._id}`}
                   className="font-semibold hover:underline"
                 >
-                  @{reel.originalPost.owner.username}
+                  @{reel?.originalPost?.owner?.username}
                 </Link>
               </span>
             )}
@@ -376,7 +376,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
         {/* Views */}
         <div className="flex flex-col items-center text-gray-300">
           <FaEye size={22} />
-          <span className="text-xs">{reel.views?.length || 0}</span>
+          <span className="text-xs">{reel?.views?.length || 0}</span>
         </div>
 
         {/* Like */}
@@ -396,7 +396,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
 
         {/* Internal Reshare */}
         <button
-          onClick={() => shareReel(reel._id, reel.owner._id)}
+          onClick={() => shareReel(reel?._id, reel?.owner?._id)}
           className="flex flex-col items-center hover:scale-110 transition-transform"
         >
           <RiShareForwardLine size={24} />
@@ -441,7 +441,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
 
       {/* Comments */}
       <CommentsPopup
-        reelId={reel._id}
+        reelId={reel?._id}
         isOpen={showComments}
         onClose={() => setShowComments(false)}
       />

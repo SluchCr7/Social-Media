@@ -10,9 +10,8 @@ const ReelsPage = () => {
 
   return (
     <div className="w-full h-screen overflow-y-auto bg-lightMode-bg dark:bg-darkMode-bg">
-      {reels.map((reel, index) => {
-        if (!reel) return null; // ✅ تجاهل أي عنصر undefined
-        const isLast = index === reels.length - 1;
+      {reels.filter(Boolean).map((reel, index) => {
+        const isLast = index === reels.filter(Boolean).length - 1;
         return <ReelCard ref={isLast ? lastReelRef : null} key={reel._id} reel={reel} />;
       })}
       {isLoading && Array.from({ length: 2 }).map((_, i) => <ReelSkeleton key={i} />)}
