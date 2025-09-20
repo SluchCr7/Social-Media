@@ -110,8 +110,8 @@ const Page = ({ params }) => {
           transition={{ duration: 0.5 }}
           className={`relative w-36 h-36 rounded-full shadow-lg cursor-pointer p-[3px]
             ${userStories.length > 0 
-              ? 'bg-gradient-to-tr from-pink-500 via-yellow-400 to-purple-600' 
-              : 'bg-transparent'}
+              ? 'border-[3px] border-blue-500' 
+              : 'border-0 border-transparent'}
           `}
           onClick={handleProfileClick}
         >
