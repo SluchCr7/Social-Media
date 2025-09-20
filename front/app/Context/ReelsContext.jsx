@@ -120,7 +120,7 @@ export const ReelsProvider = ({ children }) => {
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
       const updated = res.data.reel;
-      setReels(prev => prev.map(r => (r._id === id ? updated : r)));
+      setReels(prev => prev.map(r => (r?._id === id ? updated : r)));
     } catch (err) {
       console.error(err);
     }
@@ -143,7 +143,7 @@ export const ReelsProvider = ({ children }) => {
       showAlert("✅ Reel shared successfully.");
       setReels(prev => [res.data, ...prev]); // ✅ تحديث فوري للـ state
 
-      if (ReelOwnerId !== user._id) {
+      if (ReelOwnerId !== user?._id) {
         await addNotify({
           content: `${user.username} shared your reel`,
           type: "share",
