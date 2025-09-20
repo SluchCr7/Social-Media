@@ -11,6 +11,7 @@ const ReelsPage = () => {
   return (
     <div className="w-full h-screen overflow-y-auto bg-lightMode-bg dark:bg-darkMode-bg">
       {reels.map((reel, index) => {
+        if (!reel) return null; // ✅ تجاهل أي عنصر undefined
         const isLast = index === reels.length - 1;
         return <ReelCard ref={isLast ? lastReelRef : null} key={reel._id} reel={reel} />;
       })}
