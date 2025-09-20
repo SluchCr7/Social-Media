@@ -6,6 +6,7 @@ const { Notification } = require("../Modules/Notification");
 const asyncHandler = require("express-async-handler");
 
 // رفع Reel جديد
+// رفع Reel جديد
 const createReel = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No video file uploaded" });
@@ -14,19 +15,22 @@ const createReel = async (req, res) => {
 
     const newReel = new Reel({
       videoUrl: uploadResult.secure_url,
-      thumbnailUrl: uploadResult.secure_url, // ممكن تعمل دالة generate thumbnail بعدين
+      thumbnailUrl: uploadResult.secure_url,
       caption: req.body.caption || "",
       owner: req.user._id,
     });
 
     await newReel.save();
 
-    res.status(201).json({ message: "Reel uploaded successfully", reel: newReel });
+    await newReel.populate("owner", "username profileName profilePhoto");
+
+    res.status(201).json(newReel);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 
 // حذف Reel
 const deleteReel = async (req, res) => {
@@ -86,25 +90,17 @@ const getAllReels = async (req, res) => {
 };
 
 
+// لايك / أنلايك
 const likeReel = async (req, res) => {
   try {
     const reel = await Reel.findById(req.params.id);
     if (!reel) return res.status(404).json({ message: "Reel not found" });
 
     if (reel.likes.includes(req.user._id)) {
-      await Reel.findByIdAndUpdate(
-        req.params.id,
-        { $pull: { likes: req.user._id } }
-      );
+      await Reel.findByIdAndUpdate(req.params.id, { $pull: { likes: req.user._id } });
     } else {
-      // إضافة لايك
-      await Reel.findByIdAndUpdate(
-        req.params.id,
-        { $push: { likes: req.user._id } }
-      );
+      await Reel.findByIdAndUpdate(req.params.id, { $push: { likes: req.user._id } });
 
-      // إنشاء إشعار لصاحب البوست
-      // ✅ إرسال إشعار فقط إذا اللايك ليس على بوستك
       if (!reel.owner.equals(req.user._id)) {
         const newNotify = new Notification({
           content: "liked your reel",
@@ -116,49 +112,47 @@ const likeReel = async (req, res) => {
         });
         await newNotify.save();
 
-        // إرسال الإشعار عبر السوكيت إذا كان متصل
-        const receiverSocketId = getReceiverSocketId(post.owner);
+        const receiverSocketId = getReceiverSocketId(reel.owner.toString());
         if (receiverSocketId) {
           io.to(receiverSocketId).emit("notification", newNotify);
         }
       }
     }
-  // جلب البوست كامل بعد التعديل مع كل populate
-  const updatedPost = await Reel.findById(req.params.id)
-    .populate("owner", "username profileName profilePhoto")
-    // .populate({
-    //   path: "comments",
-    //   populate: { path: "owner", select: "username profileName profilePhoto" },
-    // });
 
-  res.status(200).json(updatedPost);
-  }
-  catch (error) {
+    const updatedReel = await Reel.findById(req.params.id)
+      .populate("owner", "username profileName profilePhoto")
+      .populate({
+        path: "originalPost",
+        populate: { path: "owner", select: "username profileName profilePhoto" },
+      });
+
+    res.status(200).json(updatedReel);
+  } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
-}
+};
 
+// مشاهدة Reel
 const viewReel = asyncHandler(async (req, res) => {
   const reelId = req.params.id;
 
-  // البحث عن البوست
   const reel = await Reel.findById(reelId);
-  if (!reel) {
-    return res.status(404).json({ message: "Reel not found" });
-  }
+  if (!reel) return res.status(404).json({ message: "Reel not found" });
 
-  // إضافة المستخدم الحالي لقائمة المشاهدات إذا لم يكن موجوداً مسبقاً
   const updatedReel = await Reel.findByIdAndUpdate(
     reelId,
-    { $addToSet: { views: req.user._id } }, // $addToSet يمنع التكرار
+    { $addToSet: { views: req.user._id } },
     { new: true }
   )
-    .populate('owner', 'username profilePhoto')
-    .populate('views', 'username profilePhoto') // المستخدمين الذين شاهدوا البوست
-    res.status(200).json({
-      reel: updatedReel
-    });
+    .populate("owner", "username profileName profilePhoto")
+    .populate({
+      path: "originalPost",
+      populate: { path: "owner", select: "username profileName profilePhoto" },
+    })
+    .populate("views", "username profilePhoto");
+
+  res.status(200).json(updatedReel);
 });
 
 const shareReel = asyncHandler(async (req, res) => {
