@@ -211,6 +211,14 @@ const getAllUsers = asyncHandler(async (req, res) => {
         path: 'followers',
         select: 'profilePhoto username profileName',
       })
+      .populate({
+        path: 'reels',
+        populate: {
+          path: 'owner',
+          model: 'User',
+          select: 'username profilePhoto profileName', // Optional: limit fields
+        },
+      })
         .populate("communities", "Name Picture members")
         .populate({
             path: "pinsPosts",

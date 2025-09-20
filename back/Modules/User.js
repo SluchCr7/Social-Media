@@ -196,6 +196,11 @@ UserSchema.virtual("notifications", {
   localField: "_id",         
   foreignField: "receiver",  
 });
+UserSchema.virtual("reels", {
+  ref: "Reel",      
+  localField: "_id",         
+  foreignField: "owner",  
+});
 
 // 🔹 Update Level Rank
 UserSchema.methods.updateLevelRank = function () {

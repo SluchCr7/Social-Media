@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createReel, deleteReel, getAllReels } = require('../Controllers/ReelsController');
+const { createReel, deleteReel, getAllReels ,likeReel,viewReel} = require('../Controllers/ReelsController');
 const videoUpload = require('../Middelwares/uploadVideo'); // المسار حسب مشروعك
 const { verifyToken } = require('../Middelwares/verifyToken');
 
@@ -12,5 +12,7 @@ router.delete('/:id', verifyToken, deleteReel);
 
 // 🚀 Get all Reels
 router.get('/', getAllReels);
+router.put('/like/:id',verifyToken, likeReel);
+router.put('/view/:id',verifyToken, viewReel);
 
 module.exports = router;

@@ -23,12 +23,11 @@ export const ReelsProvider = ({ children }) => {
     setIsLoading(true);
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/reel?page=${pageNum}&limit=10`);
-      const newReels = res.data.reels;
+      const newReels = Array.isArray(res.data.reels) ? res.data.reels : [];
 
-      if (pageNum === 1) setReels(newReels);
-      else setReels(prev => [...prev, ...newReels]);
-
-      if (newReels.length < 10) setHasMore(false);
+      setReels(prev => (pageNum === 1 ? newReels : [...prev, ...newReels]));
+      // تحديث hasMore
+      setHasMore(pageNum < res.data.pages);
     } catch (err) {
       console.error(err);
     } finally {
