@@ -41,13 +41,15 @@ const NotificationMenu = ({ showNotifications, setShowNotifications }) => {
                 className={`flex gap-4 p-3 rounded-xl transition cursor-pointer items-start hover:bg-gray-200 dark:hover:bg-gray-700
                   ${!notif.isRead ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
               >
-                <Image
-                  src={notif.sender?.profilePhoto?.url || '/default-avatar.png'}
-                  alt="avatar"
-                  width={48}
-                  height={48}
-                  className="rounded-full object-cover shadow-sm"
-                />
+                <div className="flex items-center gap-3 mb-3">
+                  <Image
+                    src={user?.profilePhoto?.url || '/default-profile.png'}
+                    alt="User Profile"
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                </div>
                 <div className="flex-1">
                   <p className="text-base font-medium text-lightMode-fg dark:text-darkMode-fg leading-snug">{notif.content}</p>
                   <p className="text-xs text-gray-500 mt-1">
