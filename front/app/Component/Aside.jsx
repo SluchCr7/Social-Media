@@ -50,14 +50,14 @@ const Aside = () => {
       title: "Main",
       items: [
         { icon: <GoHome />, text: "Home", link: "/" },
-        { icon: <GoSearch />, text: "Search", link: "/Pages/Search" },
+        { icon: <GoSearch />, text: "Explore", link: "/Pages/Explore" },
         { icon: <MdOutlineOndemandVideo />, text: "Videos", link: "/Pages/Videos" },
       ]
     },
     {
       title: "Community",
       items: [
-        { icon: <FaPlus />, text: "New Post", link: "/Pages/NewPost" },
+        { icon: <FaPlus />, text: "New Zoc", link: "/Pages/NewPost" },
         { icon: <RiUserCommunityLine />, text: "Community", link: "/Pages/CommunityMain" },
         { icon: <LuMessagesSquare />, text: "Messenger", link: "/Pages/Messanger" },
       ]
