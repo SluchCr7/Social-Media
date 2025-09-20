@@ -286,7 +286,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
 
   // ✅ Double-tap like
   const handleDoubleClick = () => {
-    if (!isLiked) {
+    if (!reel?.likes?.includes(user?._id)) {
       handleLike();
     }
     setShowHeart(true);
@@ -333,7 +333,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
 
       {/* Double-tap heart animation */}
       {showHeart && (
-        <div className="absolute inset-0 flex items-center justify-center z-10">
+        <div  className="absolute inset-0 flex items-center justify-center z-10">
           <FaHeart className="text-white/80 text-6xl animate-ping" />
         </div>
       )}
