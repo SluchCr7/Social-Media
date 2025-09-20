@@ -14,7 +14,7 @@ const Communities = () => {
     <div className="w-full max-h-[500px] overflow-hidden bg-white dark:bg-[#16181c] rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 flex flex-col">
       
       {/* Header */}
-      <div className="flex justify-between items-center px-5 py-4 border-b border-gray-300 dark:border-gray-600">
+      <div className="flex justify-between items-center px-5 py-4 border-b border-gray-300 dark:border-gray-600 bg-gradient-to-r from-blue-600 to-purple-600">
         <h2 className="text-gray-900 dark:text-gray-100 text-lg font-semibold">Communities</h2>
       </div>
 

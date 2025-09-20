@@ -19,7 +19,7 @@ const MenuMessagesFromMe = () => {
   }, [messagesByUser]);
   
   return (
-    <div className="w-full flex bg-white dark:bg-[#16181c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex-col gap-3 py-3 ">
+    <div className="w-full flex bg-white dark:bg-[#16181c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex-col gap-3 ">
       <div className="w-full p-4 border-b border-lightMode-fg/40 dark:border-darkMode-fg/40 bg-gradient-to-r from-blue-600 to-purple-600">
         <h2 className="text-lightMode-fg dark:text-darkMode-fg text-base font-semibold">Messages from Last 24 Hours</h2>
       </div>

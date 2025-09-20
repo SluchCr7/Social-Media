@@ -44,11 +44,11 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
           {/* Input Section */}
           <div className="flex gap-3 mb-4">
             <Image
-              src={user?.profilePhoto?.url || "/default-avatar.png"}
-              alt="Your profile"
+              src={user?.profilePhoto?.url || '/default-profile.png'}
+              alt="User Profile"
               width={45}
               height={45}
-              className="rounded-full object-cover"
+              className="w-9 h-9 rounded-full object-cover"
             />
             <textarea
               className="w-full border border-gray-300 dark:border-gray-600 rounded-xl p-3 
@@ -67,11 +67,11 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
             {/* User Info */}
             <div className="flex items-center gap-3 mb-3">
               <Image
-                src={post?.owner?.profilePhoto?.url || "/default-avatar.png"}
-                alt="Profile"
-                width={38}
-                height={38}
-                className="rounded-full object-cover"
+                src={user?.profilePhoto?.url || '/default-profile.png'}
+                alt="User Profile"
+                width={40}
+                height={40}
+                className="w-6 h-6 rounded-full object-cover"
               />
               <div>
                 <p className="font-semibold text-gray-800 dark:text-gray-200">
