@@ -159,6 +159,7 @@ import 'react-multi-carousel/lib/styles.css';
 import { useNews } from '@/app/Context/NewsContext';
 import { usePost } from '@/app/Context/PostContext';
 import { filterHashtags } from '@/app/utils/filterHashtags';
+import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
 
 const trendingHashtags = ['#React', '#NextJS', '#OpenAI', '#WebDev', '#TailwindCSS'];
 const newsItems = [
