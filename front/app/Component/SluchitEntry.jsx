@@ -171,20 +171,27 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                               shadow-md hover:shadow-lg transition-all duration-300 
                               border-l-4 border-blue-400'>
 
-                <div className='flex flex-col items-start md:flex-row md:justify-between md:items-center'>
+                <div className='flex flex-col md:flex-row md:justify-between md:items-center gap-2 md:gap-4'>
                   <Link
                     href={user?._id === original?.owner?._id ? '/Pages/Profile' : `/Pages/User/${original?.owner?._id}`}
-                    className='text-darkMode-fg font-semibold text-sm hover:underline flex items-center gap-2'
+                    className='flex items-center gap-3 hover:underline'
                   >
-                    <Image src={original?.owner?.profilePhoto?.url} alt='Shared_profile_post' width={500} height={500} className='rounded-full w-7 h-7 aspect-square object-cover'/>
-                    <div className='flex items-start flex-col md:items-center md:flex-row gap-[2px] md:gap-[4px]'>
-                      <span className='text-black dark:text-white text-base'>{original?.owner?.username}{' '}</span>
-                      <span className='text-gray-500 text-xs pt-1'>{original?.owner?.profileName}</span>
+                    <Image
+                      src={original?.owner?.profilePhoto?.url}
+                      alt='Shared_profile_post'
+                      width={50}
+                      height={50}
+                      className='w-12 h-12 rounded-full object-cover border-2 border-blue-400'
+                    />
+                    <div className='flex flex-col'>
+                      <span className='font-semibold text-gray-900 dark:text-white'>{original?.owner?.username}</span>
+                      <span className='text-gray-500 text-xs'>{original?.owner?.profileName}</span>
                     </div>
                   </Link>
-                  <span className='text-gray-500 text-xs'>{new Date(original?.createdAt).toDateString()}</span>
+                  <span className='text-gray-400 text-xs whitespace-nowrap'>
+                    {new Date(original?.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </span>
                 </div>
-
                 {/* Original Post Content */}
                 {original?.text && (() => {
                   const isArabic = /[\u0600-\u06FF]/.test(original?.text);

@@ -68,11 +68,6 @@ const Page = ({ params }) => {
       ]
     : []
 
-
-  useEffect(()=>{
-    console.log(userStories)
-    console.log(userSelected)
-  },[userStories ,  userSelected])
   // 📌 التحقق من حالة الحساب
   if (userSelected?.accountStatus === 'banned') {
     return (
@@ -116,7 +111,7 @@ const Page = ({ params }) => {
           transition={{ duration: 0.5 }}
           className={`relative w-36 h-36 rounded-full shadow-lg cursor-pointer p-[3px]
             ${userSelected?.stories?.length > 0 
-              ? 'border-[3px] border-blue-500' 
+              ? 'border-[5px] border-blue-500' 
               : 'border-0 border-transparent'}
           `}
           onClick={handleProfileClick}

@@ -5,7 +5,7 @@ const tabs = ['Posts', 'Saved', 'Comments', 'Reels', 'Photos']
 
 
 const Tabs = ({ activeTab, setActiveTab }) => (
-  <div className="mt-6 border-b w-[60%] mx-auto border-gray-200 dark:border-gray-700">
+  <div className="mt-6 border-b w-[80%] md:w-[60%] mx-auto border-gray-200 dark:border-gray-700">
     <div className="flex gap-6 justify-around w-full">
       {tabs.map((tab) => (
         <button

@@ -254,7 +254,7 @@ const PostPage = ({ params }) => {
           {/* Comments List */}
           <div className="flex flex-col gap-4 border-t border-gray-700 pt-6">
             {post.isCommentOff ? (
-              <div className="flex flex-col items-center justify-center py-6 bg-gray-800 rounded-lg border border-gray-700 text-gray-400">
+              <div className="flex flex-col items-center justify-center py-6 text-black dark:text-white">
                 <p>Comments are turned off</p>
               </div>
             ) : isLoading ? (
@@ -262,7 +262,7 @@ const PostPage = ({ params }) => {
             ) : comments?.length > 0 ? (
               comments.map((comment) => <Comment key={comment._id} comment={comment} />)
             ) : (
-              <div className="flex flex-col items-center justify-center py-6 bg-gray-800 rounded-lg border border-gray-700 text-gray-400">
+              <div className="flex flex-col items-center justify-center py-6 text-black dark:text-white">
                 <p>No comments yet</p>
               </div>
             )}

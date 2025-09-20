@@ -4,23 +4,10 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
-const loadingTexts = [
-  "Loading your feed...",
-  "Fetching stories...",
-  "Almost ready 🚀",
-  "Preparing content..."
-];
 
 const Loader = () => {
-  const [textIndex, setTextIndex] = useState(0);
 
-  // تغيير النص كل 2.5 ثانية
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTextIndex(prev => (prev + 1) % loadingTexts.length);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, []);
+
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden">
@@ -55,28 +42,6 @@ const Loader = () => {
           />
         </motion.div>
 
-        {/* Progress bar حديث بgradient */}
-        <div className="w-64 h-2 bg-white/10 rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-600"
-            animate={{ width: ["0%", "100%"] }}
-            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-          />
-        </div>
-
-        {/* نص ديناميكي */}
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={textIndex}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.5 }}
-            className="text-gray-200 font-medium text-lg tracking-wide"
-          >
-            {loadingTexts[textIndex]}
-          </motion.span>
-        </AnimatePresence>
       </div>
     </div>
   );
