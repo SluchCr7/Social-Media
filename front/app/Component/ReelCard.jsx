@@ -14,6 +14,7 @@ import {
   FaEye,
   FaArrowLeft
 } from "react-icons/fa";
+import CommentsPopup from './CommentReelPopup';
 
 const ReelCard = forwardRef(({ reel }, ref) => {
   const videoRef = useRef(null);
