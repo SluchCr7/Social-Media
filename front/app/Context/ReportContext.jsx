@@ -28,14 +28,12 @@ export const ReportContextProvider = ({ children }) => {
         params: { page, limit: perPage },
         headers: { Authorization: `Bearer ${user?.token}` },
       });
-
       setReports(res.data.reports);
       setTotalReports(res.data.total);
       setCurrentPage(res.data.page);
       setLimit(res.data.limit);
     } catch (err) {
       console.error('Error fetching reports:', err);
-      showAlert(err?.response?.data?.message || "Failed to fetch reports");
     } finally {
       setLoading(false);
     }

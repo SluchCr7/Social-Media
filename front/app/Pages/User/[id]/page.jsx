@@ -108,19 +108,19 @@ const Page = ({ params }) => {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className={`relative w-36 h-36 rounded-full shadow-lg cursor-pointer p-1
+          className={`relative w-36 h-36 rounded-full shadow-lg cursor-pointer p-[3px]
             ${userStories.length > 0 
               ? 'bg-gradient-to-tr from-pink-500 via-yellow-400 to-purple-600' 
               : 'bg-transparent'}
           `}
           onClick={handleProfileClick}
         >
-          <div className="w-full h-full rounded-full overflow-hidden">
+          <div className="w-full h-full rounded-full bg-lightMode-bg dark:bg-darkMode-bg p-[2px]">
             <Image
               src={userSelected?.profilePhoto?.url || '/default-profile.png'}
               alt="Profile"
               fill
-              className="object-cover transition-transform duration-300 hover:scale-105 rounded-full"
+              className="object-cover rounded-full"
             />
           </div>
         </motion.div>

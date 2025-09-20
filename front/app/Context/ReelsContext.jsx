@@ -94,7 +94,7 @@ export const ReelsProvider = ({ children }) => {
 
     try {
       const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/reel/${id}/like`,
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/reel/like/${id}`,
         {},
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
@@ -113,7 +113,7 @@ export const ReelsProvider = ({ children }) => {
 
     try {
       const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/reel/${id}/view`,
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/reel/view/${id}`,
         {},
         { headers: { Authorization: `Bearer ${user.token}` } }
       );

@@ -66,6 +66,37 @@ const TabsContent = ({ activeTab, combinedPosts, posts, userSelected }) => (
           )}
         </motion.div>
       )}
+      {activeTab === 'Photos' && (
+        <motion.div
+          key="photos"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25 }}
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 w-[95%] mx-auto"
+        >
+          {posts?.filter((p) => p?.Photos?.length > 0).length > 0 ? (
+            posts
+              .filter((p) => p?.Photos?.length > 0)
+              .flatMap((p) => p.Photos.map((img, i) => (
+                <div
+                  key={`${p._id}-${i}`}
+                  className="relative group overflow-hidden rounded-lg shadow hover:shadow-lg transition duration-300"
+                >
+                  <img
+                    src={img?.url || img}
+                    alt="post photo"
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              )))
+          ) : (
+            <div className="col-span-full text-center text-gray-500 py-10">
+              You haven’t uploaded any photos yet.
+            </div>
+          )}
+        </motion.div>
+      )}
 
     </AnimatePresence>
   </div>

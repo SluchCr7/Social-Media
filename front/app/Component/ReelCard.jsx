@@ -148,7 +148,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
         {/* Like */}
         <button
           onClick={handleLike}
-          className={`flex flex-col items-center transition-transform ${isLiked ? "scale-125 text-red-500" : "hover:scale-110"}`}
+          className={`flex flex-col items-center transition-transform ${reel?.likes?.includes(user?._id) ? "scale-125 text-red-500" : "hover:scale-110"}`}
         >
           <FaHeart size={26} />
           <span className="text-xs">{reel.likes?.length || 0}</span>
