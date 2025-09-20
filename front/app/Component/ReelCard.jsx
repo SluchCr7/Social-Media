@@ -212,7 +212,6 @@
 
 // ReelCard.displayName = "ReelCard";
 // export default ReelCard;
-
 'use client';
 
 import React, { forwardRef, useRef, useEffect, useState } from 'react';
@@ -222,27 +221,25 @@ import { useAuth } from '../Context/AuthContext';
 import {
   FaHeart,
   FaRegCommentDots,
-  FaShareAlt,
   FaTrash,
   FaVolumeMute,
   FaVolumeUp,
   FaEye,
-  FaArrowLeft
 } from "react-icons/fa";
-import { IoShareSocialOutline } from "react-icons/io5";
+import { RiShareForwardLine } from "react-icons/ri";
+import { IoLinkOutline } from "react-icons/io5";
 import CommentsPopup from './CommentReelPopup';
 
 const ReelCard = forwardRef(({ reel }, ref) => {
   const videoRef = useRef(null);
   const { user } = useAuth();
-  const { deleteReel, likeReel, viewReel } = useReels();
+  const { deleteReel, likeReel, viewReel , shareReel} = useReels();
   const [showComments, setShowComments] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [progress, setProgress] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
   const [viewed, setViewed] = useState(false);
-  const [showSharePopup, setShowSharePopup] = useState(false);
 
   // ✅ Auto play / pause + تسجيل مشاهدة
   useEffect(() => {
@@ -319,14 +316,6 @@ const ReelCard = forwardRef(({ reel }, ref) => {
       className="relative w-full h-screen flex flex-col justify-end bg-black overflow-hidden"
       onDoubleClick={handleDoubleClick}
     >
-      {/* Back to home */}
-      <Link
-        href="/"
-        className="absolute top-5 left-5 z-20 flex items-center gap-2 text-white bg-black/40 px-3 py-1 rounded-full hover:bg-black/60 transition"
-      >
-        <FaArrowLeft /> <span className="hidden sm:inline">Home</span>
-      </Link>
-
       {/* Video */}
       <video
         ref={videoRef}
@@ -349,33 +338,37 @@ const ReelCard = forwardRef(({ reel }, ref) => {
       <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-black via-transparent to-transparent" />
 
       {/* Bottom Info */}
-      <div className="absolute bottom-5 left-5 text-white max-w-[70%]">
-        <div className="flex items-center gap-2">
+      <div className="absolute bottom-5 left-5 text-white max-w-[75%]">
+        <div className="flex items-center gap-3">
           <img
             src={reel?.owner?.profilePhoto?.url}
             alt={reel?.owner?.username}
-            className="w-10 h-10 rounded-full border border-white"
+            className="w-10 h-10 rounded-full border-2 border-white"
           />
-          <Link href={`/Pages/User/${reel?.owner?._id}`} className="font-bold text-lg">
-            {reel?.owner?.username}
-          </Link>
-          {reel?.originalPost && (
-            <span className="text-xs text-gray-300">
-              Shared from{" "}
-              <Link href={`/Pages/User/${reel?.originalPost?.owner?._id}`} className="font-semibold text-white">
-                {reel?.originalPost?.owner?.username}
-              </Link>
-            </span>
-          )}
+          <div className="flex flex-col">
+            <Link href={`/Pages/User/${reel?.owner?._id}`} className="font-bold text-lg hover:underline">
+              {reel?.owner?.username}
+            </Link>
+            {reel?.originalPost && (
+              <span className="text-xs text-gray-300 flex items-center gap-1">
+                🔄 Reposted from{" "}
+                <Link href={`/Pages/User/${reel?.originalPost?.owner?._id}`} className="font-semibold hover:underline">
+                  @{reel?.originalPost?.owner?.username}
+                </Link>
+              </span>
+            )}
+          </div>
         </div>
-        <p className="mt-2 text-sm line-clamp-3">{reel?.caption}</p>
+        {reel?.caption && (
+          <p className="mt-2 text-sm line-clamp-3 text-gray-200">{reel?.caption}</p>
+        )}
       </div>
 
       {/* Right side actions */}
       <div className="absolute right-5 bottom-20 flex flex-col gap-6 text-white items-center">
         {/* Views */}
         <div className="flex flex-col items-center text-gray-300">
-          <FaEye size={24} />
+          <FaEye size={22} />
           <span className="text-xs">{reel.views?.length || 0}</span>
         </div>
 
@@ -384,27 +377,32 @@ const ReelCard = forwardRef(({ reel }, ref) => {
           onClick={handleLike}
           className={`flex flex-col items-center transition-transform ${reel?.likes?.includes(user?._id) ? "scale-125 text-red-500" : "hover:scale-110"}`}
         >
-          <FaHeart size={26} />
+          <FaHeart size={24} />
           <span className="text-xs">{reel?.likes?.length || 0}</span>
         </button>
 
         {/* Comment */}
         <button onClick={() => setShowComments(true)} className="flex flex-col items-center hover:scale-110 transition-transform">
-          <FaRegCommentDots size={26} />
+          <FaRegCommentDots size={24} />
           <span className="text-xs">{reel?.comments?.length || 0}</span>
         </button>
 
-        {/* Internal Share (repost) */}
-        <button className="flex flex-col items-center hover:scale-110 transition-transform">
-          <FaShareAlt size={26} />
-        </button>
-
-        {/* External Share */}
+        {/* Internal Reshare */}
         <button
-          onClick={() => setShowSharePopup(true)}
+          onClick={() => shareReel(reel._id, reel.owner._id)}
           className="flex flex-col items-center hover:scale-110 transition-transform"
         >
-          <IoShareSocialOutline size={26} />
+          <RiShareForwardLine size={24} />
+        </button>
+
+
+        {/* Copy Link */}
+        <button
+          onClick={handleCopyLink}
+          className="flex flex-col items-center hover:scale-110 transition-transform"
+        >
+          <IoLinkOutline size={24} />
+          <span className="text-xs">Copy</span>
         </button>
 
         {/* Delete */}
@@ -413,7 +411,7 @@ const ReelCard = forwardRef(({ reel }, ref) => {
             className="flex flex-col items-center text-red-500 hover:scale-110 transition-transform"
             onClick={() => deleteReel(reel?._id)}
           >
-            <FaTrash size={24} />
+            <FaTrash size={22} />
           </button>
         )}
       </div>
@@ -440,50 +438,6 @@ const ReelCard = forwardRef(({ reel }, ref) => {
         isOpen={showComments}
         onClose={() => setShowComments(false)}
       />
-
-      {/* Share Popup */}
-      {showSharePopup && (
-        <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-5 w-80 text-black shadow-lg relative">
-            <h3 className="text-lg font-semibold mb-4">Share Reel</h3>
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={handleCopyLink}
-                className="bg-gray-100 px-3 py-2 rounded-md hover:bg-gray-200 transition text-left"
-              >
-                📋 Copy Link
-              </button>
-              <a
-                href={`https://wa.me/?text=${encodeURIComponent(window.location.origin + "/Pages/Reel/" + reel._id)}`}
-                target="_blank"
-                className="bg-green-500 px-3 py-2 rounded-md text-white hover:bg-green-600 transition text-center"
-              >
-                WhatsApp
-              </a>
-              <a
-                href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.origin + "/Pages/Reel/" + reel._id)}`}
-                target="_blank"
-                className="bg-sky-500 px-3 py-2 rounded-md text-white hover:bg-sky-600 transition text-center"
-              >
-                Twitter
-              </a>
-              <a
-                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + "/Pages/Reel/" + reel._id)}`}
-                target="_blank"
-                className="bg-blue-600 px-3 py-2 rounded-md text-white hover:bg-blue-700 transition text-center"
-              >
-                Facebook
-              </a>
-            </div>
-            <button
-              onClick={() => setShowSharePopup(false)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-black"
-            >
-              ✖
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 });

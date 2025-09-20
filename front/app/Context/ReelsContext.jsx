@@ -4,13 +4,15 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef } f
 import axios from "axios";
 import { useAuth } from "./AuthContext";
 import { useAlert } from "./AlertContext";
+import { useNotify } from "./NotifyContext";
+import { checkUserStatus } from "../utils/checkUserLog";
 
 export const ReelsContext = createContext();
 
 export const ReelsProvider = ({ children }) => {
   const { user } = useAuth();
   const { showAlert } = useAlert();
-
+  const {addNotify} = useNotify()
   const [reels, setReels] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -124,6 +126,39 @@ export const ReelsProvider = ({ children }) => {
     }
   };
 
+  const shareReel = async (id, ReelOwnerId) => {
+    if (!checkUserStatus("Share Reel", showAlert, user)) return;
+
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/reel/share/${id}`,
+        {}, // مفيش body هنا فخليته فاضي
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+
+      showAlert("✅ Reel shared successfully.");
+      setReels(prev => [res.data, ...prev]); // ✅ تحديث فوري للـ state
+
+      if (ReelOwnerId !== user._id) {
+        await addNotify({
+          content: `${user.username} shared your reel`,
+          type: "share",
+          receiverId: ReelOwnerId, // ✅ تعديل المتغير
+          actionRef: id,
+          actionModel: "Reel",
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      showAlert("❌ Failed to share the Reel.");
+    }
+  };
+
+
   // 🔍 Infinite Scroll
   const observer = useRef();
   const lastReelRef = useCallback(
@@ -154,6 +189,7 @@ export const ReelsProvider = ({ children }) => {
         isLoading,
         hasMore,
         lastReelRef,
+        shareReel
       }}
     >
       {children}
