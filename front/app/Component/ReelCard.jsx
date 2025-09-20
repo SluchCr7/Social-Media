@@ -309,6 +309,10 @@ const ReelCard = forwardRef(({ reel }, ref) => {
     navigator.clipboard.writeText(link);
     alert("✅ Link copied!");
   };
+  useEffect(() => {
+    console.log(reel?.originalPost)
+    console.log(reel?.originalPost?.owner)
+  }, [reel?.originalPost])
 
   return (
     <div
