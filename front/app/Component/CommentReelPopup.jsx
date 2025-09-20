@@ -122,5 +122,6 @@ const CommentsPopup = ({ reelId, isOpen, onClose }) => {
     </AnimatePresence>
   );
 };
+CommentsPopup.displayName = "CommentsPopup";
 
 export default CommentsPopup;
