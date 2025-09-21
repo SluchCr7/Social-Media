@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { IoClose, IoCamera } from 'react-icons/io5';
+import { IoClose, IoCamera, IoAdd } from 'react-icons/io5';
 import { useCommunity } from '../Context/CommunityContext';
 import Image from 'next/image';
 import { useAlert } from '../Context/AlertContext';
@@ -17,9 +17,16 @@ const EditCommunityMenu = ({ community, onClose }) => {
     community?.Cover?.url || '/default-cover.png'
   );
 
+  // الحقول الجديدة
+  const [tags, setTags] = useState(community?.tags || []);
+  const [newTag, setNewTag] = useState('');
+  const [rules, setRules] = useState(community?.rules || []);
+  const [newRule, setNewRule] = useState('');
+
   const { showAlert } = useAlert();
   const { editCommunity, updateCommunityPicture, updateCommunityCover } = useCommunity();
 
+  // رفع الصور
   const handleImageChange = async (e, type) => {
     const file = e.target.files[0];
     if (!file || !(file instanceof File)) {
@@ -51,6 +58,28 @@ const EditCommunityMenu = ({ community, onClose }) => {
     }
   };
 
+  // إضافة tag
+  const addTag = () => {
+    const trimmed = newTag.trim();
+    if (trimmed && !tags.includes(trimmed)) {
+      setTags([...tags, trimmed]);
+      setNewTag('');
+    }
+  };
+
+  const removeTag = (tag) => setTags(tags.filter((t) => t !== tag));
+
+  // إضافة rule
+  const addRule = () => {
+    const trimmed = newRule.trim();
+    if (trimmed && !rules.includes(trimmed)) {
+      setRules([...rules, trimmed]);
+      setNewRule('');
+    }
+  };
+
+  const removeRule = (rule) => setRules(rules.filter((r) => r !== rule));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -58,6 +87,8 @@ const EditCommunityMenu = ({ community, onClose }) => {
     if (name !== community.Name) updatedData.Name = name;
     if (description !== community.description) updatedData.description = description;
     if (isPrivate !== community.isPrivate) updatedData.isPrivate = isPrivate;
+    if (JSON.stringify(tags) !== JSON.stringify(community.tags)) updatedData.tags = tags;
+    if (JSON.stringify(rules) !== JSON.stringify(community.rules)) updatedData.rules = rules;
 
     if (Object.keys(updatedData).length > 0) {
       try {
@@ -116,6 +147,7 @@ const EditCommunityMenu = ({ community, onClose }) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="mt-6 space-y-4 px-2">
+
           <div>
             <label className="block mb-1 font-medium">Community Name</label>
             <input
@@ -148,6 +180,59 @@ const EditCommunityMenu = ({ community, onClose }) => {
             <label htmlFor="isPrivate" className="font-medium cursor-pointer">
               Private Community
             </label>
+          </div>
+
+          {/* Tags */}
+          <div>
+            <label className="block mb-1 font-medium">Tags</label>
+            <div className="flex gap-2 flex-wrap mb-2">
+              {tags.map((t, idx) => (
+                <span
+                  key={idx}
+                  className="bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 px-2 py-1 rounded-full flex items-center gap-1 cursor-pointer"
+                  onClick={() => removeTag(t)}
+                >
+                  {t} &times;
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                placeholder="Add new tag"
+                className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button type="button" onClick={addTag} className="px-3 py-2 bg-blue-600 text-white rounded-lg">
+                <IoAdd />
+              </button>
+            </div>
+          </div>
+
+          {/* Rules */}
+          <div>
+            <label className="block mb-1 font-medium">Rules</label>
+            <div className="flex flex-col gap-2 mb-2">
+              {rules.map((r, idx) => (
+                <div key={idx} className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-lg">
+                  <span>{r}</span>
+                  <button type="button" onClick={() => removeRule(r)} className="text-red-500 font-bold">&times;</button>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newRule}
+                onChange={(e) => setNewRule(e.target.value)}
+                placeholder="Add new rule"
+                className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button type="button" onClick={addRule} className="px-3 py-2 bg-blue-600 text-white rounded-lg">
+                <IoAdd />
+              </button>
+            </div>
           </div>
 
           <button

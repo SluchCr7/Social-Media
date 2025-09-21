@@ -33,6 +33,29 @@ const getCommunityByCategory = asyncHandler(async (req, res) => {
     res.status(200).json(communities)
 })
 
+// const addNewCommunity = asyncHandler(async (req, res) => {
+//     const { error } = ValidateCommunity(req.body);
+//     if (error) {
+//         return res.status(400).json({ message: error.details[0].message });
+//     }
+
+//     const community = new Community({
+//         Name: req.body.Name,
+//         Category: req.body.Category,
+//         description: req.body.description,
+//         owner: req.user._id,
+//         members: [req.user._id], // ✅ إضافة صاحب الجروب كعضو
+//     });
+
+//     await community.save();
+
+//     res.status(201).json({
+//         message: 'Community created successfully',
+//         _id: community._id,
+//     });
+// });
+
+
 const addNewCommunity = asyncHandler(async (req, res) => {
     const { error } = ValidateCommunity(req.body);
     if (error) {
@@ -45,6 +68,10 @@ const addNewCommunity = asyncHandler(async (req, res) => {
         description: req.body.description,
         owner: req.user._id,
         members: [req.user._id], // ✅ إضافة صاحب الجروب كعضو
+        tags: req.body.tags || [], // ✅ إضافة التاجات
+        rules: req.body.rules || [], // ✅ إضافة القواعد
+        isPrivate: req.body.isPrivate || false,
+        isForAdults: req.body.isForAdults || false,
     });
 
     await community.save();
@@ -52,9 +79,9 @@ const addNewCommunity = asyncHandler(async (req, res) => {
     res.status(201).json({
         message: 'Community created successfully',
         _id: community._id,
+        community
     });
 });
-
 
 const deleteCommunity = asyncHandler(async (req, res) => {
     const community = await Community.findById(req.params.id)
@@ -98,21 +125,50 @@ const joinTheCommunity = asyncHandler(async (req, res) => {
 
 });
   
-const editCommunity = asyncHandler(async(req,res)=>{
-    const { error } = ValidateCommunityUpdate(req.body)
+const editCommunity = asyncHandler(async (req, res) => {
+    const { error } = ValidateCommunityUpdate(req.body);
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
-    const community = await Community.findByIdAndUpdate(req.params.id, {
-        $set: {
-            Name: req.body.Name,
-            Category: req.body.Category,
-        description: req.body.description,
-            isPrivate: req.body.isPrivate
-        }
-    }, { new: true })
-    res.status(200).json(community)
-})
+
+    const updateData = {
+        ...(req.body.Name && { Name: req.body.Name }),
+        ...(req.body.Category && { Category: req.body.Category }),
+        ...(req.body.description && { description: req.body.description }),
+        ...(typeof req.body.isPrivate === "boolean" && { isPrivate: req.body.isPrivate }),
+        ...(typeof req.body.isForAdults === "boolean" && { isForAdults: req.body.isForAdults }),
+        ...(req.body.tags && { tags: req.body.tags }),
+        ...(req.body.rules && { rules: req.body.rules })
+    };
+
+    const community = await Community.findByIdAndUpdate(
+        req.params.id,
+        { $set: updateData },
+        { new: true }
+    ).populate("owner members Admins joinRequests", "username profileName profilePhoto");
+
+    if (!community) {
+        return res.status(404).json({ message: "Community not found" });
+    }
+
+    res.status(200).json({ message: "Community updated successfully", community });
+});
+
+// const editCommunity = asyncHandler(async(req,res)=>{
+//     const { error } = ValidateCommunityUpdate(req.body)
+//     if (error) {
+//         return res.status(400).json({ message: error.details[0].message });
+//     }
+//     const community = await Community.findByIdAndUpdate(req.params.id, {
+//         $set: {
+//             Name: req.body.Name,
+//             Category: req.body.Category,
+//         description: req.body.description,
+//             isPrivate: req.body.isPrivate
+//         }
+//     }, { new: true })
+//     res.status(200).json(community)
+// })
 
 /**
  * @desc update Community Photo

@@ -1,81 +1,101 @@
-
-const mongoose = require('mongoose')
-const joi = require('joi')
+const mongoose = require('mongoose');
+const joi = require('joi');
+const slugify = require('slugify'); // لتوليد slug تلقائياً
 
 const communitySchema = new mongoose.Schema({
     Picture: {
-        type : Object, 
-        default:{
+        type: Object,
+        default: {
             url: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
-            publicId : null
+            publicId: null
+        }
+    },
+    Cover: {
+        type: Object,
+        default: {
+            url: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+            publicId: null
         }
     },
     Name: {
         type: String,
-        required : true,
+        required: true
     },
-    description : {
+    slug: {
         type: String,
-        default : "Group Description"
+        unique: true
+    },
+    description: {
+        type: String,
+        default: "Group Description"
     },
     members: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-        }
+        { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
     ],
-    isPrivate: {
-        type: Boolean,
-        default: false,
-    },
-    owner: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-    },
     Admins: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-        }
+        { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
     ],
-    Category : {
-        type : String,
-        required : true
+    owner: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'User'
     },
-    Cover: {
-        type : Object, 
-        default:{
-            url: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
-            publicId : null
-        }
+    Category: {
+        type: String,
+        required: true
+    },
+    tags: {
+        type: [String],
+        default: []
     },
     rules: {
         type: [String],
         default: []
     },
     joinRequests: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        }
+        { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    ],
+    isPrivate: {
+        type: Boolean,
+        default: false
+    },
+    isForAdults: {
+        type: Boolean,
+        default: false
+    },
+    memberCount: {
+        type: Number,
+        default: 0
+    },
+    postCount: {
+        type: Number,
+        default: 0
+    },
+    pinnedPosts: [
+        { type: mongoose.Schema.Types.ObjectId, ref: 'Post' }
     ]
+}, { timestamps: true });
 
-}, {
-    timestamps: true
-})
+// توليد slug تلقائياً قبل حفظ الـ document
+communitySchema.pre('save', function(next) {
+    if (this.isModified('Name')) {
+        this.slug = slugify(this.Name, { lower: true, strict: true });
+    }
+    next();
+});
 
-const Community = mongoose.model('Community', communitySchema)
+const Community = mongoose.model('Community', communitySchema);
 
+// Joi Validation
 const ValidateCommunity = (obj) => {
     const schema = joi.object({
         Name: joi.string().required(),
         description: joi.string(),
         isPrivate: joi.boolean(),
-        Category : joi.string().required()
-    })
-    return schema.validate(obj, {    
-        abortEarly: false
-    })
+        Category: joi.string().required(),
+        tags: joi.array().items(joi.string()),
+        rules: joi.array().items(joi.string()),
+        isForAdults: joi.boolean()
+    });
+    return schema.validate(obj, { abortEarly: false });
 }
 
 const ValidateCommunityUpdate = (obj) => {
@@ -83,10 +103,11 @@ const ValidateCommunityUpdate = (obj) => {
         Name: joi.string(),
         description: joi.string(),
         isPrivate: joi.boolean(),
-    })
-    return schema.validate(obj, {
-        abortEarly: false
-    })
+        tags: joi.array().items(joi.string()),
+        rules: joi.array().items(joi.string()),
+        isForAdults: joi.boolean()
+    });
+    return schema.validate(obj, { abortEarly: false });
 }
 
-module.exports = {Community , ValidateCommunity , ValidateCommunityUpdate}
+module.exports = { Community, ValidateCommunity, ValidateCommunityUpdate };
