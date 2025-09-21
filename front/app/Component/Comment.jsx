@@ -128,12 +128,11 @@
 // };
 
 // export default Comment;
-
 'use client';
 import Image from 'next/image';
 import React, { useState } from 'react';
 import { CiHeart } from 'react-icons/ci';
-import { FaRegCommentDots } from 'react-icons/fa';
+import { FaRegCommentDots, FaRegEdit } from 'react-icons/fa';
 import { IoIosHeart, IoIosSend } from 'react-icons/io';
 import { MdOutlineDelete } from 'react-icons/md';
 import { useComment } from '../Context/CommentContext';
@@ -193,33 +192,40 @@ const Comment = ({ comment }) => {
           className="rounded-full object-cover w-10 h-10 ring-2 ring-blue-400 transition-transform transform hover:scale-105"
         />
         <div className="flex-1 flex flex-col gap-2">
-          {/* Comment Body */}
-          <div className="bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3 shadow-sm border border-gray-200 dark:border-gray-700 transition-transform transform hover:scale-[1.01]">
+          {/* Comment Card */}
+          <div className="bg-white dark:bg-gray-900 rounded-2xl px-4 py-3 shadow-md border border-gray-200 dark:border-gray-700 transition hover:shadow-lg">
             <div className="flex justify-between items-start flex-wrap gap-2">
+              {/* User Info */}
               <div className="text-sm md:text-base text-gray-700 dark:text-gray-300">
-                <span className="font-semibold text-black dark:text-white">{comment.owner.username}</span>
-                <span className="text-xs md:text-sm ml-2 text-gray-500">{comment.owner.profileName}</span>
-                <span className="text-xs md:text-sm ml-2 text-gray-400">· {new Date(comment.createdAt).toLocaleDateString()}</span>
+                <span className="font-semibold text-black dark:text-white">
+                  {comment.owner.username}
+                </span>
+                <span className="text-xs md:text-sm ml-2 text-gray-500">
+                  {comment.owner.profileName}
+                </span>
+                <span className="text-xs md:text-sm ml-2 text-gray-400">
+                  · {new Date(comment.createdAt).toLocaleDateString()}
+                </span>
               </div>
+
+              {/* Actions (Edit / Delete) */}
               {user?._id === comment?.owner?._id && (
                 <div className="flex items-center gap-2">
                   {!isEditing && (
-                    <button
+                    <FaRegEdit
                       onClick={() => setIsEditing(true)}
-                      className="text-blue-500 text-sm hover:underline"
-                    >
-                      Edit
-                    </button>
+                      className="text-blue-500 text-lg md:text-xl cursor-pointer hover:scale-110 transition-transform p-1 rounded-full hover:bg-blue-100 dark:hover:bg-blue-800"
+                    />
                   )}
                   <MdOutlineDelete
-                    className="text-red-500 text-lg md:text-xl cursor-pointer hover:scale-110 transition-transform mt-1"
+                    className="text-red-500 text-lg md:text-xl cursor-pointer hover:scale-110 transition-transform p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-800"
                     onClick={() => deleteComment(comment._id, comment.postId)}
                   />
                 </div>
               )}
             </div>
 
-            {/* نص التعليق أو وضع التعديل */}
+            {/* Text OR Edit Mode */}
             {isEditing ? (
               <div className="flex flex-col gap-2 mt-2">
                 <input
@@ -227,14 +233,16 @@ const Comment = ({ comment }) => {
                   value={editText}
                   onChange={(e) => setEditText(e.target.value)}
                   dir={/[\u0600-\u06FF]/.test(editText) ? 'rtl' : 'ltr'}
-                  className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-md outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base text-black dark:text-white"
+                  className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base text-black dark:text-white"
                 />
                 <div className="flex gap-2">
                   <button
                     onClick={handleUpdateComment}
                     disabled={loadingEdit}
-                    className={`px-3 py-1 rounded-md text-white text-sm ${
-                      loadingEdit ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+                    className={`px-4 py-1.5 rounded-lg text-white text-sm font-medium shadow ${
+                      loadingEdit
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-blue-500 hover:bg-blue-600'
                     }`}
                   >
                     {loadingEdit ? 'Saving...' : 'Save'}
@@ -244,7 +252,7 @@ const Comment = ({ comment }) => {
                       setIsEditing(false);
                       setEditText(comment.text);
                     }}
-                    className="px-3 py-1 rounded-md text-gray-600 dark:text-gray-300 text-sm hover:underline"
+                    className="px-4 py-1.5 rounded-lg text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-800"
                   >
                     Cancel
                   </button>
@@ -255,7 +263,9 @@ const Comment = ({ comment }) => {
                 const isArabic = /[\u0600-\u06FF]/.test(comment.text);
                 return (
                   <p
-                    className={`text-sm md:text-base leading-relaxed ${isArabic ? 'text-right' : 'text-left'} text-gray-800 dark:text-gray-200`}
+                    className={`mt-2 text-sm md:text-base leading-relaxed ${
+                      isArabic ? 'text-right' : 'text-left'
+                    } text-gray-800 dark:text-gray-200`}
                     dir={isArabic ? 'rtl' : 'ltr'}
                   >
                     {comment.text}
@@ -265,8 +275,8 @@ const Comment = ({ comment }) => {
             )}
           </div>
 
-          {/* Actions */}
-          <div className="flex flex-wrap items-center gap-4 mt-2 text-gray-500 dark:text-gray-400 text-sm md:text-base ml-1">
+          {/* Actions (Like / Reply) */}
+          <div className="flex flex-wrap items-center gap-6 mt-2 text-gray-500 dark:text-gray-400 text-sm md:text-base ml-1">
             <div
               onClick={() => likeComment(comment._id, comment.postId)}
               className="flex items-center gap-1 cursor-pointer hover:text-red-500 transition transform hover:scale-110"
