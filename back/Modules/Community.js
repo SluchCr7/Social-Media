@@ -21,10 +21,6 @@ const communitySchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    slug: {
-        type: String,
-        unique: true
-    },
     description: {
         type: String,
         default: "Group Description"
@@ -61,26 +57,8 @@ const communitySchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    memberCount: {
-        type: Number,
-        default: 0
-    },
-    postCount: {
-        type: Number,
-        default: 0
-    },
-    pinnedPosts: [
-        { type: mongoose.Schema.Types.ObjectId, ref: 'Post' }
-    ]
 }, { timestamps: true });
 
-// توليد slug تلقائياً قبل حفظ الـ document
-communitySchema.pre('save', function(next) {
-    if (this.isModified('Name')) {
-        this.slug = slugify(this.Name, { lower: true, strict: true });
-    }
-    next();
-});
 
 const Community = mongoose.model('Community', communitySchema);
 
