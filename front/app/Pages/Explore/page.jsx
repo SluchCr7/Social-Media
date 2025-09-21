@@ -80,12 +80,12 @@ const Search = () => {
       text-lightMode-text dark:text-darkMode-text transition">
 
       {/* Header */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 flex items-center flex-col gap-2 justify-center w-full">
         <motion.h2
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.4 }}
-          className="text-4xl font-extrabold flex items-center gap-1
+          className="text-4xl font-extrabold flex items-center gap-1 justify-center w-full
             text-lightMode-fg dark:text-darkMode-fg"
         >
           <IoIosSearch /> Explore
