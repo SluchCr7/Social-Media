@@ -130,7 +130,7 @@ const CreateCommunityModal = ({ show, onClose, form, setForm, handleCreate, isCr
               <div>
                 <label className="text-sm text-lightMode-text2 dark:text-darkMode-text2">Name</label>
                 <input
-                  value={form.name}
+                  value={form.Name}
                   onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                   required
                   className="w-full mt-1 p-3 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text"
@@ -141,7 +141,7 @@ const CreateCommunityModal = ({ show, onClose, form, setForm, handleCreate, isCr
               {/* Category */}
               <div>
                 <label className="text-sm text-lightMode-text2 dark:text-darkMode-text2">Category</label>
-                <select value={form.category} onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))} className="w-full mt-1 p-3 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text">
+                <select value={form.Category} onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))} className="w-full mt-1 p-3 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text">
                   {CATEGORY_OPTIONS.filter(Boolean).map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
@@ -207,7 +207,7 @@ const CreateCommunityModal = ({ show, onClose, form, setForm, handleCreate, isCr
               {/* Preview */}
               <div className="mt-2 border rounded-lg p-3 bg-lightMode-menu dark:bg-darkMode-menu">
                 <h4 className="font-semibold">Preview:</h4>
-                <p className="text-sm text-lightMode-text dark:text-darkMode-text">{form.name || 'Community Name'}</p>
+                <p className="text-sm text-lightMode-text dark:text-darkMode-text">{form.Name || 'Community Name'}</p>
                 <p className="text-xs text-lightMode-text2 dark:text-darkMode-text2">{form.description || 'Community Description'}</p>
                 <div className="flex gap-2 flex-wrap mt-1">
                   {(form.tags || []).map((tag) => <Badge key={tag} className="bg-sky-100 text-sky-700 dark:bg-sky-900/30">{tag}</Badge>)}
@@ -284,9 +284,9 @@ export default function CommunityPage() {
   const [showCreateModal, setShowCreateModal] = useState(false)
 
   const [form, setForm] = useState({
-      name: '',
+      Name: '',
       description: '',
-      category: 'Technology',
+      Category: 'Technology',
       cover: null,
       avatar: null,
       tags: [],
@@ -336,13 +336,13 @@ export default function CommunityPage() {
 
   const handleCreate = async (e) => {
     e.preventDefault()
-    if (!form.name.trim() || !form.description.trim()) return
+    if (!form.Name.trim() || !form.description.trim()) return
     try {
       setIsCreating(true)
       // تمرير form كامل بما يشمل tags و rules إلى addCommunity
       await addCommunity?.({
-        name: form.name.trim(),
-        category: form.category,
+        Name: form.Name.trim(),
+        Category: form.Category,
         description: form.description.trim(),
         // cover: form.cover,
         // avatar: form.avatar,
