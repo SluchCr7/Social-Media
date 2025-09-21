@@ -131,7 +131,7 @@ const CreateCommunityModal = ({ show, onClose, form, setForm, handleCreate, isCr
                 <label className="text-sm text-lightMode-text2 dark:text-darkMode-text2">Name</label>
                 <input
                   value={form.Name}
-                  onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                  onChange={(e) => setForm((p) => ({ ...p, Name: e.target.value }))}
                   required
                   className="w-full mt-1 p-3 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text"
                   placeholder="e.g. Frontend Devs"
@@ -141,7 +141,7 @@ const CreateCommunityModal = ({ show, onClose, form, setForm, handleCreate, isCr
               {/* Category */}
               <div>
                 <label className="text-sm text-lightMode-text2 dark:text-darkMode-text2">Category</label>
-                <select value={form.Category} onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))} className="w-full mt-1 p-3 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text">
+                <select value={form.Category} onChange={(e) => setForm((p) => ({ ...p, Category: e.target.value }))} className="w-full mt-1 p-3 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text">
                   {CATEGORY_OPTIONS.filter(Boolean).map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
@@ -350,9 +350,9 @@ export default function CommunityPage() {
         rules: form.rules
       })
       setForm({
-        name: '',
+        Name: '',
         description: '',
-        category: 'Technology',
+        Category: 'Technology',
         cover: null,
         avatar: null,
         tags: [],
