@@ -66,7 +66,9 @@ const Search = () => {
   const topHashtags = Object.entries(hashtagCount).sort((a, b) => b[1] - a[1]);
 
   return (
-    <div className="w-full min-h-screen px-4 sm:px-8 py-8 text-lightMode-text dark:text-darkMode-text bg-gradient-to-b from-gray-50 to-white dark:from-[#1f1f1f] dark:to-[#2b2d31] transition">
+    <div className="w-full min-h-screen px-4 sm:px-8 py-8 
+      bg-lightMode-bg dark:bg-darkMode-bg 
+      text-lightMode-text dark:text-darkMode-text transition">
 
       {/* Header */}
       <div className="text-center mb-8">
@@ -74,11 +76,12 @@ const Search = () => {
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.4 }}
-          className="text-4xl font-extrabold text-gray-900 dark:text-white"
+          className="text-4xl font-extrabold 
+            text-lightMode-fg dark:text-darkMode-fg"
         >
           🔍 Explore
         </motion.h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
+        <p className="mt-2 text-lightMode-text2 dark:text-darkMode-text2">
           Discover friends, creators, trending topics and news.
         </p>
       </div>
@@ -90,27 +93,32 @@ const Search = () => {
           placeholder="Search by username or name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full py-3 pl-12 pr-12 rounded-2xl bg-white/80 dark:bg-[#2b2d31] backdrop-blur-md
-            text-gray-800 dark:text-gray-200 placeholder-gray-400
-            focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-600 focus:outline-none shadow-md transition"
+          className="w-full py-3 pl-12 pr-12 rounded-2xl 
+            bg-lightMode-menu dark:bg-darkMode-menu
+            text-lightMode-text dark:text-darkMode-text 
+            placeholder-lightMode-text2 dark:placeholder-darkMode-text2
+            focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-600 
+            focus:outline-none shadow-md transition"
         />
         <FiSearch
           className={`absolute left-4 top-1/2 -translate-y-1/2 ${
-            search ? 'text-indigo-500' : 'text-gray-400'
+            search ? 'text-indigo-500' : 'text-lightMode-text2 dark:text-darkMode-text2'
           }`}
           size={20}
         />
         {search && (
           <button
             onClick={() => setSearch('')}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-gray-200 dark:bg-gray-700 p-1.5 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+            className="absolute right-4 top-1/2 -translate-y-1/2 
+              bg-lightMode-menu dark:bg-darkMode-menu 
+              p-1.5 rounded-full hover:opacity-80 transition"
           >
-            <FiX size={16} className="text-gray-600 dark:text-gray-300" />
+            <FiX size={16} className="text-lightMode-text2 dark:text-darkMode-text2" />
           </button>
         )}
       </div>
 
-      {/* Search Results - تظهر مباشرة تحت البحث */}
+      {/* Search Results */}
       {search.trim() && (
         <motion.div
           key="autocomplete-results"
@@ -118,7 +126,9 @@ const Search = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -5 }}
           transition={{ duration: 0.2 }}
-          className="max-w-2xl mx-auto space-y-2 bg-white dark:bg-[#2b2d31] rounded-xl shadow-md p-2 mb-6"
+          className="max-w-2xl mx-auto space-y-2 
+            bg-lightMode-menu dark:bg-darkMode-menu 
+            rounded-xl shadow-md p-2 mb-6"
         >
           {filteredUsers.length > 0 ? (
             filteredUsers
@@ -127,10 +137,12 @@ const Search = () => {
                 <Link
                   key={u._id}
                   href={`/Pages/User/${u._id}`}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#3a3b3f] transition"
+                  className="flex items-center gap-3 p-2 rounded-lg 
+                    hover:bg-lightMode-bg dark:hover:bg-darkMode-bg transition"
                 >
                   <div className="w-10 h-10 relative">
-                    <div className="w-full h-full rounded-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[1px]">
+                    <div className="w-full h-full rounded-full 
+                      bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[1px]">
                       <Image
                         src={u.profilePhoto?.url || '/default-avatar.png'}
                         alt="profile"
@@ -141,13 +153,18 @@ const Search = () => {
                     </div>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{u.username}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{u.profileName || 'No bio'}</span>
+                    <span className="text-sm font-semibold 
+                      text-lightMode-text dark:text-darkMode-text">
+                      {u.username}
+                    </span>
+                    <span className="text-xs text-lightMode-text2 dark:text-darkMode-text2 truncate">
+                      {u.profileName || 'No bio'}
+                    </span>
                   </div>
                 </Link>
               ))
           ) : (
-            <p className="text-center text-gray-500 dark:text-gray-400 py-4">
+            <p className="text-center text-lightMode-text2 dark:text-darkMode-text2 py-4">
               No users found for <span className="font-medium text-indigo-600 dark:text-indigo-400">{search}</span>
             </p>
           )}
@@ -163,7 +180,7 @@ const Search = () => {
             className={`px-4 py-2 rounded-full font-semibold transition
               ${activeTab === tab
                 ? 'bg-indigo-600 text-white shadow-lg'
-                : 'bg-gray-200 dark:bg-[#2b2d31] text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-[#3a3b3f]'}`}
+                : 'bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text2 dark:text-darkMode-text2 hover:opacity-80'}`}
           >
             {tab}
           </button>
@@ -189,13 +206,16 @@ const Search = () => {
                   <Link
                     key={tag}
                     href={`/Pages/Hashtag/${encodeURIComponent(tag)}`}
-                    className="flex justify-between items-center p-3 rounded-xl bg-white dark:bg-[#2b2d31] hover:bg-gray-100 dark:hover:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-200"
+                    className="flex justify-between items-center p-3 rounded-xl 
+                      bg-lightMode-menu dark:bg-darkMode-menu 
+                      hover:opacity-80 shadow-sm hover:shadow-md transition-all duration-200"
                   >
                     <div className="flex flex-col">
-                      <span className="text-gray-900 dark:text-gray-100 font-semibold text-sm sm:text-base">
+                      <span className="font-semibold text-sm sm:text-base 
+                        text-lightMode-text dark:text-darkMode-text">
                         #{tag}
                       </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                      <span className="text-xs text-lightMode-text2 dark:text-darkMode-text2">
                         {count} posts
                       </span>
                     </div>
@@ -230,17 +250,19 @@ const Search = () => {
                   href={item?.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex gap-4 p-4 hover:bg-gray-100 dark:hover:bg-[#1e2025] transition rounded-xl"
+                  className="flex gap-4 p-4 hover:opacity-80 transition rounded-xl 
+                    bg-lightMode-menu dark:bg-darkMode-menu"
                 >
                   <div className="flex-1">
-                    <h3 className="text-sm break-all whitespace-pre-wrap font-semibold text-gray-800 dark:text-gray-100 leading-snug">
+                    <h3 className="text-sm break-all whitespace-pre-wrap font-semibold 
+                      text-lightMode-text dark:text-darkMode-text leading-snug">
                       {item?.title}
                     </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-lightMode-text2 dark:text-darkMode-text2 mt-1">
                       {new Date(item?.publishedAt).toLocaleDateString()}
                     </p>
                   </div>
-                  <div className="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden bg-gray-200 dark:bg-gray-800">
+                  <div className="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden bg-lightMode-bg dark:bg-darkMode-bg">
                     <Image
                       src={item?.image}
                       alt="news"
@@ -268,10 +290,13 @@ const Search = () => {
                 {suggestedUsers.map((u) => (
                   <div
                     key={u._id}
-                    className="flex flex-col items-center gap-2 bg-white/70 dark:bg-[#2b2d31]/80 rounded-xl p-3 hover:scale-105 hover:shadow-lg transition"
+                    className="flex flex-col items-center gap-2 
+                      bg-lightMode-menu/70 dark:bg-darkMode-menu/80 
+                      rounded-xl p-3 hover:scale-105 hover:shadow-lg transition"
                   >
                     <div className="relative w-16 h-16">
-                      <div className="w-full h-full rounded-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[2px]">
+                      <div className="w-full h-full rounded-full 
+                        bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[2px]">
                         <Image
                           src={u.profilePhoto?.url || '/default-avatar.png'}
                           alt="profile"
@@ -281,15 +306,16 @@ const Search = () => {
                         />
                       </div>
                     </div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                    <p className="text-sm font-semibold text-lightMode-text dark:text-darkMode-text">
                       {u.username} {u.isAccountWithPremiumVerify && <span className="text-blue-500 text-xs animate-pulse">✔️</span>}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate w-32">
+                    <p className="text-xs text-lightMode-text2 dark:text-darkMode-text2 truncate w-32">
                       {u.profileName || 'No bio available'}
                     </p>
                     <motion.button
                       whileTap={{ scale: 0.9 }}
-                      className="px-3 py-1.5 border border-indigo-600 text-indigo-600 text-sm rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition flex items-center gap-1"
+                      className="px-3 py-1.5 border border-indigo-600 text-indigo-600 text-sm rounded-lg 
+                        hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition flex items-center gap-1"
                     >
                       <FiUserPlus size={16} /> Follow
                     </motion.button>
