@@ -237,7 +237,13 @@ const PostPage = ({ params }) => {
           {/* Add Comment */}
           {!post.isCommentOff && isLogin && (
             <div className="flex items-center gap-2 p-2 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
-              <Image src={user?.profilePhoto?.url} alt="me" width={32} height={32} className="rounded-full" />
+              <Image
+                src={user?.profilePhoto?.url || '/default-profile.png'}
+                alt="User Profile"
+                width={40}
+                height={40}
+                className="w-8 h-8 rounded-full object-cover"
+              />
               <textarea
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}

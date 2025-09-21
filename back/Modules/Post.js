@@ -8,6 +8,9 @@ const PostSchema = new mongoose.Schema({
   Photos: {
     type: Array,
   },
+  Videos: {
+    type: Array,
+  },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

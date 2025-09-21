@@ -45,7 +45,7 @@ const Register = () => {
         {/* Left Side (Illustration / Image) */}
         <div className="hidden md:flex items-center justify-center bg-blue-50">
           <img
-            src="/register1.svg"
+            src="/register2.svg"
             alt="Register Illustration"
             className="w-3/4 h-auto"
           />
