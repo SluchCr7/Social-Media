@@ -504,6 +504,10 @@ export const MessageContextProvider = ({ children }) => {
     ? { backgroundColor: backgroundValue }
     : { backgroundImage: `url(${backgroundValue})`, backgroundSize: 'cover', backgroundPosition: 'center' };
 
+  useEffect(()=>{
+    console.log(unReadedMessage)
+  },[unReadedMessage])
+  
   return (
     <MessageContext.Provider
       value={{
