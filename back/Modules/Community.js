@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const joi = require('joi');
-const slugify = require('slugify'); // لتوليد slug تلقائياً
 
 const communitySchema = new mongoose.Schema({
     Picture: {
