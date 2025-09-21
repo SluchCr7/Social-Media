@@ -72,13 +72,16 @@ const Chat = ({ onBack }) => {
             </div>
 
             {/* Messages under this date */}
-            {groupedMessages[dateKey].map((msg, index) =>
-              msg.sender?._id === user?._id ? (
+            {groupedMessages[dateKey].map((msg, index) => {
+              const senderId = msg.sender?._id || msg.sender; // سواء object أو string
+              const isMine = senderId === user?._id;
+
+              return isMine ? (
                 <SenderMessage key={msg._id || index} message={msg} user={user} />
               ) : (
                 <ReceiverMessage key={msg._id || index} message={msg} user={selectedUser} />
-              )
-            )}
+              );
+            })}
           </div>
         ))}
         <div ref={ContainerMessageRef}></div>

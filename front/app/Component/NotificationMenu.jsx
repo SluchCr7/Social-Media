@@ -43,7 +43,7 @@ const NotificationMenu = ({ showNotifications, setShowNotifications }) => {
               >
                 <div className="flex items-center gap-3 mb-3">
                   <Image
-                    src={user?.profilePhoto?.url || '/default-profile.png'}
+                    src={notif?.sender?.profilePhoto?.url || '/default-profile.png'}
                     alt="User Profile"
                     width={40}
                     height={40}
