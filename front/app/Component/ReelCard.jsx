@@ -237,7 +237,6 @@
 
 // ReelCard.displayName = "ReelCard";
 // export default ReelCard;
-
 'use client';
 
 import React, { forwardRef, useRef, useEffect, useState } from 'react';
@@ -256,7 +255,7 @@ import { RiShareForwardLine } from "react-icons/ri";
 import { IoLinkOutline } from "react-icons/io5";
 import CommentsPopup from './CommentReelPopup';
 
-const ReelCard = forwardRef(({ reel, isActive, isMuted }, ref) => {
+const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
   const videoRef = useRef(null);
   const { user } = useAuth();
   const { deleteReel, likeReel, viewReel , shareReel} = useReels();
@@ -425,7 +424,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted }, ref) => {
       {/* Mute/Unmute */}
       <button
         className="absolute top-5 right-5 bg-black/40 p-2 rounded-full text-white hover:bg-black/60 transition"
-        onClick={() => {}}
+        onClick={toggleMute}
       >
         {isMuted ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
       </button>
