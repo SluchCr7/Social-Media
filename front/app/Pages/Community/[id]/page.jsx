@@ -217,12 +217,12 @@ const Page = ({ params }) => {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold flex items-center gap-3">
             {CommunitySelected?.Name}
-            <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{CommunitySelected?.isPrivate ? 'Private' : 'Public'}</span>
+            <span className="text-xs text-lightMode-text dark:text-darkMode-text px-2 py-0.5 rounded">{CommunitySelected?.isPrivate ? 'Private' : 'Public'}</span>
           </h1>
           <div className="text-sm text-gray-500">Created: {new Date(CommunitySelected?.createdAt).toLocaleDateString()}</div>
         </div>
 
-        <p className="text-sm text-gray-700 whitespace-pre-wrap break-words leading-relaxed bg-white p-4 rounded-md shadow-sm">
+        <p className="text-sm text-gray-900 dark:text-gray-200 whitespace-pre-wrap break-words leading-relaxed p-4 rounded-md shadow-sm">
           {CommunitySelected.description}
         </p>
 
@@ -236,12 +236,12 @@ const Page = ({ params }) => {
             {(isOwner(user?._id) || isAdmin(user?._id)) && (
               <button
                 onClick={() => setShowRequests(true)}
-                className="text-sm px-3 py-1 rounded-md bg-yellow-400 hover:bg-yellow-500"
+                className="text-sm px-3 py-1 rounded-md bg-yellow-400 hover:bg-yellow-500 text-white"
               >
                 Requests ({CommunitySelected?.joinRequests?.length || 0})
               </button>
             )}
-            <button onClick={() => setShowMembers(true)} className="text-sm px-3 py-1 rounded-md bg-gray-200 hover:bg-gray-300">
+            <button onClick={() => setShowMembers(true)} className="text-sm px-3 py-1 rounded-md bg-lightMode-bg dark:bg-darkMode-bg hover:bg-lightMode-menu dark:hover:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text">
               See all
             </button>
           </div>

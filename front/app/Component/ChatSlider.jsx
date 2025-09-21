@@ -6,14 +6,14 @@ import { BsThreeDots } from 'react-icons/bs';
 import { useMessage } from '../Context/MessageContext';
 import { useAuth } from '../Context/AuthContext';
 import UserCard from './UserCard';
-import { Users2, Search } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Users2, Search, Settings, UserCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 const ChatSlider = () => {
   const {
     users,
     setSelectedUser,
-    backgroundStyle,
     markAllAsReadBetweenUsers,
     unreadCountPerUser,
     selectedUser,
@@ -21,6 +21,9 @@ const ChatSlider = () => {
 
   const { user, onlineUsers } = useAuth();
   const [searchValue, setSearchValue] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const router = useRouter();
 
   // فلترة المستخدمين بالبحث
   const filteredUsers = users.filter((u) =>
@@ -29,7 +32,6 @@ const ChatSlider = () => {
 
   return (
     <motion.aside
-      // style={backgroundStyle}
       initial={{ x: -300, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
@@ -44,7 +46,7 @@ const ChatSlider = () => {
       `}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-darkMode-menu">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-darkMode-menu relative">
         <div className="flex items-center gap-3">
           <Image
             src={user?.profilePhoto?.url || '/default.jpg'}
@@ -62,7 +64,59 @@ const ChatSlider = () => {
             </span>
           </div>
         </div>
-        <BsThreeDots className="text-xl text-gray-700 dark:text-gray-300 cursor-pointer hover:rotate-90 transition" />
+
+        {/* Menu Dots */}
+        <div className="relative">
+          <BsThreeDots
+            className="text-xl text-gray-700 dark:text-gray-300 cursor-pointer hover:rotate-90 transition"
+            onClick={() => setMenuOpen(!menuOpen)}
+          />
+
+          <AnimatePresence>
+            {menuOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="absolute right-0 mt-2 w-48 bg-white dark:bg-darkMode-fg shadow-lg rounded-xl border border-gray-200 dark:border-darkMode-border z-50 overflow-hidden"
+              >
+                <button
+                  onClick={() => {
+                    router.push(`/Pages/Profile`);
+                    setMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                >
+                  <UserCheck className="w-4 h-4" />
+                  Profile
+                </button>
+
+                <button
+                  onClick={() => {
+                    users.forEach(u => markAllAsReadBetweenUsers(u._id));
+                    setMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                >
+                  <Users2 className="w-4 h-4" />
+                  Mark All as Read
+                </button>
+
+                <button
+                  onClick={() => {
+                    router.push('/Pages/Setting');
+                    setMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                >
+                  <Settings className="w-4 h-4" />
+                  Settings
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Search */}
@@ -101,9 +155,7 @@ const ChatSlider = () => {
                   markAllAsReadBetweenUsers(u?._id);
                 }}
                 className={`p-3 rounded-xl cursor-pointer flex items-center gap-3 transition hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                  selectedUser?._id === u._id
-                    ? 'bg-gray-200 dark:bg-gray-700'
-                    : ''
+                  selectedUser?._id === u._id ? 'bg-gray-200 dark:bg-gray-700' : ''
                 }`}
               />
             </motion.div>

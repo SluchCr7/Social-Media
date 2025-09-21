@@ -10,6 +10,7 @@ export const CommentContext = createContext();
 export const useComment = () => useContext(CommentContext);
 
 export const CommentContextProvider = ({ children }) => {
+  
   const [comments, setComments] = useState([]);
   const { user } = useAuth();
   const { addNotify } = useNotify();

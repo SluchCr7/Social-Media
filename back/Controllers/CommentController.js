@@ -28,50 +28,40 @@ const getAllComments = asyncHandler(async (req, res) => {
 });
 
 // const getAllComments = asyncHandler(async (req, res) => {
-//   const postId = req.params.postId;
-//   const page = parseInt(req.query.page) || 1;       // ?page=2
-//   const limit = parseInt(req.query.limit) || 10;    // ?limit=10
+//  const postId = req.params.postId;
+//   const page = parseInt(req.query.page) || 1;
+//   const limit = parseInt(req.query.limit) || 10;
 //   const skip = (page - 1) * limit;
 
-//   // 📌 الأول: هجيب الكومنتات الأساسية (اللي parent = null)
-//   const rootComments = await Comment.find({ postId, parent: null })
-//     .populate('owner', 'username profilePhoto profileName')
-//     .sort({ createdAt: -1 })   // الأحدث الأول
+//   // جلب التعليقات الأساسية مع Pagination
+//   const comments = await Comment.find({ postId })
+//     .sort({ createdAt: -1 }) // أحدث أول
 //     .skip(skip)
 //     .limit(limit)
+//     .populate('owner', 'username profilePhoto profileName')
 //     .lean();
 
-//   // 📌 هجيب الـ total علشان أرجع معاه pagination info
-//   const totalRootComments = await Comment.countDocuments({ postId, parent: null });
+//   const total = await Comment.countDocuments({ postId });
 
-//   // 📌 هجيب الـ replies لكل root comment
-//   const getReplies = async (parentId) => {
-//     const replies = await Comment.find({ parent: parentId })
-//       .populate('owner', 'username profilePhoto profileName')
-//       .sort({ createdAt: 1 }) // الأقدم الأول في الردود
-//       .lean();
-
-//     return Promise.all(
-//       replies.map(async (reply) => ({
-//         ...reply,
-//         replies: await getReplies(reply._id) // recursive
-//       }))
-//     );
+//   const buildCommentTree = (parentId = null) => {
+//     return comments
+//       .filter(comment => {
+//         if (!parentId) return !comment.parent;
+//         return String(comment.parent) === String(parentId);
+//       })
+//       .map(comment => ({
+//         ...comment,
+//         replies: buildCommentTree(comment._id)
+//       }));
 //   };
 
-//   // 📌 ضيف الـ replies على كل root comment
-//   const commentsWithReplies = await Promise.all(
-//     rootComments.map(async (comment) => ({
-//       ...comment,
-//       replies: await getReplies(comment._id)
-//     }))
-//   );
+//   const nestedComments = buildCommentTree();
 
 //   res.status(200).json({
-//     comments: commentsWithReplies,
-//     currentPage: page,
-//     totalPages: Math.ceil(totalRootComments / limit),
-//     totalRootComments
+//     comments: nestedComments,
+//     page,
+//     totalPages: Math.ceil(total / limit),
+//     totalComments: total
 //   });
 // });
 

@@ -10,7 +10,7 @@ const ChatHeader = () => {
   const { onlineUsers } = useAuth();
   return (
     <div
-      className='w-full flex items-center justify-between px-2 py-1'
+      className='w-full flex items-center justify-between px-2 py-4'
       // style={backgroundStyle}
     >
       {/* Left: Profile Info */}
