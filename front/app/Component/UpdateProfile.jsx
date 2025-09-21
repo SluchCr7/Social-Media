@@ -182,6 +182,7 @@
 // }
 
 // export default UpdateProfile
+
 'use client'
 import React, { useState, useEffect } from 'react'
 import { FiX } from "react-icons/fi"
@@ -254,6 +255,7 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
     }
   }
 
+  // إضافة اهتمامات جديدة
   const handleAddInterest = () => {
     const interest = formData.newInterest.trim()
     if (interest && !formData.interests.includes(interest)) {
@@ -265,6 +267,7 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
     }
   }
 
+  // حذف اهتمام
   const handleRemoveInterest = (interest) => {
     setFormData(prev => ({
       ...prev,
@@ -284,10 +287,8 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
     if (formData.dateOfBirth?.trim()) payload.dateOfBirth = formData.dateOfBirth
     if (formData.gender?.trim()) payload.gender = formData.gender
     if (formData.city?.trim()) payload.city = formData.city.trim()
-
-    // دمج الاهتمامات القديمة والجديدة بدون تكرار
     if (formData.interests.length > 0) {
-      payload.interests = Array.from(new Set([...(user.interests || []), ...formData.interests]))
+      payload.interests = Array.from(new Set([...(user.interests || []), ...formData.interests]));
     }
 
     const social = formData.socialLinks
@@ -362,7 +363,7 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
             </div>
           </div>
 
-          {/* Interests */}
+          {/* -------------------- Interests -------------------- */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Interests</label>
             <div className="flex flex-wrap gap-2 mb-2">
@@ -390,15 +391,16 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
             <p className="text-xs text-gray-500 mt-1">Add multiple interests, then press Enter or click +</p>
           </div>
 
-          {/* Social Links */}
+          {/* -------------------- Social Links -------------------- */}
           <div className="mt-6">
             <h3 className="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Social Links</h3>
             <div className="space-y-4">
-              {[{ name: 'github', label: 'GitHub', icon: <FaGithub /> },
+              {[
+                { name: 'github', label: 'GitHub', icon: <FaGithub /> },
                 { name: 'linkedin', label: 'LinkedIn', icon: <FaLinkedin className="text-blue-400" /> },
                 { name: 'twitter', label: 'Twitter', icon: <FaTwitter className="text-blue-500" /> },
                 { name: 'facebook', label: 'Facebook', icon: <FaFacebook className="text-blue-600" /> },
-                { name: 'website', label: 'Website', icon: <FaGlobe className="text-green-400" /> }
+                { name: 'website', label: 'Website', icon: <FaGlobe className="text-green-400" /> },
               ].map(({ name, label, icon }) => (
                 <div key={name} className="flex items-center gap-3">
                   <div className="w-8 h-8 flex items-center justify-center bg-gray-700 rounded-full">{icon}</div>
