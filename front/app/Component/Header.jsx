@@ -36,43 +36,49 @@ const Header = ({ unReadedMessage, setShowNotifications }) => {
               <>
                 {/* Notifications */}
                 <div className="relative">
-                  <Bell
-                    aria-label="Notifications"
+                  <button
                     onClick={handleBellClick}
-                    className="w-6 h-6 text-lightMode-text dark:text-darkMode-text cursor-pointer hover:text-lightMode-text2 dark:hover:text-darkMode-text hover:scale-110 transition-transform"
-                  />
+                    className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-darkMode-bg2 transition-all duration-200 ease-in-out hover:scale-110 hover:rotate-3"
+                  >
+                    <Bell className="w-5 h-5 text-lightMode-text dark:text-darkMode-text" />
+                  </button>
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center animate-bounce">
+                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-md">
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                   )}
                 </div>
+
+                {/* Upload Reel */}
                 <div className="relative">
-                  <RiVideoUploadLine
-                    aria-label="Upload Reel"
+                  <button
                     onClick={() => setShowModelAddReel(true)}
-                    className="w-6 h-6 cursor-pointer text-lightMode-text dark:text-darkMode-text hover:text-lightMode-text2 dark:hover:text-darkMode-text hover:scale-110 transition-transform"
-                  />
+                    className="p-2 rounded-full bg-gradient-to-r from-pink-500 to-orange-400 text-white shadow-md hover:scale-110 transition-all duration-200 ease-in-out"
+                  >
+                    <RiVideoUploadLine className="w-5 h-5" />
+                  </button>
                 </div>
-                {/* Messages */}
+
+                {/* Messenger */}
                 <Link href="/Pages/Messanger" className="relative">
-                  <MessageCircle
-                    aria-label="Messages"
-                    className="w-6 h-6 text-lightMode-text dark:text-darkMode-text hover:text-lightMode-text2 dark:hover:text-darkMode-text hover:scale-110 transition-transform"
-                  />
+                  <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-darkMode-bg2 transition-all duration-200 ease-in-out hover:scale-110 hover:rotate-3">
+                    <MessageCircle className="w-5 h-5 text-lightMode-text dark:text-darkMode-text" />
+                  </button>
                   {unReadedMessage > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full min-w-[20px] h-5 px-1 flex items-center justify-center animate-bounce">
+                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-md">
                       {unReadedMessage > 99 ? '99+' : unReadedMessage}
                     </span>
                   )}
                 </Link>
+
+                {/* Menu (Mobile Only) */}
                 {isMobile && (
                   <div className="flex lg:hidden">
                     <button
                       onClick={() => setIsMobileMenuOpen(true)}
-                      className="p-2 rounded-md bg-lightMode-bg/20 dark:bg-darkMode-bg/20"
+                      className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-darkMode-bg2 transition-all duration-200 ease-in-out hover:scale-110 hover:rotate-3"
                     >
-                      <FiMenu className="text-2xl text-lightMode-text dark:text-darkMode-text" />
+                      <FiMenu className="w-5 h-5 text-lightMode-text dark:text-darkMode-text" />
                     </button>
                   </div>
                 )}
