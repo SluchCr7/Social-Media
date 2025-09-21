@@ -24,6 +24,7 @@ const Search = () => {
   // Collect all hashtags from posts
   const hashtagCount = {};
   filterHashtags(posts, hashtagCount);
+  const topHashtags = Object.entries(hashtagCount).sort((a, b) => b[1] - a[1]);
 
   // Debounce search
   useEffect(() => {
@@ -49,8 +50,7 @@ const Search = () => {
   // Suggested Users
   const suggestedUsersArr = useMemo(() => {
     if (!Array.isArray(suggestedUsers)) return [];
-    return suggestedUsers
-      .slice(0, 8);
+    return suggestedUsers.slice(0, 8);
   }, [suggestedUsers, user]);
 
   const carouselResponsive = {
@@ -60,11 +60,8 @@ const Search = () => {
     mobile: { breakpoint: { max: 464, min: 0 }, items: 1 },
   };
 
-  const topHashtags = Object.entries(hashtagCount).sort((a, b) => b[1] - a[1]);
-
   // ----------------- INTEREST BASED NEWS -----------------
   const userInterests = user?.interests?.filter(Boolean).slice(0, 2) || [];
-
   const interestTabs = userInterests
     .map((interest) => {
       const relatedNews = news.filter(item =>
@@ -74,8 +71,8 @@ const Search = () => {
     })
     .filter(Boolean);
 
-  const finalTabs = [{ name: 'News', news }] // News always first
-    .concat(interestTabs);
+  // Final Tabs: News always first + Interests
+  const finalTabs = [{ name: 'News', news }].concat(interestTabs);
 
   return (
     <div className="w-full min-h-screen px-4 sm:px-8 py-8 
@@ -91,7 +88,7 @@ const Search = () => {
           className="text-4xl font-extrabold flex items-center gap-1
             text-lightMode-fg dark:text-darkMode-fg"
         >
-          <IoIosSearch/> Explore
+          <IoIosSearch /> Explore
         </motion.h2>
         <p className="mt-2 text-lightMode-text2 dark:text-darkMode-text2">
           Discover friends, creators, trending topics and news.
@@ -185,7 +182,7 @@ const Search = () => {
 
       {/* Tabs */}
       <div className="max-w-3xl mx-auto flex justify-center gap-4 mb-6 relative">
-        {finalTabs.map((tab) => (
+        {finalTabs.concat({ name: 'Hashtags', news: [] }).map((tab) => (
           <button
             key={tab.name}
             onClick={() => setActiveTab(tab.name)}
@@ -202,7 +199,7 @@ const Search = () => {
       {/* Tab Content */}
       <div className="max-w-3xl mx-auto space-y-4">
         <AnimatePresence mode="wait">
-          {finalTabs.map((tab) => (
+          {finalTabs.concat({ name: 'Hashtags', news: [] }).map((tab) => (
             activeTab === tab.name && (
               <motion.div
                 key={tab.name}
@@ -212,38 +209,72 @@ const Search = () => {
                 transition={{ duration: 0.3 }}
                 className="flex flex-col gap-3"
               >
-                {tab.news.map((item, index) => (
-                  <Link
-                    key={index}
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex gap-4 p-4 hover:opacity-80 transition rounded-xl 
-                      bg-lightMode-menu dark:bg-darkMode-menu"
-                  >
-                    <div className="flex-1">
-                      <h3 className="text-sm break-all whitespace-pre-wrap font-semibold 
-                        text-lightMode-text dark:text-darkMode-text leading-snug">
-                        {item.title}
-                      </h3>
-                      <p className="text-xs text-lightMode-text2 dark:text-darkMode-text2 mt-1">
-                        {new Date(item.publishedAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    {item.image && (
-                      <div className="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden bg-lightMode-bg dark:bg-darkMode-bg">
-                        <Image
-                          src={item.image}
-                          alt="news"
-                          width={64}
-                          height={64}
-                          className="w-full h-full object-cover"
-                          unoptimized
-                        />
+                {/* Hashtags Tab */}
+                {tab.name === 'Hashtags' ? (
+                  topHashtags.map(([tag, count], index) => {
+                    const isTrendingUp = index % 2 === 0;
+                    return (
+                      <Link
+                        key={tag}
+                        href={`/Pages/Hashtag/${encodeURIComponent(tag)}`}
+                        className="flex justify-between items-center p-4 rounded-xl 
+                          bg-lightMode-menu dark:bg-darkMode-menu 
+                          hover:bg-lightMode-bg dark:hover:bg-darkMode-bg 
+                          shadow-sm hover:shadow-md transition-all duration-200"
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-gray-900 dark:text-gray-100 font-semibold text-sm sm:text-base">
+                            #{tag}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {count} posts
+                          </span>
+                        </div>
+                        <div className={`flex items-center justify-center w-6 h-6 rounded-full ${isTrendingUp ? 'bg-green-100 dark:bg-green-800' : 'bg-red-100 dark:bg-red-800'}`}>
+                          {isTrendingUp ? (
+                            <FaArrowUp className="text-green-600 dark:text-green-400 text-sm" />
+                          ) : (
+                            <FaArrowDown className="text-red-600 dark:text-red-400 text-sm" />
+                          )}
+                        </div>
+                      </Link>
+                    );
+                  })
+                ) : (
+                  // Existing Tab Content (News + Interests)
+                  tab.news.map((item, index) => (
+                    <Link
+                      key={index}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex gap-4 p-4 hover:opacity-80 transition rounded-xl 
+                        bg-lightMode-menu dark:bg-darkMode-menu"
+                    >
+                      <div className="flex-1">
+                        <h3 className="text-sm break-all whitespace-pre-wrap font-semibold 
+                          text-lightMode-text dark:text-darkMode-text leading-snug">
+                          {item.title}
+                        </h3>
+                        <p className="text-xs text-lightMode-text2 dark:text-darkMode-text2 mt-1">
+                          {new Date(item.publishedAt).toLocaleDateString()}
+                        </p>
                       </div>
-                    )}
-                  </Link>
-                ))}
+                      {item.image && (
+                        <div className="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden bg-lightMode-bg dark:bg-darkMode-bg">
+                          <Image
+                            src={item.image}
+                            alt="news"
+                            width={64}
+                            height={64}
+                            className="w-full h-full object-cover"
+                            unoptimized
+                          />
+                        </div>
+                      )}
+                    </Link>
+                  ))
+                )}
               </motion.div>
             )
           ))}
