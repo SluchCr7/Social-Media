@@ -4,6 +4,7 @@ const { v2 } = require('cloudinary');
 const fs = require('fs');
 const { getReceiverSocketId, io } = require('../Config/socket');
 const asyncHandler= require('express-async-handler')
+const mongoose = require("mongoose");
 
 const getUsersInSideBar = async (req, res) => {
   try {
