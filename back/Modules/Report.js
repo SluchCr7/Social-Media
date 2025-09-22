@@ -1,5 +1,5 @@
-// const mongoose = require('mongoose')
-// const joi = require('joi')
+const mongoose = require('mongoose')
+const joi = require('joi')
 
 // const reportSchema = new mongoose.Schema({
 //   text: {
@@ -47,10 +47,6 @@
 //   return schema.validate(data)
 // }
 
-// module.exports = {
-//   Report,
-//   ValidateReport
-// }
 
 const reportSchema = new mongoose.Schema({
   text: {
@@ -128,3 +124,9 @@ const ValidateReport = (data) => {
   });
   return schema.validate(data);
 };
+
+
+module.exports = {
+  Report,
+  ValidateReport
+}
