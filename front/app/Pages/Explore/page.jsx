@@ -4,7 +4,6 @@ import { useAuth } from '../../Context/AuthContext';
 import { useNews } from '@/app/Context/NewsContext';
 import { usePost } from '@/app/Context/PostContext';
 import { filterHashtags } from '@/app/utils/filterHashtags';
-
 import DesignExplore from './DesignExplore';
 
 const Search = () => {
