@@ -126,6 +126,11 @@ const Page = ({ params }) => {
 
   return (
     <DasignCommunitySelect 
+      user={user}
+      id={id}
+      isAdmin={isAdmin}
+      isOwner={isOwner}
+        posts={posts}
         CommunitySelected={CommunitySelected} setCommunitySelected={setCommunitySelected}
         postsFiltered={postsFiltered} setPostsFiltered={setPostsFiltered}
         showEdit={showEdit} setShowEdit={setShowEdit}

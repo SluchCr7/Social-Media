@@ -28,7 +28,7 @@ const DasignCommunitySelect = ({
     CommunitySelected,setShowEdit,showMembers,setShowMembers,showRequests,setShowRequests,searchTerm,setSearchTerm,activeMemberTab,setActiveMemberTab,showRules,setShowRules,
     isJoined,hasPendingRequest,handleJoinToggle,handleMakeAdmin,handleRemoveMember,handleApprove,handleReject,
     setCommunitySelected,postsFiltered,showEdit,setPostsFiltered
-    ,filteredMembers
+    ,filteredMembers,isOwner,isAdmin,posts,user
 }) => {
   return (
     <div className="w-full text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen pb-12">
