@@ -116,7 +116,7 @@ const getUserStories = async (userId) => {
 
       // تحديث الستوري داخل state
       setStories(prev =>
-        prev.map(story => (story._id === storyId ? data.story : story))
+        prev.map(story => (story._id === storyId ? data : story))
       );
     } catch (err) {
       console.error(err);

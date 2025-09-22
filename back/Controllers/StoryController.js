@@ -176,25 +176,7 @@ const viewStory = asyncHandler(async (req, res) => {
 
 
 const toggleLoveStory = asyncHandler(async (req, res) => {
-  // const story = await Story.findById(req.params.id);
-  // if (!story) {
-  //   return res.status(404).json({ message: "Story not found" });
-  // }
 
-  // const userId = req.user._id;
-
-  // // إذا كان المستخدم قد أحب الستوري مسبقًا، يتم إزالة الحب
-  // if (story.loves.includes(userId)) {
-  //   story.loves.pull(userId);
-  //   await story.save();
-  //   return res.status(200).json({ message: "Love removed", story });
-  // }
-
-  // // إذا لم يكن المستخدم قد أحب الستوري بعد، يتم الإضافة
-  // story.loves.push(userId);
-  // await story.save();
-
-  // res.status(200).json({ message: "Love added", story });
   // جلب البوست الأساسي
   const story = await Story.findById(req.params.id);
   if (!story) {
@@ -238,10 +220,10 @@ const toggleLoveStory = asyncHandler(async (req, res) => {
 
   // جلب البوست كامل بعد التعديل مع كل populate
   const updatedStory = await Story.findById(req.params.id)
-    .populate("owner", "username profileName profilePhoto")
+    .populate('owner', 'username profilePhoto')
     .populate('loves', 'username profilePhoto')
     .populate('views', 'username profilePhoto');
-
+  
   res.status(200).json(updatedStory);
 });
 
