@@ -12,8 +12,10 @@ import {
   FaRegStar,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
+import dayjs from "dayjs";
 
 const DesignCalender = ({
+    setNewEvent,newEvent,
     currentDate, days,isToday,  setSelectedDate, typeIcons,setCurrentDate, showDayEvents,selectedEvent, setSelectedEvent,
     setShowDayEvents,loading,events,typeColors,handleAddEvent,handleUpdateEvent,handleDeleteEvent,selectedDate
 }) => {
