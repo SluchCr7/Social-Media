@@ -86,7 +86,7 @@ const TabsContent = ({ activeTab, combinedPosts, posts, userSelected }) => {
                   <div
                     key={`${p._id}-${i}`}
                     className="relative group overflow-hidden rounded-lg shadow hover:shadow-lg transition duration-300"
-                    onClick={()=>setImageView({ url: photo?.url, postId: p?._id }}
+                    onClick={()=>setImageView({ url: img?.url, postId: p?._id })}
                   >
                     <img
                       src={img?.url || img}
