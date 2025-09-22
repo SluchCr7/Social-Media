@@ -27,7 +27,7 @@ const ActionButton = ({ children, onClick, variant = 'primary', className = '' }
 const DasignCommunitySelect = ({
     CommunitySelected,setShowEdit,showMembers,setShowMembers,showRequests,setShowRequests,searchTerm,setSearchTerm,activeMemberTab,setActiveMemberTab,showRules,setShowRules,
     isJoined,hasPendingRequest,handleJoinToggle,handleMakeAdmin,handleRemoveMember,handleApprove,handleReject,
-    setCommunitySelected,postsFiltered,setPostsFiltered,showEdit,setPostsFiltered
+    setCommunitySelected,postsFiltered,showEdit,setPostsFiltered
     ,filteredMembers
 }) => {
   return (
