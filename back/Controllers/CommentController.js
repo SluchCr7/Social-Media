@@ -91,7 +91,7 @@ const addNewComment = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
   user.userLevelPoints += 3;
   user.updateLevelRank();
-
+  await user.save();
   await comment.save();
 
   const populatedComment = await Comment.findById(comment._id)

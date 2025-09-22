@@ -71,6 +71,10 @@ const addNewStory = asyncHandler(async (req, res) => {
     Photo: photoUrl || "",
     owner: req.user._id,
   });
+  const user = await User.findById(req.user._id);
+  user.userLevelPoints += 5;
+  user.updateLevelRank();
+  await user.save();
 
   await story.save();
 

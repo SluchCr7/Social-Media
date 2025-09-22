@@ -4,6 +4,7 @@ const fs = require("fs");
 const { User } = require("../Modules/User");
 const { Community } = require("../Modules/Community");
 const cloudinary = require("cloudinary").v2;
+const { moderatePost } = require('../utils/CheckTextPost');
 
 // 🔔 Socket.io & Notifications
 const { getReceiverSocketId, io } = require("../Config/socket");
@@ -63,6 +64,100 @@ const uploadToCloudinary = (buffer) => {
   });
 };
 
+// const addPost = async (req, res) => {
+//   try {
+//     let { text, Hashtags, community, mentions } = req.body;
+//     const userId = req.user._id;
+
+//     if (typeof Hashtags === "string") Hashtags = [Hashtags];
+//     else if (!Array.isArray(Hashtags)) Hashtags = [];
+
+//     // ✅ mentions: خليها Array من userIds
+//     if (typeof mentions === "string") {
+//       try {
+//         mentions = JSON.parse(mentions); // لو جايه كـ JSON string
+//       } catch {
+//         mentions = [mentions]; // أو مجرد string واحد
+//       }
+//     } else if (!Array.isArray(mentions)) {
+//       mentions = [];
+//     }
+
+//     const { error } = ValidatePost({ text, Hashtags, community, mentions });
+//     if (error) return res.status(400).json({ message: error.details[0].message });
+
+//     let communityDoc = null;
+//     if (community) {
+//       communityDoc = await Community.findById(community);
+//       if (!communityDoc) return res.status(404).json({ message: "Community not found." });
+//       if (!communityDoc.members.includes(userId))
+//         return res.status(403).json({ message: "Not a member of this community." });
+//     }
+
+//     let uploadedImages = [];
+//     let imagesArr = [];
+
+//     if (Array.isArray(req.files?.image)) imagesArr = req.files.image;
+//     else if (req.files?.image) imagesArr = [req.files.image];
+
+//     if (imagesArr.length > 0) {
+//       uploadedImages = await Promise.all(
+//         imagesArr.map(async (img) => {
+//           const result = await uploadToCloudinary(img.buffer);
+//           return { url: result.secure_url, publicId: result.public_id };
+//         })
+//       );
+//     }
+
+//     const post = new Post({
+//       text,
+//       Photos: uploadedImages,
+//       Hashtags,
+//       mentions, // ✅ هنا هتتحفظ الـ mentions
+//       owner: userId,
+//       community: communityDoc ? communityDoc._id : null,
+//     });
+
+//     // ✨ ممكن كمان تبعت إشعارات لكل mentioned users
+//     if (mentions.length > 0) {
+//       for (const mentionedUserId of mentions) {
+//         if (mentionedUserId.toString() !== userId.toString()) {
+//           const newNotify = new Notification({
+//             content: "mentioned you in a post",
+//             type: "mention",
+//             sender: userId,
+//             receiver: mentionedUserId,
+//             actionRef: post._id,
+//             actionModel: "Post",
+//           });
+//           await newNotify.save();
+
+//           const receiverSocketId = getReceiverSocketId(mentionedUserId);
+//           if (receiverSocketId) {
+//             io.to(receiverSocketId).emit("notification", newNotify);
+//           }
+//         }
+//       }
+//     }
+
+//     const user = await User.findById(userId);
+//     user.userLevelPoints += 5;
+//     user.updateLevelRank();
+//     await user.save();
+
+//     await post.save();
+//     await post.populate([
+//       { path: "owner", select: "username profileName profilePhoto" },
+//       { path: "community", select: "Name Picture members" },
+//       { path: "mentions", select: "username profileName profilePhoto" }, // ✅ populate للمنشن
+//     ]);
+//     return res.status(201).json(post);
+//   } catch (err) {
+//     return res.status(500).json({ message: err.message || "Internal Server Error" });
+//   }
+// };
+
+
 const addPost = async (req, res) => {
   try {
     let { text, Hashtags, community, mentions } = req.body;
@@ -71,12 +166,11 @@ const addPost = async (req, res) => {
     if (typeof Hashtags === "string") Hashtags = [Hashtags];
     else if (!Array.isArray(Hashtags)) Hashtags = [];
 
-    // ✅ mentions: خليها Array من userIds
     if (typeof mentions === "string") {
       try {
-        mentions = JSON.parse(mentions); // لو جايه كـ JSON string
+        mentions = JSON.parse(mentions);
       } catch {
-        mentions = [mentions]; // أو مجرد string واحد
+        mentions = [mentions];
       }
     } else if (!Array.isArray(mentions)) {
       mentions = [];
@@ -84,6 +178,12 @@ const addPost = async (req, res) => {
 
     const { error } = ValidatePost({ text, Hashtags, community, mentions });
     if (error) return res.status(400).json({ message: error.details[0].message });
+
+    // ✅ 1. فحص المحتوى
+    const moderationResult = await moderatePost({ text });
+    if (moderationResult.status === "blocked") {
+      return res.status(400).json({ message: moderationResult.reason });
+    }
 
     let communityDoc = null;
     if (community) {
@@ -112,12 +212,12 @@ const addPost = async (req, res) => {
       text,
       Photos: uploadedImages,
       Hashtags,
-      mentions, // ✅ هنا هتتحفظ الـ mentions
+      mentions,
       owner: userId,
       community: communityDoc ? communityDoc._id : null,
     });
 
-    // ✨ ممكن كمان تبعت إشعارات لكل mentioned users
+    // إشعارات الـ mentions
     if (mentions.length > 0) {
       for (const mentionedUserId of mentions) {
         if (mentionedUserId.toString() !== userId.toString()) {
@@ -140,7 +240,7 @@ const addPost = async (req, res) => {
     }
 
     const user = await User.findById(userId);
-    user.userLevelPoints += 5;
+    user.userLevelPoints += 7;
     user.updateLevelRank();
     await user.save();
 
@@ -148,8 +248,9 @@ const addPost = async (req, res) => {
     await post.populate([
       { path: "owner", select: "username profileName profilePhoto" },
       { path: "community", select: "Name Picture members" },
-      { path: "mentions", select: "username profileName profilePhoto" }, // ✅ populate للمنشن
+      { path: "mentions", select: "username profileName profilePhoto" },
     ]);
+
     return res.status(201).json(post);
   } catch (err) {
     return res.status(500).json({ message: err.message || "Internal Server Error" });

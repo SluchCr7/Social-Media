@@ -73,26 +73,26 @@ export const PostContextProvider = ({ children }) => {
       );
 
       const newPost = res.data;
-
       showAlert("Post added successfully.");
       setPosts(prev => [newPost, ...prev]);
 
-      // ✅ إرسال Notifications لليوزرز المذكورين
-      if (mentions.length > 0) {
-        mentions.forEach(m => {
-          addNotify({
-            content: `${user.username} mentioned you in a post`,
-            type: "mention",
-            receiverId: m._id,   // لازم يكون عندك الـ _id مش بس username
-            actionRef: newPost._id,
-            actionModel: "Post",
-          });
+      // إشعارات mentions
+      mentions.forEach(m => {
+        addNotify({
+          content: `${user.username} mentioned you in a post`,
+          type: "mention",
+          receiverId: m._id,
+          actionRef: newPost._id,
+          actionModel: "Post",
         });
-      }
+      });
+
     } catch (err) {
-      console.error(err);
-      showAlert(err?.response?.data?.message || "Failed to upload post.");
+      // ✅ رسالة واضحة لو البوست محظور بسبب Content Moderation
+      const message = err?.response?.data?.message;
+      showAlert(message || "Failed to upload post.");
     }
+
   };
 
   // ✅ حذف بوست

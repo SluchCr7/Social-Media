@@ -19,6 +19,10 @@ const createReel = async (req, res) => {
       caption: req.body.caption || "",
       owner: req.user._id,
     });
+    const user = await User.findById(req.user._id);
+    user.userLevelPoints += 10;
+    user.updateLevelRank();
+    await user.save();
 
     await newReel.save();
 

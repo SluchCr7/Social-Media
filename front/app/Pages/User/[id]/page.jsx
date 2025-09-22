@@ -5,6 +5,7 @@ import { useAuth } from '@/app/Context/AuthContext'
 import { usePost } from '@/app/Context/PostContext'
 import { useState, useEffect } from 'react'
 import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri"
+import { IoEllipsisHorizontal } from "react-icons/io5"
 import InfoAboutUser from '@/app/Component/UserComponents/InfoAboutUser'
 import { motion } from 'framer-motion'
 import TabsContent from '@/app/Component/UserComponents/TabsContent'
@@ -13,6 +14,8 @@ import StatBlock from '@/app/Component/UserComponents/StatBlock'
 import FollowModal from '@/app/Component/UserComponents/FollowModal'
 import { useStory } from '@/app/Context/StoryContext'
 import StoryViewer from '@/app/Component/StoryViewer'
+import { toast } from 'react-hot-toast'
+import { useReport } from '@/app/Context/ReportContext'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -28,8 +31,9 @@ const Page = ({ params }) => {
   const { getUserStories } = useStory()
   const [userStories, setUserStories] = useState([])
   const [isViewerOpen, setIsViewerOpen] = useState(false)
+  const [showDotsMenu, setShowDotsMenu] = useState(false)
+  const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport();
 
- 
   // 📌 جلب ستوريز اليوزر عند الضغط على صورته
   const handleProfileClick = async () => {
     if (!userSelected?._id) return
@@ -67,6 +71,26 @@ const Page = ({ params }) => {
         ...regularPosts.map((post) => ({ ...post, isPinned: false })),
       ]
     : []
+
+  // 📌 وظائف الدوتس مينو
+  const handleCopyLink = () => {
+    const profileUrl = `${window.location.origin}/user/${userSelected?._id}`
+    navigator.clipboard.writeText(profileUrl)
+    toast.success("Profile link copied!")
+    setShowDotsMenu(false)
+  }
+
+  const handleBlock = () => {
+    blockOrUnblockUser(userSelected?._id)
+    setShowDotsMenu(false)
+  }
+
+  const handleReport = () => {
+    setIsTargetId(userSelected?._id);
+    setReportedOnType('user');
+    setShowMenuReport(true);
+    setShowDotsMenu(false)
+  }
 
   // 📌 التحقق من حالة الحساب
   if (userSelected?.accountStatus === 'banned') {
@@ -112,8 +136,7 @@ const Page = ({ params }) => {
           className={`relative w-36 h-36 rounded-full shadow-lg cursor-pointer p-[3px]
             ${userSelected?.stories?.length > 0 
               ? 'border-[5px] border-blue-500' 
-              : 'border-0 border-transparent'}
-          `}
+              : 'border-0 border-transparent'}`}
           onClick={handleProfileClick}
         >
           <div className="w-full h-full rounded-full bg-lightMode-bg dark:bg-darkMode-bg p-[2px]">
@@ -126,7 +149,6 @@ const Page = ({ params }) => {
           </div>
         </motion.div>
 
-        {/* Username + Full Name */}
         <motion.h1
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -137,7 +159,6 @@ const Page = ({ params }) => {
         </motion.h1>
         <span className="text-gray-400 -mt-2">{userSelected?.profileName || 'Profile Name'}</span>
 
-        {/* Bio */}
         <motion.p
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -147,7 +168,6 @@ const Page = ({ params }) => {
           {userSelected?.description || 'No bio provided.'}
         </motion.p>
 
-        {/* Stats */}
         {canSeePrivateContent && (
           <div className="flex justify-center gap-10 mt-6">
             <StatBlock label="Posts" value={userSelected?.posts?.length} />
@@ -156,13 +176,13 @@ const Page = ({ params }) => {
           </div>
         )}
 
-        {/* Follow Button */}
+        {/* Follow Button + Dots Menu */}
         {isLogin && !isOwner && (
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.5 }}
-            className="flex gap-3 mt-4"
+            className="flex gap-3 mt-4 relative"
           >
             <button
               onClick={() => followUser(userSelected?._id)}
@@ -176,13 +196,35 @@ const Page = ({ params }) => {
               {isFollowing ? 'Unfollow' : 'Follow'}
             </button>
 
-            {/* Additional options */}
             <button
-              onClick={() => setShowMenu(true)}
-              className="px-4 py-2 border rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+              onClick={() => setShowDotsMenu(!showDotsMenu)}
+              className="px-4 py-2 border rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition relative"
             >
-              ⋯
+              <IoEllipsisHorizontal className="text-xl" />
             </button>
+
+            {showDotsMenu && (
+              <div className="absolute top-12 right-0 w-48 bg-white dark:bg-gray-900 border rounded-xl shadow-lg z-50 flex flex-col py-2">
+                <button
+                  onClick={handleReport}
+                  className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-left"
+                >
+                  Report User
+                </button>
+                <button
+                  onClick={handleBlock}
+                  className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-left"
+                >
+                  {isBlockedByMe ? "Unblock User" : "Block User"}
+                </button>
+                <button
+                  onClick={handleCopyLink}
+                  className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-left"
+                >
+                  Copy Profile Link
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </div>

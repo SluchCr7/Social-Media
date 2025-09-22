@@ -12,6 +12,7 @@ import EditCommunityMenu from '@/app/Component/EditCommunityMenu'
 import Loading from '@/app/Component/Loading'
 import { FaPlus, FaEdit, FaUsers, FaTrashAlt, FaCrown, FaUser, FaCheck, FaTimes } from 'react-icons/fa'
 import Link from 'next/link'
+import { FaBook } from 'react-icons/fa' // أيقونة القوانين
 
 // Small reusable action button
 const ActionButton = ({ children, onClick, variant = 'primary', className = '' }) => {
@@ -60,6 +61,7 @@ const Page = ({ params }) => {
   const [showRequests, setShowRequests] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [activeMemberTab, setActiveMemberTab] = useState('all') // all | admins | owner
+  const [showRules, setShowRules] = useState(false); // حالة عرض rules
 
   // Fetch community
   useEffect(() => {
@@ -181,10 +183,15 @@ const Page = ({ params }) => {
 
           <div className="absolute right-6 bottom-6 flex items-center gap-3">
             {(isOwner(user?._id) || isAdmin(user?._id)) && (
-              <ActionButton onClick={() => setShowEdit(true)} variant="warning">
-                <FaEdit /> Edit
-              </ActionButton>
+              <div className="flex gap-2">
+                <ActionButton onClick={() => setShowEdit(true)} variant="warning">
+                  <FaEdit /> Edit
+                </ActionButton>
+              </div>
             )}
+            <ActionButton onClick={() => setShowRules(true)} variant="dark">
+              <FaBook /> Rules
+            </ActionButton>
 
             {user && !isOwner(user._id) && (
               <>
@@ -383,6 +390,50 @@ const Page = ({ params }) => {
                   <div className="text-center text-gray-500 py-12">No pending requests.</div>
                 )}
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showRules && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 20, opacity: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-xl relative shadow-lg"
+            >
+              {/* زر الإغلاق */}
+              <button
+                onClick={() => setShowRules(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-2xl transition"
+              >
+                &times;
+              </button>
+
+              <h3 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-6 flex items-center justify-center gap-2">
+                <FaBook /> Community Rules
+              </h3>
+
+              {CommunitySelected?.rules?.length > 0 ? (
+                <ul className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                  {CommunitySelected.rules.map((rule, index) => (
+                    <li key={index} className="flex gap-3 items-start bg-gray-100 dark:bg-gray-700 p-3 rounded-lg shadow-sm">
+                      <span className="font-bold text-blue-600 dark:text-blue-400">{index + 1}.</span>
+                      <p className="text-sm text-gray-900 dark:text-gray-200">{rule}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-center text-gray-500 dark:text-gray-400 py-12">
+                  No rules have been set for this community yet.
+                </p>
+              )}
             </motion.div>
           </motion.div>
         )}

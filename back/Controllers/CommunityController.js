@@ -33,54 +33,45 @@ const getCommunityByCategory = asyncHandler(async (req, res) => {
     res.status(200).json(communities)
 })
 
-// const addNewCommunity = asyncHandler(async (req, res) => {
-//     const { error } = ValidateCommunity(req.body);
-//     if (error) {
-//         return res.status(400).json({ message: error.details[0].message });
-//     }
-
-//     const community = new Community({
-//         Name: req.body.Name,
-//         Category: req.body.Category,
-//         description: req.body.description,
-//         owner: req.user._id,
-//         members: [req.user._id], // ✅ إضافة صاحب الجروب كعضو
-//     });
-
-//     await community.save();
-
-//     res.status(201).json({
-//         message: 'Community created successfully',
-//         _id: community._id,
-//     });
-// });
-
-
 const addNewCommunity = asyncHandler(async (req, res) => {
-    const { error } = ValidateCommunity(req.body);
-    if (error) {
-        return res.status(400).json({ message: error.details[0].message });
-    }
+  const { error } = ValidateCommunity(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
 
-    const community = new Community({
-        Name: req.body.Name,
-        Category: req.body.Category,
-        description: req.body.description,
-        owner: req.user._id,
-        members: [req.user._id], // ✅ إضافة صاحب الجروب كعضو
-        tags: req.body.tags || [], // ✅ إضافة التاجات
-        rules: req.body.rules || [], // ✅ إضافة القواعد
-        isPrivate: req.body.isPrivate || false,
-        isForAdults: req.body.isForAdults || false,
-    });
+  const { Name, Category, description, tags = [], rules = [], isPrivate = false, isForAdults = false } = req.body;
 
-    await community.save();
+  const community = new Community({
+    Name,
+    Category,
+    description,
+    owner: req.user._id,
+    members: [req.user._id],
+    tags,
+    rules,
+    isPrivate,
+    isForAdults,
+  });
 
-    res.status(201).json({
-        message: 'Community created successfully',
-        _id: community._id,
-        community
-    });
+  // تحديث نقاط المستخدم قبل حفظ الـ community
+  const user = await User.findById(req.user._id);
+  user.userLevelPoints += 15;
+  user.updateLevelRank();
+  await user.save();
+
+  // حفظ الـ community
+  await community.save();
+
+  // ✅ populate البيانات المهمة قبل الإرسال
+  await community.populate([
+    { path: 'owner', select: 'username profileName profilePhoto' },
+    { path: 'members', select: 'username profileName profilePhoto' }
+  ]);
+
+  res.status(201).json({
+    message: 'Community created successfully',
+    community
+  });
 });
 
 const deleteCommunity = asyncHandler(async (req, res) => {

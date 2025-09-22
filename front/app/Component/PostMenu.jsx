@@ -30,7 +30,7 @@ const MenuOption = ({ icon, text, action, className, loading }) => (
 const PostMenu = ({ showMenu, setShowMenu, post }) => {
   const { user, pinPost, users, blockOrUnblockUser } = useAuth();
   const { deletePost, setPostIsEdit, setShowPostModelEdit, displayOrHideComments, copyPostLink } = usePost();
-  const { setIsPostId, setShowMenuReport } = useReport();
+  const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport();
 
   const menuRef = useRef();
   const isOwner = post?.owner?._id === user?._id;
@@ -101,7 +101,8 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
       icon: <MdOutlineReport size={18} />,
       text: 'Report Post',
       action: () => {
-        setIsPostId(post?._id);
+        setIsTargetId(post?._id);
+        setReportedOnType('post');
         setShowMenuReport(true);
       },
       className: 'text-red-600 hover:bg-red-100',

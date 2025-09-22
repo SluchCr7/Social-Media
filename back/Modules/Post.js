@@ -16,6 +16,7 @@ const PostSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  scheduledAt: { type: Date, default: null },
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   saved: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   shares: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
@@ -33,7 +34,11 @@ const PostSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-
+  privacy: {
+    type: String,
+    enum: ['public', 'friends', 'private', 'custom'],
+    default: 'public'
+  },
   Hashtags: [
     {
       type: String,

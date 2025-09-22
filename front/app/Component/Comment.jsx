@@ -7,6 +7,7 @@ import { IoIosHeart, IoIosSend } from 'react-icons/io';
 import { MdOutlineDelete } from 'react-icons/md';
 import { useComment } from '../Context/CommentContext';
 import { useAuth } from '../Context/AuthContext';
+import { MdOutlineReport, MdContentCopy } from "react-icons/md";
 
 const Comment = ({ comment }) => {
   const [isReplying, setIsReplying] = useState(false);
@@ -17,7 +18,7 @@ const Comment = ({ comment }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(comment.text);
   const [loadingEdit, setLoadingEdit] = useState(false);
-
+  const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport();
   const { likeComment, deleteComment, AddComment, updateComment } = useComment();
   const { user } = useAuth();
 
@@ -90,6 +91,14 @@ const Comment = ({ comment }) => {
                   <MdOutlineDelete
                     className="text-red-500 text-lg md:text-xl cursor-pointer hover:scale-110 transition-transform p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-800"
                     onClick={() => deleteComment(comment._id, comment.postId)}
+                  />
+                  <MdOutlineReport
+                    className="text-red-500 text-lg md:text-xl cursor-pointer hover:scale-110 transition-transform p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-800"
+                    onClick={() => {
+                      setIsTargetId(comment?._id);
+                      setReportedOnType('comment');
+                      setShowMenuReport(true);
+                    }}
                   />
                 </div>
               )}

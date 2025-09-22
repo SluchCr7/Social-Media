@@ -335,6 +335,28 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 <span className='text-gray-500 text-xs'>{post?.comments?.length} comments</span>
               </div>
             )}
+            {/* Self Reply Preview */}
+            {post?.comments?.length > 0 && (
+              <div className="mt-3 pl-4 border-l-2 border-gray-300 dark:border-gray-600">
+                <div className="flex items-start gap-3">
+                  <Image
+                    src={post?.comments[0]?.owner?.profilePhoto?.url}
+                    alt="comment-user"
+                    width={28}
+                    height={28}
+                    className="rounded-full w-7 h-7 object-cover"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                      {post?.comments[0]?.owner?.username}
+                    </span>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {post?.comments[0]?.text}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -40,13 +40,13 @@ const Page = ({ params }) => {
       </div>
 
       {/* قائمة البوستات */}
-      <div className="max-w-4xl mx-auto">
+      <div className="w-full">
         {postsRelated.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 w-full">
             {postsRelated.map((post) => (
               <div
                 key={post._id}
-                className="animate-fadeIn"
+                className="animate-fadeIn w-full"
               >
                 <SluchitEntry post={post} />
               </div>
