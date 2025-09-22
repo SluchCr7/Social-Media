@@ -47,7 +47,6 @@ const MenuUpComingEvents = () => {
         <h2 className="flex items-center gap-2 text-white font-semibold text-lg">
           <FaRegCalendarAlt className="text-white" /> Upcoming Events
         </h2>
-        <button className="text-white text-sm font-medium hover:underline">View All</button>
       </div>
 
       {/* Event List */}

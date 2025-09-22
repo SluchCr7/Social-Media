@@ -9,6 +9,7 @@ import { usePost } from '../Context/PostContext';
 import { useReport } from '../Context/ReportContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri"
 
 // ✅ زر فردي
 const MenuOption = ({ icon, text, action, className, loading }) => (
@@ -17,7 +18,7 @@ const MenuOption = ({ icon, text, action, className, loading }) => (
     whileTap={{ scale: 0.97 }}
     onClick={action}
     disabled={loading}
-    className={`flex items-center gap-3 px-4 py-2 text-sm font-medium text-left transition rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400
+    className={`flex items-center gap-3 px-4 py-4 text-sm font-medium text-left transition rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400
       ${className || 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'}
       ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
     role="menuitem"
@@ -28,7 +29,7 @@ const MenuOption = ({ icon, text, action, className, loading }) => (
 );
 
 const PostMenu = ({ showMenu, setShowMenu, post }) => {
-  const { user, pinPost, users, blockOrUnblockUser } = useAuth();
+  const { user, pinPost, users, blockOrUnblockUser,followUser } = useAuth();
   const { deletePost, setPostIsEdit, setShowPostModelEdit, displayOrHideComments, copyPostLink } = usePost();
   const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport();
 
@@ -97,6 +98,18 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
 
   // ✅ خيارات الزائر
   const visitorOptions = useMemo(() => [
+    {
+      icon: user?.following?.some(f => f?._id === post?.owner?._id)
+        ? <RiUserUnfollowLine className="text-lg" />
+        : <RiUserFollowLine className="text-lg" />,
+      text: user?.following?.some(f => f?._id === post?.owner?._id)
+        ? 'Unfollow User'
+        : 'Follow User',
+      action: () => {
+        followUser(post?.owner?._id)
+      },
+      className: 'text-blue-600 hover:bg-blue-100',
+    },
     {
       icon: <MdOutlineReport size={18} />,
       text: 'Report Post',
