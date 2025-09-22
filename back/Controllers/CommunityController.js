@@ -4,6 +4,7 @@ const path = require('path')
 const { cloudUpload, cloudRemove } = require('../Config/cloudUpload')
 const fs = require('fs')
 const { v2 } = require('cloudinary')
+const { User} = require('../Modules/User')
 
 const getAllCommunities = asyncHandler(async (req, res) => {
     const communities = await Community.find({}).populate('owner', 'username profileName profilePhoto')

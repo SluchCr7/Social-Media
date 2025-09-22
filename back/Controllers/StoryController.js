@@ -6,6 +6,7 @@ const {v2} = require('cloudinary');
 const { getReceiverSocketId, io } = require("../Config/socket");
 const { Notification } = require("../Modules/Notification");
 const { cloudUpload } = require("../Config/cloudUpload"); // اللي انت عامله
+const { User} = require('../Modules/User')
 
 /**
  * @desc Add a new story (image, text, or both)
