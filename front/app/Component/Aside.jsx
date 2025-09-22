@@ -1,18 +1,14 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, memo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Tooltip } from 'react-tooltip'
 import 'react-tooltip/dist/react-tooltip.css'
-import {
-  GoHome, GoSearch
-} from "react-icons/go"
-import {
-  CiUser, CiSettings
-} from "react-icons/ci"
-import { SiGoogledisplayandvideo360 } from "react-icons/si";
+import { GoHome, GoSearch } from "react-icons/go"
+import { CiUser, CiSettings } from "react-icons/ci"
+import { SiGoogledisplayandvideo360 } from "react-icons/si"
 import { FaPlus } from "react-icons/fa6"
 import { RiUserCommunityLine } from 'react-icons/ri'
 import { LuMessagesSquare } from "react-icons/lu"
@@ -39,7 +35,7 @@ const Aside = () => {
 
   useEffect(() => {
     if (isMobile) {
-      setIsCollapsed(true) // desktop collapse ما يشتغلش على الموبايل
+      setIsCollapsed(true)
     } else {
       setIsMobileMenuOpen(false)
     }
@@ -78,7 +74,7 @@ const Aside = () => {
   const activeStyle = `bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md`
   const inactiveStyle = `hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 text-lightMode-text dark:text-darkMode-text`
 
-  const SidebarContent = ({ mobile = false }) => {
+  const SidebarContent = memo(({ mobile = false }) => {
     const collapsed = mobile ? false : isCollapsed
     return (
       <>
@@ -128,28 +124,27 @@ const Aside = () => {
           ))}
         </div>
 
-        {/* User Info + Logout */}
+        {/* User Profile + Logout */}
         <div className={`mt-auto border-t pt-4 px-2`}>
-          {/* User Profile + Logout in one row */}
-          <div className="flex items-center justify-between gap-3 px-2 py-2 rounded-lg hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10">
+          <div className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             
             {/* User Info */}
-            <div className="flex items-center gap-3">
-              <div className={`relative p-[2px] rounded-full ${user?.stories?.length > 0 ? 'border border-red-500' : ''}`}>
+            <div className="flex items-center gap-3 truncate">
+              <div className={`relative p-[2px] rounded-full ${user?.stories?.length > 0 ? 'border-2 border-red-500' : ''}`}>
                 <Image
                   src={user?.profilePhoto?.url || '/default-profile.png'}
                   alt="User Profile"
                   width={40}
                   height={40}
-                  className="w-8 h-8 rounded-full object-cover"
+                  className="w-10 h-10 rounded-full object-cover"
                 />
                 {onlineUsers?.includes(user?._id) && (
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border border-white dark:border-gray-900"></span>
+                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border border-white dark:border-gray-900"></span>
                 )}
               </div>
               {!collapsed && (
                 <div className="flex flex-col truncate">
-                  <p className="text-sm font-semibold text-lightMode-text dark:text-darkMode-text truncate">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                     {user?.username || "User Name"}
                   </p>
                   <p className="text-xs text-gray-500 truncate">
@@ -159,17 +154,21 @@ const Aside = () => {
               )}
             </div>
 
-            {/* Logout Button */}
+            {/* Logout Icon */}
             <button
               onClick={Logout}
-              className={`flex items-center justify-center gap-1 px-2 py-1 text-xs md:text-sm font-medium rounded-lg border transition-all
-                ${collapsed 
-                  ? "text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 border-none" 
-                  : "text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
-                }`}
+              className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-700 transition-colors flex items-center justify-center"
+              aria-label="Logout"
             >
-              <span className="text-lg">⎋</span>
-              {!collapsed && <span>Logout</span>}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-red-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10V5" />
+              </svg>
             </button>
           </div>
         </div>
@@ -177,13 +176,13 @@ const Aside = () => {
         {collapsed && <Tooltip id="sidebar-tooltip" place="right" />}
       </>
     )
-  }
+  })
 
   return (
     <>
       {/* ===== Desktop Sidebar ===== */}
       <motion.aside
-        animate={{ width: isCollapsed ? 90 : 260 }}
+        animate={{ width: isCollapsed ? 85 : 260 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className="hidden lg:flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r p-3 hover-expanded"
       >
@@ -193,12 +192,10 @@ const Aside = () => {
       {/* ===== Mobile Drawer ===== */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[1000] flex">
-          {/* Overlay */}
           <div
             className="fixed inset-0 bg-black/40"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          {/* Drawer */}
           <motion.aside
             initial={{ x: -300 }}
             animate={{ x: 0 }}
