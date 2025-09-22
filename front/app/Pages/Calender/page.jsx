@@ -75,6 +75,7 @@ const Calendar = () => {
   return (
     <>
       <DesignCalender
+        setSelectedEvent={setSelectedEvent} selectedEvent={selectedEvent}
         currentDate={currentDate} days={days} isToday={isToday} setSelectedDate={setSelectedDate}
         typeIcons={typeIcons} setCurrentDate={setCurrentDate} showDayEvents={showDayEvents} setShowDayEvents={setShowDayEvents}
         loading={loading} events={events} typeColors={typeColors} handleAddEvent={handleAddEvent} handleUpdateEvent={handleUpdateEvent}
