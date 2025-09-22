@@ -217,4 +217,5 @@ const Aside = () => {
   )
 }
 
+SidebarContent.displayName = "SidebarContent"
 export default Aside
