@@ -404,7 +404,7 @@ const makeAccountPremiumVerify = async () => {
 
 
 // ------------------- NEW FUNCTION: Update Account Status -------------------
-  const updateAccountStatus = async (userId, status, days = null) => {
+  const updateAccountStatus = async (userId, status, days = 7) => {
     if (!user?.token) return showAlert('You must be logged in as an admin');
 
     try {

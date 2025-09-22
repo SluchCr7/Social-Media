@@ -12,6 +12,8 @@ import {
   FiMoreVertical,
 } from 'react-icons/fi';
 import Image from 'next/image';
+import { usePost } from '@/app/Context/PostContext';
+import { useComment } from '@/app/Context/CommentContext';
 
 // ================== Status Badge ==================
 const StatusBadge = ({ status }) => {
@@ -165,7 +167,7 @@ const ConfirmModal = ({ open, onClose, onConfirm, title, message }) => (
 
 // ================== Table View ==================
 const ReportsTable = ({ reports, type, openModal }) => (
-  <div className="overflow-x-auto">
+  <div className="overflow-x-auto w-full">
     <table className="w-full text-sm text-left border-collapse">
       <thead className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
         <tr>
@@ -224,13 +226,11 @@ const ReportsTable = ({ reports, type, openModal }) => (
             <td className="px-4 py-2">
               <DropdownActions
                 type={type}
-                onDeleteReport={() => openModal('deleteReport', report._id)}
-                onDeleteTarget={() =>
-                  openModal('deleteTarget', report.postId?._id || report.commentId?._id)
-                }
-                onSuspend={() => openModal('suspendUser', report.reportedUserId?._id)}
-                onBan={() => openModal('banUser', report.reportedUserId?._id)}
-                onResolve={() => openModal('resolve', report._id)}
+                onDeleteReport={() => openModal('deleteReport', report)}
+                onDeleteTarget={() => openModal('deleteTarget', report)}
+                onSuspend={() => openModal('suspendUser', report)}
+                onBan={() => openModal('banUser', report)}
+                onResolve={() => openModal('resolve', report)}
               />
             </td>
           </tr>
@@ -243,44 +243,81 @@ const ReportsTable = ({ reports, type, openModal }) => (
 // ================== Main Page ==================
 const AdminReportsPage = () => {
   const { reports, loading, getAllReports, deleteReport } = useReport();
-  const { user } = useAuth();
+  const { user, deleteUser, updateAccountStatus } = useAuth();
+  // updateAccountStatus => to make acccount baned or susbended 
+  const { deletePost } = usePost()
+  const {deleteComment} = useComment()
   const [activeTab, setActiveTab] = useState('post');
-  const [modal, setModal] = useState({ open: false, action: null, id: null });
+  const [modal, setModal] = useState({ open: false, action: null, report: null });
 
+  const openModal = (action, report) => setModal({ open: true, action, report });
   useEffect(() => {
     getAllReports();
   }, []);
 
-  const openModal = (action, id) => setModal({ open: true, action, id });
+  // const openModal = (action, id) => setModal({ open: true, action, id });
 
   const handleAction = async () => {
-    switch (modal.action) {
-      case 'deleteReport':
-        await deleteReport(modal.id);
-        toast.success('Report deleted');
-        break;
-      case 'deleteTarget':
-        toast.info('Delete Post/Comment functionality here');
-        break;
-      case 'suspendUser':
-        toast.info('Suspend User functionality here');
-        break;
-      case 'banUser':
-        toast.info('Ban User functionality here');
-        break;
-      case 'resolve':
-        toast.success('Report resolved');
-        break;
+    if (!modal.report) return;
+
+    const { _id, reportedOnType, postId, commentId, reportedUserId } = modal.report;
+
+    try {
+      switch (modal.action) {
+        case 'deleteReport':
+          await deleteReport(_id);
+          toast.success('✅ Report deleted');
+          break;
+
+        case 'deleteTarget':
+          if (reportedOnType === 'post' && postId?._id) {
+            await deletePost(postId._id);
+            toast.success('🗑️ Post deleted');
+          }
+          if (reportedOnType === 'comment' && commentId?._id) {
+            await deleteComment(commentId._id);
+            toast.success('🗑️ Comment deleted');
+          }
+          break;
+
+        case 'suspendUser':
+          if (reportedOnType === 'user' && reportedUserId?._id) {
+            await updateAccountStatus(reportedUserId._id, 'suspended');
+            toast.success('⏸️ User suspended');
+          }
+          break;
+
+        case 'banUser':
+          if (reportedOnType === 'user' && reportedUserId?._id) {
+            await updateAccountStatus(reportedUserId._id, 'banned');
+            toast.success('⛔ User banned');
+          }
+          break;
+
+        case 'resolve':
+          // هنا تقدر تستدعي updateReportStatus من useReport لو حابب
+          // await updateReportStatus(_id, "resolved");
+          toast.success('✅ Report resolved');
+          break;
+
+        default:
+          toast.error('❌ Unknown action');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('❌ Failed to complete action');
+    } finally {
+      getAllReports(); // refresh reports
     }
-    getAllReports();
   };
+
 
   const usersReports = reports.filter((r) => r.reportedOnType === 'user');
   const postsReports = reports.filter((r) => r.reportedOnType === 'post');
   const commentsReports = reports.filter((r) => r.reportedOnType === 'comment');
 
   return (
-    <div className="min-h-screen bg-lightMode-bg dark:bg-darkMode-bg p-6">
+    <div className="min-h-screen bg-lightMode-bg dark:bg-darkMode-bg p-6 w-full">
       <h1 className="text-3xl font-bold mb-6 text-lightMode-text2 dark:text-darkMode-text2">
         Reports Management
       </h1>
