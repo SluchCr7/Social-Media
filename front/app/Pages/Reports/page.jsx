@@ -188,10 +188,10 @@ const ReportsTable = ({ reports, type, openModal }) => (
             <td className="px-4 py-2 flex items-center gap-2">
               <Image
                 src={report.owner?.profilePhoto?.url || '/default-profile.png'}
+                alt="Reporter"
                 width={30}
                 height={30}
-                alt="Reporter"
-                className="rounded-full"
+                className="w-8 h-8 rounded-full object-cover"
               />
               <div>
                 <p className="font-medium">{report.owner?.username}</p>

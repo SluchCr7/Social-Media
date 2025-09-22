@@ -16,6 +16,7 @@ import { useStory } from '@/app/Context/StoryContext'
 import StoryViewer from '@/app/Component/StoryViewer'
 import { toast } from 'react-hot-toast'
 import { useReport } from '@/app/Context/ReportContext'
+import { HiBadgeCheck } from "react-icons/hi";
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -153,9 +154,9 @@ const Page = ({ params }) => {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="text-3xl font-bold"
+          className="text-3xl font-bold flex items-center gap-2"
         >
-          {userSelected?.username || 'Username'}
+          {userSelected?.username || 'Username'} {userSelected?.isAccountWithPremiumVerify && <HiBadgeCheck className='text-blue-500'/>}
         </motion.h1>
         <span className="text-gray-400 -mt-2">{userSelected?.profileName || 'Profile Name'}</span>
 

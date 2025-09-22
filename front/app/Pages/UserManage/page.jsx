@@ -3,9 +3,10 @@ import React, { useEffect } from 'react';
 import { useAuth } from '@/app/Context/AuthContext';
 import Image from 'next/image';
 import { FiTrash2, FiUserCheck, FiUserX } from 'react-icons/fi';
+import { HiBadgeCheck } from "react-icons/hi";
 
 const AdminUsersPage = () => {
-  const { users, deleteUser, blockOrUnblockUser, makeAccountPremiumVerify } = useAuth();
+  const { users, deleteUser, blockOrUnblockUser,updateAccountStatus, makeAccountPremiumVerify,makeUserAdmin } = useAuth();
 
   return (
     <div className="min-h-screen p-8 bg-lightMode-bg dark:bg-darkMode-bg w-full">
@@ -56,7 +57,7 @@ const AdminUsersPage = () => {
             <div className="flex flex-wrap gap-2 mb-4">
               {user.isAdmin && <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">Admin</span>}
               {user.accountStatus === 'banned' && <span className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full">Banned</span>}
-              {user.isAccountWithPremiumVerify && <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">Verified</span>}
+              {user.isAccountWithPremiumVerify && <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full"><HiBadgeCheck/></span>}
               {user.isPrivate && <span className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full">Private</span>}
             </div>
 
@@ -64,14 +65,14 @@ const AdminUsersPage = () => {
             <div className="flex gap-2">
               {!user.isAdmin && (
                 <button
-                  onClick={() => makeAccountPremiumVerify(user._id)}
+                  onClick={() => makeUserAdmin(user._id)}
                   className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition"
                 >
                   <FiUserCheck /> Make Admin
                 </button>
               )}
               <button
-                onClick={() => blockOrUnblockUser(user._id)}
+                onClick={() => updateAccountStatus(user._id , "banned")}
                 className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-yellow-600 text-white rounded-xl hover:bg-yellow-500 transition"
               >
                 <FiUserX /> {user.accountStatus === 'banned' ? 'Unban' : 'Ban'}
