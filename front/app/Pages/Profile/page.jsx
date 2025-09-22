@@ -76,8 +76,9 @@ const ProfilePage = () => {
     <ProfileSkeleton/>
   }
 
-  // حسابات محظورة/معلقة
-  CheckStateAccount(userData)
+  // 📌 التحقق من حالة الحساب
+  <CheckStateAccount user={userData}/>
+
 
   return (
     <>
