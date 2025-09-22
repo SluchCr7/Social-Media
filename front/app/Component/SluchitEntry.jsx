@@ -15,6 +15,7 @@ import { useReport } from '../Context/ReportContext'
 import { renderTextWithMentionsAndHashtags } from '../utils/CheckText'
 import { BiRepost } from "react-icons/bi";
 import { ShareModal } from './SharePost'
+import { getHighlightedComment } from '../utils/getHighlitedComment';
 
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost, savePost, sharePost, setPostIsEdit, imageView, setImageView } = usePost();
@@ -25,6 +26,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
   const original = post?.originalPost;
   const isCommunityPost = post?.community !== null;
   const isInCommunityPage = typeof window !== 'undefined' && window.location.href.includes('/Pages/Community/');
+  const highlightedComment = getHighlightedComment(post);
 
   return (
     <div ref={ref} className='relative w-full'>
@@ -336,22 +338,33 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
               </div>
             )}
             {/* Self Reply Preview */}
-            {post?.comments?.length > 0 && (
-              <div className="mt-3 pl-4 border-l-2 border-gray-300 dark:border-gray-600">
+            {highlightedComment && (
+              <div className="mt-4 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 shadow-sm">
                 <div className="flex items-start gap-3">
+                  {/* صورة المستخدم */}
                   <Image
-                    src={post?.comments[0]?.owner?.profilePhoto?.url}
+                    src={highlightedComment?.owner?.profilePhoto?.url || "/default-avatar.png"}
                     alt="comment-user"
-                    width={28}
-                    height={28}
-                    className="rounded-full w-7 h-7 object-cover"
+                    width={36}
+                    height={36}
+                    className="rounded-full w-9 h-9 object-cover border border-gray-300 dark:border-gray-600"
                   />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                      {post?.comments[0]?.owner?.username}
-                    </span>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {post?.comments[0]?.text}
+
+                  {/* محتوى التعليق */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        {highlightedComment?.owner?.username}
+                      </span>
+                      {highlightedComment?.label && (
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                          {highlightedComment?.label}
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="mt-1 text-sm text-gray-700 dark:text-gray-300 leading-snug">
+                      {highlightedComment?.text}
                     </p>
                   </div>
                 </div>
