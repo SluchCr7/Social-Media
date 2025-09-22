@@ -5,13 +5,14 @@ import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaUserEdit, FaCamera } from 'react-icons/fa'
 import { IoAdd } from 'react-icons/io5'
-import { BsPatchCheckFill } from 'react-icons/bs'
+import { HiBadgeCheck } from 'react-icons/hi'
 import Head from 'next/head'
 
 import { useAuth } from '@/app/Context/AuthContext'
 import { usePost } from '@/app/Context/PostContext'
 import { useStory } from '@/app/Context/StoryContext'
 
+import ProfileSkeleton from '@/app/Skeletons/ProfileSkeleton'
 import Loading from '@/app/Component/Loading'
 import UpdateProfile from '@/app/Component/UpdateProfile'
 import AddStoryModel from '@/app/Component/AddStoryModel'
@@ -20,10 +21,7 @@ import TabsContent from '@/app/Component/UserComponents/TabsContent'
 import Tabs from '@/app/Component/UserComponents/Tabs'
 import StatBlock from '@/app/Component/UserComponents/StatBlock'
 import FollowModal from '@/app/Component/UserComponents/FollowModal'
-import { HiBadgeCheck } from 'react-icons/hi'
 import { CheckStateAccount } from '@/app/Component/UserComponents/UsersStats'
-import ProfileSkeleton from '@/app/Skeletons/ProfileSkeleton'
-
 
 const ProfilePage = () => {
   const { user, users, updatePhoto } = useAuth()
@@ -31,7 +29,7 @@ const ProfilePage = () => {
   const { stories } = useStory()
 
   const [activeTab, setActiveTab] = useState('Posts')
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [image, setImage] = useState(null)
   const [userData, setUserData] = useState({})
   const [update, setUpdate] = useState(false)
@@ -39,28 +37,14 @@ const ProfilePage = () => {
   const [showMenu, setShowMenu] = useState(false)
   const [menuType, setMenuType] = useState('followers')
 
-  const myStories = stories.filter(story => story?.owner?._id === user?._id)
-
-  // تحديث بيانات المستخدم
+  // 📌 تحديث بيانات المستخدم عند التغير
   useEffect(() => {
     const matchedUser = users?.find((u) => user?._id === u?._id)
     setUserData(matchedUser || user || {})
+    setLoading(false)
   }, [users, user])
 
-  useEffect(() => {
-    if (user) setLoading(true)
-  }, [user])
-
-  // تغيير الصورة
-  const handleImageChange = async (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setImage(file)
-      if (updatePhoto) await updatePhoto(file)
-    }
-  }
-
-  // ترتيب البوستات (المثبتة أولاً)
+  // 📌 البوستات المثبتة + العادية
   const combinedPosts = useMemo(() => {
     const pinnedPosts = userData?.pinsPosts || []
     const pinnedIds = new Set(pinnedPosts.map((p) => p?._id))
@@ -71,19 +55,26 @@ const ProfilePage = () => {
     ]
   }, [userData])
 
-  if (!loading) {
-    <ProfileSkeleton/>
+  const myStories = stories.filter(story => story?.owner?._id === user?._id)
+
+  // 📌 تغيير الصورة الشخصية
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setImage(file)
+      if (updatePhoto) await updatePhoto(file)
+    }
   }
 
-  // 📌 التحقق من حالة الحساب
-  <CheckStateAccount user={userData}/>
-
+  if (loading) return <ProfileSkeleton />
 
   return (
     <>
       <Head>
         <title>{userData?.username || 'Profile'} | Social App</title>
       </Head>
+
+      <CheckStateAccount user={userData} />
 
       <motion.div
         initial={{ opacity: 0 }}
@@ -109,7 +100,6 @@ const ProfilePage = () => {
                 fill
                 className="object-cover rounded-full"
               />
-              {/* Overlay عند Hover */}
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
                 <FaCamera className="text-white text-xl" />
               </div>

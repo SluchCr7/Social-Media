@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import ChatSlider from './../../Component/ChatSlider';
-import Chat from './../../Component/Chat';
+import ChatSlider from '../../Component/ChatMessngerComponents/ChatSlider';
+import Chat from '../../Component/ChatMessngerComponents/Chat';
 import NoChat from './../../Component/NoChat';
 import { useMessage } from '@/app/Context/MessageContext';
 import { useSearchParams } from 'next/navigation';

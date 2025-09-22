@@ -3,8 +3,8 @@
 import Image from 'next/image';
 import React, { useState } from 'react';
 import { BsThreeDots } from 'react-icons/bs';
-import { useMessage } from '../Context/MessageContext';
-import { useAuth } from '../Context/AuthContext';
+import { useMessage } from '../../Context/MessageContext';
+import { useAuth } from '../../Context/AuthContext';
 import UserCard from './UserCard';
 import { Users2, Search, Settings, UserCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
