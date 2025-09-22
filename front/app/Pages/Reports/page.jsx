@@ -54,7 +54,7 @@ const DropdownActions = ({ type, onDeleteReport, onDeleteTarget, onSuspend, onBa
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: -10 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 mt-2 w-52 bg-white dark:bg-darkMode-card rounded-xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700 z-50"
+            className="absolute right-0 mt-2 w-52 bg-white dark:bg-darkMode-card rounded-xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700 z-[9999]"
           >
             <div className="flex flex-col">
               <button
@@ -167,7 +167,7 @@ const ConfirmModal = ({ open, onClose, onConfirm, title, message }) => (
 
 // ================== Table View ==================
 const ReportsTable = ({ reports, type, openModal }) => (
-  <div className="overflow-x-auto w-full">
+  <div className="w-full">
     <table className="w-full text-sm text-left border-collapse">
       <thead className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
         <tr>
