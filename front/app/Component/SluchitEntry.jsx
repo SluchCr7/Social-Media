@@ -356,11 +356,11 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                       <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                         {highlightedComment?.owner?.username}
                       </span>
-                      {highlightedComment?.label && (
+                      {/* {highlightedComment?.label && (
                         <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
                           {highlightedComment?.label}
                         </span>
-                      )}
+                      )} */}
                     </div>
 
                     <p className="mt-1 text-sm text-gray-700 dark:text-gray-300 leading-snug">

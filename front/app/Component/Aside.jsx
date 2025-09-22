@@ -129,10 +129,12 @@ const Aside = () => {
         </div>
 
         {/* User Info + Logout */}
-        <div className={`mt-auto border-t pt-4 ${collapsed ? "px-0" : "px-2"}`}>
-          <div className="flex flex-col gap-3">
-            {/* User Profile */}
-            <div className={`flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10`}>
+        <div className={`mt-auto border-t pt-4 px-2`}>
+          {/* User Profile + Logout in one row */}
+          <div className="flex items-center justify-between gap-3 px-2 py-2 rounded-lg hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10">
+            
+            {/* User Info */}
+            <div className="flex items-center gap-3">
               <div className={`relative p-[2px] rounded-full ${user?.stories?.length > 0 ? 'border border-red-500' : ''}`}>
                 <Image
                   src={user?.profilePhoto?.url || '/default-profile.png'}
@@ -157,13 +159,12 @@ const Aside = () => {
               )}
             </div>
 
-            {/* Logout */}
+            {/* Logout Button */}
             <button
               onClick={Logout}
-              className={`flex items-center justify-center gap-2 px-3 py-2 
-                text-xs md:text-sm font-medium rounded-lg border transition-all
+              className={`flex items-center justify-center gap-1 px-2 py-1 text-xs md:text-sm font-medium rounded-lg border transition-all
                 ${collapsed 
-                  ? "mx-auto text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 border-none" 
+                  ? "text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 border-none" 
                   : "text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
                 }`}
             >
@@ -182,7 +183,7 @@ const Aside = () => {
     <>
       {/* ===== Desktop Sidebar ===== */}
       <motion.aside
-        animate={{ width: isCollapsed ? 80 : 224 }}
+        animate={{ width: isCollapsed ? 90 : 260 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className="hidden lg:flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r p-3 hover-expanded"
       >

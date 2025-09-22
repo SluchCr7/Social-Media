@@ -30,14 +30,14 @@ const Loader = () => {
         <motion.div
           animate={{ scale: [1, 1.15, 1] }}
           transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
-          className="w-20 h-20 rounded-full overflow-hidden shadow-lg"
+          className="w-40 h-40 rounded-full overflow-hidden shadow-lg"
           style={{ filter: "drop-shadow(0 0 20px rgba(255,255,255,0.3))" }}
         >
           <Image 
             src="/Logo.png"
             alt="Logo"
-            width={100}
-            height={100}
+            width={150}
+            height={150}
             className="object-contain"
           />
         </motion.div>
