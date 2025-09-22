@@ -24,7 +24,6 @@ import { HiBadgeCheck } from 'react-icons/hi'
 import { CheckStateAccount } from '@/app/Component/UserComponents/UsersStats'
 import ProfileSkeleton from '@/app/Skeletons/ProfileSkeleton'
 
-const tabs = ['Posts', 'Saved', 'Comments']
 
 const ProfilePage = () => {
   const { user, users, updatePhoto } = useAuth()
