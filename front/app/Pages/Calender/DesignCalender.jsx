@@ -14,7 +14,7 @@ import {
 import { motion } from "framer-motion";
 
 const DesignCalender = ({
-    currentDate, days,isToday,  setSelectedDate, typeIcons,setCurrentDate, showDayEvents,selectedEvent, setSelectedEvent
+    currentDate, days,isToday,  setSelectedDate, typeIcons,setCurrentDate, showDayEvents,selectedEvent, setSelectedEvent,
     setShowDayEvents,loading,events,typeColors,handleAddEvent,handleUpdateEvent,handleDeleteEvent,selectedDate
 }) => {
   return (
