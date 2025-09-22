@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { usePost } from '@/app/Context/PostContext';
 import { useAuth } from '@/app/Context/AuthContext';
 import { useComment } from '@/app/Context/CommentContext';
+import { useReport } from '@/app/Context/ReportContext';
 import PostMenu from '@/app/Component/PostMenu';
 import Comment from '@/app/Component/Comment';
 import CommentSkeleton from '@/app/Skeletons/CommentSkeleton';

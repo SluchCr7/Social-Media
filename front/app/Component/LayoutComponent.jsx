@@ -31,7 +31,7 @@ const LayoutComponent = ({ children }) => {
   } = usePost();
 
   const { isLogin, isAuthChecked } = useAuth();
-  const { showMenuReport, setShowMenuReport, isPostId } = useReport();
+  const { showMenuReport, setShowMenuReport, isPostId, isTargetId, reportedOnType } = useReport();
   const pathname = usePathname();
   const [showAside , setShowAside] = useState(false)
   // الصفحات التي لا يظهر فيها Aside أو Menu
@@ -120,7 +120,11 @@ const LayoutComponent = ({ children }) => {
 
           {showMenuReport && (
             <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-50">
-              <AddNewReport postId={isPostId} onClose={() => setShowMenuReport(false)} />
+              <AddNewReport
+                targetId={isTargetId}               // ✅ الـ id
+                reportedOnType={reportedOnType}     // ✅ النوع
+                onClose={() => setShowMenuReport(false)}
+              />
             </div>
           )}
 

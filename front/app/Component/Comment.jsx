@@ -8,6 +8,7 @@ import { MdOutlineDelete } from 'react-icons/md';
 import { useComment } from '../Context/CommentContext';
 import { useAuth } from '../Context/AuthContext';
 import { MdOutlineReport, MdContentCopy } from "react-icons/md";
+import { useReport } from '@/app/Context/ReportContext';
 
 const Comment = ({ comment }) => {
   const [isReplying, setIsReplying] = useState(false);

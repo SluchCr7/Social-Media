@@ -137,6 +137,7 @@ export const ReportContextProvider = ({ children }) => {
   const [actionLoading, setActionLoading] = useState(false); // Loading لكل عملية
   const [showMenuReport, setShowMenuReport] = useState(false);
   const [isTargetId, setIsTargetId] = useState(null);
+  const [reportedOnType, setReportedOnType] = useState(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -279,6 +280,7 @@ export const ReportContextProvider = ({ children }) => {
         setFilterType,
         filterSeverity,
         setFilterSeverity,
+        reportedOnType, setReportedOnType
       }}
     >
       {children}
