@@ -251,6 +251,7 @@ import TabsContent from '@/app/Component/UserComponents/TabsContent'
 import Tabs from '@/app/Component/UserComponents/Tabs'
 import StatBlock from '@/app/Component/UserComponents/StatBlock'
 import FollowModal from '@/app/Component/UserComponents/FollowModal'
+import { HiBadgeCheck } from 'react-icons/hi'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -405,7 +406,7 @@ const ProfilePage = () => {
                 {userData?.username || 'Username'}
               </h1>
               {userData?.isAccountWithPremiumVerify && (
-                <BsPatchCheckFill
+                <HiBadgeCheck
                   className="text-blue-500 text-xl"
                   title="Verified account"
                 />
