@@ -100,7 +100,10 @@ const ProfilePage = () => {
                 fill
                 className="object-cover rounded-full"
               />
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+              <div 
+                className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer"
+                onClick={() => document.getElementById('fileInput').click()}
+              >
                 <FaCamera className="text-white text-xl" />
               </div>
             </div>
