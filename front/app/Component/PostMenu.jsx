@@ -99,10 +99,10 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
   // ✅ خيارات الزائر
   const visitorOptions = useMemo(() => [
     {
-      icon: user?.following?.some(f => f?._id === post?.owner?._id)
+      icon: user?.following?.includes(post?.owner?._id)
         ? <RiUserUnfollowLine className="text-lg" />
         : <RiUserFollowLine className="text-lg" />,
-      text: user?.following?.some(f => f?._id === post?.owner?._id)
+      text: user?.following?.includes(post?.owner?._id)
         ? 'Unfollow User'
         : 'Follow User',
       action: () => {
