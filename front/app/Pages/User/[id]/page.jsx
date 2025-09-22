@@ -26,6 +26,7 @@ const Page = ({ params }) => {
   const { posts } = usePost()
   const [isBlockedByMe, setIsBlockedByMe] = useState(false)
   const [userSelected, setUserSelected] = useState({})
+  const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('Posts')
   const [showMenu, setShowMenu] = useState(false)
   const [menuType, setMenuType] = useState('followers')
@@ -44,13 +45,15 @@ const Page = ({ params }) => {
       setIsViewerOpen(true)
     }
   }
-
   // 📌 تحديد اليوزر من قائمة الـ users
   useEffect(() => {
     const matchedUser = users.find((u) => u?._id === id)
     if (matchedUser) setUserSelected(matchedUser)
-  }, [id, users])
-
+    }, [id, users])
+  
+  useEffect(() => {
+    if (userSelected) setLoading(true)
+  }, [userSelected])
   // 📌 تحديث حالة البلوك
   useEffect(() => {
     if (user && userSelected?._id) {
@@ -91,6 +94,23 @@ const Page = ({ params }) => {
     setReportedOnType('user');
     setShowMenuReport(true);
     setShowDotsMenu(false)
+  }
+
+  if (!loading) {
+    return (
+      <div className="flex flex-col gap-6 items-center py-12 w-full">
+        {/* Skeleton Loader */}
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="w-28 h-28 sm:w-36 sm:h-36 bg-gray-300 dark:bg-gray-700 rounded-full" />
+          <div className="w-40 h-6 bg-gray-300 dark:bg-gray-700 rounded" />
+          <div className="w-24 h-4 bg-gray-200 dark:bg-gray-600 rounded" />
+          <div className="flex gap-4 mt-4">
+            <div className="w-20 h-8 bg-gray-300 dark:bg-gray-700 rounded" />
+            <div className="w-20 h-8 bg-gray-300 dark:bg-gray-700 rounded" />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // 📌 التحقق من حالة الحساب

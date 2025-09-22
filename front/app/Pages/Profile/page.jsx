@@ -303,7 +303,7 @@ const ProfilePage = () => {
 
   if (!loading) {
     return (
-      <div className="flex flex-col gap-6 items-center py-12">
+      <div className="flex flex-col gap-6 items-center py-12 w-full">
         {/* Skeleton Loader */}
         <div className="animate-pulse flex flex-col items-center gap-4">
           <div className="w-28 h-28 sm:w-36 sm:h-36 bg-gray-300 dark:bg-gray-700 rounded-full" />
