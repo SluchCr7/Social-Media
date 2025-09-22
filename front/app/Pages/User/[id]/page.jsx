@@ -98,20 +98,43 @@ const Page = ({ params }) => {
 
   if (!loading) {
     return (
-      <div className="flex flex-col gap-6 items-center py-12 w-full">
-        {/* Skeleton Loader */}
-        <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-28 h-28 sm:w-36 sm:h-36 bg-gray-300 dark:bg-gray-700 rounded-full" />
-          <div className="w-40 h-6 bg-gray-300 dark:bg-gray-700 rounded" />
-          <div className="w-24 h-4 bg-gray-200 dark:bg-gray-600 rounded" />
-          <div className="flex gap-4 mt-4">
-            <div className="w-20 h-8 bg-gray-300 dark:bg-gray-700 rounded" />
-            <div className="w-20 h-8 bg-gray-300 dark:bg-gray-700 rounded" />
+      <div className="flex flex-col items-center lg:items-start gap-6 w-full pt-10 px-4 sm:px-6 lg:px-8">
+        {/* صورة البروفايل */}
+        <div className="w-36 h-36 rounded-full bg-gray-300 dark:bg-gray-700 animate-pulse" />
+
+        {/* اسم المستخدم */}
+        <div className="h-8 w-48 rounded bg-gray-300 dark:bg-gray-700 animate-pulse" />
+
+        {/* الاسم الحقيقي */}
+        <div className="h-5 w-32 rounded bg-gray-200 dark:bg-gray-600 animate-pulse" />
+
+        {/* البايو */}
+        <div className="flex flex-col gap-2 mt-2 w-full max-w-md">
+          <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+          <div className="h-4 w-3/4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+          <div className="h-4 w-1/2 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        </div>
+
+        {/* الإحصائيات (Posts, Followers, Following) */}
+        <div className="flex justify-center lg:justify-start gap-10 mt-6 w-full max-w-md">
+          <div className="flex flex-col items-center gap-1">
+            <div className="h-6 w-12 rounded bg-gray-300 dark:bg-gray-700 animate-pulse" />
+            <div className="h-4 w-16 rounded bg-gray-200 dark:bg-gray-600 animate-pulse" />
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <div className="h-6 w-12 rounded bg-gray-300 dark:bg-gray-700 animate-pulse" />
+            <div className="h-4 w-20 rounded bg-gray-200 dark:bg-gray-600 animate-pulse" />
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <div className="h-6 w-12 rounded bg-gray-300 dark:bg-gray-700 animate-pulse" />
+            <div className="h-4 w-20 rounded bg-gray-200 dark:bg-gray-600 animate-pulse" />
           </div>
         </div>
+
       </div>
     )
   }
+
 
   // 📌 التحقق من حالة الحساب
   if (userSelected?.accountStatus === 'banned') {
