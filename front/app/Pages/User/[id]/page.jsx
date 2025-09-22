@@ -17,6 +17,8 @@ import StoryViewer from '@/app/Component/StoryViewer'
 import { toast } from 'react-hot-toast'
 import { useReport } from '@/app/Context/ReportContext'
 import { HiBadgeCheck } from "react-icons/hi";
+import { CheckStateAccount } from '@/app/Component/UserComponents/UsersStats'
+import ProfileSkeleton from '@/app/Skeletons/ProfileSkeleton'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -97,76 +99,12 @@ const Page = ({ params }) => {
   }
 
   if (!loading) {
-    return (
-      <div className="flex flex-col items-center lg:items-start gap-6 w-full pt-10 px-4 sm:px-6 lg:px-8">
-        {/* صورة البروفايل */}
-        <div className="w-36 h-36 rounded-full bg-gray-300 dark:bg-gray-700 animate-pulse" />
-
-        {/* اسم المستخدم */}
-        <div className="h-8 w-48 rounded bg-gray-300 dark:bg-gray-700 animate-pulse" />
-
-        {/* الاسم الحقيقي */}
-        <div className="h-5 w-32 rounded bg-gray-200 dark:bg-gray-600 animate-pulse" />
-
-        {/* البايو */}
-        <div className="flex flex-col gap-2 mt-2 w-full max-w-md">
-          <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
-          <div className="h-4 w-3/4 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
-          <div className="h-4 w-1/2 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
-        </div>
-
-        {/* الإحصائيات (Posts, Followers, Following) */}
-        <div className="flex justify-center lg:justify-start gap-10 mt-6 w-full max-w-md">
-          <div className="flex flex-col items-center gap-1">
-            <div className="h-6 w-12 rounded bg-gray-300 dark:bg-gray-700 animate-pulse" />
-            <div className="h-4 w-16 rounded bg-gray-200 dark:bg-gray-600 animate-pulse" />
-          </div>
-          <div className="flex flex-col items-center gap-1">
-            <div className="h-6 w-12 rounded bg-gray-300 dark:bg-gray-700 animate-pulse" />
-            <div className="h-4 w-20 rounded bg-gray-200 dark:bg-gray-600 animate-pulse" />
-          </div>
-          <div className="flex flex-col items-center gap-1">
-            <div className="h-6 w-12 rounded bg-gray-300 dark:bg-gray-700 animate-pulse" />
-            <div className="h-4 w-20 rounded bg-gray-200 dark:bg-gray-600 animate-pulse" />
-          </div>
-        </div>
-
-      </div>
-    )
+    <ProfileSkeleton/>
   }
 
 
   // 📌 التحقق من حالة الحساب
-  if (userSelected?.accountStatus === 'banned') {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-center px-6">
-        <div className="max-w-md">
-          <h1 className="text-2xl font-bold text-red-600">This account has been banned</h1>
-          <p className="text-gray-500 mt-2">
-            account is permanently disabled due to policy violations.
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  if (userSelected?.accountStatus === 'suspended') {
-    const until = userSelected?.suspendedUntil
-      ? new Date(userSelected.suspendedUntil).toLocaleDateString()
-      : 'a future date'
-
-    return (
-      <div className="flex items-center justify-center min-h-screen text-center px-6">
-        <div className="max-w-md">
-          <h1 className="text-2xl font-bold text-yellow-500">This account is suspended</h1>
-          <p className="text-gray-500 mt-2">
-            You cannot View This Page{' '}
-            <span className="font-semibold">{until}</span>.
-          </p>
-        </div>
-      </div>
-    )
-  }
+  CheckStateAccount(userSelected)
 
   return (
     <div className="w-full pt-10 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6">
