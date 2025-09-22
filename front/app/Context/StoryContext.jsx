@@ -118,6 +118,7 @@ const getUserStories = async (userId) => {
       setStories(prev =>
         prev.map(story => (story._id === storyId ? data : story))
       );
+      showAlert("you Love this Story")
     } catch (err) {
       console.error(err);
       showAlert("Failed to toggle love");

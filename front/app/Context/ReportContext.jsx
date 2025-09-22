@@ -173,7 +173,6 @@ export const ReportContextProvider = ({ children }) => {
       setLimit(res.data.limit);
     } catch (err) {
       console.error('Error fetching reports:', err);
-      showAlert("Failed to fetch reports");
     } finally {
       setLoading(false);
     }

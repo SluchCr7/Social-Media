@@ -31,7 +31,7 @@ export const ReelsProvider = ({ children }) => {
       setHasMore(pageNum < res.data.pages);
     } catch (err) {
       console.error(err);
-      showAlert("Failed to fetch reels.");
+      // showAlert("Failed to fetch reels.");
     } finally {
       setIsLoading(false);
     }
