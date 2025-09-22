@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { IoIosSend } from 'react-icons/io';
 import { IoImage, IoClose, IoMic, IoHappyOutline } from 'react-icons/io5';
-import { useMessage } from '../Context/MessageContext';
+import { useMessage } from '../../Context/MessageContext';
 
 const ChatInput = () => {
   const { AddNewMessage, backgroundStyle } = useMessage();

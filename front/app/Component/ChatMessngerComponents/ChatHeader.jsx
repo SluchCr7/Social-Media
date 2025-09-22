@@ -2,8 +2,8 @@
 import Image from 'next/image';
 import React from 'react';
 import { FiX } from "react-icons/fi";
-import { useMessage } from '../Context/MessageContext';
-import { useAuth } from '../Context/AuthContext';
+import { useMessage } from '../../Context/MessageContext';
+import { useAuth } from '../../Context/AuthContext';
 
 const ChatHeader = () => {
   const { selectedUser, setSelectedUser , backgroundStyle } = useMessage();
