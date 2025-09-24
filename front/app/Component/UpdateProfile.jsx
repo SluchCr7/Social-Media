@@ -4,7 +4,7 @@ import { FiX } from "react-icons/fi"
 import { FaGithub, FaLinkedin, FaTwitter, FaFacebook, FaGlobe, FaPlus } from 'react-icons/fa'
 import { useAuth } from '../Context/AuthContext'
 import { toast } from 'react-toastify'
-
+import Image from 'next/image'
 const UpdateProfile = ({ update, setUpdate, user }) => {
   const [formData, setFormData] = useState({
     username: '',
@@ -220,12 +220,14 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
                         formData.partner === f._id ? "bg-green-600/30" : ""
                       }`}
                     >
-                      <img
-                        src={f.profilePhoto.url || "/default-avatar.png"}
-                        alt={f.username}
+                      <Image
+                        width={100}
+                        height={100}
+                        src={f?.profilePhoto?.url || "/default-avatar.png"}
+                        alt={f?.username}
                         className="w-10 h-10 rounded-full object-cover"
                       />
-                      <span>{f.profileName || f.username}</span>
+                      <span>{f?.profileName || f?.username}</span>
                     </div>
                   ))
                 ) : (
