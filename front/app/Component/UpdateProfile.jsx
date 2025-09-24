@@ -221,7 +221,7 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
                       }`}
                     >
                       <img
-                        src={f.profilePic || "/default-avatar.png"}
+                        src={f.profilePhoto.url || "/default-avatar.png"}
                         alt={f.username}
                         className="w-10 h-10 rounded-full object-cover"
                       />

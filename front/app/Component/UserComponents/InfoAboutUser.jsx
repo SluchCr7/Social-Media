@@ -88,7 +88,7 @@ const InfoAboutUser = ({ user }) => {
             )}
 
             {/* قسم العلاقة العاطفية */}
-            {user?.relationshipStatus && (
+            {user?.partner && (
               <div className="flex items-center space-x-3 p-4 rounded-xl bg-purple-50 dark:bg-purple-900 shadow-lg hover:shadow-2xl transition hover:-translate-y-1 col-span-1 sm:col-span-2">
                 <div className="w-10 h-10 flex items-center justify-center rounded-full bg-pink-100 text-pink-500">
                   <FaHeart />
@@ -96,11 +96,11 @@ const InfoAboutUser = ({ user }) => {
                 <span className="text-sm">
                   <span className="font-semibold">Relationship:</span>{" "}
                   {user.relationshipStatus === "single" && "Single"}
-                  {(user.relationshipStatus === "in_relationship" || user.relationshipStatus === "married") && (
+                  {(user.relationshipStatus === "In a Relationship" || user.relationshipStatus === "Married") && (
                     <>
-                      {user.relationshipStatus === "in_relationship" ? "In a relationship with " : "Married to "}
+                      {user.relationshipStatus === "In a Relationship" ? "In a relationship with " : "Married to "}
                       {user.partner ? (
-                        <Link href={`/profile/${user.partner._id}`} className="text-blue-500 hover:underline">
+                        <Link href={`/Pages/User/${user.partner._id}`} className="text-blue-500 hover:underline">
                           {user.partner.username}
                         </Link>
                       ) : "Unknown"}
