@@ -1,13 +1,14 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { IoClose, IoChevronBack, IoChevronForward } from "react-icons/io5"
+import React, { useState, useEffect, useRef } from 'react'
+import { IoClose, IoChevronBack, IoChevronForward, IoSend } from "react-icons/io5"
 import { FaHeart, FaRegCommentDots } from "react-icons/fa"
 import Image from 'next/image'
 import { useSwipeable } from 'react-swipeable'
 import { useStory } from '../Context/StoryContext'
 import { useAuth } from '../Context/AuthContext'
 import { useMessage } from '../Context/MessageContext'
+import UserHoverCard from './UserHoverCard'
 
 const StoryViewer = ({ stories, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -19,23 +20,23 @@ const StoryViewer = ({ stories, onClose }) => {
   const { user } = useAuth()
   const { AddNewMessage, setSelectedUser } = useMessage()
   const story = stories[currentIndex]
+  const timerRef = useRef(null)
 
   // تسجيل المشاهدة
   useEffect(() => {
     if (story?._id) viewStory(story._id)
   }, [currentIndex, story])
 
-  // progress bar
+  // Progress Bar Timer
   useEffect(() => {
-    if (!story) return
+    if (!story || isPaused) return
     setProgress(0)
-    if (isPaused) return
 
     const interval = 50
     const duration = 5000
     const increment = (interval / duration) * 100
 
-    const timer = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setProgress(prev => {
         if (prev + increment >= 100) {
           handleNext()
@@ -45,7 +46,7 @@ const StoryViewer = ({ stories, onClose }) => {
       })
     }, interval)
 
-    return () => clearInterval(timer)
+    return () => clearInterval(timerRef.current)
   }, [currentIndex, isPaused, story])
 
   const handleNext = () => {
@@ -86,6 +87,7 @@ const StoryViewer = ({ stories, onClose }) => {
       <button
         onClick={onClose}
         className="absolute top-6 right-6 p-3 rounded-full bg-black/40 hover:bg-black/70 transition z-50 shadow-md"
+        aria-label="Close Story"
       >
         <IoClose className="text-white text-3xl" />
       </button>
@@ -95,6 +97,7 @@ const StoryViewer = ({ stories, onClose }) => {
         <button
           onClick={handlePrev}
           className="absolute left-4 md:left-10 p-2 rounded-full bg-black/40 hover:bg-black/60 transition z-40"
+          aria-label="Previous Story"
         >
           <IoChevronBack className="text-white text-4xl" />
         </button>
@@ -103,6 +106,7 @@ const StoryViewer = ({ stories, onClose }) => {
         <button
           onClick={handleNext}
           className="absolute right-4 md:right-10 p-2 rounded-full bg-black/40 hover:bg-black/60 transition z-40"
+          aria-label="Next Story"
         >
           <IoChevronForward className="text-white text-4xl" />
         </button>
@@ -117,15 +121,19 @@ const StoryViewer = ({ stories, onClose }) => {
       >
         {/* معلومات صاحب الستوري */}
         <div className="absolute top-4 left-4 flex items-center gap-3 z-30">
-          <Image
-            src={story?.owner?.profilePhoto?.url || '/default-profile.png'}
-            alt="avatar"
-            width={42}
-            height={42}
-            className="w-11 h-11 rounded-full object-cover border-2 border-white/50"
-          />
+          <UserHoverCard userSelected={story?.owner}>
+            <Image
+              src={story?.owner?.profilePhoto?.url || '/default-profile.png'}
+              alt="avatar"
+              width={42}
+              height={42}
+              className="w-11 h-11 rounded-full object-cover border-2 border-white/50"
+            />
+          </UserHoverCard>
           <div className="flex flex-col">
-            <span className="text-white font-semibold text-sm">{story?.owner?.username || 'Unknown'}</span>
+            <span className="text-white font-semibold text-sm cursor-pointer hover:underline">
+              {story?.owner?.username || 'Unknown'}
+            </span>
             <span className='text-gray-300 text-xs'>{new Date(story?.createdAt).toLocaleString()}</span>
           </div>
         </div>
@@ -138,6 +146,7 @@ const StoryViewer = ({ stories, onClose }) => {
               alt="story"
               fill
               className="object-contain"
+              priority
             />
             {story.text && (
               <div className="absolute bottom-28 w-11/12 text-center">
@@ -156,17 +165,13 @@ const StoryViewer = ({ stories, onClose }) => {
         )}
 
         {/* الأكشنات */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-10 z-50">
+        <div className={`absolute ${showCommentInput ? "bottom-20" : "bottom-6"} left-1/2 -translate-x-1/2 flex items-center gap-8 z-50`}>
           <button
             onClick={handleLove}
             className="p-4 rounded-full bg-white/10 backdrop-blur-md hover:scale-110 transition shadow-md"
           >
             <FaHeart
-              className={`text-3xl ${
-                story?.loves?.some(u => u?._id === user?._id)
-                  ? "text-red-500"
-                  : "text-white"
-              }`}
+              className={`text-3xl ${story?.loves?.some(u => u?._id === user?._id) ? "text-red-500" : "text-white"}`}
             />
           </button>
           {story?.owner?._id !== user?._id && (
@@ -184,16 +189,23 @@ const StoryViewer = ({ stories, onClose }) => {
 
         {/* حقل التعليق */}
         {showCommentInput && (
-          <div className="absolute bottom-0 left-0 w-full bg-black/70 backdrop-blur-md p-3 flex items-center gap-2 animate-slide-up">
-            <input
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Type a message..."
-              className="flex-1 px-4 py-3 rounded-lg bg-gray-800/90 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+          <div className="absolute bottom-0 left-0 w-full bg-black/70 backdrop-blur-md p-4 flex items-center gap-3 animate-slide-up">
+            <div className="relative flex-1">
+              <input
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Type a message..."
+                className="w-full px-5 py-3 rounded-2xl bg-gray-800/90 text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-black transition-shadow shadow-inner shadow-black/50"
+              />
+              <IoSend
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-blue-400 transition"
+                size={20}
+                onClick={handleCommentSubmit}
+              />
+            </div>
             <button
               onClick={handleCommentSubmit}
-              className="px-5 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium text-sm shadow-md"
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-sm rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
             >
               Send
             </button>
@@ -213,7 +225,7 @@ const StoryViewer = ({ stories, onClose }) => {
         {stories.map((_, idx) => (
           <div key={idx} className="flex-1 h-1 rounded-full bg-white/20 overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-blue-400 to-purple-500 transition-all duration-50"
+              className="h-full bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 transition-all duration-50"
               style={{
                 width:
                   idx < currentIndex ? '100%' :

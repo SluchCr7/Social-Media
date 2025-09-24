@@ -105,6 +105,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
       text: user?.following?.includes(post?.owner?._id)
         ? 'Unfollow User'
         : 'Follow User',
+
       action: () => {
         followUser(post?.owner?._id)
       },

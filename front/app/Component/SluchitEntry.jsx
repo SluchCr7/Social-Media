@@ -115,7 +115,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                   </div>
                 ) : (
                   <div className="flex flex-col leading-tight">
-                    <UserHoverCard user={post?.owner}>
+                    <UserHoverCard userSelected={post?.owner}>
                       <Link
                         href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${post?.owner?._id}`}
                         className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline"
