@@ -44,6 +44,7 @@ const Aside = ({isCollapsed, setIsCollapsed}) => {
         <SidebarContent
           isCollapsed={isCollapsed}
           isMobile={false}
+          setIsCollapsed={setIsCollapsed}
           setIsMobileMenuOpen={setIsMobileMenuOpen}
           user={{ ...user, Logout }}
           onlineUsers={onlineUsers}

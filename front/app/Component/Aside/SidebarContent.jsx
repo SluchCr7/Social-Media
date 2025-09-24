@@ -10,7 +10,7 @@ const baseStyle = `relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm
 const activeStyle = `bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md`
 const inactiveStyle = `hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 text-lightMode-text dark:text-darkMode-text`
 
-const SidebarContent = memo(({ isCollapsed, isMobile, setIsMobileMenuOpen, user, onlineUsers }) => {
+const SidebarContent = memo(({ isCollapsed,setIsCollapsed, isMobile, setIsMobileMenuOpen, user, onlineUsers }) => {
   const pathname = usePathname(); 
   return (
     <>
@@ -23,7 +23,7 @@ const SidebarContent = memo(({ isCollapsed, isMobile, setIsMobileMenuOpen, user,
         )}
         {!isMobile && (
           <button
-            onClick={() => setIsMobileMenuOpen(prev => prev ? prev : !prev)}
+            onClick={() => setIsCollapsed(!isCollapsed)}
             className="text-xl p-1 rounded hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 transition-all duration-300"
           >
             <FiChevronLeft className={`${isCollapsed ? "rotate-180" : ""}`} />
