@@ -111,7 +111,7 @@
 // export default Sluchits;
 
 
-import React, { useMemo, useRef, useCallback } from 'react';
+import React, { useMemo, useRef, useCallback, useEffect } from 'react';
 import SluchitEntry from './SluchitEntry';
 import { usePost } from '../Context/PostContext';
 import { useAuth } from '../Context/AuthContext';
@@ -126,7 +126,9 @@ const Sluchits = ({ activeTab }) => {
 
   const following = Array.isArray(user?.following) ? user?.following : [];
   const userId = user?._id;
-
+  useEffect(() => {
+    console.log(user)
+  }, [user])
   // فلترة / ترتيب البوستات حسب التبويب
   const filteredPosts = useMemo(() => {
     if (!Array.isArray(posts)) return [];

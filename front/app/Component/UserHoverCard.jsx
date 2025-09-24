@@ -7,9 +7,6 @@ import { useEffect } from 'react'
 
 const UserHoverCard = ({ userSelected, children }) => {
     const { followUser, user } = useAuth()
-    useEffect(()=>{
-      console.log(userSelected)
-    },[userSelected])
     if (!userSelected) return null;
   return (
     <HoverCard.Root>
