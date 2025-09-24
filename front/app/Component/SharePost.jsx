@@ -67,7 +67,7 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
                 alt="User Profile"
                 width={50}
                 height={50}
-                className="rounded-full object-cover"
+                className="rounded-full w-12 h-12 min-w-10 aspect-square object-cover "
               />
               <div className="flex-1 flex flex-col">
                 <textarea
@@ -92,7 +92,7 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
                   alt="Owner"
                   width={40}
                   height={40}
-                  className="rounded-full object-cover"
+                  className="rounded-full w-10 h-10 min-w-10 aspect-square object-cover "
                 />
                 <div>
                   <p className="font-semibold text-gray-800 dark:text-gray-200">

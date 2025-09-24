@@ -126,9 +126,6 @@ const Sluchits = ({ activeTab }) => {
 
   const following = Array.isArray(user?.following) ? user?.following : [];
   const userId = user?._id;
-  useEffect(() => {
-    console.log(user)
-  }, [user])
   // فلترة / ترتيب البوستات حسب التبويب
   const filteredPosts = useMemo(() => {
     if (!Array.isArray(posts)) return [];
