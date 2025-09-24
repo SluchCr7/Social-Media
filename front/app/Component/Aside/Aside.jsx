@@ -13,10 +13,10 @@ import SidebarContent from './SidebarContent'
 
 
 
-const Aside = () => {
+const Aside = ({isCollapsed, setIsCollapsed}) => {
   const { user, Logout, onlineUsers } = useAuth()
   const { isMobile, setIsMobile, isMobileMenuOpen, setIsMobileMenuOpen } = useAside()
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  // const [isCollapsed, setIsCollapsed] = useState(false)
 
   // Detect mobile safely (SSR safe)
   useEffect(() => {
@@ -39,7 +39,7 @@ const Aside = () => {
       <motion.aside
         animate={{ width: isCollapsed ? 85 : 260 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="hidden lg:flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r p-3 hover-expanded"
+        className="hidden fixed top-0 left-0 lg:flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r p-3 hover-expanded"
       >
         <SidebarContent
           isCollapsed={isCollapsed}

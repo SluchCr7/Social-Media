@@ -33,7 +33,7 @@ const LayoutComponent = ({ children }) => {
   const { isLogin, isAuthChecked } = useAuth();
   const { showMenuReport, setShowMenuReport, isPostId, isTargetId, reportedOnType } = useReport();
   const pathname = usePathname();
-  const [showAside , setShowAside] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
   // الصفحات التي لا يظهر فيها Aside أو Menu
   const hideLayout = [
     '/Pages/Login',
@@ -75,21 +75,14 @@ const LayoutComponent = ({ children }) => {
       <div className={`flex items-start gap-3 w-full`}>
         {!hideLayout && isLogin && (
           <Aside
-            showNotifications={showNotifications}
-            setShowNotifications={setShowNotifications}
-            showMessanger={showMessanger}
-            setShowMessanger={setShowMessanger}
-            showNewSluchit={showNewSluchit}
-            setShowNewSluchit={setShowNewSluchit}
-            showSearch={showSearch}
-            setShowSearch={setShowSearch}
+            isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed}
           />
         )}
 
         <div
           className={`flex items-start transition-all duration-300 ${
             hideLayout
-              ? 'w-full'
+              ? `w-full ${isCollapsed ? 'my-[85px]' : 'my-[260px]'}`
               : isLogin
               ? 'w-full'
               : 'w-[90%] md:w-[80%] mx-auto'
