@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { useAuth } from '../Context/AuthContext'
 
 const UserHoverCard = ({ userSelected, children }) => {
-    if (!userSelected) return null;
     const {followUser , user} = useAuth()
+    if (!userSelected) return null;
   return (
     <HoverCard.Root>
       <HoverCard.Trigger asChild>
