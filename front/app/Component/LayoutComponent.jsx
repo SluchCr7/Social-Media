@@ -82,9 +82,9 @@ const LayoutComponent = ({ children }) => {
         <div
           className={`flex items-start transition-all duration-300 ${
             hideLayout
-              ? `w-full ${isCollapsed ? 'my-[85px]' : 'my-[260px]'}`
+              ? `w-full `
               : isLogin
-              ? 'w-full'
+              ? `w-full ${isCollapsed ? 'my-[85px]' : 'my-[260px]'}`
               : 'w-[90%] md:w-[80%] mx-auto'
           }`}
         >
