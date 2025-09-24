@@ -13,7 +13,7 @@ const MainApp = () => {
   const { markAllAsRead, unreadCount } = useNotify();
   const { isLogin } = useAuth();
   const { unReadedMessage } = useMessage();
-
+    const [activeTab, setActiveTab] = useState("following");
   return (
     <div className="flex-1 w-full">
       {/* Header ثابت أعلى الصفحة */}
@@ -22,12 +22,14 @@ const MainApp = () => {
         setShowNotifications={setShowNotifications}
         unreadCount={unreadCount}
         markAllAsRead={markAllAsRead}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
       />
 
       {/* محتوى الصفحة */}
       <div className="w-full pt-10 md:pt-6 pb-5">
         {isLogin && <Stories />}
-        <Sluchits />
+        <Sluchits activeTab={activeTab} />
       </div>
 
       {/* قائمة الإشعارات */}

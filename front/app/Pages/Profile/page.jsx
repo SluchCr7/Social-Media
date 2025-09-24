@@ -23,6 +23,7 @@ import StatBlock from '@/app/Component/UserComponents/StatBlock'
 import FollowModal from '@/app/Component/UserComponents/FollowModal'
 import { CheckStateAccount } from '@/app/Component/UserComponents/UsersStats'
 import { useCombinedPosts } from '@/app/Custome/useCombinedPosts'
+import { selectUserFromUsers } from '@/app/utils/SelectUserFromUsers'
 const ProfilePage = () => {
   const { user, users, updatePhoto } = useAuth()
   const { posts } = usePost()
@@ -39,8 +40,7 @@ const ProfilePage = () => {
 
   // 📌 تحديث بيانات المستخدم عند التغير
   useEffect(() => {
-    const matchedUser = users?.find((u) => user?._id === u?._id)
-    setUserData(matchedUser || user || {})
+    selectUserFromUsers(setUserData, users, user?._id)
     setLoading(false)
   }, [users, user])
 

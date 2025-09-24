@@ -20,6 +20,7 @@ import { HiBadgeCheck } from "react-icons/hi";
 import { CheckStateAccount } from '@/app/Component/UserComponents/UsersStats'
 import ProfileSkeleton from '@/app/Skeletons/ProfileSkeleton'
 import { useCombinedPosts } from '@/app/Custome/useCombinedPosts'
+import { selectUserFromUsers } from '@/app/utils/SelectUserFromUsers'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -42,8 +43,7 @@ const UserProfilePage = ({ params }) => {
 
   // 📌 تحديد اليوزر من قائمة الـ users
   useEffect(() => {
-    const matchedUser = users.find(u => u?._id === id)
-    setUserSelected(matchedUser || null)
+    selectUserFromUsers(setUserSelected, users, id)
   }, [id, users])
 
   useEffect(() => {
