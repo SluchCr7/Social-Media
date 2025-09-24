@@ -54,14 +54,17 @@ const UserHoverCard = ({ userSelected, children }) => {
             <span><b>{userSelected?.followers?.length || 0}</b> Followers</span>
             <span><b>{userSelected?.following?.length || 0}</b> Following</span>
           </div>
-
-          <div className="mt-3">
-            <button onClick={() => followUser(userSelected._id)} className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm py-1.5 rounded-lg">
-                {user?.following?.includes(userSelected._id)
-                    ? 'Unfollow User'
-                    : 'Follow User'}
-            </button>
-          </div>
+          {
+            user?._id !== userSelected._id && (
+              <div className="mt-3">
+                <button onClick={() => followUser(userSelected._id)} className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm py-1.5 rounded-lg">
+                    {user?.following?.includes(userSelected._id)
+                        ? 'Unfollow User'
+                        : 'Follow User'}
+                </button>
+              </div>
+            )
+          }
 
           <HoverCard.Arrow className="fill-white dark:fill-gray-900" />
         </HoverCard.Content>
