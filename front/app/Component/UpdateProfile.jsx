@@ -206,8 +206,8 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">Choose Partner</label>
               <div className="max-h-48 overflow-y-auto border border-gray-700 rounded-xl">
-                {user.following && user.following.length > 0 ? (
-                  user.following.map(f => (
+                {user?.following && user?.following.length > 0 ? (
+                  user?.following.map(f => (
                     <div
                       key={f._id}
                       onClick={() =>

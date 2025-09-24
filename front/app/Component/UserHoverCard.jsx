@@ -3,9 +3,13 @@ import * as HoverCard from '@radix-ui/react-hover-card'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useAuth } from '../Context/AuthContext'
+import { useEffect } from 'react'
 
 const UserHoverCard = ({ userSelected, children }) => {
-    const {followUser , user} = useAuth()
+    const { followUser, user } = useAuth()
+    useEffect(()=>{
+      console.log(userSelected)
+    },[userSelected])
     if (!userSelected) return null;
   return (
     <HoverCard.Root>

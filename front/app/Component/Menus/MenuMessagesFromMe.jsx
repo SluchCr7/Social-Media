@@ -40,7 +40,7 @@ const MenuMessagesFromMe = () => {
                   <span className="text-lightMode-fg dark:text-darkMode-fg font-semibold">{msg?.sender?.username}</span>
                   <span className="text-xs text-gray-500">{dayjs(msg?.createdAt).format('HH:mm')}</span>
                 </div>
-                <p className="text-gray-300 mt-1">{msg?.text}</p>
+                <p className="text-gray-300 mt-1 text-sm break-all whitespace-pre-wrap">{msg?.text}</p>
               </div>
             </Link>
           ))
