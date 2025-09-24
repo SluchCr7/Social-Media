@@ -119,7 +119,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
         <div className="w-full flex items-center justify-between px-3 md:px-6">
           
           {/* ✅ Tabs */}
-          <div className="flex gap-6 relative -mb-px">
+          <div className="flex gap-6 relative -mb-[7px]">
             <button
               onClick={() => setActiveTab("following")}
               className={`pb-2 border-b-2 transition-colors ${
