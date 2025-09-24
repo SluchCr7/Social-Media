@@ -53,6 +53,7 @@ const activeStyle = `bg-gradient-to-r from-indigo-500 to-purple-500 text-white s
 const inactiveStyle = `hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 text-lightMode-text dark:text-darkMode-text`
 
 const SidebarContent = memo(({ isCollapsed, isMobile, setIsMobileMenuOpen, user, onlineUsers }) => {
+  const pathname = usePathname() 
   return (
     <>
       {/* Logo + Collapse Button */}
@@ -81,7 +82,6 @@ const SidebarContent = memo(({ isCollapsed, isMobile, setIsMobileMenuOpen, user,
             )}
             <div className="flex flex-col gap-1">
               {section.items.map(({ icon, text, link }) => {
-                const pathname = usePathname()
                 const isActive = pathname === link
                 return (
                   <Link
