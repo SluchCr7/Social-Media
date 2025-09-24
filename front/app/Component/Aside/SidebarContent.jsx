@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { memo } from 'react'
+import { FiChevronLeft } from "react-icons/fi"
 
 const baseStyle = `relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out`
 const activeStyle = `bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md`
