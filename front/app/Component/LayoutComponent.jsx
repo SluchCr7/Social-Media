@@ -84,7 +84,7 @@ const LayoutComponent = ({ children }) => {
             hideLayout
               ? `w-full `
               : isLogin
-              ? `w-full ${isCollapsed ? 'ml-[85px]' : 'ml-[260px]'}`
+              ? `w-full ${isCollapsed ? 'md:ml-[85px]' : 'md:ml-[260px]'}`
               : 'w-[90%] md:w-[80%] mx-auto'
           }`}
         >
