@@ -16,7 +16,8 @@ const UserSchema = new mongoose.Schema({
     },
     profileName : {
         type: String,
-        default : "@User_sluchit"
+        default: "@User_sluchit",
+        // unique: true
     },
     profilePhoto:{
         type : Object, 

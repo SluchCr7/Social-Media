@@ -323,7 +323,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
           path: "postId",
           model: "Post",
         },
-      })
+      }).populate("partner" , "username profileName")
     res.status(200).json(users);
   });
   
