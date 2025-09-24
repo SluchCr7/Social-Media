@@ -21,7 +21,7 @@ const getAllPosts = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
-    .populate("owner", "username profileName profilePhoto")
+    .populate("owner", "username profileName profilePhoto following followers description")
     .populate("community", "Name Picture members")
     .populate({
       path: "reports",

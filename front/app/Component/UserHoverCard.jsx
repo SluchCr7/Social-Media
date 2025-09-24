@@ -53,7 +53,6 @@ const UserHoverCard = ({ userSelected, children }) => {
           <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
             <span><b>{userSelected?.followers?.length || 0}</b> Followers</span>
             <span><b>{userSelected?.following?.length || 0}</b> Following</span>
-            <span><b>{userSelected?.posts?.length || 0}</b> Posts</span>
           </div>
 
           <div className="mt-3">
