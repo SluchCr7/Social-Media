@@ -6,7 +6,7 @@ import { Bell, MessageCircle } from 'lucide-react';
 import { useNotify } from '../Context/NotifyContext';
 import { useAuth } from '../Context/AuthContext';
 import { IoIosLogIn } from "react-icons/io";
-import { FiMenu} from "react-icons/fi"
+import { FiMenu } from "react-icons/fi";
 import { useAside } from '../Context/AsideContext';
 import ReelUploadModal from './MenuUploadReel';
 import { RiVideoUploadLine } from "react-icons/ri";
@@ -101,6 +101,7 @@ import { RiVideoUploadLine } from "react-icons/ri";
 
 // export default Header;
 
+
 const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab }) => {
   const { unreadCount } = useNotify();
   const { isLogin } = useAuth();
@@ -114,27 +115,27 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
   return (
     <>
       <ReelUploadModal isOpen={showModelAddReel} onClose={() => setShowModelAddReel(false)} />
-      <header className="sticky top-0 z-50 bg-white/70 dark:bg-darkMode-bg/70 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm">
-        <div className="w-full flex items-center justify-between py-3 px-3 md:px-6">
+      <header className="sticky top-0 z-50 bg-white/70 dark:bg-darkMode-bg/70 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div className="w-full flex items-center justify-between px-3 md:px-6">
           
-          {/* ✅ Tabs بدل Home */}
-          <div className="flex gap-6">
+          {/* ✅ Tabs */}
+          <div className="flex gap-6 relative -mb-px">
             <button
               onClick={() => setActiveTab("following")}
-              className={`pb-1 border-b-2 ${
+              className={`pb-2 border-b-2 transition-colors ${
                 activeTab === "following"
-                  ? "border-blue-500 text-blue-500"
-                  : "border-transparent text-gray-500"
+                  ? "border-blue-500 text-blue-500 font-medium"
+                  : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
               }`}
             >
               Following
             </button>
             <button
               onClick={() => setActiveTab("forYou")}
-              className={`pb-1 border-b-2 ${
+              className={`pb-2 border-b-2 transition-colors ${
                 activeTab === "forYou"
-                  ? "border-blue-500 text-blue-500"
-                  : "border-transparent text-gray-500"
+                  ? "border-blue-500 text-blue-500 font-medium"
+                  : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
               }`}
             >
               For You
@@ -142,7 +143,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 py-3">
             {isLogin ? (
               <>
                 {/* Notifications */}
