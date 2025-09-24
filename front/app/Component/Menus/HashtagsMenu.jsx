@@ -1,8 +1,8 @@
 import React from 'react';
-import { usePost } from '../Context/PostContext';
+import { usePost } from '../../Context/PostContext';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import Link from 'next/link';
-import { filterHashtags } from '../utils/filterHashtags';
+import { filterHashtags } from '../../utils/filterHashtags';
 
 const HashtagsMenu = () => {
   const { posts } = usePost();

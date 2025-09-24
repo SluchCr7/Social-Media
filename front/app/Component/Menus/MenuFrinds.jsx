@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { useAuth } from '../Context/AuthContext';
+import { useAuth } from '../../Context/AuthContext';
 import Image from 'next/image';
 import { FiUserPlus } from 'react-icons/fi';
 import { motion } from 'framer-motion';

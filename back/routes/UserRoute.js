@@ -17,11 +17,13 @@ const {
   makeFollow,
   updatePassword,
   updateProfile,
-  savePost,
   pinPost,
   MakeAccountPreimumVerify,
   togglePrivateAccount,
   updateAccountStatus,
+  // 🔹 Controllers الجدد
+  getRelationship,
+  updateRelationship
 } = require('../Controllers/UserController');
 
 const photoUpload = require('../Middelwares/uploadPhoto');
@@ -39,7 +41,6 @@ route.route('/admin/:id').put(verifyToken, makeUserAdmin);
 route.route('/:id/verify/:token').get(verifyAccount);
 route.route('/photo').post(verifyToken, photoUpload.single('image'), uploadPhoto);
 route.route('/follow/:id').put(verifyToken, makeFollow);
-route.route('/save/:id').put(verifyToken, savePost);
 route.route('/update').put(verifyToken, updateProfile);
 route.route('/update/pass').put(verifyToken, updatePassword);
 route.route('/pin/:id').put(verifyToken, pinPost);
@@ -50,5 +51,9 @@ route.route('/account/private').put(verifyToken, togglePrivateAccount);
 
 // 🔹 Account status & suspension
 route.route('/status/:userId').put(verifyToken, updateAccountStatus);
+
+// 🔹 Relationship routes
+route.route('/relationship/:userId').get(verifyToken, getRelationship); // جلب حالة العلاقة
+route.route('/relationship/:userId').put(verifyToken, updateRelationship); // تحديث العلاقة
 
 module.exports = route;

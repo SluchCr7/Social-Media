@@ -1,7 +1,7 @@
 'use client'
 import Image from 'next/image';
 import React from 'react';
-import { useNews } from '../Context/NewsContext';
+import { useNews } from '../../Context/NewsContext';
 import Link from 'next/link';
 import { FaExternalLinkAlt } from 'react-icons/fa';
 

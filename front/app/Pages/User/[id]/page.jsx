@@ -19,6 +19,7 @@ import { useReport } from '@/app/Context/ReportContext'
 import { HiBadgeCheck } from "react-icons/hi";
 import { CheckStateAccount } from '@/app/Component/UserComponents/UsersStats'
 import ProfileSkeleton from '@/app/Skeletons/ProfileSkeleton'
+import { useCombinedPosts } from '@/app/Custome/useCombinedPosts'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -58,18 +59,7 @@ const UserProfilePage = ({ params }) => {
   const isFollowing = useMemo(() => userSelected?.followers?.some(f => f?._id === user?._id), [userSelected, user])
   const isOwner = user?._id === userSelected?._id
   const canSeePrivateContent = useMemo(() => !userSelected?.isPrivate || isOwner || isFollowing, [userSelected, isOwner, isFollowing])
-
-  // 📌 تقسيم البوستات (مثبتة + عادية)
-  const combinedPosts = useMemo(() => {
-    if (!canSeePrivateContent || !userSelected) return []
-    const pinnedPosts = userSelected?.pinsPosts || []
-    const pinnedIds = new Set(pinnedPosts.map(p => p?._id))
-    const regularPosts = (userSelected?.posts || []).filter(p => !pinnedIds.has(p?._id))
-    return [
-      ...pinnedPosts.map(post => ({ ...post, isPinned: true })),
-      ...regularPosts.map(post => ({ ...post, isPinned: false })),
-    ]
-  }, [userSelected, canSeePrivateContent])
+  const combinedPosts = useCombinedPosts(userSelected)
 
   // 📌 جلب ستوريز اليوزر عند الضغط على صورته
   const handleProfileClick = async () => {
@@ -105,97 +95,7 @@ const UserProfilePage = ({ params }) => {
   return (
     <div className="w-full pt-10 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6">
       
-      {/* Profile Info */}
-      {/* <div className="flex flex-col items-center lg:items-start justify-start gap-6">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className={`relative w-36 h-36 rounded-full shadow-lg cursor-pointer p-[3px]
-            ${userSelected?.stories?.length > 0 
-              ? 'border-[5px] border-blue-500' 
-              : 'border-0 border-transparent'}`}
-          onClick={handleProfileClick}
-        >
-          <div className="w-full h-full rounded-full bg-lightMode-bg dark:bg-darkMode-bg p-[2px]">
-            <Image
-              src={userSelected?.profilePhoto?.url || '/default-profile.png'}
-              alt="Profile"
-              fill
-              className="object-cover rounded-full"
-            />
-          </div>
-        </motion.div>
-
-        <motion.h1
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="text-3xl font-bold flex items-center gap-2"
-        >
-          {userSelected?.username || 'Username'}
-          {userSelected?.isAccountWithPremiumVerify && <HiBadgeCheck className='text-blue-500'/>}
-        </motion.h1>
-        <span className="text-gray-400 -mt-2">{userSelected?.profileName || 'Profile Name'}</span>
-
-        <motion.p
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="text-base text-center text-gray-500 max-w-lg px-4 line-clamp-3"
-        >
-          {userSelected?.description || 'No bio provided.'}
-        </motion.p>
-
-        <CheckStateAccount user={userSelected}/>
-
-        {canSeePrivateContent && (
-          <div className="flex justify-center gap-10 mt-6">
-            <StatBlock label="Posts" value={userSelected?.posts?.length} />
-            <StatBlock label="Followers" value={userSelected?.followers?.length} onClick={() => { setFollowModalType('followers'); setShowFollowModal(true) }} />
-            <StatBlock label="Following" value={userSelected?.following?.length} onClick={() => { setFollowModalType('following'); setShowFollowModal(true) }} />
-          </div>
-        )}
-
-        {isLogin && !isOwner && (
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            className="flex gap-3 mt-4 relative"
-          >
-            <button
-              onClick={() => followUser(userSelected?._id)}
-              className={`flex items-center gap-2 px-6 py-2 rounded-xl border text-sm font-medium transition-all duration-300
-                ${isFollowing
-                  ? 'text-red-600 border-red-600 hover:bg-red-600 hover:text-white'
-                  : 'text-green-600 border-green-600 hover:bg-green-600 hover:text-white'
-                }`}
-            >
-              {isFollowing ? <RiUserUnfollowLine className="text-lg" /> : <RiUserFollowLine className="text-lg" />}
-              {isFollowing ? 'Unfollow' : 'Follow'}
-            </button>
-
-            <button
-              onClick={() => setShowDotsMenu(!showDotsMenu)}
-              className="px-4 py-2 border rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition relative"
-            >
-              <IoEllipsisHorizontal className="text-xl" />
-            </button>
-
-            {showDotsMenu && (
-              <div className="absolute top-12 right-0 w-48 bg-white dark:bg-gray-900 border rounded-xl shadow-lg z-50 flex flex-col py-2">
-                <button onClick={handleReport} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-left">Report User</button>
-                <button onClick={handleBlock} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-left">
-                  {isBlockedByMe ? "Unblock User" : "Block User"}
-                </button>
-                <button onClick={handleCopyLink} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-left">Copy Profile Link</button>
-              </div>
-            )}
-          </motion.div>
-        )}
-      </div> */}
-{/* ===================== Upper Profile Section ===================== */}
+      {/* ===================== Upper Profile Section ===================== */}
       <div className="flex flex-col items-center lg:items-start gap-6">
         
         {/* Avatar */}

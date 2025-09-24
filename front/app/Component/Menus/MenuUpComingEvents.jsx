@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { useEvent } from '../Context/EventContext'
+import { useEvent } from '../../Context/EventContext'
 import { motion } from 'framer-motion'
 import { 
   FaBirthdayCake, 
@@ -9,6 +9,7 @@ import {
   FaRegClock 
 } from 'react-icons/fa'
 import { MdEventAvailable } from 'react-icons/md'
+import Link from 'next/link'
 
 const typeIcons = {
   birthday: <FaBirthdayCake className="text-pink-500" />,
@@ -29,9 +30,9 @@ const MenuUpComingEvents = () => {
       >
         <MdEventAvailable className="mx-auto text-5xl text-gray-400 dark:text-gray-600 mb-4" />
         <p className="text-gray-500 dark:text-gray-400 mb-4">No upcoming events</p>
-        <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-sm font-medium transition">
+        <Link href="/Pages/Calender" className="px-4 py-2 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white rounded-full text-sm font-medium transition">
           Create Event
-        </button>
+        </Link>
       </motion.div>
     )
   }

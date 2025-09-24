@@ -40,7 +40,7 @@ const Register = () => {
   }
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="w-full min-h-screen flex items-center justify-center bg-gray-50 px-4 py-4">
       <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl overflow-hidden grid md:grid-cols-2">
         {/* Left Side (Illustration / Image) */}
         <div className="hidden md:flex items-center justify-center bg-blue-50">

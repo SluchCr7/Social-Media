@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import ChatSlider from '../../Component/ChatMessngerComponents/ChatSlider';
 import Chat from '../../Component/ChatMessngerComponents/Chat';
-import NoChat from './../../Component/NoChat';
+import NoChat from '../../Component/ChatMessngerComponents/NoChat';
 import { useMessage } from '@/app/Context/MessageContext';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';

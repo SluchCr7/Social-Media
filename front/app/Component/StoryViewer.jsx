@@ -8,7 +8,6 @@ import { useSwipeable } from 'react-swipeable'
 import { useStory } from '../Context/StoryContext'
 import { useAuth } from '../Context/AuthContext'
 import { useMessage } from '../Context/MessageContext'
-import UserHoverCard from './UserHoverCard'
 
 const StoryViewer = ({ stories, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -121,15 +120,13 @@ const StoryViewer = ({ stories, onClose }) => {
       >
         {/* معلومات صاحب الستوري */}
         <div className="absolute top-4 left-4 flex items-center gap-3 z-30">
-          <UserHoverCard userSelected={story?.owner}>
-            <Image
-              src={story?.owner?.profilePhoto?.url || '/default-profile.png'}
-              alt="avatar"
-              width={42}
-              height={42}
-              className="w-11 h-11 rounded-full object-cover border-2 border-white/50"
-            />
-          </UserHoverCard>
+          <Image
+            src={story?.owner?.profilePhoto?.url || '/default-profile.png'}
+            alt="avatar"
+            width={42}
+            height={42}
+            className="w-11 h-11 rounded-full object-cover border-2 border-white/50"
+          />
           <div className="flex flex-col">
             <span className="text-white font-semibold text-sm cursor-pointer hover:underline">
               {story?.owner?.username || 'Unknown'}

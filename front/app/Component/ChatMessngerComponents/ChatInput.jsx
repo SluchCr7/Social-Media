@@ -30,11 +30,16 @@ const ChatInput = () => {
     setImages([]);
   };
 
+  // إضافة دعم إرسال الرسالة عند الضغط على Enter
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // منع إضافة سطر جديد
+      handleSend();
+    }
+  };
+
   return (
-    <div
-      className="w-full px-3 py-3 bg-white dark:bg-darkMode-bg"
-      // style={backgroundStyle}
-    >
+    <div className="w-full px-3 py-3 bg-white dark:bg-darkMode-bg">
       {/* Images Preview */}
       {images.length > 0 && (
         <div className="flex gap-2 flex-wrap mb-3">
@@ -98,6 +103,7 @@ const ChatInput = () => {
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown} // <-- هنا دعم الـ Enter
           placeholder="Type your message..."
           className="flex-1 px-4 py-2 rounded-xl bg-gray-50 dark:bg-darkMode-menu text-black dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
         />

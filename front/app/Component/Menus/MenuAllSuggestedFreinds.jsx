@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import Image from 'next/image'
-import { useAuth } from '../Context/AuthContext'
+import { useAuth } from '../../Context/AuthContext'
 import { FiX, FiUserPlus, FiCheck } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 

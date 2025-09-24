@@ -45,7 +45,7 @@ const ReceiverMessage = ({ message, user }) => {
 
             {/* نص الرسالة */}
             {message.text && (
-              <p className="text-sm text-black dark:text-white break-words">
+              <p className="text-sm text-black dark:text-white break-all whitespace-pre-wrap">
                 {message.text}
               </p>
             )}

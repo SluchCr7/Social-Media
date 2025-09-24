@@ -419,23 +419,38 @@ const uploadPhoto = asyncHandler(async (req, res) => {
   if (!req.file) return res.status(400).json({ message: "No image uploaded" });
 
   try {
-    const result = await cloudUpload(req.file); // رفع من buffer مباشرة
+    // رفع الصورة للسحابة
+    const result = await cloudUpload(req.file);
 
+    // جلب المستخدم
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
+    // إزالة الصورة القديمة إذا موجودة
     if (user.profilePhoto?.publicId) {
       await cloudRemove(user.profilePhoto.publicId);
     }
 
+    // تحديث صورة البروفايل
     user.profilePhoto = {
       url: result.secure_url,
       publicId: result.public_id,
     };
-
     await user.save();
 
-    res.status(200).json(user.profilePhoto);
+    // إنشاء بوست تلقائي لتغيير الصورة
+    const postText = `🖼 ${user.username} has updated their profile photo. ${req.body.customText || ''}`;
+
+    const ImageChangePost = new Post({
+      text: postText,
+      owner: req.user._id,
+      Photos: [user.profilePhoto.url], // حطيناها كمصفوفة
+      privacy: 'public',
+    });
+
+    await ImageChangePost.save();
+
+    res.status(200).json({ message: "Profile photo updated", profilePhoto: user.profilePhoto });
   } catch (err) {
     console.error("Cloud upload failed:", err);
     res.status(500).json({ message: "Error uploading image" });
@@ -493,27 +508,6 @@ const makeFollow = asyncHandler(async (req, res) => {
   }
 });
 
-
-const savePost = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id)
-    if (!user) {
-        res.status(404)
-        throw new Error('User not found')
-    }
-    if (user.savedPosts.includes(req.params.id)) {
-        await User.findByIdAndUpdate(req.user._id, {
-            $pull: { savedPosts: req.params.id },
-        });
-        res.status(200).json({ message: 'Unsaved' })
-    }
-    else {
-        await User.findByIdAndUpdate(req.user._id, {
-            $push: { savedPosts: req.params.id },
-        });
-        res.status(200).json({ message: 'Saved' })
-    }
-})
-
 const updateProfile = asyncHandler(async (req, res) => {
   const { error } = validateUserUpdate(req.body);
   if (error) {
@@ -533,7 +527,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     dateOfBirth,
     relationshipStatus,
     partner,
-    interests
+    interests,
   } = req.body;
 
   // تحقق من وجود الشريك إذا تم إدخاله
@@ -890,6 +884,90 @@ const updateAccountStatus = async (req, res) => {
   }
 };
 
+/**
+ * @desc Get relationship info of a user
+ * @route GET /api/auth/relationship/:userId
+ * @access Private
+ */
+const getRelationship = asyncHandler(async (req, res) => {
+  const userId = req.params.userId;
+
+  const user = await User.findById(userId).populate('partner', 'username profilePhoto');
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  res.status(200).json({
+    relationshipStatus: user.relationshipStatus,
+    partner: user.partner ? { _id: user.partner._id, username: user.partner.username, profilePhoto: user.partner.profilePhoto } : null,
+  });
+});
+
+/**
+ * @desc Update relationship info of the current user
+ * @route PUT /api/auth/relationship/:userId
+ * @access Private
+ */
+const updateRelationship = asyncHandler(async (req, res) => {
+  const userId = req.params.userId;
+  const { relationshipStatus, partnerId } = req.body;
+
+  // تحقق من صلاحية المستخدم (يمكنك تعديلها حسب auth middleware)
+  if (req.user._id.toString() !== userId) {
+    return res.status(403).json({ message: "You can only update your own relationship info" });
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  // التحقق من القيم المسموح بها
+  const allowedStatuses = ['Single', 'In a Relationship', 'Married', "It's Complicated"];
+  if (!allowedStatuses.includes(relationshipStatus)) {
+    return res.status(400).json({ message: "Invalid relationship status" });
+  }
+
+  user.relationshipStatus = relationshipStatus;
+
+  // تحديث الشريك فقط إذا الحالة تسمح
+  if (['In a Relationship', 'Married'].includes(relationshipStatus)) {
+    if (partnerId) {
+      const partnerUser = await User.findById(partnerId);
+      if (!partnerUser) {
+        return res.status(404).json({ message: "Partner user not found" });
+      }
+
+      // تحقق أنه غير مرتبط بشخص آخر أو مرتبط بك
+      if (partnerUser.partner && partnerUser.partner.toString() !== userId) {
+        return res.status(400).json({ message: "This user is already in a relationship with someone else" });
+      }
+
+      user.partner = partnerId;
+
+      // تحديث الشريك ليربطه بك أيضًا
+      partnerUser.relationshipStatus = relationshipStatus;
+      partnerUser.partner = userId;
+      await partnerUser.save();
+    } else {
+      user.partner = null;
+    }
+  } else {
+    user.partner = null;
+  }
+
+  await user.save();
+
+  const updatedUser = await User.findById(userId).populate('partner', 'username profilePhoto');
+
+  res.status(200).json({
+    message: "Relationship info updated successfully",
+    relationshipStatus: updatedUser.relationshipStatus,
+    partner: updatedUser.partner ? { _id: updatedUser.partner._id, username: updatedUser.partner.username, profilePhoto: updatedUser.partner.profilePhoto } : null,
+  });
+});
+
+
 const deleteAllUsers = asyncHandler(async (req, res) => {
     await User.deleteMany({});
     await Post.deleteMany({ })
@@ -900,5 +978,17 @@ const deleteAllUsers = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "All users deleted successfully" });
 });
 
-module.exports = {updateAccountStatus,makeUserAdmin,MakeAccountPreimumVerify,togglePrivateAccount, DeleteUser,deleteAllUsers, getSuggestedUsers, blockOrUnblockUser, getAllUsers, getUserById, RegisterNewUser, LoginUser, verifyAccount, uploadPhoto, makeFollow, updatePassword, updateProfile, savePost, pinPost, updateLinksSocial}
+module.exports = {
+  updateAccountStatus,
+  makeUserAdmin,
+  MakeAccountPreimumVerify,
+  togglePrivateAccount, DeleteUser,
+  deleteAllUsers, getSuggestedUsers,
+  blockOrUnblockUser, getAllUsers, getUserById,
+  RegisterNewUser, LoginUser, verifyAccount,
+  uploadPhoto, makeFollow, updatePassword,
+  updateProfile, pinPost, updateLinksSocial,
+  getRelationship,
+  updateRelationship
+}
 

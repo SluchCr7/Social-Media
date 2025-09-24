@@ -1,10 +1,10 @@
 'use client'
 import React, { useEffect, useMemo } from 'react';
-import { useMessage } from '../Context/MessageContext';
+import { useMessage } from '../../Context/MessageContext';
 import Image from 'next/image';
 import dayjs from 'dayjs';
 import Link from 'next/link';
-import { useAuth } from '../Context/AuthContext';
+import { useAuth } from '../../Context/AuthContext';
 
 const MenuMessagesFromMe = () => {
   const { messagesByUser } = useMessage();

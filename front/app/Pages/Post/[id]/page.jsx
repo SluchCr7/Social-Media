@@ -36,7 +36,7 @@ const PostPage = ({ params }) => {
     }
   }, [post?._id]); // فقط الـid
   
-  const handleAddComment = async () => {
+  const handleAddComment = useCallback(async () => {
     if (!commentText.trim()) return;
 
     try {
@@ -45,7 +45,7 @@ const PostPage = ({ params }) => {
     } catch (err) {
       console.log(err);
     }
-  };
+  }, [commentText, post?._id, post?.owner?._id, AddComment]);
 
 
   if (!post) return <Loading />;

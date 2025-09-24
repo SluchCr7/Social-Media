@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Aside from './Aside';
-import Menu from './Menu';
+import Aside from './Aside/Aside';
+import Menu from './Menus/Menu';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../Context/AuthContext';
 import Alert from './Alert';
@@ -12,7 +12,7 @@ import { useReport } from '../Context/ReportContext';
 import AddNewReport from './AddNewReport';
 import ViewImage from './ViewImage';
 import Loader from './Loader';
-import MenuAllSuggestedFriends from './MenuAllSuggestedFreinds';
+import MenuAllSuggestedFriends from './Menus/MenuAllSuggestedFreinds';
 
 const LayoutComponent = ({ children }) => {
   const [showNotifications, setShowNotifications] = useState(false);

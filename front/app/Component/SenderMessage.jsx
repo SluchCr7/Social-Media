@@ -38,7 +38,7 @@ const SenderMessage = ({ message, user }) => {
 
             {/* النص */}
             {message.text && (
-              <p className="text-sm break-words">{message.text}</p>
+              <p className="text-sm break-all whitespace-pre-wrap">{message.text}</p>
             )}
           </div>
 

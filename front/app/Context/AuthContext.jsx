@@ -172,6 +172,8 @@ export const AuthContextProvider = ({ children }) => {
       dateOfBirth: fields.dateOfBirth ?? user.dateOfBirth,
       gender: fields.gender ?? user.gender,
       interests: fields.interests ?? user.interests ?? [],
+      relationshipStatus: fields.relationshipStatus ?? user.relationshipStatus,
+      partner: fields.partner ?? user.partner ?? null,
       socialLinks: {
         github: fields.socialLinks?.github ?? user.socialLinks?.github ?? '',
         twitter: fields.socialLinks?.twitter ?? user.socialLinks?.twitter ?? '',
@@ -182,9 +184,11 @@ export const AuthContextProvider = ({ children }) => {
     };
 
     try {
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update`, payload, {
-        headers: { authorization: `Bearer ${user.token}` }
-      });
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update`,
+        payload,
+        { headers: { authorization: `Bearer ${user.token}` } }
+      );
 
       const newUserData = res.data.user || res.data;
 
@@ -199,11 +203,12 @@ export const AuthContextProvider = ({ children }) => {
       showAlert('Profile Updated Successfully.');
       setTimeout(() => {
         window.location.reload();
-      },2000)
+      }, 2000);
     } catch (err) {
       console.error(err);
     }
   };
+
 
   const updatePassword = async (password) => {
     try {
@@ -442,6 +447,60 @@ const makeAccountPremiumVerify = async () => {
     }
   };
 
+  // ------------------- NEW FUNCTIONS: Relationship -------------------
+  const getRelationship = async (userId) => {
+    if (!user?.token) return showAlert('You must be logged in');
+
+    try {
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/relationship/${userId}`,
+        {
+          headers: { Authorization: `Bearer ${user.token}` },
+        }
+      );
+      return res.data; // ترجع العلاقة الحالية (مثلاً: "following", "requested", "none")
+    } catch (err) {
+      console.error(err);
+      showAlert(err.response?.data?.message || 'Failed to fetch relationship');
+      return null;
+    }
+  };
+
+  const updateRelationship = async (userId) => {
+    if (!user?.token) return showAlert('You must be logged in');
+
+    try {
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/relationship/${userId}`,
+        {},
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+
+      showAlert(res.data.message); // مثال: "Followed", "Unfollowed", "Request Sent"
+
+      // تحديث الـ users المحليين لو عندك state للـ users
+      setUsers((prev) =>
+        prev.map((u) =>
+          u._id === userId
+            ? {
+                ...u,
+                followers:
+                  res.data.message === 'Followed'
+                    ? [...u.followers, { _id: user._id }]
+                    : u.followers.filter((f) => f._id !== user._id),
+              }
+            : u
+        )
+      );
+
+      return res.data.message;
+    } catch (err) {
+      console.error(err);
+      showAlert(err.response?.data?.message || 'Failed to update relationship');
+      return null;
+    }
+  };
+
 
   // ------------------- INIT -------------------
   useEffect(() => {
@@ -489,6 +548,8 @@ const makeAccountPremiumVerify = async () => {
         suggestedUsers,
         deleteUser, showAllSuggestedUsers, setShowAllSuggestedUsers
         ,togglePrivateAccount,makeAccountPremiumVerify, makeUserAdmin,updateAccountStatus
+        ,getRelationship,
+        updateRelationship
       }}
     >
       {children}

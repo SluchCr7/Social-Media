@@ -106,10 +106,13 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
         ? 'Unfollow User'
         : 'Follow User',
 
+
       action: () => {
         followUser(post?.owner?._id)
       },
-      className: 'text-blue-600 hover:bg-blue-100',
+      className: user?.following?.includes(post?.owner?._id) ?
+        'text-red-600 hover:bg-red-100'
+        : 'text-blue-600 hover:bg-blue-100',
     },
     {
       icon: <MdOutlineReport size={18} />,

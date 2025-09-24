@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 import { FiSearch } from 'react-icons/fi';
-import { useAuth } from '../Context/AuthContext';
+import { useAuth } from '../../Context/AuthContext';
 import Link from 'next/link';
 import { RiUserFollowLine, RiUserUnfollowLine } from 'react-icons/ri';
 

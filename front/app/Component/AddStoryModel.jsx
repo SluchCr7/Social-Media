@@ -56,14 +56,14 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="relative w-[90%] max-w-md bg-white dark:bg-[#1c1c1e] rounded-3xl shadow-2xl p-6 flex flex-col"
+            className="relative w-[90%] max-w-md bg-white dark:bg-[#1c1c1e] rounded-3xl shadow-2xl ring-1 ring-black/10 dark:ring-white/10 p-6 flex flex-col gap-4"
           >
             {/* Close Button */}
             <button
@@ -74,14 +74,14 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
             </button>
 
             {/* Title */}
-            <h2 className="text-center text-3xl font-extrabold mb-4 text-gray-900 dark:text-gray-100">
+            <h2 className="text-center text-3xl font-extrabold tracking-wide text-gray-900 dark:text-gray-100">
               Add Story
             </h2>
-            <div className="border-b border-gray-300 dark:border-gray-700 mb-4" />
+            <div className="border-b border-gray-300 dark:border-gray-700" />
 
             {/* Error Message */}
             {error && (
-              <p className="text-red-500 text-sm text-center mb-2">{error}</p>
+              <p className="text-red-500 text-sm text-center animate-pulse">{error}</p>
             )}
 
             {/* Textarea */}
@@ -90,13 +90,13 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
               onChange={handleTextChange}
               placeholder="Write your story..."
               rows={4}
-              className="w-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-4 rounded-2xl mb-4 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+              className="w-full p-4 rounded-2xl bg-gradient-to-b from-gray-100 to-gray-50 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 italic border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 resize-none transition-shadow shadow-inner shadow-black/20"
             />
 
             {/* Image Upload */}
-            <div className="mb-4">
+            <div>
               {!storyImage && (
-                <label className="flex items-center justify-center gap-2 w-full cursor-pointer bg-green-600 hover:bg-green-500 text-white font-semibold py-2 px-4 rounded-2xl transition">
+                <label className="flex items-center justify-center gap-2 w-full cursor-pointer bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2 px-4 rounded-2xl transition shadow-md hover:shadow-lg transform hover:scale-105">
                   <IoImage className="text-xl" />
                   <span>Upload Image</span>
                   <input
@@ -111,15 +111,15 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
 
             {/* Image Preview */}
             {storyImage && (
-              <div className="relative mb-4">
+              <div className="relative">
                 <img
                   src={URL.createObjectURL(storyImage)}
                   alt="Preview"
-                  className="rounded-2xl max-h-64 w-full object-contain border border-gray-200 dark:border-gray-700"
+                  className="rounded-2xl max-h-64 w-full object-contain border-2 border-gray-200 dark:border-gray-700 shadow-lg"
                 />
                 <button
                   onClick={() => setStoryImage(null)}
-                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition"
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-md transition"
                   title="Remove Image"
                 >
                   <IoTrash className="text-sm" />
@@ -130,9 +130,9 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
             {/* Submit Button */}
             <button
               onClick={handleSubmit}
-              className="mt-auto bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-500 w-full py-3 rounded-2xl text-white font-bold text-lg transition transform hover:scale-105"
+              className="mt-auto flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 w-full py-3 rounded-2xl text-white font-bold text-lg shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 active:scale-95"
             >
-              Share Story
+              <IoImage className="text-xl" /> Share Story
             </button>
           </motion.div>
         </motion.div>
