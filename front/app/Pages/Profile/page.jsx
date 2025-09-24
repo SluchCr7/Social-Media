@@ -294,9 +294,9 @@ const ProfilePage = () => {
                 }}
               />
             </div>
-            <InfoAboutUser user={userData} />
           </div>
         </div>
+        <InfoAboutUser user={userData} />
 
 
         {/* Main Column */}

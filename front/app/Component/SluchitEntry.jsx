@@ -61,13 +61,12 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
               {post?.owner?.username}
             </Link>{' '}
             shared a post from{' '}
-            {/* <Link
+            <Link
               href={user?._id === original?.owner?._id ? '/Pages/Profile' : `/Pages/User/${original?.owner?._id}`}
               className='text-lightMode-fg dark:text-darkMode-fg font-semibold'
             >
               {original?.owner?.username}
-            </Link> */}
-            <UserHoverCard user={post?.owner} />
+            </Link>
           </div>
         )}
 
@@ -116,12 +115,14 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                   </div>
                 ) : (
                   <div className="flex flex-col leading-tight">
-                    <Link
-                      href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${post?.owner?._id}`}
-                      className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline"
-                    >
-                      {post?.owner?.username}
-                    </Link>
+                    <UserHoverCard user={post?.owner}>
+                      <Link
+                        href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${post?.owner?._id}`}
+                        className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline"
+                      >
+                        {post?.owner?.username}
+                      </Link>
+                    </UserHoverCard>
                     <div className="flex items-center gap-2 text-xs text-gray-500">
                       <span>{post?.owner?.profileName}</span>
                       <span className="w-1 h-1 bg-gray-400 rounded-full" />
