@@ -172,9 +172,9 @@ export const NotifyContextProvider = ({ children }) => {
   // ✅ حذف إشعار واحد
   const deleteNotify = async (id) => {
     try {
-      const res = await axios.delete(
+      await axios.delete(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/notification/${id}`,
-        tokenHeader
+        { headers: { Authorization: `Bearer ${user?.token}` } }
       );
       setNotificationsByUser(prev => prev.filter(n => n._id !== id));
     } catch (err) {
@@ -185,9 +185,9 @@ export const NotifyContextProvider = ({ children }) => {
   // ✅ حذف كل الإشعارات
   const clearAllNotifications = async () => {
     try {
-       await axios.delete(
+      await axios.delete(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/notification/clear`,
-        tokenHeader
+        { headers: { Authorization: `Bearer ${user?.token}` } }
       );
       setNotificationsByUser([]);
       setUnreadCount(0);
