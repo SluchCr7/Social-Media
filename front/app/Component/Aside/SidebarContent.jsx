@@ -69,7 +69,7 @@ const SidebarContent = memo(({ isCollapsed, isMobile, setIsMobileMenuOpen, user,
                 alt="User Profile"
                 width={40}
                 height={40}
-                className="w-10 h-10 rounded-full object-cover"
+                className="rounded-full w-10 h-10 min-w-10 aspect-square object-cover "
               />
               {onlineUsers?.includes(user?._id) && (
                 <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border border-white dark:border-gray-900"></span>
