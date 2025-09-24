@@ -9,6 +9,7 @@ const { moderatePost } = require('../utils/CheckTextPost');
 // 🔔 Socket.io & Notifications
 const { getReceiverSocketId, io } = require("../Config/socket");
 const { Notification } = require("../Modules/Notification");
+const {sendNotificationHelper} = require("../utils/SendNotification");
 
 // ================== Get All Posts ==================
 const getAllPosts = asyncHandler(async (req, res) => {
@@ -50,6 +51,7 @@ const getAllPosts = asyncHandler(async (req, res) => {
 
 // ================== Add Post ==================
 const streamifier = require("streamifier");
+const { sendNotification } = require("../utils/SendNotification");
 
 const uploadToCloudinary = (buffer) => {
   return new Promise((resolve, reject) => {
@@ -64,98 +66,6 @@ const uploadToCloudinary = (buffer) => {
   });
 };
 
-// const addPost = async (req, res) => {
-//   try {
-//     let { text, Hashtags, community, mentions } = req.body;
-//     const userId = req.user._id;
-
-//     if (typeof Hashtags === "string") Hashtags = [Hashtags];
-//     else if (!Array.isArray(Hashtags)) Hashtags = [];
-
-//     // ✅ mentions: خليها Array من userIds
-//     if (typeof mentions === "string") {
-//       try {
-//         mentions = JSON.parse(mentions); // لو جايه كـ JSON string
-//       } catch {
-//         mentions = [mentions]; // أو مجرد string واحد
-//       }
-//     } else if (!Array.isArray(mentions)) {
-//       mentions = [];
-//     }
-
-//     const { error } = ValidatePost({ text, Hashtags, community, mentions });
-//     if (error) return res.status(400).json({ message: error.details[0].message });
-
-//     let communityDoc = null;
-//     if (community) {
-//       communityDoc = await Community.findById(community);
-//       if (!communityDoc) return res.status(404).json({ message: "Community not found." });
-//       if (!communityDoc.members.includes(userId))
-//         return res.status(403).json({ message: "Not a member of this community." });
-//     }
-
-//     let uploadedImages = [];
-//     let imagesArr = [];
-
-//     if (Array.isArray(req.files?.image)) imagesArr = req.files.image;
-//     else if (req.files?.image) imagesArr = [req.files.image];
-
-//     if (imagesArr.length > 0) {
-//       uploadedImages = await Promise.all(
-//         imagesArr.map(async (img) => {
-//           const result = await uploadToCloudinary(img.buffer);
-//           return { url: result.secure_url, publicId: result.public_id };
-//         })
-//       );
-//     }
-
-//     const post = new Post({
-//       text,
-//       Photos: uploadedImages,
-//       Hashtags,
-//       mentions, // ✅ هنا هتتحفظ الـ mentions
-//       owner: userId,
-//       community: communityDoc ? communityDoc._id : null,
-//     });
-
-//     // ✨ ممكن كمان تبعت إشعارات لكل mentioned users
-//     if (mentions.length > 0) {
-//       for (const mentionedUserId of mentions) {
-//         if (mentionedUserId.toString() !== userId.toString()) {
-//           const newNotify = new Notification({
-//             content: "mentioned you in a post",
-//             type: "mention",
-//             sender: userId,
-//             receiver: mentionedUserId,
-//             actionRef: post._id,
-//             actionModel: "Post",
-//           });
-//           await newNotify.save();
-
-//           const receiverSocketId = getReceiverSocketId(mentionedUserId);
-//           if (receiverSocketId) {
-//             io.to(receiverSocketId).emit("notification", newNotify);
-//           }
-//         }
-//       }
-//     }
-
-//     const user = await User.findById(userId);
-//     user.userLevelPoints += 5;
-//     user.updateLevelRank();
-//     await user.save();
-
-//     await post.save();
-//     await post.populate([
-//       { path: "owner", select: "username profileName profilePhoto" },
-//       { path: "community", select: "Name Picture members" },
-//       { path: "mentions", select: "username profileName profilePhoto" }, // ✅ populate للمنشن
-//     ]);
-//     return res.status(201).json(post);
-//   } catch (err) {
-//     return res.status(500).json({ message: err.message || "Internal Server Error" });
-//   }
-// };
 
 
 const addPost = async (req, res) => {
@@ -221,20 +131,14 @@ const addPost = async (req, res) => {
     if (mentions.length > 0) {
       for (const mentionedUserId of mentions) {
         if (mentionedUserId.toString() !== userId.toString()) {
-          const newNotify = new Notification({
-            content: "mentioned you in a post",
-            type: "mention",
+          await sendNotificationHelper({
             sender: userId,
             receiver: mentionedUserId,
+            content: "mentioned you in a post",
+            type: "mention",
             actionRef: post._id,
             actionModel: "Post",
           });
-          await newNotify.save();
-
-          const receiverSocketId = getReceiverSocketId(mentionedUserId);
-          if (receiverSocketId) {
-            io.to(receiverSocketId).emit("notification", newNotify);
-          }
         }
       }
     }
@@ -311,23 +215,17 @@ const likePost = asyncHandler(async (req, res) => {
 
     // إنشاء إشعار لصاحب البوست
 // ✅ إرسال إشعار فقط إذا اللايك ليس على بوستك
-    if (!post.owner.equals(req.user._id)) {
-      const newNotify = new Notification({
-        content: "liked your post",
-        type: "like",
-        sender: req.user._id,
-        receiver: post.owner,
-        actionRef: post._id,
-        actionModel: "Post",
-      });
-      await newNotify.save();
-
-      // إرسال الإشعار عبر السوكيت إذا كان متصل
-      const receiverSocketId = getReceiverSocketId(post.owner);
-      if (receiverSocketId) {
-        io.to(receiverSocketId).emit("notification", newNotify);
+      if (!post.owner.equals(req.user._id)) {
+        await sendNotificationHelper({
+          sender: req.user._id,
+          receiver: post.owner,
+          content: "liked your post",
+          type: "like",
+          actionRef: post._id,
+          actionModel: "Post",
+        });
       }
-    }
+
   }
 
   // جلب البوست كامل بعد التعديل مع كل populate
@@ -405,6 +303,16 @@ const sharePost = asyncHandler(async (req, res) => {
     originalPost: originalPost._id,
     isShared: true,
   });
+  if (!originalPost.owner.equals(req.user._id)) {
+    await sendNotificationHelper({
+      sender: req.user._id,
+      receiver: originalPost.owner,
+      content: "shared your post",
+      type: "share",
+      actionRef: sharedPost._id,
+      actionModel: "Post",
+    });
+  }
 
   await sharedPost.save();
   await sharedPost.populate([

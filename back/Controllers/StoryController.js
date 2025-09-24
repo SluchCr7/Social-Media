@@ -197,24 +197,16 @@ const toggleLoveStory = asyncHandler(async (req, res) => {
       { $push: { loves: req.user._id } }
     );
 
-    // إنشاء إشعار لصاحب البوست
-// ✅ إرسال إشعار فقط إذا اللايك ليس على بوستك
+
     if (!story.owner.equals(req.user._id)) {
-      const newNotify = new Notification({
-        content: "love your Story",
-        type: "like",
+      await sendNotificationHelper({
         sender: req.user._id,
         receiver: story.owner,
+        content: "love your Story",
+        type: "like",
         actionRef: story._id,
         actionModel: "Story",
       });
-      await newNotify.save();
-
-      // إرسال الإشعار عبر السوكيت إذا كان متصل
-      const receiverSocketId = getReceiverSocketId(story.owner);
-      if (receiverSocketId) {
-        io.to(receiverSocketId).emit("notification", newNotify);
-      }
     }
   }
 

@@ -76,16 +76,16 @@ export const PostContextProvider = ({ children }) => {
       showAlert("Post added successfully.");
       setPosts(prev => [newPost, ...prev]);
 
-      // إشعارات mentions
-      mentions.forEach(m => {
-        addNotify({
-          content: `${user.username} mentioned you in a post`,
-          type: "mention",
-          receiverId: m._id,
-          actionRef: newPost._id,
-          actionModel: "Post",
-        });
-      });
+      // // إشعارات mentions
+      // mentions.forEach(m => {
+      //   addNotify({
+      //     content: `${user.username} mentioned you in a post`,
+      //     type: "mention",
+      //     receiverId: m._id,
+      //     actionRef: newPost._id,
+      //     actionModel: "Post",
+      //   });
+      // });
 
     } catch (err) {
       // ✅ رسالة واضحة لو البوست محظور بسبب Content Moderation
@@ -134,16 +134,6 @@ export const PostContextProvider = ({ children }) => {
       )
     );
 
-      // إشعار
-      if (res.data.message === "Post Liked" && postOwnerId !== user._id) {
-        await addNotify({
-          content: `${user.username} liked your post`,
-          type: "like",
-          receiverId: postOwnerId,
-          actionRef: postId,
-          actionModel: "Post",
-        });
-      }
 
     } catch (err) {
       console.log(err);
@@ -189,15 +179,6 @@ export const PostContextProvider = ({ children }) => {
       showAlert("Post shared successfully.");
       setPosts(prev => [res.data, ...prev]); // ✅ تحديث فوري
 
-      if (postOwnerId !== user._id) {
-        await addNotify({
-          content: `${user.username} shared your post`,
-          type: "share",
-          receiverId: postOwnerId,
-          actionRef: id,
-          actionModel: "Post",
-        });
-      }
     } catch (err) {
       console.log(err);
       showAlert("Failed to share the post.");

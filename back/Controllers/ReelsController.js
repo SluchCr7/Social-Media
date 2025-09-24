@@ -5,9 +5,8 @@ const { getReceiverSocketId, io } = require("../Config/socket");
 const { Notification } = require("../Modules/Notification");
 const asyncHandler = require("express-async-handler");
 const { User} = require('../Modules/User')
+const {sendNotificationHelper} = require("../utils/SendNotification");
 
-// رفع Reel جديد
-// رفع Reel جديد
 const createReel = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No video file uploaded" });
@@ -107,20 +106,14 @@ const likeReel = async (req, res) => {
       await Reel.findByIdAndUpdate(req.params.id, { $push: { likes: req.user._id } });
 
       if (!reel.owner.equals(req.user._id)) {
-        const newNotify = new Notification({
-          content: "liked your reel",
-          type: "like",
+        await sendNotificationHelper({
           sender: req.user._id,
           receiver: reel.owner,
+          content: "liked your reel",
+          type: "like",
           actionRef: reel._id,
           actionModel: "Reel",
         });
-        await newNotify.save();
-
-        const receiverSocketId = getReceiverSocketId(reel.owner.toString());
-        if (receiverSocketId) {
-          io.to(receiverSocketId).emit("notification", newNotify);
-        }
       }
     }
 
@@ -177,7 +170,16 @@ const shareReel = asyncHandler(async (req, res) => {
       originalPost: originalPost._id,
       owner: req.user._id,
   });
-
+  if (!originalPost.owner.equals(req.user._id)) {
+      await sendNotificationHelper({
+        sender: req.user._id,
+        receiver: originalPost.owner,
+        content: "Shared your reel",
+        type: "share",
+        actionRef: sharedReel._id,
+        actionModel: "Reel",
+      });
+  }
   await sharedReel.save();
   await sharedReel.populate([
     { path: "owner", select: "username profileName profilePhoto" },

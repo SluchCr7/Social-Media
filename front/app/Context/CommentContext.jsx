@@ -89,16 +89,6 @@ export const CommentContextProvider = ({ children }) => {
 
       showAlert('Comment added successfully.');
 
-      if (user._id !== receiverId) {
-        await addNotify({
-          content: `${user.username} commented on your post`,
-          type: 'comment',
-          receiverId,
-          actionRef: newComment._id,
-          actionModel: 'Comment',
-        });
-      }
-
       return newComment;
     } catch (err) {
       showAlert(err?.response?.data?.message || 'Failed to upload comment.');

@@ -16,6 +16,7 @@ import { renderTextWithMentionsAndHashtags } from '../utils/CheckText'
 import { BiRepost } from "react-icons/bi";
 import { ShareModal } from './SharePost'
 import { getHighlightedComment } from '../utils/getHighlitedComment';
+import UserHoverCard from './UserHoverCard'
 
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost, savePost, sharePost, setPostIsEdit, imageView, setImageView } = usePost();
@@ -60,12 +61,13 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
               {post?.owner?.username}
             </Link>{' '}
             shared a post from{' '}
-            <Link
+            {/* <Link
               href={user?._id === original?.owner?._id ? '/Pages/Profile' : `/Pages/User/${original?.owner?._id}`}
               className='text-lightMode-fg dark:text-darkMode-fg font-semibold'
             >
               {original?.owner?.username}
-            </Link>
+            </Link> */}
+            <UserHoverCard user={post?.owner} />
           </div>
         )}
 

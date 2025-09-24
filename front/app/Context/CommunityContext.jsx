@@ -68,15 +68,6 @@ export const CommunityContextProvider = ({ children }) => {
         )
       );
 
-      // 📢 إرسال إشعار لصاحب الطلب
-      await addNotify({
-        content: `You have been approved to join the community`,
-        type: 'community',
-        receiverId: userId,
-        actionRef: communityId,
-        actionModel: 'Community',
-      });
-
     } catch (err) {
       console.error(err);
       showAlert('Failed to approve join request.');
@@ -92,15 +83,6 @@ export const CommunityContextProvider = ({ children }) => {
         config
       );
       showAlert(res.data.message);
-
-      // 📢 إرسال إشعار لصاحب الطلب
-      await addNotify({
-        content: `You have been rejected to join the community`,
-        type: 'community',
-        receiverId: userId,
-        actionRef: communityId,
-        actionModel: 'Community',
-      });
 
     } catch (err) {
       console.error(err);

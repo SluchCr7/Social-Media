@@ -11,7 +11,7 @@ const fs = require('fs')
 const { v2 } = require('cloudinary')
 const speakeasy = require("speakeasy");
 const qrcode = require("qrcode");
-
+const { sendNotificationHelper } = require("../utils/SendNotification");
 const {Post, ValidatePost} = require('../Modules/Post')
 const { Comment } = require('../Modules/Comment')
 const {Community} = require('../Modules/Community')
@@ -443,42 +443,56 @@ const uploadPhoto = asyncHandler(async (req, res) => {
 });
 
 
-
 const makeFollow = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.id); // user to be followed
-    const currentUser = await User.findById(req.user._id); // the current logged-in user
-  
-    if (!user) {
-      res.status(404);
-      throw new Error('User not found');
+  const user = await User.findById(req.params.id); // الشخص اللي هيتعمله follow
+  const currentUser = await User.findById(req.user._id); // المستخدم الحالي
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  if (user.followers.includes(req.user._id)) {
+    // 🔴 Unfollow
+    await User.findByIdAndUpdate(req.params.id, {
+      $pull: { followers: req.user._id },
+    });
+    await User.findByIdAndUpdate(req.user._id, {
+      $pull: { following: req.params.id },
+    });
+
+    return res.status(200).json({
+      message: "Unfollowed",
+      user,
+    });
+  } else {
+    // 🟢 Follow
+    await User.findByIdAndUpdate(req.params.id, {
+      $push: { followers: req.user._id },
+    });
+    await User.findByIdAndUpdate(req.user._id, {
+      $push: { following: req.params.id },
+    });
+
+    // ✅ إرسال Notification لصاحب الحساب
+    if (user._id.toString() !== currentUser._id.toString()) {
+      await sendNotificationHelper({
+        sender: currentUser._id,
+        receiver: user._id,
+        content: "started following you",
+        type: "follow",
+        actionRef: currentUser._id, // ممكن نخلي المرجع هو المستخدم نفسه
+        actionModel: "User",
+      });
     }
-  
-    if (user.followers.includes(req.user._id)) {
-      // Unfollow
-      await User.findByIdAndUpdate(req.params.id, {
-        $pull: { followers: req.user._id },
-      });
-      await User.findByIdAndUpdate(req.user._id, {
-        $pull: { following: req.params.id },
-      });
-      return res.status(200).json({
-            message: `unFollowed`,
-            user,
-        });
-    } else {
-      // Follow
-      await User.findByIdAndUpdate(req.params.id, {
-        $push: { followers: req.user._id },
-      });
-      await User.findByIdAndUpdate(req.user._id, {
-        $push: { following: req.params.id },
-      });
-      return res.status(200).json({
-            message: `Followed`,
-            user,
-        });
-    }
+
+    return res.status(200).json({
+      message: "Followed",
+      user,
+    });
+  }
 });
+
 
 const savePost = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id)
@@ -618,51 +632,49 @@ const pinPost = asyncHandler(async (req, res) => {
     }
 })
 
-const blockOrUnblockUser = async (req, res) => {
+const blockOrUnblockUser = asyncHandler(async (req, res) => {
   const currentUserId = req.user._id;
   const targetUserId = req.params.id;
 
-  if (currentUserId === targetUserId) {
+  if (currentUserId.toString() === targetUserId.toString()) {
     return res.status(400).json({ message: "You can't block or unblock yourself." });
   }
 
-  try {
-    const currentUser = await User.findById(currentUserId);
-    const targetUser = await User.findById(targetUserId);
+  const currentUser = await User.findById(currentUserId);
+  const targetUser = await User.findById(targetUserId);
 
-    if (!targetUser) {
-      return res.status(404).json({ message: "The target user does not exist." });
-    }
-
-    const isBlocked = currentUser.blockedUsers.includes(targetUserId);
-
-    if (isBlocked) {
-      // Unblock user
-      currentUser.blockedUsers = currentUser.blockedUsers.filter(
-        (id) => id.toString() !== targetUserId
-      );
-      await currentUser.save();
-      return res.status(200).json({ message: "User has been unblocked." });
-    } else {
-      // Block user
-      currentUser.blockedUsers.push(targetUserId);
-
-      // Optional: Remove mutual follow if desired
-      await User.findByIdAndUpdate(currentUserId, {
-        $pull: { following: targetUserId },
-      });
-      await User.findByIdAndUpdate(targetUserId, {
-        $pull: { followers: currentUserId, following: currentUserId },
-      });
-
-      await currentUser.save();
-      return res.status(200).json({ message: "User has been blocked." });
-    }
-  } catch (err) {
-    console.error("Block/Unblock Error:", err);
-    return res.status(500).json({ message: "An error occurred.", error: err.message });
+  if (!targetUser) {
+    res.status(404);
+    throw new Error("The target user does not exist.");
   }
-};
+
+  const isBlocked = currentUser.blockedUsers.includes(targetUserId);
+
+  if (isBlocked) {
+    // 🔓 Unblock user
+    currentUser.blockedUsers = currentUser.blockedUsers.filter(
+      (id) => id.toString() !== targetUserId
+    );
+    await currentUser.save();
+
+    return res.status(200).json({ message: "User has been unblocked." });
+  } else {
+    // 🔒 Block user
+    currentUser.blockedUsers.push(targetUserId);
+
+    // إزالة المتابعة المتبادلة
+    await User.findByIdAndUpdate(currentUserId, {
+      $pull: { following: targetUserId },
+    });
+    await User.findByIdAndUpdate(targetUserId, {
+      $pull: { followers: currentUserId, following: currentUserId },
+    });
+
+    await currentUser.save();
+
+    return res.status(200).json({ message: "User has been blocked." });
+  }
+});
 
 
 const updateLinksSocial = asyncHandler(async (req, res) => {

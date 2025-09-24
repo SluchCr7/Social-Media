@@ -144,15 +144,6 @@ export const ReelsProvider = ({ children }) => {
       showAlert("✅ Reel shared successfully.");
       setReels(prev => [res.data, ...prev]); // ✅ تحديث فوري للـ state
 
-      if (ReelOwnerId !== user?._id) {
-        await addNotify({
-          content: `${user.username} shared your reel`,
-          type: "share",
-          receiverId: ReelOwnerId, // ✅ تعديل المتغير
-          actionRef: id,
-          actionModel: "Reel",
-        });
-      }
     } catch (err) {
       console.error(err);
       showAlert("❌ Failed to share the Reel.");

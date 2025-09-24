@@ -5,6 +5,7 @@ const { cloudUpload, cloudRemove } = require('../Config/cloudUpload')
 const fs = require('fs')
 const { v2 } = require('cloudinary')
 const { User} = require('../Modules/User')
+const { sendNotificationHelper } = require('../utils/SendNotification')
 
 const getAllCommunities = asyncHandler(async (req, res) => {
     const communities = await Community.find({}).populate('owner', 'username profileName profilePhoto')
@@ -114,7 +115,6 @@ const joinTheCommunity = asyncHandler(async (req, res) => {
 
       res.status(200).json({ message: "Community Joined", community });
     }
-
 });
   
 const editCommunity = asyncHandler(async (req, res) => {
@@ -145,23 +145,6 @@ const editCommunity = asyncHandler(async (req, res) => {
 
     res.status(200).json({ message: "Community updated successfully", community });
 });
-
-// const editCommunity = asyncHandler(async(req,res)=>{
-//     const { error } = ValidateCommunityUpdate(req.body)
-//     if (error) {
-//         return res.status(400).json({ message: error.details[0].message });
-//     }
-//     const community = await Community.findByIdAndUpdate(req.params.id, {
-//         $set: {
-//             Name: req.body.Name,
-//             Category: req.body.Category,
-//         description: req.body.description,
-//             isPrivate: req.body.isPrivate
-//         }
-//     }, { new: true })
-//     res.status(200).json(community)
-// })
-
 /**
  * @desc update Community Photo
  * @route PUT /api/community/photo
@@ -260,33 +243,38 @@ const updateCommunityCover = asyncHandler(async (req, res) => {
  * @route PUT /api/community/remove/:communityId/:userId
  * @access Private (Owner only)
  */
-
 const removeMember = asyncHandler(async (req, res) => {
-    const { communityId, userId } = req.params;
-    const user = req.user; 
+  const { communityId, userId } = req.params;
+  const user = req.user;
 
-    const community = await Community.findById(communityId);
-    if (!community) {
-        return res.status(404).json({ message: "Community not found" });
-    }
+  const community = await Community.findById(communityId);
+  if (!community) {
+    return res.status(404).json({ message: "Community not found" });
+  }
 
-    
-    if (community.owner.toString() !== user._id.toString()) {
-        return res.status(403).json({ message: "Only the community owner can remove members" });
-    }
+  if (community.owner.toString() !== user._id.toString()) {
+    return res.status(403).json({ message: "Only the community owner can remove members" });
+  }
 
-    if (!community.members.includes(userId)) {
-        return res.status(400).json({ message: "User is not a member of the community" });
-    }
+  if (!community.members.includes(userId)) {
+    return res.status(400).json({ message: "User is not a member of the community" });
+  }
 
-    
-    await Community.findByIdAndUpdate(communityId, {
-        $pull: { members: userId },
-    });
+  await Community.findByIdAndUpdate(communityId, {
+    $pull: { members: userId },
+  });
 
-    res.status(200).json({ message: "Member removed successfully" });
+
+  await sendNotificationHelper({
+    sender: userId,
+    receiver: user._id,
+    content: `You have been removed from the community "${community.name}"`,
+    type: "remove",
+    actionRef: communityId,
+    actionModel: "Community",
+  });
+  res.status(200).json({ message: "Member removed successfully" });
 });
-
 /**
  * @desc Make User Admin
  * @route PUT /api/community/admin/:id
@@ -328,7 +316,7 @@ const makeAdmin = asyncHandler(async (req, res) => {
       await community.save();
       return res.status(200).json({ message: "Admin added successfully" });
     }
-  });
+});
   
 
 /**
@@ -376,7 +364,7 @@ const approveJoinRequest = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Community not found" });
   }
 
-  // Check permissions
+  // Check permissions (owner or admin only)
   if (
     !community.owner.equals(req.user._id) &&
     !community.Admins.includes(req.user._id)
@@ -388,14 +376,27 @@ const approveJoinRequest = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "This user has not requested to join" });
   }
 
+  // إزالة الطلب من joinRequests وإضافة العضو
   community.joinRequests.pull(userId);
   community.members.push(userId);
   await community.save();
 
-  await community.populate("owner members Admins joinRequests", "username profileName profilePhoto");
+  await community.populate(
+    "owner members Admins joinRequests",
+    "username profileName profilePhoto"
+  );
+
+  // إرسال إشعار للمستخدم أنه اتقبل
+  await sendNotificationHelper({
+    sender: req.user._id,
+    receiver: userId,
+    content: `Your request to join the community "${community.name}" has been approved.`,
+    type: "approve",
+    actionRef: communityId,
+    actionModel: "Community",
+  });
 
   res.status(200).json({ message: "User added to community", community });
-
 });
 
 /**
@@ -411,7 +412,7 @@ const rejectJoinRequest = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Community not found" });
   }
 
-  // Check permissions
+  // ✅ Check permissions (owner or admin only)
   if (
     !community.owner.equals(req.user._id) &&
     !community.Admins.includes(req.user._id)
@@ -419,16 +420,33 @@ const rejectJoinRequest = asyncHandler(async (req, res) => {
     return res.status(403).json({ message: "Not authorized" });
   }
 
+  // ✅ Ensure the user actually requested
   if (!community.joinRequests.includes(userId)) {
     return res.status(400).json({ message: "This user has not requested to join" });
   }
+
+  // ✅ Remove the request
   community.joinRequests.pull(userId);
   await community.save();
 
-  await community.populate("owner members Admins joinRequests", "username profileName profilePhoto");
+  await community.populate(
+    "owner members Admins joinRequests",
+    "username profileName profilePhoto"
+  );
+
+  // ✨ Send rejection notification
+  await sendNotificationHelper({
+    sender: req.user._id,
+    receiver: userId,
+    content: `Your request to join the community "${community.name}" has been rejected.`,
+    type: "reject",
+    actionRef: communityId,
+    actionModel: "Community",
+  });
 
   res.status(200).json({ message: "Join request rejected", community });
 });
+
 
 /**
  * @desc Add or update community rules
