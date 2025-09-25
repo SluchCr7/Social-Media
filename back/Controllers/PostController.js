@@ -191,6 +191,54 @@ const getPostById = asyncHandler(async (req, res) => {
   res.status(200).json(post);
 });
 
+// ================== Get All Posts ==================
+const hahaPost = asyncHandler(async (req, res) => {
+  const post = await Post.findById(req.params.id);
+  if (!post) {
+    res.status(404);
+    throw new Error("Post not found");
+  }
+  if (post.likes.includes(req.user._id)){
+    return res.status(400).json({ message: "You can't hahed a post that has been liked" });
+  }
+  if (post.hahas.includes(req.user._id)) {
+    await Post.findByIdAndUpdate(
+      req.params.id,
+      { $pull: { hahas: req.user._id } }
+    );
+  } else {
+    // إضافة لايك
+    await Post.findByIdAndUpdate(
+      req.params.id,
+      { $push: { hahas: req.user._id } }
+    );
+
+    if (!post.owner.equals(req.user._id)) {
+      await sendNotificationHelper({
+        sender: req.user._id,
+        receiver: post.owner,
+        content: "haha your post",
+        type: "haha",
+        actionRef: post._id,
+        actionModel: "Post",
+      });
+    }
+  }
+  const updatedPost = await Post.findById(req.params.id)
+    .populate("owner", "username profileName profilePhoto")
+    .populate("community", "Name Picture members")
+    .populate({
+      path: "originalPost",
+      populate: { path: "owner", select: "username profileName profilePhoto" },
+    })
+    .populate({
+      path: "comments",
+      populate: { path: "owner", select: "username profileName profilePhoto" },
+    });
+
+  res.status(200).json(updatedPost);
+})
+
 // ================== Like Post ==================
 const likePost = asyncHandler(async (req, res) => {
   // جلب البوست الأساسي
@@ -199,7 +247,9 @@ const likePost = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("Post not found");
   }
-
+  if (post.hahas.includes(req.user._id)){
+    return res.status(400).json({ message: "You can't like a post that has been hahed" });
+  }
   // إذا كان المستخدم قد أعجب بالبوست مسبقًا → إلغاء اللايك
   if (post.likes.includes(req.user._id)) {
     await Post.findByIdAndUpdate(
@@ -459,5 +509,6 @@ module.exports = {
   savePost,
   sharePost,
   editPost,
-  viewPost
+  viewPost,
+  hahaPost
 };

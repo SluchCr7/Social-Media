@@ -8,7 +8,8 @@ const {
   savePost,
   sharePost,
   editPost,
-  viewPost
+  viewPost,
+  hahaPost
 } = require('../Controllers/PostController');
 
 const route = require('express').Router();
@@ -27,8 +28,9 @@ route.route('/:id')
   .get(getPostById)
   .delete(verifyToken, deletePost);
 
-// Like a post
+// Like and haha a post
 route.route('/like/:id').put(verifyToken, likePost);
+route.route('/haha/:id').put(verifyToken, hahaPost);
 
 // Save a post
 route.route('/save/:id').put(verifyToken, savePost);
@@ -44,5 +46,6 @@ route.route('/commentsOff/:id').put(verifyToken, makeCommentsOff);
 
 // View a post
 route.route('/view/:id').put(verifyToken, viewPost);
+
 
 module.exports = route;

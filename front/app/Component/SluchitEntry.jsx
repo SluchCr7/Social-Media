@@ -17,9 +17,10 @@ import { BiRepost } from "react-icons/bi";
 import { ShareModal } from './SharePost'
 import { getHighlightedComment } from '../utils/getHighlitedComment';
 import UserHoverCard from './UserHoverCard'
+import { FaFaceGrinSquintTears } from "react-icons/fa6";
 
 const SluchitEntry = forwardRef(({ post }, ref) => {
-  const { likePost, savePost, sharePost, setPostIsEdit, imageView, setImageView } = usePost();
+  const { likePost,hahaPost, savePost, sharePost, setPostIsEdit, imageView, setImageView } = usePost();
   const [showMenu, setShowMenu] = useState(false);
   const { user, isLogin } = useAuth();
   const [openModel, setOpenModel] = useState(false);
@@ -286,14 +287,22 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
             {/* Actions */}
             {isLogin && (
               <div className='flex items-center gap-6 pt-4'>
-                <div onClick={() => likePost(post?._id, post?.owner._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
+                <button disabled={post?.hahas?.includes(user?._id)} onClick={() => likePost(post?._id, post?.owner._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
                   {post?.likes?.includes(user?._id) ? (
                     <IoIosHeart className='text-red-500 text-2xl' />
                   ) : (
                     <CiHeart className='text-gray-500 text-2xl' />
                   )}
                   <span className='text-gray-400 text-sm font-medium'>{post?.likes?.length}</span>
-                </div>
+                </button>
+                <button disabled={post?.likes?.includes(user?._id)} onClick={() => hahaPost(post?._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
+                  {post?.hahas?.includes(user?._id) ? (
+                    <FaFaceGrinSquintTears className='text-yellow-500 text-2xl' />
+                  ) : (
+                    <FaFaceGrinSquintTears className='text-gray-500 text-2xl' />
+                  )}
+                  <span className='text-gray-400 text-sm font-medium'>{post?.hahas?.length}</span>
+                </button>
                 {!post?.isCommentOff && (
                   <Link href={`/Pages/Post/${post?._id}`} className='flex items-center gap-2 transition-all hover:scale-110'>
                     <FaRegCommentDots className='text-gray-500 text-xl' />

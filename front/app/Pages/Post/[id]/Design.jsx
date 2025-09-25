@@ -10,7 +10,7 @@ import { useReport } from '@/app/Context/ReportContext';
 import PostMenu from '@/app/Component/PostMenu';
 import Comment from '@/app/Component/Comment';
 import CommentSkeleton from '@/app/Skeletons/CommentSkeleton';
-
+import { FaFaceGrinSquintTears } from "react-icons/fa6";
 const DesignPostSelect = ({
   post,
   isShared,
@@ -22,6 +22,7 @@ const DesignPostSelect = ({
   setShowMenu,
   likePost,
   sharePost,
+  hahaPost,
   savePost,
   setImageView,
   renderTextWithMentionsAndHashtags,
@@ -188,7 +189,8 @@ const DesignPostSelect = ({
           {/* Actions */}
           {isLogin && (
             <div className="flex items-center gap-6 pt-4 justify-around sm:justify-start sm:gap-10">
-              <ActionIcon onClick={() => likePost(post._id, post.owner._id)} Icon={post.likes?.includes(user?._id) ? IoIosHeart : CiHeart} count={post.likes?.length} active={post.likes?.includes(user?._id)} />
+              <ActionIcon condition={post.hahas?.includes(user?._id)} onClick={() => likePost(post._id, post.owner._id)} Icon={post.likes?.includes(user?._id) ? IoIosHeart : CiHeart} count={post.likes?.length} active={post.likes?.includes(user?._id)} />
+              <ActionIcon condition={post.likes?.includes(user?._id)} onClick={() => hahaPost(post._id)} Icon={FaFaceGrinSquintTears} count={post.likes?.length} activeHaha={post.hahas?.includes(user?._id)} />
               {!post.isCommentOff && <ActionIcon Icon={FaRegCommentDots} count={comments?.length} />}
               <ActionIcon onClick={() => sharePost(post._id)} Icon={IoIosShareAlt} count={post.shares?.length} />
               <ActionIcon onClick={() => savePost(post._id)} Icon={CiBookmark} count={post.saved?.length} active={post.saved?.includes(user?._id)} />
@@ -246,11 +248,11 @@ const DesignPostSelect = ({
     </motion.div>
   )
 }
-const ActionIcon = ({ Icon, count, onClick, active }) => (
-  <motion.div onClick={onClick} whileTap={{ scale: 0.9 }} className="flex items-center gap-2 cursor-pointer">
-    <Icon className={`text-2xl ${active ? 'text-red-500' : 'text-gray-400'}`} />
+const ActionIcon = ({ Icon, count, onClick, active, activeHaha , condition }) => (
+  <motion.button disabled={condition || false} onClick={onClick} whileTap={{ scale: 0.9 }} className="flex items-center gap-2 cursor-pointer">
+    <Icon className={`text-2xl ${activeHaha ? 'text-yellow-500' : ''} ${active ? 'text-red-500' : 'text-gray-400'}`} />
     <span className="text-gray-400 text-sm">{count}</span>
-  </motion.div>
+  </motion.button>
 );
 
 export default DesignPostSelect
