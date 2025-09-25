@@ -37,7 +37,7 @@ const Aside = ({isCollapsed, setIsCollapsed}) => {
     <>
       {/* ===== Desktop Sidebar ===== */}
       <motion.aside
-        animate={{ width: isCollapsed ? 85 : 260 }}
+        animate={{ width: isCollapsed ? 80 : 260 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className="hidden fixed top-0 left-0 lg:flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r p-3 hover-expanded"
       >

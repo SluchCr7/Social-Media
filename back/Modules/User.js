@@ -116,12 +116,16 @@ const UserSchema = new mongoose.Schema({
     },
     userLevelRank : {
         type: String,
-        enum: ["Junior", "Intermediate", "Advanced", "Pro"],
+        enum: ["Junior", "Challenger", "Warrior", "Elite" , "Master", "Legend"],
         default: "Junior"
     },
     userLevelPoints : {
         type: Number,
         default: 0
+    },
+    nextLevelPoints: {
+        type: Number,
+        default: 2000  // أول ليفل بعد Junior
     },
     socialLinks: {
         github: { type: String, default: "" },
@@ -205,10 +209,25 @@ UserSchema.virtual("reels", {
 
 // 🔹 Update Level Rank
 UserSchema.methods.updateLevelRank = function () {
-  if (this.userLevelPoints >= 2000) this.userLevelRank = "Pro";
-  else if (this.userLevelPoints >= 1000) this.userLevelRank = "Advanced";
-  else if (this.userLevelPoints >= 500) this.userLevelRank = "Intermediate";
-  else this.userLevelRank = "Junior";
+  if (this.userLevelPoints >= 15000) {
+    this.userLevelRank = "Legend";
+    this.nextLevelPoints = 15000; // أعلى ليفل
+  } else if (this.userLevelPoints >= 10000) {
+    this.userLevelRank = "Master";
+    this.nextLevelPoints = 15000;
+  } else if (this.userLevelPoints >= 7000) {
+    this.userLevelRank = "Elite";
+    this.nextLevelPoints = 10000;
+  } else if (this.userLevelPoints >= 4000) {
+    this.userLevelRank = "Warrior";
+    this.nextLevelPoints = 7000;
+  } else if (this.userLevelPoints >= 2000) {
+    this.userLevelRank = "Challenger";
+    this.nextLevelPoints = 4000;
+  } else {
+    this.userLevelRank = "Junior";
+    this.nextLevelPoints = 2000;
+  }
 };
 
 const User = mongoose.model('User', UserSchema)

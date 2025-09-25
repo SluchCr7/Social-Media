@@ -123,11 +123,21 @@ const ProfilePage = () => {
 
             {/* Level & Progress */}
             <div className="w-full sm:max-w-xs">
-              <div className="flex justify-between text-sm text-gray-400">
-                <span>{userData?.userLevelRank || 'Junior'}</span>
-                <span>{userData?.userLevelPoints || 0} XP</span>
+              <div className="flex justify-between text-sm font-medium text-gray-600 dark:text-gray-300">
+                <span className="flex items-center gap-1">
+                  {userData?.userLevelRank || 'Junior'}
+                  <span className="text-lg">🏅</span>
+                </span>
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  {userData?.userLevelPoints || 0} XP
+                </motion.span>
               </div>
-              <div className="w-full h-2 bg-gray-300 dark:bg-gray-700 rounded-full mt-1 overflow-hidden">
+
+              <div className="w-full h-3 bg-gray-300 dark:bg-gray-700 rounded-full mt-2 overflow-hidden shadow-inner">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{
@@ -139,16 +149,18 @@ const ProfilePage = () => {
                     }%`,
                   }}
                   transition={{ duration: 1.2 }}
-                  className="h-full bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-600"
+                  className="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 rounded-full"
                 />
               </div>
-              <span className="text-xs text-gray-500 mt-1">
+
+              <span className="block text-xs text-gray-500 mt-1 text-right">
                 {`Next level in ${Math.max(
                   (userData?.nextLevelPoints || 500) - (userData?.userLevelPoints || 0),
                   0
                 )} XP`}
               </span>
             </div>
+
 
             {/* Bio */}
             <p className="text-sm sm:text-base text-gray-500 max-w-xs break-words whitespace-pre-wrap">
