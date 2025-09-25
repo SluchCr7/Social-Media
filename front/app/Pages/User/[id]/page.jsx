@@ -104,10 +104,11 @@ const UserProfilePage = ({ params }) => {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className={`relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden shadow-xl cursor-pointer p-1
-              ${myStories.length > 0
-                ? 'bg-gradient-to-tr from-pink-500 via-yellow-400 to-purple-600 animate-spin-slow'
-                : 'bg-transparent'}`}
+            className={`relative w-36 h-36 rounded-full shadow-lg cursor-pointer p-[3px]
+            ${userSelected?.stories?.length > 0
+              ? 'border-[5px] border-blue-500 animate-spin-slow'
+              : 'border-0 border-transparent'}`}
+            onClick={handleProfileClick}
           >
             <div className="w-full h-full rounded-full overflow-hidden bg-lightMode-bg dark:bg-darkMode-bg p-[2px]">
               <Image
@@ -227,8 +228,6 @@ const UserProfilePage = ({ params }) => {
           </div>
 
       </div>
-      
-      
       {/* Main Content */}
       {isBlockedByMe ? (
         <div className="min-h-screen flex flex-col items-center justify-center text-center text-red-500 py-20 px-4">
