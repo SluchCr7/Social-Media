@@ -28,11 +28,11 @@ const FollowModal = ({ visible, onClose, type, list }) => {
                 className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition"
               >
                 <Image
-                  src={p.profilePhoto?.url || '/default-profile.png'}
-                  alt={p.username}
-                  width={44}
-                  height={44}
-                  className="rounded-full object-cover"
+                  src={p?.profilePhoto?.url || '/default-profile.png'}
+                  alt="User Profile"
+                  width={45}
+                  height={45}
+                  className="rounded-full w-12 h-12 min-w-10 aspect-square object-cover "
                 />
                 <div>
                   <div className="font-semibold text-sm">{p.username}</div>

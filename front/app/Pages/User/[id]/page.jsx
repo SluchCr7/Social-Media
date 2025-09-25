@@ -193,7 +193,7 @@ const UserProfilePage = ({ params }) => {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
-                className="flex gap-3 mt-4 relative"
+                className="flex gap-3 mt-4 relative w-fit"
               >
                 <button
                   onClick={() => followUser(userSelected?._id)}
@@ -215,14 +215,36 @@ const UserProfilePage = ({ params }) => {
                 </button>
 
                 {showDotsMenu && (
-                  <div className="absolute top-12 right-0 w-48 bg-white dark:bg-gray-900 border rounded-xl shadow-lg z-50 flex flex-col py-2">
-                    <button onClick={handleReport} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-left">Report User</button>
-                    <button onClick={handleBlock} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-left">
-                      {isBlockedByMe ? "Unblock User" : "Block User"}
-                    </button>
-                    <button onClick={handleCopyLink} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-left">Copy Profile Link</button>
+                  <div className="absolute top-12 -right-3 w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl z-50 overflow-hidden animate-scale-in">
+                    <ul className="flex flex-col">
+                      <li>
+                        <button 
+                          onClick={handleReport} 
+                          className="flex items-center gap-3 px-5 py-3 w-full text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        >
+                          🚩 Report User
+                        </button>
+                      </li>
+                      <li>
+                        <button 
+                          onClick={handleBlock} 
+                          className="flex items-center gap-3 px-5 py-3 w-full text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        >
+                          {isBlockedByMe ? "🔓 Unblock User" : "⛔ Block User"}
+                        </button>
+                      </li>
+                      <li>
+                        <button 
+                          onClick={handleCopyLink} 
+                          className="flex items-center gap-3 px-5 py-3 w-full text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        >
+                          🔗 Copy Profile Link
+                        </button>
+                      </li>
+                    </ul>
                   </div>
                 )}
+
               </motion.div>
             )}
           </div>

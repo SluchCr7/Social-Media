@@ -44,7 +44,7 @@ const MenuUpComingEvents = () => {
       className="w-full max-w-sm bg-white dark:bg-[#16181c] rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 flex flex-col max-h-[500px] overflow-hidden"
     >
       {/* Header */}
-      <div className="flex justify-between items-center px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-blue-600">
+      <div className="flex justify-between items-center px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-500 to-indigo-500">
         <h2 className="flex items-center gap-2 text-white font-semibold text-lg">
           <FaRegCalendarAlt className="text-white" /> Upcoming Events
         </h2>

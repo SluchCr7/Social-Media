@@ -126,7 +126,7 @@ const LayoutComponent = ({ children }) => {
             <ViewImage imageView={imageView} setImageView={setImageView} />
           )}
           <button
-            className="fixed bottom-6 left-6 bg-gradient-to-r from-purple-500 to-indigo-500 
+            className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-500 to-indigo-500 
                       text-white rounded-full w-14 h-14 flex items-center justify-center 
                       shadow-lg hover:scale-110 transition duration-300"
           >
