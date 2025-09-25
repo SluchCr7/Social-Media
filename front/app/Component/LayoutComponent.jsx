@@ -13,7 +13,8 @@ import AddNewReport from './AddNewReport';
 import ViewImage from './ViewImage';
 import Loader from './Loader';
 import MenuAllSuggestedFriends from './Menus/MenuAllSuggestedFreinds';
-
+import { FiPlus } from 'react-icons/fi';
+import Link from 'next/link';
 const LayoutComponent = ({ children }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessanger, setShowMessanger] = useState(false);
@@ -124,6 +125,15 @@ const LayoutComponent = ({ children }) => {
           {imageView && (
             <ViewImage imageView={imageView} setImageView={setImageView} />
           )}
+          <button
+            className="fixed bottom-6 left-6 bg-gradient-to-r from-purple-500 to-indigo-500 
+                      text-white rounded-full w-14 h-14 flex items-center justify-center 
+                      shadow-lg hover:scale-110 transition duration-300"
+          >
+            <Link href="/Pages/NewPost">
+              <FiPlus className="text-2xl" />
+            </Link>
+          </button>
           <MenuAllSuggestedFriends/>
         </div>
       </div>

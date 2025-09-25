@@ -38,9 +38,11 @@ const Stories = () => {
   }
 
   const getBorderClass = (userStories) => {
-    const hasUnseen = userStories.some(story => !story?.views?.some(v => v?._id === user?._id))
+    const hasUnseen = userStories.some(
+      story => !story?.views?.some(v => v?._id === user?._id)
+    )
     return hasUnseen
-      ? 'bg-gradient-to-tr from-yellow-400 via-orange-400 to-pink-500 animate-pulse'
+      ? 'bg-yellow-400 border-[3px] border-yellow-400' // بدل الـ gradient القديم خليه أصفر صريح
       : 'bg-gray-500'
   }
 
@@ -62,17 +64,17 @@ const Stories = () => {
               title={group?.user?.username}
             >
               {/* Profile Image with dynamic border */}
-              <div className={`relative w-16 h-16 rounded-full p-[2px] ${getBorderClass(group.stories)}`}>
-                <div className="w-full h-full rounded-full bg-black p-[2px]">
-                  <Image
-                    src={group?.user?.profilePhoto?.url || '/default-profile.png'}
-                    alt={group?.user?.username}
-                    fill
-                    loading={index < 3 ? 'eager' : 'lazy'}
-                    className="object-cover rounded-full group-hover:scale-110 transition-transform duration-300 ease-in-out"
-                  />
+                <div className={`relative w-16 h-16 rounded-full p-[2px] ${getBorderClass(group.stories)}`}>
+                  <div className="w-full h-full rounded-full bg-black p-[2px]">
+                    <Image
+                      src={group?.user?.profilePhoto?.url || '/default-profile.png'}
+                      alt={group?.user?.username}
+                      fill
+                      loading={index < 3 ? 'eager' : 'lazy'}
+                      className="object-cover rounded-full group-hover:scale-110 transition-transform duration-300 ease-in-out"
+                    />
+                  </div>
                 </div>
-              </div>
 
               {/* User name */}
               <p className="text-xs mt-2 text-black dark:text-white text-center truncate w-16">
