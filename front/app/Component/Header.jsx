@@ -43,7 +43,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`relative px-1 pb-3 pt-3 font-medium transition-colors ${
+                className={`relative px-1 pb-6 pt-3 font-medium transition-colors ${
                   activeTab === tab.key
                     ? "text-blue-500"
                     : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
@@ -62,7 +62,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
           </div>
 
           {/* ✅ Actions */}
-          <div className="flex items-center gap-2 md:gap-4 py-3">
+          <div className="flex items-center gap-2 md:gap-4 py-3 pb-3">
             {isLogin ? (
               <>
                 {/* Notifications */}
