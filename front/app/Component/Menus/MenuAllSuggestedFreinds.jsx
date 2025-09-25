@@ -26,7 +26,7 @@ const MenuAllSuggestedFriends = () => {
             className="w-full max-w-2xl bg-lightMode-bg dark:bg-darkMode-bg rounded-2xl shadow-2xl overflow-hidden flex flex-col"
           >
             {/* Header */}
-            <div className="flex justify-between items-center border-b px-5 py-4">
+            <div className="flex justify-between items-center border-b px-5 py-4 bg-gradient-to-r from-indigo-500 to-blue-600">
               <h2 className="text-lg md:text-xl font-bold text-lightMode-fg dark:text-darkMode-fg">
                 Suggested Friends
               </h2>

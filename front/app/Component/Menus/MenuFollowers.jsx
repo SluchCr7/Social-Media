@@ -22,7 +22,7 @@ const MenuFollowers = () => {
   return (
     <div className="w-full bg-white dark:bg-[#16181c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col max-h-[500px]">
       {/* Header */}
-      <div className="flex justify-between items-center px-4 py-3 border-b border-lightMode-fg/40 dark:border-darkMode-fg/40">
+      <div className="flex justify-between items-center px-4 py-3 border-b border-lightMode-fg/40 dark:border-darkMode-fg/40 bg-gradient-to-r from-indigo-500 to-blue-600">
         <h2 className="text-lightMode-fg dark:text-darkMode-fg text-lg font-semibold">Followers</h2>
       </div>
 

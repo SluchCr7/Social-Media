@@ -11,7 +11,7 @@ const News = ({showAllNews ,setShowAllNews}) => {
   return (
     <div className="w-full bg-white dark:bg-[#16181c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 to-purple-600">
+      <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-500 to-blue-600">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white">What is happening</h2>
       </div>
 

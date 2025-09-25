@@ -42,7 +42,7 @@ const Stories = () => {
       story => !story?.views?.some(v => v?._id === user?._id)
     )
     return hasUnseen
-      ? 'bg-yellow-400 border-[3px] border-yellow-400' // بدل الـ gradient القديم خليه أصفر صريح
+      ? 'bg-red-500 border-[3px] border-red-500' // بدل الـ gradient القديم خليه أصفر صريح
       : 'bg-gray-500'
   }
 
@@ -88,10 +88,6 @@ const Stories = () => {
                 </span>
               )}
 
-              {/* New story indicator */}
-              {group.stories.some(story => !story?.views?.some(v => v?._id === user?._id)) && (
-                <span className="absolute bottom-0 right-0 w-3 h-3 bg-yellow-400 rounded-full animate-pulse shadow-md"></span>
-              )}
             </div>
           ))}
 

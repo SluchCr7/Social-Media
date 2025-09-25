@@ -55,7 +55,7 @@ export const navSections = [
   {
     title: "Community",
     items: [
-      { icon: <FaPlus />, text: "New Zoc", link: "/Pages/NewPost" },
+      // { icon: <FaPlus />, text: "New Zoc", link: "/Pages/NewPost" },
       { icon: <RiUserCommunityLine />, text: "Community", link: "/Pages/CommunityMain" },
       { icon: <LuMessagesSquare />, text: "Messenger", link: "/Pages/Messanger" },
     ]

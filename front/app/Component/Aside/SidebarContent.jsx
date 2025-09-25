@@ -32,7 +32,7 @@ const SidebarContent = memo(({ isCollapsed,setIsCollapsed, isMobile, setIsMobile
       </div>
 
       {/* Nav Sections */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 space-y-6">
+      <div className="flex-1 overflow-y-auto aside_scroll space-y-6">
         {navSections.map(section => (
           <div key={section.title}>
             {!isCollapsed && (

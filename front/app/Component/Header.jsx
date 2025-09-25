@@ -38,12 +38,12 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
         <div className="w-full flex items-center justify-between px-3 md:px-6">
           
           {/* ✅ Tabs */}
-          <div className="relative flex gap-6 py-3">
+          <div className="relative flex gap-6">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`pb-2 relative transition-colors font-medium ${
+                className={`relative px-1 pb-3 pt-3 font-medium transition-colors ${
                   activeTab === tab.key
                     ? "text-blue-500"
                     : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
@@ -53,7 +53,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
                 {activeTab === tab.key && (
                   <motion.div
                     layoutId="activeTabIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-500 rounded-full"
+                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-500"
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
                 )}

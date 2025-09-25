@@ -2,11 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  scrollbar-width: thin;       /* يجعل الاسكرول رفيع */
+  scrollbar-color: #6366F1 transparent;
+}
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+@keyframes spin-gradient {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-gradient 4s linear infinite;
 }
 
 
@@ -136,3 +154,24 @@
   width: 224px; /* same as expanded */
   transition: width 0.3s;
 }
+
+/* للـ Webkit Browsers (Chrome, Edge, Safari) */
+.aside_scroll::-webkit-scrollbar {
+  width: 6px;               /* عرض الاسكرول العمودي */
+  height: 6px;              /* ارتفاع الاسكرول الأفقي */
+}
+
+.aside_scroll::-webkit-scrollbar-track {
+  background: transparent;   /* خلفية التراك */
+}
+
+.aside_scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6366F1, #10B981); /* Gradient جميل */
+  border-radius: 9999px;     /* دائري */
+}
+
+.aside_scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #4F46E5, #059669); /* أغمق عند hover */
+}
+
+/* للـ Firefox */
