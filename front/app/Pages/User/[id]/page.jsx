@@ -96,126 +96,139 @@ const UserProfilePage = ({ params }) => {
     <div className="w-full pt-10 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6">
       
       {/* ===================== Upper Profile Section ===================== */}
-      <div className="flex flex-col items-center lg:items-start gap-6">
-        
-        {/* Avatar */}
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className={`relative w-36 h-36 rounded-full shadow-lg cursor-pointer p-[3px]
-            ${userSelected?.stories?.length > 0
-              ? 'border-[5px] border-blue-500 animate-spin-slow'
-              : 'border-0 border-transparent'}`}
-          onClick={handleProfileClick}
-        >
-          <div className="w-full h-full rounded-full overflow-hidden bg-lightMode-bg dark:bg-darkMode-bg p-[2px]">
-            <Image
-              src={userSelected?.profilePhoto?.url || '/default-profile.png'}
-              alt="Profile"
-              fill
-              className="object-cover rounded-full"
-            />
-          </div>
-        </motion.div>
 
-        {/* Username + Badge + Level */}
-        <div className="flex flex-col items-center lg:items-start gap-2">
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-bold">{userSelected?.username || 'Username'}</h1>
-            {userSelected?.isAccountWithPremiumVerify && <HiBadgeCheck className="text-blue-500 text-xl" title="Verified Account"/>}
-          </div>
-
-          {/* Level & Progress Bar */}
-          <div className="w-full sm:max-w-xs mt-1">
-            <div className="flex justify-between text-sm text-gray-400">
-              <span>{userSelected?.userLevelRank || 'Junior'}</span>
-              <span>{userSelected?.userLevelPoints || 0} XP</span>
-            </div>
-            <div className="w-full h-2 bg-gray-300 dark:bg-gray-700 rounded-full mt-1 overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{
-                  width: `${
-                    Math.min(
-                      ((userSelected?.userLevelPoints || 0) / (userSelected?.nextLevelPoints || 500)) * 100,
-                      100
-                    )
-                  }%`,
-                }}
-                transition={{ duration: 1.2 }}
-                className="h-full bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-600"
+      <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 w-full">
+          {/* Avatar */}
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className={`relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden shadow-xl cursor-pointer p-1
+              ${myStories.length > 0
+                ? 'bg-gradient-to-tr from-pink-500 via-yellow-400 to-purple-600 animate-spin-slow'
+                : 'bg-transparent'}`}
+          >
+            <div className="w-full h-full rounded-full overflow-hidden bg-lightMode-bg dark:bg-darkMode-bg p-[2px]">
+              <Image
+                src={userSelected?.profilePhoto?.url || '/default-profile.png'}
+                alt="Profile"
+                fill
+                className="object-cover rounded-full"
               />
             </div>
-            <span className="text-xs text-gray-500 mt-1">
-              {`Next level in ${Math.max(
-                (userSelected?.nextLevelPoints || 500) - (userSelected?.userLevelPoints || 0),
-                0
-              )} XP`}
-            </span>
+          </motion.div>
+
+          {/* User Info Column */}
+          <div className="flex flex-col gap-3 flex-1 w-full">
+            {/* Username & Badge */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl sm:text-3xl font-bold break-words">
+                {userSelected?.username || 'Username'}
+              </h1>
+              {userSelected?.isAccountWithPremiumVerify && (
+                <HiBadgeCheck className="text-blue-500 text-xl" title="Verified account" />
+              )}
+            </div>
+
+            {/* Level & Progress */}
+            <div className="w-full sm:max-w-xs">
+              <div className="flex justify-between text-sm font-medium text-gray-600 dark:text-gray-300">
+                <span className="flex items-center gap-1">
+                  {userSelected?.userLevelRank || 'Junior'}
+                  <span className="text-lg">🏅</span>
+                </span>
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  {userSelected?.userLevelPoints || 0} XP
+                </motion.span>
+              </div>
+
+              <div className="w-full h-3 bg-gray-300 dark:bg-gray-700 rounded-full mt-2 overflow-hidden shadow-inner">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{
+                    width: `${
+                      Math.min(
+                        ((userSelected?.userLevelPoints || 0) / (userSelected?.nextLevelPoints || 500)) * 100,
+                        100
+                      )
+                    }%`,
+                  }}
+                  transition={{ duration: 1.2 }}
+                  className="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 rounded-full"
+                />
+              </div>
+
+              <span className="block text-xs text-gray-500 mt-1 text-right">
+                {`Next level in ${Math.max(
+                  (userSelected?.nextLevelPoints || 500) - (userSelected?.userLevelPoints || 0),
+                  0
+                )} XP`}
+              </span>
+            </div>
+
+
+            {/* Bio */}
+            <p className="text-sm sm:text-base text-gray-500 max-w-xs break-words whitespace-pre-wrap">
+              {userSelected?.description || 'No bio yet.'}
+            </p>
+
+
+            {/* Stats */}
+            {canSeePrivateContent && (
+              <div className="flex justify-center lg:justify-start gap-10 mt-4 w-full">
+                <StatBlock label="Posts" value={userSelected?.posts?.length} />
+                <StatBlock label="Followers" value={userSelected?.followers?.length} onClick={() => { setFollowModalType('followers'); setShowFollowModal(true) }} />
+                <StatBlock label="Following" value={userSelected?.following?.length} onClick={() => { setFollowModalType('following'); setShowFollowModal(true) }} />
+              </div>
+            )}
+          
+            {isLogin && !isOwner && (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="flex gap-3 mt-4 relative"
+              >
+                <button
+                  onClick={() => followUser(userSelected?._id)}
+                  className={`flex items-center gap-2 px-6 py-2 rounded-xl border text-sm font-medium transition-all duration-300
+                    ${isFollowing
+                      ? 'text-red-600 border-red-600 hover:bg-red-600 hover:text-white'
+                      : 'text-green-600 border-green-600 hover:bg-green-600 hover:text-white'
+                    }`}
+                >
+                  {isFollowing ? <RiUserUnfollowLine className="text-lg" /> : <RiUserFollowLine className="text-lg" />}
+                  {isFollowing ? 'Unfollow' : 'Follow'}
+                </button>
+
+                <button
+                  onClick={() => setShowDotsMenu(!showDotsMenu)}
+                  className="px-4 py-2 border rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition relative"
+                >
+                  <IoEllipsisHorizontal className="text-xl" />
+                </button>
+
+                {showDotsMenu && (
+                  <div className="absolute top-12 right-0 w-48 bg-white dark:bg-gray-900 border rounded-xl shadow-lg z-50 flex flex-col py-2">
+                    <button onClick={handleReport} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-left">Report User</button>
+                    <button onClick={handleBlock} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-left">
+                      {isBlockedByMe ? "Unblock User" : "Block User"}
+                    </button>
+                    <button onClick={handleCopyLink} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-left">Copy Profile Link</button>
+                  </div>
+                )}
+              </motion.div>
+            )}
           </div>
 
-          {/* Bio */}
-          <motion.p
-            initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="text-base text-center lg:text-left text-gray-500 max-w-lg px-4 line-clamp-3"
-          >
-            {userSelected?.description || 'No bio provided.'}
-          </motion.p>
-
-          {/* Stats */}
-          {canSeePrivateContent && (
-            <div className="flex justify-center lg:justify-start gap-10 mt-4 w-full">
-              <StatBlock label="Posts" value={userSelected?.posts?.length} />
-              <StatBlock label="Followers" value={userSelected?.followers?.length} onClick={() => { setFollowModalType('followers'); setShowFollowModal(true) }} />
-              <StatBlock label="Following" value={userSelected?.following?.length} onClick={() => { setFollowModalType('following'); setShowFollowModal(true) }} />
-            </div>
-          )}
-
-          {/* Actions (Follow + Dots Menu) */}
-          {isLogin && !isOwner && (
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="flex gap-3 mt-4 relative"
-            >
-              <button
-                onClick={() => followUser(userSelected?._id)}
-                className={`flex items-center gap-2 px-6 py-2 rounded-xl border text-sm font-medium transition-all duration-300
-                  ${isFollowing
-                    ? 'text-red-600 border-red-600 hover:bg-red-600 hover:text-white'
-                    : 'text-green-600 border-green-600 hover:bg-green-600 hover:text-white'
-                  }`}
-              >
-                {isFollowing ? <RiUserUnfollowLine className="text-lg" /> : <RiUserFollowLine className="text-lg" />}
-                {isFollowing ? 'Unfollow' : 'Follow'}
-              </button>
-
-              <button
-                onClick={() => setShowDotsMenu(!showDotsMenu)}
-                className="px-4 py-2 border rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition relative"
-              >
-                <IoEllipsisHorizontal className="text-xl" />
-              </button>
-
-              {showDotsMenu && (
-                <div className="absolute top-12 right-0 w-48 bg-white dark:bg-gray-900 border rounded-xl shadow-lg z-50 flex flex-col py-2">
-                  <button onClick={handleReport} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-left">Report User</button>
-                  <button onClick={handleBlock} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-left">
-                    {isBlockedByMe ? "Unblock User" : "Block User"}
-                  </button>
-                  <button onClick={handleCopyLink} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-left">Copy Profile Link</button>
-                </div>
-              )}
-            </motion.div>
-          )}
-        </div>
       </div>
-
+      
+      
       {/* Main Content */}
       {isBlockedByMe ? (
         <div className="min-h-screen flex flex-col items-center justify-center text-center text-red-500 py-20 px-4">
