@@ -43,7 +43,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`relative px-1 pb-6 pt-3 font-medium transition-colors ${
+                className={`relative px-1 pt-3 font-medium transition-colors ${
                   activeTab === tab.key
                     ? "text-blue-500"
                     : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
@@ -53,16 +53,17 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
                 {activeTab === tab.key && (
                   <motion.div
                     layoutId="activeTabIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-500"
+                    className="absolute -bottom-[1px] left-0 right-0 h-[2px] bg-blue-500"
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
                 )}
               </button>
+
             ))}
           </div>
 
           {/* ✅ Actions */}
-          <div className="flex items-center gap-2 md:gap-4 py-3 pb-3">
+          <div className="flex items-center gap-2 md:gap-4 py-3">
             {isLogin ? (
               <>
                 {/* Notifications */}
