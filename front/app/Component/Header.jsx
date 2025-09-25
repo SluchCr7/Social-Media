@@ -53,7 +53,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
                 {activeTab === tab.key && (
                   <motion.div
                     layoutId="activeTabIndicator"
-                    className="absolute -bottom-[1px] left-0 right-0 h-[2px] bg-blue-500"
+                    className="absolute -bottom-[12px] left-0 right-0 h-[2px] bg-blue-500"
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
                 )}
