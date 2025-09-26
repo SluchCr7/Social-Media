@@ -60,7 +60,7 @@ const SidebarContent = memo(({ isCollapsed,setIsCollapsed, isMobile, setIsMobile
 
       {/* User Profile + Logout */}
       <div className={`mt-auto border-t pt-4 px-2`}>
-        <div className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+        <div className="flex items-center justify-between py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           {/* User Info */}
           {!isCollapsed && (
             <div className="flex items-center gap-3 truncate">
