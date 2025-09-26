@@ -91,7 +91,7 @@ const SidebarContent = memo(({ isCollapsed,setIsCollapsed, isMobile, setIsMobile
           {/* Logout Icon */}
           <button
             onClick={user?.Logout}
-            className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-700 transition-colors flex items-center justify-center"
+            className="p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-700 transition-colors flex items-center justify-center"
             aria-label="Logout"
           >
             <svg
