@@ -1,19 +1,46 @@
 'use client'
-import React from 'react'
+import React, { useMemo } from 'react'
 import CommentCard from './CommentCard'
 import SluchitEntry from '../SluchitEntry'
 import { motion, AnimatePresence } from 'framer-motion'
 import { usePost } from '@/app/Context/PostContext'
 
-const TabsContent = ({ activeTab, combinedPosts, posts, userSelected }) => {
-  const {imageView, setImageView} = usePost()
+const TabsContent = ({ activeTab, combinedPosts, posts, userSelected, filters }) => {
+  const { setImageView } = usePost()
+
+  // ✅ فلترة وترتيب البوستات حسب الفلاتر
+  const filteredPosts = useMemo(() => {
+    let result = [...(combinedPosts || [])]
+
+    // فلترة بالسنة
+    if (filters.year !== "all") {
+      result = result.filter(p => new Date(p.createdAt).getFullYear().toString() === filters.year)
+    }
+
+    // فلترة بالشهر
+    if (filters.month !== "all") {
+      result = result.filter(p => (new Date(p.createdAt).getMonth() + 1).toString() === filters.month)
+    }
+
+    // الترتيب
+    if (filters.sort === "latest") {
+      result = result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    } else if (filters.sort === "mostLiked") {
+      result = result.sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0))
+    } else if (filters.sort === "mostCommented") {
+      result = result.sort((a, b) => (b.comments?.length || 0) - (a.comments?.length || 0))
+    }
+
+    return result
+  }, [combinedPosts, filters])
+
   return (
     <div className="mt-6 w-full">
       <AnimatePresence mode="wait" initial={false}>
         {activeTab === 'Posts' && (
           <motion.div key="posts" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-[90%] mx-auto">
-            {combinedPosts?.length > 0
-              ? combinedPosts.map((post) => <SluchitEntry key={post?._id} post={post} />)
+            {filteredPosts?.length > 0
+              ? filteredPosts.map((post) => <SluchitEntry key={post?._id} post={post} />)
               : <div className="text-center text-gray-500 py-10">No posts yet.</div>}
           </motion.div>
         )}
@@ -109,3 +136,4 @@ const TabsContent = ({ activeTab, combinedPosts, posts, userSelected }) => {
 }
 
 export default TabsContent
+

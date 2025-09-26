@@ -499,6 +499,7 @@ const viewPost = asyncHandler(async (req, res) => {
   });
 });
 
+
 module.exports = {
   getAllPosts,
   makeCommentsOff,

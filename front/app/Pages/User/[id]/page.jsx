@@ -1,3 +1,4 @@
+
 'use client'
 
 import Image from 'next/image'
@@ -22,6 +23,7 @@ import { useCombinedPosts } from '@/app/Custome/useCombinedPosts'
 import { selectUserFromUsers } from '@/app/utils/SelectUserFromUsers'
 import { FaLock } from "react-icons/fa";
 import { useAlert } from '@/app/Context/AlertContext'
+import FilterBar from '@/app/Component/FilterBar'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -41,11 +43,16 @@ const UserProfilePage = ({ params }) => {
   const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [showDotsMenu, setShowDotsMenu] = useState(false)
   const [isBlockedByMe, setIsBlockedByMe] = useState(false)
-
+  const [filters, setFilters] = useState({
+    year: "all",
+    month: "all",
+    sort: "latest"
+  })
   // 📌 تحديد اليوزر من قائمة الـ users
   useEffect(() => {
     selectUserFromUsers(setUserSelected, users, id)
   }, [id, users])
+
 
   useEffect(() => {
     if (userSelected) setLoading(false)
@@ -61,6 +68,13 @@ const UserProfilePage = ({ params }) => {
   const isOwner = user?._id === userSelected?._id
   const canSeePrivateContent = useMemo(() => !userSelected?.isPrivate || isOwner || isFollowing, [userSelected, isOwner, isFollowing])
   const combinedPosts = useCombinedPosts(userSelected)
+  const postYears = useMemo(() => {
+    if (!combinedPosts) return []
+    const yearsSet = new Set(
+      combinedPosts.map((p) => new Date(p.createdAt).getFullYear().toString())
+    )
+    return Array.from(yearsSet).sort((a, b) => b - a) // ترتيب تنازلي
+  }, [combinedPosts])
 
   // 📌 جلب ستوريز اليوزر عند الضغط على صورته
   const handleProfileClick = async () => {
@@ -269,7 +283,17 @@ const UserProfilePage = ({ params }) => {
             <>
               <InfoAboutUser user={userSelected} />
               <Tabs activeTab={activeTab} setActiveTab={setActiveTab}/>
-              <TabsContent activeTab={activeTab} combinedPosts={combinedPosts} posts={posts} userSelected={userSelected} />
+              {activeTab === "Posts" && (
+                <FilterBar filters={filters} setFilters={setFilters} years={postYears} />
+              )}
+
+              <TabsContent 
+                activeTab={activeTab} 
+                combinedPosts={combinedPosts} 
+                posts={posts} 
+                userSelected={userSelected}
+                filters={filters}
+              />
             </>
           ) : (
             <div className="flex items-center w-full text-center flex-col gap-2">
@@ -290,7 +314,7 @@ const UserProfilePage = ({ params }) => {
           )}
         </div>
       )}
-
+      
       {/* Followers / Following Modal */}
       <FollowModal
         visible={showFollowModal}
