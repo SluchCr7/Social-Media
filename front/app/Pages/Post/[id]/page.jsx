@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { usePost } from '@/app/Context/PostContext';
 import { useAuth } from '@/app/Context/AuthContext';
 import { useComment } from '@/app/Context/CommentContext';

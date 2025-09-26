@@ -11,6 +11,8 @@ import PostMenu from '@/app/Component/PostMenu';
 import Comment from '@/app/Component/Comment';
 import CommentSkeleton from '@/app/Skeletons/CommentSkeleton';
 import { FaFaceGrinSquintTears } from "react-icons/fa6";
+import { LuLaugh } from "react-icons/lu";
+
 const DesignPostSelect = ({
   post,
   isShared,
@@ -190,7 +192,7 @@ const DesignPostSelect = ({
           {isLogin && (
             <div className="flex items-center gap-6 pt-4 justify-around sm:justify-start sm:gap-10">
               <ActionIcon condition={post.hahas?.includes(user?._id)} onClick={() => likePost(post._id, post.owner._id)} Icon={post.likes?.includes(user?._id) ? IoIosHeart : CiHeart} count={post.likes?.length} active={post.likes?.includes(user?._id)} />
-              <ActionIcon condition={post.likes?.includes(user?._id)} onClick={() => hahaPost(post._id)} Icon={FaFaceGrinSquintTears} count={post.likes?.length} activeHaha={post.hahas?.includes(user?._id)} />
+              <ActionIcon condition={post.likes?.includes(user?._id)} onClick={() => hahaPost(post._id)} Icon={LuLaugh} count={post.likes?.length} activeHaha={post.hahas?.includes(user?._id)} />
               {!post.isCommentOff && <ActionIcon Icon={FaRegCommentDots} count={comments?.length} />}
               <ActionIcon onClick={() => sharePost(post._id)} Icon={IoIosShareAlt} count={post.shares?.length} />
               <ActionIcon onClick={() => savePost(post._id)} Icon={CiBookmark} count={post.saved?.length} active={post.saved?.includes(user?._id)} />

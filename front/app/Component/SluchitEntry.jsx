@@ -7,6 +7,7 @@ import { CiHeart, CiBookmark } from 'react-icons/ci'
 import { FaRegCommentDots } from 'react-icons/fa'
 import { IoIosShareAlt, IoIosHeart } from 'react-icons/io'
 import { BsThreeDots } from 'react-icons/bs'
+import { LuLaugh } from "react-icons/lu";
 import { usePost } from '../Context/PostContext'
 import { useAuth } from '../Context/AuthContext'
 import PostMenu from './PostMenu'
@@ -297,9 +298,9 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 </button>
                 <button disabled={post?.likes?.includes(user?._id)} onClick={() => hahaPost(post?._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
                   {post?.hahas?.includes(user?._id) ? (
-                    <FaFaceGrinSquintTears className='text-yellow-500 text-2xl' />
+                    <LuLaugh className='text-yellow-500 text-2xl' />
                   ) : (
-                    <FaFaceGrinSquintTears className='text-gray-500 text-2xl' />
+                    <LuLaugh className='text-gray-500 text-2xl' />
                   )}
                   <span className='text-gray-400 text-sm font-medium'>{post?.hahas?.length}</span>
                 </button>

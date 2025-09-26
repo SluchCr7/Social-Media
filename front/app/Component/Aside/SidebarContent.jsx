@@ -62,8 +62,9 @@ const SidebarContent = memo(({ isCollapsed,setIsCollapsed, isMobile, setIsMobile
       <div className={`mt-auto border-t pt-4 px-2`}>
         <div className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
           {/* User Info */}
-          <div className="flex items-center gap-3 truncate">
-            <div className={`relative p-[2px] rounded-full ${user?.stories?.length > 0 ? 'border-2 border-red-500' : ''}`}>
+          {!isCollapsed && (
+            <div className="flex items-center gap-3 truncate">
+              <div className={`relative p-[2px] rounded-full ${user?.stories?.length > 0 ? 'border-2 border-red-500' : ''}`}>
               <Image
                 src={user?.profilePhoto?.url || '/default-profile.png'}
                 alt="User Profile"
@@ -74,8 +75,8 @@ const SidebarContent = memo(({ isCollapsed,setIsCollapsed, isMobile, setIsMobile
               {onlineUsers?.includes(user?._id) && (
                 <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border border-white dark:border-gray-900"></span>
               )}
-            </div>
-            {!isCollapsed && (
+              </div>
+            
               <div className="flex flex-col truncate">
                 <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                   {user?.username || "User Name"}
@@ -84,8 +85,8 @@ const SidebarContent = memo(({ isCollapsed,setIsCollapsed, isMobile, setIsMobile
                   {user?.profileName || "@user_name"}
                 </p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Logout Icon */}
           <button

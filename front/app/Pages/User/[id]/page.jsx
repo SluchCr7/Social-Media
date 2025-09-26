@@ -14,13 +14,14 @@ import StatBlock from '@/app/Component/UserComponents/StatBlock'
 import FollowModal from '@/app/Component/UserComponents/FollowModal'
 import { useStory } from '@/app/Context/StoryContext'
 import StoryViewer from '@/app/Component/StoryViewer'
-import { toast } from 'react-hot-toast'
 import { useReport } from '@/app/Context/ReportContext'
 import { HiBadgeCheck } from "react-icons/hi";
 import { CheckStateAccount } from '@/app/Component/UserComponents/UsersStats'
 import ProfileSkeleton from '@/app/Skeletons/ProfileSkeleton'
 import { useCombinedPosts } from '@/app/Custome/useCombinedPosts'
 import { selectUserFromUsers } from '@/app/utils/SelectUserFromUsers'
+import { FaLock } from "react-icons/fa";
+import { useAlert } from '@/app/Context/AlertContext'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -30,7 +31,7 @@ const UserProfilePage = ({ params }) => {
   const { posts } = usePost()
   const { getUserStories } = useStory()
   const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport();
-
+  const {showAlert} = useAlert()
   const [userSelected, setUserSelected] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('Posts')
@@ -74,7 +75,7 @@ const UserProfilePage = ({ params }) => {
   // 📌 وظائف الدوتس مينو
   const handleCopyLink = () => {
     navigator.clipboard.writeText(`${window.location.origin}/user/${userSelected?._id}`)
-    toast.success("Profile link copied!")
+    showAlert("Link copied to clipboard.");
     setShowDotsMenu(false)
   }
 
@@ -271,9 +272,21 @@ const UserProfilePage = ({ params }) => {
               <TabsContent activeTab={activeTab} combinedPosts={combinedPosts} posts={posts} userSelected={userSelected} />
             </>
           ) : (
-            <p className="text-center text-gray-500 mt-4 text-lg">
-              This account is private. Follow to see posts, comments, stats, and more information.
-            </p>
+            <div className="flex items-center w-full text-center flex-col gap-2">
+              <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+                <FaLock className="w-10 h-10 text-gray-600 dark:text-gray-300" />
+              </div>
+
+              {/* العنوان */}
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                This account is private
+              </h2>
+
+              {/* النص التوضيحي */}
+              <p className="text-gray-500 dark:text-gray-400 max-w-md mb-6">
+                Follow to unlock posts, comments, stats, and more exclusive content.
+              </p>
+            </div>
           )}
         </div>
       )}
