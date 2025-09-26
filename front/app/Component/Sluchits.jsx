@@ -127,35 +127,82 @@ const Sluchits = ({ activeTab }) => {
   const following = Array.isArray(user?.following) ? user?.following : [];
   const userId = user?._id;
   // فلترة / ترتيب البوستات حسب التبويب
+  // const filteredPosts = useMemo(() => {
+  //   if (!Array.isArray(posts)) return [];
+
+  //   // 📌 Feed للأشخاص المتابعين (زي ما هو موجود)
+  //   if (activeTab === 'following') {
+  //     return posts
+  //       .slice()
+  //       .sort((a, b) => {
+  //         const isAFollowed = following?.includes(a?.owner?._id);
+  //         const isBFollowed = following?.includes(b?.owner?._id);
+  //         if (isAFollowed && !isBFollowed) return -1;
+  //         if (!isAFollowed && isBFollowed) return 1;
+  //         return new Date(b?.createdAt) - new Date(a?.createdAt);
+  //       });
+  //   }
+
+  //   // 📌 Feed "For You" (يعتمد على interests)
+  //   if (activeTab === 'foryou') {
+  //     if (!user?.interests || user.interests.length === 0) return posts;
+
+  //     return posts.filter(post => {
+  //       const text = `${post?.text || ''} ${post?.Hashtags?.join(' ') || ''}`.toLowerCase();
+  //       return user.interests.some(interest =>
+  //         text.includes(interest.toLowerCase())
+  //       );
+  //     });
+  //   }
+
+  //   return posts;
+  // }, [posts, following, activeTab, user?.interests]);
   const filteredPosts = useMemo(() => {
     if (!Array.isArray(posts)) return [];
 
-    // 📌 Feed للأشخاص المتابعين (زي ما هو موجود)
-    if (activeTab === 'following') {
+    // 🟢 Following Feed
+    if (activeTab === "following") {
       return posts
-        .slice()
-        .sort((a, b) => {
-          const isAFollowed = following?.includes(a?.owner?._id);
-          const isBFollowed = following?.includes(b?.owner?._id);
-          if (isAFollowed && !isBFollowed) return -1;
-          if (!isAFollowed && isBFollowed) return 1;
-          return new Date(b?.createdAt) - new Date(a?.createdAt);
-        });
+        .filter(post => following?.includes(post?.owner?._id)) // فلترة مباشرة
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // الأحدث أولاً
     }
 
-    // 📌 Feed "For You" (يعتمد على interests)
-    if (activeTab === 'foryou') {
-      if (!user?.interests || user.interests.length === 0) return posts;
-
-      return posts.filter(post => {
-        const text = `${post?.text || ''} ${post?.hashtags?.join(' ') || ''}`.toLowerCase();
-        return user.interests.some(interest =>
-          text.includes(interest.toLowerCase())
+    // 🟣 For You Feed
+    if (activeTab === "foryou") {
+      if (!user?.interests || user.interests.length === 0) {
+        // fallback: timeline عادي
+        return posts.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
-      });
+      }
+
+      return posts
+        .map(post => {
+          const text = `
+            ${post?.text || ""}
+            ${post?.Hashtags?.join(" ") || ""}
+            ${post?.owner?.description || ""}
+          `.toLowerCase();
+
+          let score = 0;
+          user.interests.forEach(interest => {
+            if (text.includes(interest.toLowerCase())) score += 1;
+          });
+
+          return { post, score };
+        })
+        .filter(item => item.score > 0) // بس اللي ليه علاقة باهتماماتي
+        .sort((a, b) => {
+          if (a.score !== b.score) return b.score - a.score; // حسب الصلة
+          return new Date(b.post.createdAt) - new Date(a.post.createdAt); // الأحدث
+        })
+        .map(item => item.post);
     }
 
-    return posts;
+    // 🟡 Default Feed
+    return posts.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
   }, [posts, following, activeTab, user?.interests]);
 
   // فلترة الاقتراحات (Users)
