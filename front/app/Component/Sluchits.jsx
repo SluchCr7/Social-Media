@@ -163,10 +163,15 @@ const Sluchits = ({ activeTab }) => {
     // 🟢 Following Feed
     if (activeTab === "following") {
       return posts
-        .filter(post => following?.includes(post?.owner?._id)) // فلترة مباشرة
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // الأحدث أولاً
+        .slice()
+        .sort((a, b) => {
+          const isAFollowed = following?.includes(a?.owner?._id);
+          const isBFollowed = following?.includes(b?.owner?._id);
+          if (isAFollowed && !isBFollowed) return -1;
+          if (!isAFollowed && isBFollowed) return 1;
+          return new Date(b?.createdAt) - new Date(a?.createdAt);
+        });
     }
-
     // 🟣 For You Feed
     if (activeTab === "foryou") {
       if (!user?.interests || user.interests.length === 0) {
