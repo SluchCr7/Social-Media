@@ -45,7 +45,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
                 onClick={() => setActiveTab(tab.key)}
                 className={`relative px-1 pt-3 font-medium transition-colors ${
                   activeTab === tab.key
-                    ? "text-blue-500"
+                    ? "text-gradient-to-r  border-b-2 border-gradient-to-r from-indigo-500 to-purple-500"
                     : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
               >
