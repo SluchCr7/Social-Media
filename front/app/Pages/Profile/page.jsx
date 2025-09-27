@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaUserEdit, FaCamera } from 'react-icons/fa'
@@ -12,7 +12,6 @@ import { useAuth } from '@/app/Context/AuthContext'
 import { usePost } from '@/app/Context/PostContext'
 
 import ProfileSkeleton from '@/app/Skeletons/ProfileSkeleton'
-import Loading from '@/app/Component/Loading'
 import UpdateProfile from '@/app/Component/UpdateProfile'
 import AddStoryModel from '@/app/Component/AddStoryModel'
 import InfoAboutUser from '@/app/Component/UserComponents/InfoAboutUser'
@@ -24,9 +23,11 @@ import { CheckStateAccount } from '@/app/Component/UserComponents/UsersStats'
 import { useCombinedPosts } from '@/app/Custome/useCombinedPosts'
 import { selectUserFromUsers } from '@/app/utils/SelectUserFromUsers'
 import FilterBar from '@/app/Component/UserComponents/FilterBar'
+
 const ProfilePage = () => {
   const { user, users, updatePhoto } = useAuth()
-  const { fetchUserPosts, userPosts,posts } = usePost();
+  const { fetchUserPosts, userPosts, posts, setUserPages, userHasMore } = usePost()
+
   const [activeTab, setActiveTab] = useState('Posts')
   const [loading, setLoading] = useState(true)
   const [image, setImage] = useState(null)
@@ -35,26 +36,54 @@ const ProfilePage = () => {
   const [isStory, setIsStory] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [menuType, setMenuType] = useState('followers')
+  const [page, setPage] = useState(1) // ✅ رقم الصفحة الحالي
+  const loaderRef = useRef(null)
+
   const [filters, setFilters] = useState({
     year: "all",
     month: "all",
     sort: "latest"
   })
 
-
-  useEffect(() => {
-    if (userData?._id) {
-      fetchUserPosts(userData._id, 1, 10); // أول صفحة
-    }
-  }, [userData?._id]);
   // 📌 تحديث بيانات المستخدم عند التغير
   useEffect(() => {
     selectUserFromUsers(setUserData, users, user?._id)
     setLoading(false)
   }, [users, user])
 
+  // 📌 أول تحميل للبوستات
+  useEffect(() => {
+    if (userData?._id) {
+      setPage(1)
+      fetchUserPosts(userData._id, 1, 10, true) // reset = true (يمسح القديم)
+    }
+  }, [userData?._id])
+
+  // 📌 ملاحظة نهاية الصفحة (Infinite Scroll)
+  const handleObserver = useCallback(
+    (entries) => {
+      const target = entries[0]
+      if (target.isIntersecting && userHasMore) {
+        const nextPage = page + 1
+        setPage(nextPage)
+        fetchUserPosts(userData._id, nextPage, 10) // يجيب الصفحة الجديدة
+      }
+    },
+    [page, userHasMore, userData?._id]
+  )
+
+  useEffect(() => {
+    const option = { root: null, rootMargin: '20px', threshold: 1.0 }
+    const observer = new IntersectionObserver(handleObserver, option)
+    if (loaderRef.current) observer.observe(loaderRef.current)
+    return () => {
+      if (loaderRef.current) observer.unobserve(loaderRef.current)
+    }
+  }, [handleObserver])
+
   // 📌 البوستات المثبتة + العادية
-  const combinedPosts = useCombinedPosts(userPosts, userData?.pinsPosts || []);
+  const combinedPosts = useCombinedPosts(userPosts, userData?.pinsPosts || [])
+
   const postYears = useMemo(() => {
     if (!combinedPosts) return []
     const yearsSet = new Set(
@@ -62,7 +91,6 @@ const ProfilePage = () => {
     )
     return Array.from(yearsSet).sort((a, b) => b - a) // ترتيب تنازلي
   }, [combinedPosts])
-
 
   // 📌 تغيير الصورة الشخصية
   const handleImageChange = async (e) => {
@@ -91,7 +119,6 @@ const ProfilePage = () => {
       >
         {/* ===================== Upper Profile Section ===================== */}
         <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 w-full">
-
           {/* Avatar Column */}
           <motion.div
             whileHover={{ scale: 1.05 }}
@@ -175,7 +202,6 @@ const ProfilePage = () => {
               </span>
             </div>
 
-
             {/* Bio */}
             <p className="text-sm sm:text-base text-gray-500 max-w-xs break-words whitespace-pre-wrap">
               {userData?.description || 'No bio yet.'}
@@ -223,7 +249,6 @@ const ProfilePage = () => {
         </div>
         <InfoAboutUser user={userData} />
 
-
         {/* Main Column */}
         <div className="flex flex-col gap-6 w-full">
           <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -248,6 +273,12 @@ const ProfilePage = () => {
                 userSelected={userData}
                 filters={filters}
               />
+              {/* Loader for Infinite Scroll */}
+              {userHasMore && (
+                <div ref={loaderRef} className="flex justify-center py-6">
+                  <span className="text-gray-500">Loading more...</span>
+                </div>
+              )}
             </motion.div>
           </AnimatePresence>
         </div>

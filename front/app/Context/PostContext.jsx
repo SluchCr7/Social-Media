@@ -22,7 +22,7 @@ export const PostContextProvider = ({ children }) => {
   const [hasMore, setHasMore] = useState(true);
   const [userPosts, setUserPosts] = useState([]);
   const [userPages, setUserPages] = useState(1);
-
+  const [userHasMore, setUserHasMore] = useState(true);
   const fetchPosts = async (pageNum = 1) => {
     if (!hasMore && pageNum !== 1) return;
 
@@ -327,23 +327,24 @@ export const PostContextProvider = ({ children }) => {
 
 
   // ✅ جلب بوستات يوزر معين (مع pagination)
-  const fetchUserPosts = async (userId, pageNum = 1, limit = 10) => {
-    try {
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/user/${userId}?page=${pageNum}&limit=${limit}`
-      );
+const fetchUserPosts = async (userId, pageNum = 1, limit = 10) => {
+  try {
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/user/${userId}?page=${pageNum}&limit=${limit}`
+    );
 
-      if (pageNum === 1) {
-        setUserPosts(res.data.posts);
-      } else {
-        setUserPosts(prev => [...prev, ...res.data.posts]);
-      }
+    const newPosts = Array.isArray(res.data.posts) ? res.data.posts : [];
 
-      setUserPages(res.data.pages);
-    } catch (err) {
-      console.error("Error fetching user posts", err.response?.data || err.message);
-    }
-  };
+    setUserPosts(prev =>
+      pageNum === 1 ? newPosts : [...prev, ...newPosts]
+    );
+
+    // تحديث hasMore
+    setUserHasMore(pageNum < res.data.pages);
+  } catch (err) {
+    console.error("Error fetching user posts", err.response?.data || err.message);
+  }
+};
 
   return (
     <PostContext.Provider
@@ -363,7 +364,7 @@ export const PostContextProvider = ({ children }) => {
         displayOrHideComments,
         copyPostLink,
         imageView , setImageView, viewPost,fetchPosts,hasMore, setPage
-        ,hahaPost, userPosts, fetchUserPosts, userPages,
+        ,hahaPost, userPosts, fetchUserPosts, userPages,setUserPages , userHasMore
       }}
     >
       {children}
