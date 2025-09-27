@@ -230,14 +230,16 @@ const ProfilePage = () => {
               transition={{ duration: 0.3 }}
             >
               {activeTab === "Posts" && (
-                <FilterBar filters={filters} setFilters={setFilters} years={postYears} />
+                <FilterBar filters={filters} 
+                  setFilters={setFilters}
+                  years={postYears} />
               )}
 
               <TabsContent 
                 activeTab={activeTab} 
                 combinedPosts={combinedPosts} 
                 posts={posts} 
-                userSelected={userSelected}
+                userSelected={userData}
                 filters={filters}
               />
             </motion.div>
