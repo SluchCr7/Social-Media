@@ -12,7 +12,7 @@ module.exports = {
         lightMode: {
           bg: "#ffffff",
           fg: "#000000",
-          text: "#1f2937",     // gray-800
+          text: "#5558f1",     // move or purple
           text2: "#374151",    // gray-700
           menu: "#f9fafb"      // gray-50
         },
