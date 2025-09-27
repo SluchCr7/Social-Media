@@ -10,7 +10,6 @@ import { BsThreeDots, BsEye } from 'react-icons/bs';
 import { motion } from 'framer-motion';
 import { LuLaugh } from "react-icons/lu";
 
-import { useReport } from '@/app/Context/ReportContext';
 import PostMenu from '@/app/Component/PostMenu';
 import Comment from '@/app/Component/Comment';
 import CommentSkeleton from '@/app/Skeletons/CommentSkeleton';
@@ -223,14 +222,18 @@ const DesignPostSelect = ({
                 <p>Comments are turned off</p>
               </div>
             ) : isLoading && page === 1 ? (
+              // أول لود
               Array.from({ length: 3 }).map((_, i) => <CommentSkeleton key={i} />)
             ) : comments?.length > 0 ? (
               <>
                 {comments.map((comment) => <Comment key={comment._id} comment={comment} />)}
 
                 {page < pages && (
-                  <div ref={loaderRef} className="flex justify-center py-4">
-                    <p className="text-gray-400">{isLoading ? "Loading..." : "Scroll to load more..."}</p>
+                  <div ref={loaderRef} className="flex flex-col gap-2 py-4">
+                    {/* Skeleton بدل النص */}
+                    {isLoading
+                      ? Array.from({ length: 2 }).map((_, i) => <CommentSkeleton key={i} />)
+                      : null}
                   </div>
                 )}
               </>
