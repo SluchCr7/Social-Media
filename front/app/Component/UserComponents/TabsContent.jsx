@@ -4,6 +4,7 @@ import CommentCard from './CommentCard'
 import SluchitEntry from '../SluchitEntry'
 import { motion, AnimatePresence } from 'framer-motion'
 import { usePost } from '@/app/Context/PostContext'
+import PostSkeleton from '@/app/Skeletons/PostSkeleton'
 
 const TabsContent = ({ activeTab, combinedPosts, posts, userSelected, filters }) => {
   const { setImageView } = usePost()
@@ -41,7 +42,10 @@ const TabsContent = ({ activeTab, combinedPosts, posts, userSelected, filters })
           <motion.div key="posts" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-[90%] mx-auto">
             {filteredPosts?.length > 0
               ? filteredPosts.map((post) => <SluchitEntry key={post?._id} post={post} />)
-              : <div className="text-center text-gray-500 py-10">No posts yet.</div>}
+              : Array.from({ length: 4 }).map((_, i) => (
+                  <PostSkeleton key={i} className="animate-pulse" />
+                ))
+            }
           </motion.div>
         )}
 
