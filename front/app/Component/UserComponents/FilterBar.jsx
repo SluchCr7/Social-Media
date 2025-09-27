@@ -9,7 +9,7 @@ const FilterBar = ({ filters, setFilters, years }) => {
   }
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-4 bg-white dark:bg-gray-900 p-4 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 w-[80%] md:w-[60%] mx-auto">
+    <div className="flex flex-wrap items-center justify-center gap-4 bg-white dark:bg-gray-900 p-4 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 w-[90%] mx-auto">
       
       {/* اختيار السنة */}
       <div className="flex items-center gap-2">

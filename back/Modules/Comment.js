@@ -15,8 +15,13 @@ const commentSchema = new mongoose.Schema({
   postId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Post',
-    required: true,
+    default: null,
   },
+  // reelId: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: 'Reel',
+  //   default: null,
+  // },
   parent: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Comment',
