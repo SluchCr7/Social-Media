@@ -291,7 +291,7 @@ const Sluchits = ({ activeTab }) => {
         })
       ) : (
         <p className="text-gray-500 dark:text-gray-400 text-center py-10 text-sm">
-          No posts available
+          No posts found
         </p>
       )}
       {isLoading && <PostSkeleton className="animate-pulse" />}

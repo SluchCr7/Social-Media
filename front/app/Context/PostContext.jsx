@@ -23,6 +23,7 @@ export const PostContextProvider = ({ children }) => {
   const [userPosts, setUserPosts] = useState([]);
   const [userPages, setUserPages] = useState(1);
   const [userHasMore, setUserHasMore] = useState(true);
+  const [userIsLoading , setUserIsLoading] = useState(false);
   const fetchPosts = async (pageNum = 1) => {
     if (!hasMore && pageNum !== 1) return;
 
@@ -327,7 +328,8 @@ export const PostContextProvider = ({ children }) => {
 
 
   // ✅ جلب بوستات يوزر معين (مع pagination)
-const fetchUserPosts = async (userId, pageNum = 1, limit = 10) => {
+const fetchUserPosts = async (userId, pageNum = 1, limit = 5) => {
+  setUserIsLoading(true);
   try {
     const res = await axios.get(
       `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/user/${userId}?page=${pageNum}&limit=${limit}`
@@ -343,6 +345,8 @@ const fetchUserPosts = async (userId, pageNum = 1, limit = 10) => {
     setUserHasMore(pageNum < res.data.pages);
   } catch (err) {
     console.error("Error fetching user posts", err.response?.data || err.message);
+  }finally {
+    setUserIsLoading(false);
   }
 };
 
@@ -364,7 +368,7 @@ const fetchUserPosts = async (userId, pageNum = 1, limit = 10) => {
         displayOrHideComments,
         copyPostLink,
         imageView , setImageView, viewPost,fetchPosts,hasMore, setPage
-        ,hahaPost, userPosts, fetchUserPosts, userPages,setUserPages , userHasMore
+        ,hahaPost, userPosts, fetchUserPosts, userPages,setUserPages , userHasMore,userIsLoading
       }}
     >
       {children}

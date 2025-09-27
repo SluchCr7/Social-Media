@@ -7,7 +7,7 @@ import { usePost } from '@/app/Context/PostContext'
 import PostSkeleton from '@/app/Skeletons/PostSkeleton'
 
 const TabsContent = ({ activeTab, combinedPosts, posts, userSelected, filters }) => {
-  const { setImageView } = usePost()
+  const { setImageView , userIsLoading } = usePost()
 
   // ✅ فلترة وترتيب البوستات حسب الفلاتر
   const filteredPosts = useMemo(() => {
@@ -46,6 +46,7 @@ const TabsContent = ({ activeTab, combinedPosts, posts, userSelected, filters })
                   <PostSkeleton key={i} className="animate-pulse" />
                 ))
             }
+            {userIsLoading && <PostSkeleton className="animate-pulse" />}
           </motion.div>
         )}
 
