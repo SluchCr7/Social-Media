@@ -1,4 +1,6 @@
-import React from "react";
+'use client';
+
+import React, { useRef, useEffect } from "react";
 import Link from 'next/link';
 import Image from 'next/image';
 import { CiHeart, CiBookmark } from 'react-icons/ci';
@@ -6,18 +8,16 @@ import { FaRegCommentDots } from 'react-icons/fa';
 import { IoIosShareAlt, IoIosHeart, IoIosSend } from 'react-icons/io';
 import { BsThreeDots, BsEye } from 'react-icons/bs';
 import { motion } from 'framer-motion';
+import { LuLaugh } from "react-icons/lu";
+
 import { useReport } from '@/app/Context/ReportContext';
 import PostMenu from '@/app/Component/PostMenu';
 import Comment from '@/app/Component/Comment';
 import CommentSkeleton from '@/app/Skeletons/CommentSkeleton';
-import { FaFaceGrinSquintTears } from "react-icons/fa6";
-import { LuLaugh } from "react-icons/lu";
 
 const DesignPostSelect = ({
-  post,
   isShared,
   original,
-  user,
   isLogin,
   isCommunityPost,
   showMenu,
@@ -33,7 +33,31 @@ const DesignPostSelect = ({
   commentText,
   setCommentText,
   handleAddComment,
+  post,
+  page,
+  pages,
+  fetchCommentsByPostId,
+  user,
 }) => {
+  const loaderRef = useRef(null);
+
+  // 🔹 Auto infinite scroll
+  useEffect(() => {
+    if (!loaderRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isLoading && page < pages) {
+          fetchCommentsByPostId(post._id, page + 1, true); // append mode
+        }
+      },
+      { threshold: 1 }
+    );
+
+    observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [page, pages, isLoading, post?._id]);
+
   return (
     <motion.div
       className="w-full max-w-5xl mx-auto p-4 sm:p-6 flex flex-col gap-6"
@@ -140,42 +164,6 @@ const DesignPostSelect = ({
               {renderTextWithMentionsAndHashtags(post.text, post.mentions || [], post.Hashtags || [])}
             </p>
           )}
-          {/* Shared Original */}
-          {isShared && original && (
-            <div className="bg-white/40 dark:bg-black/20 backdrop-blur-md border border-gray-200/40 dark:border-gray-700/40 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300">
-              <div className="flex justify-between items-center mb-2">
-                <Link
-                  href={user?._id === original?.owner?._id ? '/Pages/Profile' : `/Pages/User/${original?.owner?._id}`}
-                  className="flex items-center gap-2 hover:underline"
-                >
-                  <Image
-                    src={original?.owner?.profilePhoto?.url}
-                    alt="Shared Profile"
-                    width={35}
-                    height={35}
-                    className="rounded-full object-cover w-9 h-9"
-                  />
-                  <div className="flex flex-col text-sm">
-                    <span className="text-gray-900 dark:text-gray-100">{original?.owner?.username}</span>
-                    <span className="text-gray-500 text-xs">{original?.owner?.profileName}</span>
-                  </div>
-                </Link>
-                <span className="text-gray-500 text-xs">{new Date(original?.createdAt).toLocaleDateString()}</span>
-              </div>
-              <p className="text-gray-700 dark:text-gray-200 italic whitespace-pre-wrap">
-                {renderTextWithMentionsAndHashtags(original?.text, original?.mentions || [], original?.Hashtags || [])}
-              </p>
-              {original?.Photos?.length > 0 && (
-                <div className={`grid gap-2 ${original.Photos.length === 1 ? 'grid-cols-1' : original.Photos.length === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'}`}>
-                  {original.Photos.map((photo, i) => (
-                    <motion.div key={i} onClick={() => setImageView({ url: photo?.url, postId: original._id })} className="cursor-pointer rounded-xl overflow-hidden">
-                      <Image src={photo?.url} alt={`photo-${i}`} width={500} height={500} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Photos */}
           {!isShared && post.Photos?.length > 0 && (
@@ -192,11 +180,10 @@ const DesignPostSelect = ({
           {isLogin && (
             <div className="flex items-center gap-6 pt-4 justify-around sm:justify-start sm:gap-10">
               <ActionIcon condition={post.hahas?.includes(user?._id)} onClick={() => likePost(post._id, post.owner._id)} Icon={post.likes?.includes(user?._id) ? IoIosHeart : CiHeart} count={post.likes?.length} active={post.likes?.includes(user?._id)} />
-              <ActionIcon condition={post.likes?.includes(user?._id)} onClick={() => hahaPost(post._id)} Icon={LuLaugh} count={post.likes?.length} activeHaha={post.hahas?.includes(user?._id)} />
-              {!post.isCommentOff && <ActionIcon Icon={FaRegCommentDots} count={comments?.length} />}
+              <ActionIcon condition={post.likes?.includes(user?._id)} onClick={() => hahaPost(post._id)} Icon={LuLaugh} count={post.hahas?.length} activeHaha={post.hahas?.includes(user?._id)} />
+              {!post.isCommentOff && <ActionIcon Icon={FaRegCommentDots} count={post.commentsCount || comments?.length} />}
               <ActionIcon onClick={() => sharePost(post._id)} Icon={IoIosShareAlt} count={post.shares?.length} />
               <ActionIcon onClick={() => savePost(post._id)} Icon={CiBookmark} count={post.saved?.length} active={post.saved?.includes(user?._id)} />
-              {/* Views for owner */}
               {user?._id === post.owner?._id && (
                 <div className="flex items-center gap-1 text-gray-400 text-sm">
                   <BsEye />
@@ -229,16 +216,24 @@ const DesignPostSelect = ({
             </div>
           )}
 
-          {/* Comments List */}
+          {/* Comments List + Infinite Scroll */}
           <div className="flex flex-col gap-4 border-t border-gray-700 pt-6">
             {post.isCommentOff ? (
               <div className="flex flex-col items-center justify-center py-6 text-black dark:text-white">
                 <p>Comments are turned off</p>
               </div>
-            ) : isLoading ? (
+            ) : isLoading && page === 1 ? (
               Array.from({ length: 3 }).map((_, i) => <CommentSkeleton key={i} />)
             ) : comments?.length > 0 ? (
-              comments.map((comment) => <Comment key={comment._id} comment={comment} />)
+              <>
+                {comments.map((comment) => <Comment key={comment._id} comment={comment} />)}
+
+                {page < pages && (
+                  <div ref={loaderRef} className="flex justify-center py-4">
+                    <p className="text-gray-400">{isLoading ? "Loading..." : "Scroll to load more..."}</p>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="flex flex-col items-center justify-center py-6 text-black dark:text-white">
                 <p>No comments yet</p>
@@ -250,6 +245,7 @@ const DesignPostSelect = ({
     </motion.div>
   )
 }
+
 const ActionIcon = ({ Icon, count, onClick, active, activeHaha , condition }) => (
   <motion.button disabled={condition || false} onClick={onClick} whileTap={{ scale: 0.9 }} className="flex items-center gap-2 cursor-pointer">
     <Icon className={`text-2xl ${activeHaha ? 'text-yellow-500' : ''} ${active ? 'text-red-500' : 'text-gray-400'}`} />
@@ -257,4 +253,4 @@ const ActionIcon = ({ Icon, count, onClick, active, activeHaha , condition }) =>
   </motion.button>
 );
 
-export default DesignPostSelect
+export default DesignPostSelect;
