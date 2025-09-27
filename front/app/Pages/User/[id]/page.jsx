@@ -30,7 +30,7 @@ const tabs = ['Posts', 'Saved', 'Comments']
 const UserProfilePage = ({ params }) => {
   const id = params.id
   const { users, followUser, user, blockOrUnblockUser, isLogin } = useAuth()
-  const { posts } = usePost()
+  const { fetchUserPosts, userPosts, posts, setUserPages, userHasMore } = usePost()
   const { getUserStories } = useStory()
   const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport();
   const {showAlert} = useAlert()
@@ -52,7 +52,35 @@ const UserProfilePage = ({ params }) => {
   useEffect(() => {
     selectUserFromUsers(setUserSelected, users, id)
   }, [id, users])
+    // 📌 أول تحميل للبوستات
+  useEffect(() => {
+    if (userSelected?._id) {
+      setPage(1)
+      fetchUserPosts(userSelected._id, 1, 10, true) // reset = true (يمسح القديم)
+    }
+  }, [userSelected?._id])
 
+  // 📌 ملاحظة نهاية الصفحة (Infinite Scroll)
+  const handleObserver = useCallback(
+    (entries) => {
+      const target = entries[0]
+      if (target.isIntersecting && userHasMore) {
+        const nextPage = page + 1
+        setPage(nextPage)
+        fetchUserPosts(userSelected._id, nextPage, 10) // يجيب الصفحة الجديدة
+      }
+    },
+    [page, userHasMore, userSelected?._id]
+  )
+
+  useEffect(() => {
+    const option = { root: null, rootMargin: '20px', threshold: 1.0 }
+    const observer = new IntersectionObserver(handleObserver, option)
+    if (loaderRef.current) observer.observe(loaderRef.current)
+    return () => {
+      if (loaderRef.current) observer.unobserve(loaderRef.current)
+    }
+  }, [handleObserver])
 
   useEffect(() => {
     if (userSelected) setLoading(false)
@@ -67,7 +95,7 @@ const UserProfilePage = ({ params }) => {
   const isFollowing = useMemo(() => userSelected?.followers?.some(f => f?._id === user?._id), [userSelected, user])
   const isOwner = user?._id === userSelected?._id
   const canSeePrivateContent = useMemo(() => !userSelected?.isPrivate || isOwner || isFollowing, [userSelected, isOwner, isFollowing])
-  const combinedPosts = useCombinedPosts(userSelected)
+  const combinedPosts = useCombinedPosts(userPosts, userSelected?.pinsPosts || [])
   const postYears = useMemo(() => {
     if (!combinedPosts) return []
     const yearsSet = new Set(
