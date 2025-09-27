@@ -23,7 +23,7 @@ import { useCombinedPosts } from '@/app/Custome/useCombinedPosts'
 import { selectUserFromUsers } from '@/app/utils/SelectUserFromUsers'
 import { FaLock } from "react-icons/fa";
 import { useAlert } from '@/app/Context/AlertContext'
-import FilterBar from '@/app/Component/FilterBar'
+import FilterBar from '@/app/Component/UserComponents/FilterBar'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 

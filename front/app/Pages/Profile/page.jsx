@@ -10,7 +10,6 @@ import Head from 'next/head'
 
 import { useAuth } from '@/app/Context/AuthContext'
 import { usePost } from '@/app/Context/PostContext'
-import { useStory } from '@/app/Context/StoryContext'
 
 import ProfileSkeleton from '@/app/Skeletons/ProfileSkeleton'
 import Loading from '@/app/Component/Loading'
@@ -24,10 +23,10 @@ import FollowModal from '@/app/Component/UserComponents/FollowModal'
 import { CheckStateAccount } from '@/app/Component/UserComponents/UsersStats'
 import { useCombinedPosts } from '@/app/Custome/useCombinedPosts'
 import { selectUserFromUsers } from '@/app/utils/SelectUserFromUsers'
+import FilterBar from '@/app/Component/UserComponents/FilterBar'
 const ProfilePage = () => {
   const { user, users, updatePhoto } = useAuth()
   const { posts } = usePost()
-  const { stories } = useStory()
 
   const [activeTab, setActiveTab] = useState('Posts')
   const [loading, setLoading] = useState(true)
@@ -37,7 +36,11 @@ const ProfilePage = () => {
   const [isStory, setIsStory] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [menuType, setMenuType] = useState('followers')
-
+  const [filters, setFilters] = useState({
+    year: "all",
+    month: "all",
+    sort: "latest"
+  })
   // 📌 تحديث بيانات المستخدم عند التغير
   useEffect(() => {
     selectUserFromUsers(setUserData, users, user?._id)
@@ -46,9 +49,14 @@ const ProfilePage = () => {
 
   // 📌 البوستات المثبتة + العادية
   const combinedPosts = useCombinedPosts(userData)
+  const postYears = useMemo(() => {
+    if (!combinedPosts) return []
+    const yearsSet = new Set(
+      combinedPosts.map((p) => new Date(p.createdAt).getFullYear().toString())
+    )
+    return Array.from(yearsSet).sort((a, b) => b - a) // ترتيب تنازلي
+  }, [combinedPosts])
 
-
-  const myStories = stories.filter(story => story?.owner?._id === user?._id)
 
   // 📌 تغيير الصورة الشخصية
   const handleImageChange = async (e) => {
@@ -82,9 +90,9 @@ const ProfilePage = () => {
           <motion.div
             whileHover={{ scale: 1.05 }}
             className={`relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden shadow-xl cursor-pointer p-1
-              ${myStories.length > 0
-                ? 'bg-gradient-to-tr from-pink-500 via-yellow-400 to-purple-600 animate-spin-slow'
-                : 'bg-transparent'}`}
+              ${userData?.stories?.length > 0
+              ? 'border-[5px] border-blue-500 animate-spin-slow'
+              : 'border-0 border-transparent'}`}
           >
             <div className="w-full h-full rounded-full overflow-hidden relative group">
               <Image
@@ -221,11 +229,16 @@ const ProfilePage = () => {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <TabsContent
-                activeTab={activeTab}
-                combinedPosts={combinedPosts}
-                posts={posts}
-                userSelected={userData}
+              {activeTab === "Posts" && (
+                <FilterBar filters={filters} setFilters={setFilters} years={postYears} />
+              )}
+
+              <TabsContent 
+                activeTab={activeTab} 
+                combinedPosts={combinedPosts} 
+                posts={posts} 
+                userSelected={userSelected}
+                filters={filters}
               />
             </motion.div>
           </AnimatePresence>
