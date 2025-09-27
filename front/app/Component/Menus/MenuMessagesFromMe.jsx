@@ -21,7 +21,7 @@ const MenuMessagesFromMe = () => {
   return (
     <div className="w-full flex bg-white dark:bg-[#16181c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex-col gap-3 ">
       <div className="w-full p-4 border-b border-lightMode-fg/40 dark:border-darkMode-fg/40 bg-gradient-to-r from-purple-500 to-indigo-500">
-        <h2 className="text-lightMode-fg dark:text-darkMode-fg text-base font-semibold">Messages from Last 24 Hours</h2>
+        <h2 className="text-white text-base font-semibold">Messages from Last 24 Hours</h2>
       </div>
 
       <ul className="flex flex-col w-full text-sm text-text px-4 py-2 gap-4 max-h-60 overflow-y-auto">

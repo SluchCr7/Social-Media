@@ -4,7 +4,7 @@
 import Image from 'next/image'
 import { useAuth } from '@/app/Context/AuthContext'
 import { usePost } from '@/app/Context/PostContext'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri"
 import { IoEllipsisHorizontal } from "react-icons/io5"
 import InfoAboutUser from '@/app/Component/UserComponents/InfoAboutUser'
