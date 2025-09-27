@@ -230,10 +230,14 @@ const DesignPostSelect = ({
 
                 {page < pages && (
                   <div ref={loaderRef} className="flex flex-col gap-2 py-4">
-                    {/* Skeleton بدل النص */}
-                    {isLoading
-                      ? Array.from({ length: 2 }).map((_, i) => <CommentSkeleton key={i} />)
-                      : null}
+                    {isLoading ? (
+                      Array.from({ length: 2 }).map((_, i) => (
+                        <CommentSkeleton key={i} />
+                      ))
+                    ) : (
+                      // عنصر placeholder فاضي عشان الـ IntersectionObserver يشتغل
+                      <span className="h-1 w-full"></span>
+                    )}
                   </div>
                 )}
               </>
