@@ -1,16 +1,57 @@
 'use client'
 import React from 'react'
-import { FaPhone, FaGlobe, FaLinkedin, FaGithub, FaMapMarkerAlt, FaTwitter, FaFacebook, FaBirthdayCake, FaMars, FaVenus, FaHeart } from 'react-icons/fa'
-import { BsCalendar2Date } from "react-icons/bs"
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import dayjs from 'dayjs'
+
+import { 
+  FaPhone, FaGlobe, FaLinkedin, FaGithub, FaMapMarkerAlt, FaTwitter, 
+  FaFacebook, FaBirthdayCake, FaMars, FaVenus, FaHeart 
+} from 'react-icons/fa'
+import { BsCalendar2Date } from "react-icons/bs"
+
+const InfoItem = ({ icon, label, value, bgColor, textColor }) => (
+  <motion.div
+    variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
+    className="flex items-center space-x-3 p-4 rounded-xl 
+               bg-lightMode-bg dark:bg-darkMode-bg 
+               shadow-lg hover:shadow-2xl 
+               transition hover:-translate-y-1"
+  >
+    <div className={`w-10 h-10 flex items-center justify-center rounded-full ${bgColor} ${textColor}`}>
+      {icon}
+    </div>
+    <span><span className="font-semibold">{label}:</span> {value || "Not Provided"}</span>
+  </motion.div>
+)
+
+const SocialIcon = ({ href, icon, bg, label }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    title={label}
+    className={`w-12 h-12 flex items-center justify-center rounded-full 
+                bg-gradient-to-tr ${bg} text-white hover:scale-110 transition`}
+  >
+    {icon}
+  </a>
+)
 
 const InfoAboutUser = ({ user }) => {
+  const socialIcons = {
+    github: { icon: <FaGithub />, bg: "from-gray-700 to-gray-900", label: "GitHub" },
+    linkedin: { icon: <FaLinkedin />, bg: "from-blue-600 to-blue-800", label: "LinkedIn" },
+    twitter: { icon: <FaTwitter />, bg: "from-blue-400 to-blue-600", label: "Twitter" },
+    facebook: { icon: <FaFacebook />, bg: "from-blue-700 to-blue-900", label: "Facebook" },
+    website: { icon: <FaGlobe />, bg: "from-purple-500 to-purple-700", label: "Website" },
+  }
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      initial="hidden"
+      animate="visible"
+      variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } }}
       className="mt-8 w-full rounded-2xl bg-lightMode-menu dark:bg-darkMode-menu shadow-xl p-8"
     >
       {/* العنوان */}
@@ -19,7 +60,6 @@ const InfoAboutUser = ({ user }) => {
       </h2>
 
       <div className="space-y-10">
-
         {/* القسم الأول: معلومات شخصية */}
         <div>
           <h3 className="text-lg font-semibold mb-4 text-lightMode-text2 dark:text-darkMode-text2">
@@ -27,69 +67,19 @@ const InfoAboutUser = ({ user }) => {
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-lightMode-text dark:text-darkMode-text">
-            {user?.phone && (
-              <div className="flex items-center space-x-3 p-4 rounded-xl bg-lightMode-bg dark:bg-darkMode-bg shadow-lg hover:shadow-2xl transition hover:-translate-y-1">
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-500">
-                  <FaPhone />
-                </div>
-                <span><span className="font-semibold">Phone:</span> {user.phone}</span>
-              </div>
-            )}
+            {user?.phone && <InfoItem icon={<FaPhone />} label="Phone" value={user.phone} bgColor="bg-blue-100" textColor="text-blue-500" />}
+            {user?.country && <InfoItem icon={<FaMapMarkerAlt />} label="Country" value={user.country} bgColor="bg-green-100" textColor="text-green-500" />}
+            {user?.city && <InfoItem icon={<FaMapMarkerAlt />} label="City" value={user.city} bgColor="bg-teal-100" textColor="text-teal-500" />}
+            {user?.gender && <InfoItem icon={user.gender.toLowerCase() === 'male' ? <FaMars /> : <FaVenus />} label="Gender" value={user.gender} bgColor="bg-pink-100" textColor="text-pink-500" />}
+            {user?.dateOfBirth && <InfoItem icon={<FaBirthdayCake />} label="Date of Birth" value={dayjs(user.dateOfBirth).format("MMMM D, YYYY")} bgColor="bg-yellow-100" textColor="text-yellow-500" />}
+            {user?.createdAt && <InfoItem icon={<BsCalendar2Date />} label="Date of Join" value={dayjs(user.createdAt).format("MMMM D, YYYY")} bgColor="bg-yellow-100" textColor="text-yellow-500" />}
 
-            {user?.country && (
-              <div className="flex items-center space-x-3 p-4 rounded-xl bg-lightMode-bg dark:bg-darkMode-bg shadow-lg hover:shadow-2xl transition hover:-translate-y-1">
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-green-100 text-green-500">
-                  <FaMapMarkerAlt />
-                </div>
-                <span><span className="font-semibold">Country:</span> {user.country}</span>
-              </div>
-            )}
-
-            {user?.city && (
-              <div className="flex items-center space-x-3 p-4 rounded-xl bg-lightMode-bg dark:bg-darkMode-bg shadow-lg hover:shadow-2xl transition hover:-translate-y-1">
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-teal-100 text-teal-500">
-                  <FaMapMarkerAlt />
-                </div>
-                <span><span className="font-semibold">City:</span> {user.city}</span>
-              </div>
-            )}
-
-            {user?.gender && (
-              <div className="flex items-center space-x-3 p-4 rounded-xl bg-lightMode-bg dark:bg-darkMode-bg shadow-lg hover:shadow-2xl transition hover:-translate-y-1">
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-pink-100 text-pink-500">
-                  {user.gender.toLowerCase() === 'male' ? <FaMars /> : <FaVenus />}
-                </div>
-                <span><span className="font-semibold">Gender:</span> {user.gender}</span>
-              </div>
-            )}
-
-            {user?.dateOfBirth && (
-              <div className="flex items-center space-x-3 p-4 rounded-xl bg-lightMode-bg dark:bg-darkMode-bg shadow-lg hover:shadow-2xl transition hover:-translate-y-1">
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-500">
-                  <FaBirthdayCake />
-                </div>
-                <span>
-                  <span className="font-semibold">Date of Birth:</span>{" "}
-                  {new Date(user.dateOfBirth).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}
-                </span>
-              </div>
-            )}
-
-            {user?.createdAt && (
-              <div className="flex items-center space-x-3 p-4 rounded-xl bg-lightMode-bg dark:bg-darkMode-bg shadow-lg hover:shadow-2xl transition hover:-translate-y-1">
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-yellow-100 text-yellow-500">
-                  <BsCalendar2Date />
-                </div>
-                <span>
-                  <span className="font-semibold">Date of Join:</span>{" "}
-                  {new Date(user.createdAt).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}
-                </span>
-              </div>
-            )}
-
-            {/* قسم العلاقة العاطفية */}
-            {user?.partner && (
-              <div className="flex items-center space-x-3 p-4 rounded-xl bg-purple-50 dark:bg-purple-900 shadow-lg hover:shadow-2xl transition hover:-translate-y-1 col-span-1 sm:col-span-2">
+            {/* العلاقة العاطفية */}
+            {user?.relationshipStatus && (
+              <motion.div
+                variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
+                className="flex items-center space-x-3 p-4 rounded-xl bg-purple-50 dark:bg-purple-900 shadow-lg hover:shadow-2xl transition hover:-translate-y-1 col-span-1 sm:col-span-2"
+              >
                 <div className="w-10 h-10 flex items-center justify-center rounded-full bg-pink-100 text-pink-500">
                   <FaHeart />
                 </div>
@@ -107,9 +97,8 @@ const InfoAboutUser = ({ user }) => {
                     </>
                   )}
                 </span>
-              </div>
+              </motion.div>
             )}
-
           </div>
         </div>
 
@@ -119,16 +108,20 @@ const InfoAboutUser = ({ user }) => {
             <h3 className="text-lg font-semibold mb-4 text-lightMode-text2 dark:text-darkMode-text2">
               Interests
             </h3>
-            <div className="flex flex-wrap gap-3">
+            <motion.div 
+              className="flex flex-wrap gap-3"
+              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}
+            >
               {user.interests.map((interest, index) => (
-                <span
+                <motion.span
                   key={index}
+                  variants={{ hidden: { scale: 0.9, opacity: 0 }, visible: { scale: 1, opacity: 1 } }}
                   className="px-4 py-2 rounded-full bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text shadow hover:shadow-lg transition text-sm font-medium"
                 >
                   {interest}
-                </span>
+                </motion.span>
               ))}
-            </div>
+            </motion.div>
           </div>
         )}
 
@@ -139,65 +132,14 @@ const InfoAboutUser = ({ user }) => {
               Social Links
             </h3>
             <div className="flex items-center gap-4 flex-wrap">
-              {user.socialLinks.github && (
-                <a
-                  href={user.socialLinks.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="GitHub Profile"
-                  className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-gray-700 to-gray-900 text-white hover:scale-110 transition"
-                >
-                  <FaGithub />
-                </a>
-              )}
-              {user.socialLinks.linkedin && (
-                <a
-                  href={user.socialLinks.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="LinkedIn Profile"
-                  className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-blue-600 to-blue-800 text-white hover:scale-110 transition"
-                >
-                  <FaLinkedin />
-                </a>
-              )}
-              {user.socialLinks.twitter && (
-                <a
-                  href={user.socialLinks.twitter}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Twitter Profile"
-                  className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-blue-400 to-blue-600 text-white hover:scale-110 transition"
-                >
-                  <FaTwitter />
-                </a>
-              )}
-              {user.socialLinks.facebook && (
-                <a
-                  href={user.socialLinks.facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook Profile"
-                  className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-blue-700 to-blue-900 text-white hover:scale-110 transition"
-                >
-                  <FaFacebook />
-                </a>
-              )}
-              {user.socialLinks.website && (
-                <a
-                  href={user.socialLinks.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Website"
-                  className="w-12 h-12 flex items-center justify-center rounded-full bg-gradient-to-tr from-purple-500 to-purple-700 text-white hover:scale-110 transition"
-                >
-                  <FaGlobe />
-                </a>
+              {Object.entries(user.socialLinks).map(([key, link]) =>
+                link && socialIcons[key] ? (
+                  <SocialIcon key={key} href={link} {...socialIcons[key]} />
+                ) : null
               )}
             </div>
           </div>
         )}
-
       </div>
     </motion.div>
   )

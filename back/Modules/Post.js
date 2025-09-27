@@ -45,7 +45,11 @@ const PostSchema = new mongoose.Schema({
       type: String,
     },
   ],
-
+  status: {
+    type: String,
+    enum: ["draft", "pending", "published", "failed"],
+    default: "published", // أو "pending" حسب لوجيك المشروع
+  },
   // 🎯 Mentions: مجرد userIds
   mentions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 
