@@ -26,8 +26,7 @@ import { selectUserFromUsers } from '@/app/utils/SelectUserFromUsers'
 import FilterBar from '@/app/Component/UserComponents/FilterBar'
 const ProfilePage = () => {
   const { user, users, updatePhoto } = useAuth()
-  const { posts } = usePost()
-
+  const { fetchUserPosts, userPosts,posts } = usePost();
   const [activeTab, setActiveTab] = useState('Posts')
   const [loading, setLoading] = useState(true)
   const [image, setImage] = useState(null)
@@ -41,6 +40,13 @@ const ProfilePage = () => {
     month: "all",
     sort: "latest"
   })
+
+
+  useEffect(() => {
+    if (userData?._id) {
+      fetchUserPosts(userData._id, 1, 10); // أول صفحة
+    }
+  }, [userData?._id]);
   // 📌 تحديث بيانات المستخدم عند التغير
   useEffect(() => {
     selectUserFromUsers(setUserData, users, user?._id)
@@ -48,7 +54,7 @@ const ProfilePage = () => {
   }, [users, user])
 
   // 📌 البوستات المثبتة + العادية
-  const combinedPosts = useCombinedPosts(userData)
+  const combinedPosts = useCombinedPosts(userPosts, userData?.pinsPosts || []);
   const postYears = useMemo(() => {
     if (!combinedPosts) return []
     const yearsSet = new Set(

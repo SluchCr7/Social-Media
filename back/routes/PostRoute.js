@@ -9,7 +9,8 @@ const {
   sharePost,
   editPost,
   viewPost,
-  hahaPost
+  hahaPost,
+  getPostsByUser
 } = require('../Controllers/PostController');
 
 const route = require('express').Router();
@@ -18,6 +19,9 @@ const photoUpload = require('../Middelwares/uploadPhoto');
 
 // Get all posts
 route.route('/').get(getAllPosts);
+
+// Get posts by specific user (pagination)
+route.route('/user/:userId').get(getPostsByUser);
 
 // Add post
 route.route('/add')
@@ -46,6 +50,5 @@ route.route('/commentsOff/:id').put(verifyToken, makeCommentsOff);
 
 // View a post
 route.route('/view/:id').put(verifyToken, viewPost);
-
 
 module.exports = route;

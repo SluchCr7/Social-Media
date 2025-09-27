@@ -500,6 +500,48 @@ const viewPost = asyncHandler(async (req, res) => {
 });
 
 
+// ================== Get Posts By User ==================
+const getPostsByUser = asyncHandler(async (req, res) => {
+  const userId = req.params.userId; // 👈 ID اليوزر اللي عايز تجيب بوستاته
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  // 📝 جلب البوستات الخاصة بيوزر معين
+  const posts = await Post.find({ owner: userId })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .populate("owner", "username profileName profilePhoto following followers description")
+    .populate("community", "Name Picture members")
+    .populate({
+      path: "reports",
+      populate: { path: "owner", model: "User", select: "username profileName profilePhoto" },
+    })
+    .populate("mentions", "username profileName profilePhoto")
+    .populate({
+      path: "originalPost",
+      populate: { path: "owner", select: "username profileName profilePhoto" },
+    })
+    .populate({
+      path: "comments",
+      populate: { path: "owner", select: "username profileName profilePhoto" },
+    })
+    .lean();
+
+  // 📝 احسب العدد الكلي للبوستات الخاصة باليوزر
+  const total = await Post.countDocuments({ owner: userId });
+  const pages = Math.ceil(total / limit);
+
+  res.status(200).json({
+    posts,
+    total,
+    page,
+    pages,
+  });
+});
+
+
 module.exports = {
   getAllPosts,
   makeCommentsOff,
@@ -511,5 +553,6 @@ module.exports = {
   sharePost,
   editPost,
   viewPost,
-  hahaPost
+  hahaPost,
+  getPostsByUser
 };

@@ -41,10 +41,10 @@ const CommentCard = ({ comment }) => (
       <div className="flex gap-3 items-start border-t border-[#383A40] pt-4">
         <Image
           src={comment.postId?.owner?.profilePhoto?.url || '/default-profile.png'}
-          alt="Post owner"
-          width={36}
-          height={36}
-          className="rounded-full object-cover mt-1"
+          alt="Comment User Photo"
+          width={40}
+          height={40}
+          className="rounded-full w-10 h-10 min-w-10 aspect-square object-cover "
         />
         <div className="flex flex-col bg-[#383A40] px-4 py-3 rounded-lg w-full hover:bg-[#404249] transition">
           <div className="flex justify-between items-center mb-1">

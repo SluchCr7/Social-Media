@@ -20,6 +20,9 @@ export const PostContextProvider = ({ children }) => {
   const [postIsEdit, setPostIsEdit] = useState(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [userPosts, setUserPosts] = useState([]);
+  const [userPages, setUserPages] = useState(1);
+
   const fetchPosts = async (pageNum = 1) => {
     if (!hasMore && pageNum !== 1) return;
 
@@ -322,6 +325,26 @@ export const PostContextProvider = ({ children }) => {
     }
   };
 
+
+  // ✅ جلب بوستات يوزر معين (مع pagination)
+  const fetchUserPosts = async (userId, pageNum = 1, limit = 10) => {
+    try {
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/user/${userId}?page=${pageNum}&limit=${limit}`
+      );
+
+      if (pageNum === 1) {
+        setUserPosts(res.data.posts);
+      } else {
+        setUserPosts(prev => [...prev, ...res.data.posts]);
+      }
+
+      setUserPages(res.data.pages);
+    } catch (err) {
+      console.error("Error fetching user posts", err.response?.data || err.message);
+    }
+  };
+
   return (
     <PostContext.Provider
       value={{
@@ -340,7 +363,7 @@ export const PostContextProvider = ({ children }) => {
         displayOrHideComments,
         copyPostLink,
         imageView , setImageView, viewPost,fetchPosts,hasMore, setPage
-        ,hahaPost
+        ,hahaPost, userPosts, fetchUserPosts, userPages,
       }}
     >
       {children}
