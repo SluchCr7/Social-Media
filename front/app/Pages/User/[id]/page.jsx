@@ -43,6 +43,8 @@ const UserProfilePage = ({ params }) => {
   const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [showDotsMenu, setShowDotsMenu] = useState(false)
   const [isBlockedByMe, setIsBlockedByMe] = useState(false)
+  const [page, setPage] = useState(1) // ✅ رقم الصفحة الحالي
+  const loaderRef = useRef(null)
   const [filters, setFilters] = useState({
     year: "all",
     month: "all",
@@ -60,7 +62,6 @@ const UserProfilePage = ({ params }) => {
     }
   }, [userSelected?._id])
 
-  // 📌 ملاحظة نهاية الصفحة (Infinite Scroll)
   const handleObserver = useCallback(
     (entries) => {
       const target = entries[0]
