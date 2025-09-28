@@ -5,34 +5,44 @@ import ChatSlider from '../../Component/ChatMessngerComponents/ChatSlider';
 import Chat from '../../Component/ChatMessngerComponents/Chat';
 import NoChat from '../../Component/ChatMessngerComponents/NoChat';
 import { useMessage } from '@/app/Context/MessageContext';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
 import axios from 'axios';
-import { FaBars } from 'react-icons/fa'; // 👈 أيقونة الهامبرجر
+import { FaBars } from 'react-icons/fa';
 
 const MessangerSluchit = () => {
   const { selectedUser, setSelectedUser } = useMessage();
   const searchParams = useSearchParams();
-  const [showSidebar, setShowSidebar] = useState(true); // للتحكم في ظهور السايدبار في الموبايل
+  const [showSidebar, setShowSidebar] = useState(true);
 
   useEffect(() => {
     const userId = searchParams.get('userId');
-    if (userId && !selectedUser) {
-      axios
-        .get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/${userId}`)
-        .then((res) => {
-          setSelectedUser(res.data);
-          setShowSidebar(false); // لما يختار يفتح الشات على طول
-        })
-        .catch((err) => {
-          console.error('Failed to fetch user for chat:', err);
-        });
+    if (!userId) return;
+
+    // ✅ لو عندي مستخدم مختار خلاص
+    if (selectedUser?._id === userId) return;
+
+    // ✅ لو البيانات جت من Link state
+    if (history.state?.user) {
+      setSelectedUser(history.state.user);
+      setShowSidebar(false);
+      return;
     }
-  }, [searchParams, setSelectedUser, selectedUser]);
+
+    // ✅ fallback → لو معنديش بيانات لازم أجيبها من الـ API
+    axios
+      .get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/${userId}`)
+      .then((res) => {
+        setSelectedUser(res.data);
+        setShowSidebar(false);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch user for chat:', err);
+      });
+  }, [searchParams, selectedUser, setSelectedUser]);
 
   return (
     <div className="w-full h-screen overflow-hidden bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text">
       <div className="flex h-full w-full m-0 p-0">
-
         {/* Sidebar */}
         <aside
           className={`
@@ -58,7 +68,6 @@ const MessangerSluchit = () => {
 
         {/* Main Chat Area */}
         <main className="flex-1 w-full h-full relative">
-          {/* زر الهامبرجر يظهر فقط في الموبايل */}
           <button
             onClick={() => setShowSidebar(true)}
             className="absolute top-4 left-4 z-10 p-2 rounded-md bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text shadow md:hidden"

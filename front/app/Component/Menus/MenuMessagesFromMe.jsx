@@ -27,22 +27,39 @@ const MenuMessagesFromMe = () => {
       <ul className="flex flex-col w-full text-sm text-text px-4 py-2 gap-4 max-h-60 overflow-y-auto">
         {recentMessages.length > 0 ? (
           recentMessages.map((msg, index) => (
-            <Link href={`/Pages/Messanger?userId=${msg?.sender?._id}`} key={index} className="flex items-start gap-3 w-full bg-darkMode-bgSecondary p-3 rounded-lg hover:bg-darkMode-bgHover transition">
-              <Image
-                src={msg?.sender?.profilePhoto?.url || '/default-avatar.png'}
-                alt="avatar"
-                width={40}
-                height={40}
-                className="rounded-full object-cover"
-              />
-              <div className="flex flex-col w-full">
-                <div className="flex justify-between items-center w-full">
-                  <span className="text-lightMode-fg dark:text-darkMode-fg font-semibold">{msg?.sender?.username}</span>
-                  <span className="text-xs text-gray-500">{dayjs(msg?.createdAt).format('HH:mm')}</span>
-                </div>
-                <p className="text-gray-300 mt-1 text-sm break-all whitespace-pre-wrap">{msg?.text}</p>
+          <Link 
+            href={{
+              pathname: "/Pages/Messanger",
+              query: { userId: msg?.sender?._id }
+            }}
+            as={`/Pages/Messanger?userId=${msg?.sender?._id}`}
+            key={index}
+            className="flex items-start gap-3 w-full bg-darkMode-bgSecondary p-3 rounded-lg hover:bg-darkMode-bgHover transition"
+            // 👇 هنا نضيف الـ state
+            state={{ user: msg?.sender }}
+          >
+            <Image
+              src={msg?.sender?.profilePhoto?.url || '/default-avatar.png'}
+              alt="avatar"
+              width={40}
+              height={40}
+              className="rounded-full object-cover"
+            />
+            <div className="flex flex-col w-full">
+              <div className="flex justify-between items-center w-full">
+                <span className="text-lightMode-fg dark:text-darkMode-fg font-semibold">
+                  {msg?.sender?.username}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {dayjs(msg?.createdAt).format('HH:mm')}
+                </span>
               </div>
-            </Link>
+              <p className="text-gray-300 mt-1 text-sm break-all whitespace-pre-wrap">
+                {msg?.text}
+              </p>
+            </div>
+          </Link>
+
           ))
         ) : (
           <li className="text-gray-400">No messages from the past 24 hours.</li>

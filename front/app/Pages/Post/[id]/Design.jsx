@@ -300,11 +300,6 @@ const DesignPostSelect = ({
   fetchCommentsByPostId,
   user,
 }) => {
-  useEffect(() => {
-    console.log(hasMore)
-    console.log(page)
-    console.log(pages)
-  }, [hasMore, page, pages])
   const loaderRef = useRef(null);
 
   // 🔹 Auto infinite scroll
