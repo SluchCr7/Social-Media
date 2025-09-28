@@ -194,14 +194,14 @@ export const CommentContextProvider = ({ children }) => {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [hasMore, setHasMore] = useState(true);
   const { user } = useAuth();
   const { addNotify } = useNotify();
   const { showAlert } = useAlert();
 
   // 📌 جلب التعليقات لبوست معين (مع pagination)
   const fetchCommentsByPostId = async (postId, pageNum = 1, append = false) => {
-    if (append && pages && pageNum > pages) return; // 🛑 مفيش صفحات تانية
+    if (!hasMore && append) return; // 🛑 مفيش صفحات تانية
 
     setIsLoading(true);
     try {
@@ -223,6 +223,7 @@ export const CommentContextProvider = ({ children }) => {
 
       setPage(currentPage);
       setPages(totalPages);
+      setHasMore(currentPage < totalPages); // ✅ هنا بنحدث الفلاج
     } catch (err) {
       console.error('Error fetching comments:', err);
       showAlert(err?.response?.data?.message || 'Failed to load comments.');
@@ -230,6 +231,7 @@ export const CommentContextProvider = ({ children }) => {
       setIsLoading(false);
     }
   };
+
 
   // 🔹 تحديث كومنت داخل tree recursively
   const updateCommentInTree = (list, updatedComment) => {
@@ -362,7 +364,7 @@ export const CommentContextProvider = ({ children }) => {
         fetchCommentsByPostId,
         isLoading,
         page,
-        pages
+        pages,hasMore
       }}
     >
       {children}

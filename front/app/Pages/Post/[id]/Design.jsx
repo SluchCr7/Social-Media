@@ -259,7 +259,6 @@
 
 // export default DesignPostSelect
 
-
 'use client';
 
 import React, { useRef, useEffect } from "react";
@@ -296,7 +295,7 @@ const DesignPostSelect = ({
   handleAddComment,
   post,
   page,
-  pages,
+  hasMore, // ✅ نستخدمه بدل page < pages
   fetchCommentsByPostId,
   user,
 }) => {
@@ -304,23 +303,20 @@ const DesignPostSelect = ({
 
   // 🔹 Auto infinite scroll
   useEffect(() => {
-    if (!loaderRef.current) return;
+    if (!loaderRef.current || !hasMore) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isLoading && page < pages) {
+        if (entries[0].isIntersecting && !isLoading && hasMore) {
           fetchCommentsByPostId(post._id, page + 1, true);
         }
       },
-      {
-        threshold: 0.1,       // مش لازم يبقى ظاهر كله
-        rootMargin: "100px",  // يبدأ قبل ما يوصل للآخر
-      }
+      { threshold: 0.1, rootMargin: "100px" }
     );
 
     observer.observe(loaderRef.current);
     return () => observer.disconnect();
-  }, [page, pages, isLoading, post?._id]);
+  }, [page, hasMore, isLoading, post?._id]);
 
   return (
     <motion.div
@@ -480,40 +476,40 @@ const DesignPostSelect = ({
             </div>
           )}
 
-{/* Comments List + Infinite Scroll */}
-<div className="flex flex-col gap-4 border-t border-gray-700 pt-6">
-  {post.isCommentOff ? (
-    <div className="flex flex-col items-center justify-center py-6 text-black dark:text-white">
-      <p>Comments are turned off</p>
-    </div>
-  ) : isLoading && page === 1 ? (
-    // أول لود
-    Array.from({ length: 3 }).map((_, i) => <CommentSkeleton key={i} />)
-  ) : comments?.length > 0 ? (
-    <>
-      {comments.map((comment) => (
-        <Comment key={comment._id} comment={comment} />
-      ))}
+          {/* Comments List */}
+          <div className="flex flex-col gap-4 border-t border-gray-700 pt-6">
+            {post.isCommentOff ? (
+              <div className="flex flex-col items-center justify-center py-6 text-black dark:text-white">
+                <p>Comments are turned off</p>
+              </div>
+            ) : isLoading && page === 1 ? (
+              // أول لود
+              Array.from({ length: 3 }).map((_, i) => <CommentSkeleton key={i} />)
+            ) : comments?.length > 0 ? (
+              <>
+                {comments.map((comment) => (
+                  <Comment key={comment._id} comment={comment} />
+                ))}
 
-      {/* Loader Placeholder */}
-      {page < pages && (
-        <div ref={loaderRef} className="h-16 w-full flex items-center justify-center">
-          {isLoading ? (
-            Array.from({ length: 2 }).map((_, i) => (
-              <CommentSkeleton key={i} />
-            ))
-          ) : (
-            <p className="text-gray-400 text-sm">Scroll to load more...</p>
-          )}
-        </div>
-      )}
-    </>
-  ) : (
-    <div className="flex flex-col items-center justify-center py-6 text-black dark:text-white">
-      <p>No comments yet</p>
-    </div>
-  )}
-</div>
+                {/* Loader Placeholder */}
+                {hasMore && (
+                  <div ref={loaderRef} className="h-16 w-full flex items-center justify-center">
+                    {isLoading ? (
+                      Array.from({ length: 2 }).map((_, i) => (
+                        <CommentSkeleton key={i} />
+                      ))
+                    ) : (
+                      <p className="text-gray-400 text-sm">Scroll to load more...</p>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-6 text-black dark:text-white">
+                <p>No comments yet</p>
+              </div>
+            )}
+          </div>
 
         </div>
       </div>

@@ -12,7 +12,7 @@ const PostPage = ({ params }) => {
   const id = params.id;
   const { user, isLogin } = useAuth();
   const { posts, likePost, savePost, sharePost, setImageView, viewPost,hahaPost } = usePost();
-  const { comments, AddComment, isLoading , page,pages,fetchCommentsByPostId,} = useComment();
+  const { comments, AddComment,hasMore, isLoading , page,pages,fetchCommentsByPostId,} = useComment();
   const [openModel, setOpenModel] = useState(false);
   const [post, setPost] = useState(null);
   const [commentText, setCommentText] = useState('');
@@ -76,7 +76,7 @@ const PostPage = ({ params }) => {
       setCommentText={setCommentText}
       handleAddComment={handleAddComment}
       openModel={openModel}
-      setOpenModel={setOpenModel}page={page} pages={pages}
+      setOpenModel={setOpenModel} page={page} pages={pages} hasMore={hasMore}
     />
   );
 };
