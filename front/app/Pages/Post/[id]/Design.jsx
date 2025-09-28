@@ -295,10 +295,16 @@ const DesignPostSelect = ({
   handleAddComment,
   post,
   page,
+  pages,
   hasMore, // ✅ نستخدمه بدل page < pages
   fetchCommentsByPostId,
   user,
 }) => {
+  useEffect(() => {
+    console.log(hasMore)
+    console.log(page)
+    console.log(pages)
+  }, [hasMore, page, pages])
   const loaderRef = useRef(null);
 
   // 🔹 Auto infinite scroll
@@ -499,7 +505,7 @@ const DesignPostSelect = ({
                         <CommentSkeleton key={i} />
                       ))
                     ) : (
-                      <p className="text-gray-400 text-sm">Scroll to load more...</p>
+                      <CommentSkeleton />
                     )}
                   </div>
                 )}
