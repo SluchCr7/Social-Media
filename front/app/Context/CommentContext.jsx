@@ -201,7 +201,8 @@ export const CommentContextProvider = ({ children }) => {
 
   // 📌 جلب التعليقات لبوست معين (مع pagination)
   const fetchCommentsByPostId = async (postId, pageNum = 1, append = false) => {
-    if (pageNum > pages && append) return; // 🛑 مفيش صفحات تانية
+    if (append && pages && pageNum > pages) return; // 🛑 مفيش صفحات تانية
+
     setIsLoading(true);
     try {
       const res = await axios.get(
@@ -211,9 +212,13 @@ export const CommentContextProvider = ({ children }) => {
       const { nestedComments, page: currentPage, pages: totalPages } = res.data;
 
       if (append) {
-        setComments(prev => [...prev, ...nestedComments]); // 🔹 ضيف على القديم
+        setComments(prev => {
+          const existingIds = new Set(prev.map(c => c._id));
+          const newOnes = nestedComments.filter(c => !existingIds.has(c._id));
+          return [...prev, ...newOnes];
+        });
       } else {
-        setComments(nestedComments); // 🔹 أول صفحة (refresh)
+        setComments(nestedComments);
       }
 
       setPage(currentPage);
