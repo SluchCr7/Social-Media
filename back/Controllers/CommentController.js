@@ -5,87 +5,72 @@ const { Post } = require('../Modules/Post');
 const { sendNotificationHelper } = require('../utils/SendNotification');
 
 // ================== Get All Comments (nested) ==================
-// const getAllComments = asyncHandler(async (req, res) => {
-//   const postId = req.params.postId;
-//   const page = parseInt(req.query.page) || 1; //
-//   const limit = parseInt(req.query.limit) || 10; //
-//   const skip = (page - 1) * limit; //
-//   const comments = await Comment.find({ postId })
-//     .sort({ createdAt: -1 }) //
-//     .skip(skip)//
-//     .limit(limit)//
-//     .populate("owner", "username profileName profilePhoto following followers description")
-//     .lean();//
-  
-//   const buildCommentTree = (parentId = null) => {
-//     return comments
-//       .filter(comment => {
-//         if (!parentId) return !comment.parent;
-//         return String(comment.parent) === String(parentId);
-//       })
-//       .map(comment => ({
-//         ...comment,
-//         replies: buildCommentTree(comment._id)
-//       }));
-//   };
-
-//   const nestedComments = buildCommentTree();
-//   // 📝 احسب العدد الكلي للبوستات الخاصة باليوزر
-//   const total = await Comment.countDocuments({ postId });//
-//   const pages = Math.ceil(total / limit);//
-//   res.status(200).json({
-//     nestedComments,
-//     total,//
-//     page,//
-//     pages,//
-//   });
-// });
-
 const getAllComments = asyncHandler(async (req, res) => {
   const postId = req.params.postId;
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
-
-  // 🎯 هات الكومنتات الرئيسية بس
-  const topLevelComments = await Comment.find({ postId, parent: null })
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit)
+  const comments = await Comment.find({ postId })
     .populate("owner", "username profileName profilePhoto following followers description")
-    .lean();
-
-  // 🎯 هات كل الريبلات الخاصة بالبوست
-  const allReplies = await Comment.find({ postId, parent: { $ne: null } })
-    .populate("owner", "username profileName profilePhoto following followers description")
-    .lean();
-
-  // 🏗️ بناء الشجرة
-  const buildReplies = (parentId) => {
-    return allReplies
-      .filter(reply => String(reply.parent) === String(parentId))
-      .map(reply => ({
-        ...reply,
-        replies: buildReplies(reply._id),
+  
+  const buildCommentTree = (parentId = null) => {
+    return comments
+      .filter(comment => {
+        if (!parentId) return !comment.parent;
+        return String(comment.parent) === String(parentId);
+      })
+      .map(comment => ({
+        ...comment,
+        replies: buildCommentTree(comment._id)
       }));
   };
 
-  const nestedComments = topLevelComments.map(comment => ({
-    ...comment,
-    replies: buildReplies(comment._id),
-  }));
-
-  const total = await Comment.countDocuments({ postId, parent: null });
-  const pages = Math.ceil(total / limit);
-
-  res.status(200).json({
-    nestedComments,
-    total,
-    page,
-    pages,
-  });
+  const nestedComments = buildCommentTree();
+  res.status(200).json(nestedComments);
 });
 
+// const getAllComments = asyncHandler(async (req, res) => {
+//   const postId = req.params.postId;
+//   const page = parseInt(req.query.page) || 1;
+//   const limit = parseInt(req.query.limit) || 10;
+//   const skip = (page - 1) * limit;
+
+//   // 🎯 هات الكومنتات الرئيسية بس
+//   const topLevelComments = await Comment.find({ postId, parent: null })
+//     .sort({ createdAt: -1 })
+//     .skip(skip)
+//     .limit(limit)
+//     .populate("owner", "username profileName profilePhoto following followers description")
+//     .lean();
+
+//   // 🎯 هات كل الريبلات الخاصة بالبوست
+//   const allReplies = await Comment.find({ postId, parent: { $ne: null } })
+//     .populate("owner", "username profileName profilePhoto following followers description")
+//     .lean();
+
+//   // 🏗️ بناء الشجرة
+//   const buildReplies = (parentId) => {
+//     return allReplies
+//       .filter(reply => String(reply.parent) === String(parentId))
+//       .map(reply => ({
+//         ...reply,
+//         replies: buildReplies(reply._id),
+//       }));
+//   };
+
+//   const nestedComments = topLevelComments.map(comment => ({
+//     ...comment,
+//     replies: buildReplies(comment._id),
+//   }));
+
+//   const total = await Comment.countDocuments({ postId, parent: null });
+//   const pages = Math.ceil(total / limit);
+
+//   res.status(200).json({
+//     nestedComments,
+//     total,
+//     page,
+//     pages,
+//   });
+// });
+\
 
 // ================== Add New Comment ==================
 const addNewComment = asyncHandler(async (req, res) => {
