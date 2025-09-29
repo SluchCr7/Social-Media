@@ -303,21 +303,21 @@ const DesignPostSelect = ({
   const loaderRef = useRef(null);
 
   // 🔹 Auto infinite scroll
-  useEffect(() => {
-    if (!loaderRef.current || !hasMore) return;
+useEffect(() => {
+  if (!loaderRef.current || !hasMore || isLoading) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !isLoading && hasMore) {
-          fetchCommentsByPostId(post._id, page + 1, true);
-        }
-      },
-      { threshold: 0.1, rootMargin: "100px" }
-    );
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !isLoading && hasMore) {
+      fetchCommentsByPostId(post._id, true);
+    }
+  }, { threshold: 0.1, rootMargin: "100px" });
 
-    observer.observe(loaderRef.current);
-    return () => observer.disconnect();
-  }, [page, hasMore, isLoading, post?._id]);
+  observer.observe(loaderRef.current);
+
+  return () => {
+    if (loaderRef.current) observer.unobserve(loaderRef.current);
+  };
+}, [page, hasMore, isLoading, post?._id]);
 
   return (
     <motion.div

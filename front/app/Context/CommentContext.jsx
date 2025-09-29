@@ -200,37 +200,38 @@ export const CommentContextProvider = ({ children }) => {
   const { showAlert } = useAlert();
 
   // 📌 جلب التعليقات لبوست معين (مع pagination)
-  const fetchCommentsByPostId = async (postId, pageNum = 1, append = false) => {
-    if (!hasMore && append) return; // 🛑 مفيش صفحات تانية
+const fetchCommentsByPostId = async (postId, append = false) => {
+  if (!hasMore) return;
 
-    setIsLoading(true);
-    try {
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/post/${postId}?page=${pageNum}&limit=5`
-      );
+  setIsLoading(true);
+  try {
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/post/${postId}?page=${page}&limit=5`
+    );
 
-      const { nestedComments, page: currentPage, pages: totalPages } = res.data;
+    const { nestedComments, page: currentPage, pages: totalPages } = res.data;
 
-      if (append) {
-        setComments(prev => {
-          const existingIds = new Set(prev.map(c => c._id));
-          const newOnes = nestedComments.filter(c => !existingIds.has(c._id));
-          return [...prev, ...newOnes];
-        });
-      } else {
-        setComments(nestedComments);
-      }
-
-      setPage(currentPage);
-      setPages(totalPages);
-      setHasMore(currentPage < totalPages); // ✅ هنا بنحدث الفلاج
-    } catch (err) {
-      console.error('Error fetching comments:', err);
-      showAlert(err?.response?.data?.message || 'Failed to load comments.');
-    } finally {
-      setIsLoading(false);
+    if (append) {
+      setComments(prev => {
+        const existingIds = new Set(prev.map(c => c._id));
+        const newOnes = nestedComments.filter(c => !existingIds.has(c._id));
+        return [...prev, ...newOnes];
+      });
+    } else {
+      setComments(nestedComments);
     }
-  };
+
+    setPage(prev => prev + 1); // ✅ نزود الصفحة محليًا
+    setPages(totalPages);
+    setHasMore(currentPage < totalPages);
+  } catch (err) {
+    console.error('Error fetching comments:', err);
+    showAlert(err?.response?.data?.message || 'Failed to load comments.');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
 
   // 🔹 تحديث كومنت داخل tree recursively
