@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaUserEdit, FaCamera } from 'react-icons/fa'
-import { IoAdd } from 'react-icons/io5'
+import { IoAdd, IoEllipsisHorizontal } from 'react-icons/io5'
 import { HiBadgeCheck } from 'react-icons/hi'
 import Head from 'next/head'
 
@@ -23,9 +23,10 @@ import { CheckStateAccount } from '@/app/Component/UserComponents/UsersStats'
 import { useCombinedPosts } from '@/app/Custome/useCombinedPosts'
 import { selectUserFromUsers } from '@/app/utils/SelectUserFromUsers'
 import FilterBar from '@/app/Component/UserComponents/FilterBar'
+import ProfileMenu from '@/app/Component/ProfileMenu'
 
 const ProfilePage = () => {
-  const { user, users, updatePhoto } = useAuth()
+  const { user, users, updatePhoto,togglePrivateAccount } = useAuth()
   const { fetchUserPosts, userPosts, posts, setUserPages, userHasMore } = usePost()
 
   const [activeTab, setActiveTab] = useState('Posts')
@@ -38,7 +39,7 @@ const ProfilePage = () => {
   const [menuType, setMenuType] = useState('followers')
   const [page, setPage] = useState(1) // ✅ رقم الصفحة الحالي
   const loaderRef = useRef(null)
-
+  const [openMenu , setOpenMenu] = useState(false)
   const [filters, setFilters] = useState({
     year: "all",
     month: "all",
@@ -104,7 +105,7 @@ const ProfilePage = () => {
   if (loading) return <ProfileSkeleton />
 
   return (
-    <>
+    <div>
       <Head>
         <title>{userData?.username || 'Profile'} | Social App</title>
       </Head>
@@ -160,6 +161,15 @@ const ProfilePage = () => {
               {userData?.isAccountWithPremiumVerify && (
                 <HiBadgeCheck className="text-blue-500 text-xl" title="Verified account" />
               )}
+              <button onClick={() => setOpenMenu(!openMenu)} className="ml-auto">
+                <IoEllipsisHorizontal className="text-xl" />
+              </button>
+              <ProfileMenu
+                updatePrivacy={togglePrivateAccount}
+                profileUrl={`${window.location.origin}/user/${userData?._id}`}
+                isPrivate={userData?.isPrivate} setUpdate={setUpdate}
+                userId={userData?._id} open={openMenu} setOpen={setOpenMenu}
+              />
             </div>
 
             {/* Level & Progress */}
@@ -293,7 +303,7 @@ const ProfilePage = () => {
       />
       <UpdateProfile update={update} setUpdate={setUpdate} user={userData} />
       <AddStoryModel isStory={isStory} setIsStory={setIsStory} />
-    </>
+    </div>
   )
 }
 
