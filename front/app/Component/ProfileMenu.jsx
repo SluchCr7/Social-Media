@@ -19,14 +19,6 @@ const ProfileMenu = ({ isPrivate,userId, updatePrivacy, setUpdate, profileUrl , 
 
   return (
     <div className="relative inline-block text-left">
-      {/* Trigger Button */}
-      <button
-        onClick={() => setOpen(!open)}
-        className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-      >
-        <BsThreeDots className="text-xl" />
-      </button>
-
       {/* Dropdown Menu */}
       <AnimatePresence>
         {open && (
