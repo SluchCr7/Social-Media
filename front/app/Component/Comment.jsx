@@ -53,7 +53,7 @@ const Comment = ({ comment }) => {
   };
 
   return (
-    <div className="flex flex-col items-start gap-3 w-full">
+    <div id={`comment-${comment._id}`} className="flex flex-col items-start gap-3 w-full">
       {/* Profile + Comment */}
       <div className="flex items-start gap-3 w-full">
         <Image
