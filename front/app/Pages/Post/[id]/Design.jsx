@@ -261,7 +261,7 @@
 
 'use client';
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect,useCallback } from "react";
 import Link from 'next/link';
 import Image from 'next/image';
 import { CiHeart, CiBookmark } from 'react-icons/ci';
