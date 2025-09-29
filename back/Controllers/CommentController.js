@@ -7,24 +7,29 @@ const { sendNotificationHelper } = require('../utils/SendNotification');
 // ================== Get All Comments (nested) ==================
 const getAllComments = asyncHandler(async (req, res) => {
   const postId = req.params.postId;
+
   const comments = await Comment.find({ postId })
-    .populate("owner", "username profileName profilePhoto following followers description")
-  
+    .populate("owner", "username profileName profilePhoto following followers description");
+
   const buildCommentTree = (parentId = null) => {
     return comments
       .filter(comment => {
-        if (!parentId) return !comment.parent;
+        if (!parentId) return !comment.parent; // لو parent null يبقى comment أساسي
         return String(comment.parent) === String(parentId);
       })
-      .map(comment => ({
-        ...comment,
-        replies: buildCommentTree(comment._id)
-      }));
+      .map(comment => {
+        const c = comment.toObject(); // أو comment._doc
+        return {
+          ...c,
+          replies: buildCommentTree(comment._id)
+        };
+      });
   };
 
   const nestedComments = buildCommentTree();
   res.status(200).json(nestedComments);
 });
+
 
 // const getAllComments = asyncHandler(async (req, res) => {
 //   const postId = req.params.postId;

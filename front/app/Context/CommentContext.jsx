@@ -23,7 +23,7 @@ export const CommentContextProvider = ({ children }) => {
     setIsLoading(true);
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/post/${postId}`);
-      setComments(res.data);
+      setComments(res.data); // ده هيبقى nested tree
     } catch (err) {
       console.error('Error fetching comments:', err);
       showAlert(err?.response?.data?.message || "Failed to load comments.");
@@ -31,6 +31,7 @@ export const CommentContextProvider = ({ children }) => {
       setIsLoading(false);
     }
   };
+
 
     // 📌 جلب التعليقات لبوست معين (مع pagination)
 
