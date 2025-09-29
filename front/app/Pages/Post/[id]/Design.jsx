@@ -296,28 +296,48 @@ const DesignPostSelect = ({
   post,
   page,
   pages,
+  setHasMore,
+  setPage,
   hasMore, // ✅ نستخدمه بدل page < pages
   fetchCommentsByPostId,
   user,
 }) => {
   const loaderRef = useRef(null);
-
-  // 🔹 Auto infinite scroll
-useEffect(() => {
-  if (!loaderRef.current || !hasMore || isLoading) return;
-
-  const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && !isLoading && hasMore) {
-      fetchCommentsByPostId(post._id, true);
+  const handleObserver = useCallback(
+    (entries) => {
+      const target = entries[0]
+      if (target.isIntersecting && hasMore) {
+        const nextPage = page + 1
+        setPage(nextPage)
+        fetchCommentsByPostId(post._id, nextPage, 10) // يجيب الصفحة الجديدة
+      }
+    },
+    [page, hasMore, post._id]
+  )
+  useEffect(() => {
+    const option = { root: null, rootMargin: '20px', threshold: 1.0 }
+    const observer = new IntersectionObserver(handleObserver, option)
+    if (loaderRef.current) observer.observe(loaderRef.current)
+    return () => {
+      if (loaderRef.current) observer.unobserve(loaderRef.current)
     }
-  }, { threshold: 0.1, rootMargin: "100px" });
+  }, [handleObserver])
 
-  observer.observe(loaderRef.current);
+  // useEffect(() => {
+  //   if (!loaderRef.current || !hasMore || isLoading) return;
 
-  return () => {
-    if (loaderRef.current) observer.unobserve(loaderRef.current);
-  };
-}, [page, hasMore, isLoading, post?._id]);
+  //   const observer = new IntersectionObserver((entries) => {
+  //     if (entries[0].isIntersecting && !isLoading && hasMore) {
+  //       fetchCommentsByPostId(post._id, true);
+  //     }
+  //   }, { threshold: 0.1, rootMargin: "100px" });
+
+  //   observer.observe(loaderRef.current);
+
+  //   return () => {
+  //     if (loaderRef.current) observer.unobserve(loaderRef.current);
+  //   };
+  // }, [page, hasMore, isLoading, post?._id]);
 
   return (
     <motion.div
@@ -493,7 +513,7 @@ useEffect(() => {
                 ))}
 
                 {/* Loader Placeholder */}
-                {hasMore && (
+                {/* {hasMore && (
                   <div ref={loaderRef} className="h-16 w-full flex items-center justify-center">
                     {isLoading ? (
                       Array.from({ length: 2 }).map((_, i) => (
@@ -502,6 +522,11 @@ useEffect(() => {
                     ) : (
                       <CommentSkeleton />
                     )}
+                  </div>
+                )} */}
+                {hasMore && (
+                  <div ref={loaderRef} className="flex justify-center py-6">
+                    <span className="text-gray-500">Loading more...</span>
                   </div>
                 )}
               </>

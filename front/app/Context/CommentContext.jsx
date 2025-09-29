@@ -200,37 +200,67 @@ export const CommentContextProvider = ({ children }) => {
   const { showAlert } = useAlert();
 
   // 📌 جلب التعليقات لبوست معين (مع pagination)
-const fetchCommentsByPostId = async (postId, append = false) => {
-  if (!hasMore) return;
+  const fetchCommentsByPostId = async (postId,pageNum = 1, append = false) => {
+    if (!hasMore && pageNum !== 1) return;
 
-  setIsLoading(true);
-  try {
+    setIsLoading(true);
+    try {
     const res = await axios.get(
       `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/post/${postId}?page=${page}&limit=5`
     );
 
-    const { nestedComments, page: currentPage, pages: totalPages } = res.data;
+      const { nestedComments, page: currentPage, pages: totalPages } = res.data;
+    // const newPosts = Array.isArray(res.data.posts) ? res.data.posts : [];
 
-    if (append) {
-      setComments(prev => {
-        const existingIds = new Set(prev.map(c => c._id));
-        const newOnes = nestedComments.filter(c => !existingIds.has(c._id));
-        return [...prev, ...newOnes];
-      });
-    } else {
-      setComments(nestedComments);
+      // تحديث posts
+      if (append) {
+        setComments(prev => {
+          const existingIds = new Set(prev.map(c => c._id));
+          const newOnes = nestedComments.filter(c => !existingIds.has(c._id));
+          return [...prev, ...newOnes];
+        });
+      } else {
+        setComments(nestedComments);
+      }
+      setHasMore(pageNum < res.data.pages);
+    } catch (err) {
+      console.error("Error fetching posts", err.response?.data || err.message);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    setPage(prev => prev + 1); // ✅ نزود الصفحة محليًا
-    setPages(totalPages);
-    setHasMore(currentPage < totalPages);
-  } catch (err) {
-    console.error('Error fetching comments:', err);
-    showAlert(err?.response?.data?.message || 'Failed to load comments.');
-  } finally {
-    setIsLoading(false);
-  }
-};
+//   const fetchCommentsByPostId = async (postId, append = false) => {
+//   if (!hasMore) return;
+
+//   setIsLoading(true);
+//   try {
+//     const res = await axios.get(
+//       `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/post/${postId}?page=${page}&limit=5`
+//     );
+
+//     const { nestedComments, page: currentPage, pages: totalPages } = res.data;
+
+//     if (append) {
+//       setComments(prev => {
+//         const existingIds = new Set(prev.map(c => c._id));
+//         const newOnes = nestedComments.filter(c => !existingIds.has(c._id));
+//         return [...prev, ...newOnes];
+//       });
+//     } else {
+//       setComments(nestedComments);
+//     }
+
+//     setPage(prev => prev + 1); // ✅ نزود الصفحة محليًا
+//     setPages(totalPages);
+//     setHasMore(currentPage < totalPages);
+//   } catch (err) {
+//     console.error('Error fetching comments:', err);
+//     showAlert(err?.response?.data?.message || 'Failed to load comments.');
+//   } finally {
+//     setIsLoading(false);
+//   }
+// };
 
 
 
@@ -365,7 +395,7 @@ const fetchCommentsByPostId = async (postId, append = false) => {
         fetchCommentsByPostId,
         isLoading,
         page,
-        pages,hasMore
+        pages,hasMore,setPage,setHasMore
       }}
     >
       {children}
