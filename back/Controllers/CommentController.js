@@ -70,7 +70,7 @@ const getAllComments = asyncHandler(async (req, res) => {
 //     pages,
 //   });
 // });
-\
+
 
 // ================== Add New Comment ==================
 const addNewComment = asyncHandler(async (req, res) => {
