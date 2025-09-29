@@ -222,7 +222,10 @@ export const CommentContextProvider = ({ children }) => {
       } else {
         setComments(nestedComments);
       }
-      setHasMore(pageNum < res.data.pages);
+      
+      setPage(prev => prev + 1); // ✅ نزود الصفحة محليًا
+      setPages(totalPages);
+      setHasMore(pageNum < totalPages);
     } catch (err) {
       console.error("Error fetching posts", err.response?.data || err.message);
     } finally {
