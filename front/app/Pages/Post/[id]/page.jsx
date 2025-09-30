@@ -35,7 +35,8 @@ const PostPage = ({ params }) => {
 
   // ✅ fetch comments
   useEffect(() => {
-    if (id) fetchCommentsByPostId(id);
+    if (!id) return;
+    fetchCommentsByPostId(id);
   }, [id, fetchCommentsByPostId]);
 
   // ✅ count view
