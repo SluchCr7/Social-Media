@@ -306,24 +306,18 @@ const getAllUsers = asyncHandler(async (req, res) => {
         path: "following",
         select: "profilePhoto username profileName",
       })
-      .populate({
-        path: 'posts',
-        populate: {
-          path: 'comments',
-          populate: {
-            path: 'owner',
-            model: 'User', // 🛠️ Fix: Was 'Post' — should be 'User'
-          },
-        },
-      })
-      .populate('savedPosts')
-      .populate({
-        path: "reports",
-        populate: {
-          path: "postId",
-          model: "Post",
-        },
-      }).populate("partner" , "username profileName")
+      // .populate({
+      //   path: 'posts',
+      //   populate: {
+      //     path: 'comments',
+      //     populate: {
+      //       path: 'owner',
+      //       model: 'User', // 🛠️ Fix: Was 'Post' — should be 'User'
+      //     },
+      //   },
+      // })
+      .populate('savedPosts' )
+      .populate("partner" , "username profileName")
     res.status(200).json(users);
   });
   

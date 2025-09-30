@@ -61,27 +61,6 @@ const ProfilePage = () => {
     }
   }, [userData?._id])
 
-  // 📌 ملاحظة نهاية الصفحة (Infinite Scroll)
-  // const handleObserver = useCallback(
-  //   (entries) => {
-  //     const target = entries[0]
-  //     if (target.isIntersecting && userHasMore) {
-  //       const nextPage = page + 1
-  //       setPage(nextPage)
-  //       fetchUserPosts(userData._id, nextPage, 10) // يجيب الصفحة الجديدة
-  //     }
-  //   },
-  //   [page, userHasMore, userData?._id]
-  // )
-
-  // useEffect(() => {
-  //   const option = { root: null, rootMargin: '20px', threshold: 1.0 }
-  //   const observer = new IntersectionObserver(handleObserver, option)
-  //   if (loaderRef.current) observer.observe(loaderRef.current)
-  //   return () => {
-  //     if (loaderRef.current) observer.unobserve(loaderRef.current)
-  //   }
-  // }, [handleObserver])
   useInfiniteScroll(page , setPage ,loaderRef, fetchUserPosts ,userData,userHasMore)
   // 📌 البوستات المثبتة + العادية
   const combinedPosts = useCombinedPosts(userPosts, userData?.pinsPosts || [])
