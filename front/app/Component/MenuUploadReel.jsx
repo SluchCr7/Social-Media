@@ -8,8 +8,8 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { AiOutlineCloudUpload, AiOutlineClose } from "react-icons/ai";
 import { BiLoaderAlt } from "react-icons/bi";
 
-const ReelUploadModal = ({ isOpen, onClose }) => {
-  const { uploadReel } = useReels();
+const ReelUploadModal = () => {
+  const { uploadReel ,setShowModelAddReel , showModelAddReel} = useReels();
   const { showAlert } = useAlert();
 
   const [videoFile, setVideoFile] = useState(null);
@@ -65,7 +65,7 @@ const ReelUploadModal = ({ isOpen, onClose }) => {
 
   return (
     <AnimatePresence>
-      {isOpen && (
+      {showModelAddReel && (
         <motion.div
           className="fixed inset-0 z-[1000] bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center p-4"
           initial={{ opacity: 0 }}
@@ -83,7 +83,7 @@ const ReelUploadModal = ({ isOpen, onClose }) => {
             <button
               aria-label="Close Modal"
               className="absolute top-4 right-4 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-              onClick={onClose}
+              onClick={()=> setShowModelAddReel(false)}
             >
               <AiOutlineClose size={24} />
             </button>

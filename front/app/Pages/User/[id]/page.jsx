@@ -117,7 +117,7 @@ const UserProfilePage = ({ params }) => {
 
   // 📌 وظائف الدوتس مينو
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/user/${userSelected?._id}`)
+    navigator.clipboard.writeText(`${window.location.origin}/Pages/User/${userSelected?._id}`)
     showAlert("Link copied to clipboard.");
     setShowDotsMenu(false)
   }

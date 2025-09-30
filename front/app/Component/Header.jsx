@@ -16,7 +16,6 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
   const { unreadCount } = useNotify();
   const { isLogin } = useAuth();
   const { isMobile, setIsMobileMenuOpen } = useAside();
-  const [showModelAddReel, setShowModelAddReel] = useState(false);
 
   const handleBellClick = () => {
     setShowNotifications(true);
@@ -29,11 +28,6 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
 
   return (
     <>
-      <ReelUploadModal
-        isOpen={showModelAddReel}
-        onClose={() => setShowModelAddReel(false)}
-      />
-
       <header className="sticky top-0 z-50 bg-white/70 dark:bg-darkMode-bg/70 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="w-full flex items-center justify-between px-3 md:px-6">
           
@@ -82,16 +76,6 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
                   )}
                 </div>
 
-                {/* Upload Reel */}
-                <div className="relative">
-                  <button
-                    onClick={() => setShowModelAddReel(true)}
-                    aria-label="Upload Reel"
-                    className="p-2 rounded-full bg-gradient-to-r from-pink-500 to-orange-400 text-white shadow-md hover:scale-110 transition-all duration-200 ease-in-out"
-                  >
-                    <RiVideoUploadLine className="w-5 h-5" />
-                  </button>
-                </div>
 
                 {/* Messenger */}
                 <Link href="/Pages/Messanger" className="relative">

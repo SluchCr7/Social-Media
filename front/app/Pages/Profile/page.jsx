@@ -24,6 +24,7 @@ import { useCombinedPosts } from '@/app/Custome/useCombinedPosts'
 import { selectUserFromUsers } from '@/app/utils/SelectUserFromUsers'
 import FilterBar from '@/app/Component/UserComponents/FilterBar'
 import ProfileMenu from '@/app/Component/ProfileMenu'
+import { useInfinteScroll } from '@/app/Custome/useInfinteScroll'
 
 const ProfilePage = () => {
   const { user, users, updatePhoto,togglePrivateAccount } = useAuth()
@@ -61,27 +62,27 @@ const ProfilePage = () => {
   }, [userData?._id])
 
   // 📌 ملاحظة نهاية الصفحة (Infinite Scroll)
-  const handleObserver = useCallback(
-    (entries) => {
-      const target = entries[0]
-      if (target.isIntersecting && userHasMore) {
-        const nextPage = page + 1
-        setPage(nextPage)
-        fetchUserPosts(userData._id, nextPage, 10) // يجيب الصفحة الجديدة
-      }
-    },
-    [page, userHasMore, userData?._id]
-  )
+  // const handleObserver = useCallback(
+  //   (entries) => {
+  //     const target = entries[0]
+  //     if (target.isIntersecting && userHasMore) {
+  //       const nextPage = page + 1
+  //       setPage(nextPage)
+  //       fetchUserPosts(userData._id, nextPage, 10) // يجيب الصفحة الجديدة
+  //     }
+  //   },
+  //   [page, userHasMore, userData?._id]
+  // )
 
-  useEffect(() => {
-    const option = { root: null, rootMargin: '20px', threshold: 1.0 }
-    const observer = new IntersectionObserver(handleObserver, option)
-    if (loaderRef.current) observer.observe(loaderRef.current)
-    return () => {
-      if (loaderRef.current) observer.unobserve(loaderRef.current)
-    }
-  }, [handleObserver])
-
+  // useEffect(() => {
+  //   const option = { root: null, rootMargin: '20px', threshold: 1.0 }
+  //   const observer = new IntersectionObserver(handleObserver, option)
+  //   if (loaderRef.current) observer.observe(loaderRef.current)
+  //   return () => {
+  //     if (loaderRef.current) observer.unobserve(loaderRef.current)
+  //   }
+  // }, [handleObserver])
+  useInfinteScroll(page , setPage ,loaderRef, fetchUserPosts ,userData,userHasMore)
   // 📌 البوستات المثبتة + العادية
   const combinedPosts = useCombinedPosts(userPosts, userData?.pinsPosts || [])
 
@@ -166,7 +167,7 @@ const ProfilePage = () => {
               </button>
               <ProfileMenu
                 updatePrivacy={togglePrivateAccount}
-                profileUrl={`${window.location.origin}/user/${userData?._id}`}
+                profileUrl={`${window.location.origin}/Pages/User/${userData?._id}`}
                 isPrivate={userData?.isPrivate} setUpdate={setUpdate}
                 userId={userData?._id} open={openMenu} setOpen={setOpenMenu}
               />

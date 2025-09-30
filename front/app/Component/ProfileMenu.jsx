@@ -33,7 +33,7 @@ const ProfileMenu = ({ isPrivate,userId, updatePrivacy, setUpdate, profileUrl , 
               {/* View as User */}
               <Link
               href={`/Pages/User/${userId}`}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                className="flex text-sm items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
               >
                 <IoEyeSharp /> View as User
               </Link>
@@ -44,7 +44,7 @@ const ProfileMenu = ({ isPrivate,userId, updatePrivacy, setUpdate, profileUrl , 
                     setOpen(false)
                     setUpdate(true)
                 }}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                className="flex text-sm items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
               >
                 <FaUserEdit /> Edit Profile
               </button>
@@ -52,7 +52,7 @@ const ProfileMenu = ({ isPrivate,userId, updatePrivacy, setUpdate, profileUrl , 
               {/* Toggle Privacy */}
               <button
                 onClick={updatePrivacy}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition text-sm"
               >
                 {isPrivate ? (
                   <>
@@ -68,7 +68,7 @@ const ProfileMenu = ({ isPrivate,userId, updatePrivacy, setUpdate, profileUrl , 
               {/* Copy Profile Link */}
               <button
                 onClick={copyToClipboard}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                className="flex text-sm items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
               >
                 <HiLink /> Copy Profile Link
               </button>

@@ -17,7 +17,7 @@ export const ReelsProvider = ({ children }) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [showModelAddReel, setShowModelAddReel] = useState(false);
   // 🎯 جلب الريلز مع pagination
   const fetchReels = async (pageNum = 1) => {
     if (!hasMore && pageNum !== 1) return;
@@ -182,6 +182,7 @@ export const ReelsProvider = ({ children }) => {
         hasMore,
         lastReelRef,
         shareReel
+        ,showModelAddReel, setShowModelAddReel
       }}
     >
       {children}

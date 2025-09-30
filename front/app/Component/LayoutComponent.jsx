@@ -15,6 +15,7 @@ import Loader from './Loader';
 import MenuAllSuggestedFriends from './Menus/MenuAllSuggestedFreinds';
 import { FiPlus } from 'react-icons/fi';
 import Link from 'next/link';
+import ReelUploadModal from './MenuUploadReel';
 const LayoutComponent = ({ children }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessanger, setShowMessanger] = useState(false);
@@ -134,7 +135,8 @@ const LayoutComponent = ({ children }) => {
               <FiPlus className="text-2xl" />
             </Link>
           </button>
-          <MenuAllSuggestedFriends/>
+          <MenuAllSuggestedFriends />
+          <ReelUploadModal/>
         </div>
       </div>
     </div>
