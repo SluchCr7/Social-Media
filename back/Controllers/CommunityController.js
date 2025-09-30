@@ -6,20 +6,14 @@ const fs = require('fs')
 const { v2 } = require('cloudinary')
 const { User} = require('../Modules/User')
 const { sendNotificationHelper } = require('../utils/SendNotification')
+const { communityPopulate } = require('../Populates/Populate')
 
 const getAllCommunities = asyncHandler(async (req, res) => {
-    const communities = await Community.find({}).populate('owner', 'username profileName profilePhoto')
-        .populate('members', 'username profileName profilePhoto')
-        .populate('Admins', 'username profileName profilePhoto')
-        .populate('joinRequests' , 'username profileName profilePhoto')
+    const communities = await Community.find({}).populate(communityPopulate);
     res.status(200).json(communities)
 })
   const getCommunityById = asyncHandler(async (req, res) => {
-    const community = await Community.findById(req.params.id)
-      .populate('owner', 'username profileName profilePhoto')
-      .populate('members', 'username profileName profilePhoto')
-      .populate('Admins', 'username profileName profilePhoto')
-      .populate('joinRequests' , 'username profileName profilePhoto')
+    const community = await Community.findById(req.params.id).populate(communityPopulate);
     if (!community) {
       return res.status(404).json({ message: "Community Not Found" });
     }
@@ -27,11 +21,7 @@ const getAllCommunities = asyncHandler(async (req, res) => {
     res.status(200).json(community);
   });
 const getCommunityByCategory = asyncHandler(async (req, res) => {
-  const communities = await Community.find({ Category: req.params.Category })
-      .populate('owner', 'username profileName profilePhoto')
-      .populate('members', 'username profileName profilePhoto')
-      .populate('Admins', 'username profileName profilePhoto')
-      .populate('joinRequests' , 'username profileName profilePhoto')
+  const communities = await Community.find({ Category: req.params.Category }).populate(communityPopulate);
     res.status(200).json(communities)
 })
 
@@ -103,7 +93,7 @@ const joinTheCommunity = asyncHandler(async (req, res) => {
       req.params.id,
       { $pull: { members: req.user._id } },
       { new: true }
-    ).populate("owner members Admins joinRequests", "username profileName profilePhoto");
+    ).populate(communityPopulate);
 
     res.status(200).json({ message: "Community Left", community });
     } else {
@@ -111,7 +101,7 @@ const joinTheCommunity = asyncHandler(async (req, res) => {
         req.params.id,
         { $push: { members: req.user._id } },
         { new: true }
-      ).populate("owner members Admins joinRequests", "username profileName profilePhoto");
+      ).populate(communityPopulate);
 
       res.status(200).json({ message: "Community Joined", community });
     }
@@ -137,8 +127,7 @@ const editCommunity = asyncHandler(async (req, res) => {
         req.params.id,
         { $set: updateData },
         { new: true }
-    ).populate("owner members Admins joinRequests", "username profileName profilePhoto");
-
+    ).populate(communityPopulate);
     if (!community) {
         return res.status(404).json({ message: "Community not found" });
     }
@@ -381,11 +370,7 @@ const approveJoinRequest = asyncHandler(async (req, res) => {
   community.members.push(userId);
   await community.save();
 
-  await community.populate(
-    "owner members Admins joinRequests",
-    "username profileName profilePhoto"
-  );
-
+  await community.populate(communityPopulate);
   // إرسال إشعار للمستخدم أنه اتقبل
   await sendNotificationHelper({
     sender: req.user._id,
@@ -429,10 +414,7 @@ const rejectJoinRequest = asyncHandler(async (req, res) => {
   community.joinRequests.pull(userId);
   await community.save();
 
-  await community.populate(
-    "owner members Admins joinRequests",
-    "username profileName profilePhoto"
-  );
+  await community.populate(communityPopulate);
 
   // ✨ Send rejection notification
   await sendNotificationHelper({

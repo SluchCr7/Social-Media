@@ -26,9 +26,19 @@ const ChatSlider = () => {
   const router = useRouter();
 
   // فلترة المستخدمين بالبحث
-  const filteredUsers = users.filter((u) =>
+  // const filteredUsers = users.filter((u) =>
+  //   u.username?.toLowerCase().includes(searchValue.toLowerCase())
+  // );
+  const filteredUsers = users
+  .filter((u) =>
     u.username?.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  )
+  .sort((a, b) => {
+    // الأحدث أولاً حسب آخر رسالة، إذا لم يوجد آخر رسالة نضع المستخدم بعدهم
+    const timeA = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
+    const timeB = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
+    return timeB - timeA;
+  });
 
   return (
     <motion.aside

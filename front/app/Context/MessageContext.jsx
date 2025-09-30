@@ -295,23 +295,55 @@ export const MessageContextProvider = ({ children }) => {
   const [unreadCountPerUser, setUnreadCountPerUser] = useState({});
 
   // ----------------- Fetch Users -----------------
-  useEffect(() => {
-    setIsUserLoading(true);
-    const fetchUsers = async () => {
-      try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/message/users`, {
-          headers: { Authorization: `Bearer ${user?.token}` },
-        });
-        setUsers(res.data);
-      } catch (err) {
-        console.error('Failed to fetch users:', err);
-      } finally {
-        setIsUserLoading(false);
-      }
-    };
-    if (user?.token) fetchUsers();
-  }, [user]);
+  // useEffect(() => {
+  //   setIsUserLoading(true);
+  //   const fetchUsers = async () => {
+  //     try {
+  //       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/message/users`, {
+  //         headers: { Authorization: `Bearer ${user?.token}` },
+  //       });
+  //       setUsers(res.data);
+  //     } catch (err) {
+  //       console.error('Failed to fetch users:', err);
+  //     } finally {
+  //       setIsUserLoading(false);
+  //     }
+  //   };
+  //   if (user?.token) fetchUsers();
+  // }, [user]);
 
+
+  useEffect(() => {
+  setIsUserLoading(true);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/message/users`,
+        {
+          headers: { Authorization: `Bearer ${user?.token}` },
+        }
+      );
+
+      // البيانات الآن تحتوي على: lastMessage, lastMessageAt, unreadCount
+      // يمكن ترتيبها أو تنسيقها هنا إذا أردت
+      const formattedUsers = res.data.map(u => ({
+        ...u,
+        lastMessage: u.lastMessage || "",
+        lastMessageAt: u.lastMessageAt ? new Date(u.lastMessageAt) : null,
+        unreadCount: u.unreadCount || 0
+      }));
+
+      setUsers(formattedUsers);
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+    } finally {
+      setIsUserLoading(false);
+    }
+  };
+
+  if (user?.token) fetchUsers();
+  }, [user]);
   // ----------------- Fetch Messages Between 2 users -----------------
   useEffect(() => {
     const getMessagesBetweenUsers = async () => {

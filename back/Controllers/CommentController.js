@@ -3,6 +3,7 @@ const { Comment, ValidateComment, ValidateUpdateComment } = require('../Modules/
 const { User } = require('../Modules/User');
 const { Post } = require('../Modules/Post');
 const { sendNotificationHelper } = require('../utils/SendNotification');
+const { commentPopulate } = require('../Populates/Populate');
 
 
 
@@ -112,21 +113,11 @@ const addNewComment = asyncHandler(async (req, res) => {
   await Promise.all([user.save(), comment.save()]);
 
   // ✅ populate للكومنت الجديد
-  const populatedComment = await Comment.findById(comment._id)
-    .populate("owner", "username profilePhoto profileName")
-    .populate({
-      path: "replies",
-      populate: { path: "owner", select: "username profilePhoto profileName" },
-    });
+  const populatedComment = await Comment.findById(comment._id).populate(commentPopulate);
 
   // ✅ لو الكومنت رد (reply)
   if (comment.parent) {
-    const parentComment = await Comment.findById(comment.parent)
-      .populate("owner", "username profilePhoto profileName")
-      .populate({
-        path: "replies",
-        populate: { path: "owner", select: "username profilePhoto profileName" },
-      });
+    const parentComment = await Comment.findById(comment.parent).populate(commentPopulate);
 
     // ✨ إرسال إشعار لصاحب الكومنت الأب
     if (parentComment && !parentComment.owner.equals(req.user._id)) {
@@ -178,12 +169,7 @@ const deleteComment = asyncHandler(async (req, res) => {
 
 // ================== Get Comment By ID ==================
 const getCommentById = asyncHandler(async (req, res) => {
-  const comment = await Comment.findById(req.params.id)
-    .populate('owner', 'username profilePhoto profileName')
-    .populate({
-      path: 'replies',
-      populate: { path: 'owner', select: 'username profilePhoto profileName' },
-    });
+  const comment = await Comment.findById(req.params.id).populate(commentPopulate);
 
   if (!comment) {
     res.status(404);
@@ -207,12 +193,7 @@ const likeComment = asyncHandler(async (req, res) => {
       $pull: { likes: req.user._id },
     });
 
-    comment = await Comment.findById(req.params.id)
-      .populate("owner", "username profilePhoto profileName")
-      .populate({
-        path: "replies",
-        populate: { path: "owner", select: "username profilePhoto profileName" },
-      });
+    comment = await Comment.findById(req.params.id).populate(commentPopulate);
 
     return res.status(200).json({ message: "Comment Unliked", comment });
   }
@@ -222,12 +203,7 @@ const likeComment = asyncHandler(async (req, res) => {
     $push: { likes: req.user._id },
   });
 
-  comment = await Comment.findById(req.params.id)
-    .populate("owner", "username profilePhoto profileName")
-    .populate({
-      path: "replies",
-      populate: { path: "owner", select: "username profilePhoto profileName" },
-    });
+  comment = await Comment.findById(req.params.id).populate(commentPopulate);
 
   // ✨ إرسال إشعار لصاحب الكومنت
   if (comment.owner._id.toString() !== req.user._id.toString()) {
@@ -253,18 +229,13 @@ const updateComment = asyncHandler(async (req, res) => {
   const updated = await Comment.findByIdAndUpdate(
     req.params.id,
     {
-      $set: { 
+      $set: {
         text: req.body.text,
         isEdited: true, // ✅ علامة إنه اتعدل
       },
     },
     { new: true }
-  )
-    .populate("owner", "username profilePhoto profileName")
-    .populate({
-      path: "replies",
-      populate: { path: "owner", select: "username profilePhoto profileName" },
-    });
+  ).populate(commentPopulate);
 
   res
     .status(200)

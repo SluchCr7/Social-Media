@@ -5,20 +5,96 @@ const fs = require('fs');
 const { getReceiverSocketId, io } = require('../Config/socket');
 const asyncHandler= require('express-async-handler')
 const mongoose = require("mongoose");
+const { messagePopulate } = require('../Populates/Populate');
 
-const getUsersInSideBar = async (req, res) => {
+// const getUsersInSideBar = async (req, res) => {
+//   try {
+//     const loggedUserId = req.user._id;
+//     const loggedUser = await User.findById(loggedUserId).select("following");
+
+//     const users = await User.find({ _id: { $in: loggedUser.following } })
+//       .select("username profilePhoto profileName"); // فقط البيانات المهمة
+
+//     res.status(200).json(users);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+const getUsersInSideBar = asyncHandler(async (req, res) => {
   try {
     const loggedUserId = req.user._id;
+
+    // 1️⃣ احصل على الـ following
     const loggedUser = await User.findById(loggedUserId).select("following");
 
-    const users = await User.find({ _id: { $in: loggedUser.following } })
-      .select("username profilePhoto profileName"); // فقط البيانات المهمة
+    // 2️⃣ احصل على كل الرسائل التي تشمل المستخدم الحالي
+    const messages = await Message.find({
+      $or: [
+        { sender: loggedUserId },
+        { receiver: loggedUserId }
+      ]
+    })
+      .sort({ createdAt: -1 }) // الأحدث أولًا
+      .lean();
 
-    res.status(200).json(users);
+    const usersMap = new Map();
+
+    messages.forEach(msg => {
+      const otherUserId = msg.sender.toString() === loggedUserId.toString() ? msg.receiver.toString() : msg.sender.toString();
+
+      if (!usersMap.has(otherUserId)) {
+        usersMap.set(otherUserId, {
+          lastMessage: msg.text || (msg.Photos?.[0]?.url || ""),
+          lastMessageAt: msg.createdAt,
+          unreadCount: msg.receiver.toString() === loggedUserId.toString() && !msg.isRead ? 1 : 0
+        });
+      } else {
+        const userData = usersMap.get(otherUserId);
+        if (msg.receiver.toString() === loggedUserId.toString() && !msg.isRead) {
+          userData.unreadCount += 1;
+        }
+      }
+    });
+
+    // 3️⃣ دمج الـ following الذين لم يكن لهم رسائل بعد
+    loggedUser.following.forEach(followId => {
+      if (!usersMap.has(followId.toString())) {
+        usersMap.set(followId.toString(), {
+          lastMessage: "",
+          lastMessageAt: null,
+          unreadCount: 0
+        });
+      }
+    });
+
+    // 4️⃣ جلب بيانات المستخدمين الأساسية
+    const userIds = Array.from(usersMap.keys());
+    const users = await User.find({ _id: { $in: userIds } })
+      .select("username profilePhoto profileName")
+      .lean();
+
+    // 5️⃣ دمج بيانات الرسائل مع بيانات المستخدمين
+    const sidebarData = users.map(user => ({
+      ...user,
+      ...usersMap.get(user._id.toString())
+    }));
+
+    // 6️⃣ ترتيب المستخدمين: أولًا حسب عدد الرسائل غير المقروءة، ثم حسب آخر رسالة
+    sidebarData.sort((a, b) => {
+      if (b.unreadCount !== a.unreadCount) return b.unreadCount - a.unreadCount;
+      if (b.lastMessageAt && a.lastMessageAt) return new Date(b.lastMessageAt) - new Date(a.lastMessageAt);
+      if (b.lastMessageAt) return -1;
+      if (a.lastMessageAt) return 1;
+      return 0;
+    });
+
+    res.status(200).json(sidebarData);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-};
+});
+
+module.exports = { getUsersInSideBar };
 
 
 // Get messages between logged-in user and another user
@@ -32,9 +108,7 @@ const getMessages = async (req, res) => {
         { sender, receiver: userToChatId },
         { sender: userToChatId, receiver: sender }
       ]
-    })
-      .populate('sender', 'username profilePic _id')
-      .populate('receiver', 'username profilePic _id');
+    }).populate(messagePopulate);
 
     res.status(200).json(messages);
   } catch (error) {
@@ -85,9 +159,7 @@ const sendMessage = async (req, res) => {
     await message.save();
 
     // 🔹 populate sender و receiver
-    message = await message.populate("sender", "username profilePhoto _id");
-    message = await message.populate("receiver", "username profilePhoto _id");
-
+    message = await message.populate(messagePopulate);
     const receiverSocketId = getReceiverSocketId(userToChatId);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", message);
@@ -104,7 +176,7 @@ const sendMessage = async (req, res) => {
 const getMessagesByUser = async(req,res) =>{
   try {
     const user = req.params.id
-    const messages = await Message.find({ receiver: user }).populate('sender', 'username profilePhoto _id').populate('receiver', 'username profilePhoto _id')
+    const messages = await Message.find({ receiver: user }).populate(messagePopulate);
     res.status(200).json(messages)
   }
   catch(error){
@@ -128,9 +200,7 @@ const getUnreadMessages = asyncHandler(async (req, res) => {
       receiver: userId,
       isRead: false,
     })
-      .populate('sender', 'username profilePhoto _id')
-      .populate('receiver', 'username profilePhoto _id')
-      .sort({ createdAt: -1 }); // الأحدث أولاً
+      .populate(messagePopulate).sort({ createdAt: -1 }); // الأحدث أولاً
 
     res.status(200).json(unreadMessages);
   } catch (error) {

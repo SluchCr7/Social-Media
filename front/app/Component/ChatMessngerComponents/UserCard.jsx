@@ -3,12 +3,6 @@ import Image from "next/image";
 import { useEffect } from "react";
 
 const UserCard = ({ user, isOnline, onSelect, unreadCount = 0 }) => {
-  useEffect(() => {
-    console.log('UserCard: ', user);
-    console.log('isOnline: ', isOnline);
-    console.log('unreadCount: ', unreadCount);
-  }, [user, isOnline, unreadCount]);
-
   return (
     <div
       onClick={onSelect}
@@ -38,15 +32,20 @@ const UserCard = ({ user, isOnline, onSelect, unreadCount = 0 }) => {
           </span>
           {unreadCount > 0 && (
             <span className="bg-red-600 text-white text-[10px] min-w-[20px] min-h-[20px] 
-                             flex items-center justify-center rounded-full font-bold px-1">
+                            flex items-center justify-center rounded-full font-bold px-1">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}
         </div>
         <span className="text-gray-600 dark:text-gray-400 text-xs truncate block">
-          {user.profileName || "Tap to chat"}
+          {user.lastMessage
+            ? user.lastMessage.length > 30
+              ? user.lastMessage.substring(0, 30) + '...'
+              : user.lastMessage
+            : user.profileName || "Tap to chat"}
         </span>
       </div>
+
     </div>
   );
 };
