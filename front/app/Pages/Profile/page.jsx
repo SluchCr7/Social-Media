@@ -99,7 +99,9 @@ const ProfilePage = () => {
   }
 
   if (loading) return <ProfileSkeleton />
-
+  useEffect(() => {
+    console.log(combinedPosts)
+  },[combinedPosts])
   return (
     <div>
       <Head>
