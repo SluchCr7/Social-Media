@@ -24,7 +24,7 @@ import { useCombinedPosts } from '@/app/Custome/useCombinedPosts'
 import { selectUserFromUsers } from '@/app/utils/SelectUserFromUsers'
 import FilterBar from '@/app/Component/UserComponents/FilterBar'
 import ProfileMenu from '@/app/Component/ProfileMenu'
-import { useInfinteScroll } from '@/app/Custome/useInfinteScroll'
+import { useInfiniteScroll } from '@/app/Custome/useInfinteScroll'
 
 const ProfilePage = () => {
   const { user, users, updatePhoto,togglePrivateAccount } = useAuth()
@@ -82,7 +82,7 @@ const ProfilePage = () => {
   //     if (loaderRef.current) observer.unobserve(loaderRef.current)
   //   }
   // }, [handleObserver])
-  useInfinteScroll(page , setPage ,loaderRef, fetchUserPosts ,userData,userHasMore)
+  useInfiniteScroll(page , setPage ,loaderRef, fetchUserPosts ,userData,userHasMore)
   // 📌 البوستات المثبتة + العادية
   const combinedPosts = useCombinedPosts(userPosts, userData?.pinsPosts || [])
 
