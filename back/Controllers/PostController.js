@@ -23,19 +23,12 @@ const getAllPosts = asyncHandler(async (req, res) => {
     .limit(limit)
     .populate("owner", "username profileName profilePhoto following followers description")
     .populate("community", "Name Picture members")
-    .populate({
-      path: "reports",
-      populate: { path: "owner", model: "User", select: "username profileName profilePhoto" },
-    })
     .populate("mentions", "username profileName profilePhoto")
     .populate({
       path: "originalPost",
       populate: { path: "owner", select: "username profileName profilePhoto" },
     })
-    .populate({
-      path: "comments",
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    })
+    .populate("comments")
     .lean();
 
   const total = await Post.countDocuments();
@@ -181,15 +174,6 @@ const deletePost = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "Post deleted" });
 });
 
-// ================== Get Post By ID ==================
-const getPostById = asyncHandler(async (req, res) => {
-  const post = await Post.findById(req.params.id).populate("owner", "username profilePhoto");
-  if (!post) {
-    res.status(404);
-    throw new Error("Post not found");
-  }
-  res.status(200).json(post);
-});
 
 // ================== Get All Posts ==================
 const hahaPost = asyncHandler(async (req, res) => {
@@ -541,6 +525,26 @@ const getPostsByUser = asyncHandler(async (req, res) => {
   });
 });
 
+const getPostById = asyncHandler(async (req, res) => {
+  const post = await Post.findById(req.params.id)
+    .populate("owner", "username profileName profilePhoto following followers description")
+    .populate("community", "Name Picture members")
+    .populate("mentions", "username profileName profilePhoto")
+    .populate({
+      path: "originalPost",
+      populate: { path: "owner", select: "username profileName profilePhoto" },
+    })
+    .populate({
+      path: "comments",
+      populate: { path: "owner", select: "username profileName profilePhoto" },
+    });
+
+  if (!post) {
+    return res.status(404).json({ message: "Post not found" });
+  }
+
+  res.status(200).json(post);
+});
 
 module.exports = {
   getAllPosts,
