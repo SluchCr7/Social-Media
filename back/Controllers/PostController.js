@@ -31,7 +31,7 @@ const getAllPosts = asyncHandler(async (req, res) => {
     .populate({
       path: "comments",
       populate: { path: "owner", select: "username profileName profilePhoto" },
-    });
+    })
     .lean();
 
   const total = await Post.countDocuments();
