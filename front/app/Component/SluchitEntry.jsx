@@ -354,7 +354,6 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
             {highlightedComment && (
               <div className="mt-4 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 shadow-sm">
                 <div className="flex items-start gap-3">
-                  {/* صورة المستخدم */}
                   <Image
                     src={highlightedComment?.owner?.profilePhoto?.url || "/default-avatar.png"}
                     alt="comment-user"
@@ -363,17 +362,16 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                     className="rounded-full w-9 h-9 object-cover border border-gray-300 dark:border-gray-600"
                   />
 
-                  {/* محتوى التعليق */}
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                         {highlightedComment?.owner?.username}
                       </span>
-                      {/* {highlightedComment?.label && (
+                       {highlightedComment?.label && (
                         <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
                           {highlightedComment?.label}
                         </span>
-                      )} */}
+                      )} 
                     </div>
 
                     <p className="mt-1 text-sm text-gray-700 dark:text-gray-300 leading-snug">

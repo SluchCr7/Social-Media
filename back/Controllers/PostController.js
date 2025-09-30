@@ -29,9 +29,11 @@ const getAllPosts = asyncHandler(async (req, res) => {
     })
     .populate({
       path: "comments",
-      select: "text owner",
+      select: "text owner isPinned likes", // أضفت الحقول الناقصة
       populate: { path: "owner", select: "username profileName profilePhoto" },
     })
+    .populate("likes", "username profileName profilePhoto")
+    .populate("views", "username profileName profilePhoto")
     .lean();
 
   const total = await Post.countDocuments();
@@ -528,6 +530,8 @@ const getPostById = asyncHandler(async (req, res) => {
   const post = await Post.findById(req.params.id)
     .populate("owner", "username profileName profilePhoto following followers description")
     .populate("community", "Name Picture members")
+    .populate("views", "username profileName profilePhoto")
+    .populate("likes", "username profileName profilePhoto")
     .populate("mentions", "username profileName profilePhoto")
     .populate({
       path: "originalPost",

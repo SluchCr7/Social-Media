@@ -353,7 +353,7 @@ const fetchUserPosts = async (userId, pageNum = 1, limit = 5) => {
   const getPostById = async(id) => {
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post/${id}`);
-      return res.data.post;
+      return res.data;
     } catch (err) {
       console.error(err);
     }
