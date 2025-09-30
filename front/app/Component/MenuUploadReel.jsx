@@ -60,7 +60,7 @@ const ReelUploadModal = () => {
     setVideoFile(null);
     setCaption("");
     setPreviewUrl(null);
-    onClose();
+    setShowModelAddReel(false)
   };
 
   return (
