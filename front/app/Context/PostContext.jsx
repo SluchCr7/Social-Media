@@ -373,6 +373,7 @@ const fetchUserPosts = async (userId, pageNum = 1, limit = 5) => {
         showPostModelEdit,
         setShowPostModelEdit,
         postIsEdit,
+        getPostById,
         setPostIsEdit,
         displayOrHideComments,
         copyPostLink,
