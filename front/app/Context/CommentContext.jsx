@@ -6,56 +6,39 @@ import { useAuth } from './AuthContext';
 import { useNotify } from './NotifyContext';
 import { useAlert } from './AlertContext';
 import { checkUserStatus } from '../utils/checkUserLog';
+
 export const CommentContext = createContext();
 export const useComment = () => useContext(CommentContext);
 
 export const CommentContextProvider = ({ children }) => {
-  
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState({}); // ⬅️ object keyed بالـ postId
   const { user } = useAuth();
   const { addNotify } = useNotify();
   const { showAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
 
-
-  // 📌 جلب التعليقات لبوست معين
-  const fetchCommentsByPostId = async (postId) => {
-    setIsLoading(true);
-    try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/post/${postId}`);
-      setComments(res.data); // ده هيبقى nested tree
-    } catch (err) {
-      console.error('Error fetching comments:', err);
-      showAlert(err?.response?.data?.message || "Failed to load comments.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-
-    // 📌 جلب التعليقات لبوست معين (مع pagination)
-
-  // 🔹 دالة مساعدة: تحديث كومنت داخل tree recursively
+  // 🔹 update داخل tree
   const updateCommentInTree = (list, updatedComment) => {
     return list.map(c => {
       if (c._id === updatedComment._id) return updatedComment;
-      if (c.replies && c.replies.length > 0) {
+      if (c.replies?.length) {
         return { ...c, replies: updateCommentInTree(c.replies, updatedComment) };
       }
       return c;
     });
   };
 
-  // 🔹 دالة مساعدة: حذف كومنت وكل replies recursively
+  // 🔹 delete من tree
   const deleteCommentFromTree = (list, idToDelete) => {
     return list
       .filter(c => c._id !== idToDelete)
       .map(c => ({
         ...c,
-        replies: c.replies ? deleteCommentFromTree(c.replies, idToDelete) : []
+        replies: c.replies ? deleteCommentFromTree(c.replies, idToDelete) : [],
       }));
   };
 
+  // 🔹 insert في tree
   const insertCommentToTree = (tree, comment) => {
     const replies = Array.isArray(comment.replies) ? comment.replies : [];
 
@@ -73,9 +56,26 @@ export const CommentContextProvider = ({ children }) => {
     });
   };
 
-  // إضافة كومنت
+  // 📌 fetch comments by postId
+  const fetchCommentsByPostId = async (postId) => {
+    setIsLoading(true);
+    try {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/post/${postId}`);
+      setComments(prev => ({
+        ...prev,
+        [postId]: res.data, // نخزن التعليقات الخاصة بالبوست
+      }));
+    } catch (err) {
+      console.error('Error fetching comments:', err);
+      showAlert(err?.response?.data?.message || "Failed to load comments.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 📌 Add comment
   const AddComment = async (text, postId, receiverId, parent = null) => {
-    if (!checkUserStatus("add comments",showAlert,user)) return;
+    if (!checkUserStatus("add comments", showAlert, user)) return;
 
     try {
       const res = await axios.post(
@@ -86,10 +86,12 @@ export const CommentContextProvider = ({ children }) => {
 
       const newComment = { ...res.data.comment, replies: res.data.comment.replies || [] };
 
-      setComments(prev => insertCommentToTree(prev, newComment));
+      setComments(prev => ({
+        ...prev,
+        [postId]: insertCommentToTree(prev[postId] || [], newComment),
+      }));
 
       showAlert('Comment added successfully.');
-
       return newComment;
     } catch (err) {
       showAlert(err?.response?.data?.message || 'Failed to upload comment.');
@@ -97,16 +99,21 @@ export const CommentContextProvider = ({ children }) => {
     }
   };
 
-  // 📌 حذف كومنت
-  const deleteComment = async (id) => {
-    if (!checkUserStatus("delete comments" ,showAlert,user)) return;
+  // 📌 delete comment
+  const deleteComment = async (id, postId) => {
+    if (!checkUserStatus("delete comments", showAlert, user)) return;
 
     try {
       const res = await axios.delete(`${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       showAlert(res.data.message);
-      setComments(prev => deleteCommentFromTree(prev, id));
+
+      setComments(prev => ({
+        ...prev,
+        [postId]: deleteCommentFromTree(prev[postId] || [], id),
+      }));
+
       return res.data;
     } catch (err) {
       console.error(err);
@@ -114,9 +121,9 @@ export const CommentContextProvider = ({ children }) => {
     }
   };
 
-  // 📌 تعديل كومنت
-  const updateComment = async (id, text) => {
-    if (!checkUserStatus("update comments" ,showAlert,user)) return;
+  // 📌 update comment
+  const updateComment = async (id, text, postId) => {
+    if (!checkUserStatus("update comments", showAlert, user)) return;
 
     try {
       const res = await axios.put(
@@ -126,7 +133,11 @@ export const CommentContextProvider = ({ children }) => {
       );
 
       const updatedComment = res.data.comment;
-      setComments(prev => updateCommentInTree(prev, updatedComment));
+
+      setComments(prev => ({
+        ...prev,
+        [postId]: updateCommentInTree(prev[postId] || [], updatedComment),
+      }));
 
       showAlert('Comment updated successfully.');
       return updatedComment;
@@ -136,9 +147,9 @@ export const CommentContextProvider = ({ children }) => {
     }
   };
 
-  // 📌 لايك على كومنت
-  const likeComment = async (id) => {
-    if (!checkUserStatus("like comments" ,showAlert,user)) return;
+  // 📌 like comment
+  const likeComment = async (id, postId) => {
+    if (!checkUserStatus("like comments", showAlert, user)) return;
 
     try {
       const res = await axios.put(
@@ -148,7 +159,11 @@ export const CommentContextProvider = ({ children }) => {
       );
 
       const updatedComment = res.data.comment;
-      setComments(prev => updateCommentInTree(prev, updatedComment));
+
+      setComments(prev => ({
+        ...prev,
+        [postId]: updateCommentInTree(prev[postId] || [], updatedComment),
+      }));
 
       showAlert(res.data.message);
       return updatedComment;
@@ -168,14 +183,13 @@ export const CommentContextProvider = ({ children }) => {
         likeComment,
         updateComment,
         fetchCommentsByPostId,
-        isLoading
+        isLoading,
       }}
     >
       {children}
     </CommentContext.Provider>
   );
 };
-
 
 
 // 'use client';

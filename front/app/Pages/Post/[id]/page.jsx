@@ -33,7 +33,7 @@ const PostPage = ({ params }) => {
     if (id) fetchPost();
   }, [id, getPostById]);
 
-  // ✅ fetch comments
+  // ✅ fetch comments for this post
   useEffect(() => {
     if (!id) return;
     fetchCommentsByPostId(id);
@@ -55,7 +55,7 @@ const PostPage = ({ params }) => {
     }
   }, [commentText, id, post?.owner?._id, AddComment]);
 
-  if (!post) return <Loading/>; // 🚀 مفيش Loading، الصفحة هتفضل فاضية لحد ما يوصل البوست
+  if (!post) return <Loading />;
 
   const isShared = post.isShared && post.originalPost;
   const original = post.originalPost;
@@ -77,7 +77,7 @@ const PostPage = ({ params }) => {
       savePost={savePost}
       setImageView={setImageView}
       renderTextWithMentionsAndHashtags={renderTextWithMentionsAndHashtags}
-      comments={comments}
+      comments={comments[id] || []} // ⬅️ جلب تعليقات البوست فقط
       isLoading={isLoading}
       commentText={commentText}
       setCommentText={setCommentText}
