@@ -68,7 +68,18 @@ const ProfilePage = () => {
 
   useInfiniteScroll(page , setPage ,loaderRef, fetchUserPosts ,userData,userHasMore)
   // 📌 البوستات المثبتة + العادية
-  const combinedPosts = useCombinedPosts(userPosts, userData?.pinsPosts || [])
+  // const combinedPosts = useCombinedPosts(userPosts, userData?.pinsPosts || [])
+  const combinedPosts = useMemo(() => {
+    if (!userPosts?.length && !userData?.pinsPosts?.length) return []
+
+    const pinnedIds = new Set(userData?.pinsPosts?.map(p => p._id) || [])
+    const regularPosts = userPosts.filter(p => !pinnedIds.has(p._id))
+
+    return [
+      ...(userData?.pinsPosts?.map(p => ({ ...p, isPinned: true })) || []),
+      ...regularPosts.map(p => ({ ...p, isPinned: false })),
+    ]
+  }, [userPosts, userData?.pinsPosts])
 
   const postYears = useMemo(() => {
     if (!combinedPosts) return []
