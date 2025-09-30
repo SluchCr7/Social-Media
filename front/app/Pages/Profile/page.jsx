@@ -27,8 +27,8 @@ import ProfileMenu from '@/app/Component/ProfileMenu'
 import { useInfiniteScroll } from '@/app/Custome/useInfinteScroll'
 
 const ProfilePage = () => {
-  const { user, users, updatePhoto,togglePrivateAccount } = useAuth()
-  const { fetchUserPosts, userPosts, posts, setUserPages, userHasMore ,getUserById } = usePost()
+  const { user, users, updatePhoto,togglePrivateAccount,getUserById } = useAuth()
+  const { fetchUserPosts, userPosts, posts, setUserPages, userHasMore } = usePost()
 
   const [activeTab, setActiveTab] = useState('Posts')
   const [loading, setLoading] = useState(true)
@@ -49,10 +49,14 @@ const ProfilePage = () => {
 
   // 📌 تحديث بيانات المستخدم عند التغير
   useEffect(() => {
-    // selectUserFromUsers(setUserData, users, user?._id)
-    getUserById(user?._id).then(res => setUserData(res)).catch(err => console.log(err))
-    setLoading(false)
-  }, [users, user])
+    if (!user?._id) return;
+    setLoading(true);
+    getUserById(user._id)
+      .then(res => setUserData(res))
+      .catch(err => console.log(err))
+      .finally(() => setLoading(false));
+  }, [user?._id]);
+
 
   // 📌 أول تحميل للبوستات
   useEffect(() => {
