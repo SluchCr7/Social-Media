@@ -24,6 +24,7 @@ import { selectUserFromUsers } from '@/app/utils/SelectUserFromUsers'
 import { FaLock } from "react-icons/fa";
 import { useAlert } from '@/app/Context/AlertContext'
 import FilterBar from '@/app/Component/UserComponents/FilterBar'
+import { useInfiniteScroll } from '@/app/Custome/useInfinteScroll'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
