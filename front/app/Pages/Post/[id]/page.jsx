@@ -38,6 +38,9 @@ const PostPage = ({ params }) => {
     if (id) fetchPost();
   }, [id]);
 
+  useEffect(() => {
+    console.log(post)
+  },[post])
   // ✅ جلب التعليقات بعد ما ييجي البوست
   useEffect(() => {
     if (post?._id) {
