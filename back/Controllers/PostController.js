@@ -29,7 +29,7 @@ const getAllPosts = asyncHandler(async (req, res) => {
     })
     .populate({
       path: "comments",
-      select: "text owner isPinned likes", // أضفت الحقول الناقصة
+      select: "text owner likes", // أضفت الحقول الناقصة
       populate: { path: "owner", select: "username profileName profilePhoto" },
     })
     .populate("likes", "username profileName profilePhoto")

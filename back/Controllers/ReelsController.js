@@ -6,34 +6,29 @@ const { Notification } = require("../Modules/Notification");
 const asyncHandler = require("express-async-handler");
 const { User} = require('../Modules/User')
 const {sendNotificationHelper} = require("../utils/SendNotification");
+const { reelPopulate } = require('../Populates/Populate');
 
-const createReel = async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ message: "No video file uploaded" });
+const createReel = asyncHandler(async (req, res) => {
+  if (!req.file) return res.status(400).json({ message: "No video file uploaded" });
 
-    const uploadResult = await cloudUploadVideo(req.file);
+  const uploadResult = await cloudUploadVideo(req.file);
 
-    const newReel = new Reel({
-      videoUrl: uploadResult.secure_url,
-      thumbnailUrl: uploadResult.secure_url,
-      caption: req.body.caption || "",
-      owner: req.user._id,
-    });
-    const user = await User.findById(req.user._id);
-    user.userLevelPoints += 10;
-    user.updateLevelRank();
-    await user.save();
+  const newReel = await Reel.create({
+    videoUrl: uploadResult.secure_url,
+    thumbnailUrl: uploadResult.secure_url,
+    caption: req.body.caption || "",
+    owner: req.user._id,
+  });
 
-    await newReel.save();
+  const user = await User.findById(req.user._id);
+  user.userLevelPoints += 10;
+  user.updateLevelRank();
+  await user.save();
 
-    await newReel.populate("owner", "username profileName profilePhoto");
+  await newReel.populate(reelPopulate);
 
-    res.status(201).json(newReel);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-};
+  res.status(201).json(newReel);
+});
 
 
 // حذف Reel
@@ -118,11 +113,7 @@ const likeReel = async (req, res) => {
     }
 
     const updatedReel = await Reel.findById(req.params.id)
-      .populate("owner", "username profileName profilePhoto")
-      .populate({
-        path: "originalPost",
-        populate: { path: "owner", select: "username profileName profilePhoto" },
-      });
+      .populate(reelPopulate);
 
     res.status(200).json(updatedReel);
   } catch (error) {
@@ -143,11 +134,7 @@ const viewReel = asyncHandler(async (req, res) => {
     { $addToSet: { views: req.user._id } },
     { new: true }
   )
-    .populate("owner", "username profileName profilePhoto")
-    .populate({
-      path: "originalPost",
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    })
+    .populate(reelPopulate)
     .populate("views", "username profilePhoto");
 
   res.status(200).json(updatedReel);
@@ -181,13 +168,7 @@ const shareReel = asyncHandler(async (req, res) => {
       });
   }
   await sharedReel.save();
-  await sharedReel.populate([
-    { path: "owner", select: "username profileName profilePhoto" },
-    {
-      path: "originalPost",
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    },
-  ]);
+  await sharedReel.populate(reelPopulate);
 
   // ✅ رجع بوست كامل فقط
   res.status(201).json(sharedReel);

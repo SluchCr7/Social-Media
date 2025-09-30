@@ -6,7 +6,8 @@ const {v2} = require('cloudinary');
 const { getReceiverSocketId, io } = require("../Config/socket");
 const { Notification } = require("../Modules/Notification");
 const { cloudUpload } = require("../Config/cloudUpload"); // اللي انت عامله
-const { User} = require('../Modules/User')
+const { User} = require('../Modules/User');
+const { storyPopulate } = require("../Populates/Populate");
 
 /**
  * @desc Add a new story (image, text, or both)
@@ -91,9 +92,7 @@ const addNewStory = asyncHandler(async (req, res) => {
  */
 
 const getAllStories = asyncHandler(async (req, res) => {
-  const stories = await Story.find().populate('owner', 'username profileName profilePhoto')
-    .populate('loves', 'username profilePhoto')
-    .populate('views', 'username profilePhoto');
+  const stories = await Story.find().populate(storyPopulate);
   res.status(200).json(stories);
 });
 
@@ -119,10 +118,7 @@ const deleteStory = asyncHandler(async (req, res) => {
  */
 
 const getStoriesById = asyncHandler(async (req, res) => {
-  const story = await Story.findById(req.params.id)
-    .populate('owner', 'username profileName profilePhoto')
-    .populate('loves', 'username profileName profilePhoto')
-    .populate('views', 'username profileName profilePhoto');
+  const story = await Story.findById(req.params.id).populate(storyPopulate);
 
   if (!story) {
       return res.status(404).json({ message: "Story Not Found" });
@@ -136,10 +132,7 @@ const getStoriesById = asyncHandler(async (req, res) => {
   );
 
   // إعادة تحميل الستوري بعد إضافة المشاهدة
-  const updatedStory = await Story.findById(req.params.id)
-    .populate('owner', 'username profilePhoto')
-    .populate('loves', 'username profilePhoto')
-    .populate('views', 'username profilePhoto');
+  const updatedStory = await Story.findById(req.params.id).populate(storyPopulate);
 
   res.status(200).json(updatedStory);
 });
@@ -164,10 +157,7 @@ const viewStory = asyncHandler(async (req, res) => {
     storyId,
     { $addToSet: { views: req.user._id } }, // $addToSet يمنع التكرار
     { new: true }
-  )
-    .populate('owner', 'username profilePhoto')
-    .populate('loves', 'username profilePhoto')
-    .populate('views', 'username profilePhoto');
+  ).populate(storyPopulate);
 
   res.status(200).json({
     story: updatedStory
@@ -212,9 +202,7 @@ const toggleLoveStory = asyncHandler(async (req, res) => {
 
   // جلب البوست كامل بعد التعديل مع كل populate
   const updatedStory = await Story.findById(req.params.id)
-    .populate('owner', 'username profilePhoto')
-    .populate('loves', 'username profilePhoto')
-    .populate('views', 'username profilePhoto');
+    .populate(storyPopulate);
   
   res.status(200).json(updatedStory);
 });
