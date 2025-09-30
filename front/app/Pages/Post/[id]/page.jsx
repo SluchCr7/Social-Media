@@ -20,20 +20,9 @@ const PostPage = ({ params }) => {
   const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post/${id}`);
-        setPost(res.data);
-      } catch (err) {
-        console.error("Error fetching post:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) fetchPost();
-  }, [id]);
+    const matchedPost = posts.find(p => p?._id === id);
+    if (matchedPost) setPost(matchedPost);
+  }, [id, posts]);
 
   useEffect(() => {
     if (!post) return;
