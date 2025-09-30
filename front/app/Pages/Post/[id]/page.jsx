@@ -20,7 +20,7 @@ const PostPage = ({ params }) => {
   const [loading, setLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
 
-  // ✅ استخدم getPostById بدلاً من البحث في posts
+  // ✅ Fetch post only once when id changes
   useEffect(() => {
     const fetchPost = async () => {
       try {
@@ -37,29 +37,29 @@ const PostPage = ({ params }) => {
     if (id) fetchPost();
   }, [id, getPostById]);
 
+  // ✅ Fetch comments separately (based on id, not post object)
   useEffect(() => {
-    if (!post?._id) return;
-    fetchCommentsByPostId(post._id);
-  }, [post?._id, fetchCommentsByPostId]);
+    if (id) fetchCommentsByPostId(id);
+  }, [id, fetchCommentsByPostId]);
 
+  // ✅ Count view once when id changes
   useEffect(() => {
-    if (post?._id) {
-      viewPost(post._id);
-    }
-  }, [post?._id, viewPost]);
+    if (id) viewPost(id);
+  }, [id, viewPost]);
 
   const handleAddComment = useCallback(async () => {
     if (!commentText.trim()) return;
 
     try {
-      await AddComment(commentText, post._id, post.owner._id);
+      await AddComment(commentText, id, post?.owner?._id);
       setCommentText('');
     } catch (err) {
       console.log(err);
     }
-  }, [commentText, post?._id, post?.owner?._id, AddComment]);
+  }, [commentText, id, post?.owner?._id, AddComment]);
 
-  if (loading || !post) return <Loading />;
+  if (loading) return <Loading />;
+  if (!post) return <p className="text-center text-gray-500">Post not found</p>;
 
   const isShared = post.isShared && post.originalPost;
   const original = post.originalPost;
