@@ -97,11 +97,10 @@ const ProfilePage = () => {
       if (updatePhoto) await updatePhoto(file)
     }
   }
-
-  if (loading) return <ProfileSkeleton />
   useEffect(() => {
-    console.log(combinedPosts)
-  },[combinedPosts])
+    console.log(userData)
+  },[userData])
+  if (loading) return <ProfileSkeleton />
   return (
     <div>
       <Head>
