@@ -21,11 +21,11 @@ const ReelUploadModal = () => {
   // Close on Esc key
   useEffect(() => {
     const handleEsc = (e) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") setShowModelAddReel(false);
     };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [onClose]);
+  }, []);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
