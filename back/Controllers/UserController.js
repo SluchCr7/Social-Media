@@ -228,14 +228,6 @@ const getAllUsers = asyncHandler(async (req, res) => {
             },
         })
         .populate({
-          path: "notifications",
-          populate: {
-            path: "sender",
-            select: "username profilePhoto", // عشان تجيب بيانات المرسل كمان
-          },
-          options: { sort: { createdAt: -1 } },
-        })
-        .populate({
           path: "stories",
           populate: {
             path: "owner",
@@ -271,51 +263,41 @@ const getAllUsers = asyncHandler(async (req, res) => {
           },
         },
       })
-      .populate({
-        path: 'posts',
-        populate: {
-          path: 'owner',
-          model: 'User',
-        },
-      })
-      .populate({
-        path: 'posts',
-        populate: {
-          path: 'comments',
-          model: 'Comment',
-        },
-      })
-      .populate({
-        path: 'posts',
-        populate: {
-          path: 'originalPost',
-          model: 'Post',
-        },
-      })
-      .populate({
-        path: 'posts',
-        populate: {
-          path: 'originalPost',
-          populate: {
-            path: 'owner',
-            model: 'User', // 🛠️ Fix: Was 'Post' — should be 'User'
-          },
-        },
-      })
-      .populate({
-        path: "following",
-        select: "profilePhoto username profileName",
-      })
+      // .populate({
+      //   path: 'posts',
+      //   populate: {
+      //     path: 'owner',
+      //     model: 'User',
+      //   },
+      // })
       // .populate({
       //   path: 'posts',
       //   populate: {
       //     path: 'comments',
+      //     model: 'Comment',
+      //   },
+      // })
+      // .populate({
+      //   path: 'posts',
+      //   populate: {
+      //     path: 'originalPost',
+      //     model: 'Post',
+      //   },
+      // })
+      // .populate({
+      //   path: 'posts',
+      //   populate: {
+      //     path: 'originalPost',
       //     populate: {
       //       path: 'owner',
       //       model: 'User', // 🛠️ Fix: Was 'Post' — should be 'User'
       //     },
       //   },
       // })
+      .populate({
+        path: "following",
+        select: "profilePhoto username profileName",
+      })
       .populate('savedPosts' )
       .populate("partner" , "username profileName")
     res.status(200).json(users);
@@ -337,8 +319,13 @@ const getUserById = asyncHandler(async (req, res) => {
           model: 'User',
           select: 'username profilePhoto profileName', // Optional: limit fields
         },
-      })
-    if (!user) {
+      }).populate({path: "stories",populate: {path: "owner",model: "User",}})
+      .populate({path: "following",select: "profilePhoto username profileName",})
+      .populate({path: "followers",select: "profilePhoto username profileName",})
+      .populate("communities", "Name Picture members")
+      .populate('savedPosts' )
+      .populate("partner" , "username profileName")
+  if (!user) {
         return res.status(404).json({ message: "User Not Found" })
     }
     res.status(200).json(user)
