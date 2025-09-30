@@ -7,8 +7,6 @@ const cloudinary = require("cloudinary").v2;
 const { moderatePost } = require('../utils/CheckTextPost');
 
 // 🔔 Socket.io & Notifications
-const { getReceiverSocketId, io } = require("../Config/socket");
-const { Notification } = require("../Modules/Notification");
 const {sendNotificationHelper} = require("../utils/SendNotification");
 
 // ================== Get All Posts ==================
@@ -23,13 +21,15 @@ const getAllPosts = asyncHandler(async (req, res) => {
     .limit(limit)
     .populate("owner", "username profileName profilePhoto following followers description")
     .populate("community", "Name Picture members")
-    .populate("mentions", "username profileName profilePhoto")
+    .populate("mentions", "username profileName")
     .populate({
       path: "originalPost",
+      select: "text owner", // هنا بنحدد بس الحقول المطلوبة من الـ originalPost
       populate: { path: "owner", select: "username profileName profilePhoto" },
     })
     .populate({
       path: "comments",
+      select: "text owner",
       populate: { path: "owner", select: "username profileName profilePhoto" },
     })
     .lean();
@@ -501,10 +501,6 @@ const getPostsByUser = asyncHandler(async (req, res) => {
     .limit(limit)
     .populate("owner", "username profileName profilePhoto following followers description")
     .populate("community", "Name Picture members")
-    .populate({
-      path: "reports",
-      populate: { path: "owner", model: "User", select: "username profileName profilePhoto" },
-    })
     .populate("mentions", "username profileName profilePhoto")
     .populate({
       path: "originalPost",

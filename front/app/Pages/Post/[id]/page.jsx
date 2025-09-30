@@ -11,31 +11,43 @@ import DesignPostSelect from './Design';
 const PostPage = ({ params }) => {
   const id = params.id;
   const { user, isLogin } = useAuth();
-  const { posts, likePost, savePost, sharePost, setImageView, viewPost,hahaPost } = usePost();
-  const { comments, AddComment, isLoading , fetchCommentsByPostId,} = useComment();
+  const { likePost, savePost, sharePost, setImageView, viewPost, hahaPost, getPostById } = usePost();
+  const { comments, AddComment, isLoading, fetchCommentsByPostId } = useComment();
+
   const [openModel, setOpenModel] = useState(false);
   const [post, setPost] = useState(null);
   const [commentText, setCommentText] = useState('');
   const [loading, setLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
 
+  // ✅ استخدم getPostById بدلاً من البحث في posts
   useEffect(() => {
-    const matchedPost = posts.find(p => p?._id === id);
-    if (matchedPost) setPost(matchedPost);
-  }, [id, posts]);
+    const fetchPost = async () => {
+      try {
+        setLoading(true);
+        const data = await getPostById(id);
+        setPost(data);
+      } catch (err) {
+        console.error("Error fetching post:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchPost();
+  }, [id, getPostById]);
 
   useEffect(() => {
-    if (!post) return;
+    if (!post?._id) return;
     fetchCommentsByPostId(post._id);
-  }, [post?._id]); // ✅ فقط الـid، لا تضع post كامل
-
+  }, [post?._id, fetchCommentsByPostId]);
 
   useEffect(() => {
     if (post?._id) {
       viewPost(post._id);
     }
-  }, [post?._id]); // فقط الـid
-  
+  }, [post?._id, viewPost]);
+
   const handleAddComment = useCallback(async () => {
     if (!commentText.trim()) return;
 
@@ -47,8 +59,7 @@ const PostPage = ({ params }) => {
     }
   }, [commentText, post?._id, post?.owner?._id, AddComment]);
 
-
-  if (!post) return <Loading />;
+  if (loading || !post) return <Loading />;
 
   const isShared = post.isShared && post.originalPost;
   const original = post.originalPost;
@@ -76,11 +87,9 @@ const PostPage = ({ params }) => {
       setCommentText={setCommentText}
       handleAddComment={handleAddComment}
       openModel={openModel}
-      setOpenModel={setOpenModel} 
+      setOpenModel={setOpenModel}
     />
   );
 };
-
-
 
 export default PostPage;
