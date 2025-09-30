@@ -500,7 +500,15 @@ const makeAccountPremiumVerify = async () => {
       return null;
     }
   };
-
+  const getUserById = async (id) => {
+    try {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/${id}`);
+      return res.data; // بيرجع بيانات اليوزر
+    } catch (err) {
+      console.error("Error fetching user by ID:", err);
+      return null;
+    }
+  };
 
   // ------------------- INIT -------------------
   useEffect(() => {
@@ -549,7 +557,7 @@ const makeAccountPremiumVerify = async () => {
         deleteUser, showAllSuggestedUsers, setShowAllSuggestedUsers
         ,togglePrivateAccount,makeAccountPremiumVerify, makeUserAdmin,updateAccountStatus
         ,getRelationship,
-        updateRelationship
+        updateRelationship,getUserById
       }}
     >
       {children}

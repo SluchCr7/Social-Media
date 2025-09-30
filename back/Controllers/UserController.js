@@ -211,95 +211,8 @@ const getAllUsers = asyncHandler(async (req, res) => {
         path: 'followers',
         select: 'profilePhoto username profileName',
       })
-      .populate({
-        path: 'reels',
-        populate: {
-          path: 'owner',
-          model: 'User',
-          select: 'username profilePhoto profileName', // Optional: limit fields
-        },
-      })
-        .populate("communities", "Name Picture members")
-        .populate({
-            path: "pinsPosts",
-            populate: {
-              path: "owner",
-              model: "User",
-            },
-        })
-        .populate({
-          path: "stories",
-          populate: {
-            path: "owner",
-            model: "User",
-          },
-        })
-        .populate({
-            path: "pinsPosts",
-            populate: {
-              path: "originalPost",
-              model: "Post",
-              populate: {
-                path: "owner",
-                model: "User",
-                select: "username profilePhoto profileName", // Optional: limit fields
-              },
-            },
-        })          
-      .populate({
-        path: 'comments',
-        populate: {
-          path: 'owner',
-          model: 'User',
-        },
-      })
-      .populate({
-        path: 'comments',
-        populate: {
-          path: 'postId',
-          populate: {
-            path: 'owner',
-            model: 'User',
-          },
-        },
-      })
-      // .populate({
-      //   path: 'posts',
-      //   populate: {
-      //     path: 'owner',
-      //     model: 'User',
-      //   },
-      // })
-      // .populate({
-      //   path: 'posts',
-      //   populate: {
-      //     path: 'comments',
-      //     model: 'Comment',
-      //   },
-      // })
-      // .populate({
-      //   path: 'posts',
-      //   populate: {
-      //     path: 'originalPost',
-      //     model: 'Post',
-      //   },
-      // })
-      // .populate({
-      //   path: 'posts',
-      //   populate: {
-      //     path: 'originalPost',
-      //     populate: {
-      //       path: 'owner',
-      //       model: 'User', // 🛠️ Fix: Was 'Post' — should be 'User'
-      //     },
-      //   },
-      // })
-      .populate({
-        path: "following",
-        select: "profilePhoto username profileName",
-      })
-      .populate('savedPosts' )
-      .populate("partner" , "username profileName")
+      .populate("posts")
+      .populate("comments")
     res.status(200).json(users);
   });
   
@@ -312,19 +225,76 @@ const getAllUsers = asyncHandler(async (req, res) => {
 
 const getUserById = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id).populate('comments').populate('posts')
-    .populate({
+      .populate({
         path: 'reels',
         populate: {
           path: 'owner',
           model: 'User',
           select: 'username profilePhoto profileName', // Optional: limit fields
         },
-      }).populate({path: "stories",populate: {path: "owner",model: "User",}})
+      })
+      .populate({ path: "stories", populate: { path: "owner", model: "User", } })
       .populate({path: "following",select: "profilePhoto username profileName",})
       .populate({path: "followers",select: "profilePhoto username profileName",})
       .populate("communities", "Name Picture members")
       .populate('savedPosts' )
-      .populate("partner" , "username profileName")
+      .populate("partner", "username profileName")
+      .populate({
+    path: 'posts',
+    populate: [
+      {
+        path: 'owner',
+        model: 'User',
+      },
+      {
+        path: 'comments',
+        model: 'Comment',
+      },
+      {
+        path: 'originalPost',
+        model: 'Post',
+        populate: {
+          path: 'owner',
+          model: 'User',
+        },
+      },
+    ],
+      })
+      .populate({
+        path: 'comments',
+        populate: [
+          {
+            path: 'owner',
+            model: 'User',
+          },
+          {
+            path: 'postId',
+            populate: {
+              path: 'owner',
+              model: 'User',
+            },
+          },
+        ],
+      })
+      .populate({
+        path: "pinsPosts",
+        populate: [
+          {
+            path: "owner",
+            model: "User",
+          },
+          {
+            path: "originalPost",
+            model: "Post",
+            populate: {
+              path: "owner",
+              model: "User",
+              select: "username profilePhoto profileName", // لو عايز تحدد الفيلدز
+            },
+          },
+        ],
+      })
+
   if (!user) {
         return res.status(404).json({ message: "User Not Found" })
     }

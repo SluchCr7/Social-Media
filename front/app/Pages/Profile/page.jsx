@@ -28,7 +28,7 @@ import { useInfiniteScroll } from '@/app/Custome/useInfinteScroll'
 
 const ProfilePage = () => {
   const { user, users, updatePhoto,togglePrivateAccount } = useAuth()
-  const { fetchUserPosts, userPosts, posts, setUserPages, userHasMore } = usePost()
+  const { fetchUserPosts, userPosts, posts, setUserPages, userHasMore ,getUserById } = usePost()
 
   const [activeTab, setActiveTab] = useState('Posts')
   const [loading, setLoading] = useState(true)
@@ -49,7 +49,8 @@ const ProfilePage = () => {
 
   // 📌 تحديث بيانات المستخدم عند التغير
   useEffect(() => {
-    selectUserFromUsers(setUserData, users, user?._id)
+    // selectUserFromUsers(setUserData, users, user?._id)
+    getUserById(user?._id).then(res => setUserData(res)).catch(err => console.log(err))
     setLoading(false)
   }, [users, user])
 

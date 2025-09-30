@@ -30,7 +30,7 @@ const tabs = ['Posts', 'Saved', 'Comments']
 
 const UserProfilePage = ({ params }) => {
   const id = params.id
-  const { users, followUser, user, blockOrUnblockUser, isLogin } = useAuth()
+  const { users, followUser, user, blockOrUnblockUser, isLogin, getUserById } = useAuth()
   const { fetchUserPosts, userPosts, posts, setUserPages, userHasMore } = usePost()
   const { getUserStories } = useStory()
   const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport();
@@ -53,7 +53,8 @@ const UserProfilePage = ({ params }) => {
   })
   // 📌 تحديد اليوزر من قائمة الـ users
   useEffect(() => {
-    selectUserFromUsers(setUserSelected, users, id)
+    // selectUserFromUsers(setUserSelected, users, id)
+    getUserById(id).then(res => setUserSelected(res)).catch(err => console.log(err))
   }, [id, users])
     // 📌 أول تحميل للبوستات
   useEffect(() => {
