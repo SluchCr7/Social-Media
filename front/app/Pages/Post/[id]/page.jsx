@@ -7,49 +7,35 @@ import { useComment } from '@/app/Context/CommentContext';
 import Loading from '@/app/Component/Loading';
 import { renderTextWithMentionsAndHashtags } from '@/app/utils/CheckText';
 import DesignPostSelect from './Design';
-import axios from 'axios';
 
 const PostPage = ({ params }) => {
   const id = params.id;
   const { user, isLogin } = useAuth();
-  const { likePost, savePost, sharePost, setImageView, viewPost, hahaPost } = usePost();
-  const { comments, AddComment, isLoading, fetchCommentsByPostId } = useComment();
-  
+  const { posts, likePost, savePost, sharePost, setImageView, viewPost,hahaPost } = usePost();
+  const { comments, AddComment, isLoading , fetchCommentsByPostId,} = useComment();
   const [openModel, setOpenModel] = useState(false);
   const [post, setPost] = useState(null);
   const [commentText, setCommentText] = useState('');
   const [loading, setLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
 
-  // ✅ fetch البوست من الـ API
   useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post/${id}`);
-        setPost(res.data);
-      } catch (err) {
-        console.error("Error fetching post:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) fetchPost();
-  }, [id]);
+    const matchedPost = posts.find(p => p?._id === id);
+    if (matchedPost) setPost(matchedPost);
+  }, [id, posts]);
 
   useEffect(() => {
-    console.log(post)
-  },[post])
-  // ✅ جلب التعليقات بعد ما ييجي البوست
+    if (!post) return;
+    fetchCommentsByPostId(post._id);
+  }, [post?._id]); // ✅ فقط الـid، لا تضع post كامل
+
+
   useEffect(() => {
     if (post?._id) {
-      fetchCommentsByPostId(post._id);
-      viewPost(post._id); // ✅ زيادة الـ view
+      viewPost(post._id);
     }
-  }, [post?._id, fetchCommentsByPostId, viewPost]);
-
-  // ✅ إضافة تعليق
+  }, [post?._id]); // فقط الـid
+  
   const handleAddComment = useCallback(async () => {
     if (!commentText.trim()) return;
 
@@ -61,8 +47,8 @@ const PostPage = ({ params }) => {
     }
   }, [commentText, post?._id, post?.owner?._id, AddComment]);
 
-  if (loading) return <Loading />;
-  if (!post) return <p className="text-center mt-4">Post not found</p>;
+
+  if (!post) return <Loading />;
 
   const isShared = post.isShared && post.originalPost;
   const original = post.originalPost;
@@ -90,9 +76,11 @@ const PostPage = ({ params }) => {
       setCommentText={setCommentText}
       handleAddComment={handleAddComment}
       openModel={openModel}
-      setOpenModel={setOpenModel}
+      setOpenModel={setOpenModel} 
     />
   );
 };
+
+
 
 export default PostPage;
