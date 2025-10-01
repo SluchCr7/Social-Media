@@ -19,21 +19,7 @@ const getAllPosts = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
-    .populate("owner", "username profileName profilePhoto following followers description")
-    .populate("community", "Name Picture members")
-    .populate("mentions", "username profileName")
-    .populate({
-      path: "originalPost",
-      select: "text owner", // هنا بنحدد بس الحقول المطلوبة من الـ originalPost
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    })
-    .populate({
-      path: "comments",
-      select: "text owner likes", // أضفت الحقول الناقصة
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    })
-    .populate("likes", "username profileName profilePhoto")
-    .populate("views", "username profileName profilePhoto")
+    .populate(postPopulate)
     .lean();
 
   const total = await Post.countDocuments();
@@ -50,6 +36,7 @@ const getAllPosts = asyncHandler(async (req, res) => {
 // ================== Add Post ==================
 const streamifier = require("streamifier");
 const { sendNotification } = require("../utils/SendNotification");
+const { postPopulate } = require("../Populates/Populate");
 
 const uploadToCloudinary = (buffer) => {
   return new Promise((resolve, reject) => {
@@ -214,16 +201,7 @@ const hahaPost = asyncHandler(async (req, res) => {
     }
   }
   const updatedPost = await Post.findById(req.params.id)
-    .populate("owner", "username profileName profilePhoto")
-    .populate("community", "Name Picture members")
-    .populate({
-      path: "originalPost",
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    })
-    .populate({
-      path: "comments",
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    });
+    .populate(postPopulate);
 
   res.status(200).json(updatedPost);
 })
@@ -269,16 +247,7 @@ const likePost = asyncHandler(async (req, res) => {
 
   // جلب البوست كامل بعد التعديل مع كل populate
   const updatedPost = await Post.findById(req.params.id)
-    .populate("owner", "username profileName profilePhoto")
-    .populate("community", "Name Picture members")
-    .populate({
-      path: "originalPost",
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    })
-    .populate({
-      path: "comments",
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    });
+    .populate(postPopulate);
 
   res.status(200).json(updatedPost);
 });
@@ -307,16 +276,7 @@ const savePost = asyncHandler(async (req, res) => {
 
   // ✅ هات البوست كامل بعد التعديل
   const updatedPost = await Post.findById(req.params.id)
-    .populate("owner", "username profileName profilePhoto")
-    .populate("community", "Name Picture members")
-    .populate({
-      path: "originalPost",
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    })
-    .populate({
-      path: "comments",
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    });
+    .populate(postPopulate);
 
   res.status(200).json(updatedPost);
 });
@@ -428,13 +388,7 @@ const editPost = asyncHandler(async (req, res) => {
   await post.save();
 
   // ✅ populate كامل زي getAllPosts
-  await post.populate([
-    { path: "owner", select: "username profileName profilePhoto" },
-    { path: "community", select: "Name Picture members" },
-    { path: "originalPost", populate: { path: "owner", select: "username profileName profilePhoto" }},
-    { path: "comments", populate: { path: "owner", select: "username profileName profilePhoto" }},
-    { path: "mentions", select: "username profileName profilePhoto" }, // 🎯 populate للمنشن
-  ]);
+  await post.populate(postPopulate);
 
   res.status(200).json(post);
 });
@@ -501,17 +455,7 @@ const getPostsByUser = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
-    .populate("owner", "username profileName profilePhoto following followers description")
-    .populate("community", "Name Picture members")
-    .populate("mentions", "username profileName profilePhoto")
-    .populate({
-      path: "originalPost",
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    })
-    .populate({
-      path: "comments",
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    })
+    .populate(postPopulate)
     .lean();
 
   // 📝 احسب العدد الكلي للبوستات الخاصة باليوزر
@@ -527,21 +471,7 @@ const getPostsByUser = asyncHandler(async (req, res) => {
 });
 
 const getPostById = asyncHandler(async (req, res) => {
-  const post = await Post.findById(req.params.id)
-    .populate("owner", "username profileName profilePhoto following followers description")
-    .populate("community", "Name Picture members")
-    .populate("views", "username profileName profilePhoto")
-    .populate("likes", "username profileName profilePhoto")
-    .populate("mentions", "username profileName profilePhoto")
-    .populate({
-      path: "originalPost",
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    })
-    .populate({
-      path: "comments",
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    });
-
+  const post = await Post.findById(req.params.id).populate(postPopulate);
   if (!post) {
     return res.status(404).json({ message: "Post not found" });
   }

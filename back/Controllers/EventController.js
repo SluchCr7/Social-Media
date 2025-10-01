@@ -1,4 +1,5 @@
 const Event = require("../Modules/Event");
+const { EventPopulate } = require("../Populates/Populate");
 
 // 📌 إنشاء حدث جديد
 exports.createEvent = async (req, res) => {
@@ -39,9 +40,7 @@ exports.getEvents = async (req, res) => {
 // 📌 جلب حدث واحد
 exports.getEventById = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id)
-      .populate("createdBy", "username email")
-      .populate("invitedUsers", "username email");
+    const event = await Event.findById(req.params.id).populate(EventPopulate);
 
     if (!event) {
       return res.status(404).json({ success: false, message: "Event not found" });
@@ -63,9 +62,7 @@ exports.getEventsByUser = async (req, res) => {
         { createdBy: userId },             // أحداث من صنعه
         { invitedUsers: userId }           // أحداث تمت دعوته إليها
       ]
-    }).populate("invitedUsers", "username profileName profilePhoto")
-      .populate("createdBy", "username profileName profilePhoto")
-      .sort({ date: 1 }); // ترتيب حسب التاريخ
+    }).populate(EventPopulate).sort({ date: 1 }); // ترتيب حسب التاريخ
 
     return res.status(200).json({ success: true, events });
   } catch (err) {
