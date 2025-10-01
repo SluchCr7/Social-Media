@@ -19,6 +19,9 @@ import { ShareModal } from './SharePost'
 import { getHighlightedComment } from '../utils/getHighlitedComment';
 import UserHoverCard from './UserHoverCard'
 import { FaFaceGrinSquintTears } from "react-icons/fa6";
+import RenderPostText from './Post/RenderText';
+import PostActions from './Post/PostActions';
+import PostPhotos from './Post/PostPhotos';
 
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost,hahaPost, savePost, sharePost, setPostIsEdit, imageView, setImageView } = usePost();
@@ -155,20 +158,13 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
             </div>
 
             {/* Shared Post Text */}
-            {isShared && post?.text && (() => {
-              const isArabic = /[\u0600-\u06FF]/.test(post?.text);
-              return (
-                <p
-                  className={`text-sm break-all whitespace-pre-wrap ${
-                    isArabic ? 'text-right' : 'text-left'
-                  } text-gray-600 dark:text-gray-200`}
-                  dir={isArabic ? 'rtl' : 'ltr'}
-                >
-                  {renderTextWithMentionsAndHashtags(post?.text, post?.mentions || [], post?.Hashtags || [])}
-                </p>
-              );
-            })()}
-
+            {isShared && (
+              <RenderPostText
+                text={post?.text} 
+                mentions={post?.mentions} 
+                hashtags={post?.Hashtags} 
+              />
+            )}
 
             {/* Original Post Content */}
             {isShared && original && (
@@ -200,57 +196,30 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                   </span>
                 </div>
                 {/* Original Post Content */}
-                {original?.text && (() => {
-                  const isArabic = /[\u0600-\u06FF]/.test(original?.text);
-                  return (
-                    <p
-                      className={`text-sm italic break-all whitespace-pre-wrap ${
-                        isArabic ? 'text-right' : 'text-left'
-                      } text-gray-700 dark:text-gray-300`}
-                      dir={isArabic ? 'rtl' : 'ltr'}
-                    >
-                      {renderTextWithMentionsAndHashtags(original?.text, original?.mentions || [], original?.Hashtags || [])}
-                    </p>
-                  );
-                })()}
+                {isShared && (
+                  <RenderPostText
+                    text={original?.text}
+                    mentions={original?.mentions}
+                    hashtags={original?.Hashtags}
+                    italic={true}
+                  />
+                )}
 
 
                 {original?.Photos && (
-                  <div className={`grid gap-2 ${original?.Photos.length > 1 ? 'grid-cols-2 sm:grid-cols-2' : ''}`}>
-                    {original?.Photos?.map((photo, index) => (
-                      <div
-                        key={index}
-                        onClick={() => setImageView({ url: photo?.url, postId: original?._id })}
-                        className="cursor-pointer"
-                      >
-                        <Image
-                          src={photo?.url}
-                          alt={`photo-${index}`}
-                          width={500}
-                          height={500}
-                          className="w-full max-h-[500px] object-cover rounded-lg shadow-sm"
-                        />
-                      </div>
-                    ))}
-                  </div>
+                  <PostPhotos photos={original?.Photos} setImageView={setImageView} postId={original?._id} />
                 )}
               </Link>
             )}
 
             {/* Normal Post Text */}
-            {!isShared && post?.text && (() => {
-              const isArabic = /[\u0600-\u06FF]/.test(post?.text);
-              return (
-                <p
-                  className={`text-sm break-all whitespace-pre-wrap ${
-                    isArabic ? 'text-right' : 'text-left'
-                  } text-gray-600 dark:text-gray-200`}
-                  dir={isArabic ? 'rtl' : 'ltr'}
-                >
-                  {renderTextWithMentionsAndHashtags(post?.text, post?.mentions || [], post?.Hashtags || [])}
-                </p>
-              );
-            })()}
+            {!isShared &&
+              <RenderPostText
+                text={post?.text} 
+                mentions={post?.mentions} 
+                hashtags={post?.Hashtags} 
+              />
+            }
 
 
             {/* Hashtags */}
@@ -266,71 +235,22 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
 
             {/* Post Photos */}
             {!isShared && post?.Photos && (
-              <div className={`grid gap-2 ${post?.Photos.length > 1 ? 'grid-cols-2 sm:grid-cols-2' : ''}`}>
-                {post?.Photos.map((photo, i) => (
-                  <div
-                    key={i}
-                    onClick={() => setImageView({ url: photo?.url, postId: post?._id })}
-                    className="cursor-pointer"
-                  >
-                    <Image
-                      src={photo?.url}
-                      alt={`photo-${i}`}
-                      width={500}
-                      height={500}
-                      className="w-full max-h-[500px] object-cover rounded-lg"
-                    />
-                  </div>
-                ))}
-              </div>
+              <PostPhotos photos={post?.Photos} setImageView={setImageView} postId={post?._id} />
             )}
 
             {/* Actions */}
             {isLogin && (
-              <div className='flex items-center gap-6 pt-4'>
-                <button disabled={post?.hahas?.includes(user?._id)} onClick={() => likePost(post?._id, post?.owner._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
-                  {post?.likes?.includes(user?._id) ? (
-                    <IoIosHeart className='text-red-500 text-2xl' />
-                  ) : (
-                    <CiHeart className='text-gray-500 text-2xl' />
-                  )}
-                  <span className='text-gray-400 text-sm font-medium'>{post?.likes?.length}</span>
-                </button>
-                <button disabled={post?.likes?.includes(user?._id)} onClick={() => hahaPost(post?._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
-                  {post?.hahas?.includes(user?._id) ? (
-                    <LuLaugh className='text-yellow-500 text-2xl' />
-                  ) : (
-                    <LuLaugh className='text-gray-500 text-2xl' />
-                  )}
-                  <span className='text-gray-400 text-sm font-medium'>{post?.hahas?.length}</span>
-                </button>
-                {!post?.isCommentOff && (
-                  <Link href={`/Pages/Post/${post?._id}`} className='flex items-center gap-2 transition-all hover:scale-110'>
-                    <FaRegCommentDots className='text-gray-500 text-xl' />
-                    <span className='text-gray-400 text-sm font-medium'>{post?.comments?.length}</span>
-                  </Link>
-                )}
-                <div 
-                  onClick={() => sharePost(
-                    post?.originalPost ? post?.originalPost?._id : post?._id, 
-                    post?.owner?._id
-                  )} 
-                  className="flex items-center gap-2 cursor-pointer transition-all hover:scale-110"
-                >
-                  <IoIosShareAlt className="text-gray-500 text-2xl" />
-                  {/* <span className="text-gray-400 text-sm font-medium">{post?.shares?.length}</span> */}
-                </div>
-                <div onClick={() => setOpenModel(true)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
-                  <BiRepost className='text-gray-500 text-2xl' />
-                  {/* <span className='text-gray-400 text-sm font-medium'>{post?.shares?.length}</span> */}
-                </div>
+              <PostActions
+                post={post}
+                user={user}
+                likePost={likePost}
+                hahaPost={hahaPost}
+                sharePost={sharePost}
+                savePost={savePost}
+                setOpenModel={setOpenModel}
+              />
+            )}
 
-                <div onClick={() => savePost(post?._id)} className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'>
-                  <CiBookmark className={`${post?.saved?.includes(user?._id) ? 'text-yellow-400' : 'text-gray-500'} text-2xl`} />
-                  <span className='text-gray-400 text-sm font-medium'>{post?.saved?.length}</span>
-                </div>
-              </div>
-            )} 
 
             {/* Comment Avatars */}
             {post?.comments?.length > 0 && (

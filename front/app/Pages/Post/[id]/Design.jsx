@@ -6,12 +6,11 @@ import { FaRegCommentDots } from 'react-icons/fa';
 import { IoIosShareAlt, IoIosHeart, IoIosSend } from 'react-icons/io';
 import { BsThreeDots, BsEye } from 'react-icons/bs';
 import { motion } from 'framer-motion';
-import { useReport } from '@/app/Context/ReportContext';
 import PostMenu from '@/app/Component/PostMenu';
 import Comment from '@/app/Component/Comment';
 import CommentSkeleton from '@/app/Skeletons/CommentSkeleton';
-import { FaFaceGrinSquintTears } from "react-icons/fa6";
 import { LuLaugh } from "react-icons/lu";
+import PostPhotos from "@/app/Component/Post/PostPhotos";
 
 const DesignPostSelect = ({
   post,
@@ -166,26 +165,14 @@ const DesignPostSelect = ({
                 {renderTextWithMentionsAndHashtags(original?.text, original?.mentions || [], original?.Hashtags || [])}
               </p>
               {original?.Photos?.length > 0 && (
-                <div className={`grid gap-2 ${original.Photos.length === 1 ? 'grid-cols-1' : original.Photos.length === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'}`}>
-                  {original.Photos.map((photo, i) => (
-                    <motion.div key={i} onClick={() => setImageView({ url: photo?.url, postId: original._id })} className="cursor-pointer rounded-xl overflow-hidden">
-                      <Image src={photo?.url} alt={`photo-${i}`} width={500} height={500} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
-                    </motion.div>
-                  ))}
-                </div>
+                <PostPhotos photos={original.Photos} setImageView={setImageView} postId={original._id} />
               )}
             </div>
           )}
 
           {/* Photos */}
           {!isShared && post.Photos?.length > 0 && (
-            <div className={`grid gap-2 ${post.Photos.length === 1 ? 'grid-cols-1' : post.Photos.length === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'}`}>
-              {post.Photos.map((photo, i) => (
-                <motion.div key={i} onClick={() => setImageView({ url: photo?.url, postId: post._id })} className="cursor-pointer rounded-xl overflow-hidden">
-                  <Image src={photo?.url} alt={`photo-${i}`} width={500} height={500} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
-                </motion.div>
-              ))}
-            </div>
+            <PostPhotos photos={post.Photos} setImageView={setImageView} postId={post._id} />
           )}
 
           {/* Actions */}
@@ -251,7 +238,7 @@ const DesignPostSelect = ({
   )
 }
 const ActionIcon = ({ Icon, count, onClick, active, activeHaha , condition }) => (
-  <motion.button disabled={condition || false} onClick={onClick} whileTap={{ scale: 0.9 }} className="flex items-center gap-2 cursor-pointer">
+  <motion.button onClick={onClick} whileTap={{ scale: 0.9 }} className={`${condition ? "hidden" : "flex"} items-center gap-2 cursor-pointer`}>
     <Icon className={`text-2xl ${activeHaha ? 'text-yellow-500' : ''} ${active ? 'text-red-500' : 'text-gray-400'}`} />
     <span className="text-gray-400 text-sm">{count}</span>
   </motion.button>
