@@ -301,23 +301,23 @@ export const AuthContextProvider = ({ children }) => {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/block/${id}`,
         {},
-        {
-          headers: { authorization: `Bearer ${user.token}` }
-        }
+        { headers: { authorization: `Bearer ${user.token}` } }
       );
 
       setUser((prevUser) => {
         const isBlocked = prevUser.blockedUsers.includes(id);
-
         return {
           ...prevUser,
           blockedUsers: isBlocked
             ? prevUser.blockedUsers.filter((blockedId) => blockedId !== id)
-            : [...prevUser.blockedUsers, id]
+            : [...prevUser.blockedUsers, id],
         };
       });
 
       showAlert(res.data.message);
+
+      // ✅ رجع نسخة userSelected جديدة (من الـ backend)
+      return res.data.updatedTargetUser; 
     } catch (err) {
       console.error(err);
     }
