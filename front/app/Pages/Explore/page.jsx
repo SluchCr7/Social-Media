@@ -58,10 +58,12 @@ const Search = () => {
         const filteredPosts = Array.isArray(posts)
           ? posts.filter(
               (p) =>
-                (p.title &&
-                  p.title.toLowerCase().includes(search.toLowerCase())) ||
-                (p.content &&
-                  p.content.toLowerCase().includes(search.toLowerCase()))
+                (p.text && p.text.toLowerCase().includes(search.toLowerCase())) ||
+                (p.Hashtags && p.Hashtags.some(tag => tag.toLowerCase().includes(searchLower))) ||
+                (p.owner?.username && p.owner.username.toLowerCase().includes(searchLower)) ||
+                (p.owner?.interests && p.owner.interests.some(interest => interest.toLowerCase().includes(searchLower))) ||
+                (p.community?.Name && p.community.Name.toLowerCase().includes(searchLower))
+                (p.community?.tags && p.community.tags.some(tag => tag.toLowerCase().includes(searchLower)))
             )
           : [];
 
