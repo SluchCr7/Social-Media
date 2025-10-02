@@ -112,13 +112,26 @@ export const AuthContextProvider = ({ children }) => {
               ...u,
               followers:
                 res.data.message === "Followed"
-                  ? [...u.followers, { _id: user._id }] // أضف object زي اللي راجع من السيرفر
-                  : u.followers.filter((f) => f._id !== user._id), // شيل الـ object كامل بناءً على _id
+                  ? [...u.followers, { _id: user._id }]
+                  : u.followers.filter((f) => f._id !== user._id),
             };
           }
           return u;
         })
       );
+
+      // ✅ تحديث الـ user إذا كان هو نفس الشخص الذي فعل التغيير
+      if (user._id === id) {
+        const updatedUser = {
+          ...user,
+          followers:
+            res.data.message === "Followed"
+              ? [...user.followers, { _id: user._id }]
+              : user.followers.filter((f) => f._id !== user._id),
+        };
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
     } catch (err) {
       console.error(err);
     }
@@ -296,32 +309,34 @@ export const AuthContextProvider = ({ children }) => {
   };
 
 
-  const blockOrUnblockUser = async (id) => {
-    try {
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/block/${id}`,
-        {},
-        { headers: { authorization: `Bearer ${user.token}` } }
-      );
+const blockOrUnblockUser = async (id) => {
+  try {
+    const res = await axios.put(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/block/${id}`,
+      {},
+      { headers: { authorization: `Bearer ${user.token}` } }
+    );
 
-      setUser((prevUser) => {
-        const isBlocked = prevUser.blockedUsers.includes(id);
-        return {
-          ...prevUser,
-          blockedUsers: isBlocked
-            ? prevUser.blockedUsers.filter((blockedId) => blockedId !== id)
-            : [...prevUser.blockedUsers, id],
-        };
-      });
+    // تحديث الـ user المحلي
+    setUser((prevUser) => {
+      const isBlocked = prevUser.blockedUsers.includes(id);
+      const updatedUser = {
+        ...prevUser,
+        blockedUsers: isBlocked
+          ? prevUser.blockedUsers.filter((blockedId) => blockedId !== id)
+          : [...prevUser.blockedUsers, id],
+      };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      return updatedUser;
+    });
 
-      showAlert(res.data.message);
+    showAlert(res.data.message);
 
-      // ✅ رجع نسخة userSelected جديدة (من الـ backend)
-      return res.data.updatedTargetUser; 
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    return res.data.updatedTargetUser;
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   const verifyAccount = async (id, token) => {
     try {
