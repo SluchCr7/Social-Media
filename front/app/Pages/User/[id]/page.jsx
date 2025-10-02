@@ -85,15 +85,18 @@ const UserProfilePage = ({ params }) => {
   const isOwner = user?._id === userSelected?._id
   const canSeePrivateContent = useMemo(() => !userSelected?.isPrivate || isOwner || isFollowing, [userSelected, isOwner, isFollowing])
   const combinedPosts = useMemo(() => {
-      if (!userPosts.length && !userSelected?.pinsPosts?.length) return []
-  
-      const pinnedIds = new Set(userSelected?.pinsPosts?.map(p => p?._id))
-      const regularPosts = userPosts?.filter(p => !pinnedIds.has(p?._id))
-  
-      return [
-        ...userSelected?.pinsPosts?.map(p => ({ ...p, isPinned: true })),
-        ...regularPosts?.map(p => ({ ...p, isPinned: false })),
-      ]
+    const posts = userPosts || []
+    const pins = userSelected?.pinsPosts || []
+
+    if (!posts.length && !pins.length) return []
+
+    const pinnedIds = new Set(pins.map(p => p?._id))
+    const regularPosts = posts.filter(p => !pinnedIds.has(p?._id))
+
+    return [
+      ...(pins?.map(p => ({ ...p, isPinned: true })) || []),
+      ...(regularPosts?.map(p => ({ ...p, isPinned: false })) || []),
+    ]
   }, [userPosts, userSelected?.pinsPosts])
 
   const postYears = useMemo(() => {
