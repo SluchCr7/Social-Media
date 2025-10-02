@@ -40,7 +40,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
       <div className="
         bg-white/80 dark:bg-black/30 backdrop-blur-xl
         border border-gray-200/70 dark:border-gray-700/50
-        w-full max-w-2xl mx-auto p-4 sm:p-6 
+        w-full p-4 sm:p-6 
         rounded-2xl flex flex-col gap-5 shadow-lg
         transition-all duration-300 hover:scale-[1.01]
       ">
