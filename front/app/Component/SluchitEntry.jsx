@@ -150,7 +150,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                     </div>
                   </Link>
                   <span className="text-gray-400 text-xs whitespace-nowrap">
-                    {new Date(original?.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                    {new Date(original?.createdAt).toLocaleDateString()}
                   </span>
                 </div>
 
