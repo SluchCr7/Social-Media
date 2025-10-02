@@ -8,9 +8,24 @@ import { HiLockClosed, HiLockOpen, HiLink } from 'react-icons/hi'
 import Link from 'next/link'
 import { useAuth } from '../../Context/AuthContext'
 
+const MenuItem = ({ icon, children, onClick, danger }) => (
+  <button
+    onClick={onClick}
+    className={`flex items-center gap-3 px-5 py-3 text-sm w-full text-left transition 
+      ${danger ? 'text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30' 
+               : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'}
+    `}
+  >
+    {icon}
+    <span>{children}</span>
+  </button>
+)
+
+const Divider = () => <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+
 const ProfileMenu = ({ 
-  context,            // "owner" | "visitor"
-  actions = {},       // object فيه الفانكشنز اللي محتاجها
+  context,            
+  actions = {},       
   isPrivate,
   isBlockedByMe,
   profileUrl,
@@ -35,78 +50,61 @@ const ProfileMenu = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 mt-2 w-56 rounded-xl bg-white dark:bg-gray-800 shadow-lg border dark:border-gray-700 overflow-hidden z-50"
+            className="absolute right-0 mt-2 w-64 rounded-xl bg-white dark:bg-gray-800 
+                       shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
           >
-            <div className="flex flex-col text-sm">
+            <div className="flex flex-col">
 
               {/* 👤 لو المالك */}
               {context === "owner" && (
-                <div className="flex flex-col gap-3 w-full">
-                  <Link
-                    href={`/Pages/User/${userId}`}
-                    className="flex text-sm items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                  >
-                    <IoEyeSharp /> View as User
+                <>
+                  <Link href={`/Pages/User/${userId}`}>
+                    <MenuItem icon={<IoEyeSharp />}>View as Visitor</MenuItem>
                   </Link>
 
                   {actions.setUpdate && (
-                    <button
-                      onClick={() => { setOpen(false); actions.setUpdate(true) }}
-                      className="flex text-sm items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                    >
-                      <FaUserEdit /> Edit Profile
-                    </button>
+                    <MenuItem icon={<FaUserEdit />} onClick={() => { setOpen(false); actions.setUpdate(true) }}>
+                      Edit Profile
+                    </MenuItem>
                   )}
 
                   {actions.updatePrivacy && (
-                    <button
+                    <MenuItem 
+                      icon={isPrivate ? <HiLockOpen /> : <HiLockClosed />} 
                       onClick={actions.updatePrivacy}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition text-sm"
                     >
-                      {isPrivate ? (
-                        <>
-                          <HiLockOpen /> Make Account Public
-                        </>
-                      ) : (
-                        <>
-                          <HiLockClosed /> Make Account Private
-                        </>
-                      )}
-                    </button>
+                      {isPrivate ? "Make Account Public" : "Make Account Private"}
+                    </MenuItem>
                   )}
-                </div>
+                </>
               )}
 
               {/* 👥 لو زائر */}
               {context === "visitor" && (
-                <div className="flex flex-col gap-3 w-full">
+                <>
                   {actions.handleReport && (
-                    <button
-                      onClick={actions.handleReport}
-                      className="flex items-center gap-3 px-5 py-3 w-full text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                    >
+                    <MenuItem onClick={actions.handleReport} danger>
                       🚩 Report User
-                    </button>
+                    </MenuItem>
                   )}
 
                   {actions.blockOrUnblockUser && (
-                    <button
-                      onClick={()=> actions.blockOrUnblockUser(userId)}
-                      className="flex items-center gap-3 px-5 py-3 w-full text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    <MenuItem 
+                      onClick={() => actions.blockOrUnblockUser(userId)} 
+                      danger
                     >
                       {isBlockedByMe ? "🔓 Unblock User" : "⛔ Block User"}
-                    </button>
+                    </MenuItem>
                   )}
-                </div>
+                </>
               )}
 
-              {/* زر مشترك */}
-              <button
-                onClick={copyToClipboard}
-                className="flex text-sm items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-              >
-                <HiLink /> Copy Profile Link
-              </button>
+              <Divider />
+
+              {/* مشترك */}
+              <MenuItem icon={<HiLink />} onClick={copyToClipboard}>
+                Copy Profile Link
+              </MenuItem>
             </div>
           </motion.div>
         )}

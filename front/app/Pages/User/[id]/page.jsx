@@ -132,7 +132,7 @@ const UserProfilePage = ({ params }) => {
               blockOrUnblockUser
             }}
             isBlockedByMe={isBlockedByMe}
-            profileUrl={""}
+            profileUrl={`${window.location.origin}/Pages/User/${userSelected?._id}`}
             userId={userSelected?._id}
             open={openMenu}
             setOpen={setOpenMenu}
