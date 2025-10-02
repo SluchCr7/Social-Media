@@ -233,7 +233,7 @@ const CreateCommunityModal = ({ show, onClose, form, setForm, handleCreate, isCr
 
 // ================= Search & Filter Component =================
 const CommunityFilter = ({ categories, activeCategory, setActiveCategory, searchTerm, setSearchTerm, sortBy, setSortBy }) => (
-  <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between flex-wrap sticky top-20 bg-lightMode-bg dark:bg-darkMode-bg z-10 p-2 rounded-md shadow-sm">
+  <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between flex-wrap sticky top-0 bg-lightMode-bg dark:bg-darkMode-bg z-10 p-2 rounded-md shadow-sm">
     <div className="flex gap-2 flex-wrap">
       {categories.map((cat) => (
         <motion.button

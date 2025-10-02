@@ -55,7 +55,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
           </div>
 
           {/* ✅ Actions */}
-          <div className="flex items-center gap-3 h-full">
+          <div className="flex items-center gap-2 md:gap-4 h-full pt-3">
             {isLogin ? (
               <>
                 {/* Notifications */}
