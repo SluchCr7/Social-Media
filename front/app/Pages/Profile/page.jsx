@@ -71,18 +71,17 @@ const ProfilePage = () => {
   useInfiniteScroll(page , setPage ,loaderRef, fetchUserPosts ,userData,userHasMore)
   // 📌 البوستات المثبتة + العادية
   const combinedPosts = useMemo(() => {
-    const posts = userPosts || []
-    const pins = userData?.pinsPosts || []
+    if (!userPosts && !userData?.pinsPosts) return []
 
-    if (!posts.length && !pins.length) return []
+    const pins = (userData?.pinsPosts || []).map(p => ({ ...p, isPinned: true }))
+    const pinnedIds = new Set(pins.map(p => p._id))
 
-    const pinnedIds = new Set(pins.map(p => p?._id))
-    const regularPosts = posts.filter(p => !pinnedIds.has(p?._id))
-
-    return [
-      ...(pins?.map(p => ({ ...p, isPinned: true })) || []),
-      ...(regularPosts?.map(p => ({ ...p, isPinned: false })) || []),
-    ]
+    const regularPosts = (userPosts || [])
+      .filter(p => !pinnedIds.has(p._id))
+      .map(p => ({ ...p, isPinned: false }))
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    // ✅ أولاً: المثبتة بالترتيب، ثم البوستات العادية
+    return [...pins, ...regularPosts]
   }, [userPosts, userData?.pinsPosts])
 
   const postYears = useMemo(() => {
