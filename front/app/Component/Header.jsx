@@ -8,8 +8,6 @@ import { useAuth } from '../Context/AuthContext';
 import { IoIosLogIn } from "react-icons/io";
 import { FiMenu } from "react-icons/fi";
 import { useAside } from '../Context/AsideContext';
-import ReelUploadModal from './MenuUploadReel';
-import { RiVideoUploadLine } from "react-icons/ri";
 import { motion } from "framer-motion";
 
 const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab }) => {
@@ -29,7 +27,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
   return (
     <>
       <header className="sticky top-0 z-50 bg-white/70 dark:bg-darkMode-bg/70 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="w-full flex items-center justify-between px-3 md:px-6">
+        <div className="w-full flex items-center justify-between px-3 md:px-6 h-14">
           
           {/* ✅ Tabs */}
           <div className="relative flex gap-6">
@@ -120,4 +118,3 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
 };
 
 export default Header;
-

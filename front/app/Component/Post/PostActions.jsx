@@ -14,7 +14,6 @@ const PostActions = ({ post, user, likePost, hahaPost, sharePost, savePost, setO
     >
       {/* Like */}
       <button
-        disabled={post?.hahas?.includes(user?._id)}
         onClick={() => likePost(post?._id, post?.owner._id)}
         className={`${post?.hahas?.includes(user?._id) ? 'hidden' : 'flex'} items-center gap-2 cursor-pointer transition-all hover:scale-110 min-w-[70px]`}
       >
@@ -28,7 +27,6 @@ const PostActions = ({ post, user, likePost, hahaPost, sharePost, savePost, setO
 
       {/* Haha */}
       <button
-        disabled={post?.likes?.includes(user?._id)}
         onClick={() => hahaPost(post?._id)}
         className={`${post?.likes?.includes(user?._id) ? 'hidden' : 'flex'} flex items-center gap-2 cursor-pointer transition-all hover:scale-110 min-w-[70px]`}
       >
