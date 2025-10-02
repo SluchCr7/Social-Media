@@ -168,7 +168,7 @@ const ProfilePage = () => {
               }}
               isPrivate={userData?.isPrivate}
               profileUrl={`${window.location.origin}/Pages/User/${userData?._id}`}
-              userId={userData._id}
+              userId={userData?._id}
               open={openMenu}
               setOpen={setOpenMenu}
             />
