@@ -15,7 +15,7 @@ const MainApp = () => {
   const { unReadedMessage } = useMessage();
     const [activeTab, setActiveTab] = useState("following");
   return (
-    <div className="flex-1 w-full pl-4">
+    <div className="flex-1 w-full pl-0 md:pl-4">
       {/* Header ثابت أعلى الصفحة */}
       <Header
         unReadedMessage={unReadedMessage}
