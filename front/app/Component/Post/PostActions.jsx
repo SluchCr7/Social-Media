@@ -9,12 +9,14 @@ import { BiRepost } from "react-icons/bi"
 
 const PostActions = ({ post, user, likePost, hahaPost, sharePost, savePost, setOpenModel }) => {
   return (
-    <div className='flex items-center gap-6 pt-4'>
+    <div 
+      className='flex flex-wrap gap-4 sm:gap-6 pt-4 justify-start sm:justify-between'
+    >
       {/* Like */}
       <button
         disabled={post?.hahas?.includes(user?._id)}
         onClick={() => likePost(post?._id, post?.owner._id)}
-        className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'
+        className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110 min-w-[70px]'
       >
         {post?.likes?.includes(user?._id) ? (
           <IoIosHeart className='text-red-500 text-2xl' />
@@ -28,7 +30,7 @@ const PostActions = ({ post, user, likePost, hahaPost, sharePost, savePost, setO
       <button
         disabled={post?.likes?.includes(user?._id)}
         onClick={() => hahaPost(post?._id)}
-        className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'
+        className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110 min-w-[70px]'
       >
         {post?.hahas?.includes(user?._id) ? (
           <LuLaugh className='text-yellow-500 text-2xl' />
@@ -40,7 +42,10 @@ const PostActions = ({ post, user, likePost, hahaPost, sharePost, savePost, setO
 
       {/* Comment */}
       {!post?.isCommentOff && (
-        <Link href={`/Pages/Post/${post?._id}`} className='flex items-center gap-2 transition-all hover:scale-110'>
+        <Link 
+          href={`/Pages/Post/${post?._id}`} 
+          className='flex items-center gap-2 transition-all hover:scale-110 min-w-[70px]'
+        >
           <FaRegCommentDots className='text-gray-500 text-xl' />
           <span className='text-gray-400 text-sm font-medium'>{post?.comments?.length}</span>
         </Link>
@@ -52,7 +57,7 @@ const PostActions = ({ post, user, likePost, hahaPost, sharePost, savePost, setO
           post?.originalPost ? post?.originalPost?._id : post?._id,
           post?.owner?._id
         )}
-        className="flex items-center gap-2 cursor-pointer transition-all hover:scale-110"
+        className="flex items-center gap-2 cursor-pointer transition-all hover:scale-110 min-w-[70px]"
       >
         <IoIosShareAlt className="text-gray-500 text-2xl" />
       </div>
@@ -60,7 +65,7 @@ const PostActions = ({ post, user, likePost, hahaPost, sharePost, savePost, setO
       {/* Repost (Modal) */}
       <div
         onClick={() => setOpenModel(true)}
-        className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'
+        className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110 min-w-[70px]'
       >
         <BiRepost className='text-gray-500 text-2xl' />
       </div>
@@ -68,7 +73,7 @@ const PostActions = ({ post, user, likePost, hahaPost, sharePost, savePost, setO
       {/* Save */}
       <div
         onClick={() => savePost(post?._id)}
-        className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110'
+        className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110 min-w-[70px]'
       >
         <CiBookmark className={`${post?.saved?.includes(user?._id) ? 'text-yellow-400' : 'text-gray-500'} text-2xl`} />
         <span className='text-gray-400 text-sm font-medium'>{post?.saved?.length}</span>
