@@ -70,7 +70,7 @@ const postPopulate = [
   },
   {
     path: "originalPost",
-    select: "text owner",
+    select: "text owner createdAt Photos",
     populate: {
       path: "owner",
       select: userSelect,

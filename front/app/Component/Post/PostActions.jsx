@@ -16,7 +16,7 @@ const PostActions = ({ post, user, likePost, hahaPost, sharePost, savePost, setO
       <button
         disabled={post?.hahas?.includes(user?._id)}
         onClick={() => likePost(post?._id, post?.owner._id)}
-        className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110 min-w-[70px]'
+        className={`${post?.hahas?.includes(user?._id) ? 'hidden' : 'flex'} items-center gap-2 cursor-pointer transition-all hover:scale-110 min-w-[70px]`}
       >
         {post?.likes?.includes(user?._id) ? (
           <IoIosHeart className='text-red-500 text-2xl' />
@@ -30,7 +30,7 @@ const PostActions = ({ post, user, likePost, hahaPost, sharePost, savePost, setO
       <button
         disabled={post?.likes?.includes(user?._id)}
         onClick={() => hahaPost(post?._id)}
-        className='flex items-center gap-2 cursor-pointer transition-all hover:scale-110 min-w-[70px]'
+        className={`${post?.likes?.includes(user?._id) ? 'hidden' : 'flex'} flex items-center gap-2 cursor-pointer transition-all hover:scale-110 min-w-[70px]`}
       >
         {post?.hahas?.includes(user?._id) ? (
           <LuLaugh className='text-yellow-500 text-2xl' />
