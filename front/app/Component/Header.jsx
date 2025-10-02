@@ -57,7 +57,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
           </div>
 
           {/* ✅ Actions */}
-          <div className="flex items-center gap-2 md:gap-4 py-3">
+          <div className="flex items-center gap-2 md:gap-4 py-3 pt-3">
             {isLogin ? (
               <>
                 {/* Notifications */}
