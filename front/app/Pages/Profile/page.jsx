@@ -71,13 +71,13 @@ const ProfilePage = () => {
   const handleObserver = useCallback(
     (entries) => {
       const target = entries[0];
-      if (target.isIntersecting && userHasMore && user?._id) {
+      if (target.isIntersecting && userHasMore && userData?._id) {
         const nextPage = page + 1;
         setPage(nextPage);
-        fetchUserPosts(user._id, nextPage, 10);
+        fetchUserPosts(userData._id, nextPage, 10);
       }
     },
-    [page, userHasMore, user?._id, setPage, fetchUserPosts]
+    [page, userHasMore, userData?._id, setPage, fetchUserPosts]
   );
 
   useEffect(() => {
@@ -114,9 +114,6 @@ const ProfilePage = () => {
       return new Date(b.createdAt) - new Date(a.createdAt) // الأحدث بعد البيند
     })
   }, [userPosts, userData?.pinsPosts])
-  useEffect(()=>{
-    console.log(combinedPosts)
-  },[combinedPosts])
   const postYears = useMemo(() => {
     if (!combinedPosts || combinedPosts?.length === 0) return [];
     const yearsSet = new Set(

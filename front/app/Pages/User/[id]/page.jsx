@@ -66,9 +66,30 @@ const UserProfilePage = ({ params }) => {
     }
   }, [userSelected?._id])
 
+  const handleObserver = useCallback(
+    (entries) => {
+      const target = entries[0];
+      if (target.isIntersecting && userHasMore && userSelected?._id) {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        fetchUserPosts(userSelected._id, nextPage, 10);
+      }
+    },
+    [page, userHasMore, userSelected?._id, setPage, fetchUserPosts]
+  );
 
-  useInfiniteScroll(page , setPage ,loaderRef, fetchUserPosts ,userSelected,userHasMore)
-  
+  useEffect(() => {
+    if (!loaderRef?.current) return;
+
+    const options = { root: null, rootMargin: "20px", threshold: 1.0 };
+    const observer = new IntersectionObserver(handleObserver, options);
+
+    observer.observe(loaderRef.current);
+
+    return () => {
+      if (loaderRef.current) observer.unobserve(loaderRef.current);
+    };
+  }, [handleObserver, loaderRef]);
 
   useEffect(() => {
     if (userSelected) setLoading(false)
