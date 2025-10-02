@@ -70,19 +70,28 @@ const ProfilePage = () => {
 
   useInfiniteScroll(page , setPage ,loaderRef, fetchUserPosts ,userData,userHasMore)
   // 📌 البوستات المثبتة + العادية
-  const combinedPosts = useMemo(() => {
-    if (!userPosts && !userData?.pinsPosts) return []
+const combinedPosts = useMemo(() => {
+  if (!userPosts && !userData?.pinsPosts) return []
 
-    const pins = (userData?.pinsPosts || []).map(p => ({ ...p, isPinned: true }))
-    const pinnedIds = new Set(pins.map(p => p._id))
+  const pins = (userData?.pinsPosts || []).map(p => ({ ...p, isPinned: true }))
+  const pinnedIds = new Set(pins.map(p => p._id))
 
-    const regularPosts = (userPosts || [])
-      .filter(p => !pinnedIds.has(p._id))
-      .map(p => ({ ...p, isPinned: false }))
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    // ✅ أولاً: المثبتة بالترتيب، ثم البوستات العادية
-    return [...pins, ...regularPosts]
-  }, [userPosts, userData?.pinsPosts])
+  // دمج: أي بوست في userPosts نشوف لو هو pinned
+  const regularPosts = (userPosts || []).map(p => ({
+    ...p,
+    isPinned: pinnedIds.has(p._id),
+  }))
+
+  // ندمج الاثنين (للتأكد مفيش تكرار)
+  const all = [...pins, ...regularPosts.filter(p => !pinnedIds.has(p._id))]
+
+  // ✅ ترتيب: pinned فوق، بعدين الباقي بالـ createdAt
+  return all.sort((a, b) => {
+    if (a.isPinned && !b.isPinned) return -1
+    if (!a.isPinned && b.isPinned) return 1
+    return new Date(b.createdAt) - new Date(a.createdAt) // الأحدث بعد البيند
+  })
+}, [userPosts, userData?.pinsPosts])
 
   const postYears = useMemo(() => {
     if (!combinedPosts || combinedPosts?.length === 0) return [];
