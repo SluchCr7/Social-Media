@@ -72,21 +72,21 @@ const ProfilePage = () => {
   // 📌 البوستات المثبتة + العادية
   // const combinedPosts = useCombinedPosts(userPosts, userData?.pinsPosts || [])
   const combinedPosts = useMemo(() => {
-      if (!userPosts.length && !userData?.pinsPosts.length) return []
+      if (!userPosts?.length && !userData?.pinsPosts?.length) return []
   
-      const pinnedIds = new Set(userData?.pinsPosts.map(p => p._id))
-      const regularPosts = userPosts.filter(p => !pinnedIds.has(p._id))
+      const pinnedIds = new Set(userData?.pinsPosts?.map(p => p?._id))
+      const regularPosts = userPosts?.filter(p => !pinnedIds.has(p?._id))
   
       return [
-        ...userData?.pinsPosts.map(p => ({ ...p, isPinned: true })),
+        ...userData?.pinsPosts?.map(p => ({ ...p, isPinned: true })),
         ...regularPosts.map(p => ({ ...p, isPinned: false })),
       ]
     }, [posts, userData?.pinsPosts])
 
   const postYears = useMemo(() => {
-    if (!combinedPosts || combinedPosts.length === 0) return [];
+    if (!combinedPosts || combinedPosts?.length === 0) return [];
     const yearsSet = new Set(
-      combinedPosts.map((p) => new Date(p.createdAt).getFullYear().toString())
+      combinedPosts?.map((p) => new Date(p.createdAt).getFullYear().toString())
     );
     return Array.from(yearsSet).sort((a, b) => b - a); // ترتيب تنازلي
   }, [combinedPosts]);
