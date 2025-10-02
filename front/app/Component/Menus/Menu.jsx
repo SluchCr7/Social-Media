@@ -3,7 +3,7 @@ import MenuFollowers from './MenuFollowers';
 import MenuMessagesFromMe from './MenuMessagesFromMe';
 import { useAuth } from '../../Context/AuthContext';
 import HashtagsMenu from './HashtagsMenu';
-import Communities from '../Communities';
+import Communities from './Communities';
 import Link from 'next/link';
 import News from './News';
 import MenuAllNews from '../MenuAllNews';

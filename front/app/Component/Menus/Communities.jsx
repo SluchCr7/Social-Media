@@ -1,9 +1,9 @@
 'use client'
 import React from 'react'
-import { useCommunity } from '../Context/CommunityContext'
+import { useCommunity } from '../../Context/CommunityContext'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useAuth } from '../Context/AuthContext'
+import { useAuth } from '../../Context/AuthContext'
 import { FaPlus, FaCheck, FaUsers, FaHourglassHalf, FaCrown, FaUserShield } from 'react-icons/fa'
 
 const Communities = () => {

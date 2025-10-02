@@ -50,7 +50,7 @@ const EventPopulate = [
 const postPopulate = [
   {
     path: "owner",
-    select: `username profileName profilePhoto description`, // أزلت followers/following لتخفيف الحمل
+    select: `username profileName profilePhoto description followers following`, 
   },
   {
     path: "community",
