@@ -247,7 +247,7 @@ const ProfilePage = () => {
             <ProfileMenu
               context="owner"
               actions={{
-                updatePrivacy,
+                updatePrivacy: togglePrivateAccount,
                 setUpdate
               }}
               isPrivate={isPrivate}
