@@ -167,7 +167,7 @@ const ProfilePage = () => {
                 setUpdate
               }}
               isPrivate={userData?.isPrivate}
-              profileUrl={`${window.location.origin}/Pages/User/${userData._id}`}
+              profileUrl={`${window.location.origin}/Pages/User/${userData?._id}`}
               userId={userData._id}
               open={openMenu}
               setOpen={setOpenMenu}
