@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { usePost } from '@/app/Context/PostContext'
 import PostSkeleton from '@/app/Skeletons/PostSkeleton'
 
-const TabsContent = ({ activeTab, combinedPosts, posts, userSelected, filters }) => {
+const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
   const { setImageView , userIsLoading } = usePost()
 
   // ✅ فلترة وترتيب البوستات حسب الفلاتر
@@ -52,9 +52,12 @@ const TabsContent = ({ activeTab, combinedPosts, posts, userSelected, filters })
 
         {activeTab === 'Saved' && (
           <motion.div key="saved" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-[90%] mx-auto">
-            {posts?.filter((p) => p.saved.includes(userSelected?._id)).length > 0
-              ? posts.filter((p) => p.saved.includes(userSelected?._id)).map((post) => <SluchitEntry key={post?._id} post={post} />)
-              : <div className="text-center text-gray-500 py-10">You haven’t saved any posts yet.</div>}
+            {combinedPosts?.filter((p) => p.saved.includes(userSelected?._id)).length > 0
+              ? combinedPosts
+                  .filter((p) => p.saved.includes(userSelected?._id))
+                  .map((post) => <SluchitEntry key={post?._id} post={post} />)
+              : <div className="text-center text-gray-500 py-10">You haven’t saved any posts yet.</div>
+            }
           </motion.div>
         )}
 
@@ -111,8 +114,8 @@ const TabsContent = ({ activeTab, combinedPosts, posts, userSelected, filters })
             transition={{ duration: 0.25 }}
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 w-[95%] mx-auto"
           >
-            {posts?.filter((p) => p?.Photos?.length > 0).length > 0 ? (
-              posts
+            {combinedPosts?.filter((p) => p?.Photos?.length > 0).length > 0 ? (
+              combinedPosts
                 .filter((p) => p?.Photos?.length > 0)
                 .flatMap((p) => p.Photos.map((img, i) => (
                   <div
@@ -132,6 +135,7 @@ const TabsContent = ({ activeTab, combinedPosts, posts, userSelected, filters })
                 You haven’t uploaded any photos yet.
               </div>
             )}
+
           </motion.div>
         )}
 

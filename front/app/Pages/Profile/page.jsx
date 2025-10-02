@@ -197,7 +197,6 @@ const ProfilePage = () => {
               <TabsContent 
                 activeTab={activeTab} 
                 combinedPosts={combinedPosts} 
-                posts={posts} 
                 userSelected={userData}
                 filters={filters}
               />
