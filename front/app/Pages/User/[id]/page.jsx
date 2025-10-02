@@ -92,7 +92,7 @@ const UserProfilePage = ({ params }) => {
   
       return [
         ...userSelected?.pinsPosts?.map(p => ({ ...p, isPinned: true })),
-        ...regularPosts.map(p => ({ ...p, isPinned: false })),
+        ...regularPosts?.map(p => ({ ...p, isPinned: false })),
       ]
   }, [userPosts, userSelected?.pinsPosts])
 
