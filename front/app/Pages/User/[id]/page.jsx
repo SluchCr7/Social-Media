@@ -109,9 +109,6 @@ const UserProfilePage = ({ params }) => {
 
   return (
     <div className="w-full pt-10 text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6">
-      <div>
-
-      </div>
       <ProfileHeader
         user={userSelected}
         isOwner={false}

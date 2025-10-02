@@ -84,7 +84,7 @@ const ProfilePage = () => {
   }
   if (loading) return <ProfileSkeleton />
   return (
-    <div>
+    <div className="w-full min-h-screen bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text">
       <Head>
         <title>{userData?.username || 'Profile'} | Social App</title>
       </Head>
@@ -97,8 +97,6 @@ const ProfilePage = () => {
         transition={{ duration: 0.6 }}
         className="w-full min-h-screen bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6"
       >
-        <div>
-        </div>
         <ProfileHeader
           user={userData}
           isOwner
