@@ -11,6 +11,8 @@ import Comment from '@/app/Component/Comment';
 import CommentSkeleton from '@/app/Skeletons/CommentSkeleton';
 import { LuLaugh } from "react-icons/lu";
 import PostPhotos from "@/app/Component/Post/PostPhotos";
+import RenderPostText from "@/app/Component/Post/RenderText";
+import SharedTitle from "@/app/Component/Post/SharedTitle";
 
 const DesignPostSelect = ({
   post,
@@ -55,21 +57,7 @@ const DesignPostSelect = ({
 
       {/* Shared Info */}
       {isShared && (
-        <div className="text-sm text-gray-800 dark:text-gray-200 italic">
-          <Link
-            href={user?._id === post.owner?._id ? '/Pages/Profile' : `/Pages/User/${post.owner?._id}`}
-            className="font-semibold hover:underline"
-          >
-            {post.owner.username}
-          </Link>{' '}
-          shared a post from{' '}
-          <Link
-            href={user?._id === original?.owner?._id ? '/Pages/Profile' : `/Pages/User/${original?.owner?._id}`}
-            className="font-semibold hover:underline"
-          >
-            {original?.owner?.username}
-          </Link>
-        </div>
+        <SharedTitle user={user} post={post} original={original} />
       )}
 
       {/* Post Card */}
@@ -135,9 +123,11 @@ const DesignPostSelect = ({
 
           {/* Text */}
           {post.text && (
-            <p className="text-gray-700 dark:text-gray-200 whitespace-pre-wrap">
-              {renderTextWithMentionsAndHashtags(post.text, post.mentions || [], post.Hashtags || [])}
-            </p>
+            <RenderPostText
+              text={post.text} 
+              mentions={post.mentions} 
+              hashtags={post.Hashtags} 
+            />
           )}
           {/* Shared Original */}
           {isShared && original && (
@@ -162,7 +152,11 @@ const DesignPostSelect = ({
                 <span className="text-gray-500 text-xs">{new Date(original?.createdAt).toLocaleDateString()}</span>
               </div>
               <p className="text-gray-700 dark:text-gray-200 italic whitespace-pre-wrap">
-                {renderTextWithMentionsAndHashtags(original?.text, original?.mentions || [], original?.Hashtags || [])}
+                <RenderPostText
+                  text={original?.text} 
+                  mentions={original?.mentions} 
+                  hashtags={original?.Hashtags} 
+                />
               </p>
               {original?.Photos?.length > 0 && (
                 <PostPhotos photos={original.Photos} setImageView={setImageView} postId={original._id} />

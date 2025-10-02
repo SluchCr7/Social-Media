@@ -23,7 +23,7 @@ import { CheckStateAccount } from '@/app/Component/UserComponents/UsersStats'
 import { useCombinedPosts } from '@/app/Custome/useCombinedPosts'
 import { selectUserFromUsers } from '@/app/utils/SelectUserFromUsers'
 import FilterBar from '@/app/Component/UserComponents/FilterBar'
-import ProfileMenu from '@/app/Component/ProfileMenu'
+import ProfileMenu from '@/app/Component/UserComponents/ProfileMenu'
 import { useInfiniteScroll } from '@/app/Custome/useInfinteScroll'
 import ProfileHeader from '@/app/Component/UserComponents/ProfileHeader'
 import { usePostYears } from '@/app/Custome/usePostYears'
@@ -239,15 +239,20 @@ const ProfilePage = () => {
           onImageChange={handleImageChange}
           onEdit={() => setUpdate(true)}
           onAddStory={() => setIsStory(true)}
+          setOpenMenu={setOpenMenu}
+          openMenu={openMenu}
           onShowFollowers={() => { setMenuType("followers"); setShowMenu(true); }}
           onShowFollowing={() => { setMenuType("following"); setShowMenu(true); }}
           renderOwnerMenu={() => (
             <ProfileMenu
-              updatePrivacy={togglePrivateAccount}
-              profileUrl={`${window.location.origin}/Pages/User/${userData?._id}`}
-              isPrivate={userData?.isPrivate}
-              setUpdate={setUpdate}
-              userId={userData?._id}
+              context="owner"
+              actions={{
+                updatePrivacy,
+                setUpdate
+              }}
+              isPrivate={isPrivate}
+              profileUrl={profileUrl}
+              userId={user._id}
               open={openMenu}
               setOpen={setOpenMenu}
             />

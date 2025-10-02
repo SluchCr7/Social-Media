@@ -39,7 +39,7 @@ const EventPopulate = [
   { path: "createdBy", select: "username profileName profilePhoto" },
 ];
 // utils/populatePost.js
-const postPopulate = () => [
+const postPopulate = [
   { path: "owner", select: "username profileName profilePhoto following followers description" },
   { path: "community", select: "Name Picture members" },
   { path: "mentions", select: "username profileName profilePhoto" },

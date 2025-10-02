@@ -5,28 +5,29 @@ import Image from 'next/image'
 import { useAuth } from '@/app/Context/AuthContext'
 import { usePost } from '@/app/Context/PostContext'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri"
-import { IoEllipsisHorizontal } from "react-icons/io5"
 import InfoAboutUser from '@/app/Component/UserComponents/InfoAboutUser'
-import { motion } from 'framer-motion'
 import TabsContent from '@/app/Component/UserComponents/TabsContent'
 import Tabs from '@/app/Component/UserComponents/Tabs'
-import StatBlock from '@/app/Component/UserComponents/StatBlock'
 import FollowModal from '@/app/Component/UserComponents/FollowModal'
 import { useStory } from '@/app/Context/StoryContext'
 import StoryViewer from '@/app/Component/StoryViewer'
 import { useReport } from '@/app/Context/ReportContext'
+import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri"
+import { IoEllipsisHorizontal } from "react-icons/io5"
+import { motion } from 'framer-motion'
+import StatBlock from '@/app/Component/UserComponents/StatBlock'
 import { HiBadgeCheck } from "react-icons/hi";
 import { CheckStateAccount } from '@/app/Component/UserComponents/UsersStats'
+import { selectUserFromUsers } from '@/app/utils/SelectUserFromUsers'
 import ProfileSkeleton from '@/app/Skeletons/ProfileSkeleton'
 import { useCombinedPosts } from '@/app/Custome/useCombinedPosts'
-import { selectUserFromUsers } from '@/app/utils/SelectUserFromUsers'
 import { FaLock } from "react-icons/fa";
 import { useAlert } from '@/app/Context/AlertContext'
 import FilterBar from '@/app/Component/UserComponents/FilterBar'
 import { useInfiniteScroll } from '@/app/Custome/useInfinteScroll'
 import ProfileHeader from '@/app/Component/UserComponents/ProfileHeader'
 import { usePostYears } from '@/app/Custome/usePostYears'
+import ProfileMenu from '@/app/Component/UserComponents/ProfileMenu'
 
 const tabs = ['Posts', 'Saved', 'Comments']
 
@@ -44,10 +45,10 @@ const UserProfilePage = ({ params }) => {
   const [followModalType, setFollowModalType] = useState('followers')
   const [userStories, setUserStories] = useState([])
   const [isViewerOpen, setIsViewerOpen] = useState(false)
-  const [showDotsMenu, setShowDotsMenu] = useState(false)
   const [isBlockedByMe, setIsBlockedByMe] = useState(false)
   const [page, setPage] = useState(1) // ✅ رقم الصفحة الحالي
   const loaderRef = useRef(null)
+  const [openMenu, setOpenMenu] = useState(false)
   const [filters, setFilters] = useState({
     year: "all",
     month: "all",
@@ -97,17 +98,10 @@ const UserProfilePage = ({ params }) => {
     }
   }
 
-  // 📌 وظائف الدوتس مينو
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/Pages/User/${userSelected?._id}`)
-    showAlert("Link copied to clipboard.");
-    setShowDotsMenu(false)
-  }
 
   const handleBlock = async () => {
     const updatedTargetUser = await blockOrUnblockUser(userSelected._id);
     if (updatedTargetUser) setUserSelected(updatedTargetUser);
-    setShowDotsMenu(false);
   };
 
 
@@ -115,7 +109,6 @@ const UserProfilePage = ({ params }) => {
     setIsTargetId(userSelected?._id);
     setReportedOnType('user');
     setShowMenuReport(true);
-    setShowDotsMenu(false)
   }
 
   if (loading) return <ProfileSkeleton/>
@@ -281,45 +274,26 @@ const UserProfilePage = ({ params }) => {
         canSeePrivateContent={canSeePrivateContent}
         onProfileClick={handleProfileClick}
         onFollow={() => followUser(userSelected?._id)}
+        openMenu={openMenu}
+        setOpenMenu={setOpenMenu}
         onUnfollow={() => followUser(userSelected?._id)}
         onShowFollowers={() => { setFollowModalType("followers"); setShowFollowModal(true); }}
         onShowFollowing={() => { setFollowModalType("following"); setShowFollowModal(true); }}
         renderVisitorMenu={() => (
-          <button onClick={() => setShowDotsMenu(!showDotsMenu)} className="ml-auto">
-            <IoEllipsisHorizontal className="text-xl" />
-          </button>
+          <ProfileMenu
+            context="visitor"
+            actions={{
+              handleReport,
+              handleBlock
+            }}
+            isBlockedByMe={isBlockedByMe}
+            profileUrl={profileUrl}
+            userId={userSelected?._id}
+            open={openMenu}
+            setOpen={setOpenMenu}
+          />
         )}
       />
-      {showDotsMenu && (
-        <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white dark:bg-gray-800 shadow-lg border dark:border-gray-700 overflow-hidden z-50">
-          <ul className="flex flex-col">
-            <li>
-              <button 
-                onClick={handleReport} 
-                className="flex items-center gap-3 px-5 py-3 w-full text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              >
-                🚩 Report User
-              </button>
-            </li>
-            <li>
-              <button 
-                onClick={handleBlock} 
-                className="flex items-center gap-3 px-5 py-3 w-full text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              >
-                {isBlockedByMe ? "🔓 Unblock User" : "⛔ Block User"}
-              </button>
-            </li>
-            <li>
-              <button 
-                onClick={handleCopyLink} 
-                className="flex items-center gap-3 px-5 py-3 w-full text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              >
-                🔗 Copy Profile Link
-              </button>
-            </li>
-          </ul>
-        </div>
-      )}
       {/* Main Content */}
       {isBlockedByMe ? (
         <div className="min-h-screen flex flex-col items-center justify-center text-center text-red-500 py-20 px-4">

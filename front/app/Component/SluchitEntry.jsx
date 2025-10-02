@@ -22,6 +22,7 @@ import { FaFaceGrinSquintTears } from "react-icons/fa6";
 import RenderPostText from './Post/RenderText';
 import PostActions from './Post/PostActions';
 import PostPhotos from './Post/PostPhotos';
+import SharedTitle from './Post/SharedTitle';
 
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost,hahaPost, savePost, sharePost, setPostIsEdit, imageView, setImageView } = usePost();
@@ -58,21 +59,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
 
         {/* Shared By Info */}
         {isShared && (
-          <div className='text-sm text-gray-900 dark:text-gray-300 italic mb-2'>
-            <Link
-              href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${post?.owner?._id}`}
-              className='text-lightMode-fg dark:text-darkMode-fg font-semibold'
-            >
-              {post?.owner?.username}
-            </Link>{' '}
-            shared a post from{' '}
-            <Link
-              href={user?._id === original?.owner?._id ? '/Pages/Profile' : `/Pages/User/${original?.owner?._id}`}
-              className='text-lightMode-fg dark:text-darkMode-fg font-semibold'
-            >
-              {original?.owner?.username}
-            </Link>
-          </div>
+          <SharedTitle user={user} post={post} original={original} />
         )}
 
         <div className='flex items-start gap-4'>

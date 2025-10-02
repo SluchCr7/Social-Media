@@ -19,6 +19,8 @@ const ProfileHeader = ({
   onUnfollow,
   onShowFollowers,
   onShowFollowing,
+  setOpenMenu,
+  openMenu,
   onProfileClick,
   renderOwnerMenu,     // JSX للمنيو في صفحة المالك
   renderVisitorMenu    // JSX للمنيو في صفحة الزائر
@@ -77,7 +79,7 @@ const ProfileHeader = ({
           {user?.isAccountWithPremiumVerify && (
             <HiBadgeCheck className="text-blue-500 text-xl" title="Verified" />
           )}
-
+          <span onClick={() => setOpenMenu(!openMenu)} className="text-gray-600 dark:text-gray-300"><IoEllipsisHorizontal/></span>
           {/* Owner Menu OR Visitor Menu */}
           {isOwner ? renderOwnerMenu?.() : renderVisitorMenu?.()}
         </div>
