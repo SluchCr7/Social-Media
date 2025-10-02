@@ -250,9 +250,9 @@ const ProfilePage = () => {
                 updatePrivacy: togglePrivateAccount,
                 setUpdate
               }}
-              isPrivate={isPrivate}
-              profileUrl={profileUrl}
-              userId={user._id}
+              isPrivate={userData?.isPrivate}
+              profileUrl={""}
+              userId={userData._id}
               open={openMenu}
               setOpen={setOpenMenu}
             />

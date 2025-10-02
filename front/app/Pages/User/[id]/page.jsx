@@ -287,7 +287,7 @@ const UserProfilePage = ({ params }) => {
               handleBlock
             }}
             isBlockedByMe={isBlockedByMe}
-            profileUrl={profileUrl}
+            profileUrl={""}
             userId={userSelected?._id}
             open={openMenu}
             setOpen={setOpenMenu}
