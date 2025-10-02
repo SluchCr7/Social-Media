@@ -89,9 +89,9 @@ const ProfileMenu = ({
                     </button>
                   )}
 
-                  {actions.handleBlock && (
+                  {actions.blockOrUnblockUser && (
                     <button
-                      onClick={actions.handleBlock}
+                      onClick={()=> actions.blockOrUnblockUser(userId)}
                       className="flex items-center gap-3 px-5 py-3 w-full text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                     >
                       {isBlockedByMe ? "🔓 Unblock User" : "⛔ Block User"}
