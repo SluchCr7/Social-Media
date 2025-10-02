@@ -27,13 +27,12 @@ const ProfileHeader = ({
 }) => {
   return (
     <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 w-full">
-      
       {/* Avatar */}
       <motion.div
         whileHover={{ scale: 1.05 }}
-        className={`relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden shadow-xl cursor-pointer p-1
+        className={`relative w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden shadow-xl cursor-pointer p-1
           ${user?.stories?.length > 0
-            ? "border-[5px] border-blue-500 animate-spin-slow"
+            ? "border-[4px] sm:border-[5px] border-blue-500 animate-spin-slow"
             : "border-0 border-transparent"}`}
         onClick={!isOwner ? onProfileClick : undefined}
       >
@@ -69,32 +68,35 @@ const ProfileHeader = ({
       </motion.div>
 
       {/* User Info */}
-      <div className="flex flex-col gap-3 flex-1 w-full">
+      <div className="flex flex-col gap-3 flex-1 w-full items-center lg:items-start text-center lg:text-left">
         
         {/* Username & Badge */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <h1 className="text-2xl sm:text-3xl font-bold break-words">
+        <div className="flex items-center gap-2 flex-wrap justify-center lg:justify-start">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold break-words">
             {user?.username || "Username"}
           </h1>
           {user?.isAccountWithPremiumVerify && (
-            <HiBadgeCheck className="text-blue-500 text-xl" title="Verified" />
+            <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
           )}
-          <span onClick={() => setOpenMenu(!openMenu)} className="text-gray-600 dark:text-gray-300"><IoEllipsisHorizontal/></span>
-          {/* Owner Menu OR Visitor Menu */}
+          <span
+            onClick={() => setOpenMenu(!openMenu)}
+            className="cursor-pointer text-gray-600 dark:text-gray-300"
+          >
+            <IoEllipsisHorizontal size={20} />
+          </span>
           {isOwner ? renderOwnerMenu?.() : renderVisitorMenu?.()}
         </div>
 
         {/* Level & Progress */}
-        <div className="w-full sm:max-w-xs">
-          <div className="flex justify-between text-sm font-medium text-gray-600 dark:text-gray-300">
+        <div className="w-full max-w-xs mx-auto lg:mx-0">
+          <div className="flex justify-between text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">
             <span className="flex items-center gap-1">
-              {user?.userLevelRank || "Junior"} <span className="text-lg">🏅</span>
+              {user?.userLevelRank || "Junior"} <span>🏅</span>
             </span>
             <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
               {user?.userLevelPoints || 0} XP
             </motion.span>
           </div>
-
           <div className="w-full h-3 bg-gray-300 dark:bg-gray-700 rounded-full mt-2 overflow-hidden shadow-inner">
             <motion.div
               initial={{ width: 0 }}
@@ -108,7 +110,6 @@ const ProfileHeader = ({
               className="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 rounded-full"
             />
           </div>
-
           <span className="block text-xs text-gray-500 mt-1 text-right">
             {`Next level in ${Math.max(
               (user?.nextLevelPoints || 500) - (user?.userLevelPoints || 0),
@@ -118,20 +119,13 @@ const ProfileHeader = ({
         </div>
 
         {/* Bio */}
-        <p className="text-sm sm:text-base text-gray-500 max-w-xs break-words whitespace-pre-wrap">
+        <p className="text-sm sm:text-base text-gray-500 max-w-md break-words whitespace-pre-wrap mt-2">
           {user?.description || "No bio yet."}
         </p>
 
         {/* Actions */}
         {isOwner ? (
-          <div className="flex gap-3 flex-wrap mt-2">
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={onEdit}
-              className="flex items-center gap-2 border px-4 sm:px-6 py-2 rounded-xl text-sm font-medium hover:bg-lightMode-hover dark:hover:bg-darkMode-hover hover:shadow-md transition"
-            >
-              <FaUserEdit /> Edit profile
-            </motion.button>
+          <div className="flex flex-wrap gap-3 mt-3 justify-center lg:justify-start">
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={onAddStory}
@@ -141,10 +135,10 @@ const ProfileHeader = ({
             </motion.button>
           </div>
         ) : (
-          <div className="flex gap-3 mt-4 relative w-fit">
+          <div className="flex gap-3 mt-4 justify-center lg:justify-start">
             <button
               onClick={isFollowing ? onUnfollow : onFollow}
-              className={`flex items-center gap-2 px-6 py-2 rounded-xl border text-sm font-medium transition-all duration-300
+              className={`flex items-center gap-2 px-5 sm:px-6 py-2 rounded-xl border text-sm font-medium transition-all duration-300
                 ${isFollowing
                   ? "text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
                   : "text-green-600 border-green-600 hover:bg-green-600 hover:text-white"}`}
@@ -157,7 +151,7 @@ const ProfileHeader = ({
 
         {/* Stats */}
         {canSeePrivateContent && (
-          <div className="flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-6 sm:gap-10 mt-4 w-full">
+          <div className="flex justify-between sm:justify-center lg:justify-start gap-6 sm:gap-10 mt-5 w-full max-w-md">
             <StatBlock label="Posts" value={user?.posts?.length} />
             <StatBlock label="Followers" value={user?.followers?.length} onClick={onShowFollowers} />
             <StatBlock label="Following" value={user?.following?.length} onClick={onShowFollowing} />
