@@ -13,27 +13,38 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
   const filteredPosts = useMemo(() => {
     let result = [...(combinedPosts || [])]
 
-    // فلترة بالسنة
+    // فلترة
     if (filters.year !== "all") {
       result = result.filter(p => new Date(p.createdAt).getFullYear().toString() === filters.year)
     }
-
-    // فلترة بالشهر
     if (filters.month !== "all") {
       result = result.filter(p => (new Date(p.createdAt).getMonth() + 1).toString() === filters.month)
     }
 
-    // الترتيب
+    // الترتيب (مع احترام الـ pinned)
     if (filters.sort === "latest") {
-      result = result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      result = result.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1
+        if (!a.isPinned && b.isPinned) return 1
+        return new Date(b.createdAt) - new Date(a.createdAt)
+      })
     } else if (filters.sort === "mostLiked") {
-      result = result.sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0))
+      result = result.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1
+        if (!a.isPinned && b.isPinned) return 1
+        return (b.likes?.length || 0) - (a.likes?.length || 0)
+      })
     } else if (filters.sort === "mostCommented") {
-      result = result.sort((a, b) => (b.comments?.length || 0) - (a.comments?.length || 0))
+      result = result.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1
+        if (!a.isPinned && b.isPinned) return 1
+        return (b.comments?.length || 0) - (a.comments?.length || 0)
+      })
     }
 
     return result
   }, [combinedPosts, filters])
+
 
   return (
     <div className="mt-6 w-full">
@@ -52,8 +63,8 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
 
         {activeTab === 'Saved' && (
           <motion.div key="saved" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-[90%] mx-auto">
-            {combinedPosts?.filter((p) => p.saved.includes(userSelected?._id)).length > 0
-              ? combinedPosts
+            {filteredPosts?.filter((p) => p.saved.includes(userSelected?._id)).length > 0
+              ? filteredPosts
                   .filter((p) => p.saved.includes(userSelected?._id))
                   .map((post) => <SluchitEntry key={post?._id} post={post} />)
               : <div className="text-center text-gray-500 py-10">You haven’t saved any posts yet.</div>
@@ -114,8 +125,8 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
             transition={{ duration: 0.25 }}
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 w-[95%] mx-auto"
           >
-            {combinedPosts?.filter((p) => p?.Photos?.length > 0).length > 0 ? (
-              combinedPosts
+            {filteredPosts?.filter((p) => p?.Photos?.length > 0).length > 0 ? (
+              filteredPosts
                 .filter((p) => p?.Photos?.length > 0)
                 .flatMap((p) => p.Photos.map((img, i) => (
                   <div
