@@ -85,21 +85,21 @@ const UserProfilePage = ({ params }) => {
   const isOwner = user?._id === userSelected?._id
   const canSeePrivateContent = useMemo(() => !userSelected?.isPrivate || isOwner || isFollowing, [userSelected, isOwner, isFollowing])
   const combinedPosts = useMemo(() => {
-      if (!userPosts.length && !userSelected?.pinsPosts.length) return []
+      if (!userPosts.length && !userSelected?.pinsPosts?.length) return []
   
-      const pinnedIds = new Set(userSelected?.pinsPosts.map(p => p._id))
-      const regularPosts = userPosts.filter(p => !pinnedIds.has(p._id))
+      const pinnedIds = new Set(userSelected?.pinsPosts?.map(p => p?._id))
+      const regularPosts = userPosts?.filter(p => !pinnedIds.has(p?._id))
   
       return [
-        ...userSelected?.pinsPosts.map(p => ({ ...p, isPinned: true })),
+        ...userSelected?.pinsPosts?.map(p => ({ ...p, isPinned: true })),
         ...regularPosts.map(p => ({ ...p, isPinned: false })),
       ]
-  }, [posts, userSelected?.pinsPosts])
-  
+  }, [userPosts, userSelected?.pinsPosts])
+
   const postYears = useMemo(() => {
-    if (!combinedPosts || combinedPosts.length === 0) return [];
+    if (!combinedPosts || combinedPosts?.length === 0) return [];
     const yearsSet = new Set(
-      combinedPosts.map((p) => new Date(p.createdAt).getFullYear().toString())
+      combinedPosts?.map((p) => new Date(p.createdAt).getFullYear().toString())
     );
     return Array.from(yearsSet).sort((a, b) => b - a); // ترتيب تنازلي
   }, [combinedPosts]);

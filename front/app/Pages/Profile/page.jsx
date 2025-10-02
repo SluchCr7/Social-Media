@@ -81,7 +81,7 @@ const ProfilePage = () => {
         ...userData?.pinsPosts?.map(p => ({ ...p, isPinned: true })),
         ...regularPosts.map(p => ({ ...p, isPinned: false })),
       ]
-    }, [posts, userData?.pinsPosts])
+    }, [userPosts, userData?.pinsPosts])
 
   const postYears = useMemo(() => {
     if (!combinedPosts || combinedPosts?.length === 0) return [];
