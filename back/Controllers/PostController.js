@@ -5,10 +5,10 @@ const { User } = require("../Modules/User");
 const { Community } = require("../Modules/Community");
 const cloudinary = require("cloudinary").v2;
 const { moderatePost } = require('../utils/CheckTextPost');
-const story = require("../Populates/Populate");
-const {postPopulate} = require('../Populates/Populate');
 // 🔔 Socket.io & Notifications
 const {sendNotificationHelper} = require("../utils/SendNotification");
+const { postPopulate } = require("../Populates/Populate");
+const streamifier = require("streamifier");
 
 // ================== Get All Posts ==================
 const getAllPosts = asyncHandler(async (req, res) => {
@@ -35,9 +35,6 @@ const getAllPosts = asyncHandler(async (req, res) => {
 });
 
 // ================== Add Post ==================
-const streamifier = require("streamifier");
-const { sendNotification } = require("../utils/SendNotification");
-const { postPopulate } = require("../Populates/Populate");
 
 const uploadToCloudinary = (buffer) => {
   return new Promise((resolve, reject) => {
