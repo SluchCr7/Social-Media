@@ -7,7 +7,7 @@ import TabsContent from "./TabsContent"
 import FilterBar from "./FilterBar"
 
 const ProfileLayout = ({
-  user,
+user,
   isOwner,
   isFollowing,
   canSeePrivateContent,
@@ -19,7 +19,17 @@ const ProfileLayout = ({
   combinedPosts,
   userHasMore,
   loaderRef,
-  renderMenu
+  renderMenu,
+  onImageChange,
+  onEdit,
+  onAddStory,
+  onFollow,
+  onUnfollow,
+  onShowFollowers,
+  onShowFollowing,
+  onProfileClick,
+  setOpenMenu,
+  openMenu
 }) => {
   return (
     <motion.div
@@ -35,16 +45,16 @@ const ProfileLayout = ({
         isFollowing={isFollowing}
         canSeePrivateContent={canSeePrivateContent}
         // 👇 مهم: مرر كل الـ handlers
-        onImageChange={props?.onImageChange}
-        onEdit={props?.onEdit}
-        onAddStory={props?.onAddStory}
-        onFollow={props?.onFollow}
-        onUnfollow={props?.onUnfollow}
-        onShowFollowers={props?.onShowFollowers}
-        onShowFollowing={props?.onShowFollowing}
-        onProfileClick={props?.onProfileClick}
-        setOpenMenu={props?.setOpenMenu}
-        openMenu={props?.openMenu}
+        onImageChange={onImageChange}
+        onEdit={onEdit}
+        onAddStory={onAddStory}
+        onFollow={onFollow}
+        onUnfollow={onUnfollow}
+        onShowFollowers={onShowFollowers}
+        onShowFollowing={onShowFollowing}
+        onProfileClick={onProfileClick}
+        setOpenMenu={setOpenMenu}
+        openMenu={openMenu}
         renderOwnerMenu={isOwner ? renderMenu : undefined}
         renderVisitorMenu={!isOwner ? renderMenu : undefined}
       />
