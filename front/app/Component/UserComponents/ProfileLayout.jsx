@@ -33,7 +33,20 @@ const ProfileLayout = ({
         user={user}
         isOwner={isOwner}
         isFollowing={isFollowing}
-        renderMenu={renderMenu}
+        canSeePrivateContent={canSeePrivateContent}
+        // 👇 مهم: مرر كل الـ handlers
+        onImageChange={props?.onImageChange}
+        onEdit={props?.onEdit}
+        onAddStory={props?.onAddStory}
+        onFollow={props?.onFollow}
+        onUnfollow={props?.onUnfollow}
+        onShowFollowers={props?.onShowFollowers}
+        onShowFollowing={props?.onShowFollowing}
+        onProfileClick={props?.onProfileClick}
+        setOpenMenu={props?.setOpenMenu}
+        openMenu={props?.openMenu}
+        renderOwnerMenu={isOwner ? renderMenu : undefined}
+        renderVisitorMenu={!isOwner ? renderMenu : undefined}
       />
 
       <InfoAboutUser user={user} />

@@ -130,7 +130,15 @@ export const MusicProvider = ({ children }) => {
     }
   };
 
-
+  const getMusicFileById = async (id) => {
+    try {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/music/${id}`);
+      return res.data.music;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  };
 
   // 🔍 Infinite Scroll
   const observer = useRef();
@@ -162,7 +170,7 @@ export const MusicProvider = ({ children }) => {
         isLoading,
         hasMore,
         lastMusicRef,
-        showModelAddMusic, setShowModelAddMusic
+        showModelAddMusic, setShowModelAddMusic,getMusicFileById
       }}
     >
       {children}

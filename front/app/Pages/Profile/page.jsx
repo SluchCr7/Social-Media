@@ -44,6 +44,18 @@ const ProfilePage = () => {
         combinedPosts={combinedPosts}
         userHasMore={userHasMore}
         loaderRef={loaderRef}
+        onImageChange={(e) => console.log("change photo", e.target.files[0])}
+        onAddStory={() => setIsStory(true)}
+        onShowFollowers={() => {
+          setMenuType("followers")
+          setShowMenu(true)
+        }}
+        onShowFollowing={() => {
+          setMenuType("following")
+          setShowMenu(true)
+        }}
+        setOpenMenu={setOpenMenu}
+        openMenu={openMenu}
         renderMenu={() => (
           <ProfileMenu
             context="owner"

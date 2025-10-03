@@ -10,7 +10,7 @@ const createMusic = asyncHandler(async (req, res) => {
   if (!req.file) return res.status(400).json({ message: "No Music file uploaded" });
 
   const uploadResult = await cloudUploadMusic(req.file);
-     
+    
   const newMusic = new Music({
     url: uploadResult.secure_url,
     cover: uploadResult.secure_url || "",
@@ -21,10 +21,10 @@ const createMusic = asyncHandler(async (req, res) => {
     album : req.body.album,
   });
     await newMusic.save();
-  const user = await User.findById(req.user._id);
-  user.userLevelPoints += 10;
-  user.updateLevelRank();
-  await user.save();
+    const user = await User.findById(req.user._id);
+    user.userLevelPoints += 10;
+    user.updateLevelRank();
+    await user.save();
 
   await newMusic.populate("owner", "username profilePhoto");
 

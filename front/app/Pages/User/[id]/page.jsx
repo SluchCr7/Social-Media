@@ -60,6 +60,20 @@ const UserProfilePage = ({ params }) => {
         combinedPosts={combinedPosts}
         userHasMore={userHasMore}
         loaderRef={loaderRef}
+        // ⬇️ مرر الدوال هنا
+        onProfileClick={handleProfileClick}
+        onFollow={() => followUser(userData._id)}
+        onUnfollow={() => followUser(userData._id)} // أو دالة خاصة بالـ unfollow
+        onShowFollowers={() => {
+          setFollowModalType("followers")
+          setShowFollowModal(true)
+        }}
+        onShowFollowing={() => {
+          setFollowModalType("following")
+          setShowFollowModal(true)
+        }}
+        setOpenMenu={setOpenMenu}
+        openMenu={openMenu}
         renderMenu={() => (
           <ProfileMenu
             context="visitor"
@@ -70,6 +84,8 @@ const UserProfilePage = ({ params }) => {
           />
         )}
       />
+
+
 
       <FollowModal
         visible={showFollowModal}
