@@ -8,7 +8,7 @@ import {
   FaVolumeUp, FaSearch, FaExpand
 } from 'react-icons/fa'
 import Image from 'next/image'
-import { useMusic } from '@/app/Context/MusicContext'' // ✅ استدعاء الكونتكست
+import { useMusic } from '@/app/Context/MusicContext'
 
 // ----------------------
 // Utility
