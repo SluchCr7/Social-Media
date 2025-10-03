@@ -294,7 +294,14 @@ const getUserById = asyncHandler(async (req, res) => {
           },
         ],
       })
-
+      .populate({
+        path: 'reels',
+        populate: {
+          path: 'owner',
+          model: 'User',
+          select: 'username profilePhoto profileName', // Optional: limit fields
+        },
+      })
   if (!user) {
         return res.status(404).json({ message: "User Not Found" })
     }
