@@ -14,9 +14,8 @@ const AddMusicModal = ({ isOpen, onClose }) => {
   const [genre, setGenre] = useState("Other")
   const [file, setFile] = useState(null)
   const [cover, setCover] = useState(null)
-  const {uploadMusic}= useMusic()
+  const { uploadMusic } = useMusic()
 
-  // ✅ handle cover upload
   const handleCoverChange = (e) => {
     const imageFile = e.target.files[0]
     if (imageFile) {
@@ -25,13 +24,11 @@ const AddMusicModal = ({ isOpen, onClose }) => {
     }
   }
 
-  // ✅ handle music file upload
   const handleFileChange = (e) => {
     const audioFile = e.target.files[0]
     if (audioFile) setFile(audioFile)
   }
 
-  // ✅ handle submit
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!title || !artist || !file) {
@@ -51,11 +48,12 @@ const AddMusicModal = ({ isOpen, onClose }) => {
     uploadMusic(newMusic)
     onClose()
   }
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm overflow-y-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -67,7 +65,8 @@ const AddMusicModal = ({ isOpen, onClose }) => {
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ duration: 0.25 }}
             className="relative w-full max-w-lg bg-lightMode-bg dark:bg-darkMode-menu 
-                       rounded-3xl shadow-2xl p-6 md:p-8 border border-gray-200/20"
+                       rounded-3xl shadow-2xl p-6 md:p-8 border border-gray-200/20 
+                       my-10 max-h-[90vh] overflow-y-auto"
           >
             {/* Close Button */}
             <button
@@ -100,8 +99,6 @@ const AddMusicModal = ({ isOpen, onClose }) => {
                         height={160}
                         className="object-cover w-full h-full"
                       />
-
-                      {/* Overlay Controls */}
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                         <label className="px-3 py-1.5 bg-white/90 dark:bg-darkMode-menu text-sm rounded-lg font-medium cursor-pointer hover:bg-white dark:hover:bg-darkMode-bg transition">
                           Change
@@ -112,7 +109,6 @@ const AddMusicModal = ({ isOpen, onClose }) => {
                             className="hidden"
                           />
                         </label>
-
                         <button
                           type="button"
                           onClick={() => setCover(null)}
