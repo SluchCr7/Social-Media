@@ -503,7 +503,7 @@ import {
   FaVolumeUp, FaSearch, FaExpand
 } from 'react-icons/fa'
 import Image from 'next/image'
-import { useMusic } from '../Context/MusicContext' // ✅ استدعاء الكونتكست
+import { useMusic } from '../../Context/MusicContext' // ✅ استدعاء الكونتكست
 
 // ----------------------
 // Utility
