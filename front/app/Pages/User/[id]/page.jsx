@@ -8,6 +8,7 @@ import { useAuth } from "@/app/Context/AuthContext"
 import { useStory } from "@/app/Context/StoryContext"
 import { useReport } from "@/app/Context/ReportContext"
 import { useProfilePosts } from "@/app/Custome/useProfilePosts"
+import { useState } from "react"
 
 const UserProfilePage = ({ params }) => {
   const id = params.id

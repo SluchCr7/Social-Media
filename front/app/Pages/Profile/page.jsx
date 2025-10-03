@@ -8,6 +8,7 @@ import FollowModal from "@/app/Component/UserComponents/FollowModal"
 import { useAuth } from "@/app/Context/AuthContext"
 import { useProfilePosts } from "@/app/Custome/useProfilePosts"
 import ProfileSkeleton from "@/app/Skeletons/ProfileSkeleton"
+import { useState } from "react"
 
 const ProfilePage = () => {
   const { user, togglePrivateAccount } = useAuth()
