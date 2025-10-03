@@ -18,6 +18,7 @@ import {SocketProvider} from "./Context/SocketContext";
 import { EventProvider } from "./Context/EventContext";
 import { AsideContextProvider } from "./Context/AsideContext";
 import { ReelsProvider } from "./Context/ReelsContext";
+import { MusicProvider } from "./Context/MusicContext";
 const jetBrainsMono = JetBrains_Mono({
   subsets: ["latin"]
   , weight: ["100", "200", "300", "400"]
@@ -48,11 +49,13 @@ export default function RootLayout({ children }) {
                             <ReportContextProvider>
                               <ReelsProvider>
                                 <EventProvider>
-                                  <AsideContextProvider>  
-                                    <LayoutComponent>
-                                        {children}
-                                    </LayoutComponent>
-                                  </AsideContextProvider>
+                                  <MusicProvider>
+                                    <AsideContextProvider>  
+                                      <LayoutComponent>
+                                          {children}
+                                      </LayoutComponent>
+                                    </AsideContextProvider>
+                                  </MusicProvider>
                                 </EventProvider>
                               </ReelsProvider>
                             </ReportContextProvider>

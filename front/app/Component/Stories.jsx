@@ -37,13 +37,29 @@ const Stories = () => {
     userStories.forEach(story => viewStory(story._id))
   }
 
-  const getBorderClass = (userStories) => {
-    const hasUnseen = userStories.some(
-      story => !story?.views?.some(v => v?._id === user?._id)
-    )
-    return hasUnseen
-      ? 'bg-red-500 border-[3px] border-red-500' // بدل الـ gradient القديم خليه أصفر صريح
-      : 'bg-gray-500'
+  // 🟢 دالة لتوليد البوردر كـ conic-gradient
+  const getBorderStyle = (stories, userId) => {
+    const total = stories.length
+    if (total === 1) {
+      const unseen = !stories[0]?.views?.some(v => v?._id === userId)
+      return unseen
+        ? "conic-gradient(red 0deg 360deg, transparent 0deg)"
+        : "conic-gradient(gray 0deg 360deg, transparent 0deg)"
+    }
+
+    const step = 360 / total
+    let gradients = []
+
+    stories.forEach((story, i) => {
+      const start = i * step
+      const end = (i + 1) * step
+      const unseen = !story?.views?.some(v => v?._id === userId)
+      gradients.push(
+        `${unseen ? "red" : "gray"} ${start}deg ${end}deg`
+      )
+    })
+
+    return `conic-gradient(${gradients.join(", ")})`
   }
 
   return (
@@ -63,18 +79,23 @@ const Stories = () => {
               onClick={() => handleOpenViewer(group.stories)}
               title={group?.user?.username}
             >
-              {/* Profile Image with dynamic border */}
-                <div className={`relative w-16 h-16 rounded-full p-[2px] ${getBorderClass(group.stories)}`}>
-                  <div className="w-full h-full rounded-full bg-black p-[2px]">
-                    <Image
-                      src={group?.user?.profilePhoto?.url || '/default-profile.png'}
-                      alt={group?.user?.username}
-                      fill
-                      loading={index < 3 ? 'eager' : 'lazy'}
-                      className="object-cover rounded-full group-hover:scale-110 transition-transform duration-300 ease-in-out"
-                    />
-                  </div>
+              {/* Profile Image with dynamic conic border */}
+              <div
+                className="relative w-16 h-16 rounded-full p-[2px]"
+                style={{
+                  background: getBorderStyle(group.stories, user?._id)
+                }}
+              >
+                <div className="w-full h-full rounded-full bg-black p-[2px]">
+                  <Image
+                    src={group?.user?.profilePhoto?.url || '/default-profile.png'}
+                    alt={group?.user?.username}
+                    fill
+                    loading={index < 3 ? 'eager' : 'lazy'}
+                    className="object-cover rounded-full group-hover:scale-110 transition-transform duration-300 ease-in-out"
+                  />
                 </div>
+              </div>
 
               {/* User name */}
               <p className="text-xs mt-2 text-black dark:text-white text-center truncate w-16">
@@ -87,7 +108,6 @@ const Stories = () => {
                   {group.stories.length}
                 </span>
               )}
-
             </div>
           ))}
 

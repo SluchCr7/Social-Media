@@ -5,7 +5,7 @@ import { IoImage, IoClose, IoMic, IoHappyOutline } from 'react-icons/io5';
 import { useMessage } from '../../Context/MessageContext';
 
 const ChatInput = () => {
-  const { AddNewMessage, backgroundStyle } = useMessage();
+  const { AddNewMessage } = useMessage();
   const [message, setMessage] = useState('');
   const [images, setImages] = useState([]);
   const fileInputRef = useRef();
@@ -30,23 +30,22 @@ const ChatInput = () => {
     setImages([]);
   };
 
-  // إضافة دعم إرسال الرسالة عند الضغط على Enter
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault(); // منع إضافة سطر جديد
+      e.preventDefault();
       handleSend();
     }
   };
 
   return (
-    <div className="w-full px-3 py-3 bg-white dark:bg-darkMode-bg">
+    <div className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-white dark:bg-darkMode-bg border-t border-gray-200 dark:border-gray-700 sticky bottom-0">
       {/* Images Preview */}
       {images.length > 0 && (
-        <div className="flex gap-2 flex-wrap mb-3">
+        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-2 sm:mb-3">
           {images.map((img, idx) => (
             <div
               key={idx}
-              className="relative w-16 h-16 rounded-lg overflow-hidden shadow-sm border border-gray-200 dark:border-gray-600"
+              className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shadow border border-gray-200 dark:border-gray-600"
             >
               <img
                 src={img.url}
@@ -55,7 +54,7 @@ const ChatInput = () => {
               />
               <IoClose
                 onClick={() => removeImage(img.url)}
-                className="absolute top-1 right-1 bg-white dark:bg-black bg-opacity-70 text-red-600 text-lg rounded-full cursor-pointer"
+                className="absolute top-1 right-1 bg-white dark:bg-black bg-opacity-70 text-red-600 text-lg sm:text-xl rounded-full cursor-pointer"
               />
             </div>
           ))}
@@ -63,30 +62,30 @@ const ChatInput = () => {
       )}
 
       {/* Input Section */}
-      <div className="flex items-center gap-2 w-full">
+      <div className="flex items-center gap-1 sm:gap-2 w-full">
         {/* Upload */}
         <button
           onClick={() => fileInputRef.current.click()}
-          className="p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition"
+          className="p-2 sm:p-2.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition"
           title="Upload Image"
         >
-          <IoImage className="text-xl text-blue-500" />
+          <IoImage className="text-lg sm:text-xl text-blue-500" />
         </button>
 
         {/* Emoji */}
         <button
-          className="p-2 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900 transition"
+          className="p-2 sm:p-2.5 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900 transition"
           title="Insert Emoji"
         >
-          <IoHappyOutline className="text-xl text-yellow-500" />
+          <IoHappyOutline className="text-lg sm:text-xl text-yellow-500" />
         </button>
 
         {/* Mic */}
         <button
-          className="p-2 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900 transition"
+          className="p-2 sm:p-2.5 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900 transition"
           title="Record Voice"
         >
-          <IoMic className="text-xl text-purple-500" />
+          <IoMic className="text-lg sm:text-xl text-purple-500" />
         </button>
 
         <input
@@ -103,18 +102,18 @@ const ChatInput = () => {
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyDown} // <-- هنا دعم الـ Enter
+          onKeyDown={handleKeyDown}
           placeholder="Type your message..."
-          className="flex-1 px-4 py-2 rounded-xl bg-gray-50 dark:bg-darkMode-menu text-black dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
+          className="flex-1 px-3 sm:px-4 py-2 rounded-xl bg-gray-50 dark:bg-darkMode-menu text-black dark:text-white text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
         />
 
         {/* Send */}
         <button
           onClick={handleSend}
-          className="p-3 bg-green-500 text-white rounded-full hover:bg-green-600 active:scale-95 transition"
+          className="p-2 sm:p-3 bg-green-500 text-white rounded-full hover:bg-green-600 active:scale-95 transition"
           title="Send Message"
         >
-          <IoIosSend className="text-lg" />
+          <IoIosSend className="text-lg sm:text-xl" />
         </button>
       </div>
     </div>

@@ -15,7 +15,7 @@ const PostPhotos = ({ photos = [], setImageView, postId }) => {
           className="cursor-pointer"
         >
           <Image
-            src={photo?.url}
+            src={photo?.url || photo[0]}
             alt={`photo-${index}`}
             width={500}
             height={500}

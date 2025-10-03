@@ -13,6 +13,7 @@ import { LuLaugh } from "react-icons/lu";
 import PostPhotos from "@/app/Component/Post/PostPhotos";
 import RenderPostText from "@/app/Component/Post/RenderText";
 import SharedTitle from "@/app/Component/Post/SharedTitle";
+import { HiBadgeCheck } from "react-icons/hi";
 
 const DesignPostSelect = ({
   post,
@@ -98,7 +99,12 @@ const DesignPostSelect = ({
                     {post.owner?.username}
                   </Link>
                   <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                    <span>{post.owner?.profileName}</span>
+                    <div>
+                      <span>{post.owner?.profileName}</span>
+                      {post?.owner?.isAccountWithPremiumVerify && (
+                        <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
+                      )}
+                    </div>
                     <span className="w-1 h-1 bg-gray-400 rounded-full hidden sm:inline-block" />
                     <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                   </div>

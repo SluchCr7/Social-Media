@@ -13,6 +13,7 @@ import RenderPostText from './Post/RenderText';
 import PostActions from './Post/PostActions';
 import PostPhotos from './Post/PostPhotos';
 import SharedTitle from './Post/SharedTitle';
+import { HiBadgeCheck } from 'react-icons/hi';
 
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost();
@@ -93,7 +94,12 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                     </Link>
                   </UserHoverCard>
                   <div className="flex items-center gap-2 text-xs text-gray-500 flex-wrap">
-                    <span className="truncate max-w-[120px]">{post?.owner?.profileName}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="truncate max-w-[120px]">{post?.owner?.profileName}</span>
+                      {post?.owner?.isAccountWithPremiumVerify && (
+                        <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
+                      )}
+                    </div>
                     <span className="hidden sm:inline w-1 h-1 bg-gray-400 rounded-full" />
                     <span>{new Date(post?.createdAt).toLocaleDateString()}</span>
                   </div>
