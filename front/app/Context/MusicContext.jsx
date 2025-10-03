@@ -43,7 +43,7 @@ export const MusicProvider = ({ children }) => {
   }, [page]);
 
   // 🎥 رفع Music جديد
-  const uploadMusic = async (file, title , artist , genre , album=null) => {
+  const uploadMusic = async (file, title , artist , genre , album=null , cover) => {
     if (!user?.token) {
       showAlert("You must be logged in to upload a music file.");
       return;
@@ -56,9 +56,9 @@ export const MusicProvider = ({ children }) => {
       formData.append("artist", artist);
       formData.append("genre", genre);
       formData.append("album", album);
-
+      formData.append("image" , cover)
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/musi`,
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/music`,
         formData,
         {
           headers: {

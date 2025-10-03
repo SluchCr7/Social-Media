@@ -1,60 +1,144 @@
 'use client'
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { IoClose } from "react-icons/io5"
+import { IoClose, IoImage } from "react-icons/io5"
+import Image from "next/image"
+import { useMusic } from "../Context/MusicContext"
 
 const genres = ["Pop", "Rock", "HipHop", "Jazz", "Classical", "Other"]
 
-const AddMusicModal = ({ isOpen, onClose, onSubmit }) => {
+const AddMusicModal = ({ isOpen, onClose }) => {
   const [title, setTitle] = useState("")
   const [artist, setArtist] = useState("")
   const [album, setAlbum] = useState("")
   const [genre, setGenre] = useState("Other")
   const [file, setFile] = useState(null)
+  const [cover, setCover] = useState(null)
+  const {uploadMusic}= useMusic()
 
+  // ✅ handle cover upload
+  const handleCoverChange = (e) => {
+    const imageFile = e.target.files[0]
+    if (imageFile) {
+      const imageUrl = URL.createObjectURL(imageFile)
+      setCover(imageUrl)
+    }
+  }
+
+  // ✅ handle music file upload
+  const handleFileChange = (e) => {
+    const audioFile = e.target.files[0]
+    if (audioFile) setFile(audioFile)
+  }
+
+  // ✅ handle submit
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!title || !artist || !file) {
       alert("Title, Artist and File are required!")
       return
     }
-    const newMusic = { title, artist, album, genre, url: file }
-    onSubmit(newMusic)
+
+    const newMusic = {
+      title,
+      artist,
+      album,
+      genre,
+      file,
+      cover,
+    }
+
+    uploadMusic(newMusic)
     onClose()
   }
-
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           {/* Modal Container */}
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ duration: 0.25 }}
             className="relative w-full max-w-lg bg-lightMode-bg dark:bg-darkMode-menu 
-                       rounded-2xl shadow-2xl p-6 md:p-8"
+                       rounded-3xl shadow-2xl p-6 md:p-8 border border-gray-200/20"
           >
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="absolute top-3 right-3 text-lightMode-text dark:text-darkMode-text 
-                         hover:scale-110 transition"
+              className="absolute top-4 right-4 text-gray-600 dark:text-gray-300 hover:text-red-500 transition"
             >
               <IoClose size={26} />
             </button>
 
-            <h2 className="text-xl md:text-2xl font-bold mb-6 text-lightMode-text dark:text-darkMode-text">
+            {/* Title */}
+            <h2 className="text-2xl md:text-3xl font-extrabold mb-6 text-center text-lightMode-text dark:text-darkMode-text">
               🎵 Add New Music
             </h2>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+              {/* 🎨 Cover Upload */}
+              <div className="flex flex-col items-center text-center">
+                <label className="block text-sm font-medium text-lightMode-text2 dark:text-darkMode-text2 mb-2">
+                  Cover Image
+                </label>
+
+                <div className="relative group w-40 h-40 rounded-2xl overflow-hidden shadow-md border border-gray-300 dark:border-gray-700 bg-lightMode-menu dark:bg-darkMode-bg flex items-center justify-center cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]">
+                  {cover ? (
+                    <>
+                      <Image
+                        src={cover}
+                        alt="cover preview"
+                        width={160}
+                        height={160}
+                        className="object-cover w-full h-full"
+                      />
+
+                      {/* Overlay Controls */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                        <label className="px-3 py-1.5 bg-white/90 dark:bg-darkMode-menu text-sm rounded-lg font-medium cursor-pointer hover:bg-white dark:hover:bg-darkMode-bg transition">
+                          Change
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleCoverChange}
+                            className="hidden"
+                          />
+                        </label>
+
+                        <button
+                          type="button"
+                          onClick={() => setCover(null)}
+                          className="px-3 py-1.5 bg-red-500 text-white text-sm rounded-lg font-medium hover:bg-red-600 transition"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center gap-2 text-gray-600 dark:text-gray-400 cursor-pointer">
+                      <div className="p-3 bg-gray-100 dark:bg-darkMode-menu rounded-full shadow-sm group-hover:scale-110 transition-transform">
+                        <IoImage size={26} />
+                      </div>
+                      <span className="text-sm font-medium">Upload Cover</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleCoverChange}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+
               {/* Title */}
               <div>
                 <label className="block text-sm font-medium text-lightMode-text2 dark:text-darkMode-text2">
@@ -65,9 +149,9 @@ const AddMusicModal = ({ isOpen, onClose, onSubmit }) => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Enter song title"
-                  className="w-full mt-1 px-3 py-2 border rounded-xl focus:ring-2 
-                             focus:ring-lightMode-text dark:focus:ring-darkMode-text 
-                             bg-lightMode-menu dark:bg-darkMode-bg text-lightMode-fg dark:text-darkMode-fg"
+                  className="w-full mt-1 px-4 py-2 border rounded-xl focus:ring-2 
+                             focus:ring-blue-500 bg-lightMode-menu dark:bg-darkMode-bg 
+                             text-lightMode-fg dark:text-darkMode-fg outline-none transition"
                 />
               </div>
 
@@ -81,9 +165,9 @@ const AddMusicModal = ({ isOpen, onClose, onSubmit }) => {
                   value={artist}
                   onChange={(e) => setArtist(e.target.value)}
                   placeholder="Enter artist name"
-                  className="w-full mt-1 px-3 py-2 border rounded-xl focus:ring-2 
-                             focus:ring-lightMode-text dark:focus:ring-darkMode-text 
-                             bg-lightMode-menu dark:bg-darkMode-bg text-lightMode-fg dark:text-darkMode-fg"
+                  className="w-full mt-1 px-4 py-2 border rounded-xl focus:ring-2 
+                             focus:ring-blue-500 bg-lightMode-menu dark:bg-darkMode-bg 
+                             text-lightMode-fg dark:text-darkMode-fg outline-none transition"
                 />
               </div>
 
@@ -97,9 +181,9 @@ const AddMusicModal = ({ isOpen, onClose, onSubmit }) => {
                   value={album}
                   onChange={(e) => setAlbum(e.target.value)}
                   placeholder="Enter album name"
-                  className="w-full mt-1 px-3 py-2 border rounded-xl focus:ring-2 
-                             focus:ring-lightMode-text dark:focus:ring-darkMode-text 
-                             bg-lightMode-menu dark:bg-darkMode-bg text-lightMode-fg dark:text-darkMode-fg"
+                  className="w-full mt-1 px-4 py-2 border rounded-xl focus:ring-2 
+                             focus:ring-blue-500 bg-lightMode-menu dark:bg-darkMode-bg 
+                             text-lightMode-fg dark:text-darkMode-fg outline-none transition"
                 />
               </div>
 
@@ -108,14 +192,14 @@ const AddMusicModal = ({ isOpen, onClose, onSubmit }) => {
                 <span className="block text-sm font-medium text-lightMode-text2 dark:text-darkMode-text2 mb-2">
                   Genre
                 </span>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {genres.map((g) => (
                     <label
                       key={g}
-                      className={`flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer
-                                ${genre === g
-                          ? "border-lightMode-text dark:border-darkMode-text bg-lightMode-menu dark:bg-darkMode-bg"
-                          : "border-gray-300 dark:border-gray-700"}`}
+                      className={`flex items-center justify-center gap-2 px-3 py-2 border rounded-lg cursor-pointer text-sm font-medium transition-all
+                        ${genre === g
+                          ? "border-blue-500 bg-blue-500 text-white"
+                          : "border-gray-300 dark:border-gray-700 bg-transparent text-gray-700 dark:text-gray-300 hover:border-blue-400"}`}
                     >
                       <input
                         type="radio"
@@ -124,7 +208,7 @@ const AddMusicModal = ({ isOpen, onClose, onSubmit }) => {
                         onChange={() => setGenre(g)}
                         className="hidden"
                       />
-                      <span>{g}</span>
+                      {g}
                     </label>
                   ))}
                 </div>
@@ -138,16 +222,18 @@ const AddMusicModal = ({ isOpen, onClose, onSubmit }) => {
                 <input
                   type="file"
                   accept="audio/*"
-                  onChange={(e) => setFile(e.target.files[0])}
-                  className="w-full mt-1 px-3 py-2 border rounded-xl cursor-pointer bg-lightMode-menu dark:bg-darkMode-bg"
+                  onChange={handleFileChange}
+                  className="w-full mt-1 px-4 py-2 border rounded-xl cursor-pointer 
+                             bg-lightMode-menu dark:bg-darkMode-bg text-lightMode-fg 
+                             dark:text-darkMode-fg outline-none"
                 />
               </div>
 
               {/* Submit */}
               <button
                 type="submit"
-                className="w-full py-2 mt-4 rounded-xl bg-lightMode-text dark:bg-darkMode-text 
-                           text-white font-medium hover:opacity-90 transition"
+                className="w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 
+                           text-white font-semibold hover:opacity-90 transition-all shadow-md"
               >
                 Save Music
               </button>

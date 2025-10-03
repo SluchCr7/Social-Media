@@ -1,36 +1,50 @@
-const {Music,musicValidation} = require('../Modules/Music');
+const { Music, musicValidation } = require('../Modules/Music');
+const { cloudUpload } = require('../Config/cloudUpload'); // للصور
+const asyncHandler = require("express-async-handler");
 const mongoose = require('mongoose');
 const {cloudUploadMusic, cloudRemoveMusic} = require('../Config/cloudUploadMusic');
 const { User } = require('../Modules/User');
 const { sendNotificationHelper } = require('../utils/SendNotification');
 // ✅ إضافة أغنية جديدة
-const asyncHandler = require("express-async-handler");
-
 const createMusic = asyncHandler(async (req, res) => {
-  if (!req.file) return res.status(400).json({ message: "No Music file uploaded" });
+  // ✅ تأكد أن فيه ملف صوت
+  if (!req.files || !req.files.audio) {
+    return res.status(400).json({ message: "No Music file uploaded" });
+  }
 
-  const uploadResult = await cloudUploadMusic(req.file);
-    
+  // ✅ ارفع ملف الصوت
+  const uploadAudio = await cloudUploadMusic(req.files.audio[0]);
+
+  // ✅ ارفع صورة الكوفر (اختياري)
+  let coverUrl;
+  if (req.files.cover && req.files.cover[0]) {
+    const uploadCover = await cloudUpload(req.files.cover[0]);
+    coverUrl = uploadCover.secure_url;
+  }
+
+  // ✅ إنشاء document جديد
   const newMusic = new Music({
-    url: uploadResult.secure_url,
-    cover: uploadResult.secure_url || "",
+    url: uploadAudio.secure_url,
+    cover: coverUrl, // لو undefined → schema بيحط default
     owner: req.user._id,
     genre: req.body.genre,
     title: req.body.title,
     artist: req.body.artist,
-    album : req.body.album,
+    album: req.body.album,
   });
-    await newMusic.save();
-    const user = await User.findById(req.user._id);
-    user.userLevelPoints += 10;
-    user.updateLevelRank();
-    await user.save();
+
+  await newMusic.save();
+
+  // ✅ نقاط للمستخدم
+  const user = await User.findById(req.user._id);
+  user.userLevelPoints += 10;
+  user.updateLevelRank();
+  await user.save();
 
   await newMusic.populate("owner", "username profilePhoto");
 
   res.status(201).json(newMusic);
 });
-
 
 // ✅ الحصول على كل الأغاني
 const getAllMusic = async (req, res) => {

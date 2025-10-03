@@ -27,6 +27,7 @@ const MusicSchema = new mongoose.Schema({
     },
     cover: {
         type: String,
+        default: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200&q=80"
     },
     // duration: {
     //     type: Number, // بالثواني
