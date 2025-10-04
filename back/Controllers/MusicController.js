@@ -22,10 +22,10 @@ const createMusic = asyncHandler(async (req, res) => {
 
     // رفع صورة الكوفر (اختياري)
     let coverUrl = null;
-    if (req.files.cover && req.files.cover[0]) {
-      const coverUpload = await cloudUpload(req.files.cover[0]);
-      coverUrl = coverUpload.secure_url;
-    }
+  if (req.files.image && req.files.image[0]) {
+    const coverUpload = await cloudUpload(req.files.image[0]);
+    coverUrl = coverUpload.secure_url;
+  }
 
     // إنشاء الوثيقة
     const newMusic = new Music({
