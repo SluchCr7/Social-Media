@@ -24,7 +24,7 @@ export default function NotFound() {
         transition={{ delay: 0.2 }}
         className="text-4xl font-bold mb-2"
       >
-        الصفحة غير موجودة
+        this page could not be found
       </motion.h1>
 
       {/* Subtitle */}
@@ -34,7 +34,7 @@ export default function NotFound() {
         transition={{ delay: 0.4 }}
         className="text-gray-500 dark:text-gray-400 mb-6 text-center max-w-md"
       >
-        عذراً، الصفحة التي تبحث عنها غير متوفرة أو قد تكون حُذفت. جرب العودة للصفحة الرئيسية.
+        you might have misspelled the address or the page might have been removed
       </motion.p>
 
       {/* Button */}
@@ -47,7 +47,7 @@ export default function NotFound() {
           href="/"
           className="px-6 py-3 rounded-full bg-blue-600 text-white font-medium hover:bg-blue-500 transition shadow-lg"
         >
-          العودة للرئيسية
+          return home
         </Link>
       </motion.div>
     </div>

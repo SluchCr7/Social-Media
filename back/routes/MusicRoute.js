@@ -13,7 +13,7 @@ router.put('/:id', verifyToken, updateMusic);
 router.delete('/:id', verifyToken, deleteMusic);
 
 // Actions
-router.post('/like/:id', verifyToken, toggleLike);
-router.post('/view/:id', addView);
+router.put('/like/:id', verifyToken, toggleLike);
+router.put('/view/:id', addView);
 
 module.exports = router;

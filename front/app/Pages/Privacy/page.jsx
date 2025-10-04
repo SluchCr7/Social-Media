@@ -1,12 +1,14 @@
-'use client';
-import React, { useState } from 'react';
-import { ShieldCheck, Info, Share2, Lock, UserCheck, RefreshCw, Mail } from 'lucide-react';
+'use client'
 
-const sections = [
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion'
+import { Lock, Info, Share2, ShieldCheck, RefreshCw, Mail, UserCheck } from 'lucide-react'
+
+const sectionsData = [
   {
     id: 'info',
     title: '1. Information We Collect',
-    icon: <Info className="w-5 h-5 text-blue-500" />,
+    icon: <Info className="w-5 h-5 text-indigo-500" />,
     content:
       'We may collect information you provide directly such as name, email, profile picture, posts, messages, and other content. We may also collect IP address, device info, browser type, and usage data automatically.',
   },
@@ -52,98 +54,189 @@ const sections = [
     content: (
       <>
         If you have any questions regarding our Privacy Policy, please contact us at:{' '}
-        <a
-          href="mailto:privacy@socialmediaapp.com"
-          className="text-blue-600 dark:text-blue-400 underline hover:opacity-90 transition"
-        >
+        <a href="mailto:privacy@socialmediaapp.com" className="text-indigo-600 dark:text-indigo-400 underline">
           privacy@socialmediaapp.com
         </a>
       </>
     ),
   },
-];
+]
 
-const PrivacyPolicyPage = () => {
-  const [expandedSections, setExpandedSections] = useState(sections.map(s => s.id));
+export default function PrivacyPolicyPage() {
+  const [openIds, setOpenIds] = useState(sectionsData.map(s => s.id))
+  const [mobileTocOpen, setMobileTocOpen] = useState(false)
+  const sectionRefs = useRef({})
+  const [activeId, setActiveId] = useState(sectionsData[0].id)
+
+  // scroll progress
+  const { scrollYProgress } = useScroll()
+  const scaleX = useSpring(scrollYProgress, { stiffness: 200, damping: 30 })
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id)
+          }
+        })
+      },
+      { root: null, rootMargin: '-30% 0px -50% 0px', threshold: 0 }
+    )
+
+    Object.values(sectionRefs.current).forEach((el) => el && observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
 
   const toggleSection = (id) => {
-    setExpandedSections(prev =>
-      prev.includes(id) ? prev.filter(sec => sec !== id) : [...prev, id]
-    );
-  };
+    setOpenIds((prev) => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]))
+  }
+
+  const goTo = (id) => {
+    const el = sectionRefs.current[id]
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      setMobileTocOpen(false)
+    }
+  }
+
+  const renderSection = (sec) => {
+    const isOpen = openIds.includes(sec.id)
+    return (
+      <section
+        key={sec.id}
+        id={sec.id}
+        ref={(el) => (sectionRefs.current[sec.id] = el)}
+        className="bg-white dark:bg-gray-900 rounded-2xl p-6 md:p-8 shadow-md border border-gray-100 dark:border-gray-800 transition hover:shadow-xl"
+      >
+        <button
+          onClick={() => toggleSection(sec.id)}
+          className="w-full flex items-start gap-4 text-left focus:outline-none"
+        >
+          <div className="mt-1">{sec.icon}</div>
+          <div className="flex-1">
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-lg md:text-xl font-semibold text-gray-800 dark:text-gray-100">{sec.title}</h2>
+              <div className="text-gray-400 dark:text-gray-500 text-lg">{isOpen ? '−' : '+'}</div>
+            </div>
+            <AnimatePresence initial={false}>
+              {isOpen && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.28 }}
+                  className="mt-4 text-sm leading-7 text-gray-600 dark:text-gray-300"
+                >
+                  {sec.content}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </button>
+      </section>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text px-6 md:px-12 py-16">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
-        
-        {/* Sidebar */}
-        <aside className="md:col-span-1 space-y-6 sticky top-20 self-start hidden md:block">
-          <h3 className="text-lg font-bold mb-4 text-lightMode-text2 dark:text-darkMode-text2">
-            Table of Contents
-          </h3>
-          <ul className="space-y-2 text-sm">
-            {sections.map(sec => (
-              <li key={sec.id}>
-                <a
-                  href={`#${sec.id}`}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 text-gray-900 dark:text-gray-100">
+
+      {/* progress bar */}
+      <motion.div style={{ scaleX }} className="origin-left fixed top-0 left-0 right-0 h-1 z-50 bg-indigo-600" />
+
+      {/* header */}
+      <header className="sticky top-0 z-40 backdrop-blur-lg bg-white/60 dark:bg-black/40 border-b border-gray-200 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Lock className="w-5 h-5 text-indigo-600" />
+            <div>
+              <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Privacy Policy</h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Last updated: {new Date().toLocaleDateString()}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hidden md:inline-block text-sm text-indigo-600 hover:underline">Back to top</button>
+            <button onClick={() => setMobileTocOpen(s => !s)} className="md:hidden px-3 py-2 rounded-lg border">Contents</button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-6 md:px-8 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
+
+        {/* desktop TOC */}
+        <aside className="hidden md:block md:col-span-1 sticky top-28 self-start">
+          <div className="bg-white/60 dark:bg-gray-900/60 p-4 rounded-2xl shadow border border-gray-100 dark:border-gray-800">
+            <h3 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-200">Table of contents</h3>
+            <nav className="space-y-2 text-sm">
+              {sectionsData.map(s => (
+                <button
+                  key={s.id}
+                  onClick={() => goTo(s.id)}
+                  className={`w-full flex items-center gap-3 p-2 rounded-lg text-left transition ${activeId === s.id ? 'bg-indigo-50 dark:bg-indigo-900/40 ring-1 ring-indigo-200 dark:ring-indigo-900' : 'hover:bg-gray-50 dark:hover:bg-gray-800/40'}`}
                 >
-                  {sec.icon}
-                  <span>{sec.title}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
+                  <span>{s.icon}</span>
+                  <span className="truncate">{s.title}</span>
+                </button>
+              ))}
+            </nav>
+            <div className="mt-4 text-xs text-gray-500">Tip: click any section to jump to it.</div>
+          </div>
         </aside>
 
-        {/* Main Content */}
-        <main className="md:col-span-3 space-y-8">
-          <h1 className="text-4xl font-bold text-center mb-12 text-lightMode-text2 dark:text-darkMode-text2">
-            Privacy Policy
-          </h1>
-          
-          {sections.map(sec => (
-            <section
-              id={sec.id}
-              key={sec.id}
-              className="bg-white dark:bg-darkMode-card rounded-2xl p-6 md:p-8 shadow-lg border border-gray-200 dark:border-gray-700 transition hover:shadow-2xl"
-            >
-              <button
-                onClick={() => toggleSection(sec.id)}
-                className="flex items-center gap-3 w-full text-left focus:outline-none"
-              >
-                {sec.icon}
-                <h2 className="text-xl font-semibold text-lightMode-text2 dark:text-darkMode-text2 flex-1">
-                  {sec.title}
-                </h2>
-                <span className="text-gray-400 dark:text-gray-500">{expandedSections.includes(sec.id) ? '−' : '+'}</span>
-              </button>
-              {expandedSections.includes(sec.id) && (
-                <p className="mt-4 leading-7 text-base">{sec.content}</p>
-              )}
-            </section>
-          ))}
+        {/* mobile TOC overlay */}
+        <AnimatePresence>
+          {mobileTocOpen && (
+            <motion.aside initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="md:hidden fixed inset-0 z-50 p-6">
+              <div className="absolute inset-0 bg-black/30" onClick={() => setMobileTocOpen(false)} />
+              <motion.div initial={{ y: 40 }} animate={{ y: 0 }} exit={{ y: 40 }} className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 max-w-md mx-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-semibold">Contents</h4>
+                  <button onClick={() => setMobileTocOpen(false)} className="px-2 py-1 rounded-md border">Close</button>
+                </div>
+                <div className="space-y-2">
+                  {sectionsData.map(s => (
+                    <button key={s.id} onClick={() => goTo(s.id)} className="w-full flex items-center gap-3 p-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/40 text-left">
+                      <span>{s.icon}</span>
+                      <span>{s.title}</span>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            </motion.aside>
+          )}
+        </AnimatePresence>
 
-          {/* CTA Section */}
-          <section className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-8 rounded-2xl shadow-lg text-center">
-            <h2 className="text-2xl font-bold mb-4">Stay Secure & Informed</h2>
-            <p className="mb-6">Update your settings regularly and stay aware of our policies.</p>
-            <a
-              href="/Pages/Settings"
-              className="inline-block px-6 py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-gray-100 transition"
-            >
-              Go to Settings
-            </a>
+        {/* main content */}
+        <div className="md:col-span-3 space-y-8">
+
+          <div className="prose max-w-none prose-lg dark:prose-invert">
+            <p className="text-sm text-gray-600 dark:text-gray-300">Your privacy matters. This privacy policy explains what data we collect and how we use it. We aim to keep things simple and transparent.</p>
+          </div>
+
+          {/* sections */}
+          <div className="space-y-6">
+            {sectionsData.map(renderSection)}
+          </div>
+
+          {/* CTA banner */}
+          <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 p-8 text-white shadow-xl">
+            <div className="relative z-10">
+              <h3 className="text-2xl font-bold">Stay Secure & Informed</h3>
+              <p className="mt-2 opacity-90">Review your settings and keep your account safe. You can manage your privacy preferences in settings.</p>
+              <div className="mt-4">
+                <a href="/Pages/Settings" className="inline-block bg-white text-indigo-600 px-5 py-2 rounded-lg font-semibold shadow">Go to Settings</a>
+              </div>
+            </div>
+            <div className="absolute -right-20 -bottom-20 opacity-10 transform rotate-12">
+              <svg width="240" height="240" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="120" cy="120" r="120" fill="white" />
+              </svg>
+            </div>
           </section>
-        </main>
-      </div>
 
-      {/* Footer */}
-      <footer className="mt-16 border-t border-gray-200 dark:border-gray-700 pt-8 text-center text-sm text-gray-500">
-        &copy; {new Date().getFullYear()} Zocial. All rights reserved.
-      </footer>
+          <footer className="mt-6 text-sm text-gray-500">&copy; {new Date().getFullYear()} Zocial. All rights reserved.</footer>
+        </div>
+      </main>
     </div>
-  );
-};
-
-export default PrivacyPolicyPage;
+  )
+}
