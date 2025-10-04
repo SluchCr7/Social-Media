@@ -66,8 +66,7 @@ export const MusicProvider = ({ children }) => {
         formData,
         {
           headers: {
-            Authorization: `Bearer ${user.token}`,
-            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${user.token}`
           },
         }
       );

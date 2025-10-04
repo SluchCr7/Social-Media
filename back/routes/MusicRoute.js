@@ -6,8 +6,12 @@ const musicUpload = require('../Middelwares/uploadMusic')
 const photoUpload = require('../Middelwares/uploadPhoto');
 
 // CRUD
-router.post('/', verifyToken, photoUpload.single('image') , musicUpload.single('audio'), createMusic);
-router.get('/', getAllMusic);
+const upload = require('../Middelwares/uploadFiles');
+
+router.post('/', verifyToken, upload.fields([
+  { name: 'audio', maxCount: 1 },
+  { name: 'image', maxCount: 1 },
+]), createMusic);router.get('/', getAllMusic);
 router.get('/:id', getMusicById);
 router.put('/:id', verifyToken, updateMusic);
 router.delete('/:id', verifyToken, deleteMusic);

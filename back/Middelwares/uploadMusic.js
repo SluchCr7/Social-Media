@@ -1,14 +1,23 @@
 const multer = require("multer");
 
-const musicUpload = multer({
-  storage: multer.memoryStorage(),
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith("audio")) cb(null, true);
-    else cb(new Error("Only audio files are allowed!"), false);
-  },
-  limits: {
-    fileSize: 20 * 1024 * 1024, // 20MB حد أقصى للملفات الصوتية
-  },
-});
+// 🧠 استخدم نفس التخزين في الذاكرة
+const storage = multer.memoryStorage();
 
-module.exports = musicUpload;
+// ⚙️ إعداد الـ fileFilter لقبول الصوت والصورة فقط
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("audio") || file.mimetype.startsWith("image")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only audio and image files are allowed!"), false);
+  }
+};
+
+// ⚖️ تحديد الحدود (يمكنك ضبطها حسب حاجتك)
+const limits = {
+  fileSize: 20 * 1024 * 1024, // أقصى حجم 20MB (للصوت والصورة)
+};
+
+// 🧩 إنشاء الـ multer instance
+const upload = multer({ storage, fileFilter, limits });
+
+module.exports = upload;
