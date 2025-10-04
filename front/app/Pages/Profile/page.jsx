@@ -10,11 +10,6 @@ import { useProfilePosts } from "@/app/Custome/useProfilePosts"
 import ProfileSkeleton from "@/app/Skeletons/ProfileSkeleton"
 import { useState } from "react"
 
-export const metadata = {
-  title: "Zociel - Profile",
-  description: "View and edit your profile on Zociel",
-};
-
 const ProfilePage = () => {
   const { user, togglePrivateAccount } = useAuth()
   const {

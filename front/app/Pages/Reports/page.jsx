@@ -17,10 +17,6 @@ import { useComment } from '@/app/Context/CommentContext';
 import DesignReports from './Design';
 
 
-export const metadata = {
-  title: "Zociel - Reports",
-  description: "View all Reports and edit it or make a action",
-};
 
 // ================== Main Page ==================
 const AdminReportsPage = () => {

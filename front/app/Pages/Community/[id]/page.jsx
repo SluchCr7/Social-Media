@@ -6,11 +6,6 @@ import { usePost } from '@/app/Context/PostContext'
 import Loading from '@/app/Component/Loading'
 import DasignCommunitySelect from './Dasign'
 
-export const metadata = {
-  title: "Zociel - Community",
-  description: "Zocial Community Page",
-};
-
 
 const SkeletonCover = () => (
   <div className="animate-pulse">
