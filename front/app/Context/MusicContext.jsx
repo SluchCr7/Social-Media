@@ -12,7 +12,7 @@ export const MusicProvider = ({ children }) => {
   const { user } = useAuth();
   const { showAlert } = useAlert();
   const { addNotify } = useNotify();
-
+  const [currentMusic , setCurrentMusic] = useState(null);
   const [music, setMusic] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -165,6 +165,8 @@ export const MusicProvider = ({ children }) => {
         lastMusicRef,
         showModelAddMusic,
         setShowModelAddMusic,
+        currentMusic,
+        setCurrentMusic,
       }}
     >
       {children}
