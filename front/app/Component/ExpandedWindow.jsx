@@ -1,8 +1,8 @@
 'use client'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
-import React, { useEffect, useRef, useState } from 'react'
-import { FaPlay, FaPause, FaStepForward, FaStepBackward, FaRandom, FaRedo, FaTimes, FaHeart } from 'react-icons/fa'
+import React from 'react'
+import { FaPlay, FaPause, FaStepForward, FaStepBackward, FaRandom, FaRedo, FaTimes } from 'react-icons/fa'
 
 const ExpandedWindow = ({
   current,
@@ -12,29 +12,9 @@ const ExpandedWindow = ({
   duration,
   formatTime,
   playing,
-  togglePlay,
-  toggleLike,
-  liked,
-  accentColor,
-  setAccentColor,
-  lyrics // optional: current.lyrics or passed prop
+  togglePlay
 }) => {
-  const [localScroll, setLocalScroll] = useState(0)
-  const lyricsRef = useRef(null)
-
-  // Scroll lyrics automatically if they include timestamps array
-  useEffect(() => {
-    if (!lyricsRef.current) return
-    // if lyrics is an array of {time, text} we can sync, else we leave it scrollable
-    if (!Array.isArray(lyrics)) return
-    // find current index
-    const idx = lyrics.findIndex((l) => l.time > progress) - 1
-    const clamped = Math.max(0, idx)
-    const el = lyricsRef.current.children[clamped]
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
-  }, [progress, lyrics])
+  const progressPercent = (progress / (duration || 1)) * 100
 
   return (
     <AnimatePresence>
@@ -43,139 +23,79 @@ const ExpandedWindow = ({
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 40 }}
-          transition={{ duration: 0.25 }}
-          className="fixed inset-0 z-[1000] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className="fixed inset-0 z-[1000] bg-black/70 backdrop-blur-md flex items-center justify-center px-4 py-8"
         >
           <motion.div
-            initial={{ scale: 0.98, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.98, opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="relative w-full max-w-4xl bg-white/10 dark:bg-gray-900/80 rounded-3xl p-6 shadow-2xl border border-white/10"
-            style={{ outline: `1px solid ${accentColor ? `${accentColor}33` : 'transparent'}` }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="relative w-full max-w-3xl bg-white/10 dark:bg-gray-900/70 
+                       rounded-3xl shadow-2xl border border-white/20 p-6 flex flex-col items-center"
           >
+            {/* Close Button */}
             <button
               onClick={() => setExpanded(false)}
-              className="absolute right-4 top-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white"
-              aria-label="Close"
+              className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 text-white rounded-full transition-all"
             >
-              <FaTimes />
+              <FaTimes size={18} />
             </button>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-              {/* Cover */}
-              <div className="w-full flex items-center justify-center">
-                <div className="relative w-64 h-64 rounded-2xl overflow-hidden shadow-2xl">
-                  {current?.cover ? (
-                    <Image src={current.cover} alt={current.title} fill className="object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-500">No Cover</div>
-                  )}
+            {/* Cover */}
+            <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-3xl overflow-hidden shadow-xl">
+              {current?.cover ? (
+                <Image src={current.cover} alt={current.title} fill className="object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-300 dark:bg-gray-700 text-gray-500">
+                  No Cover
                 </div>
+              )}
+            </div>
+
+            {/* Song Info */}
+            <div className="text-center mt-6">
+              <h2 className="text-2xl font-semibold text-white">{current?.title || 'Unknown Title'}</h2>
+              <p className="text-gray-300 mt-1">{current?.artist || 'Unknown Artist'} • {current?.album || '—'}</p>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="w-full mt-8">
+              <div className="flex justify-between text-sm text-gray-400 mb-1">
+                <span>{formatTime(progress)}</span>
+                <span>{formatTime(duration)}</span>
               </div>
-
-              {/* Details + Controls */}
-              <div className="md:col-span-2">
-                <h3 className="text-2xl font-semibold text-white">{current?.title || 'Unknown Title'}</h3>
-                <p className="text-sm text-gray-300 mt-1">{current?.artist} • {current?.album || '—'}</p>
-
-                {/* Controls */}
-                <div className="mt-5 flex items-center gap-4">
-                  <button className="p-3 text-gray-300 hover:text-white" title="Shuffle"><FaRandom /></button>
-                  <button onClick={() => {
-                    // parent handles prev
-                    const ev = new CustomEvent('player-prev'); window.dispatchEvent(ev)
-                  }} className="p-3 text-gray-300 hover:text-white"><FaStepBackward /></button>
-
-                  <button
-                    onClick={togglePlay}
-                    className="p-4 rounded-full"
-                    style={{
-                      background: `linear-gradient(90deg, ${accentColor || '#6366f1'}, ${accentColor ? darkenHex(accentColor, -30) : '#ec4899'})`,
-                      color: '#fff',
-                      boxShadow: `0 10px 30px ${accentColor ? `${accentColor}44` : 'rgba(0,0,0,0.2)'}`
-                    }}
-                  >
-                    {playing ? <FaPause /> : <FaPlay />}
-                  </button>
-
-                  <button onClick={() => {
-                    const ev = new CustomEvent('player-next'); window.dispatchEvent(ev)
-                  }} className="p-3 text-gray-300 hover:text-white"><FaStepForward /></button>
-
-                  <button className={`p-3 rounded-md ${liked ? 'bg-red-600 text-white scale-105' : 'text-gray-300'}`} onClick={() => toggleLike && toggleLike(current?._id)}>
-                    <FaHeart />
-                  </button>
-                </div>
-
-                {/* progress + times */}
-                <div className="mt-6">
-                  <div className="flex items-center justify-between text-sm text-gray-300">
-                    <span>{formatTime(progress)}</span>
-                    <span>{formatTime(duration)}</span>
-                  </div>
-                  <div className="mt-2 h-2 rounded-full bg-gray-700 overflow-hidden">
-                    <div style={{ width: `${(progress / (duration || 1)) * 100}%` }} className="h-full rounded-full" />
-                  </div>
-                </div>
-
-                {/* Lyrics + extra */}
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white/5 rounded-lg p-3 max-h-44 overflow-auto text-sm text-gray-200" ref={lyricsRef}>
-                    <div className="font-semibold mb-2">Lyrics</div>
-                    {Array.isArray(lyrics) ? (
-                      lyrics.map((l, idx) => (
-                        <div key={idx} className={`py-1 ${progress >= (l.time || 0) ? 'text-white' : 'text-gray-300'}`}>
-                          {l.text}
-                        </div>
-                      ))
-                    ) : (
-                      <pre className="whitespace-pre-wrap text-sm text-gray-300">{lyrics || 'Lyrics not available'}</pre>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="bg-white/5 rounded-lg p-3">
-                      <div className="text-xs text-gray-300">Album</div>
-                      <div className="font-medium">{current?.album || '—'}</div>
-                    </div>
-                    <div className="bg-white/5 rounded-lg p-3">
-                      <div className="text-xs text-gray-300">Released</div>
-                      <div className="font-medium">{current?.year || '—'}</div>
-                    </div>
-                    <div className="bg-white/5 rounded-lg p-3">
-                      <div className="text-xs text-gray-300">Genre</div>
-                      <div className="font-medium">{current?.genre || '—'}</div>
-                    </div>
-                  </div>
-                </div>
-
+              <div className="relative h-2 bg-gray-700 rounded-full overflow-hidden group">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-indigo-500 to-blue-500"
+                  style={{ width: `${progressPercent}%` }}
+                  transition={{ duration: 0.3 }}
+                />
+                <motion.div
+                  className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-blue-400 
+                             shadow-md opacity-0 group-hover:opacity-100"
+                  style={{ left: `calc(${progressPercent}% - 6px)` }}
+                />
               </div>
+            </div>
+
+            {/* Controls */}
+            <div className="flex items-center justify-center gap-6 mt-8">
+              <button className="p-3 text-gray-300 hover:text-white transition"><FaRandom /></button>
+              <button className="p-3 text-gray-300 hover:text-white transition"><FaStepBackward size={20} /></button>
+              <button
+                onClick={togglePlay}
+                className="p-5 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-lg hover:scale-110 transition-transform"
+              >
+                {playing ? <FaPause size={22} /> : <FaPlay size={22} />}
+              </button>
+              <button className="p-3 text-gray-300 hover:text-white transition"><FaStepForward size={20} /></button>
+              <button className="p-3 text-gray-300 hover:text-white transition"><FaRedo /></button>
             </div>
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
   )
-}
-
-// helper to slightly darken a hex color (accepts #RRGGBB or rgb)
-function darkenHex(hex, amt = -20) {
-  try {
-    if (!hex) return '#6366f1'
-    // strip alpha if present
-    const c = hex.replace('#','')
-    const num = parseInt(c,16)
-    let r = (num >> 16) + amt
-    let g = ((num >> 8) & 0x00FF) + amt
-    let b = (num & 0x0000FF) + amt
-    r = Math.max(Math.min(255, r), 0)
-    g = Math.max(Math.min(255, g), 0)
-    b = Math.max(Math.min(255, b), 0)
-    return `#${(r<<16 | g<<8 | b).toString(16).padStart(6,'0')}`
-  } catch (e) {
-    return hex
-  }
 }
 
 export default ExpandedWindow
