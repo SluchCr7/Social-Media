@@ -7,6 +7,7 @@ import { LuMessagesSquare } from "react-icons/lu"
 import { MdOutlineOndemandVideo } from "react-icons/md"
 import { IoTrophyOutline } from "react-icons/io5"
 import { SlCalender } from "react-icons/sl"
+import { IoIosMusicalNotes } from "react-icons/io";
 
 export const colors = [
     {
@@ -50,6 +51,7 @@ export const navSections = [
       { icon: <GoHome />, text: "Home", link: "/" },
       { icon: <GoSearch />, text: "Explore", link: "/Pages/Explore" },
       { icon: <MdOutlineOndemandVideo />, text: "Videos", link: "/Pages/Videos" },
+      { icon: <IoIosMusicalNotes />, text: "Music", link: "/Pages/Music" },
     ]
   },
   {

@@ -493,7 +493,7 @@ export default function MusicPage() {
               </div>
             </div>
             <div className="mt-3 text-xs text-gray-500">
-              Plays: {current?.views ?? 0} • Likes: {current?.likes ?? 0}
+              Plays: {current?.views?.length ?? 0} • Likes: {current?.likes?.length ?? 0}
             </div>
           </div>
 
