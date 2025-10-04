@@ -6,7 +6,7 @@ const musicUpload = require('../Middelwares/uploadMusic')
 const photoUpload = require('../Middelwares/uploadPhoto');
 
 // CRUD
-const upload = require('../Middelwares/uploadFiles');
+const upload = require('../Middelwares/uploadMusic');
 
 router.post('/', verifyToken, upload.fields([
   { name: 'audio', maxCount: 1 },
