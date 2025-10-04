@@ -46,27 +46,15 @@ export const MusicProvider = ({ children }) => {
   }, [page, fetchMusic]);
 
   // 🎵 رفع موسيقى جديدة
-  const uploadMusic = useCallback(async (file, title, artist, genre, album = null, cover) => {
-    if (!user?.token) {
-      showAlert("You must be logged in to upload a music file.");
-      return;
-    }
-
+  const uploadMusic = async (formData) => {
     try {
-      const formData = new FormData();
-      formData.append("audio", file);
-      formData.append("title", title);
-      formData.append("artist", artist);
-      formData.append("genre", genre);
-      if (album) formData.append("album", album);
-      if (cover) formData.append("image", cover);
-
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/music`,
         formData,
         {
           headers: {
-            Authorization: `Bearer ${user.token}`
+            Authorization: `Bearer ${user.token}`,
+            // ❌ لا تكتب Content-Type يدوياً، axios يضبطه تلقائياً
           },
         }
       );
@@ -77,7 +65,7 @@ export const MusicProvider = ({ children }) => {
       console.error(err);
       showAlert(err?.response?.data?.message || "Failed to upload Music.");
     }
-  }, [user, showAlert]);
+  };
 
   // 🗑️ حذف موسيقى
   const deleteMusic = useCallback(async (id) => {

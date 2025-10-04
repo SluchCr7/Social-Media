@@ -12,40 +12,44 @@ const AddMusicModal = ({ isOpen, onClose }) => {
   const [artist, setArtist] = useState("")
   const [album, setAlbum] = useState("")
   const [genre, setGenre] = useState("Other")
-  const [file, setFile] = useState(null)
-  const [cover, setCover] = useState(null)
+  const [audioFile, setAudioFile] = useState(null)
+  const [imageFile, setImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
   const { uploadMusic } = useMusic()
 
+  // ✅ معالجة اختيار الكوفر
   const handleCoverChange = (e) => {
-    const imageFile = e.target.files[0]
-    if (imageFile) {
-      const imageUrl = URL.createObjectURL(imageFile)
-      setCover(imageUrl)
+    const file = e.target.files[0]
+    if (file) {
+      setImageFile(file)
+      setImagePreview(URL.createObjectURL(file))
     }
   }
 
-  const handleFileChange = (e) => {
-    const audioFile = e.target.files[0]
-    if (audioFile) setFile(audioFile)
+  // ✅ معالجة اختيار ملف الصوت
+  const handleAudioChange = (e) => {
+    const file = e.target.files[0]
+    if (file) setAudioFile(file)
   }
 
-  const handleSubmit = (e) => {
+  // ✅ إرسال النموذج
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!title || !artist || !file) {
-      alert("Title, Artist and File are required!")
+
+    if (!title || !artist || !audioFile) {
+      alert("Title, Artist, and Audio File are required!")
       return
     }
 
-    const newMusic = {
-      title,
-      artist,
-      album,
-      genre,
-      file,
-      cover,
-    }
+    const formData = new FormData()
+    formData.append("title", title)
+    formData.append("artist", artist)
+    formData.append("album", album)
+    formData.append("genre", genre)
+    formData.append("audio", audioFile)
+    if (imageFile) formData.append("image", imageFile)
 
-    uploadMusic(newMusic)
+    await uploadMusic(formData)
     onClose()
   }
 
@@ -58,7 +62,6 @@ const AddMusicModal = ({ isOpen, onClose }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {/* Modal Container */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -76,24 +79,23 @@ const AddMusicModal = ({ isOpen, onClose }) => {
               <IoClose size={26} />
             </button>
 
-            {/* Title */}
             <h2 className="text-2xl md:text-3xl font-extrabold mb-6 text-center text-lightMode-text dark:text-darkMode-text">
               🎵 Add New Music
             </h2>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-              {/* 🎨 Cover Upload */}
+              {/* Cover Image Upload */}
               <div className="flex flex-col items-center text-center">
                 <label className="block text-sm font-medium text-lightMode-text2 dark:text-darkMode-text2 mb-2">
                   Cover Image
                 </label>
 
                 <div className="relative group w-40 h-40 rounded-2xl overflow-hidden shadow-md border border-gray-300 dark:border-gray-700 bg-lightMode-menu dark:bg-darkMode-bg flex items-center justify-center cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]">
-                  {cover ? (
+                  {imagePreview ? (
                     <>
                       <Image
-                        src={cover}
+                        src={imagePreview}
                         alt="cover preview"
                         width={160}
                         height={160}
@@ -111,7 +113,10 @@ const AddMusicModal = ({ isOpen, onClose }) => {
                         </label>
                         <button
                           type="button"
-                          onClick={() => setCover(null)}
+                          onClick={() => {
+                            setImageFile(null)
+                            setImagePreview(null)
+                          }}
                           className="px-3 py-1.5 bg-red-500 text-white text-sm rounded-lg font-medium hover:bg-red-600 transition"
                         >
                           Remove
@@ -210,7 +215,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
                 </div>
               </div>
 
-              {/* File Upload */}
+              {/* Audio Upload */}
               <div>
                 <label className="block text-sm font-medium text-lightMode-text2 dark:text-darkMode-text2">
                   Upload Music File
@@ -218,7 +223,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
                 <input
                   type="file"
                   accept="audio/*"
-                  onChange={handleFileChange}
+                  onChange={handleAudioChange}
                   className="w-full mt-1 px-4 py-2 border rounded-xl cursor-pointer 
                              bg-lightMode-menu dark:bg-darkMode-bg text-lightMode-fg 
                              dark:text-darkMode-fg outline-none"

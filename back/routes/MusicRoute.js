@@ -8,10 +8,11 @@ const photoUpload = require('../Middelwares/uploadPhoto');
 // CRUD
 const upload = require('../Middelwares/uploadMusic');
 
-router.post('/', verifyToken, upload.fields([
+router.post('/',  upload.fields([
   { name: 'audio', maxCount: 1 },
   { name: 'image', maxCount: 1 },
-]), createMusic);router.get('/', getAllMusic);
+]), verifyToken, createMusic)
+router.get('/', getAllMusic);
 router.get('/:id', getMusicById);
 router.put('/:id', verifyToken, updateMusic);
 router.delete('/:id', verifyToken, deleteMusic);
