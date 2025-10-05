@@ -24,7 +24,7 @@ export default function AnalyticsDashboard() {
     setFollowing(user?.following || []);
   }, [user]);
 
-  const userPosts = useMemo(() => posts?.filter(p => p.author?._id === user?._id) || [], [posts, user]);
+  const userPosts = useMemo(() => posts?.filter(p => p.owner?._id === user?._id) || [], [posts, user]);
   const totalLikes = useMemo(() => userPosts.reduce((sum, p) => sum + (p.likes?.length || 0), 0), [userPosts]);
   const totalComments = useMemo(() => userPosts.reduce((sum, p) => sum + (p.comments?.length || 0), 0), [userPosts]);
 
@@ -95,8 +95,8 @@ export default function AnalyticsDashboard() {
           whileHover={{ scale: 1.05 }}
           className="p-5 rounded-2xl shadow flex flex-col items-center justify-center transition-colors duration-300 bg-lightMode-menu dark:bg-darkMode-menu"
         >
-          <div className="text-xl mb-1">{item.icon}</div>
-          <div className="text-sm opacity-70">{item.key}</div>
+          <div className="text-xl mb-1 text-lightMode-fg dark:text-darkMode-fg">{item.icon}</div>
+          <div className="text-sm opacity-70 text-lightMode-fg dark:text-darkMode-fg">{item.key}</div>
           <div className="text-2xl font-bold text-lightMode-text dark:text-darkMode-text">{item.value}</div>
         </motion.div>
       ))}
@@ -171,7 +171,7 @@ export default function AnalyticsDashboard() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6 space-y-6 bg-lightMode-bg dark:bg-darkMode-bg">
+    <div className="w-full p-6 space-y-6 bg-lightMode-bg dark:bg-darkMode-bg">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
