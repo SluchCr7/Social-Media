@@ -16,12 +16,12 @@ const AdminUsersPage = () => {
   const filteredUsers = useMemo(() => {
     return users.filter(u => {
       const matchesSearch = u.username.toLowerCase().includes(search.toLowerCase()) 
-                            || u.profileName.toLowerCase().includes(search.toLowerCase())
-                            || u.email.toLowerCase().includes(search.toLowerCase());
+        || u.profileName.toLowerCase().includes(search.toLowerCase())
+        || u.email.toLowerCase().includes(search.toLowerCase());
       const matchesStatus = statusFilter === 'all' 
-                            || (statusFilter === 'admin' && u.isAdmin) 
-                            || (statusFilter === 'banned' && u.accountStatus === 'banned')
-                            || (statusFilter === 'verified' && u.isAccountWithPremiumVerify);
+        || (statusFilter === 'admin' && u.isAdmin) 
+        || (statusFilter === 'banned' && u.accountStatus === 'banned')
+        || (statusFilter === 'verified' && u.isAccountWithPremiumVerify);
       return matchesSearch && matchesStatus;
     });
   }, [users, search, statusFilter]);

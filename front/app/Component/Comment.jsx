@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { CiHeart } from 'react-icons/ci';
 import { FaRegCommentDots, FaRegEdit } from 'react-icons/fa';
 import { IoIosHeart, IoIosSend } from 'react-icons/io';
-import { MdOutlineDelete } from 'react-icons/md';
+import { MdOutlineContentCopy, MdOutlineDelete } from 'react-icons/md';
 import { useComment } from '../Context/CommentContext';
 import { useAuth } from '../Context/AuthContext';
 import { MdOutlineReport, MdContentCopy } from "react-icons/md";
@@ -78,6 +78,16 @@ const Comment = ({ comment }) => {
                 <span className="text-xs md:text-sm ml-2 text-gray-400">
                   · {new Date(comment.createdAt).toLocaleDateString()}
                 </span>
+                {comment?.isEdited && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="inline-flex items-center gap-1 bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 text-xs px-2 py-0.5 rounded-full ml-2"
+                  >
+                    <MdOutlineContentCopy className="w-4 h-4" />
+                    <span>Edited</span>
+                  </motion.div>
+                )}
               </div>
 
               {/* Actions (Edit / Delete) */}

@@ -11,8 +11,8 @@ import Image from 'next/image'
 import { useMusic } from '../../Context/MusicContext' // ✅ استدعاء الكونتكست
 import AddMusicModal from '@/app/Component/AddMusicMenu'
 import { useAuth } from '@/app/Context/AuthContext'
-import SongPlayer from '@/app/Component/SongPlayer'
-import ExpandedWindow from '@/app/Component/ExpandedWindow'
+import SongPlayer from '@/app/Component/MusicPage/SongPlayer'
+import ExpandedWindow from '@/app/Component/MusicPage/ExpandedWindow'
 
 // ----------------------
 // Utility

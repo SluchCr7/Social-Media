@@ -7,7 +7,7 @@ const communitySelect = "Name Picture members";
 
 const reelPopulate = [
   { path: "owner", select: userSelect },
-  { path: "originalPost", populate: { path: "owner", select: userSelect } },
+  { path: "originalPost", populate: { path: "owner", select: userSelect } }
 ];
 
 const storyPopulate = [

@@ -36,7 +36,7 @@ const Calendar = () => {
 
   const handleAddEvent = async () => {
     if (!newEvent.title) return;
-    const event = { ...newEvent, date: selectedDate.format("YYYY-MM-DD") };
+    const event = { ...newEvent, date: selectedDate.format("YYYY-MM-DD")};
     await addEvent(event);
     setNewEvent({ title: "", description: "", type: "custom", repeatYearly: false });
     setSelectedDate(null);

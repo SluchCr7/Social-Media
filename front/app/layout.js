@@ -19,6 +19,8 @@ import { EventProvider } from "./Context/EventContext";
 import { AsideContextProvider } from "./Context/AsideContext";
 import { ReelsProvider } from "./Context/ReelsContext";
 import { MusicProvider } from "./Context/MusicContext";
+import { TranslateContextProvider } from "./Context/TranslateContext";
+import { ThemeContextProvider } from "./Context/ThemeContext";
 const jetBrainsMono = JetBrains_Mono({
   subsets: ["latin"]
   , weight: ["100", "200", "300", "400"]
@@ -50,11 +52,15 @@ export default function RootLayout({ children }) {
                               <ReelsProvider>
                                 <EventProvider>
                                   <MusicProvider>
-                                    <AsideContextProvider>  
-                                      <LayoutComponent>
-                                          {children}
-                                      </LayoutComponent>
-                                    </AsideContextProvider>
+                                    <ThemeContextProvider>
+                                      <TranslateContextProvider>
+                                        <AsideContextProvider>  
+                                          <LayoutComponent>
+                                              {children}
+                                          </LayoutComponent>
+                                        </AsideContextProvider>
+                                      </TranslateContextProvider>
+                                    </ThemeContextProvider>
                                   </MusicProvider>
                                 </EventProvider>
                               </ReelsProvider>

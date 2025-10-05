@@ -155,6 +155,14 @@ const UserSchema = new mongoose.Schema({
         type : Boolean,
         default : false
     },
+    acceptedCookies : {
+        type : Boolean,
+        default : false
+    },
+    preferedLanguage : {
+        type : String,
+        default : "English"
+    }
     interests : {
         type : [String],
         default : []

@@ -73,3 +73,72 @@ export const navSections = [
     ]
   }
 ]
+
+export const CATEGORY_OPTIONS = [
+  'All', 'Technology', 'Art', 'Science', 'Gaming', 'Music',
+  'Food', 'Travel', 'Health', 'Business', 'Politics', 'Sports', 'Other'
+]
+
+export const SORT_OPTIONS = ['Newest', 'Most Members', 'A-Z']
+
+export const languageMap = {
+  Arabic: "ar",
+  English: "en",
+  French: "fr",
+  Spanish: "es",
+  German: "de",
+  Italian: "it",
+  Portuguese: "pt",
+  Russian: "ru",
+  Chinese: "zh",
+  Japanese: "ja",
+  Korean: "ko",
+  Turkish: "tr",
+  Hindi: "hi",
+  Bengali: "bn",
+  Urdu: "ur",
+  Persian: "fa",
+  Dutch: "nl",
+  Greek: "el",
+  Polish: "pl",
+  Swedish: "sv",
+  Norwegian: "no",
+  Danish: "da",
+  Finnish: "fi",
+  Thai: "th",
+  Vietnamese: "vi",
+  Indonesian: "id",
+  Hebrew: "he",
+  Malay: "ms",
+};
+
+export const iso6391Map = {
+    eng: "en",
+    ara: "ar",
+    fra: "fr",
+    spa: "es",
+    deu: "de",
+    ita: "it",
+    por: "pt",
+    rus: "ru",
+    zho: "zh",
+    jpn: "ja",
+    kor: "ko",
+    tur: "tr",
+    hin: "hi",
+    ben: "bn",
+    urd: "ur",
+    fas: "fa",
+    nld: "nl",
+    ell: "el",
+    pol: "pl",
+    swe: "sv",
+    nor: "no",
+    dan: "da",
+    fin: "fi",
+    tha: "th",
+    vie: "vi",
+    ind: "id",
+    heb: "he",
+    msa: "ms",
+  };

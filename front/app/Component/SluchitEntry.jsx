@@ -14,19 +14,56 @@ import PostActions from './Post/PostActions';
 import PostPhotos from './Post/PostPhotos';
 import SharedTitle from './Post/SharedTitle';
 import { HiBadgeCheck } from 'react-icons/hi';
-
+import { useTranslate } from '../Context/TranslateContext';
+import franc from 'franc';
+import { languageMap , iso6391Map} from '../utils/Data';
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost();
   const [showMenu, setShowMenu] = useState(false);
   const { user, isLogin } = useAuth();
   const [openModel, setOpenModel] = useState(false);
-
+  const { translate, loading } = useTranslate();
+  const [translated, setTranslated] = useState(null);
+  const [showTranslateButton, setShowTranslateButton] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
   const isShared = post?.isShared && post?.originalPost;
   const original = post?.originalPost;
   const isCommunityPost = post?.community !== null;
   const isInCommunityPage = typeof window !== 'undefined' && window.location.href.includes('/Pages/Community/');
   const highlightedComment = getHighlightedComment(post);
+   // فحص إذا كان يجب إظهار زر الترجمة
+  useEffect(() => {
+    if (!post?.text || !post?.owner?.preferredLanguage) return;
 
+    const preferredLangText = post.owner.preferredLanguage;
+    const preferredLang = languageMap[preferredLangText] || null;
+    if (!preferredLang) return;
+
+    const langCode3 = franc(post.text);
+    const textLang = iso6391Map[langCode3] || 'en';
+
+    setShowTranslateButton(textLang !== preferredLang);
+  }, [post?.text, post?.owner?.preferredLanguage]);
+
+  // دالة الترجمة
+  const handleTranslate = async () => {
+    if (!post?.text || !post?.owner?.preferredLanguage) return;
+
+    const targetLang = languageMap[post.owner.preferredLanguage];
+    if (!targetLang) return;
+
+    const result = await translate(post.text, targetLang);
+    setTranslated(result);
+    setShowOriginal(true);
+    setShowTranslateButton(false);
+  };
+
+  // دالة الرجوع للنص الأصلي
+  const handleShowOriginal = () => {
+    setShowOriginal(false);
+    setTranslated(null);
+    setShowTranslateButton(true);
+  };
   return (
     <div ref={ref} className="relative w-full">
       {/* 🔄 Share Modal */}
@@ -85,21 +122,21 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
               <div className="flex items-center gap-3">
                 <div className="flex flex-col leading-tight">
-                  <UserHoverCard userSelected={post?.owner}>
-                    <Link
-                      href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${post?.owner?._id}`}
-                      className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline truncate max-w-[150px] sm:max-w-[200px]"
-                    >
-                      {post?.owner?.username}
-                    </Link>
-                  </UserHoverCard>
+                  <div className="flex items-center gap-1">
+                    <UserHoverCard userSelected={post?.owner}>
+                      <Link
+                        href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${post?.owner?._id}`}
+                        className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline truncate max-w-[150px] sm:max-w-[200px]"
+                      >
+                        {post?.owner?.username}
+                      </Link>
+                    </UserHoverCard>
+                    {post?.owner?.isAccountWithPremiumVerify && (
+                      <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 text-xs text-gray-500 flex-wrap">
-                    <div className="flex items-center gap-1">
-                      <span className="truncate max-w-[120px]">{post?.owner?.profileName}</span>
-                      {post?.owner?.isAccountWithPremiumVerify && (
-                        <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
-                      )}
-                    </div>
+                    <span className="truncate max-w-[120px]">{post?.owner?.profileName}</span>
                     <span className="hidden sm:inline w-1 h-1 bg-gray-400 rounded-full" />
                     <span>{new Date(post?.createdAt).toLocaleDateString()}</span>
                   </div>
@@ -123,11 +160,31 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
 
             {/* 📝 Text */}
             <RenderPostText
-              text={isShared ? post?.text : post?.text}
+              text={showOriginal ? translated : post?.text}
               mentions={post?.mentions}
               hashtags={post?.Hashtags}
-              italic={isShared}
+              italic={post?.isShared}
             />
+
+            {/* زر الترجمة / العودة للنص الأصلي */}
+            {showTranslateButton && (
+              <button
+                onClick={handleTranslate}
+                disabled={loading}
+                className="text-blue-500 mt-2 hover:underline"
+              >
+                {loading ? 'جارٍ الترجمة...' : 'Translate'}
+              </button>
+            )}
+
+            {showOriginal && (
+              <button
+                onClick={handleShowOriginal}
+                className="text-blue-500 mt-2 hover:underline"
+              >
+                Show Original
+              </button>
+            )}
 
             {/* 🖼️ Original Post if Shared */}
             {isShared && original && (
@@ -150,10 +207,17 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                       height={50}
                       className="w-12 h-12 rounded-full object-cover border-2 border-blue-400"
                     />
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-gray-900 dark:text-white">{original?.owner?.username}</span>
-                      <span className="text-gray-500 text-xs">{original?.owner?.profileName}</span>
-                    </div>
+                    <UserHoverCard userSelected={original?.owner}>
+                      <div className="flex flex-col">
+                        <div className='flex items-center gap-1'>
+                          <span className="font-semibold text-gray-900 dark:text-white">{original?.owner?.username}</span>
+                          {original?.owner?.isAccountWithPremiumVerify && (
+                            <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
+                          )}
+                        </div>
+                        <span className="text-gray-500 text-xs">{original?.owner?.profileName}</span>
+                      </div>
+                    </UserHoverCard>
                   </Link>
                   <span className="text-gray-400 text-xs whitespace-nowrap">
                     {new Date(original?.createdAt).toLocaleDateString()}

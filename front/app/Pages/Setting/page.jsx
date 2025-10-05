@@ -14,6 +14,7 @@ import {
 } from 'react-icons/fa'
 import { CiChat1 } from 'react-icons/ci'
 import { MdLanguage } from 'react-icons/md'
+import { useTheme } from '@/app/Context/ThemeContext'
 
 // NOTE: This component assumes Tailwind CSS is configured + Framer Motion installed.
 // It is a single-file, production-ready React component intended as a polished redesign
@@ -154,8 +155,11 @@ export default function SettingsPage({
 }) {
   const [activeTab, setActiveTab] = useState('appearance')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [darkMode, setDarkMode] = useState(false)
+  // استخدم الـ Context
+  const { theme, toggleTheme } = useTheme()
 
+  // نعرف متغير بسيط لسهولة التعامل
+  const darkMode = theme === 'dark'
   // security form
   const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -174,16 +178,6 @@ export default function SettingsPage({
   const [isPrivate, setIsPrivate] = useState(user?.isPrivate || false)
   const [isVerified, setIsVerified] = useState(user?.isAccountWithPremiumVerify || false)
 
-  useEffect(() => {
-    setDarkMode(document.documentElement.classList.contains('dark'))
-  }, [])
-
-  const handleToggleTheme = () => {
-    onToggleTheme()
-    setDarkMode((s) => !s)
-    // optional: toggle class on html
-    document.documentElement.classList.toggle('dark')
-  }
 
   const submitPassword = (e) => {
     e.preventDefault()
@@ -275,7 +269,7 @@ export default function SettingsPage({
               <div className="mt-4">
                 <div className="text-xs text-gray-500 mb-2">Theme</div>
                 <div className="flex items-center gap-3">
-                  <button onClick={handleToggleTheme} className="p-2 rounded-md shadow hover:scale-105 transition bg-white/50 dark:bg-gray-800/50">
+                  <button onClick={toggleTheme} className="p-2 rounded-md shadow hover:scale-105 transition bg-white/50 dark:bg-gray-800/50">
                     {darkMode ? <FaMoon /> : <FaSun />}
                   </button>
                   <div className="text-sm">{darkMode ? 'Dark' : 'Light'}</div>
@@ -324,7 +318,7 @@ export default function SettingsPage({
                           <div className="font-medium">Theme</div>
                           <div className="flex items-center gap-3">
                             <div className="text-xs text-gray-500">Light</div>
-                            <ToggleSwitch checked={darkMode} onChange={handleToggleTheme} />
+                            <ToggleSwitch checked={darkMode} onChange={toggleTheme} />
                             <div className="text-xs text-gray-500">Dark</div>
                           </div>
                         </div>

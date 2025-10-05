@@ -3,6 +3,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import dayjs from 'dayjs'
+import { GrLanguage } from "react-icons/gr";
 
 import { 
   FaPhone, FaGlobe, FaLinkedin, FaGithub, FaMapMarkerAlt, FaTwitter, 
@@ -14,9 +15,9 @@ const InfoItem = ({ icon, label, value, bgColor, textColor }) => (
   <motion.div
     variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
     className="flex items-center space-x-3 p-4 rounded-xl 
-               bg-lightMode-bg dark:bg-darkMode-bg 
-               shadow-lg hover:shadow-2xl 
-               transition hover:-translate-y-1"
+      bg-lightMode-bg dark:bg-darkMode-bg 
+      shadow-lg hover:shadow-2xl 
+      transition hover:-translate-y-1"
   >
     <div className={`w-10 h-10 flex items-center justify-center rounded-full ${bgColor} ${textColor}`}>
       {icon}
@@ -71,6 +72,7 @@ const InfoAboutUser = ({ user }) => {
             {user?.country && <InfoItem icon={<FaMapMarkerAlt />} label="Country" value={user.country} bgColor="bg-green-100" textColor="text-green-500" />}
             {user?.city && <InfoItem icon={<FaMapMarkerAlt />} label="City" value={user.city} bgColor="bg-teal-100" textColor="text-teal-500" />}
             {user?.gender && <InfoItem icon={user.gender.toLowerCase() === 'male' ? <FaMars /> : <FaVenus />} label="Gender" value={user.gender} bgColor="bg-pink-100" textColor="text-pink-500" />}
+            {user?.preferedLanguage && <InfoItem icon={<GrLanguage />} label="Perferd Language" value={user?.preferedLanguage} bgColor="bg-blue-200" textColor="text-blue-600" />}
             {user?.dateOfBirth && <InfoItem icon={<FaBirthdayCake />} label="Date of Birth" value={dayjs(user.dateOfBirth).format("MMMM D, YYYY")} bgColor="bg-yellow-100" textColor="text-yellow-500" />}
             {user?.createdAt && <InfoItem icon={<BsCalendar2Date />} label="Date of Join" value={dayjs(user.createdAt).format("MMMM D, YYYY")} bgColor="bg-yellow-100" textColor="text-yellow-500" />}
 
