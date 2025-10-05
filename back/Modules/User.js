@@ -162,7 +162,7 @@ const UserSchema = new mongoose.Schema({
     preferedLanguage : {
         type : String,
         default : "English"
-    }
+    },
     interests : {
         type : [String],
         default : []
