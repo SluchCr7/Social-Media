@@ -5,6 +5,8 @@ import { IoEllipsisHorizontal, IoAdd } from "react-icons/io5";
 import { FaUserEdit, FaCamera } from "react-icons/fa";
 import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri";
 import StatBlock from "./StatBlock";
+import { SiGoogleanalytics } from "react-icons/si";
+import Link from "next/link";
 
 const ProfileHeader = ({
   user,
@@ -78,13 +80,25 @@ const ProfileHeader = ({
           {user?.isAccountWithPremiumVerify && (
             <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
           )}
-          <span
-            onClick={() => setOpenMenu(!openMenu)}
-            className="cursor-pointer text-gray-600 dark:text-gray-300"
-          >
-            <IoEllipsisHorizontal size={20} />
-          </span>
+          <div className="flex items-center gap-1">
+            <span
+              onClick={() => setOpenMenu(!openMenu)}
+              className="cursor-pointer text-gray-600 dark:text-gray-300"
+            >
+              <IoEllipsisHorizontal size={20} />
+            </span>
+            <Link href="/Pages/Analytics">
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <SiGoogleanalytics className="text-gray-600 dark:text-gray-300" size={20} />
+              </motion.span>
+            </Link>
+          </div>
           {isOwner ? renderOwnerMenu?.() : renderVisitorMenu?.()}
+        
         </div>
 
         {/* Level & Progress */}
