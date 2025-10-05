@@ -1,10 +1,10 @@
-import axios from "axios";
+const axios = require("axios");
 /**
  * @desc ترجم النصوص إلى اللغة المطلوبة
  * @route POST /api/translate
  * @access Public
  */
-export const translateText = async (req, res) => {
+const translateText = async (req, res) => {
   try {
     const { text, targetLang } = req.body;
 
@@ -34,3 +34,5 @@ export const translateText = async (req, res) => {
     });
   }
 };
+
+module.exports = { translateText }

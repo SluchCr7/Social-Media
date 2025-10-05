@@ -1,9 +1,10 @@
-import express from "express";
-import { translateText } from "../Controllers/TranslateController";
+const express = require("express");
+// const translateText = require("../Controllers/TranslateController");
+const {translateText} = require("../Controllers/TranslateController");
 const { verifyToken } = require('../Middelwares/verifyToken');
-const router = express.Router();
+const route = express.Router();
 
 // POST /api/translate
-router.post("/", verifyToken, translateText);
+route.post("/", verifyToken, translateText);
 
-export default router;
+module.exports = route;
