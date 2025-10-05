@@ -61,10 +61,6 @@ const postPopulate = [
     select: userSelect,
   },
   {
-    path: "likes",
-    select: userSelect,
-  },
-  {
     path: "views",
     select: userSelect,
   },
