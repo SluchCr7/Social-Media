@@ -51,98 +51,98 @@ const uploadToCloudinary = (buffer) => {
 
 
 
-const addPost = async (req, res) => {
-  try {
-    let { text, Hashtags, community, mentions } = req.body;
-    const userId = req.user._id;
+// const addPost = async (req, res) => {
+//   try {
+//     let { text, Hashtags, community, mentions } = req.body;
+//     const userId = req.user._id;
 
-    if (typeof Hashtags === "string") Hashtags = [Hashtags];
-    else if (!Array.isArray(Hashtags)) Hashtags = [];
+//     if (typeof Hashtags === "string") Hashtags = [Hashtags];
+//     else if (!Array.isArray(Hashtags)) Hashtags = [];
 
-    if (typeof mentions === "string") {
-      try {
-        mentions = JSON.parse(mentions);
-      } catch {
-        mentions = [mentions];
-      }
-    } else if (!Array.isArray(mentions)) {
-      mentions = [];
-    }
+//     if (typeof mentions === "string") {
+//       try {
+//         mentions = JSON.parse(mentions);
+//       } catch {
+//         mentions = [mentions];
+//       }
+//     } else if (!Array.isArray(mentions)) {
+//       mentions = [];
+//     }
 
-    const { error } = ValidatePost({ text, Hashtags, community, mentions });
-    if (error) return res.status(400).json({ message: error.details[0].message });
+//     const { error } = ValidatePost({ text, Hashtags, community, mentions });
+//     if (error) return res.status(400).json({ message: error.details[0].message });
 
-    // ✅ 1. فحص المحتوى
-    const moderationResult = await moderatePost({ text });
-    if (moderationResult.status === "blocked") {
-      return res.status(400).json({ message: moderationResult.reason });
-    }
+//     // ✅ 1. فحص المحتوى
+//     const moderationResult = await moderatePost({ text });
+//     if (moderationResult.status === "blocked") {
+//       return res.status(400).json({ message: moderationResult.reason });
+//     }
 
-    let communityDoc = null;
-    if (community) {
-      communityDoc = await Community.findById(community);
-      if (!communityDoc) return res.status(404).json({ message: "Community not found." });
-      if (!communityDoc.members.includes(userId))
-        return res.status(403).json({ message: "Not a member of this community." });
-    }
+//     let communityDoc = null;
+//     if (community) {
+//       communityDoc = await Community.findById(community);
+//       if (!communityDoc) return res.status(404).json({ message: "Community not found." });
+//       if (!communityDoc.members.includes(userId))
+//         return res.status(403).json({ message: "Not a member of this community." });
+//     }
 
-    let uploadedImages = [];
-    let imagesArr = [];
+//     let uploadedImages = [];
+//     let imagesArr = [];
 
-    if (Array.isArray(req.files?.image)) imagesArr = req.files.image;
-    else if (req.files?.image) imagesArr = [req.files.image];
+//     if (Array.isArray(req.files?.image)) imagesArr = req.files.image;
+//     else if (req.files?.image) imagesArr = [req.files.image];
 
-    if (imagesArr.length > 0) {
-      uploadedImages = await Promise.all(
-        imagesArr.map(async (img) => {
-          const result = await uploadToCloudinary(img.buffer);
-          return { url: result.secure_url, publicId: result.public_id };
-        })
-      );
-    }
+//     if (imagesArr.length > 0) {
+//       uploadedImages = await Promise.all(
+//         imagesArr.map(async (img) => {
+//           const result = await uploadToCloudinary(img.buffer);
+//           return { url: result.secure_url, publicId: result.public_id };
+//         })
+//       );
+//     }
 
-    const post = new Post({
-      text,
-      Photos: uploadedImages,
-      Hashtags,
-      mentions,
-      owner: userId,
-      community: communityDoc ? communityDoc._id : null,
-    });
+//     const post = new Post({
+//       text,
+//       Photos: uploadedImages,
+//       Hashtags,
+//       mentions,
+//       owner: userId,
+//       community: communityDoc ? communityDoc._id : null,
+//     });
 
-    // إشعارات الـ mentions
-    if (mentions.length > 0) {
-      for (const mentionedUserId of mentions) {
-        if (mentionedUserId.toString() !== userId.toString()) {
-          await sendNotificationHelper({
-            sender: userId,
-            receiver: mentionedUserId,
-            content: "mentioned you in a post",
-            type: "mention",
-            actionRef: post._id,
-            actionModel: "Post",
-          });
-        }
-      }
-    }
+//     // إشعارات الـ mentions
+//     if (mentions.length > 0) {
+//       for (const mentionedUserId of mentions) {
+//         if (mentionedUserId.toString() !== userId.toString()) {
+//           await sendNotificationHelper({
+//             sender: userId,
+//             receiver: mentionedUserId,
+//             content: "mentioned you in a post",
+//             type: "mention",
+//             actionRef: post._id,
+//             actionModel: "Post",
+//           });
+//         }
+//       }
+//     }
 
-    const user = await User.findById(userId);
-    user.userLevelPoints += 7;
-    user.updateLevelRank();
-    await user.save();
+//     const user = await User.findById(userId);
+//     user.userLevelPoints += 7;
+//     user.updateLevelRank();
+//     await user.save();
 
-    await post.save();
-    await post.populate([
-      { path: "owner", select: "username profileName profilePhoto" },
-      { path: "community", select: "Name Picture members" },
-      { path: "mentions", select: "username profileName profilePhoto" },
-    ]);
+//     await post.save();
+//     await post.populate([
+//       { path: "owner", select: "username profileName profilePhoto" },
+//       { path: "community", select: "Name Picture members" },
+//       { path: "mentions", select: "username profileName profilePhoto" },
+//     ]);
 
-    return res.status(201).json(post);
-  } catch (err) {
-    return res.status(500).json({ message: err.message || "Internal Server Error" });
-  }
-};
+//     return res.status(201).json(post);
+//   } catch (err) {
+//     return res.status(500).json({ message: err.message || "Internal Server Error" });
+//   }
+// };
 const addPost = async (req, res) => {
   try {
     let { text, Hashtags, community, mentions, scheduledAt } = req.body;
