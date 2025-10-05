@@ -9,7 +9,8 @@ import {
 import { useAuth } from "@/app/Context/AuthContext";
 import { usePost } from "@/app/Context/PostContext";
 
-const COLORS = ["#5558f1", "#7c3aed", "#06b6d4", "#fb7185", "#f59e0b"];
+// ----- COLORS & THEME -----
+const COLORS = ["#3b82f6", "#2563eb", "#14b8a6", "#facc15", "#f97316"];
 
 export default function AnalyticsDashboard() {
   const { user, getUserById } = useAuth();
@@ -37,8 +38,9 @@ export default function AnalyticsDashboard() {
 
   // ----- Fetch user's posts -----
   useEffect(() => {
+    
     if (!userData?._id) return;
-    fetchUserPosts(userData._id, 1, 100, true); // جلب 100 بوست أو حسب الحاجة
+    fetchUserPosts(userData._id, 1, 100, true); // جلب 100 بوست
   }, [userData?._id]);
 
   // ----- Derived data -----
@@ -90,6 +92,7 @@ export default function AnalyticsDashboard() {
     { name: "Followers", value: followers.length },
   ];
 
+  // ----- Export CSV -----
   const exportCSV = () => {
     const rows = [["Metric", "Value"]];
     overview.forEach(o => rows.push([o.key, o.value]));
@@ -109,25 +112,25 @@ export default function AnalyticsDashboard() {
         <motion.div
           key={item.key}
           whileHover={{ scale: 1.05 }}
-          className="p-5 rounded-2xl shadow flex flex-col items-center justify-center transition-colors duration-300 bg-lightMode-menu dark:bg-darkMode-menu"
+          className="p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center transition-all duration-300 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-700"
         >
-          <div className="text-xl mb-1 text-lightMode-fg dark:text-darkMode-fg">{item.icon}</div>
-          <div className="text-sm opacity-70 text-lightMode-fg dark:text-darkMode-fg">{item.key}</div>
-          <div className="text-2xl font-bold text-lightMode-text dark:text-darkMode-text">{item.value}</div>
+          <div className="text-2xl mb-2 text-blue-600 dark:text-blue-400">{item.icon}</div>
+          <div className="text-sm opacity-70 text-gray-700 dark:text-gray-300">{item.key}</div>
+          <div className="text-3xl font-bold text-gray-900 dark:text-white">{item.value}</div>
         </motion.div>
       ))}
     </div>
   );
 
   const renderLineChart = () => (
-    <div className="p-5 rounded-2xl shadow bg-lightMode-menu dark:bg-darkMode-menu">
-      <h4 className="font-semibold mb-2 text-lightMode-text dark:text-darkMode-text">Activity Over Time</h4>
-      <div style={{ height: 280 }}>
+    <div className="p-6 rounded-2xl shadow-lg bg-white dark:bg-gray-800">
+      <h4 className="font-semibold mb-3 text-gray-900 dark:text-white">Activity Over Time</h4>
+      <div style={{ height: 300 }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={timeSeries}>
             <XAxis dataKey="date" stroke="currentColor"/>
             <YAxis stroke="currentColor"/>
-            <Tooltip />
+            <Tooltip formatter={(value, name) => [value, name]} />
             <Line type="monotone" dataKey="posts" stroke={COLORS[0]} dot={{ r: 3 }} />
             <Line type="monotone" dataKey="likes" stroke={COLORS[1]} dot={{ r: 3 }} />
             <Line type="monotone" dataKey="comments" stroke={COLORS[2]} dot={{ r: 3 }} />
@@ -138,11 +141,11 @@ export default function AnalyticsDashboard() {
   );
 
   const renderEngagementChart = () => (
-    <div className="p-5 rounded-2xl shadow bg-lightMode-menu dark:bg-darkMode-menu">
-      <h4 className="font-semibold mb-2 text-lightMode-text dark:text-darkMode-text">Engagement Overview</h4>
+    <div className="p-6 rounded-2xl shadow-lg bg-white dark:bg-gray-800">
+      <h4 className="font-semibold mb-3 text-gray-900 dark:text-white">Engagement Overview</h4>
       <ResponsiveContainer width="100%" height={250}>
         <PieChart>
-          <Pie data={engagement} dataKey="value" nameKey="name" outerRadius={80} label>
+          <Pie data={engagement} dataKey="value" nameKey="name" outerRadius={80} startAngle={180} endAngle={0} label>
             {engagement.map((e, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
           </Pie>
           <Legend />
@@ -152,11 +155,11 @@ export default function AnalyticsDashboard() {
   );
 
   const renderTopPosts = () => (
-    <div className="p-5 rounded-2xl shadow bg-lightMode-menu dark:bg-darkMode-menu">
-      <h4 className="font-semibold mb-3 text-lightMode-text dark:text-darkMode-text">Top Posts</h4>
+    <div className="p-6 rounded-2xl shadow-lg bg-white dark:bg-gray-800">
+      <h4 className="font-semibold mb-3 text-gray-900 dark:text-white">Top Posts</h4>
       <div className="space-y-3">
         {topPosts.length ? topPosts.map(p => (
-          <div key={p._id} className="flex justify-between p-3 rounded-xl transition-colors duration-300 hover:bg-sky-100 dark:hover:bg-gray-800">
+          <div key={p._id} className="flex justify-between p-3 rounded-xl transition-all duration-300 hover:bg-blue-50 dark:hover:bg-gray-700">
             <p className="truncate" title={p.text}>{p.text}</p>
             <span className="text-sm opacity-70">{(p.likes?.length || 0) + (p.comments?.length || 0)*2} ❤️</span>
           </div>
@@ -168,39 +171,48 @@ export default function AnalyticsDashboard() {
   const renderPeakHours = () => {
     const max = Math.max(...Object.values(peakHours || {}), 1);
     return (
-      <div className="p-5 rounded-2xl shadow bg-lightMode-menu dark:bg-darkMode-menu">
-        <h4 className="font-semibold mb-3 text-lightMode-text dark:text-darkMode-text">Peak Hours</h4>
-        <div className="grid grid-cols-12 gap-1">
+      <div className="p-6 rounded-2xl shadow-lg bg-white dark:bg-gray-800">
+        <h4 className="font-semibold mb-3 text-gray-900 dark:text-white">Peak Hours</h4>
+        <div className="flex gap-1 overflow-x-auto">
           {Array.from({ length: 24 }).map((_, h) => (
-            <div key={h} className="text-center">
+            <div key={h} className="text-center flex flex-col items-center">
               <div
-                className="w-6 h-6 rounded-md mx-auto transition-colors duration-300"
+                className="w-6 h-6 rounded-md mb-1 transition-colors duration-300"
                 style={{ background: `rgba(59,130,246,${(peakHours[h] || 0)/max})` }}
                 title={`Hour ${h}: ${peakHours[h] || 0} interactions`}
               ></div>
-              <div className="text-[10px] mt-1">{h}</div>
+              <div className="text-[10px]">{h}</div>
             </div>
           ))}
         </div>
+        <div className="text-xs mt-2 text-gray-500 dark:text-gray-400">Color intensity represents total interactions</div>
       </div>
     );
   };
 
-  if (loading) return <div className="p-6 text-center">Loading...</div>;
+  // ----- Loading Skeleton -----
+  if (loading) return (
+    <div className="w-full p-6 space-y-6">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="h-24 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+      ))}
+    </div>
+  );
 
+  // ----- Main Render -----
   return (
-    <div className="w-full p-6 space-y-6 bg-lightMode-bg dark:bg-darkMode-bg">
+    <div className="w-full p-6 space-y-6 bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-lightMode-fg dark:text-darkMode-fg">Analytics Dashboard</h1>
-          <p className="text-sm opacity-70 text-lightMode-text2 dark:text-darkMode-text2">Overview of {userData?.username}'s social performance</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Analytics Dashboard</h1>
+          <p className="text-sm opacity-70 text-gray-700 dark:text-gray-300">Overview of {userData?.username}'s social performance</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-lightMode-menu dark:bg-darkMode-menu">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-gray-800 shadow">
             <FaCalendarAlt />
             <select
-              className="outline-none bg-transparent text-sm"
+              className="outline-none bg-transparent text-sm text-lightMode-fg dark:text-darkMode-fg"
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
             >
@@ -211,7 +223,7 @@ export default function AnalyticsDashboard() {
           </div>
           <button
             onClick={exportCSV}
-            className="px-3 py-2 bg-sky-600 text-white rounded-lg flex items-center gap-2 hover:bg-sky-500 transition-colors duration-300"
+            className="px-3 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-500 transition-all duration-300 shadow"
           >
             <FaDownload /> Export CSV
           </button>
@@ -231,4 +243,4 @@ export default function AnalyticsDashboard() {
       </div>
     </div>
   );
-}  
+}
