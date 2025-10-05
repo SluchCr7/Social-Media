@@ -1,5 +1,5 @@
 'use client'
-import React, { forwardRef, useState } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BsThreeDots } from 'react-icons/bs';
@@ -35,7 +35,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
   useEffect(() => {
     if (!post?.text || !post?.owner?.preferredLanguage) return;
 
-    const preferredLangText = post.owner.preferredLanguage;
+    const preferredLangText = post?.owner?.preferredLanguage;
     const preferredLang = languageMap[preferredLangText] || null;
     if (!preferredLang) return;
 
