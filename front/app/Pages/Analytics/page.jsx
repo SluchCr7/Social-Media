@@ -1,5 +1,5 @@
 'use client'
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { FaDownload, FaCalendarAlt, FaHeart, FaComment, FaUser } from "react-icons/fa";
 import {
@@ -12,19 +12,36 @@ import { usePost } from "@/app/Context/PostContext";
 const COLORS = ["#5558f1", "#7c3aed", "#06b6d4", "#fb7185", "#f59e0b"];
 
 export default function AnalyticsDashboard() {
-  const { user  , getUserById} = useAuth(); 
-  const { posts , fetchUserPosts , userPosts } = usePost();
+  const { user, getUserById } = useAuth();
+  const { fetchUserPosts, userPosts } = usePost();
 
+  const [userData, setUserData] = useState(null);
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
   const [period, setPeriod] = useState("30");
+  const [loading, setLoading] = useState(false);
 
+  // ----- Fetch user data -----
   useEffect(() => {
-    setFollowers(user?.followers || []);
-    setFollowing(user?.following || []);
-  }, [user]);
+    if (!user?._id) return;
+    setLoading(true);
+    getUserById(user._id)
+      .then(res => {
+        setUserData(res);
+        setFollowers(res?.followers || []);
+        setFollowing(res?.following || []);
+      })
+      .catch(err => console.log(err))
+      .finally(() => setLoading(false));
+  }, [user?._id]);
 
-  const userPosts = useMemo(() => posts?.filter(p => p?.owner?._id === user?._id) || [], [posts, user]);
+  // ----- Fetch user's posts -----
+  useEffect(() => {
+    if (!userData?._id) return;
+    fetchUserPosts(userData._id, 1, 100, true); // جلب 100 بوست أو حسب الحاجة
+  }, [userData?._id]);
+
+  // ----- Derived data -----
   const totalLikes = useMemo(() => userPosts.reduce((sum, p) => sum + (p?.likes?.length || 0), 0), [userPosts]);
   const totalComments = useMemo(() => userPosts.reduce((sum, p) => sum + (p?.comments?.length || 0), 0), [userPosts]);
 
@@ -81,15 +98,14 @@ export default function AnalyticsDashboard() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `analytics_${user?.username || "user"}.csv`;
+    a.download = `analytics_${userData?.username || "user"}.csv`;
     a.click();
   };
 
   // ----- Render Functions -----
-
   const renderOverview = () => (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-      {overview.map((item) => (
+      {overview.map(item => (
         <motion.div
           key={item.key}
           whileHover={{ scale: 1.05 }}
@@ -109,7 +125,7 @@ export default function AnalyticsDashboard() {
       <div style={{ height: 280 }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={timeSeries}>
-            <XAxis dataKey="date" className="text-lightMode-text2 dark:text-darkMode-text2" stroke="currentColor"/>
+            <XAxis dataKey="date" stroke="currentColor"/>
             <YAxis stroke="currentColor"/>
             <Tooltip />
             <Line type="monotone" dataKey="posts" stroke={COLORS[0]} dot={{ r: 3 }} />
@@ -170,13 +186,15 @@ export default function AnalyticsDashboard() {
     );
   };
 
+  if (loading) return <div className="p-6 text-center">Loading...</div>;
+
   return (
     <div className="w-full p-6 space-y-6 bg-lightMode-bg dark:bg-darkMode-bg">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-lightMode-fg dark:text-darkMode-fg">Analytics Dashboard</h1>
-          <p className="text-sm opacity-70 text-lightMode-text2 dark:text-darkMode-text2">Overview of your social performance</p>
+          <p className="text-sm opacity-70 text-lightMode-text2 dark:text-darkMode-text2">Overview of {userData?.username}'s social performance</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 p-2 rounded-lg bg-lightMode-menu dark:bg-darkMode-menu">
@@ -213,4 +231,4 @@ export default function AnalyticsDashboard() {
       </div>
     </div>
   );
-}
+}  
