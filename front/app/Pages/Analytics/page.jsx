@@ -205,7 +205,7 @@ const renderPeakHours = () => {
   };
 
   return (
-    <div className="p-6 rounded-2xl shadow-lg bg-white dark:bg-gray-800">
+    <div className="p-6 rounded-2xl  shadow-lg bg-white dark:bg-gray-800">
       <h4 className="font-semibold mb-4 text-gray-900 dark:text-white text-lg">Peak Hours</h4>
       <div className="flex gap-1 overflow-x-auto py-2">
         {Array.from({ length: 24 }).map((_, h) => (
@@ -243,7 +243,7 @@ const renderPeakHours = () => {
 
   // ----- Main Render -----
   return (
-    <div className="w-full p-6 space-y-6 bg-gray-50 dark:bg-gray-900">
+    <div className="w-full max-w-7xl mx-auto p-6 space-y-6 bg-gray-50 dark:bg-gray-900">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
