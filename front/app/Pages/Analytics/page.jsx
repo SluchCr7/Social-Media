@@ -154,41 +154,83 @@ export default function AnalyticsDashboard() {
     </div>
   );
 
-  const renderTopPosts = () => (
+// ----- Top Posts Component -----
+const renderTopPosts = () => (
+  <div className="p-6 rounded-2xl shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-700">
+    <h4 className="font-semibold mb-4 text-gray-900 dark:text-white text-lg">Top Posts</h4>
+    <div className="space-y-3">
+      {topPosts.length ? topPosts.map(p => {
+        const engagementScore = (p.likes?.length || 0) + (p.comments?.length || 0) * 2;
+        const maxScore = Math.max(...topPosts.map(tp => (tp.likes?.length || 0) + (tp.comments?.length || 0) * 2), 1);
+        const progressPercent = (engagementScore / maxScore) * 100;
+
+        return (
+          <motion.div
+            key={p._id}
+            whileHover={{ scale: 1.02 }}
+            className="flex items-center justify-between p-3 rounded-xl transition-all duration-300 hover:shadow-md hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 dark:hover:from-gray-700 dark:hover:to-gray-600 cursor-pointer"
+            title={p.text}
+          >
+            <p className="truncate text-sm font-medium text-gray-900 dark:text-white">{p.text}</p>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">{engagementScore} ❤️</span>
+              <div className="w-20 h-1 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                <div
+                  className="h-1 bg-blue-600 dark:bg-blue-400 rounded-full"
+                  style={{ width: `${progressPercent}%` }}
+                ></div>
+              </div>
+            </div>
+          </motion.div>
+        );
+      }) : (
+        <div className="text-sm opacity-70 text-gray-700 dark:text-gray-300">No posts yet</div>
+      )}
+    </div>
+  </div>
+);
+
+// ----- Peak Hours Component -----
+const renderPeakHours = () => {
+  const max = Math.max(...Object.values(peakHours || {}), 1);
+
+  // function to determine color based on value
+  const getColor = (value) => {
+    const ratio = value / max;
+    if (ratio > 0.75) return '#f87171'; // red
+    if (ratio > 0.5) return '#2563eb'; // blue dark
+    if (ratio > 0.25) return '#60a5fa'; // blue medium
+    if (ratio > 0) return '#bfdbfe'; // blue light
+    return '#e5e7eb'; // gray
+  };
+
+  return (
     <div className="p-6 rounded-2xl shadow-lg bg-white dark:bg-gray-800">
-      <h4 className="font-semibold mb-3 text-gray-900 dark:text-white">Top Posts</h4>
-      <div className="space-y-3">
-        {topPosts.length ? topPosts.map(p => (
-          <div key={p._id} className="flex justify-between p-3 rounded-xl transition-all duration-300 hover:bg-blue-50 dark:hover:bg-gray-700">
-            <p className="truncate" title={p.text}>{p.text}</p>
-            <span className="text-sm opacity-70">{(p.likes?.length || 0) + (p.comments?.length || 0)*2} ❤️</span>
+      <h4 className="font-semibold mb-4 text-gray-900 dark:text-white text-lg">Peak Hours</h4>
+      <div className="flex gap-1 overflow-x-auto py-2">
+        {Array.from({ length: 24 }).map((_, h) => (
+          <div key={h} className="flex flex-col items-center min-w-[24px]">
+            <div
+              className="w-6 rounded-md mb-1 transition-all duration-300 cursor-pointer"
+              style={{
+                height: `${((peakHours[h] || 0) / max) * 80}px`,
+                backgroundColor: getColor(peakHours[h] || 0)
+              }}
+              title={`Hour ${h}: ${peakHours[h] || 0} interactions`}
+            ></div>
+            <div className="text-[10px] text-gray-600 dark:text-gray-300">{h}</div>
           </div>
-        )) : <div className="text-sm opacity-70">No posts yet</div>}
+        ))}
+      </div>
+      <div className="text-xs mt-2 text-gray-500 dark:text-gray-400 flex gap-2">
+        <span className="inline-block w-3 h-3 bg-bfdbfe rounded-full"></span> Low
+        <span className="inline-block w-3 h-3 bg-60a5fa rounded-full"></span> Medium
+        <span className="inline-block w-3 h-3 bg-2563eb rounded-full"></span> High
+        <span className="inline-block w-3 h-3 bg-f87171 rounded-full"></span> Peak
       </div>
     </div>
   );
-
-  const renderPeakHours = () => {
-    const max = Math.max(...Object.values(peakHours || {}), 1);
-    return (
-      <div className="p-6 rounded-2xl shadow-lg bg-white dark:bg-gray-800">
-        <h4 className="font-semibold mb-3 text-gray-900 dark:text-white">Peak Hours</h4>
-        <div className="flex gap-1 overflow-x-auto">
-          {Array.from({ length: 24 }).map((_, h) => (
-            <div key={h} className="text-center flex flex-col items-center">
-              <div
-                className="w-6 h-6 rounded-md mb-1 transition-colors duration-300"
-                style={{ background: `rgba(59,130,246,${(peakHours[h] || 0)/max})` }}
-                title={`Hour ${h}: ${peakHours[h] || 0} interactions`}
-              ></div>
-              <div className="text-[10px]">{h}</div>
-            </div>
-          ))}
-        </div>
-        <div className="text-xs mt-2 text-gray-500 dark:text-gray-400">Color intensity represents total interactions</div>
-      </div>
-    );
-  };
+};
 
   // ----- Loading Skeleton -----
   if (loading) return (

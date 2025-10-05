@@ -49,6 +49,7 @@ const LayoutComponent = ({ children }) => {
     '/Pages/Music',
     '/Pages/Privacy',
     '/Pages/Cookies',
+    '/Pages/Analytics',
     '/Pages/ResetPassword/[id]/[token]',
     '/Pages/UserVerify/[id]/verify/[token]',
   ].includes(pathname);
