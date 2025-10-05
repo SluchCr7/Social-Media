@@ -32,6 +32,7 @@
     "react-textarea-autosize": "^8.5.9",
     "react-toastify": "^11.0.5",
     "react-tooltip": "^5.29.1",
+    "recharts": "^3.2.1",
     "socket.io-client": "^4.8.1",
     "sweetalert": "^2.1.2",
     "threadsv2": "file:.."
