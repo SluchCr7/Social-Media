@@ -486,6 +486,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     relationshipStatus,
     partner,
     interests,
+    preferedLanguage
   } = req.body;
 
   // تحقق من وجود الشريك إذا تم إدخاله
@@ -528,7 +529,8 @@ const updateProfile = asyncHandler(async (req, res) => {
     relationshipStatus,
     partner: partner || null,
     interests,
-    city
+    city,
+    preferedLanguage
   };
 
   // تحديث المستخدم

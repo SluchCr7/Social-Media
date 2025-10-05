@@ -19,6 +19,7 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
     city: '',
     relationshipStatus: '',
     partner: '',
+    preferedLanguage : '',
     socialLinks: {
       github: '',
       linkedin: '',
@@ -45,6 +46,7 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
         partner: user.partner || '',
         dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
         interests: user.interests || [],
+        preferedLanguage : user.preferedLanguage || '',
         socialLinks: {
           github: user.socialLinks?.github || '',
           linkedin: user.socialLinks?.linkedin || '',
@@ -106,6 +108,7 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
     if (formData.dateOfBirth?.trim()) payload.dateOfBirth = formData.dateOfBirth
     if (formData.gender?.trim()) payload.gender = formData.gender
     if (formData.city?.trim()) payload.city = formData.city.trim()
+    if (formData.preferedLanguage?.trim()) payload.preferedLanguage = formData.preferedLanguage.trim()
     if (formData.relationshipStatus?.trim()) payload.relationshipStatus = formData.relationshipStatus
     if (formData.partner?.trim()) payload.partner = formData.partner
     if (formData.interests.length > 0) {
@@ -173,6 +176,10 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">Date of Birth</label>
               <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputStyle} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Prefered Language</label>
+              <input type="date" name="preferedLanguage" value={formData.preferedLanguage} onChange={handleChange} className={inputStyle} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">Gender</label>

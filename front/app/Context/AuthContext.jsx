@@ -187,6 +187,7 @@ export const AuthContextProvider = ({ children }) => {
       interests: fields.interests ?? user.interests ?? [],
       relationshipStatus: fields.relationshipStatus ?? user.relationshipStatus,
       partner: fields.partner ?? user.partner ?? null,
+      preferedLanguage: fields.preferedLanguage ?? user.preferedLanguage,
       socialLinks: {
         github: fields.socialLinks?.github ?? user.socialLinks?.github ?? '',
         twitter: fields.socialLinks?.twitter ?? user.socialLinks?.twitter ?? '',
