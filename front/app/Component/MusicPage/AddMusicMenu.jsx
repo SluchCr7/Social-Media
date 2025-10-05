@@ -253,7 +253,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IoClose, IoImage, IoMusicalNotes } from "react-icons/io5";
 import Image from "next/image";
-import { useMusic } from "../Context/MusicContext";
+import { useMusic } from "../../Context/MusicContext";
 
 const genres = ["Pop", "Rock", "HipHop", "Jazz", "Classical", "Other"];
 
