@@ -32,12 +32,25 @@ const DesignPost = ({
   setShowEmojiPicker,
   handleEmojiClick,
   handlePost,
-  handleImageClick
-  , setScheduleDate, 
+  setScheduleDate,
   scheduleDate,
   scheduleEnabled,
   setScheduleEnabled,
 }) => {
+
+  // إزالة منشن: تحدث ال-state وتزيل النص من الـ textarea
+  const handleRemoveMention = (id) => {
+    const removed = selectedMentions.find(m => m._id === id);
+    setSelectedMentions(prev => prev.filter(m => m._id !== id));
+    if (removed?.username) {
+      setPostText(prev => {
+        // نحذف كل تكرارات @username متبوعة بمسافة اختيارياً
+        const re = new RegExp(`@${removed.username}\\b\\s?`, 'g');
+        return prev.replace(re, '');
+      });
+    }
+  };
+
   return (
     <main className="flex items-center justify-center w-full py-10 px-4 bg-gray-50 dark:bg-darkMode-bg transition-colors">
       <div className="w-full max-w-5xl mx-auto bg-lightMode-bg dark:bg-darkMode-bg rounded-3xl shadow-xl overflow-hidden transition-all duration-500">
@@ -84,11 +97,43 @@ const DesignPost = ({
           </div>
         </div>
 
-        {/* Textarea with highlights */}
+        {/* Body (mentions area + textarea with highlights) */}
         <div className="relative p-6 pb-2">
+
+          {/* --- Selected Mentions (chips) --- */}
+          {selectedMentions && selectedMentions.length > 0 && (
+            <div className="mb-4 px-1">
+              <div className="flex items-center gap-2 overflow-x-auto py-1">
+                {selectedMentions.map((m) => (
+                  <div
+                    key={m._id}
+                    className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full shadow-sm whitespace-nowrap"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Image
+                        src={m?.profilePhoto?.url || '/default.png'}
+                        alt={m.username}
+                        width={28}
+                        height={28}
+                        className="rounded-full object-cover"
+                      />
+                      <span className="text-sm text-gray-800 dark:text-gray-100">@{m.username}</span>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveMention(m._id)}
+                      aria-label={`Remove mention ${m.username}`}
+                      className="p-1 rounded-full hover:bg-red-500 hover:text-white transition"
+                    >
+                      <FiX size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Highlight Layer */}
           <div className="relative">
-            {/* Highlight Layer */}
             <div
               className="absolute top-0 left-0 w-full h-full p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed"
             >
@@ -104,8 +149,8 @@ const DesignPost = ({
               placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
               dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
               className={`relative w-full p-5 text-base font-sans leading-relaxed text-lightMode-text dark:text-darkMode-text rounded-2xl resize-none border shadow-inner focus:ring-2 bg-transparent caret-blue-600 z-10 text-transparent selection:bg-blue-200 selection:text-black
-                ${errorText 
-                  ? 'border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:ring-red-500' 
+                ${errorText
+                  ? 'border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:ring-red-500'
                   : 'bg-gray-50 dark:bg-darkMode-bg border-gray-300 dark:border-gray-600 focus:ring-blue-500'
                 }`}
               style={{ textAlign: /[\u0600-\u06FF]/.test(postText) ? 'right' : 'left' }}
@@ -120,7 +165,7 @@ const DesignPost = ({
             {errorText && <span className="text-red-500">Max 500 characters allowed</span>}
           </div>
 
-          {/* Mentions Dropdown */}
+          {/* Mentions Dropdown (same logic from parent) */}
           {showMentionList && filteredMentions.length > 0 && (
             <div className="absolute top-full left-6 mt-2 z-50 bg-white dark:bg-darkMode-bg shadow-2xl rounded-xl w-72 max-h-60 overflow-auto border border-gray-200 dark:border-gray-600">
               {filteredMentions.map((u) => (
@@ -213,6 +258,7 @@ const DesignPost = ({
             Post
           </button>
         </div>
+
         {/* Schedule Post Section */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-3 px-6 pb-6">
           <div className="flex items-center gap-2">
