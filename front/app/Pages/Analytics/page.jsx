@@ -12,8 +12,8 @@ import { usePost } from "@/app/Context/PostContext";
 const COLORS = ["#5558f1", "#7c3aed", "#06b6d4", "#fb7185", "#f59e0b"];
 
 export default function AnalyticsDashboard() {
-  const { user } = useAuth(); 
-  const { posts } = usePost();
+  const { user  , getUserById} = useAuth(); 
+  const { posts , fetchUserPosts , userPosts } = usePost();
 
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
@@ -24,9 +24,9 @@ export default function AnalyticsDashboard() {
     setFollowing(user?.following || []);
   }, [user]);
 
-  const userPosts = useMemo(() => posts?.filter(p => p.owner?._id === user?._id) || [], [posts, user]);
-  const totalLikes = useMemo(() => userPosts.reduce((sum, p) => sum + (p.likes?.length || 0), 0), [userPosts]);
-  const totalComments = useMemo(() => userPosts.reduce((sum, p) => sum + (p.comments?.length || 0), 0), [userPosts]);
+  const userPosts = useMemo(() => posts?.filter(p => p?.owner?._id === user?._id) || [], [posts, user]);
+  const totalLikes = useMemo(() => userPosts.reduce((sum, p) => sum + (p?.likes?.length || 0), 0), [userPosts]);
+  const totalComments = useMemo(() => userPosts.reduce((sum, p) => sum + (p?.comments?.length || 0), 0), [userPosts]);
 
   const overview = [
     { key: "Posts", value: userPosts.length, icon: <FaUser /> },
