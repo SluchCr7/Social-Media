@@ -248,7 +248,7 @@ const renderPeakHours = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Analytics Dashboard</h1>
-          <p className="text-sm opacity-70 text-gray-700 dark:text-gray-300">Overview of {userData?.username}'s social performance</p>
+          <p className="text-sm opacity-70 text-gray-700 dark:text-gray-300">Overview of {userData?.username}&apos;s social performance</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-gray-800 shadow">
