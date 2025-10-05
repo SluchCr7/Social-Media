@@ -9,6 +9,7 @@ import { useComment } from '../Context/CommentContext';
 import { useAuth } from '../Context/AuthContext';
 import { MdOutlineReport, MdContentCopy } from "react-icons/md";
 import { useReport } from '@/app/Context/ReportContext';
+import { motion, AnimatePresence } from "framer-motion";
 
 const Comment = ({ comment }) => {
   const [isReplying, setIsReplying] = useState(false);
