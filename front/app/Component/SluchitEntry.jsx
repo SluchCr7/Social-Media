@@ -35,13 +35,25 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
   useEffect(() => {
     if (!post?.text || !post?.owner?.preferredLanguage) return;
 
-    const preferredLangText = post?.owner?.preferredLanguage;
-    const preferredLang = languageMap[preferredLangText] || null;
+    const preferredLangText = post.owner.preferredLanguage;
+    const preferredLang = languageMap[preferredLangText];
     if (!preferredLang) return;
 
-    const langCode3 = franc(post.text);
+    // نص قصير جدًا نتجاهله
+    if (post.text.length < 3) {
+      setShowTranslateButton(false);
+      return;
+    }
+
+    let langCode3 = franc(post.text, { minLength: 3 }); // زيادة الدقة للنصوص القصيرة
+    if (langCode3 === 'und') {
+      setShowTranslateButton(false);
+      return;
+    }
+
     const textLang = iso6391Map[langCode3] || 'en';
 
+    // إظهار زر الترجمة إذا لغة النص مختلفة عن لغة المفضل
     setShowTranslateButton(textLang !== preferredLang);
   }, [post?.text, post?.owner?.preferredLanguage]);
 
