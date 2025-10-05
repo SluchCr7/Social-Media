@@ -15,7 +15,7 @@ import PostPhotos from './Post/PostPhotos';
 import SharedTitle from './Post/SharedTitle';
 import { HiBadgeCheck } from 'react-icons/hi';
 import { useTranslate } from '../Context/TranslateContext';
-import franc from 'franc';
+import { franc } from 'franc';
 import { languageMap , iso6391Map} from '../utils/Data';
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost();
