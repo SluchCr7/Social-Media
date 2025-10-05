@@ -51,43 +51,53 @@ export const PostContextProvider = ({ children }) => {
 
 
   // ✅ إضافة بوست جديد
-  const AddPost = async (content, images, Hashtags, communityId, mentions = []) => {
-    if (!checkUserStatus("Add Post",showAlert,user)) return;
-    const formData = new FormData();
-    formData.append("text", content);
+const AddPost = async (content, images, Hashtags, communityId, mentions = [], scheduledAt = null) => {
+  if (!checkUserStatus("Add Post", showAlert, user)) return;
 
-    images.forEach(img => formData.append("image", img.file));
-    Hashtags.forEach(tag => formData.append("Hashtags", tag));
+  const formData = new FormData();
+  formData.append("text", content);
 
-    if (communityId) formData.append("community", communityId);
+  images.forEach(img => formData.append("image", img.file));
+  Hashtags.forEach(tag => formData.append("Hashtags", tag));
 
-    // ✅ إضافة mentions
-    if (mentions.length > 0) formData.append("mentions", JSON.stringify(mentions));
+  if (communityId) formData.append("community", communityId);
 
-    try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/add`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+  // ✅ إضافة mentions
+  if (mentions.length > 0) formData.append("mentions", JSON.stringify(mentions));
 
-      const newPost = res.data;
-      showAlert("Post added successfully.");
+  // ✅ إذا كان المستخدم اختار وقت جدولة
+  if (scheduledAt) {
+    formData.append("scheduledAt", scheduledAt); // يجب أن يكون ISO string
+  }
+
+  try {
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/add`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    const newPost = res.data;
+
+    // ✅ لو البوست مجدول، نعرض رسالة مختلفة
+    if (scheduledAt) {
+      showAlert("✅ Post scheduled successfully.");
+    } else {
+      showAlert("✅ Post added successfully.");
       setPosts(prev => [newPost, ...prev]);
-
-
-    } catch (err) {
-      // ✅ رسالة واضحة لو البوست محظور بسبب Content Moderation
-      const message = err?.response?.data?.message;
-      showAlert(message || "Failed to upload post.");
     }
 
-  };
+  } catch (err) {
+    const message = err?.response?.data?.message;
+    showAlert(message || "❌ Failed to upload post.");
+  }
+};
+
 
   // ✅ حذف بوست
   const deletePost = async (id) => {

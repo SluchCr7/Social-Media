@@ -77,7 +77,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
     setShowTranslateButton(true);
   };
   return (
-    <div ref={ref} className="relative w-full">
+    <div ref={ref} className="relative w-[90%] md:w-full mx-auto">
       {/* 🔄 Share Modal */}
       <ShareModal 
         post={post} 

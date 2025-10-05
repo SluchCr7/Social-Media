@@ -22,6 +22,10 @@ const NewPost = () => {
   const [mentionSearch, setMentionSearch] = useState('');
   const [showMentionList, setShowMentionList] = useState(false);
 
+  // 🕓 حالات الجدولة الجديدة
+  const [scheduleEnabled, setScheduleEnabled] = useState(false);
+  const [scheduleDate, setScheduleDate] = useState('');
+
   const textareaRef = useRef();
   const { user ,users } = useAuth();
   const { AddPost } = usePost();
@@ -32,7 +36,6 @@ const NewPost = () => {
     setSelectedUser(matchedUser || user || {})
   }, [users, user])
 
-  // Users you follow
   const myFollowing = selectedUser?.following || [];
 
   // ------------------- Image Upload -------------------
@@ -129,22 +132,28 @@ const NewPost = () => {
       return;
     }
 
-    if (postText.trim() || images.length > 0) {
-      AddPost(
-        postText.replace(/#[\w\u0600-\u06FF]+/g, '').trim(),
-        images,
-        hashtags,
-        selectedCommunity,
-        selectedMentions.map(u => u._id)
-      );
+    if (!postText.trim() && images.length === 0) return;
 
-      setPostText('');
-      setImages([]);
-      setSelectedMentions([]);
-    }
+    // 🕓 منطق الجدولة
+    const scheduleTime = scheduleEnabled && scheduleDate ? scheduleDate : null;
+
+    AddPost(
+      postText.replace(/#[\w\u0600-\u06FF]+/g, '').trim(),
+      images,
+      hashtags,
+      selectedCommunity,
+      selectedMentions.map(u => u._id),
+      scheduleTime // <-- إرسال وقت الجدولة هنا
+    );
+
+    setPostText('');
+    setImages([]);
+    setSelectedMentions([]);
+    setScheduleEnabled(false);
+    setScheduleDate('');
   };
 
-  // ------------------- Highlight Text (mentions + hashtags) -------------------
+  // ------------------- Highlight Text -------------------
   const renderHighlightedText = (text) => {
     return text.split(/(\s+)/).map((part, idx) => {
       if (part.startsWith('@')) {
@@ -185,9 +194,13 @@ const NewPost = () => {
       setShowEmojiPicker={setShowEmojiPicker}
       handleEmojiClick={handleEmojiClick}
       handlePost={handlePost}
+      // 🕓 تمرير حالات الجدولة للمكون
+      scheduleEnabled={scheduleEnabled}
+      setScheduleEnabled={setScheduleEnabled}
+      scheduleDate={scheduleDate}
+      setScheduleDate={setScheduleDate}
     />
   );
-
 };
 
 export default NewPost;

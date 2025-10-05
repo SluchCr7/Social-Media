@@ -31,7 +31,12 @@ const DesignPost = ({
   showEmojiPicker,
   setShowEmojiPicker,
   handleEmojiClick,
-  handlePost
+  handlePost,
+  handleImageClick
+  , setScheduleDate, 
+  scheduleDate,
+  scheduleEnabled,
+  setScheduleEnabled,
 }) => {
   return (
     <main className="flex items-center justify-center w-full py-10 px-4 bg-gray-50 dark:bg-darkMode-bg transition-colors">
@@ -207,6 +212,31 @@ const DesignPost = ({
           >
             Post
           </button>
+        </div>
+        {/* Schedule Post Section */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3 px-6 pb-6">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={scheduleEnabled}
+              onChange={(e) => setScheduleEnabled(e.target.checked)}
+              id="schedule"
+              className="cursor-pointer w-4 h-4 accent-blue-600"
+            />
+            <label htmlFor="schedule" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+              Schedule this post
+            </label>
+          </div>
+
+          {scheduleEnabled && (
+            <input
+              type="datetime-local"
+              value={scheduleDate}
+              onChange={(e) => setScheduleDate(e.target.value)}
+              min={new Date().toISOString().slice(0, 16)}
+              className="px-3 py-2 border dark:border-gray-600 rounded-lg text-sm bg-gray-50 dark:bg-darkMode-bg text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500"
+            />
+          )}
         </div>
       </div>
     </main>

@@ -143,6 +143,100 @@ const addPost = async (req, res) => {
     return res.status(500).json({ message: err.message || "Internal Server Error" });
   }
 };
+const addPost = async (req, res) => {
+  try {
+    let { text, Hashtags, community, mentions, scheduledAt } = req.body;
+    const userId = req.user._id;
+
+    if (typeof Hashtags === "string") Hashtags = [Hashtags];
+    else if (!Array.isArray(Hashtags)) Hashtags = [];
+
+    if (typeof mentions === "string") {
+      try { mentions = JSON.parse(mentions); }
+      catch { mentions = [mentions]; }
+    } else if (!Array.isArray(mentions)) mentions = [];
+
+    const { error } = ValidatePost({ text, Hashtags, community, mentions });
+    if (error) return res.status(400).json({ message: error.details[0].message });
+
+    // ✅ فحص إذا كان التاريخ مستقبلي
+    let postStatus = "published";
+    let scheduleDate = null;
+
+    if (scheduledAt && new Date(scheduledAt) > new Date()) {
+      postStatus = "scheduled";
+      scheduleDate = new Date(scheduledAt);
+    }
+
+    const moderationResult = await moderatePost({ text });
+    if (moderationResult.status === "blocked") {
+      return res.status(400).json({ message: moderationResult.reason });
+    }
+
+    let communityDoc = null;
+    if (community) {
+      communityDoc = await Community.findById(community);
+      if (!communityDoc) return res.status(404).json({ message: "Community not found." });
+      if (!communityDoc.members.includes(userId))
+        return res.status(403).json({ message: "Not a member of this community." });
+    }
+
+    let uploadedImages = [];
+    let imagesArr = [];
+
+    if (Array.isArray(req.files?.image)) imagesArr = req.files.image;
+    else if (req.files?.image) imagesArr = [req.files.image];
+
+    if (imagesArr.length > 0) {
+      uploadedImages = await Promise.all(
+        imagesArr.map(async (img) => {
+          const result = await uploadToCloudinary(img.buffer);
+          return { url: result.secure_url, publicId: result.public_id };
+        })
+      );
+    }
+
+    const post = new Post({
+      text,
+      Photos: uploadedImages,
+      Hashtags,
+      mentions,
+      owner: userId,
+      community: communityDoc ? communityDoc._id : null,
+      scheduledAt: scheduleDate,
+      status: postStatus,
+    });
+
+    // إشعارات mentions فقط إذا تم النشر فورًا
+    if (postStatus === "published" && mentions.length > 0) {
+      for (const mentionedUserId of mentions) {
+        if (mentionedUserId.toString() !== userId.toString()) {
+          await sendNotificationHelper({
+            sender: userId,
+            receiver: mentionedUserId,
+            content: "mentioned you in a post",
+            type: "mention",
+            actionRef: post._id,
+            actionModel: "Post",
+          });
+        }
+      }
+    }
+
+    const user = await User.findById(userId);
+    user.userLevelPoints += 7;
+    user.updateLevelRank();
+    await user.save();
+
+    await post.save();
+    await post.populate(postPopulate);
+
+    return res.status(201).json(post);
+  } catch (err) {
+    return res.status(500).json({ message: err.message || "Internal Server Error" });
+  }
+};
+
 
 
 // ================== Delete Post ==================

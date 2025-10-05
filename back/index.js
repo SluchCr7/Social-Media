@@ -1,12 +1,12 @@
 const express = require('express')
-// const app = express()
 require('dotenv').config()
 const cors = require('cors')
 const connectDB = require('./Config/db')
 const { errorhandler } = require('./Middelwares/errorHandler')
 const cookieParser = require('cookie-parser');
-const {app , server} = require('./Config/socket')
-const path = require('path')    
+const { app, server } = require('./Config/socket')
+const path = require('path')
+
 // Database connection
 connectDB()
 
@@ -39,8 +39,17 @@ app.use('/api/translate', require('./routes/TranslateRoute'))
 app.use(errorhandler)
 
 
+// ================== Scheduled Posts System ==================
+const { processScheduledPosts } = require("./utils/schedulePosts");
 
-// Listen on port 3001
+// فحص المنشورات المجدولة كل دقيقة
+setInterval(() => {
+    processScheduledPosts(global.io); // global.io لو عندك socket.io
+}, 60 * 1000);
+
+console.log("📅 Scheduled post processor is running every 1 minute...");
+
+// Listen on port
 server.listen(process.env.PORT, () => {
-    console.log(`Server is running on port ${process.env.PORT}`)
+    console.log(`🚀 Server is running on port ${process.env.PORT}`)
 })
