@@ -3,16 +3,17 @@ import Link from "next/link";
 export const renderTextWithMentionsAndHashtags = (text, mentions = [], hashtags = []) => {
   if (!text) return null;
 
-  // نستخدم regex لالتقاط @mention و #hashtag والكلمات العادية والمسافات
-  const parts = text.match(/(@[A-Za-z0-9_.-]+|#[\w\u0600-\u06FF]+|\s+|[^\s@#]+)/g);
+  // نلتقط @mention حتى لو فيه مسافات مثل @Ahmed Abobakr
+  const parts = text.match(/(@[A-Za-z0-9_.\u0600-\u06FF-]+(?:\s+[A-Za-z0-9_.\u0600-\u06FF-]+)*|#[\w\u0600-\u06FF]+|\s+|[^\s@#]+)/g);
 
   return parts.map((part, i) => {
     // 🎯 mentions
     if (part.startsWith('@')) {
-      const username = part.slice(1).trim();
+      const username = part.slice(1).trim(); // إزالة @ والمسافات
       const mentionedUser = mentions.find(
-        u => u.username?.toLowerCase() === username.toLowerCase()
+        u => u.username?.toLowerCase().trim() === username.toLowerCase()
       );
+
       if (mentionedUser) {
         return (
           <Link
@@ -24,7 +25,11 @@ export const renderTextWithMentionsAndHashtags = (text, mentions = [], hashtags 
           </Link>
         );
       } else {
-        return <span key={i} className="text-blue-400">{part}</span>;
+        return (
+          <span key={i} className="text-blue-400">
+            {part}
+          </span>
+        );
       }
     }
 
@@ -42,7 +47,11 @@ export const renderTextWithMentionsAndHashtags = (text, mentions = [], hashtags 
           </Link>
         );
       } else {
-        return <span key={i} className="text-purple-400">{part}</span>;
+        return (
+          <span key={i} className="text-purple-400">
+            {part}
+          </span>
+        );
       }
     }
 
