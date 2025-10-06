@@ -5,8 +5,10 @@ const asyncHandler = require("express-async-handler");
 const mongoose = require('mongoose');
 const { User } = require('../Modules/User');
 const { sendNotificationHelper } = require('../utils/SendNotification');
+const mm = require('music-metadata'); // أعلى الملف مع require الأخرى
 
-// ✅ إنشاء أغنية جديدة
+// ✅ إنشاء أغنية جديدة مع حساب duration تلقائي
+// ✅ إنشاء أغنية جديدة مع حساب duration وضبط tags, releaseDate, language تلقائيًا
 const createMusic = asyncHandler(async (req, res) => {
   try {
     // التأكد من وجود ملف صوتي
@@ -20,22 +22,36 @@ const createMusic = asyncHandler(async (req, res) => {
       return res.status(500).json({ message: "Audio upload failed" });
     }
 
+    // قراءة مدة الصوت باستخدام music-metadata
+    const audioPath = req.files.audio[0].path; 
+    let duration = 0;
+    try {
+      const metadata = await mm.parseFile(audioPath);
+      duration = Math.floor(metadata.format.duration); // بالثواني
+    } catch (err) {
+      console.warn("Could not parse audio duration:", err.message);
+    }
+
     // رفع صورة الكوفر (اختياري)
     let coverUrl = null;
-  if (req.files.image && req.files.image[0]) {
-    const coverUpload = await cloudUpload(req.files.image[0]);
-    coverUrl = coverUpload.secure_url;
-  }
+    if (req.files.image && req.files.image[0]) {
+      const coverUpload = await cloudUpload(req.files.image[0]);
+      coverUrl = coverUpload.secure_url;
+    }
 
     // إنشاء الوثيقة
     const newMusic = new Music({
       title: req.body.title,
       artist: req.body.artist,
-      album: req.body.album,
-      genre: req.body.genre,
+      album: req.body.album || "Single",
+      genre: req.body.genre || "Other",
       url: audioUpload.secure_url,
       cover: coverUrl,
+      duration, 
       owner: req.user._id,
+      tags: Array.isArray(req.body.tags) ? req.body.tags : [], // إذا لم تُرسل، تصبح مصفوفة فارغة
+      releaseDate: Date.now(), 
+      language: req.body.language || "Unknown" // القيمة الافتراضية
     });
 
     await newMusic.save();
@@ -54,6 +70,7 @@ const createMusic = asyncHandler(async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
+
 
 // ✅ جلب كل الأغاني
 const getAllMusic = asyncHandler(async (req, res) => {

@@ -7,9 +7,9 @@ import {
 } from 'react-icons/fa'
 import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
 import { useMusic } from '@/app/Context/MusicContext'
-
-const ExpandedWindow = ({ expanded, setExpanded, formatTime }) => {
-  const { current, playing, togglePlay, progress, duration, next, prev, shuffle, setShuffle, repeatMode, setRepeatMode } = useMusicPlayer()
+import { formatTime } from '@/app/utils/formatTime'
+const ExpandedWindow = () => {
+  const { current, playing, togglePlay, progress, duration, next, prev, shuffle, setShuffle, repeatMode, setRepeatMode,expanded, setExpanded } = useMusicPlayer()
   const { likeMusic } = useMusic()
   const progressPercent = (progress / (duration || 1)) * 100
 
@@ -103,7 +103,9 @@ const ExpandedWindow = ({ expanded, setExpanded, formatTime }) => {
               </button>
               <button
                 onClick={() => current?._id && likeMusic(current._id)}
-                className="p-3 text-gray-300 hover:text-white transition"
+                className={`p-3 rounded-lg ${
+                  current?.likes?.includes(user._id) ? 'bg-red-500 text-white' : 'bg-white/30 dark:bg-gray-800/40'
+                }`}
                 title="Like"
               >
                 <FaHeart />

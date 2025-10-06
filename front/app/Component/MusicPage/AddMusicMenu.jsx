@@ -265,6 +265,8 @@ const AddMusicModal = ({ isOpen, onClose }) => {
   const [audioFile, setAudioFile] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [language, setLanguage] = useState("Unknown");
+  const [tags, setTags] = useState("");
   const [loading, setLoading] = useState(false);
   const { uploadMusic } = useMusic();
 
@@ -281,6 +283,10 @@ const AddMusicModal = ({ isOpen, onClose }) => {
     if (file) setAudioFile(file);
   };
 
+// داخل useState
+
+
+// داخل handleSubmit
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title || !artist || !audioFile) return;
@@ -293,11 +299,18 @@ const AddMusicModal = ({ isOpen, onClose }) => {
     formData.append("genre", genre);
     formData.append("audio", audioFile);
     if (imageFile) formData.append("image", imageFile);
+    formData.append("language", language);
+    if (tags.trim()) {
+      // تحويل النص إلى مصفوفة عبر الفواصل
+      const tagsArray = tags.split(",").map(t => t.trim()).filter(Boolean);
+      tagsArray.forEach(tag => formData.append("tags[]", tag));
+    }
 
     await uploadMusic(formData);
     setLoading(false);
     onClose();
   };
+
 
   return (
     <AnimatePresence>
@@ -418,6 +431,31 @@ const AddMusicModal = ({ isOpen, onClose }) => {
                     </label>
                   ))}
                 </div>
+              </div>
+              {/* Language */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Language</label>
+                <input
+                  type="text"
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  placeholder="Enter language (default: Unknown)"
+                  className="w-full px-4 py-2 border border-gray-700 rounded-xl bg-gray-900/50 text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                />
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Tags (comma separated)
+                </label>
+                <input
+                  type="text"
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                  placeholder="e.g., summer, chill, 2025"
+                  className="w-full px-4 py-2 border border-gray-700 rounded-xl bg-gray-900/50 text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                />
               </div>
 
               {/* Audio Upload */}

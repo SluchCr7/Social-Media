@@ -48,25 +48,24 @@ export const MusicProvider = ({ children }) => {
   // 🎵 رفع موسيقى جديدة
   const uploadMusic = async (formData) => {
     try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/music`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-            // ❌ لا تكتب Content-Type يدوياً، axios يضبطه تلقائياً
-          },
-        }
-      );
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/music`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+        },
+      }
+    );
 
-      setMusic(prev => [res.data, ...prev]);
-      showAlert("Music uploaded successfully!");
-    } catch (err) {
-      console.error(err);
-      showAlert(err?.response?.data?.message || "Failed to upload Music.");
-    }
-  };
-
+    // تحديث state مباشرة بالموسيقى الجديدة
+    setMusic(prev => [res.data, ...prev]);
+    showAlert("Music uploaded successfully!");
+  } catch (err) {
+    console.error(err);
+    showAlert(err?.response?.data?.message || "Failed to upload Music.");
+  }
+};
   // 🗑️ حذف موسيقى
   const deleteMusic = useCallback(async (id) => {
     if (!user?.token) return;

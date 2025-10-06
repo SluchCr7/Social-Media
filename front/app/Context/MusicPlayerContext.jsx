@@ -19,6 +19,7 @@ export const MusicPlayerProvider = ({ children }) => {
   const [repeatMode, setRepeatMode] = useState('off') // 'off' | 'one' | 'all'
   const [songs, setSongs] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [expanded, setExpanded] = useState(false)
 useEffect(() => {
     if (songs.length && !current) {
         // تعيين أول أغنية تلقائياً
@@ -149,6 +150,7 @@ useEffect(() => {
         setSongs,
         currentIndex,
         setCurrentIndex,
+        expanded, setExpanded
       }}
     >
       <audio ref={audioRef} preload="metadata" hidden />

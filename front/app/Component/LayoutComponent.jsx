@@ -12,10 +12,14 @@ import { useReport } from '../Context/ReportContext';
 import AddNewReport from './AddNewReport';
 import ViewImage from './ViewImage';
 import Loader from './Loader';
+import { IoIosMusicalNotes } from "react-icons/io";
 import MenuAllSuggestedFriends from './Menus/MenuAllSuggestedFreinds';
 import { FiPlus } from 'react-icons/fi';
 import Link from 'next/link';
 import ReelUploadModal from './MenuUploadReel';
+import { useMusicPlayer } from '../Context/MusicPlayerContext';
+import SongPlayer from './MusicPage/SongPlayer';
+import ExpandedWindow from './MusicPage/ExpandedWindow';
 const LayoutComponent = ({ children }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessanger, setShowMessanger] = useState(false);
@@ -36,6 +40,7 @@ const LayoutComponent = ({ children }) => {
   const { showMenuReport, setShowMenuReport, isPostId, isTargetId, reportedOnType } = useReport();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const {expanded, setExpanded} = useMusicPlayer()
   // الصفحات التي لا يظهر فيها Aside أو Menu
   const hideLayout = [
     '/Pages/Login',
@@ -130,17 +135,24 @@ const LayoutComponent = ({ children }) => {
           {imageView && (
             <ViewImage imageView={imageView} setImageView={setImageView} />
           )}
-          <button
-            className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-500 to-indigo-500 
-                      text-white rounded-full w-14 h-14 flex items-center justify-center 
-                      shadow-lg hover:scale-110 transition duration-300"
-          >
-            <Link href="/Pages/NewPost">
-              <FiPlus className="text-2xl" />
-            </Link>
-          </button>
+          <div className="fixed bottom-5 right-5 z-50 flex items-center gap-3">
+            <button
+              className="bg-gradient-to-r from-purple-500 to-indigo-500 
+                        text-white rounded-full w-14 h-14 flex items-center justify-center 
+                        shadow-lg hover:scale-110 transition duration-300"
+            >
+              <Link href="/Pages/NewPost">
+                <FiPlus className="text-2xl" />
+              </Link>
+            </button>
+            <button onClick={() => setExpanded(!expanded)} className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:scale-110 transition duration-300">
+              <IoIosMusicalNotes/>
+            </button>
+          </div>
           <MenuAllSuggestedFriends />
-          <ReelUploadModal/>
+          <ReelUploadModal />
+          <SongPlayer />
+          <ExpandedWindow/>
         </div>
       </div>
     </div>

@@ -15,7 +15,7 @@ const MusicSchema = new mongoose.Schema({
     album: {
         type: String,
         trim: true,
-        default: "Single"  // لو مش مرتبط بألبوم
+        default: "Single"
     },
     url: {
         type: String,
@@ -29,10 +29,9 @@ const MusicSchema = new mongoose.Schema({
         type: String,
         default: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200&q=80"
     },
-    // duration: {
-    //     type: Number, // بالثواني
-    //     required: false
-    // },
+    duration: {
+        type: Number, // بالثواني
+    },
     genre: {
         type: String,
         enum: ["Pop", "Rock", "HipHop", "Jazz", "Classical", "Other"],
@@ -47,12 +46,26 @@ const MusicSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    },
+    // ✅ الإضافات المطلوبة
+    tags: [{
+        type: String,
+        trim: true
+    }],
+    releaseDate: {
+        type: Date,
+        default: Date.now
+    },
+    language: {
+        type: String,
+        trim: true,
+        default: "Unknown"
     }
 }, {
     timestamps: true
 });
 
-
+// 🎯 Joi validation المحدثة
 const musicValidation = Joi.object({
     title: Joi.string().trim().required().messages({
         'string.empty': 'Title is required'
@@ -64,10 +77,12 @@ const musicValidation = Joi.object({
     url: Joi.string().uri().required().messages({
         'string.uri': 'Invalid URL format'
     }),
-    cover: Joi.string(),
+    cover: Joi.string().uri(),
     genre: Joi.string().valid("Pop", "Rock", "HipHop", "Jazz", "Classical", "Other").default("Other"),
+    tags: Joi.array().items(Joi.string().trim()),
+    releaseDate: Joi.date(),
+    language: Joi.string().trim().default("Unknown")
 });
-
 
 const Music = mongoose.model('Music', MusicSchema);
 

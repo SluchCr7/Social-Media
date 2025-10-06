@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
 import { useMusic } from '@/app/Context/MusicContext'
 
-const SongPlayer = ({ setExpanded }) => {
+const SongPlayer = () => {
   const {
     current,
     playing,
@@ -18,7 +18,8 @@ const SongPlayer = ({ setExpanded }) => {
     shuffle,
     setShuffle,
     repeatMode,
-    setRepeatMode
+    setRepeatMode,
+    setExpanded
   } = useMusicPlayer()
   const { likeMusic } = useMusic()
 
@@ -56,8 +57,9 @@ const SongPlayer = ({ setExpanded }) => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => current?._id && likeMusic(current._id)}
-                className="p-2 rounded-full bg-white/20 dark:bg-gray-700/40 text-gray-700 dark:text-gray-300 
-                           hover:bg-white/30 transition-all"
+                className={`p-3 rounded-lg ${
+                  current?.likes?.includes(user._id) ? 'bg-red-500 text-white' : 'bg-white/30 dark:bg-gray-800/40'
+                }`}
                 title="Like"
               >
                 <FaHeart />

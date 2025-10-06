@@ -14,20 +14,7 @@ import { useAuth } from '@/app/Context/AuthContext'
 import AddMusicModal from '@/app/Component/MusicPage/AddMusicMenu'
 import SongPlayer from '@/app/Component/MusicPage/SongPlayer'
 import ExpandedWindow from '@/app/Component/MusicPage/ExpandedWindow'
-
-// ----------------------
-// Utility
-// ----------------------
-const formatTime = (s = 0) => {
-  if (!s || isNaN(s)) return '0:00'
-  const mm = Math.floor(s / 60)
-  const ss = Math.floor(s % 60).toString().padStart(2, '0')
-  return `${mm}:${ss}`
-}
-
-// ----------------------
-// Main Component
-// ----------------------
+import { formatTime } from '@/app/utils/formatTime'
 export default function MusicPage() {
   const { music: songs, isLoading, likeMusic, viewMusic } = useMusic()
   const { user } = useAuth()
@@ -49,11 +36,11 @@ export default function MusicPage() {
     setMuted,
     setTrack,
     currentIndex,
-    setCurrentIndex
+    setCurrentIndex,
+    expanded, setExpanded
   } = useMusicPlayer()
 
   const [search, setSearch] = useState('')
-  const [expanded, setExpanded] = useState(false)
   const [openModel, setOpenModel] = useState(false)
   const [showLeftNav, setShowLeftNav] = useState(false)
 
@@ -87,22 +74,8 @@ export default function MusicPage() {
     <div className="min-h-screen w-full relative">
       <AddMusicModal isOpen={openModel} onClose={() => setOpenModel(false)} />
       <SongPlayer
-        playing={playing}
-        togglePlay={togglePlay}
-        progress={progress}
-        duration={duration}
-        current={current}
-        setExpanded={setExpanded}
       />
       <ExpandedWindow
-        current={current}
-        expanded={expanded}
-        setExpanded={setExpanded}
-        progress={progress}
-        duration={duration}
-        formatTime={formatTime}
-        playing={playing}
-        togglePlay={togglePlay}
       />
       <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100 relative overflow-x-hidden">
 
@@ -137,7 +110,7 @@ export default function MusicPage() {
           {/* Left Nav */}
           <aside className={`lg:col-span-2 transition-transform duration-300 ${showLeftNav ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} fixed lg:static inset-y-0 left-0 z-50 w-64 lg:w-auto bg-white/60 dark:bg-black/40 border-r border-gray-200 dark:border-gray-800 backdrop-blur-md p-4 lg:p-0`}>
             <div className="lg:block hidden lg:sticky lg:top-16 lg:h-[calc(100vh-64px)] lg:pt-6">
-              <nav className="space-y-2">
+              <nav className="space-y-2 pl-3">
                 <div className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
                   <FaHome />
                   <span className="ml-2">Home</span>
@@ -177,7 +150,10 @@ export default function MusicPage() {
                       <div className="text-sm text-gray-500 mt-1">{current?.artist} • {current?.album}</div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <button onClick={() => current?._id && likeMusic(current._id)} className="p-3 rounded-lg bg-white/30 dark:bg-gray-800/40">
+                      <button onClick={() => current?._id && likeMusic(current._id)} className={`p-3 rounded-lg ${
+                          current?.likes?.includes(user._id) ? 'bg-red-500 text-white' : 'bg-white/30 dark:bg-gray-800/40'
+                        }`}
+                      >
                         <FaHeart />
                       </button>
                       <button className="p-3 rounded-lg bg-white/30 dark:bg-gray-800/40">
@@ -254,7 +230,7 @@ export default function MusicPage() {
               ) : (
                 <div className="space-y-2">
                   {filtered.map((s, i) => (
-                    <div key={s._id} className={`flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition ${current?._id === s._id ? 'ring-2 ring-blue-400 bg-white/30' : ''}`}>
+                    <div onClick={() => setTrack(s, i, songs)} key={s._id} className={`flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition ${current?._id === s._id ? 'ring-2 ring-blue-400 bg-white/30' : ''}`}>
                       <div className="w-12 h-12 relative rounded-md overflow-hidden bg-gray-200">
                         <Image src={s.cover} alt={s.title} fill className="object-cover" />
                       </div>
@@ -264,8 +240,7 @@ export default function MusicPage() {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-xs text-gray-500">{formatTime(s.duration)}</div>
-                        <button
-                          onClick={() => setTrack(s, i, songs)}
+                        <button                 
                           className="p-2 rounded-lg bg-white/20 dark:bg-gray-800/40"
                         >
                           <FaPlay />
