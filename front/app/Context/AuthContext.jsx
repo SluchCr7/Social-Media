@@ -526,6 +526,22 @@ const makeAccountPremiumVerify = async () => {
     }
   };
 
+  const saveMusicInPlayList = async (musicId) => {
+    try {
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/save/music/${musicId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${userToken}` },
+        }
+      );
+      return res.data;
+    } catch (err) {
+      console.error("Error saving music in playlist:", err);
+      return null;
+    }
+  };
+
   // ------------------- INIT -------------------
   useEffect(() => {
     const storedUser = localStorage.getItem('user');

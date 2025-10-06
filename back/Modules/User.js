@@ -166,6 +166,10 @@ const UserSchema = new mongoose.Schema({
     interests : {
         type : [String],
         default : []
+    },
+    myMusicPlaylist: {
+        type: Array,
+        default: []
     }
 }, {
     timestamps: true,

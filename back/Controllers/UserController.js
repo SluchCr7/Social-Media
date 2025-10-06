@@ -18,6 +18,7 @@ const {Community} = require('../Modules/Community')
 const { Notification } = require('../Modules/Notification');
 const { Report, ValidateReport } = require('../Modules/Report')
 const { validateStory, Story } = require("../Modules/Story");
+const { Music } = require('../Modules/Music')
 /**
  * @desc Register New User
  * @route POST /api/auth/register
@@ -206,15 +207,16 @@ const LoginUser = asyncHandler(async (req, res) => {
  */
 
 const getAllUsers = asyncHandler(async (req, res) => {
-    const users = await User.find()
-      .populate({
-        path: 'followers',
-        select: 'profilePhoto username profileName',
-      })
-      .populate("posts")
-      .populate("comments")
-    res.status(200).json(users);
-  });
+  const users = await User.find()
+    .populate({
+      path: 'followers',
+      select: 'profilePhoto username profileName',
+    })
+    .populate("posts")
+    .populate("comments")
+  res.status(200).json(users);
+});
+
   
 
 /**
@@ -938,6 +940,36 @@ const deleteAllUsers = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "All users deleted successfully" });
 });
 
+const toggleSongInPlaylist = asyncHandler(async (req, res) => {
+    const userId = req.user._id; // المستخدم الحالي
+    const songId = req.params.songId; // ID الأغنية
+
+    const user = await User.findById(userId);
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+    const song = await Music.findById(songId);
+    if (!song) {
+      return res.status(404).json({ message: "Song not found" });
+    }
+    // تحقق إذا الأغنية موجودة في playlist بالفعل
+    const songExists = user.myMusicPlaylist.includes(songId);
+
+    if (songExists) {
+        // 🔴 إزالة الأغنية
+        user.myMusicPlaylist = user.myMusicPlaylist.filter(
+            id => id.toString() !== songId
+        );
+        await user.save();
+        return res.status(200).json({ message: "Song removed from playlist", playlist: user.myMusicPlaylist });
+    } else {
+        // 🟢 إضافة الأغنية
+        user.myMusicPlaylist.push(songId);
+        await user.save();
+        return res.status(200).json({ message: "Song added to playlist", playlist: user.myMusicPlaylist });
+    }
+});
+
 module.exports = {
   updateAccountStatus,
   makeUserAdmin,
@@ -949,6 +981,7 @@ module.exports = {
   uploadPhoto, makeFollow, updatePassword,
   updateProfile, pinPost, updateLinksSocial,
   getRelationship,
-  updateRelationship
+  updateRelationship,
+  toggleSongInPlaylist
 }
 

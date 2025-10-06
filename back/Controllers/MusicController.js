@@ -149,16 +149,20 @@ const toggleLike = asyncHandler(async (req, res) => {
   const music = await Music.findById(req.params.id);
   if (!music) return res.status(404).json({ message: "Music not found" });
 
-  const alreadyLiked = music.likes.includes(req.user._id);
+  const userId = req.user._id;
+  const alreadyLiked = music.likes.includes(userId);
 
   if (alreadyLiked) {
-    music.likes.pull(req.user._id);
+    // إزالة اللايك
+    music.likes.pull(userId);
   } else {
-    music.likes.push(req.user._id);
+    // إضافة اللايك
+    music.likes.push(userId);
 
-    if (!music.owner.equals(req.user._id)) {
+    // إرسال إشعار للمالك إذا كان المستخدم ليس هو المالك
+    if (!music.owner.equals(userId)) {
       await sendNotificationHelper({
-        sender: req.user._id,
+        sender: userId,
         receiver: music.owner,
         content: "liked your music",
         type: "like",
@@ -168,7 +172,15 @@ const toggleLike = asyncHandler(async (req, res) => {
     }
   }
 
+  // حفظ التغييرات
   await music.save();
+
+  // تحديث الشعبية بناءً على عدد اللايكات فقط
+  const POPULAR_LIKES_THRESHOLD = 50; // عدّل العدد حسب احتياجك
+  music.isPopular = music.likes.length >= POPULAR_LIKES_THRESHOLD;
+  await music.save();
+
+  // تعبئة بيانات المالك للعرض
   await music.populate("owner", "username profilePhoto");
 
   res.status(200).json(music);

@@ -23,7 +23,7 @@ const Communities = () => {
       
       {/* Header */}
       <div className="flex justify-between items-center px-5 py-4 border-b border-gray-300 dark:border-gray-600 bg-gradient-to-r from-purple-500 to-indigo-500">
-        <h2 className="text-gray-900 dark:text-gray-100 text-lg font-semibold">Communities</h2>
+        <h2 className="text-white text-lg font-semibold">Communities</h2>
       </div>
 
       {/* Body */}
