@@ -115,7 +115,7 @@ const DesignPost = ({
                         alt={m.username}
                         width={28}
                         height={28}
-                        className="rounded-full object-cover"
+                        className="rounded-full w-7 h-7 min-w-7 aspect-square object-cover "
                       />
                       <span className="text-sm text-gray-800 dark:text-gray-100">@{m.username}</span>
                     </div>
@@ -179,7 +179,7 @@ const DesignPost = ({
                     alt={u.username}
                     width={32}
                     height={32}
-                    className="rounded-full object-cover"
+                    className="rounded-full w-8 h-8 min-w-8 aspect-square object-cover "
                   />
                   <div className="flex flex-col">
                     <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">@{u.username}</span>

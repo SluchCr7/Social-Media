@@ -48,7 +48,7 @@ export const renderTextWithMentionsAndHashtags = (text, mentions = [], hashtags 
             rendered.push(
               <Link
                 key={`${i}-${j}`}
-                href={`/Pages/Hashtag/${tag}`}
+                href={`/Pages/Hashtag/${encodeURIComponent(tag)}`}
                 className="text-purple-500 font-semibold hover:underline"
               >
                 {inner}
