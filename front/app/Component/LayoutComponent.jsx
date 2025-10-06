@@ -40,7 +40,7 @@ const LayoutComponent = ({ children }) => {
   const { showMenuReport, setShowMenuReport, isPostId, isTargetId, reportedOnType } = useReport();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const {expanded, setExpanded} = useMusicPlayer()
+  const {expanded, setExpanded,viewMusicPlayer, setViewMusicPlayer} = useMusicPlayer()
   // الصفحات التي لا يظهر فيها Aside أو Menu
   const hideLayout = [
     '/Pages/Login',
@@ -145,13 +145,17 @@ const LayoutComponent = ({ children }) => {
                 <FiPlus className="text-2xl" />
               </Link>
             </button>
-            <button onClick={() => setExpanded(!expanded)} className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:scale-110 transition duration-300">
+            <button onClick={() => setViewMusicPlayer(true)} className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:scale-110 transition duration-300">
               <IoIosMusicalNotes/>
             </button>
           </div>
           <MenuAllSuggestedFriends />
           <ReelUploadModal />
-          <SongPlayer />
+          {
+            viewMusicPlayer && (
+              <SongPlayer/>
+            )
+          }
           <ExpandedWindow/>
         </div>
       </div>

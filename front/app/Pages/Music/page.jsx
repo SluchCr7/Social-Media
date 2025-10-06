@@ -67,14 +67,9 @@ export default function MusicPage() {
     return songs.slice(currentIndex + 1).concat(songs.slice(0, currentIndex))
   }, [songs, currentIndex])
 
-  // ----------------------
-  // Render
-  // ----------------------
   return (
     <div className="min-h-screen w-full relative">
       <AddMusicModal isOpen={openModel} onClose={() => setOpenModel(false)} />
-      <SongPlayer
-      />
       <ExpandedWindow
       />
       <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100 relative overflow-x-hidden">

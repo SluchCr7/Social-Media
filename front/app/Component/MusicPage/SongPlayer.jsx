@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
 import { useMusic } from '@/app/Context/MusicContext'
+import { useAuth } from '@/app/Context/AuthContext'
 
 const SongPlayer = () => {
   const {
@@ -19,10 +20,10 @@ const SongPlayer = () => {
     setShuffle,
     repeatMode,
     setRepeatMode,
-    setExpanded
+    setExpanded,viewMusicPlayer, setViewMusicPlayer
   } = useMusicPlayer()
   const { likeMusic } = useMusic()
-
+  const {user} = useAuth()
   const progressPercent = (progress / (duration || 1)) * 100
 
   return (

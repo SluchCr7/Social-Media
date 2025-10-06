@@ -8,11 +8,12 @@ import {
 import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
 import { useMusic } from '@/app/Context/MusicContext'
 import { formatTime } from '@/app/utils/formatTime'
+import { useAuth } from '@/app/Context/AuthContext'
 const ExpandedWindow = () => {
   const { current, playing, togglePlay, progress, duration, next, prev, shuffle, setShuffle, repeatMode, setRepeatMode,expanded, setExpanded } = useMusicPlayer()
   const { likeMusic } = useMusic()
   const progressPercent = (progress / (duration || 1)) * 100
-
+  const {user} = useAuth()
   if (!current) return null
 
   return (

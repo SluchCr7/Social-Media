@@ -20,12 +20,7 @@ export const MusicPlayerProvider = ({ children }) => {
   const [songs, setSongs] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [expanded, setExpanded] = useState(false)
-useEffect(() => {
-    if (songs.length && !current) {
-        // تعيين أول أغنية تلقائياً
-        setTrack(songs[0], 0, songs)
-    }
-}, [songs])
+  const [viewMusicPlayer, setViewMusicPlayer] = useState(false)
   // ⏯️ التحكم في الصوت
   const play = async () => {
     if (!audioRef.current) return
@@ -150,7 +145,7 @@ useEffect(() => {
         setSongs,
         currentIndex,
         setCurrentIndex,
-        expanded, setExpanded
+        expanded, setExpanded,viewMusicPlayer, setViewMusicPlayer
       }}
     >
       <audio ref={audioRef} preload="metadata" hidden />
