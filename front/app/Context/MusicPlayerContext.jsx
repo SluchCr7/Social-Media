@@ -7,9 +7,11 @@ const MusicPlayerContext = createContext()
 
 export const MusicPlayerProvider = ({ children }) => {
   const audioRef = useRef(null)
-  const { viewMusic } = useMusic()
-
-  const [current, setCurrent] = useState(null)
+  const { viewMusic , music} = useMusic()
+    
+    const [current, setCurrent] = useState(music && music.length ? music[0] : null)
+    const [currentIndex, setCurrentIndex] = useState(0)
+    const [songs, setSongs] = useState(music || [])
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -17,11 +19,16 @@ export const MusicPlayerProvider = ({ children }) => {
   const [muted, setMuted] = useState(false)
   const [shuffle, setShuffle] = useState(false)
   const [repeatMode, setRepeatMode] = useState('off') // 'off' | 'one' | 'all'
-  const [songs, setSongs] = useState([])
-  const [currentIndex, setCurrentIndex] = useState(0)
   const [expanded, setExpanded] = useState(false)
   const [viewMusicPlayer, setViewMusicPlayer] = useState(false)
-  // ⏯️ التحكم في الصوت
+    // ⏯️ التحكم في الصوت
+    useEffect(() => {
+        if (music && music.length) {
+            setSongs(music)
+            setCurrent(music[0])
+            setCurrentIndex(0)
+        }
+    }, [music])
   const play = async () => {
     if (!audioRef.current) return
     try {

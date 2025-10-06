@@ -145,7 +145,7 @@ const LayoutComponent = ({ children }) => {
                 <FiPlus className="text-2xl" />
               </Link>
             </button>
-            <button onClick={() => setViewMusicPlayer(true)} className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:scale-110 transition duration-300">
+            <button onClick={() => setViewMusicPlayer(!viewMusicPlayer)} className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:scale-110 transition duration-300">
               <IoIosMusicalNotes/>
             </button>
           </div>
