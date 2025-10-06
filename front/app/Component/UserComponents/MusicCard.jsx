@@ -14,14 +14,19 @@ const MusicCard = ({ music }) => {
       {/* 🎵 بطاقة الموسيقى */}
       <motion.div
         onClick={() => setShowModal(true)}
-        whileHover={{ scale: 1.05 }}
+        whileHover={{ scale: 1.04 }}
         whileTap={{ scale: 0.97 }}
-        className="relative flex flex-col items-center bg-gradient-to-br from-indigo-500/10 to-purple-600/10
-                   dark:from-gray-800/60 dark:to-gray-900/50 rounded-2xl p-4 cursor-pointer
-                   border border-white/10 shadow-md hover:shadow-lg transition-all duration-300"
+        className="
+          relative flex flex-col items-center justify-between
+          bg-gradient-to-br from-indigo-500/10 to-purple-600/10
+          dark:from-gray-800/60 dark:to-gray-900/50
+          rounded-2xl p-4 sm:p-5 cursor-pointer border border-white/10
+          shadow-md hover:shadow-lg transition-all duration-300
+          w-full sm:w-[200px] md:w-[220px] lg:w-[240px]
+        "
       >
         {/* غلاف الموسيقى */}
-        <div className="relative group">
+        <div className="relative group w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36">
           <motion.div
             whileHover={{ rotate: 3 }}
             transition={{ duration: 0.3 }}
@@ -30,16 +35,16 @@ const MusicCard = ({ music }) => {
             <Image
               src={music?.cover || '/default_music_cover.jpg'}
               alt={music?.name || 'Music Cover'}
-              width={140}
-              height={140}
-              className="rounded-full object-cover aspect-square border border-white/10 shadow-inner"
+              fill
+              className="rounded-full object-cover border border-white/10 shadow-inner"
             />
 
             {/* زر التشغيل */}
             <motion.div
               initial={{ opacity: 0 }}
               whileHover={{ opacity: 1 }}
-              className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-full
+              className="absolute inset-0 flex items-center justify-center 
+                         bg-black/40 backdrop-blur-sm rounded-full
                          transition-opacity"
             >
               <motion.div
@@ -53,26 +58,32 @@ const MusicCard = ({ music }) => {
           </motion.div>
         </div>
 
-        {/* الاسم */}
-        <p className="mt-3 text-sm font-semibold text-gray-800 dark:text-gray-100 truncate w-full text-center">
-          {music?.title || 'Unknown Track'}
-        </p>
-        <p className="text-xs text-gray-500 dark:text-gray-400">{music?.artist || 'Unknown Artist'}</p>
+        {/* الاسم والفنان */}
+        <div className="mt-3 text-center w-full">
+          <p className="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-100 truncate">
+            {music?.title || 'Unknown Track'}
+          </p>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
+            {music?.artist || 'Unknown Artist'}
+          </p>
+        </div>
       </motion.div>
 
       {/* 🎧 نافذة التفاصيل */}
       <AnimatePresence>
         {showModal && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
+            className="fixed inset-0 z-50 flex items-center justify-center px-4 sm:px-0 
+                       bg-black/70 backdrop-blur-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={(e) => e.target === e.currentTarget && setShowModal(false)}
           >
             <motion.div
-              className="relative bg-white/10 dark:bg-gray-900/80 backdrop-blur-2xl border border-white/20 
-                         rounded-3xl p-6 sm:p-8 w-[90%] sm:w-[420px] shadow-2xl text-center overflow-hidden"
+              className="relative bg-white/10 dark:bg-gray-900/80 backdrop-blur-2xl 
+                         border border-white/20 rounded-3xl p-5 sm:p-8 w-full max-w-[400px] 
+                         shadow-2xl text-center overflow-hidden"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -99,18 +110,19 @@ const MusicCard = ({ music }) => {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.1 }}
               >
-                <Image
-                  src={music?.cover || '/default_music_cover.jpg'}
-                  alt={music?.name || 'Music Cover'}
-                  width={220}
-                  height={220}
-                  className="rounded-2xl mx-auto object-cover border border-white/20 shadow-xl"
-                />
+                <div className="relative w-40 h-40 sm:w-52 sm:h-52 mx-auto">
+                  <Image
+                    src={music?.cover || '/default_music_cover.jpg'}
+                    alt={music?.name || 'Music Cover'}
+                    fill
+                    className="rounded-2xl object-cover border border-white/20 shadow-xl"
+                  />
+                </div>
               </motion.div>
 
               {/* التفاصيل */}
               <div className="mt-6 space-y-1">
-                <h2 className="text-xl font-bold text-white flex items-center justify-center gap-2">
+                <h2 className="text-lg sm:text-xl font-bold text-white flex items-center justify-center gap-2">
                   <FaMusic className="text-indigo-400" /> {music?.title || 'Unknown Track'}
                 </h2>
                 <p className="text-sm text-gray-300">{music?.artist || 'Unknown Artist'}</p>

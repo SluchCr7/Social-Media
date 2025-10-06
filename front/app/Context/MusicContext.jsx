@@ -34,7 +34,6 @@ export const MusicProvider = ({ children }) => {
       setHasMore(pageNum < res.data.totalPages);
     } catch (err) {
       console.error(err);
-      showAlert("Failed to fetch music.");
     } finally {
       setIsLoading(false);
     }

@@ -21,12 +21,10 @@ const StoryViewer = ({ stories, onClose }) => {
   const story = stories[currentIndex]
   const timerRef = useRef(null)
 
-  // تسجيل المشاهدة
   useEffect(() => {
     if (story?._id) viewStory(story._id)
   }, [currentIndex, story])
 
-  // Progress Bar Timer
   useEffect(() => {
     if (!story || isPaused) return
     setProgress(0)
@@ -67,9 +65,7 @@ const StoryViewer = ({ stories, onClose }) => {
     ? story.Photo.find(url => url) || null
     : story?.Photo || null
 
-  const handleLove = () => {
-    toggleLove(story._id)
-  }
+  const handleLove = () => toggleLove(story._id)
 
   const handleCommentSubmit = async () => {
     if (!comment.trim()) return
@@ -85,29 +81,29 @@ const StoryViewer = ({ stories, onClose }) => {
       {/* زر الإغلاق */}
       <button
         onClick={onClose}
-        className="absolute top-6 right-6 p-3 rounded-full bg-black/40 hover:bg-black/70 transition z-50 shadow-md"
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 sm:p-3 rounded-full bg-black/40 hover:bg-black/70 transition z-50 shadow-md"
         aria-label="Close Story"
       >
-        <IoClose className="text-white text-3xl" />
+        <IoClose className="text-white text-2xl sm:text-3xl" />
       </button>
 
       {/* أسهم التنقل */}
       {currentIndex > 0 && (
         <button
           onClick={handlePrev}
-          className="absolute left-4 md:left-10 p-2 rounded-full bg-black/40 hover:bg-black/60 transition z-40"
+          className="absolute left-2 sm:left-4 md:left-10 p-2 sm:p-3 rounded-full bg-black/40 hover:bg-black/60 transition z-40"
           aria-label="Previous Story"
         >
-          <IoChevronBack className="text-white text-4xl" />
+          <IoChevronBack className="text-white text-3xl sm:text-4xl" />
         </button>
       )}
       {currentIndex < stories.length - 1 && (
         <button
           onClick={handleNext}
-          className="absolute right-4 md:right-10 p-2 rounded-full bg-black/40 hover:bg-black/60 transition z-40"
+          className="absolute right-2 sm:right-4 md:right-10 p-2 sm:p-3 rounded-full bg-black/40 hover:bg-black/60 transition z-40"
           aria-label="Next Story"
         >
-          <IoChevronForward className="text-white text-4xl" />
+          <IoChevronForward className="text-white text-3xl sm:text-4xl" />
         </button>
       )}
 
@@ -116,7 +112,7 @@ const StoryViewer = ({ stories, onClose }) => {
         {...handlers}
         onMouseDown={() => setIsPaused(true)}
         onMouseUp={() => setIsPaused(false)}
-        className="relative max-w-lg w-full rounded-2xl overflow-hidden shadow-2xl flex flex-col items-center justify-center h-[75vh] z-20 bg-black"
+        className="relative w-[95%] sm:w-[80%] md:w-[60%] lg:max-w-lg h-[70vh] sm:h-[75vh] rounded-2xl overflow-hidden shadow-2xl flex flex-col items-center justify-center z-20 bg-black"
       >
         {/* معلومات صاحب الستوري */}
         <div className="absolute top-4 left-4 flex items-center gap-3 z-30">
@@ -125,13 +121,15 @@ const StoryViewer = ({ stories, onClose }) => {
             alt="avatar"
             width={42}
             height={42}
-            className="w-11 h-11 rounded-full object-cover border-2 border-white/50"
+            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border-2 border-white/50"
           />
           <div className="flex flex-col">
-            <span className="text-white font-semibold text-sm cursor-pointer hover:underline">
+            <span className="text-white font-semibold text-sm sm:text-base cursor-pointer hover:underline">
               {story?.owner?.username || 'Unknown'}
             </span>
-            <span className='text-gray-300 text-xs'>{new Date(story?.createdAt).toLocaleString()}</span>
+            <span className="text-gray-300 text-[10px] sm:text-xs">
+              {new Date(story?.createdAt).toLocaleString()}
+            </span>
           </div>
         </div>
 
@@ -142,12 +140,12 @@ const StoryViewer = ({ stories, onClose }) => {
               src={photoUrl}
               alt="story"
               fill
-              className="object-contain"
+              className="object-contain max-h-[70vh] sm:max-h-[75vh]"
               priority
             />
             {story.text && (
-              <div className="absolute bottom-28 w-11/12 text-center">
-                <p className="text-lg md:text-2xl font-semibold text-white px-4 py-2 bg-black/50 rounded-xl shadow-lg backdrop-blur-md">
+              <div className="absolute bottom-24 sm:bottom-28 w-11/12 text-center">
+                <p className="text-base sm:text-lg md:text-2xl font-semibold text-white px-3 sm:px-4 py-2 bg-black/50 rounded-xl shadow-lg backdrop-blur-md">
                   {story.text}
                 </p>
               </div>
@@ -155,20 +153,20 @@ const StoryViewer = ({ stories, onClose }) => {
           </div>
         ) : (
           <div className="bg-gradient-to-b from-gray-800 to-black w-full h-full flex items-center justify-center px-6 text-center rounded-xl overflow-auto">
-            <p className="text-2xl md:text-3xl font-semibold text-white drop-shadow-lg leading-snug">
+            <p className="text-lg sm:text-2xl md:text-3xl font-semibold text-white drop-shadow-lg leading-snug">
               {story.text}
             </p>
           </div>
         )}
 
         {/* الأكشنات */}
-        <div className={`absolute ${showCommentInput ? "bottom-20" : "bottom-6"} left-1/2 -translate-x-1/2 flex items-center gap-8 z-50`}>
+        <div className={`absolute ${showCommentInput ? "bottom-20" : "bottom-6"} left-1/2 -translate-x-1/2 flex items-center gap-6 sm:gap-8 z-50`}>
           <button
             onClick={handleLove}
-            className="p-4 rounded-full bg-white/10 backdrop-blur-md hover:scale-110 transition shadow-md"
+            className="p-3 sm:p-4 rounded-full bg-white/10 backdrop-blur-md hover:scale-110 transition shadow-md"
           >
             <FaHeart
-              className={`text-3xl ${story?.loves?.some(u => u?._id === user?._id) ? "text-red-500" : "text-white"}`}
+              className={`text-2xl sm:text-3xl ${story?.loves?.some(u => u?._id === user?._id) ? "text-red-500" : "text-white"}`}
             />
           </button>
           {story?.owner?._id !== user?._id && (
@@ -177,32 +175,32 @@ const StoryViewer = ({ stories, onClose }) => {
                 setSelectedUser(story?.owner)
                 setShowCommentInput(!showCommentInput)
               }}
-              className="p-4 rounded-full bg-white/10 backdrop-blur-md hover:scale-110 transition shadow-md"
+              className="p-3 sm:p-4 rounded-full bg-white/10 backdrop-blur-md hover:scale-110 transition shadow-md"
             >
-              <FaRegCommentDots className="text-white text-3xl" />
+              <FaRegCommentDots className="text-white text-2xl sm:text-3xl" />
             </button>
           )}
         </div>
 
         {/* حقل التعليق */}
         {showCommentInput && (
-          <div className="absolute bottom-0 left-0 w-full bg-black/70 backdrop-blur-md p-4 flex items-center gap-3 animate-slide-up">
+          <div className="absolute bottom-0 left-0 w-full bg-black/70 backdrop-blur-md p-3 sm:p-4 flex items-center gap-2 sm:gap-3 animate-slide-up">
             <div className="relative flex-1">
               <input
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Type a message..."
-                className="w-full px-5 py-3 rounded-2xl bg-gray-800/90 text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-black transition-shadow shadow-inner shadow-black/50"
+                className="w-full px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-gray-800/90 text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-black transition-shadow shadow-inner shadow-black/50"
               />
               <IoSend
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-blue-400 transition"
-                size={20}
+                className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-blue-400 transition"
+                size={18}
                 onClick={handleCommentSubmit}
               />
             </div>
             <button
               onClick={handleCommentSubmit}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-sm rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
+              className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-sm rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
             >
               Send
             </button>
@@ -211,14 +209,14 @@ const StoryViewer = ({ stories, onClose }) => {
 
         {/* عدد المشاهدات لصاحب الستوري */}
         {user?._id === story?.owner?._id && (
-          <div className="absolute top-4 right-4 text-white text-sm bg-black/50 px-3 py-1 rounded-lg z-30 shadow-md">
+          <div className="absolute top-4 right-4 text-white text-xs sm:text-sm bg-black/50 px-3 py-1 rounded-lg z-30 shadow-md">
             {story?.views?.length || 0} Views
           </div>
         )}
       </div>
 
       {/* Progress bar */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-2 z-40 w-11/12 max-w-lg">
+      <div className="absolute top-3 sm:top-4 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2 z-40 w-[92%] sm:w-11/12 max-w-lg">
         {stories.map((_, idx) => (
           <div key={idx} className="flex-1 h-1 rounded-full bg-white/20 overflow-hidden">
             <div

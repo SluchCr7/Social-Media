@@ -192,7 +192,7 @@ export default function MusicPage() {
             </div>
 
             {/* Songs Feed */}
-            <div className="rounded-2xl p-4 bg-white/50 dark:bg-gray-900/50 border">
+            <div className="rounded-2xl p-4 mt-5 md:mt-1 bg-white/50 dark:bg-gray-900/50 border">
               <h3 className="text-lg font-semibold mb-3">All Songs</h3>
               {isLoading ? <div className="text-sm text-gray-500">Loading...</div> : (
                 <div className="space-y-2">

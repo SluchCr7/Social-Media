@@ -135,7 +135,11 @@ const LayoutComponent = ({ children }) => {
           {imageView && (
             <ViewImage imageView={imageView} setImageView={setImageView} />
           )}
-          <div className="fixed bottom-5 right-5 z-50 flex items-center gap-3">
+          <div
+            className={`fixed z-50 flex items-center gap-3 transition-all duration-300 right-5 ${
+              viewMusicPlayer ? "bottom-[120px]" : "bottom-5"
+            }`}
+          >
             <button
               className="bg-gradient-to-r from-purple-500 to-indigo-500 
                         text-white rounded-full w-14 h-14 flex items-center justify-center 
@@ -145,10 +149,14 @@ const LayoutComponent = ({ children }) => {
                 <FiPlus className="text-2xl" />
               </Link>
             </button>
-            <button onClick={() => setViewMusicPlayer(!viewMusicPlayer)} className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:scale-110 transition duration-300">
-              <IoIosMusicalNotes/>
+            <button
+              onClick={() => setViewMusicPlayer(!viewMusicPlayer)}
+              className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:scale-110 transition duration-300"
+            >
+              <IoIosMusicalNotes />
             </button>
           </div>
+
           <MenuAllSuggestedFriends />
           <ReelUploadModal />
           {

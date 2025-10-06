@@ -75,7 +75,6 @@ const DesignPostSelect = ({
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col gap-3">
-
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
             <div>
@@ -86,7 +85,7 @@ const DesignPostSelect = ({
                   </Link>
                   <div className="flex flex-wrap gap-2 text-xs text-gray-500">
                     <span>@{post.owner?.username}</span>
-                    <span className="w-1 h-1 bg-gray-400 rounded-full hidden sm:inline-block" />
+                    <span className="hidden sm:inline-block w-1 h-1 bg-gray-400 rounded-full" />
                     <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
@@ -94,18 +93,16 @@ const DesignPostSelect = ({
                 <div className="flex flex-col text-sm">
                   <Link
                     href={user?._id === post.owner?._id ? '/Pages/Profile' : `/Pages/User/${post.owner?._id}`}
-                    className="font-semibold hover:underline text-gray-900 dark:text-gray-100"
+                    className="font-semibold hover:underline text-gray-900 dark:text-gray-100 flex items-center gap-1"
                   >
                     {post.owner?.username}
+                    {post?.owner?.isAccountWithPremiumVerify && (
+                      <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
+                    )}
                   </Link>
                   <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                    <div>
-                      <span>{post.owner?.profileName}</span>
-                      {post?.owner?.isAccountWithPremiumVerify && (
-                        <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
-                      )}
-                    </div>
-                    <span className="w-1 h-1 bg-gray-400 rounded-full hidden sm:inline-block" />
+                    <span>{post.owner?.profileName}</span>
+                    <span className="hidden sm:inline-block w-1 h-1 bg-gray-400 rounded-full" />
                     <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
@@ -152,9 +149,7 @@ const DesignPostSelect = ({
                 </Link>
                 <span className="text-gray-500 text-xs">{new Date(original?.createdAt).toLocaleDateString()}</span>
               </div>
-              <p className="text-gray-700 dark:text-gray-200 italic whitespace-pre-wrap">
-                <RenderPostText text={original?.text} mentions={original?.mentions} hashtags={original?.Hashtags} />
-              </p>
+              <RenderPostText text={original?.text} mentions={original?.mentions} hashtags={original?.Hashtags} />
               {original?.Photos?.length > 0 && (
                 <PostPhotos photos={original.Photos} setImageView={setImageView} postId={original._id} />
               )}
@@ -168,14 +163,14 @@ const DesignPostSelect = ({
 
           {/* Actions */}
           {isLogin && (
-            <div className="flex flex-wrap gap-4 sm:gap-8 pt-4 justify-around sm:justify-start">
-              <ActionIcon condition={post.hahas?.includes(user?._id)} onClick={() => likePost(post._id, post.owner._id)} Icon={post.likes?.includes(user?._id) ? IoIosHeart : CiHeart} count={post.likes?.length} active={post.likes?.includes(user?._id)} />
-              <ActionIcon condition={post.likes?.includes(user?._id)} onClick={() => hahaPost(post._id)} Icon={LuLaugh} count={post.hahas?.length} activeHaha={post.hahas?.includes(user?._id)} />
+            <div className="flex flex-wrap items-center justify-between sm:justify-start gap-3 sm:gap-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <ActionIcon onClick={() => likePost(post._id, post.owner._id)} Icon={post.likes?.includes(user?._id) ? IoIosHeart : CiHeart} count={post.likes?.length} active={post.likes?.includes(user?._id)} />
+              <ActionIcon onClick={() => hahaPost(post._id)} Icon={LuLaugh} count={post.hahas?.length} activeHaha={post.hahas?.includes(user?._id)} />
               {!post.isCommentOff && <ActionIcon Icon={FaRegCommentDots} count={comments?.length} />}
               <ActionIcon onClick={() => sharePost(post._id)} Icon={IoIosShareAlt} count={post.shares?.length} />
               <ActionIcon onClick={() => savePost(post._id)} Icon={CiBookmark} count={post.saved?.length} active={post.saved?.includes(user?._id)} />
               {user?._id === post.owner?._id && (
-                <div className="flex items-center gap-1 text-gray-400 text-xs sm:text-sm">
+                <div className="flex items-center gap-1 text-gray-400 text-xs sm:text-sm ml-auto sm:ml-0">
                   <BsEye />
                   <span>{post?.views?.length || 0}</span>
                 </div>
@@ -185,24 +180,28 @@ const DesignPostSelect = ({
 
           {/* Add Comment */}
           {!post.isCommentOff && isLogin && (
-            <div className="flex flex-col sm:flex-row items-center gap-2 p-2 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+            <div className="flex items-center gap-2 mt-4 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-full focus-within:ring-2 focus-within:ring-blue-400 transition">
               <Image
                 src={user?.profilePhoto?.url || '/default-profile.png'}
                 alt="User Profile"
-                width={40}
-                height={40}
-                className="w-8 h-8 rounded-full object-cover"
+                width={36}
+                height={36}
+                className="w-9 h-9 rounded-full object-cover"
               />
               <textarea
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder="Write a comment..."
-                className="flex-1 bg-transparent text-sm resize-none outline-none placeholder-gray-400 dark:placeholder-gray-500 w-full sm:w-auto"
+                className="flex-1 bg-transparent text-sm resize-none outline-none placeholder-gray-400 dark:placeholder-gray-500 px-2 min-h-[36px]"
                 rows={1}
               />
-              <button onClick={handleAddComment} className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition self-end sm:self-auto">
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={handleAddComment}
+                className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition"
+              >
                 <IoIosSend className="text-white text-lg" />
-              </button>
+              </motion.button>
             </div>
           )}
 
@@ -228,13 +227,13 @@ const DesignPostSelect = ({
   )
 }
 
-const ActionIcon = ({ Icon, count, onClick, active, activeHaha , condition }) => (
+const ActionIcon = ({ Icon, count, onClick, active, activeHaha }) => (
   <motion.button 
     onClick={onClick} 
     whileTap={{ scale: 0.9 }} 
-    className={`${condition ? "hidden" : "flex"} items-center gap-2 cursor-pointer min-w-[70px] justify-center sm:justify-start`}
+    className="flex items-center gap-1 sm:gap-2 cursor-pointer min-w-[50px] justify-center sm:justify-start transition"
   >
-    <Icon className={`text-2xl ${activeHaha ? 'text-yellow-500' : ''} ${active ? 'text-red-500' : 'text-gray-400'}`} />
+    <Icon className={`text-2xl ${activeHaha ? 'text-yellow-500' : ''} ${active ? 'text-red-500' : 'text-gray-400'} hover:scale-110 transition-transform`} />
     <span className="text-gray-400 text-xs sm:text-sm">{count}</span>
   </motion.button>
 );
