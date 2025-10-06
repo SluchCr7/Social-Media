@@ -19,7 +19,12 @@ export const MusicPlayerProvider = ({ children }) => {
   const [repeatMode, setRepeatMode] = useState('off') // 'off' | 'one' | 'all'
   const [songs, setSongs] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
-
+useEffect(() => {
+    if (songs.length && !current) {
+        // تعيين أول أغنية تلقائياً
+        setTrack(songs[0], 0, songs)
+    }
+}, [songs])
   // ⏯️ التحكم في الصوت
   const play = async () => {
     if (!audioRef.current) return
