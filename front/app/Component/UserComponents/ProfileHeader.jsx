@@ -87,18 +87,21 @@ const ProfileHeader = ({
             >
               <IoEllipsisHorizontal size={20} />
             </span>
-            <Link href="/Pages/Analytics">
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-              >
-                <SiGoogleanalytics className="text-gray-600 dark:text-gray-300" size={20} />
-              </motion.span>
-            </Link>
+            {
+              isOwner && (
+                <Link href="/Pages/Analytics">
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <SiGoogleanalytics className="text-gray-600 dark:text-gray-300" size={20} />
+                  </motion.span>
+                </Link>
+              )
+            }
           </div>
           {isOwner ? renderOwnerMenu?.() : renderVisitorMenu?.()}
-        
         </div>
 
         {/* Level & Progress */}

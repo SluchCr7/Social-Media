@@ -59,8 +59,8 @@ const NewPost = () => {
   };
 
   // ------------------- Mentions Handling -------------------
-  const handleTextareaChange = (e) => {
- const value = e.target.value;
+const handleTextareaChange = (e) => {
+  const value = e.target.value;
   setPostText(value);
   if (value.length <= 500) setErrorText(false);
 
@@ -69,29 +69,30 @@ const NewPost = () => {
 
   if (lastAt >= 0) {
     const wordAfterAt = value.slice(lastAt + 1, cursorPos);
+    const hasSpace = wordAfterAt.includes(' ');
 
-    // ✅ التعديل هنا: عرض القائمة حتى لو ما كتبش ولا حرف بعد @
-    if (!wordAfterAt.includes(' ')) {
+    // ✅ تُظهر القائمة عند مجرد كتابة @ وتظل مفتوحة أثناء الكتابة
+    if (!hasSpace) {
       setMentionSearch(wordAfterAt);
-      setShowMentionList(true);
+      if (!showMentionList) setShowMentionList(true);
     } else {
       setShowMentionList(false);
     }
   } else {
     setShowMentionList(false);
   }
-  };
+};
 
-  const filteredMentions = myFollowing.filter(u => {
-    if (!u || typeof u?.username !== 'string') return false;
-    const notAlreadySelected = !selectedMentions.some(m => m?._id === u?._id);
+const filteredMentions = myFollowing.filter((u) => {
+  if (!u || typeof u?.username !== "string") return false;
+  const notAlreadySelected = !selectedMentions.some((m) => m?._id === u?._id);
 
-    // ✅ لو المستخدم كتب فقط @ يظهر كل من يتابعه
-    if (!mentionSearch) return notAlreadySelected;
+  // ✅ لو المستخدم كتب فقط @ يظهر كل من يتابعه
+  if (!mentionSearch) return notAlreadySelected;
 
-    const usernameMatch = u.username.toLowerCase().includes(mentionSearch.toLowerCase());
-    return usernameMatch && notAlreadySelected;
-  });
+  const usernameMatch = u.username.toLowerCase().includes(mentionSearch.toLowerCase());
+  return usernameMatch && notAlreadySelected;
+});
 
 
   const selectMention = (user) => {

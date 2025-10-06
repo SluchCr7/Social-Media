@@ -166,12 +166,17 @@ const DesignPost = ({
 
           {/* Mentions Dropdown */}
           {showMentionList && filteredMentions.length > 0 && (
-            <div className="absolute top-full left-6 mt-2 z-50 bg-white dark:bg-darkMode-bg shadow-2xl rounded-xl w-72 max-h-60 overflow-auto border border-gray-200 dark:border-gray-600">
+            <div
+              className="absolute top-full left-6 mt-2 z-50 bg-white dark:bg-darkMode-bg shadow-2xl rounded-xl w-72 max-h-60 overflow-auto border border-gray-200 dark:border-gray-600"
+              // ✅ يمنع اختفاء القائمة عند الضغط داخلها (قبل blur)
+              onMouseDown={(e) => e.preventDefault()}
+            >
               {filteredMentions.map((u) => (
                 <div
                   key={u._id}
                   className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
-                  onClick={() => selectMention(u)}
+                  // ✅ استخدم onMouseDown بدل onClick حتى لا يختفي قبل الاختيار
+                  onMouseDown={() => selectMention(u)}
                 >
                   <Image
                     src={u?.profilePhoto?.url || '/default.png'}
@@ -181,16 +186,19 @@ const DesignPost = ({
                     className="rounded-full w-8 h-8 min-w-8 aspect-square object-cover"
                   />
                   <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">@{u.username}</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                      @{u.username}
+                    </span>
                     {u.profileName && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{u.profileName}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {u.profileName}
+                      </span>
                     )}
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
 
         {/* Images Preview */}
         {images.length > 0 && (
