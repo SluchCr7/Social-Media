@@ -5,6 +5,7 @@ import SluchitEntry from '../SluchitEntry'
 import { motion, AnimatePresence } from 'framer-motion'
 import { usePost } from '@/app/Context/PostContext'
 import PostSkeleton from '@/app/Skeletons/PostSkeleton'
+import MusicCard from './MusicCard'
 
 const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
   const { setImageView , userIsLoading } = usePost()
@@ -116,6 +117,28 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
             )}
           </motion.div>
         )}
+        {
+          activeTab === 'Music' && (
+            <motion.div
+              key="music"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25 }}
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 w-[95%] mx-auto"
+            >
+              {userSelected?.music?.length > 0 ? (
+                userSelected.music.map((music) => (
+                  <MusicCard key={music?._id} music={music} />
+                ))
+              ) : (
+                <div className="col-span-full text-center text-gray-500 py-10">
+                  You haven’t uploaded any music yet.
+                </div>
+              )}
+            </motion.div>
+          )
+        }
         {activeTab === 'Photos' && (
           <motion.div
             key="photos"

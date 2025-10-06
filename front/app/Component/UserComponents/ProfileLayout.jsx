@@ -102,11 +102,10 @@ const ProfileLayout = ({
       />
 
       {/* 🎶 قسم الموسيقى */}
-      {musicList.length > 0 && (
+      {/* {musicList.length > 0 && (
         <div className="flex flex-col items-center gap-6 w-full py-4">
           <h2 className="text-xl font-semibold text-center">My Music</h2>
 
-          {/* ✅ غلاف الأغنية مع أنميشن */}
           <motion.div
             className="relative w-36 h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden shadow-xl cursor-pointer border-4 border-primary/40"
             animate={{
@@ -138,7 +137,6 @@ const ProfileLayout = ({
             </motion.div>
           </motion.div>
 
-          {/* 🔊 معلومات الأغنية */}
           <div className="text-center">
             <p className="text-lg font-medium">
               {musicList[currentTrackIndex]?.title || "Unknown Track"}
@@ -148,7 +146,6 @@ const ProfileLayout = ({
             </p>
           </div>
 
-          {/* ⏯️ أزرار التحكم */}
           <div className="flex items-center justify-center gap-6">
             <button
               onClick={handlePrev}
@@ -170,14 +167,13 @@ const ProfileLayout = ({
             </button>
           </div>
 
-          {/* 🎧 العنصر الصوتي الفعلي */}
           <audio
             ref={audioRef}
             src={musicList[currentTrackIndex]?.url}
             onEnded={handleNext}
           />
         </div>
-      )}
+      )} */}
 
       {/* 🧾 معلومات المستخدم */}
       <InfoAboutUser user={user} />

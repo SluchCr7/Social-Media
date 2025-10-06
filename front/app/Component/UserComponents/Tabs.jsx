@@ -1,7 +1,7 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const tabs = ['Posts', 'Saved', 'Comments', 'Reels', 'Photos']
+const tabs = ['Posts', 'Saved', 'Comments', 'Reels', 'Photos' , 'Music']
 
 
 const Tabs = ({ activeTab, setActiveTab }) => (
