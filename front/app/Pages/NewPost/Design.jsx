@@ -1,10 +1,9 @@
-'use client';
-import React from 'react';
-import Image from 'next/image';
-import { FiX } from 'react-icons/fi';
-import { FaUsers } from 'react-icons/fa';
-import { IoImage, IoHappyOutline } from 'react-icons/io5';
-import EmojiPicker from 'emoji-picker-react';
+import React from 'react'
+import Image from 'next/image'
+import { FiX } from 'react-icons/fi'
+import { FaUsers } from 'react-icons/fa'
+import { IoImage, IoHappyOutline } from 'react-icons/io5'
+import EmojiPicker from 'emoji-picker-react'
 
 const DesignPost = ({
   user,
@@ -39,11 +38,13 @@ const DesignPost = ({
   setScheduleEnabled,
 }) => {
 
+  // إزالة منشن: تحدث ال-state وتزيل النص من الـ textarea
   const handleRemoveMention = (id) => {
     const removed = selectedMentions.find(m => m._id === id);
     setSelectedMentions(prev => prev.filter(m => m._id !== id));
     if (removed?.username) {
       setPostText(prev => {
+        // نحذف كل تكرارات @username متبوعة بمسافة اختيارياً
         const re = new RegExp(`@${removed.username}\\b\\s?`, 'g');
         return prev.replace(re, '');
       });
@@ -51,25 +52,21 @@ const DesignPost = ({
   };
 
   return (
-    <main className="flex items-center justify-center w-full min-h-screen py-10 px-4 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-950 relative overflow-hidden">
-
-      {/* زجاجي الخلفية */}
-      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.05] pointer-events-none"></div>
-
-      <div className="w-full max-w-5xl mx-auto backdrop-blur-2xl bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded-3xl shadow-[0_8px_40px_-10px_rgba(0,0,0,0.4)] overflow-hidden transition-all duration-500">
+    <main className="flex items-center justify-center w-full py-10 px-4 bg-gray-50 dark:bg-darkMode-bg transition-colors">
+      <div className="w-full max-w-5xl mx-auto bg-lightMode-bg dark:bg-darkMode-bg rounded-3xl shadow-xl overflow-hidden transition-all duration-500">
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between w-full p-6 border-b border-white/20 dark:border-gray-700 gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between w-full p-6 border-b border-gray-200 dark:border-gray-700 gap-4">
           <div className="flex items-center gap-4">
             <Image
               src={user?.profilePhoto?.url}
               alt="profile"
               width={56}
               height={56}
-              className="rounded-full w-14 h-14 object-cover border-2 border-white/40 shadow-lg"
+              className="rounded-full w-14 h-14 object-cover border-2 border-gradient-to-br from-blue-400 to-purple-600"
             />
             <div className="flex flex-col">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white drop-shadow-sm">{user?.username}</h2>
+              <h2 className="text-lg font-bold text-gray-800 dark:text-white">{user?.username}</h2>
               <span className="text-sm text-gray-500 dark:text-gray-400">{user?.profileName}</span>
             </div>
           </div>
@@ -82,7 +79,7 @@ const DesignPost = ({
                 <select
                   value={selectedCommunity}
                   onChange={(e) => setSelectedCommunity(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-white/30 dark:bg-gray-800/40 border border-white/30 dark:border-gray-700 rounded-xl text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 backdrop-blur-lg transition"
+                  className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-darkMode-bg border dark:border-gray-600 rounded-xl text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
                 >
                   <option value="">Select a Community</option>
                   {communities
@@ -100,17 +97,17 @@ const DesignPost = ({
           </div>
         </div>
 
-        {/* Body */}
+        {/* Body (mentions area + textarea with highlights) */}
         <div className="relative p-6 pb-2">
 
-          {/* Mentions Chips */}
-          {selectedMentions?.length > 0 && (
+          {/* --- Selected Mentions (chips) --- */}
+          {selectedMentions && selectedMentions.length > 0 && (
             <div className="mb-4 px-1">
-              <div className="flex items-center gap-2 overflow-x-auto py-1 scrollbar-thin scrollbar-thumb-gray-400/30">
+              <div className="flex items-center gap-2 overflow-x-auto py-1">
                 {selectedMentions.map((m) => (
                   <div
                     key={m._id}
-                    className="flex items-center gap-2 bg-white/40 dark:bg-gray-800/60 px-3 py-1 rounded-full shadow-sm backdrop-blur-lg border border-white/20 whitespace-nowrap"
+                    className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full shadow-sm whitespace-nowrap"
                   >
                     <div className="flex items-center gap-2">
                       <Image
@@ -118,14 +115,14 @@ const DesignPost = ({
                         alt={m.username}
                         width={28}
                         height={28}
-                        className="rounded-full w-7 h-7 min-w-7 object-cover"
+                        className="rounded-full w-7 h-7 min-w-7 aspect-square object-cover "
                       />
                       <span className="text-sm text-gray-800 dark:text-gray-100">@{m.username}</span>
                     </div>
                     <button
                       onClick={() => handleRemoveMention(m._id)}
                       aria-label={`Remove mention ${m.username}`}
-                      className="p-1 rounded-full hover:bg-red-500/80 hover:text-white transition"
+                      className="p-1 rounded-full hover:bg-red-500 hover:text-white transition"
                     >
                       <FiX size={14} />
                     </button>
@@ -135,12 +132,15 @@ const DesignPost = ({
             </div>
           )}
 
-          {/* Textarea with Highlight */}
-          <div className="relative group">
-            <div className="absolute top-0 left-0 w-full h-full p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed text-gray-900 dark:text-gray-200">
+          {/* Highlight Layer */}
+          <div className="relative">
+            <div
+              className="absolute top-0 left-0 w-full h-full p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed"
+            >
               {renderHighlightedText(postText)}
             </div>
 
+            {/* Transparent Textarea */}
             <textarea
               ref={textareaRef}
               value={postText}
@@ -148,29 +148,30 @@ const DesignPost = ({
               rows={5}
               placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
               dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
-              className={`relative w-full p-5 text-base font-sans leading-relaxed rounded-2xl resize-none border focus:ring-2 bg-transparent caret-blue-600 z-10 text-transparent selection:bg-blue-200 selection:text-black shadow-inner
+              className={`relative w-full p-5 text-base font-sans leading-relaxed text-lightMode-text dark:text-darkMode-text rounded-2xl resize-none border shadow-inner focus:ring-2 bg-transparent caret-blue-600 z-10 text-transparent selection:bg-blue-200 selection:text-black
                 ${errorText
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'border-white/30 dark:border-gray-700 focus:ring-blue-500'
+                  ? 'border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:ring-red-500'
+                  : 'bg-gray-50 dark:bg-darkMode-bg border-gray-300 dark:border-gray-600 focus:ring-blue-500'
                 }`}
+              style={{ textAlign: /[\u0600-\u06FF]/.test(postText) ? 'right' : 'left' }}
             />
           </div>
 
           {/* Counter */}
           <div className="flex justify-between items-center mt-1 text-xs">
-            <span className={`${errorText ? 'text-red-500 font-semibold' : 'text-gray-400'}`}>
+            <span className={`transition ${errorText ? 'text-red-500 font-semibold' : 'text-gray-500'}`}>
               {postText.length}/500
             </span>
             {errorText && <span className="text-red-500">Max 500 characters allowed</span>}
           </div>
 
-          {/* Mentions Dropdown */}
+          {/* Mentions Dropdown (same logic from parent) */}
           {showMentionList && filteredMentions.length > 0 && (
-            <div className="absolute top-full left-6 mt-2 z-50 bg-white/70 dark:bg-gray-800/80 backdrop-blur-lg shadow-2xl rounded-xl w-72 max-h-60 overflow-auto border border-white/30 dark:border-gray-600">
+            <div className="absolute top-full left-6 mt-2 z-50 bg-white dark:bg-darkMode-bg shadow-2xl rounded-xl w-72 max-h-60 overflow-auto border border-gray-200 dark:border-gray-600">
               {filteredMentions.map((u) => (
                 <div
                   key={u._id}
-                  className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-blue-50/60 dark:hover:bg-gray-700 transition"
+                  className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
                   onClick={() => selectMention(u)}
                 >
                   <Image
@@ -178,7 +179,7 @@ const DesignPost = ({
                     alt={u.username}
                     width={32}
                     height={32}
-                    className="rounded-full w-8 h-8 min-w-8 object-cover"
+                    className="rounded-full w-8 h-8 min-w-8 aspect-square object-cover "
                   />
                   <div className="flex flex-col">
                     <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">@{u.username}</span>
@@ -192,11 +193,11 @@ const DesignPost = ({
           )}
         </div>
 
-        {/* Images */}
+        {/* Images Preview */}
         {images.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 px-6 pb-4">
             {images.map((img, idx) => (
-              <div key={idx} className="relative group rounded-xl overflow-hidden shadow-lg border border-white/20 backdrop-blur-sm">
+              <div key={idx} className="relative group rounded-xl overflow-hidden shadow-lg">
                 <img
                   src={img.url}
                   alt={`preview-${idx}`}
@@ -214,23 +215,24 @@ const DesignPost = ({
         )}
 
         {/* Footer */}
-        <div className="flex relative items-center justify-between px-6 py-4 border-t border-white/20 dark:border-gray-700">
+        <div className="flex relative items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3 relative">
-            <label className="cursor-pointer flex items-center justify-center w-12 h-12 rounded-full bg-white/40 dark:bg-gray-800/40 hover:bg-blue-100/50 dark:hover:bg-blue-900/50 text-gray-700 dark:text-gray-300 shadow-md backdrop-blur-lg transition">
+            <label className="cursor-pointer flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-darkMode-bg hover:bg-blue-100 dark:hover:bg-blue-800 text-gray-700 dark:text-gray-300 transition shadow-md">
               <IoImage size={22} />
               <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
             </label>
 
             <button
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className="flex items-center justify-center w-12 h-12 rounded-full bg-white/40 dark:bg-gray-800/40 hover:bg-yellow-100/50 dark:hover:bg-yellow-900/50 text-gray-600 dark:text-gray-300 shadow-md backdrop-blur-lg transition"
+              className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-darkMode-bg hover:bg-yellow-100 dark:hover:bg-yellow-800 text-gray-600 dark:text-gray-300 transition shadow-md"
             >
               <IoHappyOutline size={22} />
             </button>
 
+            {/* Emoji Picker */}
             {showEmojiPicker && (
-              <div className="absolute z-50 top-[-400px] left-6 w-[320px] rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl border border-white/20 bg-white/30 dark:bg-gray-800/70 transition-transform">
-                <div className="flex justify-between items-center bg-white/30 dark:bg-gray-700/50 px-3 py-2">
+              <div className="absolute z-50 top-[-400px] left-6 w-[320px] rounded-2xl shadow-2xl overflow-hidden transition-transform duration-300 transform scale-95 animate-scale-up">
+                <div className="flex justify-between items-center bg-gray-200 dark:bg-gray-700 px-3 py-2">
                   <span className="text-gray-700 dark:text-gray-200 font-semibold">Emojis</span>
                   <button
                     onClick={() => setShowEmojiPicker(false)}
@@ -249,15 +251,15 @@ const DesignPost = ({
             disabled={(!postText.trim() && images.length === 0) || errorText}
             className={`px-8 py-2 text-sm font-semibold rounded-full shadow-lg transition-all duration-300 ${
               (!postText.trim() && images.length === 0) || errorText
-                ? 'bg-gray-300/60 text-gray-500 cursor-not-allowed'
-                : 'bg-gradient-to-r from-blue-500/80 to-purple-600/80 hover:from-blue-600 hover:to-purple-700 text-white backdrop-blur-lg'
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white'
             }`}
           >
             Post
           </button>
         </div>
 
-        {/* Schedule Section */}
+        {/* Schedule Post Section */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-3 px-6 pb-6">
           <div className="flex items-center gap-2">
             <input
@@ -278,13 +280,13 @@ const DesignPost = ({
               value={scheduleDate}
               onChange={(e) => setScheduleDate(e.target.value)}
               min={new Date().toISOString().slice(0, 16)}
-              className="px-3 py-2 border border-white/30 dark:border-gray-600 rounded-lg text-sm bg-white/30 dark:bg-gray-800/40 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 backdrop-blur-lg"
+              className="px-3 py-2 border dark:border-gray-600 rounded-lg text-sm bg-gray-50 dark:bg-darkMode-bg text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500"
             />
           )}
         </div>
       </div>
     </main>
-  );
-};
+  )
+}
 
-export default DesignPost;
+export default DesignPost
