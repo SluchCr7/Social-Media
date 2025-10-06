@@ -67,14 +67,16 @@ const postPopulate = [
   {
     path: "originalPost",
     select: "text owner createdAt Photos mentions Hashtags",
-    populate: {
-      path: "owner",
-      select: userSelect,
-    },
-    populate: {
-      path: "mentions",
-      select: userSelect,
-    },
+    populate: [
+      {
+        path: "owner",
+        select: userSelect,
+      },
+      {
+        path: "mentions",
+        select: userSelect,
+      },
+    ],
   },
   {
     path: "comments",
