@@ -166,7 +166,8 @@ export default function MusicPage() {
                         const rect = e.currentTarget.getBoundingClientRect()
                         const x = e.clientX - rect.left
                         const pct = Math.max(0, Math.min(1, x / rect.width))
-                        setTrack({ ...current, seek: pct * (duration || current?.duration || 0) })
+                        const newTime = pct * (duration || current?.duration || 0)
+                        seek(newTime) // ✅ استدعاء الدالة seek لضبط الوقت فقط
                       }}>
                         <div className="h-2 rounded-full bg-gray-200 dark:bg-gray-700 w-full relative">
                           <div style={{ width: `${(progress / (duration || 1)) * 100}%` }} className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all shadow-[0_0_10px_rgba(99,102,241,0.45)]" />
