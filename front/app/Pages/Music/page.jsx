@@ -17,6 +17,7 @@ import { useAuth } from '@/app/Context/AuthContext'
 import AddMusicModal from '@/app/Component/MusicPage/AddMusicMenu'
 import { formatTime } from '@/app/utils/formatTime'
 import Link from 'next/link'
+import ProgressBar from '@/app/Component/MusicPage/ProgressBar'
 
 export default function MusicPage() {
   const { music: songs, isLoading, likeMusic } = useMusic()
@@ -26,7 +27,7 @@ export default function MusicPage() {
     shuffle, setShuffle, repeatMode, setRepeatMode,
     progress, duration, volume, setVolume, muted, setMuted,
     setTrack, currentIndex, setCurrentIndex,
-    expanded, setExpanded
+    expanded, setExpanded,setProgress
   } = useMusicPlayer()
 
   const [userData, setUserData] = useState(null)
@@ -162,17 +163,14 @@ export default function MusicPage() {
                   <div className="mt-4">
                     <div className="flex items-center gap-4">
                       <div className="text-xs w-12 text-right">{formatTime(progress)}</div>
-                      <div className="flex-1 cursor-pointer" onClick={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect()
-                        const x = e.clientX - rect.left
-                        const pct = Math.max(0, Math.min(1, x / rect.width))
-                        const newTime = pct * (duration || current?.duration || 0)
-                        seek(newTime) // ✅ استدعاء الدالة seek لضبط الوقت فقط
-                      }}>
-                        <div className="h-2 rounded-full bg-gray-200 dark:bg-gray-700 w-full relative">
-                          <div style={{ width: `${(progress / (duration || 1)) * 100}%` }} className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all shadow-[0_0_10px_rgba(99,102,241,0.45)]" />
-                        </div>
-                      </div>
+                      <ProgressBar
+                        progress={progress} // الوقت الحالي بالثواني
+                        duration={duration} // مدة الأغنية
+                        seek={(time) => {
+                          audioRef.current.currentTime = time;
+                          setProgress(time);
+                        }}
+                      />
                       <div className="text-xs w-12">{formatTime(duration)}</div>
                     </div>
                     <div className="mt-2 flex items-center gap-3 justify-end">
