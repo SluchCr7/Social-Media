@@ -111,7 +111,7 @@ const MusicCard = ({ music }) => {
               {/* التفاصيل */}
               <div className="mt-6 space-y-1">
                 <h2 className="text-xl font-bold text-white flex items-center justify-center gap-2">
-                  <FaMusic className="text-indigo-400" /> {music?.name || 'Unknown Track'}
+                  <FaMusic className="text-indigo-400" /> {music?.title || 'Unknown Track'}
                 </h2>
                 <p className="text-sm text-gray-300">{music?.artist || 'Unknown Artist'}</p>
                 {music?.album && (

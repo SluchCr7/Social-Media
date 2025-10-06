@@ -1,10 +1,27 @@
 'use client'
 import React from 'react'
-import { FaExpand, FaPause, FaPlay } from 'react-icons/fa'
+import { FaExpand, FaPause, FaPlay, FaHeart, FaShareAlt } from 'react-icons/fa'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
+import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
+import { useMusic } from '@/app/Context/MusicContext'
 
-const SongPlayer = ({ playing, togglePlay, progress, duration, current, setExpanded }) => {
+const SongPlayer = ({ setExpanded }) => {
+  const {
+    current,
+    playing,
+    togglePlay,
+    progress,
+    duration,
+    next,
+    prev,
+    shuffle,
+    setShuffle,
+    repeatMode,
+    setRepeatMode
+  } = useMusicPlayer()
+  const { likeMusic } = useMusic()
+
   const progressPercent = (progress / (duration || 1)) * 100
 
   return (
@@ -38,6 +55,21 @@ const SongPlayer = ({ playing, togglePlay, progress, duration, current, setExpan
             {/* Buttons */}
             <div className="flex items-center gap-2">
               <button
+                onClick={() => current?._id && likeMusic(current._id)}
+                className="p-2 rounded-full bg-white/20 dark:bg-gray-700/40 text-gray-700 dark:text-gray-300 
+                           hover:bg-white/30 transition-all"
+                title="Like"
+              >
+                <FaHeart />
+              </button>
+              <button
+                className="p-2 rounded-full bg-white/20 dark:bg-gray-700/40 text-gray-700 dark:text-gray-300 
+                           hover:bg-white/30 transition-all"
+                title="Share"
+              >
+                <FaShareAlt />
+              </button>
+              <button
                 onClick={togglePlay}
                 className="p-3 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-md 
                            hover:scale-110 transition-transform"
@@ -63,7 +95,6 @@ const SongPlayer = ({ playing, togglePlay, progress, duration, current, setExpan
                 transition={{ ease: "easeOut", duration: 0.3 }}
               />
             </div>
-            {/* Progress Dot */}
             <motion.div
               className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-blue-500 shadow-md opacity-0 group-hover:opacity-100"
               style={{ left: `calc(${progressPercent}% - 6px)` }}

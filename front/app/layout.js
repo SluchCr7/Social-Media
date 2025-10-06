@@ -21,6 +21,7 @@ import { ReelsProvider } from "./Context/ReelsContext";
 import { MusicProvider } from "./Context/MusicContext";
 import { TranslateContextProvider } from "./Context/TranslateContext";
 import { ThemeContextProvider } from "./Context/ThemeContext";
+import { MusicPlayerProvider } from "./Context/MusicPlayerContext";
 const jetBrainsMono = JetBrains_Mono({
   subsets: ["latin"]
   , weight: ["100", "200", "300", "400"]
@@ -52,15 +53,17 @@ export default function RootLayout({ children }) {
                               <ReelsProvider>
                                 <EventProvider>
                                   <MusicProvider>
-                                    <ThemeContextProvider>
-                                      <TranslateContextProvider>
-                                        <AsideContextProvider>  
-                                          <LayoutComponent>
-                                              {children}
-                                          </LayoutComponent>
-                                        </AsideContextProvider>
-                                      </TranslateContextProvider>
-                                    </ThemeContextProvider>
+                                    <MusicPlayerProvider>
+                                      <ThemeContextProvider>
+                                        <TranslateContextProvider>
+                                          <AsideContextProvider>  
+                                            <LayoutComponent>
+                                                {children}
+                                            </LayoutComponent>
+                                          </AsideContextProvider>
+                                        </TranslateContextProvider>
+                                      </ThemeContextProvider>
+                                    </MusicPlayerProvider>
                                   </MusicProvider>
                                 </EventProvider>
                               </ReelsProvider>

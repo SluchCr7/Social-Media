@@ -2,19 +2,18 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 import React from 'react'
-import { FaPlay, FaPause, FaStepForward, FaStepBackward, FaRandom, FaRedo, FaTimes } from 'react-icons/fa'
+import { 
+  FaPlay, FaPause, FaStepForward, FaStepBackward, FaRandom, FaRedo, FaTimes, FaHeart, FaShareAlt 
+} from 'react-icons/fa'
+import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
+import { useMusic } from '@/app/Context/MusicContext'
 
-const ExpandedWindow = ({
-  current,
-  expanded,
-  setExpanded,
-  progress,
-  duration,
-  formatTime,
-  playing,
-  togglePlay
-}) => {
+const ExpandedWindow = ({ expanded, setExpanded, formatTime }) => {
+  const { current, playing, togglePlay, progress, duration, next, prev, shuffle, setShuffle, repeatMode, setRepeatMode } = useMusicPlayer()
+  const { likeMusic } = useMusic()
   const progressPercent = (progress / (duration || 1)) * 100
+
+  if (!current) return null
 
   return (
     <AnimatePresence>
@@ -54,8 +53,8 @@ const ExpandedWindow = ({
 
             {/* Song Info */}
             <div className="text-center mt-6">
-              <h2 className="text-2xl font-semibold text-white">{current?.title || 'Unknown Title'}</h2>
-              <p className="text-gray-300 mt-1">{current?.artist || 'Unknown Artist'} • {current?.album || '—'}</p>
+              <h2 className="text-2xl font-semibold text-white">{current?.title}</h2>
+              <p className="text-gray-300 mt-1">{current?.artist} • {current?.album || '—'}</p>
             </div>
 
             {/* Progress Bar */}
@@ -80,16 +79,41 @@ const ExpandedWindow = ({
 
             {/* Controls */}
             <div className="flex items-center justify-center gap-6 mt-8">
-              <button className="p-3 text-gray-300 hover:text-white transition"><FaRandom /></button>
-              <button className="p-3 text-gray-300 hover:text-white transition"><FaStepBackward size={20} /></button>
+              <button 
+                onClick={() => setShuffle(!shuffle)}
+                className={`p-3 rounded-full ${shuffle ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'}`}
+                title="Shuffle"
+              >
+                <FaRandom />
+              </button>
+              <button onClick={prev} className="p-3 text-gray-300 hover:text-white transition"><FaStepBackward size={20} /></button>
               <button
                 onClick={togglePlay}
                 className="p-5 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-lg hover:scale-110 transition-transform"
               >
                 {playing ? <FaPause size={22} /> : <FaPlay size={22} />}
               </button>
-              <button className="p-3 text-gray-300 hover:text-white transition"><FaStepForward size={20} /></button>
-              <button className="p-3 text-gray-300 hover:text-white transition"><FaRedo /></button>
+              <button onClick={next} className="p-3 text-gray-300 hover:text-white transition"><FaStepForward size={20} /></button>
+              <button
+                onClick={() => setRepeatMode(repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off')}
+                className={`p-3 rounded-full ${repeatMode !== 'off' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'}`}
+                title="Repeat"
+              >
+                <FaRedo />
+              </button>
+              <button
+                onClick={() => current?._id && likeMusic(current._id)}
+                className="p-3 text-gray-300 hover:text-white transition"
+                title="Like"
+              >
+                <FaHeart />
+              </button>
+              <button
+                className="p-3 text-gray-300 hover:text-white transition"
+                title="Share"
+              >
+                <FaShareAlt />
+              </button>
             </div>
           </motion.div>
         </motion.div>
