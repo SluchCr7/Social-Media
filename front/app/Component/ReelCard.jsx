@@ -105,36 +105,54 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
       <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-black via-transparent to-transparent" />
 
       {/* 📄 Bottom Info */}
-      <div className="absolute bottom-5 left-4 md:left-6 text-white max-w-[75%] sm:max-w-[70%] md:max-w-[60%]">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <img
-            src={reel?.owner?.profilePhoto?.url}
-            alt={reel?.owner?.username}
-            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white object-cover"
-          />
-          <div className="flex flex-col">
+      <div className="absolute bottom-5 left-4 md:left-6 text-white max-w-[80%] sm:max-w-[65%] md:max-w-[55%]">
+        {/* 🔹 صور المالك الأصلي + من أعاد النشر */}
+        <div className="relative flex items-center gap-3 sm:gap-4">
+          <div className="relative">
+            {/* صورة المالك الأصلي */}
+            <img
+              src={reel?.originalPost?.owner?.profilePhoto?.url || reel?.owner?.profilePhoto?.url}
+              alt={reel?.originalPost?.owner?.username || reel?.owner?.username}
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white object-cover shadow-md"
+            />
+
+            {/* إذا كان الريل مُعاد نشره */}
+            {reel?.originalPost && reel?.originalPost?.owner && (
+              <img
+                src={reel?.owner?.profilePhoto?.url}
+                alt={reel?.owner?.username}
+                className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-white object-cover absolute -bottom-1 -right-2 bg-gray-800 shadow-md"
+              />
+            )}
+          </div>
+
+          {/* 🔹 بيانات المستخدم */}
+          <div className="flex flex-col leading-tight">
             <Link
-              href={`/Pages/User/${reel?.owner?._id}`}
+              href={`/Pages/User/${reel?.originalPost?.owner?._id || reel?.owner?._id}`}
               className="font-semibold text-sm sm:text-base hover:underline"
             >
-              {reel?.owner?.username}
+              {reel?.originalPost?.owner?.username || reel?.owner?.username}
             </Link>
+
+            {/* إذا كانت هناك إعادة نشر */}
             {reel?.originalPost && reel?.originalPost?.owner && (
-              <span className="text-[10px] sm:text-xs text-gray-300 flex items-center gap-1">
-                🔄 Reposted from{" "}
+              <span className="text-[11px] sm:text-xs text-gray-300 flex items-center gap-1">
+                🔁 Reposted by{" "}
                 <Link
-                  href={`/Pages/User/${reel?.originalPost?.owner?._id}`}
-                  className="font-medium hover:underline"
+                  href={`/Pages/User/${reel?.owner?._id}`}
+                  className="hover:underline font-medium text-gray-200"
                 >
-                  @{reel?.originalPost?.owner?.username}
+                  @{reel?.owner?.username}
                 </Link>
               </span>
             )}
           </div>
         </div>
 
+        {/* 🔹 الكابشن */}
         {reel?.caption && (
-          <p className="mt-2 text-xs sm:text-sm line-clamp-3 text-gray-200">
+          <p className="mt-3 text-xs sm:text-sm text-gray-200 leading-snug line-clamp-3">
             {reel?.caption}
           </p>
         )}
