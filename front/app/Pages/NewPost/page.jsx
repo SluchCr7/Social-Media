@@ -21,7 +21,6 @@ const NewPost = () => {
   const [selectedMentions, setSelectedMentions] = useState([]);
   const [mentionSearch, setMentionSearch] = useState('');
   const [showMentionList, setShowMentionList] = useState(false);
-  const [cursorPosition, setCursorPosition] = useState(null);
 
   // 🕓 حالات الجدولة الجديدة
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
@@ -59,65 +58,57 @@ const NewPost = () => {
     return matches ? Array.from(new Set(matches.map(tag => tag.slice(1).toLowerCase()))) : [];
   };
 
-// ------------------- Mentions Handling (Fixed & Stable) -------------------
+  // ------------------- Mentions Handling -------------------
+  const handleTextareaChange = (e) => {
+    const value = e.target.value;
+    setPostText(value);
+    if (value.length <= 500) setErrorText(false);
 
-const handleTextareaChange = (e) => {
-  const value = e.target.value;
-  setPostText(value);
-  if (value.length <= 500) setErrorText(false);
+    const cursorPos = e.target.selectionStart;
+    const lastAt = value.lastIndexOf('@', cursorPos - 1);
 
-  const cursor = e.target.selectionStart;
-  setCursorPosition(cursor);
-
-  const lastAt = value.lastIndexOf('@', cursor - 1);
-  if (lastAt >= 0) {
-    const afterAt = value.slice(lastAt + 1, cursor);
-    const regex = /^[^\s@]{0,30}$/; // يمنع المسافات بعد @
-    if (regex.test(afterAt)) {
-      setMentionSearch(afterAt);
-      setShowMentionList(true);
-      return;
+    if (lastAt >= 0) {
+      const wordAfterAt = value.slice(lastAt + 1, cursorPos);
+      if (!wordAfterAt.includes(' ')) {
+        setMentionSearch(wordAfterAt);
+        setShowMentionList(true);
+      } else {
+        setShowMentionList(false);
+      }
+    } else {
+      setShowMentionList(false);
     }
-  }
+  };
 
-  setShowMentionList(false);
-};
-
-useEffect(() => {
-  if (!mentionSearch) {
-    setFilteredMentions(myFollowing);
-    return;
-  }
-
-  const filtered = myFollowing.filter((u) =>
-    u.username?.toLowerCase().includes(mentionSearch.toLowerCase())
-  );
-
-  setFilteredMentions(filtered);
-}, [mentionSearch, myFollowing]);
-
-const selectMention = (user) => {
-  if (!user || typeof user.username !== 'string') return;
-
-  const value = postText;
-  const lastAt = value.lastIndexOf('@', cursorPosition - 1);
-  if (lastAt < 0) return;
-
-  const before = value.slice(0, lastAt);
-  const after = value.slice(cursorPosition);
-
-  const newText = `${before}@${user.username} ${after}`;
-  setPostText(newText);
-  setSelectedMentions((prev) => [...prev, user]);
-  setShowMentionList(false);
-  setMentionSearch('');
-
-  requestAnimationFrame(() => {
-    textareaRef.current.focus();
-    textareaRef.current.selectionStart = textareaRef.current.selectionEnd =
-      newText.length;
+  const filteredMentions = myFollowing.filter(u => {
+    if (!u || typeof u?.username !== 'string') return false;
+    const usernameMatch = u.username.toLowerCase().includes((mentionSearch || '').toLowerCase());
+    const notAlreadySelected = !selectedMentions.some(m => m?._id === u?._id);
+    return usernameMatch && notAlreadySelected;
   });
-};
+
+  const selectMention = (user) => {
+    if (!user || typeof user.username !== 'string') return;
+
+    const cursorPos = textareaRef.current.selectionStart;
+    const textBeforeCursor = postText.slice(0, cursorPos);
+    const lastAt = textBeforeCursor.lastIndexOf('@');
+    const textAfterCursor = postText.slice(cursorPos);
+
+    const newText =
+      textBeforeCursor.slice(0, lastAt) +
+      `@${user.username} ` +
+      textAfterCursor;
+
+    setPostText(newText);
+    setSelectedMentions(prev => [...prev, user]);
+    setShowMentionList(false);
+
+    setTimeout(() => {
+      textareaRef.current.focus();
+      textareaRef.current.selectionStart = textareaRef.current.selectionEnd = lastAt + user.username.length + 2;
+    }, 0);
+  };
 
   // ------------------- Emoji Picker -------------------
   const handleEmojiClick = (emojiData) => {
