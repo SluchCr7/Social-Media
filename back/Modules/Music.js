@@ -60,7 +60,11 @@ const MusicSchema = new mongoose.Schema({
         type: String,
         trim: true,
         default: "Unknown"
-    }
+    }, 
+    isPopular : {
+        type : Boolean,
+        default : false
+    },
 }, {
     timestamps: true
 });

@@ -70,8 +70,6 @@ export default function MusicPage() {
   return (
     <div className="min-h-screen w-full relative">
       <AddMusicModal isOpen={openModel} onClose={() => setOpenModel(false)} />
-      <ExpandedWindow
-      />
       <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100 relative overflow-x-hidden">
 
         {/* Header */}
@@ -103,7 +101,7 @@ export default function MusicPage() {
 
         <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Nav */}
-          <aside className={`lg:col-span-2 transition-transform duration-300 ${showLeftNav ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} fixed lg:static inset-y-0 left-0 z-50 w-64 lg:w-auto bg-white/60 dark:bg-black/40 border-r border-gray-200 dark:border-gray-800 backdrop-blur-md p-4 lg:p-0`}>
+          {/* <aside className={`lg:col-span-2 transition-transform duration-300 ${showLeftNav ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} fixed lg:static inset-y-0 left-0 z-50 w-64 lg:w-auto bg-white/60 dark:bg-black/40 border-r border-gray-200 dark:border-gray-800 backdrop-blur-md p-4 lg:p-0`}>
             <div className="lg:block hidden lg:sticky lg:top-16 lg:h-[calc(100vh-64px)] lg:pt-6">
               <nav className="space-y-2 pl-3">
                 <div className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
@@ -127,7 +125,7 @@ export default function MusicPage() {
             <div className="lg:hidden mt-4">
               <button className="px-3 py-2 rounded-md border" onClick={() => setShowLeftNav(false)}>Close</button>
             </div>
-          </aside>
+          </aside> */}
 
           {/* Main Content */}
           <main className="lg:col-span-7 space-y-6">
