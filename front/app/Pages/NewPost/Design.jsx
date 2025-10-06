@@ -38,13 +38,12 @@ const DesignPost = ({
   setScheduleEnabled,
 }) => {
 
-  // إزالة منشن: تحدث ال-state وتزيل النص من الـ textarea
+  // إزالة mention من النص
   const handleRemoveMention = (id) => {
     const removed = selectedMentions.find(m => m._id === id);
     setSelectedMentions(prev => prev.filter(m => m._id !== id));
     if (removed?.username) {
       setPostText(prev => {
-        // نحذف كل تكرارات @username متبوعة بمسافة اختيارياً
         const re = new RegExp(`@${removed.username}\\b\\s?`, 'g');
         return prev.replace(re, '');
       });
@@ -100,7 +99,7 @@ const DesignPost = ({
         {/* Body (mentions area + textarea with highlights) */}
         <div className="relative p-6 pb-2">
 
-          {/* --- Selected Mentions (chips) --- */}
+          {/* Selected Mentions */}
           {selectedMentions && selectedMentions.length > 0 && (
             <div className="mb-4 px-1">
               <div className="flex items-center gap-2 overflow-x-auto py-1">
@@ -115,7 +114,7 @@ const DesignPost = ({
                         alt={m.username}
                         width={28}
                         height={28}
-                        className="rounded-full w-7 h-7 min-w-7 aspect-square object-cover "
+                        className="rounded-full w-7 h-7 min-w-7 aspect-square object-cover"
                       />
                       <span className="text-sm text-gray-800 dark:text-gray-100">@{m.username}</span>
                     </div>
@@ -165,7 +164,7 @@ const DesignPost = ({
             {errorText && <span className="text-red-500">Max 500 characters allowed</span>}
           </div>
 
-          {/* Mentions Dropdown (same logic from parent) */}
+          {/* Mentions Dropdown */}
           {showMentionList && filteredMentions.length > 0 && (
             <div className="absolute top-full left-6 mt-2 z-50 bg-white dark:bg-darkMode-bg shadow-2xl rounded-xl w-72 max-h-60 overflow-auto border border-gray-200 dark:border-gray-600">
               {filteredMentions.map((u) => (
@@ -179,7 +178,7 @@ const DesignPost = ({
                     alt={u.username}
                     width={32}
                     height={32}
-                    className="rounded-full w-8 h-8 min-w-8 aspect-square object-cover "
+                    className="rounded-full w-8 h-8 min-w-8 aspect-square object-cover"
                   />
                   <div className="flex flex-col">
                     <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">@{u.username}</span>
@@ -229,7 +228,6 @@ const DesignPost = ({
               <IoHappyOutline size={22} />
             </button>
 
-            {/* Emoji Picker */}
             {showEmojiPicker && (
               <div className="absolute z-50 top-[-400px] left-6 w-[320px] rounded-2xl shadow-2xl overflow-hidden transition-transform duration-300 transform scale-95 animate-scale-up">
                 <div className="flex justify-between items-center bg-gray-200 dark:bg-gray-700 px-3 py-2">
@@ -259,7 +257,7 @@ const DesignPost = ({
           </button>
         </div>
 
-        {/* Schedule Post Section */}
+        {/* Schedule */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-3 px-6 pb-6">
           <div className="flex items-center gap-2">
             <input
