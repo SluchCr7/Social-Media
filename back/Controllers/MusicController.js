@@ -5,7 +5,6 @@ const asyncHandler = require("express-async-handler");
 const mongoose = require('mongoose');
 const { User } = require('../Modules/User');
 const { sendNotificationHelper } = require('../utils/SendNotification');
-const mm = require('music-metadata'); // أعلى الملف مع require الأخرى
 
 // ✅ إنشاء أغنية جديدة مع حساب duration تلقائي
 // ✅ إنشاء أغنية جديدة مع حساب duration وضبط tags, releaseDate, language تلقائيًا
@@ -23,14 +22,14 @@ const createMusic = asyncHandler(async (req, res) => {
     }
 
     // قراءة مدة الصوت باستخدام music-metadata
-    const audioPath = req.files.audio[0].path; 
-    let duration = 0;
-    try {
-      const metadata = await mm.parseFile(audioPath);
-      duration = Math.floor(metadata.format.duration); // بالثواني
-    } catch (err) {
-      console.warn("Could not parse audio duration:", err.message);
-    }
+    // const audioPath = req.files.audio[0].path; 
+    // let duration = 0;
+    // try {
+    //   const metadata = await mm.parseFile(audioPath);
+    //   duration = Math.floor(metadata.format.duration); // بالثواني
+    // } catch (err) {
+    //   console.warn("Could not parse audio duration:", err.message);
+    // }
 
     // رفع صورة الكوفر (اختياري)
     let coverUrl = null;
@@ -47,7 +46,7 @@ const createMusic = asyncHandler(async (req, res) => {
       genre: req.body.genre || "Other",
       url: audioUpload.secure_url,
       cover: coverUrl,
-      duration, 
+      // duration, 
       owner: req.user._id,
       tags: Array.isArray(req.body.tags) ? req.body.tags : [], // إذا لم تُرسل، تصبح مصفوفة فارغة
       releaseDate: Date.now(), 
