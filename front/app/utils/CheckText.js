@@ -3,59 +3,70 @@ import Link from "next/link";
 export const renderTextWithMentionsAndHashtags = (text, mentions = [], hashtags = []) => {
   if (!text) return null;
 
-  // نلتقط @mention حتى لو فيه مسافات مثل @Ahmed Abobakr
-  const parts = text.match(/(@[A-Za-z0-9_.\u0600-\u06FF-]+(?:\s+[A-Za-z0-9_.\u0600-\u06FF-]+)*|#[\w\u0600-\u06FF]+|\s+|[^\s@#]+)/g);
+  let rendered = [];
+  let lastIndex = 0;
 
-  return parts.map((part, i) => {
-    // 🎯 mentions
-    if (part.startsWith('@')) {
-      const username = part.slice(1).trim(); // إزالة @ والمسافات
-      const mentionedUser = mentions.find(
-        u => u.username?.toLowerCase().trim() === username.toLowerCase()
-      );
+  // نمشي على mentions ونحوّل كل username مطابق في النص إلى لينك
+  const sortedMentions = [...mentions].sort(
+    (a, b) => b.username.length - a.username.length
+  );
 
+  // نكرر العملية لإضافة كل mention كمطابقة دقيقة
+  let tempText = text;
+
+  sortedMentions.forEach((user) => {
+    const mentionPattern = new RegExp(`@${user.username}`, "gi");
+    tempText = tempText.replace(mentionPattern, `@@MENTION:${user._id}@@`);
+  });
+
+  // الآن نقسم النص بناءً على العلامة المؤقتة
+  const parts = tempText.split(/(@@MENTION:[^@]+@@)/g);
+
+  parts.forEach((part, i) => {
+    const mentionMatch = part.match(/^@@MENTION:([^@]+)@@$/);
+    if (mentionMatch) {
+      const id = mentionMatch[1];
+      const mentionedUser = mentions.find((u) => u._id === id);
       if (mentionedUser) {
-        return (
+        rendered.push(
           <Link
             key={i}
             href={`/Pages/User/${mentionedUser._id}`}
             className="text-blue-500 font-semibold hover:underline"
           >
-            {part}
+            @{mentionedUser.username}
           </Link>
         );
-      } else {
-        return (
-          <span key={i} className="text-blue-400">
-            {part}
-          </span>
-        );
       }
+    } else {
+      // تحليل باقي النص للهاشتاقات
+      const innerParts = part.match(/(#[\w\u0600-\u06FF]+|\s+|[^\s#]+)/g) || [];
+      innerParts.forEach((inner, j) => {
+        if (inner.startsWith("#")) {
+          const tag = inner.slice(1).toLowerCase();
+          if (hashtags.includes(tag)) {
+            rendered.push(
+              <Link
+                key={`${i}-${j}`}
+                href={`/Pages/Hashtag/${tag}`}
+                className="text-purple-500 font-semibold hover:underline"
+              >
+                {inner}
+              </Link>
+            );
+          } else {
+            rendered.push(
+              <span key={`${i}-${j}`} className="text-purple-400">
+                {inner}
+              </span>
+            );
+          }
+        } else {
+          rendered.push(inner);
+        }
+      });
     }
-
-    // 🟣 hashtags
-    if (part.startsWith('#')) {
-      const tag = part.slice(1).toLowerCase();
-      if (hashtags.includes(tag)) {
-        return (
-          <Link
-            key={i}
-            href={`/Pages/Hashtag/${tag}`}
-            className="text-purple-500 font-semibold hover:underline"
-          >
-            {part}
-          </Link>
-        );
-      } else {
-        return (
-          <span key={i} className="text-purple-400">
-            {part}
-          </span>
-        );
-      }
-    }
-
-    // نص عادي
-    return part;
   });
+
+  return rendered;
 };
