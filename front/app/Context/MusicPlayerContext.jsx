@@ -7,11 +7,12 @@ const MusicPlayerContext = createContext()
 
 export const MusicPlayerProvider = ({ children }) => {
   const audioRef = useRef(null)
-  const { viewMusic , music} = useMusic()
-    
-    const [current, setCurrent] = useState(music && music.length ? music[0] : null)
-    const [currentIndex, setCurrentIndex] = useState(0)
-    const [songs, setSongs] = useState(music || [])
+  const { viewMusic, music } = useMusic()
+
+  // ✨ الحالة الأولية
+  const [songs, setSongs] = useState(music || [])
+  const [current, setCurrent] = useState(music && music.length ? music[0] : null)
+  const [currentIndex, setCurrentIndex] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -21,14 +22,24 @@ export const MusicPlayerProvider = ({ children }) => {
   const [repeatMode, setRepeatMode] = useState('off') // 'off' | 'one' | 'all'
   const [expanded, setExpanded] = useState(false)
   const [viewMusicPlayer, setViewMusicPlayer] = useState(false)
-    // ⏯️ التحكم في الصوت
-    useEffect(() => {
-        if (music && music.length) {
-            setSongs(music)
-            setCurrent(music[0])
-            setCurrentIndex(0)
-        }
-    }, [music])
+
+  // ✨ تحديث songs و current عند تغير music
+  useEffect(() => {
+    if (music && music.length) {
+      setSongs(music)
+      setCurrent(music[0])
+      setCurrentIndex(0)
+    }
+  }, [music])
+
+  // ✨ ضبط src للأوديو عند تغير current
+  useEffect(() => {
+    if (!audioRef.current || !current) return
+    audioRef.current.src = current.url
+    audioRef.current.load()
+  }, [current])
+
+  // ⏯️ التحكم في الصوت
   const play = async () => {
     if (!audioRef.current) return
     try {
@@ -53,12 +64,8 @@ export const MusicPlayerProvider = ({ children }) => {
     setCurrent(track)
     setCurrentIndex(index)
     if (allSongs?.length) setSongs(allSongs)
-    if (audioRef.current) {
-      audioRef.current.src = track.url
-      audioRef.current.load()
-      play()
-      viewMusic(track._id)
-    }
+    viewMusic(track._id)
+    play()
   }
 
   // ⏮️ السابق
@@ -152,7 +159,10 @@ export const MusicPlayerProvider = ({ children }) => {
         setSongs,
         currentIndex,
         setCurrentIndex,
-        expanded, setExpanded,viewMusicPlayer, setViewMusicPlayer
+        expanded,
+        setExpanded,
+        viewMusicPlayer,
+        setViewMusicPlayer
       }}
     >
       <audio ref={audioRef} preload="metadata" hidden />
