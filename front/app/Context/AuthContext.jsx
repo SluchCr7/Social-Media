@@ -532,7 +532,7 @@ const makeAccountPremiumVerify = async () => {
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/save/music/${musicId}`,
         {},
         {
-          headers: { Authorization: `Bearer ${userToken}` },
+          headers: { Authorization: `Bearer ${user?.token}` },
         }
       );
       showAlert(res.data.message || 'Music saved successfully');
