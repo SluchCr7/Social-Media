@@ -21,6 +21,7 @@ const NewPost = () => {
   const [selectedMentions, setSelectedMentions] = useState([]);
   const [mentionSearch, setMentionSearch] = useState('');
   const [showMentionList, setShowMentionList] = useState(false);
+  const [cursorPosition, setCursorPosition] = useState(null);
 
   // 🕓 حالات الجدولة الجديدة
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
@@ -58,54 +59,59 @@ const NewPost = () => {
     return matches ? Array.from(new Set(matches.map(tag => tag.slice(1).toLowerCase()))) : [];
   };
 
-  // ------------------- Mentions Handling -------------------
+// ------------------- Mentions Handling (Fixed & Stable) -------------------
+
 const handleTextareaChange = (e) => {
   const value = e.target.value;
   setPostText(value);
   if (value.length <= 500) setErrorText(false);
 
-  const cursorPos = e.target.selectionStart;
-  const textBeforeCursor = value.slice(0, cursorPos);
+  const cursor = e.target.selectionStart;
+  setCursorPosition(cursor);
 
-  // ✅ ابحث عن آخر @ بدون مسافة قبلها
-  const match = textBeforeCursor.match(/@([^\s@]*)$/);
-
-  if (match) {
-    const searchTerm = match[1];
-    setMentionSearch(searchTerm);
-    setShowMentionList(true);
-  } else {
-    setShowMentionList(false);
+  const lastAt = value.lastIndexOf('@', cursor - 1);
+  if (lastAt >= 0) {
+    const afterAt = value.slice(lastAt + 1, cursor);
+    const regex = /^[^\s@]{0,30}$/; // يمنع المسافات بعد @
+    if (regex.test(afterAt)) {
+      setMentionSearch(afterAt);
+      setShowMentionList(true);
+      return;
+    }
   }
+
+  setShowMentionList(false);
 };
 
-const filteredMentions = myFollowing.filter((u) => {
-  if (!u || typeof u?.username !== "string") return false;
-  const notAlreadySelected = !selectedMentions.some((m) => m?._id === u?._id);
+useEffect(() => {
+  if (!mentionSearch) {
+    setFilteredMentions(myFollowing);
+    return;
+  }
 
-  // ✅ لو المستخدم كتب فقط @ يظهر كل من يتابعه
-  if (!mentionSearch) return notAlreadySelected;
+  const filtered = myFollowing.filter((u) =>
+    u.username?.toLowerCase().includes(mentionSearch.toLowerCase())
+  );
 
-  const usernameMatch = u.username.toLowerCase().includes(mentionSearch.toLowerCase());
-  return usernameMatch && notAlreadySelected;
-});
+  setFilteredMentions(filtered);
+}, [mentionSearch, myFollowing]);
 
-
-  const selectMention = (user) => {
+const selectMention = (user) => {
   if (!user || typeof user.username !== 'string') return;
 
-  const cursorPos = textareaRef.current.selectionStart;
-  const textBeforeCursor = postText.slice(0, cursorPos);
-  const textAfterCursor = postText.slice(cursorPos);
+  const value = postText;
+  const lastAt = value.lastIndexOf('@', cursorPosition - 1);
+  if (lastAt < 0) return;
 
-  // ✅ استبدل آخر كلمة تبدأ بـ @ بالكلمة المختارة
-  const newText = textBeforeCursor.replace(/@([^\s@]*)$/, `@${user.username} `) + textAfterCursor;
+  const before = value.slice(0, lastAt);
+  const after = value.slice(cursorPosition);
 
+  const newText = `${before}@${user.username} ${after}`;
   setPostText(newText);
   setSelectedMentions((prev) => [...prev, user]);
   setShowMentionList(false);
+  setMentionSearch('');
 
-  // 🔁 أعد التركيز على الـ textarea بعد الاختيار
   requestAnimationFrame(() => {
     textareaRef.current.focus();
     textareaRef.current.selectionStart = textareaRef.current.selectionEnd =
