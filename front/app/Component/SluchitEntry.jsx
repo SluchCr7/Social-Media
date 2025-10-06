@@ -88,12 +88,14 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
 
       {/* 📰 Post Card */}
       <div className="
+        relative z-[1]
         bg-white/80 dark:bg-black/30 backdrop-blur-xl
         border border-gray-200/70 dark:border-gray-700/50
         w-full p-4 sm:p-6 
         rounded-2xl flex flex-col gap-5 shadow-lg
         transition-all duration-300 hover:scale-[1.01]
       ">
+
         {/* 📌 Tags */}
         {post?.isPinned && (
           <div className="bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 
