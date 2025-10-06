@@ -535,6 +535,7 @@ const makeAccountPremiumVerify = async () => {
           headers: { Authorization: `Bearer ${userToken}` },
         }
       );
+      showAlert(res.data.message || 'Music saved successfully');
       return res.data;
     } catch (err) {
       console.error("Error saving music in playlist:", err);
@@ -586,6 +587,7 @@ const makeAccountPremiumVerify = async () => {
         onlineUsers,
         blockOrUnblockUser,
         suggestedUsers,
+        saveMusicInPlayList,
         deleteUser, showAllSuggestedUsers, setShowAllSuggestedUsers
         ,togglePrivateAccount,makeAccountPremiumVerify, makeUserAdmin,updateAccountStatus
         ,getRelationship,
