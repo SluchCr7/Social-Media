@@ -144,7 +144,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
       <div className="absolute right-3 sm:right-5 bottom-20 flex flex-col gap-5 sm:gap-6 text-white items-center">
         {/* 👁 Views */}
         <div className="flex flex-col items-center text-gray-300">
-          <FaEye size={20} className="sm:size-22" />
+          <FaEye />
           <span className="text-[10px] sm:text-xs">{reel?.views?.length || 0}</span>
         </div>
 
@@ -157,7 +157,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
               : "hover:scale-110"
           }`}
         >
-          <FaHeart size={22} className="sm:size-24" />
+          <FaHeart />
           <span className="text-[10px] sm:text-xs">{reel?.likes?.length || 0}</span>
         </button>
 
@@ -166,7 +166,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
           onClick={() => setShowComments(true)}
           className="flex flex-col items-center hover:scale-110 transition-transform"
         >
-          <FaRegCommentDots size={22} className="sm:size-24" />
+          <FaRegCommentDots />
           <span className="text-[10px] sm:text-xs">{reel?.comments?.length || 0}</span>
         </button>
 
@@ -175,7 +175,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
           onClick={() => shareReel(reel?._id, reel?.owner?._id)}
           className="flex flex-col items-center hover:scale-110 transition-transform"
         >
-          <RiShareForwardLine size={22} className="sm:size-24" />
+          <RiShareForwardLine  />
         </button>
 
         {/* 🔗 Copy Link */}
@@ -183,7 +183,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
           onClick={handleCopyLink}
           className="flex flex-col items-center hover:scale-110 transition-transform"
         >
-          <IoLinkOutline size={22} className="sm:size-24" />
+          <IoLinkOutline  />
           <span className="text-[10px] sm:text-xs">Copy</span>
         </button>
 
@@ -193,7 +193,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
             className="flex flex-col items-center text-red-500 hover:scale-110 transition-transform"
             onClick={() => deleteReel(reel?._id)}
           >
-            <FaTrash size={20} className="sm:size-22" />
+            <FaTrash />
           </button>
         )}
       </div>
@@ -204,13 +204,13 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
           onClick={toggleMute}
           className="bg-black/40 p-2 sm:p-3 rounded-full text-white hover:bg-black/60 transition"
         >
-          {isMuted ? <FaVolumeMute size={18} /> : <FaVolumeUp size={18} />}
+          {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
         </button>
         <button
           onClick={() => setShowModelAddReel(true)}
           className="bg-black/40 p-2 sm:p-3 rounded-full text-white hover:bg-black/60 transition"
         >
-          <FaPlus size={18} />
+          <FaPlus />
         </button>
       </div>
 

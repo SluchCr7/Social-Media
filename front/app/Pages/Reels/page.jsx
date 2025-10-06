@@ -22,7 +22,7 @@ const ReelsPage = () => {
     setTimeout(() => setScrolling(false), 500);
   };
 
-  // Arrow key navigation
+  // 🔽 التحكم بالأسهم (للكمبيوتر)
   useEffect(() => {
     const handleKey = (e) => {
       if (e.key === 'ArrowDown') goToReel(currentIndex + 1);
@@ -32,7 +32,7 @@ const ReelsPage = () => {
     return () => window.removeEventListener('keydown', handleKey);
   }, [currentIndex, reels.length, scrolling]);
 
-  // Wheel navigation
+  // 🖱️ التحكم بعجلة الماوس
   useEffect(() => {
     const handleWheel = (e) => {
       if (scrolling) return;
@@ -44,9 +44,58 @@ const ReelsPage = () => {
     return () => container.removeEventListener('wheel', handleWheel);
   }, [currentIndex, scrolling, reels.length]);
 
+  // 📱 التحكم بالسحب (Swipe) على الموبايل
+  useEffect(() => {
+    let startY = 0;
+    let endY = 0;
+
+    const handleTouchStart = (e) => {
+      startY = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e) => {
+      endY = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = () => {
+      const diff = startY - endY;
+      if (Math.abs(diff) < 50 || scrolling) return; // تجاهل السحب الخفيف
+
+      if (diff > 0) {
+        // سحب لأعلى → الريل التالي
+        goToReel(currentIndex + 1);
+      } else {
+        // سحب لأسفل → الريل السابق
+        goToReel(currentIndex - 1);
+      }
+    };
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('touchstart', handleTouchStart);
+      container.addEventListener('touchmove', handleTouchMove);
+      container.addEventListener('touchend', handleTouchEnd);
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener('touchstart', handleTouchStart);
+        container.removeEventListener('touchmove', handleTouchMove);
+        container.removeEventListener('touchend', handleTouchEnd);
+      }
+    };
+  }, [currentIndex, scrolling, reels.length]);
+
   return (
     <DesignReels
-      containerRef={containerRef}  reels={reels}  currentIndex={currentIndex}  reelRefs={reelRefs}  isLoading={isLoading}  lastReelRef={lastReelRef}  isMuted={isMuted}  setIsMuted={setIsMuted}
+      containerRef={containerRef}
+      reels={reels}
+      currentIndex={currentIndex}
+      reelRefs={reelRefs}
+      isLoading={isLoading}
+      lastReelRef={lastReelRef}
+      isMuted={isMuted}
+      setIsMuted={setIsMuted}
     />
   );
 };
