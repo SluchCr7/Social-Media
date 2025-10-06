@@ -127,8 +127,8 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
               transition={{ duration: 0.25 }}
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 w-[95%] mx-auto"
             >
-              {userSelected?.music?.length > 0 ? (
-                userSelected.music.map((music) => (
+              {userSelected?.audios?.length > 0 ? (
+                userSelected.audios.map((music) => (
                   <MusicCard key={music?._id} music={music} />
                 ))
               ) : (
