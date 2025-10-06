@@ -137,7 +137,7 @@ const LayoutComponent = ({ children }) => {
           )}
           <div
             className={`fixed z-50 flex items-center gap-3 transition-all duration-300 right-5 ${
-              viewMusicPlayer ? "bottom-[120px]" : "bottom-5"
+              viewMusicPlayer ? "bottom-[160px]" : "bottom-5"
             }`}
           >
             <button
