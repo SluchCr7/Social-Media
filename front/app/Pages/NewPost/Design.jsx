@@ -200,99 +200,99 @@ const DesignPost = ({
             </div>
           )}
 
-        {/* Images Preview */}
-        {images.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 px-6 pb-4">
-            {images.map((img, idx) => (
-              <div key={idx} className="relative group rounded-xl overflow-hidden shadow-lg">
-                <img
-                  src={img.url}
-                  alt={`preview-${idx}`}
-                  className="w-full h-32 object-cover rounded-xl transform group-hover:scale-105 transition-transform duration-300"
-                />
-                <button
-                  onClick={() => removeImage(idx)}
-                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full shadow hover:bg-red-600 transition"
-                >
-                  <FiX size={16} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Footer */}
-        <div className="flex relative items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-3 relative">
-            <label className="cursor-pointer flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-darkMode-bg hover:bg-blue-100 dark:hover:bg-blue-800 text-gray-700 dark:text-gray-300 transition shadow-md">
-              <IoImage size={22} />
-              <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
-            </label>
-
-            <button
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-darkMode-bg hover:bg-yellow-100 dark:hover:bg-yellow-800 text-gray-600 dark:text-gray-300 transition shadow-md"
-            >
-              <IoHappyOutline size={22} />
-            </button>
-
-            {showEmojiPicker && (
-              <div className="absolute z-50 top-[-400px] left-6 w-[320px] rounded-2xl shadow-2xl overflow-hidden transition-transform duration-300 transform scale-95 animate-scale-up">
-                <div className="flex justify-between items-center bg-gray-200 dark:bg-gray-700 px-3 py-2">
-                  <span className="text-gray-700 dark:text-gray-200 font-semibold">Emojis</span>
+          {/* Images Preview */}
+          {images.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 px-6 pb-4">
+              {images.map((img, idx) => (
+                <div key={idx} className="relative group rounded-xl overflow-hidden shadow-lg">
+                  <img
+                    src={img.url}
+                    alt={`preview-${idx}`}
+                    className="w-full h-32 object-cover rounded-xl transform group-hover:scale-105 transition-transform duration-300"
+                  />
                   <button
-                    onClick={() => setShowEmojiPicker(false)}
-                    className="text-gray-600 dark:text-gray-300 hover:text-red-500 transition"
+                    onClick={() => removeImage(idx)}
+                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full shadow hover:bg-red-600 transition"
                   >
-                    <FiX size={18} />
+                    <FiX size={16} />
                   </button>
                 </div>
-                <EmojiPicker onEmojiClick={handleEmojiClick} theme="dark" height={300} />
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
 
-          <button
-            onClick={handlePost}
-            disabled={(!postText.trim() && images.length === 0) || errorText}
-            className={`px-8 py-2 text-sm font-semibold rounded-full shadow-lg transition-all duration-300 ${
-              (!postText.trim() && images.length === 0) || errorText
+          {/* Footer */}
+          <div className="flex relative items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-3 relative">
+              <label className="cursor-pointer flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-darkMode-bg hover:bg-blue-100 dark:hover:bg-blue-800 text-gray-700 dark:text-gray-300 transition shadow-md">
+                <IoImage size={22} />
+                <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
+              </label>
+
+              <button
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-darkMode-bg hover:bg-yellow-100 dark:hover:bg-yellow-800 text-gray-600 dark:text-gray-300 transition shadow-md"
+              >
+                <IoHappyOutline size={22} />
+              </button>
+
+              {showEmojiPicker && (
+                <div className="absolute z-50 top-[-400px] left-6 w-[320px] rounded-2xl shadow-2xl overflow-hidden transition-transform duration-300 transform scale-95 animate-scale-up">
+                  <div className="flex justify-between items-center bg-gray-200 dark:bg-gray-700 px-3 py-2">
+                    <span className="text-gray-700 dark:text-gray-200 font-semibold">Emojis</span>
+                    <button
+                      onClick={() => setShowEmojiPicker(false)}
+                      className="text-gray-600 dark:text-gray-300 hover:text-red-500 transition"
+                    >
+                      <FiX size={18} />
+                    </button>
+                  </div>
+                  <EmojiPicker onEmojiClick={handleEmojiClick} theme="dark" height={300} />
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={handlePost}
+              disabled={(!postText.trim() && images.length === 0) || errorText}
+              className={`px-8 py-2 text-sm font-semibold rounded-full shadow-lg transition-all duration-300 ${(!postText.trim() && images.length === 0) || errorText
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white'
-            }`}
-          >
-            Post
-          </button>
-        </div>
-
-        {/* Schedule */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-3 px-6 pb-6">
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={scheduleEnabled}
-              onChange={(e) => setScheduleEnabled(e.target.checked)}
-              id="schedule"
-              className="cursor-pointer w-4 h-4 accent-blue-600"
-            />
-            <label htmlFor="schedule" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-              Schedule this post
-            </label>
+                }`}
+            >
+              Post
+            </button>
           </div>
 
-          {scheduleEnabled && (
-            <input
-              type="datetime-local"
-              value={scheduleDate}
-              onChange={(e) => setScheduleDate(e.target.value)}
-              min={new Date().toISOString().slice(0, 16)}
-              className="px-3 py-2 border dark:border-gray-600 rounded-lg text-sm bg-gray-50 dark:bg-darkMode-bg text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500"
-            />
-          )}
+          {/* Schedule */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-3 px-6 pb-6">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={scheduleEnabled}
+                onChange={(e) => setScheduleEnabled(e.target.checked)}
+                id="schedule"
+                className="cursor-pointer w-4 h-4 accent-blue-600"
+              />
+              <label htmlFor="schedule" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                Schedule this post
+              </label>
+            </div>
+
+            {scheduleEnabled && (
+              <input
+                type="datetime-local"
+                value={scheduleDate}
+                onChange={(e) => setScheduleDate(e.target.value)}
+                min={new Date().toISOString().slice(0, 16)}
+                className="px-3 py-2 border dark:border-gray-600 rounded-lg text-sm bg-gray-50 dark:bg-darkMode-bg text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500"
+              />
+            )}
+          </div>
         </div>
       </div>
     </main>
-  )
-}
+    
+)}
 
 export default DesignPost
