@@ -125,7 +125,7 @@ export default function MusicPage() {
                     </button>
                     <button 
                       onClick={() => current?._id && saveMusicInPlayList(current._id)}
-                      className={`p-3 rounded-lg ${myPlaylist?.includes(current?._id) ? 'bg-yellow-500 text-white' : 'bg-white/30 dark:bg-gray-800/40'}`}
+                      className={`p-3 rounded-lg ${myPlaylist?.some(s => s._id === current._id) ? 'bg-yellow-500 text-white' : 'bg-white/30 dark:bg-gray-800/40'}`}
                     >
                       <CiBookmark />
                     </button>
