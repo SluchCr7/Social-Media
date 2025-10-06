@@ -65,19 +65,15 @@ const handleTextareaChange = (e) => {
   if (value.length <= 500) setErrorText(false);
 
   const cursorPos = e.target.selectionStart;
-  const lastAt = value.lastIndexOf('@', cursorPos - 1);
+  const textBeforeCursor = value.slice(0, cursorPos);
 
-  if (lastAt >= 0) {
-    const wordAfterAt = value.slice(lastAt + 1, cursorPos);
-    const hasSpace = wordAfterAt.includes(' ');
+  // ✅ ابحث عن آخر @ بدون مسافة قبلها
+  const match = textBeforeCursor.match(/@([^\s@]*)$/);
 
-    // ✅ تُظهر القائمة عند مجرد كتابة @ وتظل مفتوحة أثناء الكتابة
-    if (!hasSpace) {
-      setMentionSearch(wordAfterAt);
-      if (!showMentionList) setShowMentionList(true);
-    } else {
-      setShowMentionList(false);
-    }
+  if (match) {
+    const searchTerm = match[1];
+    setMentionSearch(searchTerm);
+    setShowMentionList(true);
   } else {
     setShowMentionList(false);
   }
@@ -96,27 +92,26 @@ const filteredMentions = myFollowing.filter((u) => {
 
 
   const selectMention = (user) => {
-    if (!user || typeof user.username !== 'string') return;
+  if (!user || typeof user.username !== 'string') return;
 
-    const cursorPos = textareaRef.current.selectionStart;
-    const textBeforeCursor = postText.slice(0, cursorPos);
-    const lastAt = textBeforeCursor.lastIndexOf('@');
-    const textAfterCursor = postText.slice(cursorPos);
+  const cursorPos = textareaRef.current.selectionStart;
+  const textBeforeCursor = postText.slice(0, cursorPos);
+  const textAfterCursor = postText.slice(cursorPos);
 
-    const newText =
-      textBeforeCursor.slice(0, lastAt) +
-      `@${user.username} ` +
-      textAfterCursor;
+  // ✅ استبدل آخر كلمة تبدأ بـ @ بالكلمة المختارة
+  const newText = textBeforeCursor.replace(/@([^\s@]*)$/, `@${user.username} `) + textAfterCursor;
 
-    setPostText(newText);
-    setSelectedMentions(prev => [...prev, user]);
-    setShowMentionList(false);
+  setPostText(newText);
+  setSelectedMentions((prev) => [...prev, user]);
+  setShowMentionList(false);
 
-    setTimeout(() => {
-      textareaRef.current.focus();
-      textareaRef.current.selectionStart = textareaRef.current.selectionEnd = lastAt + user.username.length + 2;
-    }, 0);
-  };
+  // 🔁 أعد التركيز على الـ textarea بعد الاختيار
+  requestAnimationFrame(() => {
+    textareaRef.current.focus();
+    textareaRef.current.selectionStart = textareaRef.current.selectionEnd =
+      newText.length;
+  });
+};
 
   // ------------------- Emoji Picker -------------------
   const handleEmojiClick = (emojiData) => {
