@@ -1,4 +1,4 @@
-import { renderTextWithMentionsAndHashtags } from '@/app/utils/CheckText';
+import { renderTextWithMentionsHashtagsAndLinks } from '@/app/utils/CheckText';
 import React from 'react';
 
 const RenderPostText = ({ text, mentions = [], hashtags = [], italic = false }) => {
@@ -13,7 +13,7 @@ const RenderPostText = ({ text, mentions = [], hashtags = [], italic = false }) 
       } text-gray-600 dark:text-gray-200`}
       dir={isArabic ? 'rtl' : 'ltr'}
     >
-      {renderTextWithMentionsAndHashtags(text, mentions, hashtags)}
+      {renderTextWithMentionsHashtagsAndLinks(text, mentions, hashtags)}
     </p>
   );
 };
