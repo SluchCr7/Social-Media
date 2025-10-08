@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FaShare } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../../Context/AuthContext";
 
 export function ShareModal({ post, isOpen, onClose, onShare }) {
   const [customText, setCustomText] = useState("");

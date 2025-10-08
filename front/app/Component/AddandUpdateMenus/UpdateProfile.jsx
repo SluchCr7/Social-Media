@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { FiX } from "react-icons/fi"
 import { FaGithub, FaLinkedin, FaTwitter, FaFacebook, FaGlobe, FaPlus } from 'react-icons/fa'
-import { useAuth } from '../Context/AuthContext'
+import { useAuth } from '../../Context/AuthContext'
 import { toast } from 'react-toastify'
 import Image from 'next/image'
 import { useUser } from '@/app/Context/UserContext'

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useReels } from '../Context/ReelsContext';
-import { useAlert } from '../Context/AlertContext';
+import { useReels } from '../../Context/ReelsContext';
+import { useAlert } from '../../Context/AlertContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import TextareaAutosize from 'react-textarea-autosize';
 import { AiOutlineCloudUpload, AiOutlineClose } from "react-icons/ai";
