@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
-import { usePost } from '../Context/PostContext';
+import { usePost } from '../../Context/PostContext';
 import { FaTimes } from 'react-icons/fa';
 import { FaUsers } from 'react-icons/fa';
 import { IoImage, IoHappyOutline } from 'react-icons/io5';
