@@ -6,7 +6,7 @@ import { BsThreeDots } from 'react-icons/bs';
 import { usePost } from '../Context/PostContext';
 import { useAuth } from '../Context/AuthContext';
 import PostMenu from './PostMenu';
-import { ShareModal } from './SharePost';
+import { ShareModal } from './AddandUpdateMenus/SharePost';
 import { getHighlightedComment } from '../utils/getHighlitedComment';
 import UserHoverCard from './UserHoverCard';
 import RenderPostText from './Post/RenderText';

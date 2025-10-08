@@ -2,7 +2,7 @@
 import Head from "next/head"
 import ProfileLayout from "@/app/Component/UserComponents/ProfileLayout"
 import ProfileMenu from "@/app/Component/UserComponents/ProfileMenu"
-import UpdateProfile from "@/app/Component/UpdateProfile"
+import UpdateProfile from "@/app/Component/AddandUpdateMenus/UpdateProfile"
 import AddStoryModel from "@/app/Component/AddandUpdateMenus/AddStoryModel"
 import FollowModal from "@/app/Component/UserComponents/FollowModal"
 import { useAuth } from "@/app/Context/AuthContext"
