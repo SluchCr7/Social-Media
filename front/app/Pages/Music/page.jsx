@@ -301,6 +301,7 @@ import AddMusicModal from '@/app/Component/MusicPage/AddMusicMenu'
 import { formatTime } from '@/app/utils/formatTime'
 import Link from 'next/link'
 import ProgressBar from '@/app/Component/MusicPage/ProgressBar'
+import MusicSkeleton from '@/app/Skeletons/MusicSkeleton'
 
 export default function MusicPage() {
   const { music: songs, isLoading, likeMusic } = useMusic()
@@ -387,139 +388,144 @@ export default function MusicPage() {
         
         {/* Main Feed */}
         <main className="xl:col-span-9 space-y-8">
-          {/* Now Playing + Feed */}
-          <div className="rounded-2xl p-6 relative shadow-sm border dark:border-gray-800" style={accentStyle}>
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="relative w-48 h-48 md:w-44 md:h-44 rounded-xl shadow-xl overflow-hidden bg-gray-200">
-                {current?.cover && <Image src={current.cover} alt={current.title} fill className="object-cover" />}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-4 justify-between flex-wrap">
-                  <div>
-                    <div className="text-sm text-gray-500">Now Playing</div>
-                    <h2 className="text-2xl font-semibold">{current?.title || 'Select a song'}</h2>
-                    <div className="text-sm text-gray-500 mt-1">{current?.artist} • {current?.album}</div>
+          {isLoading || loading ? (
+            <MusicSkeleton />
+          ) : (
+            <>
+              <div className="rounded-2xl p-6 relative shadow-sm border dark:border-gray-800" style={accentStyle}>
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="relative w-48 h-48 md:w-44 md:h-44 rounded-xl shadow-xl overflow-hidden bg-gray-200">
+                    {current?.cover && <Image src={current.cover} alt={current.title} fill className="object-cover" />}
                   </div>
-                  <div className="flex items-center gap-3">
-                    <button 
-                      onClick={() => current?._id && likeMusic(current._id)}
-                      className={`p-3 rounded-lg transition ${current?.likes?.includes(userData?._id) ? 'bg-red-500 text-white' : 'bg-white/30 dark:bg-gray-800/40 hover:bg-red-500/70 hover:text-white'}`}
-                    >
-                      <FaHeart />
-                    </button>
-                    <button 
-                      onClick={() => current?._id && saveMusicInPlayList(current._id)}
-                      className={`p-3 rounded-lg transition ${myPlaylist?.some(s => s._id === current._id) ? 'bg-yellow-500 text-white' : 'bg-white/30 dark:bg-gray-800/40 hover:bg-yellow-400/60 hover:text-white'}`}
-                    >
-                      <CiBookmark />
-                    </button>
-                    <button className="p-3 rounded-lg bg-white/30 dark:bg-gray-800/40 hover:bg-blue-500/70 hover:text-white transition">
-                      <FaShareAlt />
-                    </button>
-                    <button onClick={() => setExpanded(true)} className="p-3 rounded-lg bg-white/30 dark:bg-gray-800/40 hover:bg-indigo-500/70 hover:text-white transition">
-                      <FaExpand />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Player Controls */}
-                <div className="mt-6">
-                  <div className="flex items-center gap-4 justify-center md:justify-start">
-                    <button
-                      onClick={() => setShuffle(!shuffle)}
-                      className={`p-3 rounded-full transition ${shuffle ? 'bg-blue-600 text-white' : 'bg-white/20 dark:bg-gray-800/40 hover:bg-blue-500/40'}`}
-                      title="Shuffle"
-                    ><FaRandom /></button>
-                    <button onClick={prev} className="p-3 rounded-full bg-white/30 dark:bg-gray-800/40 hover:bg-gray-700/40 transition"><FaStepBackward /></button>
-                    <button onClick={togglePlay} className="p-4 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-2xl shadow-lg hover:scale-105 transition">
-                      {playing ? <FaPause /> : <FaPlay />}
-                    </button>
-                    <button onClick={next} className="p-3 rounded-full bg-white/30 dark:bg-gray-800/40 hover:bg-gray-700/40 transition"><FaStepForward /></button>
-                    <button
-                      onClick={() => setRepeatMode(repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off')}
-                      className={`p-3 rounded-full transition ${repeatMode !== 'off' ? 'bg-blue-600 text-white' : 'bg-white/20 dark:bg-gray-800/40 hover:bg-blue-500/40'}`}
-                      title="Repeat"
-                    ><FaRedo /></button>
-                  </div>
-
-                  {/* Progress */}
-                  <div className="mt-4">
-                    <div className="flex items-center gap-4">
-                      <div className="text-xs w-12 text-right">{formatTime(progress)}</div>
-                      <ProgressBar
-                        progress={progress}
-                        duration={duration}
-                        seek={(time) => {
-                          audioRef.current.currentTime = time;
-                          setProgress(time);
-                        }}
-                      />
-                      <div className="text-xs w-12">{formatTime(duration)}</div>
-                    </div>
-                    <div className="mt-2 flex items-center gap-3 justify-end">
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <FaVolumeUp />
-                        <input
-                          type="range"
-                          min={0}
-                          max={1}
-                          step={0.01}
-                          value={muted ? 0 : volume}
-                          onChange={(e) => { setVolume(Number(e.target.value)); setMuted(false) }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Songs Feed */}
-            <div className="rounded-2xl p-4 mt-6 bg-white/50 dark:bg-gray-900/50 border dark:border-gray-800">
-              <h3 className="text-lg font-semibold mb-3">All Songs</h3>
-              {isLoading ? <div className="text-sm text-gray-500">Loading...</div> : (
-                <div className="space-y-2">
-                  {filtered.map((s, i) => (
-                    <div
-                      key={s._id}
-                      onClick={() => setTrack(s, i, songs)}
-                      className={`flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer ${current?._id === s._id ? 'ring-2 ring-blue-400 bg-white/30' : ''}`}
-                    >
-                      <div className="w-12 h-12 relative rounded-md overflow-hidden bg-gray-200">
-                        <Image src={s.cover} alt={s.title} fill className="object-cover" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-medium">{s.title}</div>
-                        <div className="text-sm text-gray-500">{s.artist}</div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-4 justify-between flex-wrap">
+                      <div>
+                        <div className="text-sm text-gray-500">Now Playing</div>
+                        <h2 className="text-2xl font-semibold">{current?.title || 'Select a song'}</h2>
+                        <div className="text-sm text-gray-500 mt-1">{current?.artist} • {current?.album}</div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="text-xs text-gray-500">{formatTime(s.duration)}</div>
-                        <button className="p-2 rounded-lg bg-white/20 dark:bg-gray-800/40"><FaPlay /></button>
+                        <button
+                          onClick={() => current?._id && likeMusic(current._id)}
+                          className={`p-3 rounded-lg transition ${current?.likes?.includes(userData?._id) ? 'bg-red-500 text-white' : 'bg-white/30 dark:bg-gray-800/40 hover:bg-red-500/70 hover:text-white'}`}
+                        >
+                          <FaHeart />
+                        </button>
+                        <button
+                          onClick={() => current?._id && saveMusicInPlayList(current._id)}
+                          className={`p-3 rounded-lg transition ${myPlaylist?.some(s => s._id === current._id) ? 'bg-yellow-500 text-white' : 'bg-white/30 dark:bg-gray-800/40 hover:bg-yellow-400/60 hover:text-white'}`}
+                        >
+                          <CiBookmark />
+                        </button>
+                        <button className="p-3 rounded-lg bg-white/30 dark:bg-gray-800/40 hover:bg-blue-500/70 hover:text-white transition">
+                          <FaShareAlt />
+                        </button>
+                        <button onClick={() => setExpanded(true)} className="p-3 rounded-lg bg-white/30 dark:bg-gray-800/40 hover:bg-indigo-500/70 hover:text-white transition">
+                          <FaExpand />
+                        </button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
 
-            {/* 🔥 Trending Now Section */}
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                🔥 Trending Now
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                {songs.slice(0, 8).map((s) => (
-                  <div key={s._id} className="p-3 rounded-xl bg-white/40 dark:bg-gray-900/40 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:scale-[1.02] transition-all duration-300">
-                    <div className="w-full aspect-square relative rounded-lg overflow-hidden mb-2">
-                      <Image src={s.cover} alt={s.title} fill className="object-cover" />
+                    {/* Player Controls */}
+                    <div className="mt-6">
+                      <div className="flex items-center gap-4 justify-center md:justify-start">
+                        <button
+                          onClick={() => setShuffle(!shuffle)}
+                          className={`p-3 rounded-full transition ${shuffle ? 'bg-blue-600 text-white' : 'bg-white/20 dark:bg-gray-800/40 hover:bg-blue-500/40'}`}
+                          title="Shuffle"
+                        ><FaRandom /></button>
+                        <button onClick={prev} className="p-3 rounded-full bg-white/30 dark:bg-gray-800/40 hover:bg-gray-700/40 transition"><FaStepBackward /></button>
+                        <button onClick={togglePlay} className="p-4 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-2xl shadow-lg hover:scale-105 transition">
+                          {playing ? <FaPause /> : <FaPlay />}
+                        </button>
+                        <button onClick={next} className="p-3 rounded-full bg-white/30 dark:bg-gray-800/40 hover:bg-gray-700/40 transition"><FaStepForward /></button>
+                        <button
+                          onClick={() => setRepeatMode(repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off')}
+                          className={`p-3 rounded-full transition ${repeatMode !== 'off' ? 'bg-blue-600 text-white' : 'bg-white/20 dark:bg-gray-800/40 hover:bg-blue-500/40'}`}
+                          title="Repeat"
+                        ><FaRedo /></button>
+                      </div>
+
+                      {/* Progress */}
+                      <div className="mt-4">
+                        <div className="flex items-center gap-4">
+                          <div className="text-xs w-12 text-right">{formatTime(progress)}</div>
+                          <ProgressBar
+                            progress={progress}
+                            duration={duration}
+                            seek={(time) => {
+                              audioRef.current.currentTime = time;
+                              setProgress(time);
+                            }}
+                          />
+                          <div className="text-xs w-12">{formatTime(duration)}</div>
+                        </div>
+                        <div className="mt-2 flex items-center gap-3 justify-end">
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <FaVolumeUp />
+                            <input
+                              type="range"
+                              min={0}
+                              max={1}
+                              step={0.01}
+                              value={muted ? 0 : volume}
+                              onChange={(e) => { setVolume(Number(e.target.value)); setMuted(false) }}
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-sm font-medium truncate">{s.title}</div>
-                    <div className="text-xs text-gray-500 truncate">{s.artist}</div>
                   </div>
-                ))}
+                </div>
+
+                {/* Songs Feed */}
+                <div className="rounded-2xl p-4 mt-6 bg-white/50 dark:bg-gray-900/50 border dark:border-gray-800">
+                  <h3 className="text-lg font-semibold mb-3">All Songs</h3>
+                  {isLoading ? <div className="text-sm text-gray-500">Loading...</div> : (
+                    <div className="space-y-2">
+                      {filtered.map((s, i) => (
+                        <div
+                          key={s._id}
+                          onClick={() => setTrack(s, i, songs)}
+                          className={`flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer ${current?._id === s._id ? 'ring-2 ring-blue-400 bg-white/30' : ''}`}
+                        >
+                          <div className="w-12 h-12 relative rounded-md overflow-hidden bg-gray-200">
+                            <Image src={s.cover} alt={s.title} fill className="object-cover" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium">{s.title}</div>
+                            <div className="text-sm text-gray-500">{s.artist}</div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="text-xs text-gray-500">{formatTime(s.duration)}</div>
+                            <button className="p-2 rounded-lg bg-white/20 dark:bg-gray-800/40"><FaPlay /></button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 🔥 Trending Now Section */}
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    🔥 Trending Now
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {songs.slice(0, 8).map((s) => (
+                      <div key={s._id} className="p-3 rounded-xl bg-white/40 dark:bg-gray-900/40 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:scale-[1.02] transition-all duration-300">
+                        <div className="w-full aspect-square relative rounded-lg overflow-hidden mb-2">
+                          <Image src={s.cover} alt={s.title} fill className="object-cover" />
+                        </div>
+                        <div className="text-sm font-medium truncate">{s.title}</div>
+                        <div className="text-xs text-gray-500 truncate">{s.artist}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
         </main>
 
         {/* Sidebar */}
@@ -585,28 +591,6 @@ export default function MusicPage() {
         </aside>
       </div>
 
-      {/* 🎧 Mini Player for Mobile */}
-      <motion.div
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        transition={{ type: 'spring', stiffness: 80 }}
-        className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between"
-      >
-        <div className="flex items-center gap-3">
-          {current?.cover && (
-            <div className="w-10 h-10 relative rounded-md overflow-hidden">
-              <Image src={current.cover} alt={current.title} fill className="object-cover" />
-            </div>
-          )}
-          <div>
-            <div className="text-sm font-medium truncate">{current?.title}</div>
-            <div className="text-xs text-gray-500 truncate">{current?.artist}</div>
-          </div>
-        </div>
-        <button onClick={togglePlay} className="p-3 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-lg shadow-md">
-          {playing ? <FaPause /> : <FaPlay />}
-        </button>
-      </motion.div>
     </div>
   )
 }

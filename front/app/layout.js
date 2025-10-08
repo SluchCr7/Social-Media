@@ -22,6 +22,8 @@ import { MusicProvider } from "./Context/MusicContext";
 import { TranslateContextProvider } from "./Context/TranslateContext";
 import { ThemeContextProvider } from "./Context/ThemeContext";
 import { MusicPlayerProvider } from "./Context/MusicPlayerContext";
+import { UserContextProvider } from "./Context/UserContext";
+import { UserAdminContextProvider } from "./Context/UserAdminContext";
 const jetBrainsMono = JetBrains_Mono({
   subsets: ["latin"]
   , weight: ["100", "200", "300", "400"]
@@ -40,43 +42,47 @@ export default function RootLayout({ children }) {
         className={`antialiased bg-lightMode-bg dark:bg-darkMode-bg transition-all duration-500  ${jetBrainsMono.className}`}
       >
         <AlertContextProvider>
-          <AuthContextProvider>
-            <SocketProvider>
-              <NotifyContextProvider>
-                <MessageContextProvider>
-                  <PostContextProvider>
-                    <CommentContextProvider>
-                      <CommunityContextProvider>
-                        <StoryContextProvider>
-                          <NewsContextProvider>
-                            <ReportContextProvider>
-                              <ReelsProvider>
-                                <EventProvider>
-                                  <MusicProvider>
-                                    <MusicPlayerProvider>
-                                      <ThemeContextProvider>
-                                        <TranslateContextProvider>
-                                          <AsideContextProvider>  
-                                            <LayoutComponent>
-                                                {children}
-                                            </LayoutComponent>
-                                          </AsideContextProvider>
-                                        </TranslateContextProvider>
-                                      </ThemeContextProvider>
-                                    </MusicPlayerProvider>
-                                  </MusicProvider>
-                                </EventProvider>
-                              </ReelsProvider>
-                            </ReportContextProvider>
-                          </NewsContextProvider>
-                        </StoryContextProvider>
-                      </CommunityContextProvider>
-                    </CommentContextProvider>
-                  </PostContextProvider>
-                </MessageContextProvider>
-              </NotifyContextProvider>
-            </SocketProvider>
-          </AuthContextProvider>
+        <AuthContextProvider>
+        <UserContextProvider>
+        <UserAdminContextProvider>
+        <SocketProvider>
+          <NotifyContextProvider>
+            <MessageContextProvider>
+              <PostContextProvider>
+                <CommentContextProvider>
+                  <CommunityContextProvider>
+                    <StoryContextProvider>
+                      <NewsContextProvider>
+                        <ReportContextProvider>
+                          <ReelsProvider>
+                            <EventProvider>
+                              <MusicProvider>
+                                <MusicPlayerProvider>
+                                  <ThemeContextProvider>
+                                    <TranslateContextProvider>
+                                      <AsideContextProvider>  
+                                        <LayoutComponent>
+                                            {children}
+                                        </LayoutComponent>
+                                      </AsideContextProvider>
+                                    </TranslateContextProvider>
+                                  </ThemeContextProvider>
+                                </MusicPlayerProvider>
+                              </MusicProvider>
+                            </EventProvider>
+                          </ReelsProvider>
+                        </ReportContextProvider>
+                      </NewsContextProvider>
+                    </StoryContextProvider>
+                  </CommunityContextProvider>
+                </CommentContextProvider>
+              </PostContextProvider>
+            </MessageContextProvider>
+          </NotifyContextProvider>
+        </SocketProvider>
+        </UserAdminContextProvider>
+        </UserContextProvider>
+        </AuthContextProvider>
         </AlertContextProvider>
       </body>
     </html>

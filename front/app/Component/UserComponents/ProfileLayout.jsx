@@ -36,42 +36,6 @@ const ProfileLayout = ({
   setOpenMenu,
   openMenu
 }) => {
-  // 🎵 إدارة حالة مشغل الموسيقى
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const audioRef = useRef(null)
-
-  const musicList = user?.audios || []
-
-  const handlePlayPause = (index) => {
-    if (currentTrackIndex === index) {
-      setIsPlaying(!isPlaying)
-    } else {
-      setCurrentTrackIndex(index)
-      setIsPlaying(true)
-    }
-  }
-
-  useEffect(() => {
-    if (!audioRef.current) return
-    if (isPlaying) {
-      audioRef.current.play().catch(() => setIsPlaying(false))
-    } else {
-      audioRef.current.pause()
-    }
-  }, [isPlaying, currentTrackIndex])
-
-  const handleNext = () => {
-    setCurrentTrackIndex((prev) => (prev + 1) % musicList.length)
-    setIsPlaying(true)
-  }
-
-  const handlePrev = () => {
-    setCurrentTrackIndex((prev) =>
-      prev === 0 ? musicList.length - 1 : prev - 1
-    )
-    setIsPlaying(true)
-  }
 
   return (
     <motion.div
@@ -101,80 +65,6 @@ const ProfileLayout = ({
         renderVisitorMenu={!isOwner ? renderMenu : undefined}
       />
 
-      {/* 🎶 قسم الموسيقى */}
-      {/* {musicList.length > 0 && (
-        <div className="flex flex-col items-center gap-6 w-full py-4">
-          <h2 className="text-xl font-semibold text-center">My Music</h2>
-
-          <motion.div
-            className="relative w-36 h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden shadow-xl cursor-pointer border-4 border-primary/40"
-            animate={{
-              rotate: isPlaying ? 360 : 0,
-            }}
-            transition={{
-              repeat: isPlaying ? Infinity : 0,
-              duration: 10,
-              ease: "linear",
-            }}
-            onClick={() => handlePlayPause(currentTrackIndex)}
-          >
-            <Image
-              width={300}
-              height={300}
-              src={musicList[currentTrackIndex]?.cover || "/default-cover.jpg"}
-              alt="cover"
-              className="object-cover w-full h-full"
-            />
-            <motion.div
-              className="absolute inset-0 bg-black/30 flex items-center justify-center text-white"
-              whileTap={{ scale: 0.9 }}
-            >
-              {isPlaying ? (
-                <FaPause size={32} />
-              ) : (
-                <FaPlay size={32} />
-              )}
-            </motion.div>
-          </motion.div>
-
-          <div className="text-center">
-            <p className="text-lg font-medium">
-              {musicList[currentTrackIndex]?.title || "Unknown Track"}
-            </p>
-            <p className="text-sm text-gray-500">
-              {musicList[currentTrackIndex]?.artist || user?.username}
-            </p>
-          </div>
-
-          <div className="flex items-center justify-center gap-6">
-            <button
-              onClick={handlePrev}
-              className="p-3 rounded-full bg-primary/20 hover:bg-primary/40 transition"
-            >
-              <FaStepBackward size={20} />
-            </button>
-            <button
-              onClick={() => handlePlayPause(currentTrackIndex)}
-              className="p-4 rounded-full bg-primary text-white hover:bg-primary/80 transition"
-            >
-              {isPlaying ? <FaPause size={22} /> : <FaPlay size={22} />}
-            </button>
-            <button
-              onClick={handleNext}
-              className="p-3 rounded-full bg-primary/20 hover:bg-primary/40 transition"
-            >
-              <FaStepForward size={20} />
-            </button>
-          </div>
-
-          <audio
-            ref={audioRef}
-            src={musicList[currentTrackIndex]?.url}
-            onEnded={handleNext}
-          />
-        </div>
-      )} */}
-
       {/* 🧾 معلومات المستخدم */}
       <InfoAboutUser user={user} />
 
@@ -201,11 +91,11 @@ const ProfileLayout = ({
               filters={filters}
             />
 
-            {userHasMore && (
+            {/* {userHasMore && (
               <div ref={loaderRef} className="flex justify-center py-6">
                 <span className="text-gray-500">Loading more...</span>
               </div>
-            )}
+            )} */}
           </motion.div>
         </AnimatePresence>
       </div>

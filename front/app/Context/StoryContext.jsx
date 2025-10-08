@@ -33,6 +33,12 @@ export const StoryContextProvider = ({ children }) => {
       return;
     }
 
+    if (storyData.collaborators) {
+      for (const collaborator of storyData.collaborators) {
+        formData.append('collaborators', collaborator);
+      }
+    }
+
     try {
       await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/add`,
@@ -124,13 +130,35 @@ const getUserStories = async (userId) => {
       showAlert("Failed to toggle love");
     }
   };
+
+  const shareStory = async (id) => {
+    if (!checkUserStatus("Share Story", showAlert, user)) return;
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/share/${id}`,
+        {}, // مفيش body هنا فخليته فاضي
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+
+      showAlert("✅ Story shared successfully.");
+      setStories(prev => [res.data, ...prev]); // ✅ تحديث فوري للـ state
+
+    } catch (err) {
+      console.error(err);
+      showAlert("❌ Failed to share the Reel.");
+    }
+  };
   return (
     <StoryContext.Provider
       value={{
         addNewStory,
         stories,
         isLoading,
-        viewStory,toggleLove, getUserStories
+        viewStory,toggleLove, getUserStories,shareStory
       }}
     >
       {children}

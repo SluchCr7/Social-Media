@@ -8,6 +8,7 @@ import { useMessage } from '../Context/MessageContext';
 import Header from './Header';
 import { useAuth } from '../Context/AuthContext';
 
+
 const MainApp = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const { markAllAsRead, unreadCount } = useNotify();

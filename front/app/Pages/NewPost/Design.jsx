@@ -36,15 +36,23 @@ const DesignPost = ({
   scheduleDate,
   scheduleEnabled,
   setScheduleEnabled,
+  mentionPosition,
+
+  // 🟢 Props جديدة للـ Links
+  links,
+  setLinks,
+  linkInput,
+  setLinkInput,
+  handleAddLink,
+  handleRemoveLink
 }) => {
 
-  // إزالة منشن: تحدث ال-state وتزيل النص من الـ textarea
+  // إزالة منشن
   const handleRemoveMention = (id) => {
     const removed = selectedMentions.find(m => m._id === id);
     setSelectedMentions(prev => prev.filter(m => m._id !== id));
     if (removed?.username) {
       setPostText(prev => {
-        // نحذف كل تكرارات @username متبوعة بمسافة اختيارياً
         const re = new RegExp(`@${removed.username}\\b\\s?`, 'g');
         return prev.replace(re, '');
       });
@@ -97,10 +105,10 @@ const DesignPost = ({
           </div>
         </div>
 
-        {/* Body (mentions area + textarea with highlights) */}
+        {/* Body */}
         <div className="relative p-6 pb-2">
 
-          {/* --- Selected Mentions (chips) --- */}
+          {/* Selected Mentions */}
           {selectedMentions && selectedMentions.length > 0 && (
             <div className="mb-4 px-1">
               <div className="flex items-center gap-2 overflow-x-auto py-1">
@@ -132,6 +140,40 @@ const DesignPost = ({
             </div>
           )}
 
+          {/* Links Chips */}
+          {links && links.length > 0 && (
+            <div className="mb-4 px-1 flex flex-wrap gap-2">
+              {links.map((link, idx) => (
+                <div key={idx} className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full shadow-sm">
+                  <span className="text-sm text-gray-800 dark:text-gray-100 truncate max-w-xs">{link}</span>
+                  <button
+                    onClick={() => handleRemoveLink(idx)}
+                    className="p-1 rounded-full hover:bg-red-500 hover:text-white transition"
+                  >
+                    <FiX size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Link Input */}
+          <div className="flex gap-2 mb-4">
+            <input
+              type="text"
+              placeholder="Add a link..."
+              value={linkInput}
+              onChange={(e) => setLinkInput(e.target.value)}
+              className="flex-1 px-3 py-2 border dark:border-gray-600 rounded-lg text-sm bg-gray-50 dark:bg-darkMode-bg text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={handleAddLink}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            >
+              Add
+            </button>
+          </div>
+
           {/* Highlight Layer */}
           <div className="relative">
             <div
@@ -145,6 +187,7 @@ const DesignPost = ({
               ref={textareaRef}
               value={postText}
               onChange={handleTextareaChange}
+              onKeyUp={handleTextareaChange}
               rows={5}
               placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
               dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
@@ -165,9 +208,12 @@ const DesignPost = ({
             {errorText && <span className="text-red-500">Max 500 characters allowed</span>}
           </div>
 
-          {/* Mentions Dropdown (same logic from parent) */}
+          {/* Mentions Dropdown */}
           {showMentionList && filteredMentions.length > 0 && (
-            <div className="absolute top-full left-6 mt-2 z-50 bg-white dark:bg-darkMode-bg shadow-2xl rounded-xl w-72 max-h-60 overflow-auto border border-gray-200 dark:border-gray-600">
+            <div
+              className="absolute z-50 bg-white dark:bg-darkMode-bg shadow-2xl rounded-xl w-72 max-h-60 overflow-auto border border-gray-200 dark:border-gray-600"
+              style={{ top: mentionPosition.top, left: mentionPosition.left }}
+            >
               {filteredMentions.map((u) => (
                 <div
                   key={u._id}

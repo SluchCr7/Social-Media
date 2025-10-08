@@ -5,6 +5,7 @@ import { FaGithub, FaLinkedin, FaTwitter, FaFacebook, FaGlobe, FaPlus } from 're
 import { useAuth } from '../Context/AuthContext'
 import { toast } from 'react-toastify'
 import Image from 'next/image'
+import { useUser } from '@/app/Context/UserContext'
 const UpdateProfile = ({ update, setUpdate, user }) => {
   const [formData, setFormData] = useState({
     username: '',

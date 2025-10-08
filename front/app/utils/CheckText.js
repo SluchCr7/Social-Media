@@ -1,17 +1,20 @@
 import Link from "next/link";
 
-export const renderTextWithMentionsAndHashtags = (text, mentions = [], hashtags = []) => {
+export const renderTextWithMentionsHashtagsAndLinks = (
+  text,
+  mentions = [],
+  hashtags = [],
+  links = [] // مصفوفة روابط أو كائنات { label, url }
+) => {
   if (!text) return null;
 
   let rendered = [];
-  let lastIndex = 0;
 
-  // نمشي على mentions ونحوّل كل username مطابق في النص إلى لينك
+  // ----------------- Mentions -----------------
   const sortedMentions = [...mentions].sort(
     (a, b) => b.username.length - a.username.length
   );
 
-  // نكرر العملية لإضافة كل mention كمطابقة دقيقة
   let tempText = text;
 
   sortedMentions.forEach((user) => {
@@ -19,10 +22,21 @@ export const renderTextWithMentionsAndHashtags = (text, mentions = [], hashtags 
     tempText = tempText.replace(mentionPattern, `@@MENTION:${user._id}@@`);
   });
 
-  // الآن نقسم النص بناءً على العلامة المؤقتة
-  const parts = tempText.split(/(@@MENTION:[^@]+@@)/g);
+  // ----------------- Links -----------------
+  links.forEach((link) => {
+    const url = typeof link === 'string' ? link : link.url;
+    const label = typeof link === 'string' ? link : link.label || link.url;
+    if (!url) return;
+    const escapedUrl = url.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const linkPattern = new RegExp(escapedUrl, "gi");
+    tempText = tempText.replace(linkPattern, `@@LINK:${url}::${label}@@`);
+  });
+
+  // ----------------- Split Text -----------------
+  const parts = tempText.split(/(@@MENTION:[^@]+@@|@@LINK:[^@]+::[^@]+@@)/g);
 
   parts.forEach((part, i) => {
+    // ---- Mentions ----
     const mentionMatch = part.match(/^@@MENTION:([^@]+)@@$/);
     if (mentionMatch) {
       const id = mentionMatch[1];
@@ -38,34 +52,54 @@ export const renderTextWithMentionsAndHashtags = (text, mentions = [], hashtags 
           </Link>
         );
       }
-    } else {
-      // تحليل باقي النص للهاشتاقات
-      const innerParts = part.match(/(#[\w\u0600-\u06FF]+|\s+|[^\s#]+)/g) || [];
-      innerParts.forEach((inner, j) => {
-        if (inner.startsWith("#")) {
-          const tag = inner.slice(1).toLowerCase();
-          if (hashtags.includes(tag)) {
-            rendered.push(
-              <Link
-                key={`${i}-${j}`}
-                href={`/Pages/Hashtag/${encodeURIComponent(tag)}`}
-                className="text-purple-500 font-semibold hover:underline"
-              >
-                {inner}
-              </Link>
-            );
-          } else {
-            rendered.push(
-              <span key={`${i}-${j}`} className="text-purple-400">
-                {inner}
-              </span>
-            );
-          }
-        } else {
-          rendered.push(inner);
-        }
-      });
+      return;
     }
+
+    // ---- Links ----
+    const linkMatch = part.match(/^@@LINK:([^:]+)::(.+)@@$/);
+    if (linkMatch) {
+      const url = linkMatch[1];
+      const label = linkMatch[2];
+      rendered.push(
+        <a
+          key={i}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-green-500 hover:underline"
+        >
+          {label}
+        </a>
+      );
+      return;
+    }
+
+    // ---- Hashtags ----
+    const innerParts = part.match(/(#[\w\u0600-\u06FF]+|\s+|[^\s#]+)/g) || [];
+    innerParts.forEach((inner, j) => {
+      if (inner.startsWith("#")) {
+        const tag = inner.slice(1).toLowerCase();
+        if (hashtags.includes(tag)) {
+          rendered.push(
+            <Link
+              key={`${i}-${j}`}
+              href={`/Pages/Hashtag/${encodeURIComponent(tag)}`}
+              className="text-purple-500 font-semibold hover:underline"
+            >
+              {inner}
+            </Link>
+          );
+        } else {
+          rendered.push(
+            <span key={`${i}-${j}`} className="text-purple-400">
+              {inner}
+            </span>
+          );
+        }
+      } else {
+        rendered.push(inner);
+      }
+    });
   });
 
   return rendered;

@@ -190,7 +190,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
 
         {/* 🔁 Share */}
         <button
-          onClick={() => shareReel(reel?._id, reel?.owner?._id)}
+          onClick={() => shareReel(reel?._id, reel?.originalPost ? reel?.originalPost?._id : reel?.owner?._id)}
           className="flex flex-col items-center hover:scale-110 transition-transform"
         >
           <RiShareForwardLine  />

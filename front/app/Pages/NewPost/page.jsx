@@ -2,10 +2,6 @@
 
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
-import { IoImage, IoHappyOutline } from 'react-icons/io5';
-import { FiX } from 'react-icons/fi';
-import { FaUsers } from 'react-icons/fa';
-import EmojiPicker from 'emoji-picker-react';
 import { usePost } from '../../Context/PostContext';
 import { useCommunity } from '../../Context/CommunityContext';
 import { useAuth } from '../../Context/AuthContext';
@@ -21,6 +17,7 @@ const NewPost = () => {
   const [selectedMentions, setSelectedMentions] = useState([]);
   const [mentionSearch, setMentionSearch] = useState('');
   const [showMentionList, setShowMentionList] = useState(false);
+  const [mentionPosition, setMentionPosition] = useState({ top: 0, left: 0 });
 
   // 🕓 حالات الجدولة الجديدة
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
@@ -30,7 +27,26 @@ const NewPost = () => {
   const { user ,users } = useAuth();
   const { AddPost } = usePost();
   const { communities } = useCommunity();
+  const [links, setLinks] = useState([]); // 🟢 state للروابط
+  const [linkInput, setLinkInput] = useState(''); // 🟢 حقل إدخال رابط جديد
 
+// ---- إضافة رابط جديد ----
+  const handleAddLink = () => {
+    const url = linkInput.trim();
+    if (!url) return;
+
+    // التحقق من شكل الرابط
+    const pattern = /^(https?:\/\/)/i;
+    const formattedUrl = pattern.test(url) ? url : `https://${url}`;
+
+    setLinks(prev => [...prev, formattedUrl]);
+    setLinkInput('');
+  };
+
+  // ---- إزالة رابط ----
+  const handleRemoveLink = (index) => {
+    setLinks(prev => prev.filter((_, i) => i !== index));
+  };
   useEffect(() => {
     const matchedUser = users?.find((u) => user?._id === u?._id)
     setSelectedUser(matchedUser || user || {})
@@ -64,16 +80,33 @@ const NewPost = () => {
     setPostText(value);
     if (value.length <= 500) setErrorText(false);
 
-    const cursorPos = e.target.selectionStart;
-    const lastAt = value.lastIndexOf('@', cursorPos - 1);
+    // const cursorPos = e.target.selectionStart;
+    // const lastAt = value.lastIndexOf('@', cursorPos - 1);
 
-    if (lastAt >= 0) {
-      const wordAfterAt = value.slice(lastAt + 1, cursorPos);
-      if (!wordAfterAt.includes(' ')) {
-        setMentionSearch(wordAfterAt);
-        setShowMentionList(true);
-      } else {
-        setShowMentionList(false);
+    // if (lastAt >= 0) {
+    //   const wordAfterAt = value.slice(lastAt + 1, cursorPos);
+    //   if (!wordAfterAt.includes(' ')) {
+    //     setMentionSearch(wordAfterAt);
+    //     setShowMentionList(true);
+    //   } else {
+    //     setShowMentionList(false);
+    //   }
+    // } else {
+    //   setShowMentionList(false);
+    // }
+    const cursorPos = e.target.selectionStart;
+    const textUntilCursor = value.slice(0, cursorPos);
+    const mentionMatch = textUntilCursor.match(/@([\w\u0600-\u06FF]*)$/);
+
+    if (mentionMatch) {
+      setMentionSearch(mentionMatch[1]);
+      setShowMentionList(true);
+      if (textareaRef.current) {
+        const range = textareaRef.current.selectionStart;
+        const lineHeight = 24;
+        const row = (textareaRef.current.value.slice(0, range).match(/\n/g) || []).length;
+        const col = range - textareaRef.current.value.lastIndexOf('\n', range - 1);
+        setMentionPosition({ top: (row + 1) * lineHeight, left: col * 8 });
       }
     } else {
       setShowMentionList(false);
@@ -143,9 +176,10 @@ const NewPost = () => {
       hashtags,
       selectedCommunity,
       selectedMentions.map(u => u._id),
-      scheduleTime // <-- إرسال وقت الجدولة هنا
+      scheduleTime ,
+      links
     );
-
+    setLinks([]);
     setPostText('');
     setImages([]);
     setSelectedMentions([]);
@@ -199,6 +233,13 @@ const NewPost = () => {
       setScheduleEnabled={setScheduleEnabled}
       scheduleDate={scheduleDate}
       setScheduleDate={setScheduleDate}
+      mentionPosition={mentionPosition}
+      links={links}
+      setLinks={setLinks}
+      linkInput={linkInput}
+      setLinkInput={setLinkInput}
+      handleAddLink={handleAddLink}
+      handleRemoveLink={handleRemoveLink}
     />
   );
 };

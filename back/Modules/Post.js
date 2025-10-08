@@ -1,5 +1,5 @@
-const mongoose = require('mongoose')
-const joi = require('joi')
+const mongoose = require('mongoose');
+const joi = require('joi');
 
 const PostSchema = new mongoose.Schema({
   text: {
@@ -21,11 +21,9 @@ const PostSchema = new mongoose.Schema({
   hahas: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   saved: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   shares: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  views: [{ 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User' 
-  }],
-  // New fields for sharing
+  views: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  
+  // ✅ مشاركة
   originalPost: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Post',
@@ -35,22 +33,39 @@ const PostSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  
   privacy: {
     type: String,
     enum: ['public', 'friends', 'private', 'custom'],
     default: 'public'
   },
+
   Hashtags: [
     {
       type: String,
     },
   ],
+
+  // ✅ روابط
+  links: [
+    {
+      type: String,
+      validate: {
+        validator: function (v) {
+          // يتحقق أن الرابط يبدأ بـ http أو https
+          return /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(v);
+        },
+        message: props => `${props.value} is not a valid URL`
+      }
+    }
+  ],
+
   status: {
     type: String,
     enum: ["scheduled", "pending", "published", "failed"],
-    default: "published", // أو "pending" حسب لوجيك المشروع
+    default: "published",
   },
-  // 🎯 Mentions: مجرد userIds
+
   mentions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 
   community: { type: mongoose.Schema.Types.ObjectId, ref: 'Community', default: null },
@@ -66,7 +81,7 @@ const PostSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Virtual property for comments
+// Virtuals
 PostSchema.virtual("comments", {
   ref: "Comment",
   localField: "_id",
@@ -79,8 +94,7 @@ PostSchema.virtual("reports", {
   foreignField: "postId"
 });
 
-const Post = mongoose.model('Post', PostSchema)
-
+const Post = mongoose.model('Post', PostSchema);
 
 // ✅ Joi Validation
 const ValidatePost = (post) => {
@@ -89,9 +103,13 @@ const ValidatePost = (post) => {
     Hashtags: joi.array().items(joi.string()).optional(),
     community: joi.string().optional(),
     image: joi.any().optional(),
-    mentions: joi.array().items(joi.string()).optional() // array of userIds
+    mentions: joi.array().items(joi.string()).optional(),
+    // ✅ تحقق من الروابط
+    links: joi.array().items(
+      joi.string().uri().message("Invalid link format")
+    ).optional()
   });
   return schema.validate(post);
 };
 
-module.exports = { Post, ValidatePost }
+module.exports = { Post, ValidatePost };

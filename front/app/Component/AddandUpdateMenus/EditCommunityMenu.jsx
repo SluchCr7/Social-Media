@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { IoClose, IoCamera, IoAdd } from 'react-icons/io5';
-import { useCommunity } from '../Context/CommunityContext';
+import { useCommunity } from '../../Context/CommunityContext';
 import Image from 'next/image';
-import { useAlert } from '../Context/AlertContext';
+import { useAlert } from '../../Context/AlertContext';
 
 const EditCommunityMenu = ({ community, onClose }) => {
   const [name, setName] = useState(community?.Name || '');

@@ -51,52 +51,70 @@ export const PostContextProvider = ({ children }) => {
 
 
   // ✅ إضافة بوست جديد
-const AddPost = async (content, images, Hashtags, communityId, mentions = [], scheduledAt = null) => {
-  if (!checkUserStatus("Add Post", showAlert, user)) return;
+  const AddPost = async (
+    content,
+    images,
+    Hashtags,
+    communityId,
+    mentions = [],
+    scheduledAt = null,
+    links = [] // ✅ دعم الروابط الجديدة
+  ) => {
+    if (!checkUserStatus("Add Post", showAlert, user)) return;
 
-  const formData = new FormData();
-  formData.append("text", content);
+    const formData = new FormData();
+    formData.append("text", content);
 
-  images.forEach(img => formData.append("image", img.file));
-  Hashtags.forEach(tag => formData.append("Hashtags", tag));
+    // ✅ رفع الصور
+    images.forEach(img => formData.append("image", img.file));
 
-  if (communityId) formData.append("community", communityId);
+    // ✅ إضافة الهاشتاقات
+    Hashtags.forEach(tag => formData.append("Hashtags", tag));
 
-  // ✅ إضافة mentions
-  if (mentions.length > 0) formData.append("mentions", JSON.stringify(mentions));
+    // ✅ المجتمع (community)
+    if (communityId) formData.append("community", communityId);
 
-  // ✅ إذا كان المستخدم اختار وقت جدولة
-  if (scheduledAt) {
-    formData.append("scheduledAt", scheduledAt); // يجب أن يكون ISO string
-  }
+    // ✅ mentions
+    if (mentions.length > 0)
+      formData.append("mentions", JSON.stringify(mentions));
 
-  try {
-    const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/add`,
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    // ✅ جدولة النشر
+    if (scheduledAt) formData.append("scheduledAt", scheduledAt);
 
-    const newPost = res.data;
-
-    // ✅ لو البوست مجدول، نعرض رسالة مختلفة
-    if (scheduledAt) {
-      showAlert("✅ Post scheduled successfully.");
-    } else {
-      showAlert("✅ Post added successfully.");
-      setPosts(prev => [newPost, ...prev]);
+    // ✅ إضافة الروابط
+    // (الروابط قد تكون array of strings أو array of {label, url})
+    if (links.length > 0) {
+      formData.append("links", JSON.stringify(links));
     }
 
-  } catch (err) {
-    const message = err?.response?.data?.message;
-    showAlert(message || "❌ Failed to upload post.");
-  }
-};
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/add`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const newPost = res.data?.post || res.data;
+
+      // ✅ لو البوست مجدول
+      if (scheduledAt) {
+        showAlert("✅ Post scheduled successfully.");
+      } else {
+        showAlert("✅ Post added successfully.");
+        setPosts(prev => [newPost, ...prev]);
+      }
+
+    } catch (err) {
+      const message = err?.response?.data?.message;
+      showAlert(message || "❌ Failed to upload post.");
+    }
+  };
+
 
 
   // ✅ حذف بوست
@@ -218,23 +236,41 @@ const AddPost = async (content, images, Hashtags, communityId, mentions = [], sc
 
 
   // ✅ تعديل بوست
-  const editPost = async (id, { text, community, Hashtags, existingPhotos, newPhotos, mentions = [] }) => {
+  const editPost = async (
+    id,
+    { text, community, Hashtags, existingPhotos, newPhotos, mentions = [], links = [] }
+  ) => {
     try {
       const formData = new FormData();
+
+      // ✅ النص
       formData.append('text', text);
+
+      // ✅ المجتمع
       if (community) formData.append('community', community);
+
+      // ✅ الهاشتاقات
       if (Hashtags && Hashtags.length > 0) {
         formData.append('Hashtags', JSON.stringify(Hashtags));
       }
-      formData.append('existingPhotos', JSON.stringify(existingPhotos));
+
+      // ✅ الصور القديمة
+      formData.append('existingPhotos', JSON.stringify(existingPhotos || []));
 
       // ✅ mentions
-      if (mentions.length > 0) formData.append('mentions', JSON.stringify(mentions));
+      if (mentions.length > 0)
+        formData.append('mentions', JSON.stringify(mentions));
 
+      // ✅ الصور الجديدة
       if (newPhotos && newPhotos.length > 0) {
         newPhotos.forEach(photo => {
           formData.append('newPhotos', photo);
         });
+      }
+
+      // ✅ الروابط
+      if (links && links.length > 0) {
+        formData.append('links', JSON.stringify(links));
       }
 
       const res = await axios.put(
@@ -248,9 +284,10 @@ const AddPost = async (content, images, Hashtags, communityId, mentions = [], sc
         }
       );
 
-      const updatedPost = res.data;
-      showAlert("Post edited successfully.");
+      const updatedPost = res.data?.post || res.data;
+      showAlert("✅ Post edited successfully.");
 
+      // ✅ تحديث الحالة في الواجهة
       setPosts(prev =>
         prev.map(p =>
           p._id === id ? updatedPost : p
@@ -259,7 +296,8 @@ const AddPost = async (content, images, Hashtags, communityId, mentions = [], sc
 
     } catch (err) {
       console.error(err);
-      showAlert("Failed to edit the post.");
+      const message = err?.response?.data?.message;
+      showAlert(message || "❌ Failed to edit the post.");
     }
   };
 

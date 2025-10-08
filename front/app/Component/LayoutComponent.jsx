@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useEffect, useState } from 'react';
 import Aside from './Aside/Aside';
 import Menu from './Menus/Menu';
@@ -9,12 +8,10 @@ import Alert from './Alert';
 import { usePost } from '../Context/PostContext';
 import EditPostModal from './EditPostModel';
 import { useReport } from '../Context/ReportContext';
-import AddNewReport from './AddNewReport';
+import AddNewReport from './AddandUpdateMenus/AddNewReport';
 import ViewImage from './ViewImage';
 import Loader from './Loader';
-import { IoIosMusicalNotes } from "react-icons/io";
 import MenuAllSuggestedFriends from './Menus/MenuAllSuggestedFreinds';
-import { FiPlus } from 'react-icons/fi';
 import Link from 'next/link';
 import ReelUploadModal from './MenuUploadReel';
 import { useMusicPlayer } from '../Context/MusicPlayerContext';
@@ -40,7 +37,7 @@ const LayoutComponent = ({ children }) => {
   const { showMenuReport, setShowMenuReport, isPostId, isTargetId, reportedOnType } = useReport();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const {expanded, setExpanded,viewMusicPlayer, setViewMusicPlayer} = useMusicPlayer()
+  const {viewMusicPlayer, setViewMusicPlayer} = useMusicPlayer()
   // الصفحات التي لا يظهر فيها Aside أو Menu
   const hideLayout = [
     '/Pages/Login',
@@ -131,32 +128,9 @@ const LayoutComponent = ({ children }) => {
               />
             </div>
           )}
-
           {imageView && (
             <ViewImage imageView={imageView} setImageView={setImageView} />
           )}
-          <div
-            className={`fixed z-50 flex items-center gap-3 transition-all duration-300 right-5 ${
-              viewMusicPlayer ? "bottom-[160px]" : "bottom-5"
-            }`}
-          >
-            <button
-              className="bg-gradient-to-r from-purple-500 to-indigo-500 
-                        text-white rounded-full w-14 h-14 flex items-center justify-center 
-                        shadow-lg hover:scale-110 transition duration-300"
-            >
-              <Link href="/Pages/NewPost">
-                <FiPlus className="text-2xl" />
-              </Link>
-            </button>
-            <button
-              onClick={() => setViewMusicPlayer(!viewMusicPlayer)}
-              className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:scale-110 transition duration-300"
-            >
-              <IoIosMusicalNotes />
-            </button>
-          </div>
-
           <MenuAllSuggestedFriends />
           <ReelUploadModal />
           {

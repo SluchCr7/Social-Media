@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { IoClose, IoChevronBack, IoChevronForward, IoSend } from "react-icons/io5"
-import { FaHeart, FaRegCommentDots } from "react-icons/fa"
+import { FaHeart, FaRegCommentDots, FaShare } from "react-icons/fa"
 import Image from 'next/image'
 import { useSwipeable } from 'react-swipeable'
 import { useStory } from '../Context/StoryContext'
 import { useAuth } from '../Context/AuthContext'
 import { useMessage } from '../Context/MessageContext'
+import Link from 'next/link'
 
 const StoryViewer = ({ stories, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -15,7 +16,7 @@ const StoryViewer = ({ stories, onClose }) => {
   const [progress, setProgress] = useState(0)
   const [showCommentInput, setShowCommentInput] = useState(false)
   const [comment, setComment] = useState("")
-  const { viewStory, toggleLove } = useStory()
+  const { viewStory, toggleLove , shareStory } = useStory()
   const { user } = useAuth()
   const { AddNewMessage, setSelectedUser } = useMessage()
   const story = stories[currentIndex]
@@ -66,7 +67,7 @@ const StoryViewer = ({ stories, onClose }) => {
     : story?.Photo || null
 
   const handleLove = () => toggleLove(story._id)
-
+  const handleShare = ()=> shareStory(story._id)
   const handleCommentSubmit = async () => {
     if (!comment.trim()) return
     await AddNewMessage(comment)
@@ -116,23 +117,85 @@ const StoryViewer = ({ stories, onClose }) => {
       >
         {/* معلومات صاحب الستوري */}
         <div className="absolute top-4 left-4 flex items-center gap-3 z-30">
-          <Image
-            src={story?.owner?.profilePhoto?.url || '/default-profile.png'}
-            alt="avatar"
-            width={42}
-            height={42}
-            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border-2 border-white/50"
-          />
-          <div className="flex flex-col">
-            <span className="text-white font-semibold text-sm sm:text-base cursor-pointer hover:underline">
-              {story?.owner?.username || 'Unknown'}
-            </span>
+          {/* صورة المالك */}
+          <div className="relative">
+            <Image
+              src={
+                story?.originalStory
+                  ? story.originalStory.owner?.profilePhoto?.url
+                  : story?.owner?.profilePhoto?.url || '/default-profile.png'
+              }
+              alt="story owner"
+              width={48}
+              height={48}
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-white/70 shadow-md"
+            />
+
+            {/* لو القصة متشيرة */}
+            {story?.originalStory && (
+              <Link href={`/Pages/User/${story?.originalStory?.owner?._id}`} className="absolute -bottom-1 -right-1 bg-gradient-to-tr from-green-500 to-emerald-400 rounded-full p-[2px] shadow-md">
+                <Image
+                  src={story?.owner?.profilePhoto?.url || '/default-profile.png'}
+                  alt="reshared by"
+                  width={22}
+                  height={22}
+                  className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover border border-white/70"
+                />
+              </Link>
+            )}
+          </div>
+
+          {/* بيانات النصوص + الكولابوريتورز */}
+          <div className="flex flex-col leading-tight">
+            {/* اسم المالك */}
+            <div className="flex items-center flex-wrap gap-1">
+              <span className="text-white font-semibold text-sm sm:text-base cursor-pointer hover:underline">
+                {story?.originalStory
+                  ? story.originalStory.owner?.username
+                  : story?.owner?.username || 'Unknown'}
+              </span>
+
+              {/* لو فيه Collaborators و مش ستوري متشيرة */}
+              {!story?.originalStory && story?.collaborators?.length > 0 && (
+                <div className="flex items-center ml-2">
+                  {story.collaborators.slice(0, 3).map((colab, idx) => (
+                    <Link
+                      href={`/Pages/User/${colab._id}`}
+                      key={colab._id || idx}
+                      className={`-ml-2 border-2 border-black/50 rounded-full overflow-hidden`}
+                      title={colab.username}
+                    >
+                      <Image
+                        src={colab?.profilePhoto?.url || '/default-profile.png'}
+                        alt={colab.username}
+                        width={24}
+                        height={24}
+                        className="w-5 h-5 sm:w-6 sm:h-6 object-cover rounded-full"
+                      />
+                    </Link>
+                  ))}
+                  {story.collaborators.length > 3 && (
+                    <span className="text-xs text-gray-300 ml-1">
+                      +{story.collaborators.length - 3}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* تاريخ الإنشاء */}
             <span className="text-gray-300 text-[10px] sm:text-xs">
               {new Date(story?.createdAt).toLocaleString()}
             </span>
+
+            {/* لو القصة متشيرة */}
+            {story?.originalStory && (
+              <span className="text-[10px] sm:text-xs text-emerald-400 mt-0.5 italic">
+                Reshared by @{story?.owner?.username}
+              </span>
+            )}
           </div>
         </div>
-
         {/* الصورة + النص */}
         {photoUrl ? (
           <div className="relative w-full h-full flex items-center justify-center bg-black">
@@ -167,6 +230,14 @@ const StoryViewer = ({ stories, onClose }) => {
           >
             <FaHeart
               className={`text-2xl sm:text-3xl ${story?.loves?.some(u => u?._id === user?._id) ? "text-red-500" : "text-white"}`}
+            />
+          </button>
+          <button
+            onClick={handleShare}
+            className="p-3 sm:p-4 rounded-full bg-white/10 backdrop-blur-md hover:scale-110 transition shadow-md"
+          >
+            <FaShare
+              className={`text-2xl sm:text-3xl text-white`}
             />
           </button>
           {story?.owner?._id !== user?._id && (

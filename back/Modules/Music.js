@@ -65,6 +65,10 @@ const MusicSchema = new mongoose.Schema({
         type : Boolean,
         default : false
     },
+    isTrending: {
+        type : Boolean,
+        default : false
+    },
 }, {
     timestamps: true
 });

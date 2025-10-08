@@ -1,15 +1,49 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { IoClose, IoImage, IoTrash, IoCamera } from 'react-icons/io5';
+import React, { useEffect, useState, useMemo } from 'react';
+import { IoClose, IoImage, IoTrash, IoCamera, IoCheckmarkCircleOutline } from 'react-icons/io5';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useStory } from '../Context/StoryContext';
+import Select from 'react-select';
+import { useStory } from '../../Context/StoryContext';
+import { useAuth } from '../../Context/AuthContext';
+import { useUser } from '@/app/Context/UserContext';
 
 const AddStoryModel = ({ setIsStory, isStory }) => {
   const [storyText, setStoryText] = useState('');
   const [storyImage, setStoryImage] = useState(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [collaborators, setCollaborators] = useState([]);
+  const [userData, setUserData] = useState(null);
   const { addNewStory } = useStory();
+  const { user,getUserById } = useAuth();
+  // const {getUserById} = useUser();
+  // استرجاع بيانات المستخدم و الـ following
+  useEffect(() => {
+    if (!user?._id) return;
+    getUserById(user._id)
+      .then(res => setUserData(res))
+      .catch(err => console.log(err));
+  }, [user?._id]);
+
+  // حفظ المسودة تلقائيًا
+  useEffect(() => {
+    const saved = localStorage.getItem('storyDraft');
+    if (saved) setStoryText(saved);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('storyDraft', storyText);
+  }, [storyText]);
+
+  // خيارات المتعاونين
+  const collaboratorOptions = useMemo(() =>
+    (userData?.following || []).map(f => ({
+      value: f._id,
+      label: `@${f.username}`,
+      avatar: f.profilePhoto?.url || '/default-avatar.png',
+    }))
+  , [userData?.following]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -31,42 +65,62 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
     }
 
     setIsLoading(true);
-    const storyData = { text: storyText || '', file: storyImage || null };
+    setSuccess(false);
+    const storyData = {
+      text: storyText || '',
+      file: storyImage || null,
+      collaborators: collaborators.length ? collaborators.map(c => c.value) : [],
+    };
+
     await addNewStory(storyData);
     setIsLoading(false);
+    setSuccess(true);
+
+    // تنظيف بعد الإرسال
     clearInput();
-    setIsStory(false);
+    localStorage.removeItem('storyDraft');
+
+    // إغلاق تلقائي بعد ثانيتين
+    setTimeout(() => setIsStory(false), 2000);
   };
 
   const clearInput = () => {
     setStoryImage(null);
     setStoryText('');
     setError('');
+    setCollaborators([]);
   };
 
-  useEffect(() => {
-    if (storyImage) console.log('Image selected:', storyImage.name);
-  }, [storyImage]);
+  const placeholder = storyImage
+    ? "Add a short caption..."
+    : "Share your thoughts or upload an image...";
+
+  const gradient = storyImage
+    ? 'from-purple-500/30 via-indigo-500/30 to-fuchsia-500/30'
+    : 'from-emerald-500/30 via-green-500/30 to-lime-500/30';
 
   return (
     <AnimatePresence>
       {isStory && (
         <motion.div
+          key="storyModal"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center 
+          className="fixed inset-0 z-50 flex items-center justify-center
                      bg-gradient-to-br from-black/70 via-gray-900/70 to-black/70 backdrop-blur-lg"
+          onClick={(e) => e.target === e.currentTarget && setIsStory(false)}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: -20 }}
+            key="modalCard"
+            initial={{ scale: 0.9, opacity: 0, y: 30 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ duration: 0.25 }}
-            className="relative w-[90%] max-w-md rounded-3xl p-6 shadow-2xl 
-                       bg-gradient-to-br from-white/10 via-gray-100/5 to-black/30 
-                       dark:from-black/40 border border-white/10 backdrop-blur-xl
-                       flex flex-col gap-5"
+            className={`relative w-[90%] max-w-md rounded-3xl p-6 shadow-2xl
+                       bg-gradient-to-br ${gradient}
+                       dark:from-black/40 border border-white/10 backdrop-blur-2xl
+                       flex flex-col gap-5`}
           >
             {/* Close Button */}
             <motion.button
@@ -84,6 +138,21 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
                            bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">
               Add Story
             </h2>
+
+            {/* Success Animation */}
+            <AnimatePresence>
+              {success && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex flex-col items-center justify-center text-green-400"
+                >
+                  <IoCheckmarkCircleOutline className="text-5xl mb-2" />
+                  <p className="font-semibold">Story shared successfully!</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Error Message */}
             <AnimatePresence>
@@ -104,7 +173,7 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
               <textarea
                 value={storyText}
                 onChange={handleTextChange}
-                placeholder="Share your thoughts..."
+                placeholder={placeholder}
                 rows={4}
                 maxLength={300}
                 className="w-full p-4 rounded-2xl bg-gradient-to-b from-gray-100/10 
@@ -113,12 +182,9 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
                            focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 
                            resize-none transition-shadow shadow-inner"
               />
-              <p className="text-xs text-gray-400 text-right mt-1">
-                {storyText.length}/300
-              </p>
             </div>
 
-            {/* Image Upload or Preview */}
+            {/* Image Upload / Preview */}
             <div className="w-full">
               {!storyImage ? (
                 <div className="flex gap-3">
@@ -157,10 +223,11 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
                   animate={{ opacity: 1, scale: 1 }}
                   className="relative group"
                 >
-                  <img
+                  <motion.img
+                    whileHover={{ scale: 1.02 }}
                     src={URL.createObjectURL(storyImage)}
                     alt="Preview"
-                    className="rounded-3xl max-h-64 w-full object-cover border border-gray-700/40 shadow-lg group-hover:brightness-75 transition duration-300"
+                    className="rounded-3xl max-h-64 w-full object-cover border border-gray-700/40 shadow-lg transition duration-300"
                   />
                   <motion.button
                     whileHover={{ scale: 1.1 }}
@@ -176,6 +243,58 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
               )}
             </div>
 
+            {/* Collaborators Selector */}
+            {userData?.following?.length > 0 && (
+              <div className="w-full">
+                <label className="block text-gray-300 text-sm mb-2">
+                  Add Collaborators (optional)
+                </label>
+                <Select
+                  isMulti
+                  options={collaboratorOptions}
+                  value={collaborators}
+                  onChange={setCollaborators}
+                  placeholder="Select collaborators..."
+                  formatOptionLabel={(option) => (
+                    <div className="flex items-center gap-2">
+                      <img src={option.avatar} alt="" className="w-6 h-6 rounded-full" />
+                      <span>{option.label}</span>
+                    </div>
+                  )}
+                  classNamePrefix="select"
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      backgroundColor: '#1f2937',
+                      borderColor: '#374151',
+                      borderRadius: '1rem',
+                      color: '#fff',
+                      padding: '2px',
+                    }),
+                    menu: (base) => ({
+                      ...base,
+                      backgroundColor: '#111827',
+                      color: '#fff',
+                    }),
+                    option: (base, state) => ({
+                      ...base,
+                      backgroundColor: state.isSelected
+                        ? '#10b981'
+                        : state.isFocused
+                        ? '#374151'
+                        : '#111827',
+                      color: '#fff',
+                    }),
+                    multiValue: (base) => ({
+                      ...base,
+                      backgroundColor: '#10b981',
+                      color: '#fff',
+                    }),
+                  }}
+                />
+              </div>
+            )}
+
             {/* Submit Button */}
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -189,11 +308,14 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
                           transition-all ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               {isLoading ? (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-                  className="border-t-2 border-white w-5 h-5 rounded-full"
-                />
+                <>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                    className="border-t-2 border-white w-5 h-5 rounded-full"
+                  />
+                  <span>Posting your story...</span>
+                </>
               ) : (
                 <>
                   <IoImage className="text-xl" /> Share Story

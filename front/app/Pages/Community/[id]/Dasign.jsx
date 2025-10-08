@@ -6,7 +6,7 @@ import { FaPlus, FaEdit, FaUsers, FaTrashAlt, FaCrown, FaUser, FaCheck, FaTimes 
 import Link from 'next/link'
 import { FaBook } from 'react-icons/fa' // أيقونة القوانين
 import { motion, AnimatePresence } from 'framer-motion'
-import EditCommunityMenu from '@/app/Component/EditCommunityMenu'
+import EditCommunityMenu from '@/app/Component/AddandUpdateMenus/EditCommunityMenu'
 const ActionButton = ({ children, onClick, variant = 'primary', className = '' }) => {
   const styles = {
     primary: 'bg-blue-600 hover:bg-blue-700',

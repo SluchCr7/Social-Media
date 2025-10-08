@@ -174,4 +174,11 @@
   background: linear-gradient(180deg, #4F46E5, #059669); /* أغمق عند hover */
 }
 
-/* للـ Firefox */
+@media (max-width: 640px) {
+  [data-radix-hover-card-content] {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    right: auto !important;
+  }
+}
+

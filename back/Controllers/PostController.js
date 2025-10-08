@@ -145,7 +145,7 @@ const uploadToCloudinary = (buffer) => {
 // };
 const addPost = async (req, res) => {
   try {
-    let { text, Hashtags, community, mentions, scheduledAt } = req.body;
+    let { text, Hashtags, community, mentions, scheduledAt, links } = req.body;
     const userId = req.user._id;
 
     if (typeof Hashtags === "string") Hashtags = [Hashtags];
@@ -155,6 +155,16 @@ const addPost = async (req, res) => {
       try { mentions = JSON.parse(mentions); }
       catch { mentions = [mentions]; }
     } else if (!Array.isArray(mentions)) mentions = [];
+    
+    if (typeof links === "string") {
+      try {
+        links = JSON.parse(links);
+      } catch {
+        links = [links];
+      }
+    } else if (!Array.isArray(links)) {
+      links = [];
+    }
 
     const { error } = ValidatePost({ text, Hashtags, community, mentions });
     if (error) return res.status(400).json({ message: error.details[0].message });
@@ -205,6 +215,7 @@ const addPost = async (req, res) => {
       community: communityDoc ? communityDoc._id : null,
       scheduledAt: scheduleDate,
       status: postStatus,
+      links, // ✅ تم الإضافة هنا
     });
 
     // إشعارات mentions فقط إذا تم النشر فورًا
@@ -421,7 +432,7 @@ const sharePost = asyncHandler(async (req, res) => {
 
 // ================== Edit Post ==================
 const editPost = asyncHandler(async (req, res) => {
-  let { text, community, Hashtags, existingPhotos, mentions } = req.body;
+  let { text, community, Hashtags, existingPhotos, mentions, links } = req.body;
 
   try {
     existingPhotos = existingPhotos ? JSON.parse(existingPhotos) : [];
@@ -437,6 +448,17 @@ const editPost = asyncHandler(async (req, res) => {
     } else if (!Array.isArray(mentions)) {
       mentions = [];
     }
+    // ✅ معالجة الروابط لو جت كـ string
+    if (typeof links === "string") {
+      try {
+        links = JSON.parse(links);
+      } catch {
+        links = [links];
+      }
+    } else if (!Array.isArray(links)) {
+      links = [];
+    }
+
 
   } catch (err) {
     return res.status(400).json({ message: "Invalid JSON in body fields" });
@@ -476,7 +498,7 @@ const editPost = asyncHandler(async (req, res) => {
   post.Hashtags = Hashtags;
   post.Photos = [...existingPhotos, ...newUploadedPhotos];
   post.mentions = mentions || post.mentions; // 🎯 تحديث mentions
-
+  post.links = links || post.links;
   await post.save();
 
   // ✅ populate كامل زي getAllPosts

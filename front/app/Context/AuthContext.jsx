@@ -10,16 +10,16 @@ export const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthContextProvider = ({ children }) => {
+  const [isLogin, setIsLogin] = useState(false);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [users, setUsers] = useState([]);
   const [user, setUser] = useState(null);
   const [userToken, setUserToken] = useState(null);
-  const [isLogin, setIsLogin] = useState(false);
-  const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [verifyStatus, setVerifyStatus] = useState(false);
-  const { showAlert } = useAlert();
-  const [suggestedUsers, setSuggestedUsers] = useState([]);
   const [showAllSuggestedUsers , setShowAllSuggestedUsers] = useState(false)
+  const [suggestedUsers, setSuggestedUsers] = useState([]);
+  const { showAlert } = useAlert();
   // ------------------- AUTH ACTIONS -------------------
 
   const login = async (email, password) => {
@@ -245,15 +245,6 @@ export const AuthContextProvider = ({ children }) => {
       );
 
       showAlert(res.data.message);
-
-      // تحديث الـ posts في الـ state
-      setPosts((prev) =>
-        prev.map((post) =>
-          post._id === id
-            ? { ...post, isPinned: res.data.message === "Post Pin" } // ضيف فلاغ isPinned
-            : post
-        )
-      );
     } catch (err) {
       console.error(err);
     }
@@ -384,7 +375,6 @@ const blockOrUnblockUser = async (id) => {
     }
   }
 
-  // داخل AuthContextProvider
 const togglePrivateAccount = async () => {
   if (!user?.token) return showAlert('You must be logged in');
   try {
@@ -424,7 +414,6 @@ const makeAccountPremiumVerify = async () => {
 };
 
 
-// ------------------- NEW FUNCTION: Update Account Status -------------------
   const updateAccountStatus = async (userId, status, days = 7) => {
     if (!user?.token) return showAlert('You must be logged in as an admin');
 
@@ -463,7 +452,6 @@ const makeAccountPremiumVerify = async () => {
     }
   };
 
-  // ------------------- NEW FUNCTIONS: Relationship -------------------
   const getRelationship = async (userId) => {
     if (!user?.token) return showAlert('You must be logged in');
 
