@@ -7,7 +7,6 @@ import { usePost } from '../../Context/PostContext';
 import { useCommunity } from '../../Context/CommunityContext';
 import { useAuth } from '../../Context/AuthContext';
 import DesignPost from './Design';
-import { MentionsInput, Mention } from 'react-mentions';
 const NewPost = () => {
   const [postText, setPostText] = useState('');
   const [images, setImages] = useState([]);
@@ -20,7 +19,7 @@ const NewPost = () => {
   // 🕓 حالات الجدولة الجديدة
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
   const [scheduleDate, setScheduleDate] = useState('');
-
+  const [loading , setLoading] = useState(false)
   const textareaRef = useRef();
   const { user ,users } = useAuth();
   const { AddPost } = usePost();
@@ -91,7 +90,7 @@ const NewPost = () => {
   };
 
   // ------------------- Post Submission -------------------
-  const handlePost = () => {
+  const handlePost = async () => {
     const hashtags = extractHashtags(postText);
 
     if (postText.trim().length > 500) {
@@ -104,53 +103,27 @@ const NewPost = () => {
     // 🕓 منطق الجدولة
     const scheduleTime = scheduleEnabled && scheduleDate ? scheduleDate : null;
 
-    AddPost(
-      postText.replace(/#[\w\u0600-\u06FF]+/g, '').trim(),
-      images,
-      hashtags,
-      selectedCommunity,
-      selectedMentions.map(u => u._id),
-      scheduleTime ,
-      links
-    );
-    setLinks([]);
-    setPostText('');
-    setImages([]);
-    setSelectedMentions([]);
-    setScheduleEnabled(false);
-    setScheduleDate('');
+    setLoading(true)
+    try {
+      await AddPost(
+        postText.replace(/#[\w\u0600-\u06FF]+/g, '').trim(),
+        images,
+        hashtags,
+        selectedCommunity,
+        selectedMentions.map(u => u._id),
+        scheduleTime ,
+        links
+      );
+    } finally {
+      setLoading(false)
+      setLinks([]);
+      setPostText('');
+      setImages([]);
+      setSelectedMentions([]);
+      setScheduleEnabled(false);
+      setScheduleDate('');
+    }
   };
-  const MentionInputBox = () => (
-    <MentionsInput
-      value={postText}
-      onChange={(e) => setPostText(e.target.value)}
-      className="mentions-input w-full rounded-2xl p-4 bg-gray-50 dark:bg-darkMode-bg text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
-      placeholder="What's on your mind? Add #hashtags or @mentions..."
-      style={{
-        control: {
-          fontSize: 16,
-          fontWeight: '400',
-          backgroundColor: 'transparent',
-        },
-        highlighter: {
-          overflow: 'hidden',
-        },
-        input: {
-          margin: 0,
-        },
-      }}
-    >
-      <Mention
-        trigger="@"
-        data={myFollowing.map((u) => ({
-          id: u._id,
-          display: u.username,
-        }))}
-        style={{ color: '#4F46E5', fontWeight: 600 }}
-        onAdd={(id) => setMentions((prev) => [...new Set([...prev, id])])}
-      />
-    </MentionsInput>
-  );
   // ------------------- Highlight Text -------------------
   const renderHighlightedText = (text) => {
     return text.split(/(\s+)/).map((part, idx) => {
@@ -195,7 +168,8 @@ const NewPost = () => {
       setLinkInput={setLinkInput}
       handleAddLink={handleAddLink}
       handleRemoveLink={handleRemoveLink}
-      MentionInputBox={MentionInputBox} // 🟢 تمرير مكون الإدخال
+      loading={loading}
+      setLoading={setLoading}
     />
   );
 };

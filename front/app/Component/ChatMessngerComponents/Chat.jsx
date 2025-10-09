@@ -9,13 +9,13 @@ import { isToday, isYesterday, format } from 'date-fns';
 
 const Chat = ({ onBack }) => {
   const { user } = useAuth();
-  const { selectedUser, messages, backgroundStyle } = useMessage();
+  const { selectedUser, messages } = useMessage();
   const ContainerMessageRef = useRef(null);
 
   // --- Group messages by date ---
   const groupMessagesByDate = (messages) => {
     return messages.reduce((groups, message) => {
-      if (!message?.createdAt) return groups; 
+      if (!message?.createdAt) return groups;
       const date = new Date(message.createdAt);
       const dayKey = date.toDateString();
       if (!groups[dayKey]) groups[dayKey] = [];
@@ -24,7 +24,7 @@ const Chat = ({ onBack }) => {
     }, {});
   };
 
-  // --- Display friendly date labels ---
+  // --- Friendly date labels ---
   const getDisplayDate = (dateString) => {
     const date = new Date(dateString);
     if (isToday(date)) return 'Today';
@@ -37,7 +37,7 @@ const Chat = ({ onBack }) => {
     (a, b) => new Date(a).getTime() - new Date(b).getTime()
   );
 
-  // Auto-scroll to bottom
+  // --- Auto-scroll to bottom ---
   useEffect(() => {
     if (ContainerMessageRef.current && messages?.length > 0) {
       ContainerMessageRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -46,25 +46,24 @@ const Chat = ({ onBack }) => {
 
   return (
     <div className="flex flex-col w-full h-full bg-lightMode-bg dark:bg-darkMode-bg rounded-lg overflow-hidden shadow-md">
-      
-      {/* Chat Header */}
+
+      {/* ✅ Responsive Chat Header - visible on all screens */}
       <div className="sticky top-0 z-20 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-darkMode-menu shadow-sm">
         <ChatHeader onBack={onBack} />
       </div>
 
-      {/* Messages Area */}
+      {/* 💬 Messages Area */}
       <div
-        className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-3 space-y-6 
-          bg-lightMode-bg dark:bg-darkMode-bg 
-          scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 
-          scrollbar-track-transparent"
-        // style={backgroundStyle}
+        className="flex-1 overflow-y-auto overflow-x-hidden px-2 sm:px-3 md:px-4 py-2 sm:py-3 space-y-5
+        bg-lightMode-bg dark:bg-darkMode-bg 
+        scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 
+        scrollbar-track-transparent"
       >
         {sortedDates.map((dateKey) => (
           <div key={dateKey}>
-            {/* Date separator */}
-            <div className="flex justify-center my-4">
-              <div className="text-xs text-gray-600 dark:text-gray-400 
+            {/* 📅 Date separator */}
+            <div className="flex justify-center my-2 sm:my-3 md:my-4">
+              <div className="text-[10px] sm:text-xs md:text-sm text-gray-600 dark:text-gray-400 
                               bg-gray-200 dark:bg-gray-700 
                               px-3 py-1 rounded-full shadow-sm">
                 {getDisplayDate(dateKey)}
@@ -73,9 +72,8 @@ const Chat = ({ onBack }) => {
 
             {/* Messages under this date */}
             {groupedMessages[dateKey].map((msg, index) => {
-              const senderId = msg.sender?._id || msg.sender; // سواء object أو string
+              const senderId = msg.sender?._id || msg.sender;
               const isMine = senderId === user?._id;
-
               return isMine ? (
                 <SenderMessage key={msg._id || index} message={msg} user={user} />
               ) : (
@@ -87,8 +85,8 @@ const Chat = ({ onBack }) => {
         <div ref={ContainerMessageRef}></div>
       </div>
 
-      {/* Chat Input */}
-      <div className="border-t border-gray-200 dark:border-gray-700 p-3 bg-white dark:bg-darkMode-menu shadow-sm">
+      {/* 📝 Chat Input */}
+      <div className="border-t border-gray-200 dark:border-gray-700 p-2 sm:p-3 md:p-4 bg-white dark:bg-darkMode-menu shadow-sm">
         <ChatInput />
       </div>
     </div>
