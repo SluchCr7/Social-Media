@@ -21,13 +21,13 @@ const Sluchits = ({ activeTab }) => {
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(true)
   useEffect(() => {
-    if (!userId) return
+    if (!user?._id) return
     setLoading(true)
-    getUserById(userId)
+    getUserById(user?._id)
       .then(res => setUserData(res))
       .catch(err => console.log(err))
       .finally(() => setLoading(false))
-  }, [userId])
+  }, [user?._id])
 
   const following = Array.isArray(userData?.following) ? userData.following : [];
   const userId = userData?._id;
