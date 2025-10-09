@@ -244,6 +244,15 @@ useEffect(() => {
     setSelectedUser(matchedUser || user || {})
   }, [users, user])
 
+
+  const filteredUsers = users?.filter(
+  (u) =>
+    mentionQuery &&
+    (u.username?.toLowerCase().includes(mentionQuery.toLowerCase()) ||
+     u.profileName?.toLowerCase().includes(mentionQuery.toLowerCase())) &&
+    u._id !== user._id // استثناء المستخدم الحالي
+) || []
+
   // ------------------- UI -------------------
   return (
     <main className="flex items-center justify-center w-full py-10 px-4 bg-gray-50 dark:bg-darkMode-bg transition-colors">
