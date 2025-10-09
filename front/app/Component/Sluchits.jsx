@@ -18,9 +18,19 @@ const Sluchits = ({ activeTab }) => {
   const { posts, isLoading, fetchPosts, hasMore, setPage, page } = usePost();
   const { user, suggestedUsers } = useAuth();
   const { communities } = useCommunity();
+  const [userData, setUserData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  useEffect(() => {
+    if (!userId) return
+    setLoading(true)
+    getUserById(userId)
+      .then(res => setUserData(res))
+      .catch(err => console.log(err))
+      .finally(() => setLoading(false))
+  }, [userId])
 
-  const following = Array.isArray(user?.following) ? user.following : [];
-  const userId = user?._id;
+  const following = Array.isArray(userData?.following) ? userData.following : [];
+  const userId = userData?._id;
 
   // 🎯 فلترة وترتيب المنشورات
   const filteredPosts = useMemo(() => {
@@ -41,7 +51,7 @@ const Sluchits = ({ activeTab }) => {
 
     // 🟣 For You feed
     if (activeTab === 'foryou') {
-      if (!user?.interests || user.interests.length === 0) {
+      if (!userData?.interests || userData.interests.length === 0) {
         // fallback إلى timeline عادي
         return posts
           .slice()
@@ -57,7 +67,7 @@ const Sluchits = ({ activeTab }) => {
           `.toLowerCase();
 
           let score = 0;
-          user.interests.forEach(interest => {
+          userData.interests.forEach(interest => {
             if (text.includes(interest.toLowerCase())) score += 1;
           });
 
@@ -80,7 +90,7 @@ const Sluchits = ({ activeTab }) => {
     return posts
       .slice()
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  }, [posts, following, activeTab, user?.interests]);
+  }, [posts, following, activeTab, userData?.interests]);
 
   // 🔹 فلترة المستخدمين المقترحين
   const filteredUsers = useMemo(() => {

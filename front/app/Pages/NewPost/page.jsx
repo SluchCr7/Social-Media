@@ -356,20 +356,22 @@ useEffect(() => {
             </button>
           </div>
 
-          {/* Text Area */}
-          <div className="relative">
+            {/* Text Area */}
+          <div className="relative w-full">
+            {/* خلفية النص (الهايلايت) */}
             <div
-              className={`absolute top-0 left-0 w-full h-full p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed
-                ${/[\u0600-\u06FF]/.test(postText) ? 'text-right' : 'text-left'}
-                ${/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
+              className={`absolute inset-0 p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed
+                ${/[\u0600-\u06FF]/.test(postText) ? 'text-right rtl' : 'text-left ltr'}
               `}
               style={{
                 direction: /[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr',
+                color: 'transparent', // <=== هذه مهمة جدًا
               }}
             >
               {renderHighlightedText(postText)}
             </div>
 
+            {/* مربع الكتابة */}
             <textarea
               ref={textareaRef}
               value={postText}
@@ -383,9 +385,13 @@ useEffect(() => {
                   : 'bg-gray-50 dark:bg-darkMode-bg border-gray-300 dark:border-gray-600 focus:ring-blue-500'
                 } text-gray-900 dark:text-white`}
               style={{
-                direction: /[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr',
+                background: 'transparent', // مهم جدًا
+                position: 'relative',
+                zIndex: 10, // فوق الهايلايت
               }}
             />
+          </div>
+
 
           </div>
 

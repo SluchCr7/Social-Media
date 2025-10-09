@@ -3,49 +3,74 @@ import Link from "next/link";
 export const renderTextWithMentionsHashtagsAndLinks = (
   text,
   mentions = [],
-  hashtags = []
+  hashtags = [],
+  links = [] // مصفوفة روابط أو كائنات { label, url }
 ) => {
   if (!text) return null;
 
   let rendered = [];
 
   // ----------------- Mentions -----------------
-  const escapeRegExp = (s) =>
-    typeof s === "string" ? s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") : "";
-
   const sortedMentions = [...mentions].sort(
-    (a, b) => (b?.username?.length || 0) - (a?.username?.length || 0)
+    (a, b) => b.username?.length - a.username?.length
   );
 
   let tempText = text;
 
   sortedMentions.forEach((user) => {
-    const uname = user?.username;
-    if (!uname || typeof uname !== "string") return;
-    const mentionPattern = new RegExp(`@${escapeRegExp(uname)}`, "i");
-    tempText = tempText.replace(mentionPattern, `@@MENTION:${user._id}@@`);
+    const mentionPattern = new RegExp(`@${user?.username}`, "gi");
+    tempText = tempText.replace(mentionPattern, `@@MENTION:${user?._id}@@`);
+  });
+
+  // ----------------- Links -----------------
+  links.forEach((link) => {
+    const url = typeof link === 'string' ? link : link.url;
+    const label = typeof link === 'string' ? link : link.label || link.url;
+    if (!url) return;
+    const escapedUrl = url.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const linkPattern = new RegExp(escapedUrl, "gi");
+    tempText = tempText.replace(linkPattern, `@@LINK:${url}::${label}@@`);
   });
 
   // ----------------- Split Text -----------------
-  const parts = tempText.split(/(@@MENTION:[^@]+@@)/g);
+  const parts = tempText.split(/(@@MENTION:[^@]+@@|@@LINK:[^@]+::[^@]+@@)/g);
 
   parts.forEach((part, i) => {
     // ---- Mentions ----
     const mentionMatch = part.match(/^@@MENTION:([^@]+)@@$/);
     if (mentionMatch) {
       const id = mentionMatch[1];
-      const mentionedUser = mentions.find((u) => u._id === id);
+      const mentionedUser = mentions.find((u) => u?._id === id);
       if (mentionedUser) {
         rendered.push(
           <Link
             key={i}
-            href={`/Pages/User/${mentionedUser._id}`}
+            href={`/Pages/User/${mentionedUser?._id}`}
             className="text-blue-500 font-semibold hover:underline"
           >
-            @{mentionedUser.username}
+            @{mentionedUser?.username}
           </Link>
         );
       }
+      return;
+    }
+
+    // ---- Links ----
+    const linkMatch = part.match(/^@@LINK:([^:]+)::(.+)@@$/);
+    if (linkMatch) {
+      const url = linkMatch[1];
+      const label = linkMatch[2];
+      rendered.push(
+        <a
+          key={i}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-green-500 hover:underline"
+        >
+          {label}
+        </a>
+      );
       return;
     }
 
