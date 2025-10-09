@@ -1,4 +1,4 @@
-export default CalendarSkeleton = () => (
+const CalendarSkeleton = () => (
   <div className="animate-pulse space-y-4">
     {/* Header */}
     <div className="flex justify-between items-center">
@@ -17,10 +17,13 @@ export default CalendarSkeleton = () => (
     {/* Days */}
     <div className="grid grid-cols-7 gap-2 mt-3">
       {Array.from({ length: 35 }).map((_, i) => (
-        <div key={i} className="h-20 sm:h-24 bg-gray-800/40 rounded-xl border border-gray-700/40" />
+        <div
+          key={i}
+          className="h-20 sm:h-24 bg-gray-800/40 rounded-xl border border-gray-700/40"
+        />
       ))}
     </div>
   </div>
 );
 
-CalendarSkeleton.displayName = 'CalendarSkeleton';
+export default CalendarSkeleton;
