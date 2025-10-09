@@ -22,3 +22,5 @@ export default CalendarSkeleton = () => (
     </div>
   </div>
 );
+
+CalendarSkeleton.displayName = 'CalendarSkeleton';
