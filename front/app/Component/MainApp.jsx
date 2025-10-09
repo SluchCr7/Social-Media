@@ -7,10 +7,13 @@ import { useNotify } from '../Context/NotifyContext';
 import { useMessage } from '../Context/MessageContext';
 import Header from './Header';
 import { useAuth } from '../Context/AuthContext';
+import LoadingOverlay from './Post/LoadingOverlay';
+import { usePost } from '../Context/PostContext';
 
 
 const MainApp = () => {
   const [showNotifications, setShowNotifications] = useState(false);
+  const {isLoadingPostCreated } = usePost();
   const { markAllAsRead, unreadCount } = useNotify();
   const { isLogin } = useAuth();
   const { unReadedMessage } = useMessage();
@@ -32,6 +35,7 @@ const MainApp = () => {
         <div className='w-full pl-2'>
           {isLogin && <Stories />}
         </div>
+        <LoadingOverlay isLoading={isLoadingPostCreated}/>
         <Sluchits activeTab={activeTab} />
       </div>
 

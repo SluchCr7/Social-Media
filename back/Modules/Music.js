@@ -73,15 +73,19 @@ const MusicSchema = new mongoose.Schema({
     timestamps: true
 });
 
-MusicSchema.methods.updatePopularity = async function() {
-    const likesCount = this.likes.length;
+MusicSchema.methods.updatePopularity = async function({ threshold = 50 } = {}) {
+  if (!this.likes) this.likes = [];
 
-    // مثال: تصبح popular بعد 50 لايك
-    this.isPopular = likesCount >= 50;
+  const isNowPopular = this.likes.length >= threshold;
 
+  // فقط احفظ إذا تغيرت الحالة
+  if (this.isPopular !== isNowPopular) {
+    this.isPopular = isNowPopular;
     await this.save();
-    return this;
-}
+  }
+
+  return this;
+};
 
 // 🎯 Joi validation المحدثة
 const musicValidation = Joi.object({

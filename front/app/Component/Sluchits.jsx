@@ -15,7 +15,7 @@ import { useCommunity } from '../Context/CommunityContext';
 import { SuggestionRow } from './SuggestedRow';
 
 const Sluchits = ({ activeTab }) => {
-  const { posts, isLoading, fetchPosts, hasMore, setPage, page } = usePost();
+  const { posts, isLoading, fetchPosts, hasMore, setPage, page,isLoadingPostCreated } = usePost();
   const { user, suggestedUsers,getUserById } = useAuth();
   const { communities } = useCommunity();
   const [userData, setUserData] = useState(null)

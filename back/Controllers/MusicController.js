@@ -21,16 +21,6 @@ const createMusic = asyncHandler(async (req, res) => {
       return res.status(500).json({ message: "Audio upload failed" });
     }
 
-    // قراءة مدة الصوت باستخدام music-metadata
-    // const audioPath = req.files.audio[0].path; 
-    // let duration = 0;
-    // try {
-    //   const metadata = await mm.parseFile(audioPath);
-    //   duration = Math.floor(metadata.format.duration); // بالثواني
-    // } catch (err) {
-    //   console.warn("Could not parse audio duration:", err.message);
-    // }
-
     // رفع صورة الكوفر (اختياري)
     let coverUrl = null;
     if (req.files.image && req.files.image[0]) {
@@ -172,19 +162,15 @@ const toggleLike = asyncHandler(async (req, res) => {
     }
   }
 
-  // حفظ التغييرات
-  await music.save();
-
-  // تحديث الشعبية بناءً على عدد اللايكات فقط
-  const POPULAR_LIKES_THRESHOLD = 50; // عدّل العدد حسب احتياجك
-  music.isPopular = music.likes.length >= POPULAR_LIKES_THRESHOLD;
-  await music.save();
+  // تحديث الشعبية باستخدام الـmethod الجديدة
+  await music.updatePopularity({ threshold: 50 }); // يمكن تعديل threshold حسب الحاجة
 
   // تعبئة بيانات المالك للعرض
   await music.populate("owner", "username profilePhoto");
 
   res.status(200).json(music);
 });
+
 
 // ✅ إضافة مشاهدة
 const addView = asyncHandler(async (req, res) => {

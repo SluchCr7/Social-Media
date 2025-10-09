@@ -24,6 +24,7 @@ export const PostContextProvider = ({ children }) => {
   const [userPages, setUserPages] = useState(1);
   const [userHasMore, setUserHasMore] = useState(true);
   const [userIsLoading , setUserIsLoading] = useState(false);
+  const [isLoadingPostCreated , setIsLoadingPostCreated] = useState(false)
   const fetchPosts = async (pageNum = 1) => {
     if (!hasMore && pageNum !== 1) return;
 
@@ -86,7 +87,7 @@ export const PostContextProvider = ({ children }) => {
     if (links.length > 0) {
       formData.append("links", JSON.stringify(links));
     }
-
+    setIsLoadingPostCreated(true)
     try {
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/add`,
@@ -112,6 +113,8 @@ export const PostContextProvider = ({ children }) => {
     } catch (err) {
       const message = err?.response?.data?.message;
       showAlert(message || "❌ Failed to upload post.");
+    }finally{
+      setIsLoadingPostCreated(false)
     }
   };
 
@@ -427,6 +430,7 @@ const fetchUserPosts = async (userId, pageNum = 1, limit = 5) => {
         copyPostLink,
         imageView , setImageView, viewPost,fetchPosts,hasMore, setPage
         ,hahaPost, userPosts, fetchUserPosts, userPages,setUserPages , userHasMore,userIsLoading
+        ,isLoadingPostCreated
       }}
     >
       {children}
