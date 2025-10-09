@@ -18,7 +18,6 @@ const DesignPost = ({
   images,
   setImages,
   textareaRef,
-  handleTextareaChange,
   errorText,
   removeImage,
   handleImageChange,
@@ -30,18 +29,16 @@ const DesignPost = ({
   scheduleDate,
   scheduleEnabled,
   setScheduleEnabled,
-  selectedMentions, setSelectedMentions, mentionSearch, setMentionSearch,
-  showMentionList,setShowMentionList,filteredMentions,selectMention,removeMention,
-  mentionPosition,
   // 🟢 Links
   links,
   setLinks,
   linkInput,
   setLinkInput,
   handleAddLink,
-  handleRemoveLink
+  handleRemoveLink,
+  // 🟢 Mentions Input
+  MentionInputBox
 }) => {
-
   return (
     <main className="flex items-center justify-center w-full py-10 px-4 bg-gray-50 dark:bg-darkMode-bg transition-colors">
       <div className="w-full max-w-5xl mx-auto bg-lightMode-bg dark:bg-darkMode-bg rounded-3xl shadow-xl overflow-hidden transition-all duration-500 relative">
@@ -91,7 +88,6 @@ const DesignPost = ({
         {/* Body */}
         <div className="relative p-6 pb-2">
 
-
           {/* Links */}
           {links?.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-2">
@@ -126,76 +122,18 @@ const DesignPost = ({
             </button>
           </div>
 
-          {/* Highlight Layer */}
-          <div className="relative">
-            <div
-              className="absolute top-0 left-0 w-full h-full p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed"
-            >
-              {renderHighlightedText(postText)}
-            </div>
-
-            {/* Transparent Textarea */}
-            <textarea
-              ref={textareaRef}
-              value={postText}
-              onChange={handleTextareaChange}
-              rows={5}
-              placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
-              dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
-              className={`relative w-full p-5 text-base leading-relaxed text-transparent rounded-2xl resize-none border shadow-inner bg-transparent caret-blue-600 z-10 selection:bg-blue-200 selection:text-black
-                ${errorText
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'bg-gray-50 dark:bg-darkMode-bg border-gray-300 dark:border-gray-600 focus:ring-blue-500'
-                }`}
-              style={{ textAlign: /[\u0600-\u06FF]/.test(postText) ? 'right' : 'left' }}
-            />
+          {/* MentionsInput */}
+          <div className="relative mb-4">
+            {MentionInputBox ? (
+              <div className="relative">
+                <MentionInputBox />
+              </div>
+            ) : (
+              <p className="text-gray-400 text-sm">MentionInput not loaded</p>
+            )}
           </div>
         </div>
-       {/* Mentions */}
-        {selectedMentions?.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2">
-            {selectedMentions.map((m, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 px-3 py-1 rounded-full border border-blue-400/40 backdrop-blur-md shadow-sm"
-              >
-                <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">@{m.username}</span>
-                <button
-                  onClick={() => removeMention(idx)}
-                  className="p-1 rounded-full hover:bg-red-500 hover:text-white transition"
-                >
-                  <FiX size={14} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
 
-        {/* Mention Picker */}
-        {showMentionList && filteredMentions.length > 0 && (
-          <div className="absolute z-50 bg-white dark:bg-darkMode-bg border border-gray-300 dark:border-gray-700 rounded-xl shadow-xl w-full max-h-52 overflow-y-auto mt-2">
-            {filteredMentions.map((user) => (
-              <div
-                key={user._id}
-                onClick={() => selectMention(user)}
-                className="flex items-center gap-3 px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/40 cursor-pointer transition"
-              >
-                <Image
-                  src={user?.profilePhoto?.url || '/default.png'}
-                  alt="avatar"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">@{user.username}</h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{user.profileName}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
- 
         {/* Image Preview */}
         {images.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 px-6 pb-4">

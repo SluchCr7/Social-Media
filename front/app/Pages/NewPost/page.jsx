@@ -6,7 +6,7 @@ import { usePost } from '../../Context/PostContext';
 import { useCommunity } from '../../Context/CommunityContext';
 import { useAuth } from '../../Context/AuthContext';
 import DesignPost from './Design';
-
+import { MentionsInput, Mention } from 'react-mentions';
 const NewPost = () => {
   const [postText, setPostText] = useState('');
   const [images, setImages] = useState([]);
@@ -14,7 +14,7 @@ const NewPost = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [errorText, setErrorText] = useState(false);
   const [selectedUser , setSelectedUser] = useState({});
-  const [mentions, setMentions] = useState([])
+  const [mentions, setMentions] = useState([]); // 🟢 حفظ IDs للمستخدمين المذكورين
   const [mentionsSelected , setMentionsSelected] = useState()
   // 🕓 حالات الجدولة الجديدة
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
@@ -26,47 +26,8 @@ const NewPost = () => {
   const { communities } = useCommunity();
   const [links, setLinks] = useState([]); // 🟢 state للروابط
   const [linkInput, setLinkInput] = useState(''); // 🟢 حقل إدخال رابط جديد
-  // ------------------- Mentions -------------------
-  const [mentionSearch, setMentionSearch] = useState('');
-  const [showMentionList, setShowMentionList] = useState(false);
-  const [selectedMentions, setSelectedMentions] = useState([]);
-  const [mentionPosition, setMentionPosition] = useState({ top: 0, left: 0 });
   const myFollowing = selectedUser?.following || [];
 
-  const filteredMentions = myFollowing.filter(f =>
-    f?.username?.toLowerCase().includes(mentionSearch.toLowerCase())
-  );
-
-  const handleTextareaChange = (e) => {
-    const value = e.target.value;
-    setPostText(value);
-    if (value.length <= 500) setErrorText(false);
-
-    // 🟢 اكتشاف إذا كتب @
-    const lastWord = value.split(/\s+/).pop();
-    if (lastWord.startsWith('@')) {
-      setMentionSearch(lastWord.slice(1));
-      setShowMentionList(true);
-    } else {
-      setShowMentionList(false);
-    }
-  };
-
-  const selectMention = (user) => {
-    setSelectedMentions(prev => [...prev, user]);
-    setShowMentionList(false);
-
-    // 🟢 نضيف المنشن داخل النص
-    const cursorPos = textareaRef.current.selectionStart;
-    const newText =
-      postText.slice(0, cursorPos).replace(/@\w*$/, `@${user.username} `) +
-      postText.slice(cursorPos);
-    setPostText(newText);
-  };
-
-  const removeMention = (index) => {
-    setSelectedMentions(prev => prev.filter((_, i) => i !== index));
-  };
 // ---- إضافة رابط جديد ----
   const handleAddLink = () => {
     const url = linkInput.trim();
@@ -154,7 +115,37 @@ const NewPost = () => {
     setScheduleEnabled(false);
     setScheduleDate('');
   };
-
+  const MentionInputBox = () => (
+    <MentionsInput
+      value={postText}
+      onChange={(e) => setPostText(e.target.value)}
+      className="mentions-input w-full rounded-2xl p-4 bg-gray-50 dark:bg-darkMode-bg text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+      placeholder="What's on your mind? Add #hashtags or @mentions..."
+      style={{
+        control: {
+          fontSize: 16,
+          fontWeight: '400',
+          backgroundColor: 'transparent',
+        },
+        highlighter: {
+          overflow: 'hidden',
+        },
+        input: {
+          margin: 0,
+        },
+      }}
+    >
+      <Mention
+        trigger="@"
+        data={myFollowing.map((u) => ({
+          id: u._id,
+          display: u.username,
+        }))}
+        style={{ color: '#4F46E5', fontWeight: 600 }}
+        onAdd={(id) => setMentions((prev) => [...new Set([...prev, id])])}
+      />
+    </MentionsInput>
+  );
   // ------------------- Highlight Text -------------------
   const renderHighlightedText = (text) => {
     return text.split(/(\s+)/).map((part, idx) => {
@@ -179,18 +170,6 @@ const NewPost = () => {
       setPostText={setPostText}
       images={images}
       setImages={setImages}
-      // ========= Mentions
-      selectedMentions={selectedMentions}
-      setSelectedMentions={setSelectedMentions}
-      mentionSearch={mentionSearch}
-      setMentionSearch={setMentionSearch}
-      showMentionList={showMentionList}
-      setShowMentionList={setShowMentionList}
-      filteredMentions={filteredMentions}
-      selectMention={selectMention}
-      removeMention={removeMention}
-      mentionPosition={mentionPosition}
-      // ==========
       textareaRef={textareaRef}
       handleTextareaChange={handleTextareaChange}
       errorText={errorText}
@@ -211,6 +190,7 @@ const NewPost = () => {
       setLinkInput={setLinkInput}
       handleAddLink={handleAddLink}
       handleRemoveLink={handleRemoveLink}
+      MentionInputBox={MentionInputBox} // 🟢 تمرير مكون الإدخال
     />
   );
 };
