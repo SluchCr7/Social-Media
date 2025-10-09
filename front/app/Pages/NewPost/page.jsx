@@ -392,9 +392,6 @@ useEffect(() => {
             />
           </div>
 
-
-          </div>
-
           <AnimatePresence>
             {showMentionBox && filteredUsers.length > 0 && (
               <motion.ul
