@@ -182,3 +182,11 @@
   }
 }
 
+.mentions-input__control {
+  background: transparent !important;
+}
+
+.mentions__mention {
+  color: #4F46E5;
+  font-weight: 600;
+}
