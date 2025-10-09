@@ -20,7 +20,6 @@ const DesignPost = ({
   textareaRef,
   handleTextareaChange,
   errorText,
-  filteredMentions,
   removeImage,
   handleImageChange,
   showEmojiPicker,
