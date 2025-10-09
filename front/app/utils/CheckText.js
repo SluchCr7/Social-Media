@@ -3,37 +3,31 @@ import Link from "next/link";
 export const renderTextWithMentionsHashtagsAndLinks = (
   text,
   mentions = [],
-  hashtags = [],
-  links = [] // مصفوفة روابط أو كائنات { label, url }
+  hashtags = []
 ) => {
   if (!text) return null;
 
   let rendered = [];
 
   // ----------------- Mentions -----------------
+  const escapeRegExp = (s) =>
+    typeof s === "string" ? s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") : "";
+
   const sortedMentions = [...mentions].sort(
-    (a, b) => b.username.length - a.username.length
+    (a, b) => (b?.username?.length || 0) - (a?.username?.length || 0)
   );
 
   let tempText = text;
 
   sortedMentions.forEach((user) => {
-    const mentionPattern = new RegExp(`@${user.username}`, "gi");
+    const uname = user?.username;
+    if (!uname || typeof uname !== "string") return;
+    const mentionPattern = new RegExp(`@${escapeRegExp(uname)}`, "i");
     tempText = tempText.replace(mentionPattern, `@@MENTION:${user._id}@@`);
   });
 
-  // ----------------- Links -----------------
-  links.forEach((link) => {
-    const url = typeof link === 'string' ? link : link.url;
-    const label = typeof link === 'string' ? link : link.label || link.url;
-    if (!url) return;
-    const escapedUrl = url.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const linkPattern = new RegExp(escapedUrl, "gi");
-    tempText = tempText.replace(linkPattern, `@@LINK:${url}::${label}@@`);
-  });
-
   // ----------------- Split Text -----------------
-  const parts = tempText.split(/(@@MENTION:[^@]+@@|@@LINK:[^@]+::[^@]+@@)/g);
+  const parts = tempText.split(/(@@MENTION:[^@]+@@)/g);
 
   parts.forEach((part, i) => {
     // ---- Mentions ----
@@ -52,25 +46,6 @@ export const renderTextWithMentionsHashtagsAndLinks = (
           </Link>
         );
       }
-      return;
-    }
-
-    // ---- Links ----
-    const linkMatch = part.match(/^@@LINK:([^:]+)::(.+)@@$/);
-    if (linkMatch) {
-      const url = linkMatch[1];
-      const label = linkMatch[2];
-      rendered.push(
-        <a
-          key={i}
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-green-500 hover:underline"
-        >
-          {label}
-        </a>
-      );
       return;
     }
 

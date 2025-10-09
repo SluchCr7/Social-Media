@@ -358,9 +358,18 @@ useEffect(() => {
 
           {/* Text Area */}
           <div className="relative">
-            <div className="absolute top-0 left-0 w-full h-full p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed">
+            <div
+              className={`absolute top-0 left-0 w-full h-full p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed
+                ${/[\u0600-\u06FF]/.test(postText) ? 'text-right' : 'text-left'}
+                ${/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
+              `}
+              style={{
+                direction: /[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr',
+              }}
+            >
               {renderHighlightedText(postText)}
             </div>
+
             <textarea
               ref={textareaRef}
               value={postText}
@@ -368,15 +377,16 @@ useEffect(() => {
               rows={5}
               placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
               dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
-              className={`relative w-full p-5 text-base leading-relaxed text-transparent rounded-2xl resize-none border shadow-inner bg-transparent caret-blue-600 z-10 selection:bg-blue-200 selection:text-black
+              className={`relative w-full p-5 text-base leading-relaxed bg-transparent border rounded-2xl resize-none shadow-inner caret-blue-600 z-10 selection:bg-blue-200 selection:text-black
                 ${errorText
                   ? 'border-red-500 focus:ring-red-500'
                   : 'bg-gray-50 dark:bg-darkMode-bg border-gray-300 dark:border-gray-600 focus:ring-blue-500'
-                }`}
+                } text-gray-900 dark:text-white`}
               style={{
-                textAlign: /[\u0600-\u06FF]/.test(postText) ? 'right' : 'left',
+                direction: /[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr',
               }}
             />
+
           </div>
 
           <AnimatePresence>
@@ -531,7 +541,7 @@ useEffect(() => {
         </div>
 
         {/* Schedule Section */}
-        <div className="px-6 pb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="px-6 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setScheduleEnabled(!scheduleEnabled)}

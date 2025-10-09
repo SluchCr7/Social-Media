@@ -18,10 +18,6 @@ import { useMusicPlayer } from '../Context/MusicPlayerContext';
 import SongPlayer from './MusicPage/SongPlayer';
 import ExpandedWindow from './MusicPage/ExpandedWindow';
 const LayoutComponent = ({ children }) => {
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showMessanger, setShowMessanger] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const [showNewSluchit, setShowNewSluchit] = useState(false);
   const [loading, setLoading] = useState(true); // للتحكم في الـ Loader
 
   const {
@@ -102,10 +98,6 @@ const LayoutComponent = ({ children }) => {
 
           {isLogin && !hideLayout && (
             <Menu
-              showNotifications={showNotifications}
-              setShowNotifications={setShowNotifications}
-              showMessanger={showMessanger}
-              setShowMessanger={setShowMessanger}
             />
           )}
 
