@@ -16,7 +16,7 @@ import { SuggestionRow } from './SuggestedRow';
 
 const Sluchits = ({ activeTab }) => {
   const { posts, isLoading, fetchPosts, hasMore, setPage, page } = usePost();
-  const { user, suggestedUsers } = useAuth();
+  const { user, suggestedUsers,getUserById } = useAuth();
   const { communities } = useCommunity();
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(true)
