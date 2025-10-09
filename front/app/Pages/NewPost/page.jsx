@@ -31,6 +31,7 @@ const NewPost = () => {
   const [showMentionList, setShowMentionList] = useState(false);
   const [selectedMentions, setSelectedMentions] = useState([]);
   const [mentionPosition, setMentionPosition] = useState({ top: 0, left: 0 });
+  const myFollowing = selectedUser?.following || [];
 
   const filteredMentions = myFollowing.filter(f =>
     f?.username?.toLowerCase().includes(mentionSearch.toLowerCase())
@@ -88,7 +89,6 @@ const NewPost = () => {
     setSelectedUser(matchedUser || user || {})
   }, [users, user])
 
-  const myFollowing = selectedUser?.following || [];
 
   // ------------------- Image Upload -------------------
   const handleImageChange = (e) => {
