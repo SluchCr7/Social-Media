@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -27,7 +28,11 @@ const NewPost = () => {
   const [links, setLinks] = useState([]); // 🟢 state للروابط
   const [linkInput, setLinkInput] = useState(''); // 🟢 حقل إدخال رابط جديد
   const myFollowing = selectedUser?.following || [];
-
+  const handleTextareaChange = (e) => {
+    const value = e.target.value;
+    setPostText(value);
+    if (value.length <= 500) setErrorText(false);
+  };
 // ---- إضافة رابط جديد ----
   const handleAddLink = () => {
     const url = linkInput.trim();

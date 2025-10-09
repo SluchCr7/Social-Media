@@ -29,6 +29,7 @@ const DesignPost = ({
   scheduleDate,
   scheduleEnabled,
   setScheduleEnabled,
+  handleTextareaChange,
   // 🟢 Links
   links,
   setLinks,
