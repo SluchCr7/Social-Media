@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 import Image from 'next/image'
 import { FiX } from 'react-icons/fi'
@@ -36,9 +38,8 @@ const DesignPost = ({
   scheduleDate,
   scheduleEnabled,
   setScheduleEnabled,
-  mentionPosition,
 
-  // 🟢 Props جديدة للـ Links
+  // 🟢 Links
   links,
   setLinks,
   linkInput,
@@ -47,27 +48,27 @@ const DesignPost = ({
   handleRemoveLink
 }) => {
 
-  // إزالة منشن
+  // 🧩 إزالة mention من القائمة والنص
   const handleRemoveMention = (id) => {
-    const removed = selectedMentions.find(m => m._id === id);
-    setSelectedMentions(prev => prev.filter(m => m._id !== id));
+    const removed = selectedMentions.find(m => m._id === id)
+    setSelectedMentions(prev => prev.filter(m => m._id !== id))
     if (removed?.username) {
       setPostText(prev => {
-        const re = new RegExp(`@${removed.username}\\b\\s?`, 'g');
-        return prev.replace(re, '');
-      });
+        const re = new RegExp(`@${removed.username}\\b\\s?`, 'g')
+        return prev.replace(re, '')
+      })
     }
-  };
+  }
 
   return (
     <main className="flex items-center justify-center w-full py-10 px-4 bg-gray-50 dark:bg-darkMode-bg transition-colors">
-      <div className="w-full max-w-5xl mx-auto bg-lightMode-bg dark:bg-darkMode-bg rounded-3xl shadow-xl overflow-hidden transition-all duration-500">
+      <div className="w-full max-w-5xl mx-auto bg-lightMode-bg dark:bg-darkMode-bg rounded-3xl shadow-xl overflow-hidden transition-all duration-500 relative">
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between w-full p-6 border-b border-gray-200 dark:border-gray-700 gap-4">
           <div className="flex items-center gap-4">
             <Image
-              src={user?.profilePhoto?.url}
+              src={user?.profilePhoto?.url || '/default.png'}
               alt="profile"
               width={56}
               height={56}
@@ -109,43 +110,38 @@ const DesignPost = ({
         <div className="relative p-6 pb-2">
 
           {/* Selected Mentions */}
-          {selectedMentions && selectedMentions.length > 0 && (
-            <div className="mb-4 px-1">
-              <div className="flex items-center gap-2 overflow-x-auto py-1">
-                {selectedMentions.map((m) => (
-                  <div
-                    key={m._id}
-                    className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full shadow-sm whitespace-nowrap"
+          {selectedMentions?.length > 0 && (
+            <div className="mb-4 px-1 flex items-center gap-2 overflow-x-auto">
+              {selectedMentions.map((m) => (
+                <div
+                  key={m._id}
+                  className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full shadow-sm"
+                >
+                  <Image
+                    src={m?.profilePhoto?.url || '/default.png'}
+                    alt={m.username}
+                    width={28}
+                    height={28}
+                    className="rounded-full object-cover"
+                  />
+                  <span className="text-sm text-gray-800 dark:text-gray-100">@{m.username}</span>
+                  <button
+                    onClick={() => handleRemoveMention(m._id)}
+                    className="p-1 rounded-full hover:bg-red-500 hover:text-white transition"
                   >
-                    <div className="flex items-center gap-2">
-                      <Image
-                        src={m?.profilePhoto?.url || '/default.png'}
-                        alt={m.username}
-                        width={28}
-                        height={28}
-                        className="rounded-full object-cover"
-                      />
-                      <span className="text-sm text-gray-800 dark:text-gray-100">@{m.username}</span>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveMention(m._id)}
-                      aria-label={`Remove mention ${m.username}`}
-                      className="p-1 rounded-full hover:bg-red-500 hover:text-white transition"
-                    >
-                      <FiX size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
+                    <FiX size={14} />
+                  </button>
+                </div>
+              ))}
             </div>
           )}
 
-          {/* Links Chips */}
-          {links && links.length > 0 && (
-            <div className="mb-4 px-1 flex flex-wrap gap-2">
+          {/* Links */}
+          {links?.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-2">
               {links.map((link, idx) => (
                 <div key={idx} className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full shadow-sm">
-                  <span className="text-sm text-gray-800 dark:text-gray-100 truncate max-w-xs">{link}</span>
+                  <a href={link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 truncate max-w-[150px]">{link}</a>
                   <button
                     onClick={() => handleRemoveLink(idx)}
                     className="p-1 rounded-full hover:bg-red-500 hover:text-white transition"
@@ -157,7 +153,7 @@ const DesignPost = ({
             </div>
           )}
 
-          {/* Link Input */}
+          {/* Add Link */}
           <div className="flex gap-2 mb-4">
             <input
               type="text"
@@ -191,28 +187,20 @@ const DesignPost = ({
               rows={5}
               placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
               dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
-              className={`relative w-full p-5 text-base font-sans leading-relaxed text-lightMode-text dark:text-darkMode-text rounded-2xl resize-none border shadow-inner focus:ring-2 bg-transparent caret-blue-600 z-10 text-transparent selection:bg-blue-200 selection:text-black
+              className={`relative w-full p-5 text-base leading-relaxed text-transparent rounded-2xl resize-none border shadow-inner bg-transparent caret-blue-600 z-10 selection:bg-blue-200 selection:text-black
                 ${errorText
-                  ? 'border-red-500 focus:ring-red-500 dark:border-red-500 dark:focus:ring-red-500'
+                  ? 'border-red-500 focus:ring-red-500'
                   : 'bg-gray-50 dark:bg-darkMode-bg border-gray-300 dark:border-gray-600 focus:ring-blue-500'
                 }`}
               style={{ textAlign: /[\u0600-\u06FF]/.test(postText) ? 'right' : 'left' }}
             />
           </div>
 
-          {/* Counter */}
-          <div className="flex justify-between items-center mt-1 text-xs">
-            <span className={`transition ${errorText ? 'text-red-500 font-semibold' : 'text-gray-500'}`}>
-              {postText.length}/500
-            </span>
-            {errorText && <span className="text-red-500">Max 500 characters allowed</span>}
-          </div>
-
-          {/* Mentions Dropdown */}
+          {/* Mentions Dropdown (🟦 NEW) */}
           {showMentionList && filteredMentions.length > 0 && (
             <div
-              className="absolute z-50 bg-white dark:bg-darkMode-bg shadow-2xl rounded-xl w-72 max-h-60 overflow-auto border border-gray-200 dark:border-gray-600"
-              style={{ top: mentionPosition.top, left: mentionPosition.left }}
+              className="absolute z-50 bg-white dark:bg-darkMode-bg shadow-2xl rounded-xl w-full max-h-60 overflow-auto border border-gray-200 dark:border-gray-600 mt-2"
+              style={{ top: '100%', left: 0 }}
             >
               {filteredMentions.map((u) => (
                 <div
@@ -239,7 +227,7 @@ const DesignPost = ({
           )}
         </div>
 
-        {/* Images Preview */}
+        {/* Image Preview */}
         {images.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 px-6 pb-4">
             {images.map((img, idx) => (
@@ -277,7 +265,7 @@ const DesignPost = ({
 
             {/* Emoji Picker */}
             {showEmojiPicker && (
-              <div className="absolute z-50 top-[-400px] left-6 w-[320px] rounded-2xl shadow-2xl overflow-hidden transition-transform duration-300 transform scale-95 animate-scale-up">
+              <div className="absolute z-50 bottom-[110%] left-0 w-[320px] rounded-2xl shadow-2xl overflow-hidden transition-transform duration-300">
                 <div className="flex justify-between items-center bg-gray-200 dark:bg-gray-700 px-3 py-2">
                   <span className="text-gray-700 dark:text-gray-200 font-semibold">Emojis</span>
                   <button
@@ -305,7 +293,7 @@ const DesignPost = ({
           </button>
         </div>
 
-        {/* Schedule Post Section */}
+        {/* Schedule Post */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-3 px-6 pb-6">
           <div className="flex items-center gap-2">
             <input

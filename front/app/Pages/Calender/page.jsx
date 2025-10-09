@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 import { useEvent } from "@/app/Context/EventContext";
 import DesignCalender from "./DesignCalender";
+import CalenderSkeleton from "@/app/Skeletons/CalenderSkeleton";
 
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(dayjs());
@@ -66,7 +67,7 @@ const Calendar = () => {
   }
 
   const isToday = (d) => dayjs().isSame(d, "day");
-
+  if (loading) return <CalenderSkeleton/>
   return (
     <>
       <DesignCalender

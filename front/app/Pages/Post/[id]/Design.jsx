@@ -14,6 +14,7 @@ import PostPhotos from "@/app/Component/Post/PostPhotos";
 import RenderPostText from "@/app/Component/Post/RenderText";
 import SharedTitle from "@/app/Component/Post/SharedTitle";
 import { HiBadgeCheck } from "react-icons/hi";
+import PostLinks from "@/app/Component/Post/PostLinks";
 
 const DesignPostSelect = ({
   post,
@@ -126,7 +127,7 @@ const DesignPostSelect = ({
           {post.text && (
             <RenderPostText text={post.text} mentions={post.mentions} hashtags={post.Hashtags} />
           )}
-
+          <PostLinks links={post?.links}/>
           {/* Shared Original */}
           {isShared && original && (
             <div className="bg-white/40 dark:bg-black/20 backdrop-blur-md border border-gray-200/40 dark:border-gray-700/40 rounded-xl p-3 sm:p-4 shadow-md">
@@ -153,6 +154,7 @@ const DesignPostSelect = ({
               {original?.Photos?.length > 0 && (
                 <PostPhotos photos={original.Photos} setImageView={setImageView} postId={original._id} />
               )}
+              <PostLinks links={original?.links}/>
             </div>
           )}
 

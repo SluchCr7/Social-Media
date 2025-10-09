@@ -224,32 +224,36 @@ const StoryViewer = ({ stories, onClose }) => {
 
         {/* الأكشنات */}
         <div className={`absolute ${showCommentInput ? "bottom-20" : "bottom-6"} left-1/2 -translate-x-1/2 flex items-center gap-6 sm:gap-8 z-50`}>
-          <button
-            onClick={handleLove}
-            className="p-3 sm:p-4 rounded-full bg-white/10 backdrop-blur-md hover:scale-110 transition shadow-md"
-          >
-            <FaHeart
-              className={`text-2xl sm:text-3xl ${story?.loves?.some(u => u?._id === user?._id) ? "text-red-500" : "text-white"}`}
-            />
-          </button>
-          <button
-            onClick={handleShare}
-            className="p-3 sm:p-4 rounded-full bg-white/10 backdrop-blur-md hover:scale-110 transition shadow-md"
-          >
-            <FaShare
-              className={`text-2xl sm:text-3xl text-white`}
-            />
-          </button>
-          {story?.owner?._id !== user?._id && (
-            <button
-              onClick={() => {
-                setSelectedUser(story?.owner)
-                setShowCommentInput(!showCommentInput)
-              }}
-              className="p-3 sm:p-4 rounded-full bg-white/10 backdrop-blur-md hover:scale-110 transition shadow-md"
-            >
-              <FaRegCommentDots className="text-white text-2xl sm:text-3xl" />
-            </button>
+          
+          {
+            story?.owner?._id !== user?._id &&(
+            <>
+              <button
+                onClick={handleLove}
+                className="p-3 sm:p-4 rounded-full bg-white/10 backdrop-blur-md hover:scale-110 transition shadow-md"
+              >
+                <FaHeart
+                  className={`text-2xl sm:text-3xl ${story?.loves?.some(u => u?._id === user?._id) ? "text-red-500" : "text-white"}`}
+                />
+              </button>
+              <button
+                onClick={handleShare}
+                className="p-3 sm:p-4 rounded-full bg-white/10 backdrop-blur-md hover:scale-110 transition shadow-md"
+              >
+                <FaShare
+                  className={`text-2xl sm:text-3xl text-white`}
+                />
+              </button> 
+              <button
+                onClick={() => {
+                  setSelectedUser(story?.owner)
+                  setShowCommentInput(!showCommentInput)
+                }}
+                className="p-3 sm:p-4 rounded-full bg-white/10 backdrop-blur-md hover:scale-110 transition shadow-md"
+              >
+                <FaRegCommentDots className="text-white text-2xl sm:text-3xl" />
+              </button>
+            </>
           )}
         </div>
 

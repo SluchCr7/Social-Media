@@ -132,7 +132,7 @@ const getUserStories = async (userId) => {
   };
 
   const shareStory = async (id) => {
-    if (!checkUserStatus("Share Story", showAlert, user)) return;
+    if (!user.token) showAlert("You must be logged in.");
     try {
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/share/${id}`,

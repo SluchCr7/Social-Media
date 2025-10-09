@@ -17,6 +17,7 @@ import { HiBadgeCheck } from 'react-icons/hi';
 import { useTranslate } from '../Context/TranslateContext';
 import { franc } from 'franc';
 import { languageMap , iso6391Map} from '../utils/Data';
+import PostLinks from './Post/PostLinks';
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost();
   const [showMenu, setShowMenu] = useState(false);
@@ -179,6 +180,8 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
               hashtags={post?.Hashtags}
               italic={post?.isShared}
             />
+            {/* 🔗 External Links */}
+            <PostLinks links={post?.links}/>
 
             {/* زر الترجمة / العودة للنص الأصلي */}
             {showTranslateButton && (
@@ -248,6 +251,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 {original?.Photos && (
                   <PostPhotos photos={original?.Photos} setImageView={setImageView} postId={original?._id} />
                 )}
+                <PostLinks links={original?.links}/>
               </Link>
             )}
 

@@ -11,294 +11,209 @@ import {
   FaCalendarAlt,
   FaRegStar,
 } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
+import AddEventModal from '@/app/Component/AddandUpdateMenus/AddEventModal';
+import EventDetailsModal from '@/app/Component/AddandUpdateMenus/EventDetailsModal';
+import ShowAllEvents from '@/app/Component/AddandUpdateMenus/ShowAllEvents';
+
 
 const DesignCalender = ({
     setNewEvent,newEvent,
     currentDate, days,isToday,  setSelectedDate, typeIcons,setCurrentDate, showDayEvents,selectedEvent, setSelectedEvent,
     setShowDayEvents,loading,events,typeColors,handleAddEvent,handleUpdateEvent,handleDeleteEvent,selectedDate
 }) => {
+
+  // helper to format day key
+  const dayKey = (d) => d.format('YYYY-MM-DD')
+
   return (
-    <div className="p-4 sm:p-6 w-full max-w-6xl mx-auto 
-      bg-lightMode-bg dark:bg-darkMode-bg 
-      text-lightMode-text dark:text-darkMode-text">
+    <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto
+      bg-gradient-to-b from-white/2 dark:from-black/40 to-transparent
+      text-lightMode-text dark:text-darkMode-text rounded-2xl">
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => setCurrentDate(currentDate.subtract(1, "month"))}
-          className="p-2 rounded-full hover:bg-lightMode-menu dark:hover:bg-darkMode-menu transition"
-        >
-          <FaChevronLeft />
-        </button>
-        <h2 className="text-xl sm:text-2xl font-bold 
-          text-lightMode-text dark:text-darkMode-text">
-          {currentDate.format("MMMM YYYY")}
-        </h2>
-        <button
-          onClick={() => setCurrentDate(currentDate.add(1, "month"))}
-          className="p-2 rounded-full hover:bg-lightMode-menu dark:hover:bg-darkMode-menu transition"
-        >
-          <FaChevronRight />
-        </button>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <button
+            onClick={() => setCurrentDate(currentDate.subtract(1, "month"))}
+            className="p-2 rounded-full hover:bg-gray-100/60 dark:hover:bg-white/5 transition"
+            title="Previous month"
+          >
+            <FaChevronLeft />
+          </button>
+
+          <div className="flex flex-col text-left">
+            <h2 className="text-lg sm:text-2xl font-bold">{currentDate.format("MMMM YYYY")}</h2>
+            <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-3">
+              <button
+                onClick={() => setCurrentDate(dayjs())}
+                className="text-sm text-blue-500 hover:underline"
+              >
+                Today
+              </button>
+              <span>·</span>
+              <span>{days.length} days</span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setCurrentDate(currentDate.add(1, "month"))}
+            className="p-2 rounded-full hover:bg-gray-100/60 dark:hover:bg-white/5 transition ml-2 sm:ml-4"
+            title="Next month"
+          >
+            <FaChevronRight />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              // open add event modal by selecting today
+              setSelectedDate(dayjs())
+            }}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg shadow"
+            title="Add event"
+          >
+            <FaPlus /> <span className="text-sm hidden sm:inline">Add Event</span>
+          </button>
+
+          <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <span className="flex items-center gap-1"><FaBirthdayCake /> Birthday</span>
+            <span className="flex items-center gap-1"><FaUsers /> Meeting</span>
+            <span className="flex items-center gap-1"><FaCalendarAlt /> Public</span>
+          </div>
+        </div>
       </div>
 
       {/* Days Header */}
-      <div className="grid grid-cols-7 text-center font-semibold 
-        text-lightMode-text2 dark:text-darkMode-text2 
-        mb-2 text-sm sm:text-base">
+      <div className="hidden sm:grid grid-cols-7 text-center font-semibold text-xs sm:text-sm
+        text-lightMode-text2 dark:text-darkMode-text2 mb-2 uppercase tracking-wider">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-          <div key={day}>{day}</div>
+          <div key={day} className="py-2">{day}</div>
         ))}
       </div>
 
-      {/* Days Grid */}
-      <motion.div layout className="grid grid-cols-7 gap-1 sm:gap-2 text-xs sm:text-sm">
-        {days.map((day, idx) => {
-          const dayEvents = events.filter(
-            (ev) => dayjs(ev.date).format("YYYY-MM-DD") === day.format("YYYY-MM-DD")
-          );
+      {/* Days Grid wrapper: on small screens use horizontal scroll */}
+      <div className="overflow-x-auto">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentDate.format("MM-YYYY")}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.35 }}
+            className="grid grid-cols-7 gap-2 min-w-[640px] sm:min-w-full"
+          >
+            {days.map((day, idx) => {
+              const dayStr = dayKey(day)
+              const dayEvents = events.filter(
+                (ev) => dayjs(ev.date).format("YYYY-MM-DD") === dayStr
+              );
 
-          return (
-            <motion.div
-              key={idx}
-              whileHover={{ scale: 1.02 }}
-              className={`min-h-[90px] sm:h-28 border rounded-lg p-1 sm:p-2 cursor-pointer relative
-                ${isToday(day) ? "bg-blue-50 border-blue-400" : "bg-lightMode-bg dark:bg-darkMode-bg"}`}
-              onClick={() => setSelectedDate(day)}
-            >
-              <div className="absolute top-1 right-1 text-[10px] sm:text-xs font-bold 
-                text-lightMode-text2 dark:text-darkMode-text2">
-                {day.date()}
-              </div>
+              const isCurrent = isToday(day)
 
-              {/* Event indicators */}
-              <div className="absolute bottom-1 left-1 flex gap-1">
-                {dayEvents.some(ev => dayjs(ev.date).isSame(dayjs(), "day")) && (
-                  <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                )}
-                {dayEvents.some(ev => dayjs(ev.date).diff(dayjs(), "day") === 1) && (
-                  <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
-                )}
-              </div>
+              // max 3 previewed events
+              const preview = dayEvents.slice(0, 3)
+              const moreCount = Math.max(0, dayEvents.length - 3)
 
-              {/* Events */}
-              <div className="mt-4 space-y-1">
-                {dayEvents.slice(0, 3).map((ev) => (
-                  <div
-                    key={ev._id}
-                    className={`px-2 py-1 rounded-md font-medium flex items-center gap-1 cursor-pointer shadow-sm truncate 
-                      ${typeColors[ev.type]} ${ev.repeatYearly ? "border border-yellow-400" : ""}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedEvent(ev);
-                    }}
-                  >
-                    <span className="text-sm">{typeIcons[ev.type]}</span>
-                    <span className="truncate">{ev.title}</span>
+              return (
+                <motion.div
+                  key={idx}
+                  whileHover={{ scale: 1.02 }}
+                  className={`min-h-[100px] sm:h-28 border rounded-xl p-2 relative
+                    transition-all duration-200 cursor-pointer
+                    ${isCurrent ? "bg-blue-50/40 border-blue-400" : "bg-white/3 dark:bg-transparent"}
+                    `}
+                  onClick={() => setSelectedDate(day)}
+                >
+                  {/* Date badge */}
+                  <div className={`absolute top-2 left-2 text-[12px] font-semibold px-2 py-1 rounded-full
+                    ${isCurrent ? "bg-blue-600 text-white" : "bg-black/5 dark:bg-white/5 text-gray-800 dark:text-gray-100"}`}>
+                    {day.date()}
                   </div>
-                ))}
 
-                {dayEvents.length > 3 && (
-                  <button
-                    className="text-[10px] sm:text-xs text-blue-600 underline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowDayEvents(dayEvents);
-                    }}
-                  >
-                    +{dayEvents.length - 3} more
-                  </button>
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
-      </motion.div>
+                  {/* small indicators */}
+                  <div className="absolute top-2 right-2 flex items-center gap-1">
+                    {/* red dot: event today */}
+                    {dayEvents.some(ev => dayjs(ev.date).isSame(dayjs(), "day")) && (
+                      <span className="w-2 h-2 rounded-full bg-red-500" title="Happening today" />
+                    )}
+                    {/* yellow dot: tomorrow */}
+                    {dayEvents.some(ev => dayjs(ev.date).isSame(dayjs().add(1, 'day'), "day")) && (
+                      <span className="w-2 h-2 rounded-full bg-yellow-400" title="Tomorrow" />
+                    )}
+                  </div>
+
+                  {/* Events preview */}
+                  <div className="mt-6 space-y-1">
+                    {preview.map((ev) => (
+                      <div
+                        key={ev._id}
+                        className={`flex items-center gap-2 px-2 py-1 rounded-md font-medium truncate shadow-sm
+                          ${typeColors?.[ev.type] || "bg-gray-800/40"} `}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedEvent(ev)
+                        }}
+                        title={ev.title}
+                      >
+                        <span className="text-sm">{typeIcons?.[ev.type] || '•'}</span>
+                        <span className="text-xs truncate">{ev.title}</span>
+                        {/* repeat indicator */}
+                        {ev.repeatYearly && (
+                          <span className="ml-auto text-[10px] px-1 rounded bg-yellow-400/20 text-yellow-600">yr</span>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* more button */}
+                    {moreCount > 0 && (
+                      <button
+                        className="text-[11px] text-blue-600 underline ml-1"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setShowDayEvents(dayEvents)
+                        }}
+                      >
+                        +{moreCount} more
+                      </button>
+                    )}
+
+                    {/* empty hint */}
+                    {dayEvents.length === 0 && (
+                      <div className="text-[12px] text-gray-500 mt-1">No events</div>
+                    )}
+                  </div>
+                </motion.div>
+              )
+            })}
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
       {/* Add Event Modal */}
       {selectedDate && !selectedEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-lightMode-bg dark:bg-darkMode-bg 
-              text-lightMode-text dark:text-darkMode-text
-              rounded-xl p-4 sm:p-6 w-11/12 sm:w-96 shadow-xl"
-          >
-            <h3 className="text-lg font-bold mb-4">
-              Add Event on {selectedDate.format("DD MMM YYYY")}
-            </h3>
-            <input
-              type="text"
-              placeholder="Event Title"
-              className="w-full border p-2 rounded mb-3 bg-lightMode-menu dark:bg-darkMode-menu"
-              value={newEvent.title}
-              onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-            />
-            <textarea
-              placeholder="Description"
-              className="w-full border p-2 rounded mb-3 bg-lightMode-menu dark:bg-darkMode-menu"
-              value={newEvent.description}
-              onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-            />
-            <select
-              className="w-full border p-2 rounded mb-3 bg-lightMode-menu dark:bg-darkMode-menu"
-              value={newEvent.type}
-              onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })}
-            >
-              <option value="birthday">🎂 Birthday</option>
-              <option value="meeting">👥 Meeting</option>
-              <option value="public">📅 Public</option>
-              <option value="custom">⭐ Custom</option>
-            </select>
-
-            {/* Repeat yearly option */}
-            <div className="flex items-center mb-3 gap-2">
-              <input
-                type="checkbox"
-                checked={newEvent.repeatYearly}
-                onChange={(e) =>
-                  setNewEvent({ ...newEvent, repeatYearly: e.target.checked })
-                }
-                id="repeatYearly"
-              />
-              <label htmlFor="repeatYearly" className="text-sm">Repeat every year</label>
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <button className="px-4 py-2 rounded bg-lightMode-menu dark:bg-darkMode-menu" onClick={() => setSelectedDate(null)}>
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 rounded bg-blue-500 text-white flex items-center gap-1"
-                onClick={handleAddEvent}
-                disabled={loading}
-              >
-                <FaPlus /> {loading ? "Saving..." : "Add"}
-              </button>
-            </div>
-          </motion.div>
-        </div>
+        <AddEventModal selectedDate={selectedDate}
+          newEvent={newEvent} setNewEvent={setNewEvent}
+          setSelectedDate={setSelectedDate}
+          handleAddEvent={handleAddEvent}
+        />
       )}
 
       {/* Event Details Modal */}
       {selectedEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <motion.div
-            initial={{ y: -50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="bg-lightMode-bg dark:bg-darkMode-bg 
-              text-lightMode-text dark:text-darkMode-text
-              rounded-xl p-4 sm:p-6 w-11/12 sm:w-96 shadow-xl"
-          >
-            <h3 className="text-lg font-bold mb-4">Event Details</h3>
-            <input
-              type="text"
-              className="w-full border p-2 rounded mb-3 bg-lightMode-menu dark:bg-darkMode-menu"
-              value={selectedEvent.title}
-              onChange={(e) =>
-                setSelectedEvent({ ...selectedEvent, title: e.target.value })
-              }
-            />
-            <textarea
-              className="w-full border p-2 rounded mb-3 bg-lightMode-menu dark:bg-darkMode-menu"
-              value={selectedEvent.description}
-              onChange={(e) =>
-                setSelectedEvent({ ...selectedEvent, description: e.target.value })
-              }
-            />
-            <select
-              className="w-full border p-2 rounded mb-3 bg-lightMode-menu dark:bg-darkMode-menu"
-              value={selectedEvent.type}
-              onChange={(e) =>
-                setSelectedEvent({ ...selectedEvent, type: e.target.value })
-              }
-            >
-              <option value="birthday">🎂 Birthday</option>
-              <option value="meeting">👥 Meeting</option>
-              <option value="public">📅 Public</option>
-              <option value="custom">⭐ Custom</option>
-            </select>
-
-            {/* Repeat yearly option */}
-            <div className="flex items-center mb-3 gap-2">
-              <input
-                type="checkbox"
-                checked={selectedEvent.repeatYearly || false}
-                onChange={(e) =>
-                  setSelectedEvent({ ...selectedEvent, repeatYearly: e.target.checked })
-                }
-                id="repeatYearlyEdit"
-              />
-              <label htmlFor="repeatYearlyEdit" className="text-sm">Repeat every year</label>
-            </div>
-
-            <p className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mb-4">
-              Date: {dayjs(selectedEvent.date).format("DD MMM YYYY")}
-            </p>
-
-            <div className="flex justify-between">
-              <button className="px-4 py-2 rounded bg-lightMode-menu dark:bg-darkMode-menu" onClick={() => setSelectedEvent(null)}>
-                Close
-              </button>
-              <div className="flex gap-2">
-                <button
-                  className="px-4 py-2 rounded bg-blue-500 text-white flex items-center gap-1"
-                  onClick={handleUpdateEvent}
-                  disabled={loading}
-                >
-                  <FaEdit /> {loading ? "Saving..." : "Edit"}
-                </button>
-                <button
-                  className="px-4 py-2 rounded bg-red-500 text-white flex items-center gap-1"
-                  onClick={handleDeleteEvent}
-                  disabled={loading}
-                >
-                  <FaTrash /> Delete
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </div>
+        <EventDetailsModal 
+          handleUpdateEvent={handleUpdateEvent} handleDeleteEvent={handleDeleteEvent} selectedEvent={selectedDate}
+          setSelectedEvent={setSelectedDate}
+        />
       )}
 
       {/* Show All Events in a Day */}
       {showDayEvents && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <motion.div
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="bg-lightMode-bg dark:bg-darkMode-bg 
-              text-lightMode-text dark:text-darkMode-text
-              rounded-xl p-4 sm:p-6 w-11/12 sm:w-96 shadow-xl max-h-[80vh] overflow-y-auto"
-          >
-            <h3 className="text-lg font-bold mb-4">Day Events</h3>
-            {showDayEvents.map((ev) => (
-              <div
-                key={ev._id}
-                className={`px-3 py-2 mb-2 rounded-md font-medium flex items-center gap-2 cursor-pointer shadow-sm 
-                  ${typeColors[ev.type]} ${ev.repeatYearly ? "border border-yellow-400" : ""}`}
-                onClick={() => {
-                  setSelectedEvent(ev);
-                  setShowDayEvents(null);
-                }}
-              >
-                <span>{typeIcons[ev.type]}</span>
-                <div className="flex-1">
-                  <p className="font-semibold">{ev.title}</p>
-                  <p className="text-xs">{ev.description}</p>
-                </div>
-              </div>
-            ))}
-            <div className="flex justify-end">
-              <button className="px-4 py-2 rounded bg-lightMode-menu dark:bg-darkMode-menu" onClick={() => setShowDayEvents(null)}>
-                Close
-              </button>
-            </div>
-          </motion.div>
-        </div>
+        <ShowAllEvents 
+          setSelectedEvent={setSelectedEvent} showDayEvents={showDayEvents} setShowDayEvents={setShowDayEvents} typeColors={typeColors} typeIcons={typeIcons}
+        />
       )}
     </div>
   )
