@@ -286,7 +286,7 @@ export default function AnalyticsDashboardImproved() {
 
         <div className="p-4 rounded-2xl bg-gradient-to-br from-gray-900/60 to-gray-900/40 border border-gray-800">
           <h4 className="text-lg font-semibold mb-3">Peak Hours</h4>
-          <div className="flex gap-2 items-end h-36 px-2">
+          <div className="grid grid-cols-7 h-36 px-2">
             {Array.from({ length: 24 }).map((_, h) => {
               const max = Math.max(...Object.values(peakHours || {}), 1)
               const value = peakHours[h] || 0

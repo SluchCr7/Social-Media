@@ -17,17 +17,10 @@ const DesignPost = ({
   setPostText,
   images,
   setImages,
-  selectedMentions,
-  setSelectedMentions,
-  mentionSearch,
-  setMentionSearch,
-  showMentionList,
-  setShowMentionList,
   textareaRef,
   handleTextareaChange,
   errorText,
   filteredMentions,
-  selectMention,
   removeImage,
   handleImageChange,
   showEmojiPicker,
@@ -38,7 +31,9 @@ const DesignPost = ({
   scheduleDate,
   scheduleEnabled,
   setScheduleEnabled,
-
+  selectedMentions, setSelectedMentions, mentionSearch, setMentionSearch,
+  showMentionList,setShowMentionList,filteredMentions,selectMention,removeMention,
+  mentionPosition,
   // 🟢 Links
   links,
   setLinks,
@@ -47,18 +42,6 @@ const DesignPost = ({
   handleAddLink,
   handleRemoveLink
 }) => {
-
-  // 🧩 إزالة mention من القائمة والنص
-  const handleRemoveMention = (id) => {
-    const removed = selectedMentions.find(m => m._id === id)
-    setSelectedMentions(prev => prev.filter(m => m._id !== id))
-    if (removed?.username) {
-      setPostText(prev => {
-        const re = new RegExp(`@${removed.username}\\b\\s?`, 'g')
-        return prev.replace(re, '')
-      })
-    }
-  }
 
   return (
     <main className="flex items-center justify-center w-full py-10 px-4 bg-gray-50 dark:bg-darkMode-bg transition-colors">
@@ -109,32 +92,6 @@ const DesignPost = ({
         {/* Body */}
         <div className="relative p-6 pb-2">
 
-          {/* Selected Mentions */}
-          {selectedMentions?.length > 0 && (
-            <div className="mb-4 px-1 flex items-center gap-2 overflow-x-auto">
-              {selectedMentions.map((m) => (
-                <div
-                  key={m._id}
-                  className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full shadow-sm"
-                >
-                  <Image
-                    src={m?.profilePhoto?.url || '/default.png'}
-                    alt={m.username}
-                    width={28}
-                    height={28}
-                    className="rounded-full object-cover"
-                  />
-                  <span className="text-sm text-gray-800 dark:text-gray-100">@{m.username}</span>
-                  <button
-                    onClick={() => handleRemoveMention(m._id)}
-                    className="p-1 rounded-full hover:bg-red-500 hover:text-white transition"
-                  >
-                    <FiX size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
 
           {/* Links */}
           {links?.length > 0 && (
@@ -183,7 +140,6 @@ const DesignPost = ({
               ref={textareaRef}
               value={postText}
               onChange={handleTextareaChange}
-              onKeyUp={handleTextareaChange}
               rows={5}
               placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
               dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
@@ -195,38 +151,52 @@ const DesignPost = ({
               style={{ textAlign: /[\u0600-\u06FF]/.test(postText) ? 'right' : 'left' }}
             />
           </div>
-
-          {/* Mentions Dropdown (🟦 NEW) */}
-          {showMentionList && filteredMentions.length > 0 && (
-            <div
-              className="absolute z-50 bg-white dark:bg-darkMode-bg shadow-2xl rounded-xl w-full max-h-60 overflow-auto border border-gray-200 dark:border-gray-600 mt-2"
-              style={{ top: '100%', left: 0 }}
-            >
-              {filteredMentions.map((u) => (
-                <div
-                  key={u._id}
-                  className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
-                  onClick={() => selectMention(u)}
-                >
-                  <Image
-                    src={u?.profilePhoto?.url || '/default.png'}
-                    alt={u.username}
-                    width={32}
-                    height={32}
-                    className="rounded-full object-cover"
-                  />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">@{u.username}</span>
-                    {u.profileName && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{u.profileName}</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
+       {/* Mentions */}
+        {selectedMentions?.length > 0 && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            {selectedMentions.map((m, idx) => (
+              <div
+                key={idx}
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 px-3 py-1 rounded-full border border-blue-400/40 backdrop-blur-md shadow-sm"
+              >
+                <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">@{m.username}</span>
+                <button
+                  onClick={() => removeMention(idx)}
+                  className="p-1 rounded-full hover:bg-red-500 hover:text-white transition"
+                >
+                  <FiX size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
+        {/* Mention Picker */}
+        {showMentionList && filteredMentions.length > 0 && (
+          <div className="absolute z-50 bg-white dark:bg-darkMode-bg border border-gray-300 dark:border-gray-700 rounded-xl shadow-xl w-full max-h-52 overflow-y-auto mt-2">
+            {filteredMentions.map((user) => (
+              <div
+                key={user._id}
+                onClick={() => selectMention(user)}
+                className="flex items-center gap-3 px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/40 cursor-pointer transition"
+              >
+                <Image
+                  src={user?.profilePhoto?.url || '/default.png'}
+                  alt="avatar"
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">@{user.username}</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{user.profileName}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+ 
         {/* Image Preview */}
         {images.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 px-6 pb-4">

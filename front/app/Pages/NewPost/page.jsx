@@ -14,11 +14,8 @@ const NewPost = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [errorText, setErrorText] = useState(false);
   const [selectedUser , setSelectedUser] = useState({});
-  const [selectedMentions, setSelectedMentions] = useState([]);
-  const [mentionSearch, setMentionSearch] = useState('');
-  const [showMentionList, setShowMentionList] = useState(false);
-  const [mentionPosition, setMentionPosition] = useState({ top: 0, left: 0 });
-
+  const [mentions, setMentions] = useState([])
+  const [mentionsSelected , setMentionsSelected] = useState()
   // 🕓 حالات الجدولة الجديدة
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
   const [scheduleDate, setScheduleDate] = useState('');
@@ -29,7 +26,46 @@ const NewPost = () => {
   const { communities } = useCommunity();
   const [links, setLinks] = useState([]); // 🟢 state للروابط
   const [linkInput, setLinkInput] = useState(''); // 🟢 حقل إدخال رابط جديد
+  // ------------------- Mentions -------------------
+  const [mentionSearch, setMentionSearch] = useState('');
+  const [showMentionList, setShowMentionList] = useState(false);
+  const [selectedMentions, setSelectedMentions] = useState([]);
+  const [mentionPosition, setMentionPosition] = useState({ top: 0, left: 0 });
 
+  const filteredMentions = myFollowing.filter(f =>
+    f?.username?.toLowerCase().includes(mentionSearch.toLowerCase())
+  );
+
+  const handleTextareaChange = (e) => {
+    const value = e.target.value;
+    setPostText(value);
+    if (value.length <= 500) setErrorText(false);
+
+    // 🟢 اكتشاف إذا كتب @
+    const lastWord = value.split(/\s+/).pop();
+    if (lastWord.startsWith('@')) {
+      setMentionSearch(lastWord.slice(1));
+      setShowMentionList(true);
+    } else {
+      setShowMentionList(false);
+    }
+  };
+
+  const selectMention = (user) => {
+    setSelectedMentions(prev => [...prev, user]);
+    setShowMentionList(false);
+
+    // 🟢 نضيف المنشن داخل النص
+    const cursorPos = textareaRef.current.selectionStart;
+    const newText =
+      postText.slice(0, cursorPos).replace(/@\w*$/, `@${user.username} `) +
+      postText.slice(cursorPos);
+    setPostText(newText);
+  };
+
+  const removeMention = (index) => {
+    setSelectedMentions(prev => prev.filter((_, i) => i !== index));
+  };
 // ---- إضافة رابط جديد ----
   const handleAddLink = () => {
     const url = linkInput.trim();
@@ -74,74 +110,6 @@ const NewPost = () => {
     return matches ? Array.from(new Set(matches.map(tag => tag.slice(1).toLowerCase()))) : [];
   };
 
-  // ------------------- Mentions Handling -------------------
-  const handleTextareaChange = (e) => {
-    const value = e.target.value;
-    setPostText(value);
-    if (value.length <= 500) setErrorText(false);
-
-    // const cursorPos = e.target.selectionStart;
-    // const lastAt = value.lastIndexOf('@', cursorPos - 1);
-
-    // if (lastAt >= 0) {
-    //   const wordAfterAt = value.slice(lastAt + 1, cursorPos);
-    //   if (!wordAfterAt.includes(' ')) {
-    //     setMentionSearch(wordAfterAt);
-    //     setShowMentionList(true);
-    //   } else {
-    //     setShowMentionList(false);
-    //   }
-    // } else {
-    //   setShowMentionList(false);
-    // }
-    const cursorPos = e.target.selectionStart;
-    const textUntilCursor = value.slice(0, cursorPos);
-    const mentionMatch = textUntilCursor.match(/@([\w\u0600-\u06FF]*)$/);
-
-    if (mentionMatch) {
-      setMentionSearch(mentionMatch[1]);
-      setShowMentionList(true);
-      if (textareaRef.current) {
-        const range = textareaRef.current.selectionStart;
-        const lineHeight = 24;
-        const row = (textareaRef.current.value.slice(0, range).match(/\n/g) || []).length;
-        const col = range - textareaRef.current.value.lastIndexOf('\n', range - 1);
-        setMentionPosition({ top: (row + 1) * lineHeight, left: col * 8 });
-      }
-    } else {
-      setShowMentionList(false);
-    }
-  };
-
-  const filteredMentions = myFollowing.filter(u => {
-    if (!u || typeof u?.username !== 'string') return false;
-    const usernameMatch = u.username.toLowerCase().includes((mentionSearch || '').toLowerCase());
-    const notAlreadySelected = !selectedMentions.some(m => m?._id === u?._id);
-    return usernameMatch && notAlreadySelected;
-  });
-
-  const selectMention = (user) => {
-    if (!user || typeof user.username !== 'string') return;
-
-    const cursorPos = textareaRef.current.selectionStart;
-    const textBeforeCursor = postText.slice(0, cursorPos);
-    const lastAt = textBeforeCursor.lastIndexOf('@');
-    const textAfterCursor = postText.slice(cursorPos);
-
-    const newText =
-      textBeforeCursor.slice(0, lastAt) +
-      `@${user.username} ` +
-      textAfterCursor;
-
-    setPostText(newText);
-    setSelectedMentions(prev => [...prev, user]);
-    setShowMentionList(false);
-
-    setTimeout(() => {
-      textareaRef.current.focus();
-      textareaRef.current.selectionStart = textareaRef.current.selectionEnd = lastAt + user.username.length + 2;
-    }, 0);
-  };
 
   // ------------------- Emoji Picker -------------------
   const handleEmojiClick = (emojiData) => {
@@ -211,17 +179,21 @@ const NewPost = () => {
       setPostText={setPostText}
       images={images}
       setImages={setImages}
+      // ========= Mentions
       selectedMentions={selectedMentions}
       setSelectedMentions={setSelectedMentions}
       mentionSearch={mentionSearch}
       setMentionSearch={setMentionSearch}
       showMentionList={showMentionList}
       setShowMentionList={setShowMentionList}
+      filteredMentions={filteredMentions}
+      selectMention={selectMention}
+      removeMention={removeMention}
+      mentionPosition={mentionPosition}
+      // ==========
       textareaRef={textareaRef}
       handleTextareaChange={handleTextareaChange}
       errorText={errorText}
-      filteredMentions={filteredMentions}
-      selectMention={selectMention}
       removeImage={removeImage}
       handleImageChange={handleImageChange}
       showEmojiPicker={showEmojiPicker}
@@ -233,7 +205,6 @@ const NewPost = () => {
       setScheduleEnabled={setScheduleEnabled}
       scheduleDate={scheduleDate}
       setScheduleDate={setScheduleDate}
-      mentionPosition={mentionPosition}
       links={links}
       setLinks={setLinks}
       linkInput={linkInput}
