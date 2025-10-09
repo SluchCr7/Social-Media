@@ -41,7 +41,7 @@ const DesignPost = ({
   loading,setLoading
 }) => {
 
-const textareaRef = useRef();
+// const textareaRef = useRef();
   const [cursorPosition, setCursorPosition] = useState(0);
   const [mentionQuery, setMentionQuery] = useState('');
   const [showMentionBox, setShowMentionBox] = useState(false);
