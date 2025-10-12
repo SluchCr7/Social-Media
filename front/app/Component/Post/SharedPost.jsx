@@ -4,6 +4,8 @@ import UserHoverCard from '../UserHoverCard'
 import RenderPostText from './RenderText'
 import PostPhotos from './PostPhotos'
 import PostLinks from './PostLinks'
+import Link from 'next/link'
+import Image from 'next/image'
 
 const SharedPost = ({
     original,

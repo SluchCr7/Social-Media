@@ -5,7 +5,7 @@ import { usePost } from '@/app/Context/PostContext';
 import { useAuth } from '@/app/Context/AuthContext';
 import { useComment } from '@/app/Context/CommentContext';
 import Loading from '@/app/Component/Loading';
-import { renderTextWithMentionsAndHashtags } from '@/app/utils/CheckText';
+import { renderTextWithMentionsHashtagsAndLinks } from '@/app/utils/CheckText';
 import DesignPostSelect from './Design';
 
 const PostPage = ({ params }) => {
@@ -80,7 +80,7 @@ const PostPage = ({ params }) => {
       sharePost={sharePost}
       savePost={savePost}
       setImageView={setImageView}
-      renderTextWithMentionsAndHashtags={renderTextWithMentionsAndHashtags}
+      renderTextWithMentionsAndHashtags={renderTextWithMentionsHashtagsAndLinks}
       comments={comments}
       isLoading={isLoading}
       commentText={commentText}
