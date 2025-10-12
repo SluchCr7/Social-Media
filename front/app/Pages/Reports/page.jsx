@@ -15,13 +15,15 @@ import Image from 'next/image';
 import { usePost } from '@/app/Context/PostContext';
 import { useComment } from '@/app/Context/CommentContext';
 import DesignReports from './Design';
+import { useAdmin } from '@/app/Context/UserAdminContext';
 
 
 
 // ================== Main Page ==================
 const AdminReportsPage = () => {
   const { reports, loading, getAllReports, deleteReport } = useReport();
-  const { user, deleteUser, updateAccountStatus } = useAuth();
+  const { user } = useAuth();
+  const {deleteUser, updateAccountStatus} = useAdmin()
   // updateAccountStatus => to make acccount baned or susbended 
   const { deletePost } = usePost()
   const {deleteComment} = useComment()

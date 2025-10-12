@@ -16,6 +16,7 @@ export const EventProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const { showAlert } = useAlert();
   const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [isCreating , setIsCreating] = useState(false)
   // ---------------------------
   // Fetch all events
   // ---------------------------
@@ -70,7 +71,7 @@ const fetchEvents = async () => {
   // ---------------------------
   const addEvent = async (event) => {
     if (!user?.token) return;
-    setLoading(true);
+    setIsCreating(true);
     try {
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/events`,
@@ -95,7 +96,7 @@ const fetchEvents = async () => {
       console.error(err);
       return null;
     } finally {
-      setLoading(false);
+      setIsCreating(false);
     }
   };
 
@@ -174,7 +175,7 @@ const fetchEvents = async () => {
 
   return (
     <EventContext.Provider
-      value={{ events, loading, fetchEvents, addEvent, updateEvent, deleteEvent ,upcomingEvents}}
+      value={{ events, loading, fetchEvents, addEvent, updateEvent, deleteEvent ,upcomingEvents , setIsCreating , isCreating}}
     >
       {children}
     </EventContext.Provider>

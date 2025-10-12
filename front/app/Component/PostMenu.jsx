@@ -8,8 +8,11 @@ import { useAuth } from '../Context/AuthContext';
 import { usePost } from '../Context/PostContext';
 import { useReport } from '../Context/ReportContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'react-toastify';
 import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri"
+import { useUser } from '../Context/UserContext';
+import { useAdmin } from '../Context/UserAdminContext';
+import { useAlert } from '../Context/AlertContext';
+import { useGetData } from '../Custome/useGetData';
 
 // ✅ زر فردي
 const MenuOption = ({ icon, text, action, className, loading }) => (
@@ -29,16 +32,17 @@ const MenuOption = ({ icon, text, action, className, loading }) => (
 );
 
 const PostMenu = ({ showMenu, setShowMenu, post }) => {
-  const { user, pinPost, users, blockOrUnblockUser,followUser } = useAuth();
+  const { followUser, pinPost } = useUser()
+  const {blockOrUnblockUser}= useAdmin()
+  const { user } = useAuth();
   const { deletePost, setPostIsEdit, setShowPostModelEdit, displayOrHideComments, copyPostLink } = usePost();
   const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport();
-
+  const {showAlert} = useAlert()
   const menuRef = useRef();
   const isOwner = post?.owner?._id === user?._id;
-  const [myUser, setMyUser] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null);
   const [loadingBtn, setLoadingBtn] = useState(false);
-
+  const {userData} = useGetData(user?._id)
   // إغلاق القائمة عند الضغط خارجها
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -48,16 +52,11 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showMenu]);
 
-  // جلب بيانات المستخدم الحالي
-  useEffect(() => {
-    setMyUser(users.find((userobj) => userobj?._id === user?._id));
-  }, [users, user]);
-
   // ✅ خيارات المالك
   const ownerOptions = useMemo(() => [
     {
       icon: <CiMapPin size={18} />,
-      text: myUser?.pinsPosts?.some((p) => p?.id === post?._id) ? 'Unpin Post' : 'Pin Post',
+      text: userData?.pinsPosts?.some((p) => p?.id === post?._id) ? 'Unpin Post' : 'Pin Post',
       action: async () => {
         setLoadingBtn(true);
         await pinPost(post?._id);
@@ -94,7 +93,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
         ? 'text-green-600 hover:bg-green-100'
         : 'text-red-600 hover:bg-yellow-100',
     },
-  ], [myUser, post]);
+  ], [userData, post]);
 
   // ✅ خيارات الزائر
   const visitorOptions = useMemo(() => [
@@ -129,7 +128,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
       text: 'Copy Link',
       action: () => {
         copyPostLink(post?._id);
-        toast.success('Post link copied!');
+        showAlert('Post link copied!');
       },
       className: 'text-blue-600 hover:bg-blue-100',
     },

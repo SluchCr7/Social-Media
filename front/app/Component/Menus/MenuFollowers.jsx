@@ -5,11 +5,12 @@ import { FiSearch } from 'react-icons/fi';
 import { useAuth } from '../../Context/AuthContext';
 import Link from 'next/link';
 import { RiUserFollowLine, RiUserUnfollowLine } from 'react-icons/ri';
+import { useUser } from '@/app/Context/UserContext';
 
 const MenuFollowers = () => {
-  const { user, users, followUser } = useAuth();
+  const { user, users } = useAuth();
   const [myUser, setMyUser] = useState(null);
-
+  const {followUser} = useUser()
   useEffect(() => {
     const currentUser = users.find((userObj) => userObj._id === user?._id);
     setMyUser(currentUser);

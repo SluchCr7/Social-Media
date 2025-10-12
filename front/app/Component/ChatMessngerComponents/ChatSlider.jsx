@@ -9,6 +9,8 @@ import UserCard from './UserCard';
 import { Users2, Search, Settings, UserCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@/app/Context/UserContext';
+import SidebarSkeleton from '@/app/Skeletons/SidebarSkeleton';
 
 const ChatSlider = () => {
   const {
@@ -17,28 +19,25 @@ const ChatSlider = () => {
     markAllAsReadBetweenUsers,
     unreadCountPerUser,
     selectedUser,
+    isUserLoading
   } = useMessage();
 
-  const { user, onlineUsers } = useAuth();
+  const { user } = useAuth();
+  const { onlineUsers } = useUser();
   const [searchValue, setSearchValue] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
-
   const router = useRouter();
 
-  // فلترة المستخدمين بالبحث
-  // const filteredUsers = users.filter((u) =>
-  //   u.username?.toLowerCase().includes(searchValue.toLowerCase())
-  // );
+  // 🔍 فلترة المستخدمين مع ترتيبهم حسب أحدث رسالة
   const filteredUsers = users
-  .filter((u) =>
-    u.username?.toLowerCase().includes(searchValue.toLowerCase())
-  )
-  .sort((a, b) => {
-    // الأحدث أولاً حسب آخر رسالة، إذا لم يوجد آخر رسالة نضع المستخدم بعدهم
-    const timeA = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
-    const timeB = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
-    return timeB - timeA;
-  });
+    .filter((u) =>
+      u.username?.toLowerCase().includes(searchValue.toLowerCase())
+    )
+    .sort((a, b) => {
+      const timeA = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
+      const timeB = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
+      return timeB - timeA;
+    });
 
   return (
     <motion.aside
@@ -55,7 +54,7 @@ const ChatSlider = () => {
         md:static
       `}
     >
-      {/* Header */}
+      {/* ✅ Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-darkMode-menu relative">
         <div className="flex items-center gap-3">
           <Image
@@ -75,7 +74,7 @@ const ChatSlider = () => {
           </div>
         </div>
 
-        {/* Menu Dots */}
+        {/* ⚙️ Menu */}
         <div className="relative">
           <BsThreeDots
             className="text-xl text-gray-700 dark:text-gray-300 cursor-pointer hover:rotate-90 transition"
@@ -129,7 +128,7 @@ const ChatSlider = () => {
         </div>
       </div>
 
-      {/* Search */}
+      {/* 🔍 Search */}
       <div className="relative p-3 border-b border-gray-200 dark:border-gray-700">
         <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
         <input
@@ -141,14 +140,19 @@ const ChatSlider = () => {
         />
       </div>
 
-      {/* User List */}
+      {/* 👥 User List OR Skeleton */}
       <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-1 custom-scrollbar">
-        {filteredUsers.length === 0 ? (
+        {isUserLoading ? (
+          // ✅ عرض Skeleton أثناء تحميل المستخدمين
+          <SidebarSkeleton />
+        ) : filteredUsers.length === 0 ? (
+          // ❌ لا يوجد مستخدمين
           <div className="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 mt-10 text-sm">
             <Users2 className="w-10 h-10 mb-2 opacity-50" />
             No users found.
           </div>
         ) : (
+          // ✅ عرض المستخدمين
           filteredUsers.map((u) => (
             <motion.div
               key={u._id}

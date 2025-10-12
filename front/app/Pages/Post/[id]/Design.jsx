@@ -36,6 +36,20 @@ const DesignPostSelect = ({
   setCommentText,
   handleAddComment,
 }) => {
+
+  // 🔹 تحقق من صلاحية التعليق بناءً على الخصوصية
+  const canComment = () => {
+    if (post.privacy === 'public') return true;
+
+    if (post.privacy === 'friends') {
+      const isFollower = post.owner?.followers?.some(f => f._id === user._id);
+      const isFollowing = post.owner?.following?.some(f => f._id === user._id);
+      return isFollower || isFollowing;
+    }
+
+    return false;
+  }
+
   return (
     <motion.div
       className="w-full max-w-5xl mx-auto p-3 sm:p-6 flex flex-col gap-6"
@@ -128,6 +142,7 @@ const DesignPostSelect = ({
             <RenderPostText text={post.text} mentions={post.mentions} hashtags={post.Hashtags} />
           )}
           <PostLinks links={post?.links}/>
+
           {/* Shared Original */}
           {isShared && original && (
             <div className="bg-white/40 dark:bg-black/20 backdrop-blur-md border border-gray-200/40 dark:border-gray-700/40 rounded-xl p-3 sm:p-4 shadow-md">
@@ -180,31 +195,37 @@ const DesignPostSelect = ({
             </div>
           )}
 
-          {/* Add Comment */}
+          {/* Add Comment with Privacy Check */}
           {!post.isCommentOff && isLogin && (
-            <div className="flex items-center gap-2 mt-4 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-full focus-within:ring-2 focus-within:ring-blue-400 transition">
-              <Image
-                src={user?.profilePhoto?.url || '/default-profile.png'}
-                alt="User Profile"
-                width={36}
-                height={36}
-                className="w-9 h-9 rounded-full object-cover"
-              />
-              <textarea
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Write a comment..."
-                className="flex-1 bg-transparent text-sm resize-none outline-none placeholder-gray-400 dark:placeholder-gray-500 px-2 min-h-[36px]"
-                rows={1}
-              />
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={handleAddComment}
-                className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition"
-              >
-                <IoIosSend className="text-white text-lg" />
-              </motion.button>
-            </div>
+            canComment() ? (
+              <div className="flex items-center gap-2 mt-4 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-full focus-within:ring-2 focus-within:ring-blue-400 transition">
+                <Image
+                  src={user?.profilePhoto?.url || '/default-profile.png'}
+                  alt="User Profile"
+                  width={36}
+                  height={36}
+                  className="w-9 h-9 rounded-full object-cover"
+                />
+                <textarea
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder="Write a comment..."
+                  className="flex-1 bg-transparent text-sm resize-none outline-none placeholder-gray-400 dark:placeholder-gray-500 px-2 min-h-[36px]"
+                  rows={1}
+                />
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleAddComment}
+                  className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition"
+                >
+                  <IoIosSend className="text-white text-lg" />
+                </motion.button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 mt-4 px-3 py-2 bg-yellow-100 dark:bg-yellow-900 rounded-xl text-sm text-yellow-800 dark:text-yellow-300">
+                You must follow or be followed by @{post.owner?.username} to comment on this post.
+              </div>
+            )
           )}
 
           {/* Comments List */}

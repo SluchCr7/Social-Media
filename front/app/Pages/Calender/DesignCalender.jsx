@@ -22,6 +22,7 @@ const DesignCalender = ({
     setNewEvent,newEvent,
     currentDate, days,isToday,  setSelectedDate, typeIcons,setCurrentDate, showDayEvents,selectedEvent, setSelectedEvent,
     setShowDayEvents,loading,events,typeColors,handleAddEvent,handleUpdateEvent,handleDeleteEvent,selectedDate
+    ,setIsCreating , isCreating
 }) => {
 
   // helper to format day key
@@ -197,17 +198,20 @@ const DesignCalender = ({
         <AddEventModal selectedDate={selectedDate}
           newEvent={newEvent} setNewEvent={setNewEvent}
           setSelectedDate={setSelectedDate}
-          handleAddEvent={handleAddEvent}
+          handleAddEvent={handleAddEvent} isCreating={isCreating}
         />
       )}
 
       {/* Event Details Modal */}
       {selectedEvent && (
         <EventDetailsModal 
-          handleUpdateEvent={handleUpdateEvent} handleDeleteEvent={handleDeleteEvent} selectedEvent={selectedDate}
-          setSelectedEvent={setSelectedDate}
+          handleUpdateEvent={handleUpdateEvent} 
+          handleDeleteEvent={handleDeleteEvent} 
+          selectedEvent={selectedEvent}      
+          setSelectedEvent={setSelectedEvent}  
         />
       )}
+
 
       {/* Show All Events in a Day */}
       {showDayEvents && (

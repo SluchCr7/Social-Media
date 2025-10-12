@@ -170,6 +170,10 @@ const UserSchema = new mongoose.Schema({
     myMusicPlaylist: {
         type: Array,
         default: []
+    },
+    isContainAdultContent : {
+        type : Boolean,
+        default : false
     }
 }, {
     timestamps: true,

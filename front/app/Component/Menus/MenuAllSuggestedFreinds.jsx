@@ -4,10 +4,11 @@ import Image from 'next/image'
 import { useAuth } from '../../Context/AuthContext'
 import { FiX, FiUserPlus, FiCheck } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useUser } from '@/app/Context/UserContext'
 
 const MenuAllSuggestedFriends = () => {
-  const { showAllSuggestedUsers, user, setShowAllSuggestedUsers, suggestedUsers, followUser } = useAuth()
-
+  const {  user } = useAuth()
+  const { setShowAllSuggestedUsers, suggestedUsers, followUser,showAllSuggestedUsers} = useUser();
   return (
     <AnimatePresence>
       {showAllSuggestedUsers && (

@@ -979,6 +979,17 @@ const toggleSongInPlaylist = asyncHandler(async (req, res) => {
     }
 });
 
+const acceptCookies = asyncHandler(async (req, res) => {
+  let user = await User.findById(req.user._id);
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  user.acceptedCookies = true;
+  await user.save();
+})
+
 module.exports = {
   updateAccountStatus,
   makeUserAdmin,
@@ -991,6 +1002,6 @@ module.exports = {
   updateProfile, pinPost, updateLinksSocial,
   getRelationship,
   updateRelationship,
-  toggleSongInPlaylist
+  toggleSongInPlaylist,acceptCookies
 }
 

@@ -4,19 +4,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Cookie, ShieldCheck, Settings, X, ToggleRight, MonitorSpeaker } from 'lucide-react';
 
-/**
- * CookiesPolicyPage (Light + Dark, responsive, animated, accessible)
- *
- * Features:
- * - Glassmorphism + gradient hero
- * - Read progress bar (scroll-based)
- * - Animated entry for sections (Framer Motion)
- * - Modal to Manage Preferences with toggles (Essential/Analytics/Marketing)
- * - Accept All & Save Preferences store to localStorage (example)
- * - Accessible buttons, aria attributes, responsive widths
- *
- * Paste into a page component (e.g. app/cookies/page.jsx or pages/cookies.jsx)
- */
 
 const COOKIE_PREF_KEY = 'zocial_cookie_prefs_v1';
 

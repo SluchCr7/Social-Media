@@ -19,7 +19,7 @@ const Calendar = () => {
   const [newEvent, setNewEvent] = useState({ title: "", description: "", type: "custom", repeatYearly: false });
   const [showDayEvents, setShowDayEvents] = useState(null);
 
-  const { events, loading, addEvent, updateEvent, deleteEvent } = useEvent();
+  const { events, loading, addEvent, updateEvent, deleteEvent,setIsCreating , isCreating } = useEvent();
 
   const typeIcons = {
     birthday: <FaBirthdayCake />,
@@ -67,7 +67,11 @@ const Calendar = () => {
   }
 
   const isToday = (d) => dayjs().isSame(d, "day");
-  if (loading) return <CalenderSkeleton/>
+  if (loading) return (
+    <div className="w-full">
+      <CalenderSkeleton />
+    </div>
+  )
   return (
     <>
       <DesignCalender
@@ -77,6 +81,7 @@ const Calendar = () => {
         typeIcons={typeIcons} setCurrentDate={setCurrentDate} showDayEvents={showDayEvents} setShowDayEvents={setShowDayEvents}
         loading={loading} events={events} typeColors={typeColors} handleAddEvent={handleAddEvent} handleUpdateEvent={handleUpdateEvent}
         handleDeleteEvent={handleDeleteEvent} selectedDate={selectedDate}
+        setIsCreating={setIsCreating} isCreating={isCreating}
       />
     </>
   );

@@ -9,6 +9,7 @@ import { IoIosLogIn } from "react-icons/io";
 import { FiMenu } from "react-icons/fi";
 import { useAside } from '../Context/AsideContext';
 import { motion } from "framer-motion";
+import { tabsHeader } from '../utils/Data';
 
 const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab }) => {
   const { unreadCount } = useNotify();
@@ -19,10 +20,6 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
     setShowNotifications(true);
   };
 
-  const tabs = [
-    { key: "following", label: "Following" },
-    { key: "forYou", label: "For You" },
-  ];
 
   return (
     <>
@@ -31,7 +28,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
           
           {/* ✅ Tabs */}
           <div className="relative flex gap-6">
-            {tabs.map((tab) => (
+            {tabsHeader.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}

@@ -1,7 +1,7 @@
 import React from 'react'
 // ✨ Improved Skeleton Loader ✨
 const AnalyticsSkeleton = () => (
-  <div className="space-y-8 animate-pulse">
+  <div className="space-y-8 animate-pulse w-full">
     {/* Header */}
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <div className="space-y-2">

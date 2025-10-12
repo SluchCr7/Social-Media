@@ -1,37 +1,27 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
-import {
-  FaPlay, FaPause, FaStepBackward, FaStepForward,
-  FaRandom, FaRedo, FaHeart, FaShareAlt,
-  FaVolumeUp, FaSearch, FaExpand
-} from 'react-icons/fa'
-import { CiHeart, CiBookmark } from 'react-icons/ci'
-import Image from 'next/image'
 import { useMusic } from '../../Context/MusicContext'
 import { useMusicPlayer } from '../../Context/MusicPlayerContext'
 import { useAuth } from '@/app/Context/AuthContext'
-import AddMusicModal from '@/app/Component/MusicPage/AddMusicMenu'
-import { formatTime } from '@/app/utils/formatTime'
-import Link from 'next/link'
-import ProgressBar from '@/app/Component/MusicPage/ProgressBar'
-import MusicSkeleton from '@/app/Skeletons/MusicSkeleton'
+import MusicPagePresentation from './MusicPage.presentation'
+import { useUser } from '@/app/Context/UserContext'
+import { useGetData } from '@/app/Custome/useGetData'
 
-export default function MusicPage() {
+export default function MusicPageContainer() {
   const { music: songs, isLoading, likeMusic } = useMusic()
-  const { user, getUserById, saveMusicInPlayList } = useAuth()
+  const { user } = useAuth()
+  const { getUserById, saveMusicInPlayList} = useUser()
   const {
     current, playing, togglePlay, next, prev,
     shuffle, setShuffle, repeatMode, setRepeatMode,
     progress, duration, volume, setVolume, muted, setMuted,
     setTrack, currentIndex, setCurrentIndex,
-    expanded, setExpanded,setProgress
+    expanded, setExpanded, setProgress
   } = useMusicPlayer()
 
-  const [userData, setUserData] = useState(null)
+  const {loading , userData} = useGetData(user?._id)
   const [search, setSearch] = useState('')
-  const [loading, setLoading] = useState(true)
   const [openModel, setOpenModel] = useState(false)
 
   // جلب بيانات اليوزر عند وجود user._id
@@ -73,239 +63,41 @@ export default function MusicPage() {
   }, [userData])
 
   return (
-    <div className="min-h-screen w-full relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 text-gray-900 dark:text-gray-100">
-      <AddMusicModal isOpen={openModel} onClose={() => setOpenModel(false)} />
-
-      {/* Header */}
-      <header className="sticky top-0 z-40 backdrop-blur-md bg-white/70 dark:bg-black/40 border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Zocial</Link>
-            <div className="hidden md:flex items-center gap-2 bg-white/80 dark:bg-gray-800/60 rounded-full px-3 py-1 border">
-              <FaSearch className="text-gray-500" />
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search songs, artists, albums..."
-                className="bg-transparent outline-none w-64 text-sm text-gray-700 dark:text-gray-200"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setOpenModel(true)} className="px-3 py-1 rounded-md border hover:bg-indigo-600 hover:text-white transition">Upload</button>
-            <div className="hidden md:block text-sm text-gray-500">{userData?.username}</div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content Layout */}
-      <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 xl:grid-cols-12 gap-8">
-        
-        {/* Main Feed */}
-        <main className="xl:col-span-9 space-y-8">
-          {isLoading || loading ? (
-            <MusicSkeleton />
-          ) : (
-            <>
-              <div className="rounded-2xl p-6 relative shadow-sm border dark:border-gray-800" style={accentStyle}>
-                <div className="flex flex-col md:flex-row items-center gap-6">
-                  <div className="relative w-48 h-48 md:w-44 md:h-44 rounded-xl shadow-xl overflow-hidden bg-gray-200">
-                    {current?.cover && <Image src={current.cover} alt={current.title} fill className="object-cover" />}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4 justify-between flex-wrap">
-                      <div>
-                        <div className="text-sm text-gray-500">Now Playing</div>
-                        <h2 className="text-2xl font-semibold">{current?.title || 'Select a song'}</h2>
-                        <div className="text-sm text-gray-500 mt-1">{current?.artist} • {current?.album}</div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() => current?._id && likeMusic(current._id)}
-                          className={`p-3 rounded-lg transition ${current?.likes?.includes(userData?._id) ? 'bg-red-500 text-white' : 'bg-white/30 dark:bg-gray-800/40 hover:bg-red-500/70 hover:text-white'}`}
-                        >
-                          <FaHeart />
-                        </button>
-                        <button
-                          onClick={() => current?._id && saveMusicInPlayList(current._id)}
-                          className={`p-3 rounded-lg transition ${myPlaylist?.some(s => s._id === current._id) ? 'bg-yellow-500 text-white' : 'bg-white/30 dark:bg-gray-800/40 hover:bg-yellow-400/60 hover:text-white'}`}
-                        >
-                          <CiBookmark />
-                        </button>
-                        <button className="p-3 rounded-lg bg-white/30 dark:bg-gray-800/40 hover:bg-blue-500/70 hover:text-white transition">
-                          <FaShareAlt />
-                        </button>
-                        <button onClick={() => setExpanded(true)} className="p-3 rounded-lg bg-white/30 dark:bg-gray-800/40 hover:bg-indigo-500/70 hover:text-white transition">
-                          <FaExpand />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Player Controls */}
-                    <div className="mt-6">
-                      <div className="flex items-center gap-4 justify-center md:justify-start">
-                        <button
-                          onClick={() => setShuffle(!shuffle)}
-                          className={`p-3 rounded-full transition ${shuffle ? 'bg-blue-600 text-white' : 'bg-white/20 dark:bg-gray-800/40 hover:bg-blue-500/40'}`}
-                          title="Shuffle"
-                        ><FaRandom /></button>
-                        <button onClick={prev} className="p-3 rounded-full bg-white/30 dark:bg-gray-800/40 hover:bg-gray-700/40 transition"><FaStepBackward /></button>
-                        <button onClick={togglePlay} className="p-4 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-2xl shadow-lg hover:scale-105 transition">
-                          {playing ? <FaPause /> : <FaPlay />}
-                        </button>
-                        <button onClick={next} className="p-3 rounded-full bg-white/30 dark:bg-gray-800/40 hover:bg-gray-700/40 transition"><FaStepForward /></button>
-                        <button
-                          onClick={() => setRepeatMode(repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off')}
-                          className={`p-3 rounded-full transition ${repeatMode !== 'off' ? 'bg-blue-600 text-white' : 'bg-white/20 dark:bg-gray-800/40 hover:bg-blue-500/40'}`}
-                          title="Repeat"
-                        ><FaRedo /></button>
-                      </div>
-
-                      {/* Progress */}
-                      <div className="mt-4">
-                        <div className="flex items-center gap-4">
-                          <div className="text-xs w-12 text-right">{formatTime(progress)}</div>
-                          <ProgressBar
-                            progress={progress}
-                            duration={duration}
-                            seek={(time) => {
-                              audioRef.current.currentTime = time;
-                              setProgress(time);
-                            }}
-                          />
-                          <div className="text-xs w-12">{formatTime(duration)}</div>
-                        </div>
-                        <div className="mt-2 flex items-center gap-3 justify-end">
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <FaVolumeUp />
-                            <input
-                              type="range"
-                              min={0}
-                              max={1}
-                              step={0.01}
-                              value={muted ? 0 : volume}
-                              onChange={(e) => { setVolume(Number(e.target.value)); setMuted(false) }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Songs Feed */}
-                <div className="rounded-2xl p-4 mt-6 bg-white/50 dark:bg-gray-900/50 border dark:border-gray-800">
-                  <h3 className="text-lg font-semibold mb-3">All Songs</h3>
-                  {isLoading ? <div className="text-sm text-gray-500">Loading...</div> : (
-                    <div className="space-y-2">
-                      {filtered.map((s, i) => (
-                        <div
-                          key={s._id}
-                          onClick={() => setTrack(s, i, songs)}
-                          className={`flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer ${current?._id === s._id ? 'ring-2 ring-blue-400 bg-white/30' : ''}`}
-                        >
-                          <div className="w-12 h-12 relative rounded-md overflow-hidden bg-gray-200">
-                            <Image src={s.cover} alt={s.title} fill className="object-cover" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="font-medium">{s.title}</div>
-                            <div className="text-sm text-gray-500">{s.artist}</div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="text-xs text-gray-500">{formatTime(s.duration)}</div>
-                            <button className="p-2 rounded-lg bg-white/20 dark:bg-gray-800/40"><FaPlay /></button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* 🔥 Trending Now Section */}
-                <div className="mt-8">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    🔥 Trending Now
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {songs.slice(0, 8).map((s) => (
-                      <div key={s._id} className="p-3 rounded-xl bg-white/40 dark:bg-gray-900/40 hover:bg-white/60 dark:hover:bg-gray-800/60 hover:scale-[1.02] transition-all duration-300">
-                        <div className="w-full aspect-square relative rounded-lg overflow-hidden mb-2">
-                          <Image src={s.cover} alt={s.title} fill className="object-cover" />
-                        </div>
-                        <div className="text-sm font-medium truncate">{s.title}</div>
-                        <div className="text-xs text-gray-500 truncate">{s.artist}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </main>
-
-        {/* Sidebar */}
-        <aside className="xl:col-span-3 space-y-6 sticky top-24 self-start">
-          <div className="rounded-2xl p-4 bg-white/50 dark:bg-gray-900/50 border dark:border-gray-800">
-            <div className="text-sm text-gray-500">Now Playing</div>
-            <div className="flex items-center gap-3 mt-3">
-              <div className="w-12 h-12 relative rounded-md overflow-hidden bg-gray-200">
-                {current?.cover && <Image src={current.cover} alt={current.title} fill className="object-cover" />}
-              </div>
-              <div>
-                <div className="font-medium">{current?.title || '—'}</div>
-                <div className="text-xs text-gray-500">{current?.artist}</div>
-              </div>
-            </div>
-            <div className="mt-3 text-xs text-gray-500">
-              Plays: {current?.views?.length ?? 0} • Likes: {current?.likes?.length ?? 0}
-            </div>
-          </div>
-
-          <div className="rounded-2xl p-4 bg-white/50 dark:bg-gray-900/50 border dark:border-gray-800">
-            <div className="flex items-center justify-between">
-              <h4 className="font-semibold">Up Next</h4>
-              <div className="text-xs text-gray-500">{queue.length} songs</div>
-            </div>
-            <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
-              {queue.map((q) => (
-                <div key={q._id} className="flex items-center gap-3">
-                  <div className="w-10 h-10 relative rounded-md overflow-hidden bg-gray-200">
-                    <Image src={q.cover} alt={q.title} fill className="object-cover" />
-                  </div>
-                  <div className="flex-1 text-sm">
-                    <div className="font-medium truncate">{q.title}</div>
-                    <div className="text-xs text-gray-500 truncate">{q.artist}</div>
-                  </div>
-                  <div className="text-xs text-gray-500">{formatTime(q.duration)}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-2xl p-4 bg-white/50 dark:bg-gray-900/50 border dark:border-gray-800">
-            <h4 className="font-semibold mb-3">My Playlist</h4>
-            {myPlaylist?.length ? (
-              <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-                {myPlaylist.map((s, i) => (
-                  <div key={s._id} onClick={() => setTrack(s, i, myPlaylist)} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer">
-                    <div className="w-10 h-10 relative rounded-md overflow-hidden bg-gray-200">
-                      <Image src={s.cover} alt={s.title} fill className="object-cover" />
-                    </div>
-                    <div className="flex-1 text-sm">
-                      <div className="font-medium truncate">{s.title}</div>
-                      <div className="text-xs text-gray-500 truncate">{s.artist}</div>
-                    </div>
-                    <div className="text-xs text-gray-500">{formatTime(s.duration)}</div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-sm text-gray-500">No saved songs yet.</div>
-            )}
-          </div>
-        </aside>
-      </div>
-
-    </div>
+    <MusicPagePresentation
+      songs={songs}
+      filtered={filtered}
+      current={current}
+      playing={playing}
+      togglePlay={togglePlay}
+      next={next}
+      prev={prev}
+      shuffle={shuffle}
+      setShuffle={setShuffle}
+      repeatMode={repeatMode}
+      setRepeatMode={setRepeatMode}
+      progress={progress}
+      setProgress={setProgress}
+      duration={duration}
+      volume={volume}
+      setVolume={setVolume}
+      muted={muted}
+      setMuted={setMuted}
+      setTrack={setTrack}
+      currentIndex={currentIndex}
+      setCurrentIndex={setCurrentIndex}
+      expanded={expanded}
+      setExpanded={setExpanded}
+      userData={userData}
+      search={search}
+      setSearch={setSearch}
+      loading={loading}
+      isLoading={isLoading}
+      openModel={openModel}
+      setOpenModel={setOpenModel}
+      likeMusic={likeMusic}
+      saveMusicInPlayList={saveMusicInPlayList}
+      queue={queue}
+      myPlaylist={myPlaylist}
+    />
   )
 }

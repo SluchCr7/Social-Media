@@ -141,4 +141,36 @@ export const iso6391Map = {
     ind: "id",
     heb: "he",
     msa: "ms",
-  };
+};
+  
+
+export const TABS = [
+  { id: 'appearance', label: 'Appearance', icon: <FaSun /> },
+  { id: 'security', label: 'Security', icon: <FaLock /> },
+  { id: 'chat', label: 'Chat Colors', icon: <CiChat1 /> },
+  { id: 'language', label: 'Language', icon: <MdLanguage /> },
+  { id: 'history', label: 'Login History', icon: <FaHistory /> },
+  { id: 'account', label: 'Account', icon: <FaUserCog /> },
+]
+
+export const LANGUAGES = [
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+]
+
+export const DEFAULT_COLORS = [
+  { name: 'Ocean', value: '#06b6d4' },
+  { name: 'Sunset', value: '#fb923c' },
+  { name: 'Mint', value: '#34d399' },
+  { name: 'Lavender', value: '#a78bfa' },
+  { name: 'Rose', value: '#f43f5e' },
+  { name: 'Slate', value: '#64748b' },
+]
+
+
+  export const tabsHeader = [
+    { key: "following", label: "Following" },
+    { key: "forYou", label: "For You" },
+  ];

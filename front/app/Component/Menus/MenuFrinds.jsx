@@ -4,10 +4,11 @@ import { useAuth } from '../../Context/AuthContext';
 import Image from 'next/image';
 import { FiUserPlus } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import { useUser } from '@/app/Context/UserContext';
 
 const MenuFriends = () => {
-  const { suggestedUsers, followUser, user, setShowAllSuggestedUsers } = useAuth();
-
+  const {  user } = useAuth();
+  const {suggestedUsers, followUser,setShowAllSuggestedUsers} = useUser()
   const hasSuggestions = Array.isArray(suggestedUsers) && suggestedUsers.length > 0;
 
   return (

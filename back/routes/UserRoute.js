@@ -15,6 +15,7 @@ const {
   verifyAccount,
   uploadPhoto,
   makeFollow,
+  acceptCookies,
   toggleSongInPlaylist,
   updatePassword,
   updateProfile,
@@ -53,6 +54,7 @@ route.route('/account/private').put(verifyToken, togglePrivateAccount);
 route.route('/save/music/:songId').put(verifyToken, toggleSongInPlaylist);
 // 🔹 Account status & suspension
 route.route('/status/:userId').put(verifyToken, updateAccountStatus);
+route.route('/cookies/:id').put(verifyToken, acceptCookies);
 
 // 🔹 Relationship routes
 route.route('/relationship/:userId').get(verifyToken, getRelationship); // جلب حالة العلاقة

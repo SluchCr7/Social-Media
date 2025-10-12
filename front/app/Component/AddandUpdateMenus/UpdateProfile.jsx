@@ -1,11 +1,22 @@
-'use client'
-import React, { useState, useEffect } from 'react'
-import { FiX } from "react-icons/fi"
-import { FaGithub, FaLinkedin, FaTwitter, FaFacebook, FaGlobe, FaPlus } from 'react-icons/fa'
-import { useAuth } from '../../Context/AuthContext'
-import { toast } from 'react-toastify'
-import Image from 'next/image'
-import { useUser } from '@/app/Context/UserContext'
+'use client';
+import React, { useState, useEffect } from 'react';
+import {
+  FiX,
+  FiLoader
+} from 'react-icons/fi';
+import {
+  FaGithub,
+  FaLinkedin,
+  FaTwitter,
+  FaFacebook,
+  FaGlobe,
+  FaPlus
+} from 'react-icons/fa';
+import { useAuth } from '../../Context/AuthContext';
+import { toast } from 'react-toastify';
+import Image from 'next/image';
+import { useUser } from '@/app/Context/UserContext';
+
 const UpdateProfile = ({ update, setUpdate, user }) => {
   const [formData, setFormData] = useState({
     username: '',
@@ -20,7 +31,7 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
     city: '',
     relationshipStatus: '',
     partner: '',
-    preferedLanguage : '',
+    preferedLanguage: '',
     socialLinks: {
       github: '',
       linkedin: '',
@@ -28,9 +39,9 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
       facebook: '',
       website: '',
     }
-  })
+  });
 
-  const { updateProfile } = useAuth()
+  const { updateProfile, updateProfileLoading } = useUser();
 
   useEffect(() => {
     if (user) {
@@ -47,7 +58,7 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
         partner: user.partner || '',
         dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
         interests: user.interests || [],
-        preferedLanguage : user.preferedLanguage || '',
+        preferedLanguage: user.preferedLanguage || '',
         socialLinks: {
           github: user.socialLinks?.github || '',
           linkedin: user.socialLinks?.linkedin || '',
@@ -55,12 +66,12 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
           facebook: user.socialLinks?.facebook || '',
           website: user.socialLinks?.website || '',
         }
-      }))
+      }));
     }
-  }, [user])
+  }, [user]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     if (name in formData.socialLinks) {
       setFormData(prev => ({
         ...prev,
@@ -68,86 +79,98 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
           ...prev.socialLinks,
           [name]: value
         }
-      }))
+      }));
     } else {
       setFormData(prev => ({
         ...prev,
         [name]: value
-      }))
+      }));
     }
-  }
+  };
 
-  // إضافة اهتمام جديد
   const handleAddInterest = () => {
-    const interest = formData.newInterest.trim()
+    const interest = formData.newInterest.trim();
     if (interest && !formData.interests.includes(interest)) {
       setFormData(prev => ({
         ...prev,
         interests: [...prev.interests, interest],
         newInterest: ''
-      }))
+      }));
     }
-  }
+  };
 
-  // حذف اهتمام
   const handleRemoveInterest = (interest) => {
     setFormData(prev => ({
       ...prev,
       interests: prev.interests.filter(i => i !== interest)
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    const payload = {}
+    e.preventDefault();
+    const payload = {};
 
-    if (formData.username?.trim()) payload.username = formData.username.trim()
-    if (formData.profileName?.trim()) payload.profileName = formData.profileName.trim()
-    if (formData.description?.trim()) payload.description = formData.description.trim()
-    if (formData.country?.trim()) payload.country = formData.country.trim()
-    if (formData.phone?.trim()) payload.phone = formData.phone.trim()
-    if (formData.dateOfBirth?.trim()) payload.dateOfBirth = formData.dateOfBirth
-    if (formData.gender?.trim()) payload.gender = formData.gender
-    if (formData.city?.trim()) payload.city = formData.city.trim()
-    if (formData.preferedLanguage?.trim()) payload.preferedLanguage = formData.preferedLanguage.trim()
-    if (formData.relationshipStatus?.trim()) payload.relationshipStatus = formData.relationshipStatus
-    if (formData.partner?.trim()) payload.partner = formData.partner
+    if (formData.username?.trim()) payload.username = formData.username.trim();
+    if (formData.profileName?.trim()) payload.profileName = formData.profileName.trim();
+    if (formData.description?.trim()) payload.description = formData.description.trim();
+    if (formData.country?.trim()) payload.country = formData.country.trim();
+    if (formData.phone?.trim()) payload.phone = formData.phone.trim();
+    if (formData.dateOfBirth?.trim()) payload.dateOfBirth = formData.dateOfBirth;
+    if (formData.gender?.trim()) payload.gender = formData.gender;
+    if (formData.city?.trim()) payload.city = formData.city.trim();
+    if (formData.preferedLanguage?.trim()) payload.preferedLanguage = formData.preferedLanguage.trim();
+    if (formData.relationshipStatus?.trim()) payload.relationshipStatus = formData.relationshipStatus;
+    if (formData.partner?.trim()) payload.partner = formData.partner;
     if (formData.interests.length > 0) {
       payload.interests = Array.from(new Set([...(user.interests || []), ...formData.interests]));
     }
 
-    const social = formData.socialLinks
-    const links = {}
-    if (social.github?.trim()) links.github = social.github.trim()
-    if (social.linkedin?.trim()) links.linkedin = social.linkedin.trim()
-    if (social.twitter?.trim()) links.twitter = social.twitter.trim()
-    if (social.facebook?.trim()) links.facebook = social.facebook.trim()
-    if (social.website?.trim()) links.website = social.website.trim()
-    if (Object.keys(links).length > 0) payload.socialLinks = links
+    const social = formData.socialLinks;
+    const links = {};
+    if (social.github?.trim()) links.github = social.github.trim();
+    if (social.linkedin?.trim()) links.linkedin = social.linkedin.trim();
+    if (social.twitter?.trim()) links.twitter = social.twitter.trim();
+    if (social.facebook?.trim()) links.facebook = social.facebook.trim();
+    if (social.website?.trim()) links.website = social.website.trim();
+    if (Object.keys(links).length > 0) payload.socialLinks = links;
 
     if (Object.keys(payload).length === 0) {
-      toast.error("Please fill in at least one field.")
-      return
+      toast.error("Please fill in at least one field.");
+      return;
     }
 
-    updateProfile(payload)
-    setUpdate(false)
-  }
+    updateProfile(payload);
+  };
 
-  const inputStyle = "w-full py-3 px-4 text-sm text-white bg-[#1f1f1f] border border-gray-700 rounded-xl placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+  const inputStyle =
+    "w-full py-3 px-4 text-sm text-white bg-[#1f1f1f] border border-gray-700 rounded-xl placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition";
 
   return (
     <div className={`${update ? 'fixed inset-0 bg-black/60 z-50 flex items-center justify-center' : 'hidden'}`}>
-      <div className="bg-[#181818] text-white w-[95%] max-w-2xl rounded-2xl shadow-2xl p-6 relative animate-fade-in space-y-6 max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-[#181818] text-white w-[95%] max-w-2xl rounded-2xl shadow-2xl p-6 animate-fade-in space-y-6 max-h-[90vh] overflow-y-auto">
 
-        <button onClick={() => setUpdate(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl transition">
+        {/* ✅ شاشة التحميل */}
+        {updateProfileLoading && (
+          <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-50 rounded-2xl backdrop-blur-sm">
+            <div className="animate-spin text-green-400 text-4xl mb-3">
+              <FiLoader />
+            </div>
+            <p className="text-gray-300 font-semibold text-lg">Updating profile...</p>
+          </div>
+        )}
+
+        <button
+          onClick={() => setUpdate(false)}
+          className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl transition"
+        >
           <FiX />
         </button>
 
-        <h2 className="text-3xl font-bold text-center border-b pb-3 border-gray-700">Edit Profile Info</h2>
+        <h2 className="text-3xl font-bold text-center border-b pb-3 border-gray-700">
+          Edit Profile Info
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-
           {/* -------------------- Basic Info -------------------- */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -307,8 +330,16 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
             </div>
           </div>
 
-          <button type="submit" className="w-full mt-6 py-3 px-4 rounded-xl bg-green-600 hover:bg-green-500 transition text-white font-semibold text-lg shadow-lg">
-            Save Changes
+          <button
+            type="submit"
+            disabled={updateProfileLoading}
+            className={`w-full mt-6 py-3 px-4 rounded-xl font-semibold text-lg shadow-lg transition 
+              ${updateProfileLoading
+                ? 'bg-gray-600 cursor-not-allowed text-gray-300'
+                : 'bg-green-600 hover:bg-green-500 text-white'
+              }`}
+          >
+            {updateProfileLoading ? 'Saving...' : 'Save Changes'}
           </button>
         </form>
       </div>

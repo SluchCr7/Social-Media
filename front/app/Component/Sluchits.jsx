@@ -13,21 +13,15 @@ import { useAuth } from '../Context/AuthContext';
 import PostSkeleton from '../Skeletons/PostSkeleton';
 import { useCommunity } from '../Context/CommunityContext';
 import { SuggestionRow } from './SuggestedRow';
+import { useUser } from '../Context/UserContext';
+import { useGetData } from '../Custome/useGetData';
 
 const Sluchits = ({ activeTab }) => {
   const { posts, isLoading, fetchPosts, hasMore, setPage, page,isLoadingPostCreated } = usePost();
-  const { user, suggestedUsers,getUserById } = useAuth();
+  const { user } = useAuth();
+  const {suggestedUsers} = useUser()
   const { communities } = useCommunity();
-  const [userData, setUserData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    if (!user?._id) return
-    setLoading(true)
-    getUserById(user?._id)
-      .then(res => setUserData(res))
-      .catch(err => console.log(err))
-      .finally(() => setLoading(false))
-  }, [user?._id])
+  const {userData,loading} = useGetData(user?._id)
 
   const following = Array.isArray(userData?.following) ? userData.following : [];
   const userId = userData?._id;

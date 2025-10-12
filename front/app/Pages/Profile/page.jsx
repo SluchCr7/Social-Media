@@ -9,9 +9,11 @@ import { useAuth } from "@/app/Context/AuthContext"
 import { useProfilePosts } from "@/app/Custome/useProfilePosts"
 import ProfileSkeleton from "@/app/Skeletons/ProfileSkeleton"
 import { useState } from "react"
+import { useUser } from "@/app/Context/UserContext"
 
 const ProfilePage = () => {
-  const { user, togglePrivateAccount } = useAuth()
+  const { user } = useAuth() 
+  const {togglePrivateAccount} = useUser()
   const {
     combinedPosts, postYears, loading, loaderRef, userData,
     filters, setFilters, activeTab, setActiveTab, userHasMore

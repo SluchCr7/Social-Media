@@ -9,6 +9,7 @@ import { useComment } from '../Context/CommentContext';
 import { useAuth } from '../Context/AuthContext';
 import { useReport } from '@/app/Context/ReportContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { HiBadgeCheck } from 'react-icons/hi';
 
 const Comment = ({ comment }) => {
   const [isReplying, setIsReplying] = useState(false);
@@ -62,6 +63,9 @@ const Comment = ({ comment }) => {
             <div className="flex justify-between items-start flex-wrap gap-2">
               <div className="text-sm text-gray-700 dark:text-gray-300 break-words">
                 <span className="font-semibold text-black dark:text-white">{comment.owner.username}</span>
+                {comment.owner.isAccountWithPremiumVerify && (
+                  <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
+                )}
                 <span className="ml-2 text-xs text-gray-500">{comment.owner.profileName}</span>
                 <span className="ml-2 text-xs text-gray-400">· {new Date(comment.createdAt).toLocaleDateString()}</span>
                 {comment?.isEdited && (

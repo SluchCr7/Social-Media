@@ -1,5 +1,5 @@
 const CalendarSkeleton = () => (
-  <div className="animate-pulse space-y-4">
+  <div className="animate-pulse space-y-4 w-full">
     {/* Header */}
     <div className="flex justify-between items-center">
       <div className="h-6 w-24 bg-gray-700/40 rounded-lg" />

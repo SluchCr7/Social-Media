@@ -1,6 +1,6 @@
 
 // 👤 Common select for user data
-const userSelect = "username profileName profilePhoto";
+const userSelect = "username profileName profilePhoto isAccountWithPremiumVerify";
 
 // 🏘 Common select for community
 const communitySelect = "Name Picture members";
@@ -52,7 +52,7 @@ const EventPopulate = [
 const postPopulate = [
   {
     path: "owner",
-    select: `username profileName profilePhoto description followers following`, 
+    select: `username profileName profilePhoto isAccountWithPremiumVerify description followers following`, 
   },
   {
     path: "community",

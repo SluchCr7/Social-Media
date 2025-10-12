@@ -1,5 +1,7 @@
 'use client';
 import { useAuth } from '@/app/Context/AuthContext';
+import { useUser } from '@/app/Context/UserContext';
+import { useVerify } from '@/app/Context/VerifyContext';
 import Link from 'next/link';
 import React, { useEffect } from 'react';
 import { FaCircleCheck } from 'react-icons/fa6';
@@ -7,7 +9,7 @@ import { IoIosCloseCircleOutline } from 'react-icons/io';
 
 const Page = ({ params }) => {
   const { id, token } = params;
-  const { verifyStatus, verifyAccount } = useAuth();
+  const { verifyStatus, verifyAccount } = useVerify();
 
   useEffect(() => {
     if (!verifyStatus) {

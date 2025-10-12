@@ -145,7 +145,7 @@ const uploadToCloudinary = (buffer) => {
 // };
 const addPost = async (req, res) => {
   try {
-    let { text, Hashtags, community, mentions, scheduledAt, links } = req.body;
+    let { text, Hashtags, community, mentions, scheduledAt, links,privacy} = req.body;
     const userId = req.user._id;
 
     if (typeof Hashtags === "string") Hashtags = [Hashtags];
@@ -216,6 +216,7 @@ const addPost = async (req, res) => {
       scheduledAt: scheduleDate,
       status: postStatus,
       links, // ✅ تم الإضافة هنا
+      privacy // ✅ تم الإضافة هنا
     });
 
     // إشعارات mentions فقط إذا تم النشر فورًا
@@ -592,6 +593,7 @@ const getPostById = asyncHandler(async (req, res) => {
 
   res.status(200).json(post);
 });
+
 
 module.exports = {
   getAllPosts,

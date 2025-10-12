@@ -15,16 +15,7 @@ import {
   X,
 } from 'lucide-react';
 
-/**
- * Enhanced Privacy Policy Page
- * - Light + Dark support
- * - Glassmorphism panels
- * - Scroll progress bar (spring)
- * - Animated entry for sections
- * - Desktop TOC with active highlighting
- * - Mobile TOC overlay and bottom quick bar
- * - Smooth scrolling + accessibility
- */
+
 
 const sectionsData = [
   {

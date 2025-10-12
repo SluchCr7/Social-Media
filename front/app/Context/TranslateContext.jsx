@@ -11,7 +11,7 @@ export const TranslateContextProvider = ({ children }) => {
     if (!text) return "";
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/translate", {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/translate`, {
         text,
         targetLang,
       });

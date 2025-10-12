@@ -9,13 +9,16 @@ import { useStory } from "@/app/Context/StoryContext"
 import { useReport } from "@/app/Context/ReportContext"
 import { useProfilePosts } from "@/app/Custome/useProfilePosts"
 import { useState } from "react"
+import { useAdmin } from "@/app/Context/UserAdminContext"
+import { useUser } from "@/app/Context/UserContext"
 
 const UserProfilePage = ({ params }) => {
   const id = params.id
-  const { followUser, blockOrUnblockUser, user } = useAuth()
+  const { user } = useAuth()
+  const {followUser} = useUser()
   const { getUserStories } = useStory()
   const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport()
-
+  const {blockOrUnblockUser} = useAdmin()
   const {
     combinedPosts, postYears, loading, loaderRef, userData,
     filters, setFilters, activeTab, setActiveTab, userHasMore

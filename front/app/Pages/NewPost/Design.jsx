@@ -100,21 +100,26 @@ const DesignPost = ({
         <div className="flex flex-col md:flex-row md:items-center justify-between w-full p-6 border-b border-gray-200 dark:border-gray-700 gap-4">
           <div className="flex items-center gap-4">
             <Image
-              src={user?.profilePhoto?.url || '/default.png'}
+              src={selectedUser?.profilePhoto?.url || '/default.png'}
               alt="profile"
               width={56}
               height={56}
               className="rounded-full w-14 h-14 object-cover border-2 border-gradient-to-br from-blue-400 to-purple-600"
             />
             <div className="flex flex-col">
-              <h2 className="text-lg font-bold text-gray-800 dark:text-white">{user?.username}</h2>
-              <span className="text-sm text-gray-500 dark:text-gray-400">{user?.profileName}</span>
+              <h2 className="text-lg font-bold text-gray-800 dark:text-white">
+                {selectedUser?.username}
+              </h2>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                {selectedUser?.profileName}
+              </span>
             </div>
           </div>
 
-          {/* Community Selector */}
           <div className="w-full md:w-64 relative">
-            {communities.filter(com => com?.members.some(m => m._id === user._id)).length > 0 ? (
+            {communities.filter((com) =>
+              com?.members.some((m) => m._id === user._id)
+            ).length > 0 ? (
               <div className="relative">
                 <FaUsers className="absolute left-3 top-3 text-gray-400" />
                 <select
@@ -124,7 +129,9 @@ const DesignPost = ({
                 >
                   <option value="">Select a Community</option>
                   {communities
-                    .filter(com => com.members.some(m => m._id === user._id))
+                    .filter((com) =>
+                      com.members.some((m) => m._id === user._id)
+                    )
                     .map((com) => (
                       <option key={com._id} value={com._id}>
                         {com.Name}
@@ -133,11 +140,18 @@ const DesignPost = ({
                 </select>
               </div>
             ) : (
-              <span className="text-sm text-gray-500 dark:text-gray-400">You haven’t joined any communities.</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                You haven’t joined any communities.
+              </span>
             )}
           </div>
         </div>
-
+        <div className="flex items-center justify-between mb-4">
+          <PostPrivacySelector
+            defaultValue={privacy}
+            onChange={(value) => setPrivacy(value)}
+          />
+        </div>
         {/* Body */}
         <div className="relative p-6 pb-2">
 
@@ -145,8 +159,18 @@ const DesignPost = ({
           {links?.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-2">
               {links.map((link, idx) => (
-                <div key={idx} className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full shadow-sm">
-                  <a href={link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 truncate max-w-[150px]">{link}</a>
+                <div
+                  key={idx}
+                  className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full shadow-sm"
+                >
+                  <a
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 truncate max-w-[150px]"
+                  >
+                    {link}
+                  </a>
                   <button
                     onClick={() => handleRemoveLink(idx)}
                     className="p-1 rounded-full hover:bg-red-500 hover:text-white transition"
@@ -176,10 +200,19 @@ const DesignPost = ({
           </div>
 
           {/* Text Area */}
-          <div className="relative">
-            <div className="absolute top-0 left-0 w-full h-full p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed">
+          {/* <div className="relative w-full">
+            <div
+              className={`absolute inset-0 p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed
+                ${/[\u0600-\u06FF]/.test(postText) ? 'text-right rtl' : 'text-left ltr'}
+              `}
+              style={{
+                direction: /[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr',
+                color: 'transparent', // <=== هذه مهمة جدًا
+              }}
+            >
               {renderHighlightedText(postText)}
             </div>
+
             <textarea
               ref={textareaRef}
               value={postText}
@@ -187,51 +220,104 @@ const DesignPost = ({
               rows={5}
               placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
               dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
-              className={`relative w-full p-5 text-base leading-relaxed text-transparent rounded-2xl resize-none border shadow-inner bg-transparent caret-blue-600 z-10 selection:bg-blue-200 selection:text-black
+              className={`relative w-full p-5 text-base leading-relaxed bg-transparent border rounded-2xl resize-none shadow-inner caret-blue-600 z-10 selection:bg-blue-200 selection:text-black
                 ${errorText
                   ? 'border-red-500 focus:ring-red-500'
                   : 'bg-gray-50 dark:bg-darkMode-bg border-gray-300 dark:border-gray-600 focus:ring-blue-500'
-                }`}
-              style={{ textAlign: /[\u0600-\u06FF]/.test(postText) ? 'right' : 'left' }}
+                } text-gray-900 dark:text-white`}
+              style={{
+                background: 'transparent', // مهم جدًا
+                position: 'relative',
+                zIndex: 10, // فوق الهايلايت
+              }}
+            />
+          </div> */}
+          <div className="relative w-full">
+            {/* خلفية النص (الهايلايت) */}
+            <div
+              className={`absolute inset-0 p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed
+                ${/[\u0600-\u06FF]/.test(postText) ? 'text-right rtl' : 'text-left ltr'}
+              `}
+              style={{
+                direction: /[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr',
+                color: 'transparent',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                overflowWrap: 'break-word',
+                fontFamily: 'inherit',
+                fontSize: '1rem',
+                lineHeight: '1.625rem',
+              }}
+            >
+              {renderHighlightedText(postText)}
+            </div>
+
+            {/* مربع الكتابة */}
+            <textarea
+              ref={textareaRef}
+              value={postText}
+              onChange={handleTextareaChange}
+              rows={5}
+              placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
+              dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
+              className={`absolute top-0 left-0 w-full h-full p-5 text-base leading-relaxed bg-transparent border rounded-2xl resize-none shadow-inner caret-blue-600 z-10 selection:bg-blue-200 selection:text-black
+                ${errorText
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'bg-gray-50 dark:bg-darkMode-bg border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                } text-gray-900 dark:text-white`}
+              style={{
+                fontFamily: 'inherit',
+                fontSize: '1rem',
+                lineHeight: '1.625rem',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                overflowWrap: 'break-word',
+              }}
             />
           </div>
+
           <AnimatePresence>
-          {showMentionBox && filteredUsers.length > 0 && (
-            <motion.ul
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="absolute left-5 bottom-[110%] bg-white dark:bg-gray-800 shadow-xl rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 z-50 max-h-56 overflow-y-auto w-72"
-            >
-              {filteredUsers.map((mention) => (
-                <li
-                  key={mention._id}
-                  onClick={() => handleSelectMention(mention)}
-                  className="flex items-center gap-2 px-3 py-2 hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer transition-all"
-                >
-                  <Image
-                    src={mention.profilePhoto?.url || '/default.png'}
-                    alt=""
-                    width={28}
-                    height={28}
-                    className="rounded-full"
-                  />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-gray-700 dark:text-white">
-                      {mention.username}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {mention.profileName || ''}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </motion.ul>
-          )}
-        </AnimatePresence>
+            {showMentionBox && filteredUsers.length > 0 && (
+              <motion.ul
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 5 }}
+                style={{
+                  top: mentionBoxPos.top,
+                  left: mentionBoxPos.left,
+                }}
+                className="absolute bg-white dark:bg-gray-800 shadow-xl rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 z-[9999] w-64 max-h-56 overflow-y-auto"
+              >
+                {filteredUsers.map((mention) => (
+                  <li
+                    key={mention._id}
+                    onClick={() => handleSelectMention(mention)}
+                    className="flex items-center gap-2 px-3 py-2 hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer transition-all"
+                  >
+                    <Image
+                      src={mention.profilePhoto?.url || '/default.png'}
+                      alt=""
+                      width={28}
+                      height={28}
+                      className="rounded-full"
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-gray-700 dark:text-white">
+                        {mention.username}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {mention.profileName || ''}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>
+
         </div>
 
-        {/* Image Preview */}
+        {/* Images */}
         <AnimatePresence>
           {images.length > 0 && (
             <motion.div
@@ -270,7 +356,13 @@ const DesignPost = ({
           <div className="flex items-center gap-3 relative">
             <label className="cursor-pointer flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-darkMode-bg hover:bg-blue-100 dark:hover:bg-blue-800 text-gray-700 dark:text-gray-300 transition shadow-md">
               <IoImage size={22} />
-              <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageChange}
+                className="hidden"
+              />
             </label>
 
             <button
@@ -290,7 +382,9 @@ const DesignPost = ({
                   className="absolute z-50 bottom-[110%] left-0 w-[320px] rounded-2xl shadow-2xl overflow-hidden"
                 >
                   <div className="flex justify-between items-center bg-gray-200 dark:bg-gray-700 px-3 py-2">
-                    <span className="text-gray-700 dark:text-gray-200 font-semibold">Emojis</span>
+                    <span className="text-gray-700 dark:text-gray-200 font-semibold">
+                      Emojis
+                    </span>
                     <button
                       onClick={() => setShowEmojiPicker(false)}
                       className="text-gray-600 dark:text-gray-300 hover:text-red-500 transition"
@@ -298,13 +392,17 @@ const DesignPost = ({
                       <FiX size={18} />
                     </button>
                   </div>
-                  <EmojiPicker onEmojiClick={handleEmojiClick} theme="dark" height={300} />
+                  <EmojiPicker
+                    onEmojiClick={handleEmojiClick}
+                    theme="dark"
+                    height={300}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          {/* Post Button with Loading */}
+          {/* Post Button */}
           <button
             onClick={handlePost}
             disabled={loading || (!postText.trim() && images.length === 0) || errorText}
@@ -320,58 +418,58 @@ const DesignPost = ({
               <>
                 <motion.span
                   className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
-                ></motion.span>
-                Posting...
+                />
+                <span>Posting...</span>
               </>
             ) : (
-              'Post'
+              <span>Post</span>
             )}
           </button>
         </div>
 
-        {/* Schedule Post (Enhanced) */}
-        <div className="px-6 pb-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-darkMode-bg/30">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-            <div
+        {/* Schedule Section */}
+        <div className="px-6 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2">
+            <button
               onClick={() => setScheduleEnabled(!scheduleEnabled)}
-              className="flex items-center gap-2 cursor-pointer group"
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all duration-300 ${
+                scheduleEnabled
+                  ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-blue-400'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
             >
-              <div
-                className={`flex items-center justify-center w-6 h-6 rounded-full border transition-all duration-300 ${
-                  scheduleEnabled
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 border-transparent'
-                    : 'border-gray-400 dark:border-gray-600'
-                }`}
-              >
-                {scheduleEnabled && <FiClock className="text-white text-sm" />}
-              </div>
-              <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-500 transition">
-                Schedule this post
-              </span>
-            </div>
-
-            <AnimatePresence>
-              {scheduleEnabled && (
-                <motion.div
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 5 }}
-                  transition={{ duration: 0.25 }}
-                  className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-xl shadow-inner"
-                >
-                  <FiClock className="text-blue-500" />
-                  <input
-                    type="datetime-local"
-                    value={scheduleDate}
-                    onChange={(e) => setScheduleDate(e.target.value)}
-                    min={new Date().toISOString().slice(0, 16)}
-                    className="px-3 py-1.5 border-none bg-transparent text-sm text-gray-700 dark:text-gray-200 focus:ring-0"
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+              <FiClock size={18} />
+              <span className="text-sm font-medium">Schedule Post</span>
+            </button>
           </div>
+
+          <AnimatePresence>
+            {scheduleEnabled && (
+              <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 5 }}
+                className="flex items-center gap-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl p-3 shadow-inner transition-all duration-300"
+              >
+                <input
+                  type="datetime-local"
+                  value={scheduleDate}
+                  onChange={(e) => setScheduleDate(e.target.value)}
+                  className="px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border dark:border-gray-700 text-gray-800 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+                {scheduleDate && (
+                  <button
+                    onClick={() => setScheduleDate('')}
+                    className="p-2 rounded-full hover:bg-red-500 hover:text-white transition"
+                  >
+                    <FiX size={16} />
+                  </button>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
+        
       </div>
     </main>
   )

@@ -8,13 +8,13 @@ import 'react-tooltip/dist/react-tooltip.css'
 import { useAuth } from '../../Context/AuthContext'
 import { useAside } from '../../Context/AsideContext'
 import SidebarContent from './SidebarContent'
-
-
+import { useUser } from '@/app/Context/UserContext'
 
 
 
 const Aside = ({isCollapsed, setIsCollapsed}) => {
-  const { user, Logout, onlineUsers } = useAuth()
+  const { user, Logout } = useAuth()
+  const {onlineUsers} = useUser()
   const { isMobile, setIsMobile, isMobileMenuOpen, setIsMobileMenuOpen } = useAside()
   // const [isCollapsed, setIsCollapsed] = useState(false)
 

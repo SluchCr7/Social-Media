@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/app/Context/AuthContext';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { useUser } from '@/app/Context/UserContext';
+import { useVerify } from '@/app/Context/VerifyContext';
 
 const Reset = ({params}) => {
   const {id , token} = params
@@ -9,7 +11,7 @@ const Reset = ({params}) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const {ResetPassword} = useAuth(ResetPassword)
+  const {ResetPassword} = useVerify()
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);

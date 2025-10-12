@@ -2,10 +2,11 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { usePost } from "@/app/Context/PostContext"
 import { useAuth } from "@/app/Context/AuthContext"
+import { useUser } from "../Context/UserContext"
 
 export const useProfilePosts = (userId, pinsPosts = []) => {
   const { fetchUserPosts, userPosts, userHasMore } = usePost()
-  const { getUserById } = useAuth()
+  const { getUserById } = useUser()
 
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(true)

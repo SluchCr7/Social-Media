@@ -7,6 +7,18 @@
   scrollbar-color: #6366F1 transparent;
 }
 
+/* الخط الافتراضي (الإنجليزي) */
+body {
+  font-family: var(--font-english);
+}
+
+/* أي نص عربي */
+:lang(ar),
+[dir="rtl"] {
+  font-family: var(--font-arabic);
+}
+
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

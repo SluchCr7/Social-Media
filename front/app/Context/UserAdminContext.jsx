@@ -66,29 +66,55 @@ export const UserAdminContextProvider = ({ children }) => {
   };
 
   // 🧩 3️⃣ Update Account Status (Suspend / Active / etc)
+  const makeAccountPremiumVerify = async () => {
+    if (!user?.token) return showAlert('You must be logged in');
+    try {
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/verify`,
+        {},
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+
+      // تحديث حالة الحساب المحليًا
+      setUser((prev) => ({ ...prev, isAccountWithPremiumVerify: true }));
+
+      showAlert(res.data.message || 'Account verified successfully');
+    } catch (err) {
+      console.error(err);
+      showAlert(err.response?.data?.message || 'Failed to verify account');
+    }
+  };
+
+
   const updateAccountStatus = async (userId, status, days = 7) => {
     if (!user?.token) return showAlert('You must be logged in as an admin');
 
     try {
       const body = { accountStatus: status };
-      if (status === 'suspended' && days) body.days = days;
+      if (status === "suspended" && days) {
+        body.days = days; // نضيف مدة التعليق لو فيه
+      }
 
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/status/${userId}`,
         body,
-        { headers: { Authorization: `Bearer ${user.token}` } }
+        {
+          headers: { Authorization: `Bearer ${user.token}` },
+        }
       );
 
+      // تحديث الـ users في الـ state لو عندك لستة users
       setUsers((prev) =>
         prev.map((u) =>
           u._id === userId ? { ...u, accountStatus: status } : u
         )
       );
 
+      // لو بتعدل نفسك كـ user (حالة خاصة)
       if (user._id === userId) {
         const updatedUser = { ...user, accountStatus: status };
         setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        localStorage.setItem("user", JSON.stringify(updatedUser));
       }
 
       showAlert(res.data.message || `Account status updated to ${status}`);
@@ -119,6 +145,7 @@ export const UserAdminContextProvider = ({ children }) => {
         blockOrUnblockUser,
         updateAccountStatus,
         deleteUser,
+        makeAccountPremiumVerify,
         loading,
       }}
     >

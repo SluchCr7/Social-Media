@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 import { useAlert } from './AlertContext';
+import { useSocket } from './SocketContext';
 
 const UserContext = createContext();
 export const useUser = () => useContext(UserContext);
@@ -11,9 +12,13 @@ export const UserContextProvider = ({ children }) => {
     const { user, setUser, setUsers } = useAuth();
     const [loading, setLoading] = useState(false);
     const {showAlert} = useAlert()
-    const [verifyStatus, setVerifyStatus] = useState(false);
     const [suggestedUsers, setSuggestedUsers] = useState([]);
+    const [updateProfileLoading , setUpdateProfileLoading] = useState(false)
+    const { socket } = useSocket(); // ✅ نأخذ الـ socket من السياق
+    const [onlineUsers, setOnlineUsers] = useState([]); // ✅ حالة للمستخدمين الأونلاين
+
   const followUser = async (id) => {
+    setLoading(true);
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/follow/${id}`,
@@ -52,6 +57,8 @@ export const UserContextProvider = ({ children }) => {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -114,7 +121,7 @@ export const UserContextProvider = ({ children }) => {
         website: fields.socialLinks?.website ?? user.socialLinks?.website ?? '',
       }
     };
-
+    setUpdateProfileLoading(true)
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update`,
@@ -133,8 +140,13 @@ export const UserContextProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
       showAlert('Profile Updated Successfully.');
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } catch (err) {
       console.error(err);
+    } finally {
+      setUpdateProfileLoading(false)
     }
   };
 
@@ -160,73 +172,15 @@ export const UserContextProvider = ({ children }) => {
       );
 
       showAlert(res.data.message);
-
-      // تحديث الـ posts في الـ state
-      setPosts((prev) =>
-        prev.map((post) =>
-          post._id === id
-            ? { ...post, isPinned: res.data.message === "Post Pin" } // ضيف فلاغ isPinned
-            : post
-        )
-      );
     } catch (err) {
       console.error(err);
     }
   };  
 
-  const ResetPassword = async (id, token, password) => {
-    if (!password) return showAlert('All fields are required');
-    try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/password/reset-password/${id}/${token}`, { password }, {
-        headers: { authorization: `Bearer ${user.token}` }
-      });
-      showAlert(res.data.message);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
-  const ForgetEmail = async (email) => {
-    if (!email) return showAlert('Email field is required');
-    try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/password/reset`, { email }, {
-        headers: { authorization: `Bearer ${user.token}` }
-      });
-      showAlert(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const verifyAccount = async (id, token) => {
-    try {
-      await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/${id}/verify/${token}`);
-      setVerifyStatus(true);
-      showAlert('Account Verified');
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    const getSuggestedUsers = async () => {
-      if (!user?.token) return;
-
-      try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/suggested`, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
-        setSuggestedUsers(res.data);
-      } catch (err) {
-        console.error("Error fetching suggested users:", err.response?.data || err.message);
-      }
-    };
-    getSuggestedUsers();
-  }, [user?.token]);
 const togglePrivateAccount = async () => {
   if (!user?.token) return showAlert('You must be logged in');
+
   try {
     const res = await axios.put(
       `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/account/private`,
@@ -244,25 +198,8 @@ const togglePrivateAccount = async () => {
   }
 };
 
-const makeAccountPremiumVerify = async () => {
-  if (!user?.token) return showAlert('You must be logged in');
-  try {
-    const res = await axios.put(
-      `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/verify`,
-      {},
-      { headers: { Authorization: `Bearer ${user.token}` } }
-    );
 
-    // تحديث حالة الحساب المحليًا
-    setUser((prev) => ({ ...prev, isAccountWithPremiumVerify: true }));
-
-    showAlert(res.data.message || 'Account verified successfully');
-  } catch (err) {
-    console.error(err);
-    showAlert(err.response?.data?.message || 'Failed to verify account');
-  }
-};
-const getUserById = async (id) => {
+  const getUserById = async (id) => {
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/${id}`);
       return res.data; // بيرجع بيانات اليوزر
@@ -289,22 +226,52 @@ const getUserById = async (id) => {
     }
   };
 
+  // =====================================
+
+  useEffect(() => {
+    const getSuggestedUsers = async () => {
+      if (!user?.token) return;
+
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/suggested`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+        setSuggestedUsers(res.data);
+      } catch (err) {
+        console.error("Error fetching suggested users:", err.response?.data || err.message);
+      }
+    };
+    getSuggestedUsers();
+  }, [user?.token]);
+
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("getOnlineUsers", (users) => {
+      setOnlineUsers(users);
+      console.log("👥 Online users updated:", users);
+    });
+
+    // تنظيف عند الخروج
+    return () => socket.off("getOnlineUsers");
+  }, [socket]);
+
+
   return (
     <UserContext.Provider
         value={{
             suggestedUsers,
             saveMusicInPlayList,
-            togglePrivateAccount,makeAccountPremiumVerify
+            togglePrivateAccount
             ,getUserById,followUser,
             updatePhoto,
             updateProfile,
             updatePassword,
             pinPost,
-            ResetPassword,
-            ForgetEmail,
-            verifyAccount,
-            verifyStatus,
-            setVerifyStatus,
+            onlineUsers,updateProfileLoading,loading
         }}
     >
       {children}

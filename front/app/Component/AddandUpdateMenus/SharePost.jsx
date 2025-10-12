@@ -1,28 +1,28 @@
 'use client'
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { FaShare } from "react-icons/fa";
+import { FaShare, FaSpinner } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../Context/AuthContext";
+import { usePost } from "@/app/Context/PostContext";
 
 export function ShareModal({ post, isOpen, onClose, onShare }) {
   const [customText, setCustomText] = useState("");
   const { user } = useAuth();
+  const { isLoading } = usePost();
 
   // إغلاق المودال عند الضغط على Escape
   useEffect(() => {
-    const handleKey = (e) => e.key === "Escape" && onClose();
+    const handleKey = (e) => e.key === "Escape" && !isLoading && onClose();
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
-  }, [onClose]);
+  }, [onClose, isLoading]);
 
   if (!isOpen) return null;
 
   const handleSubmit = () => {
-    if (!post?._id) return;
+    if (!post?._id || isLoading) return;
     onShare(post?.originalPost ? post?.originalPost?._id : post?._id, customText);
-    setCustomText("");
-    onClose();
   };
 
   return (
@@ -34,16 +34,34 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4"
-          onClick={onClose} // إغلاق عند النقر على الخلفية
+          onClick={!isLoading ? onClose : undefined} // لا يُغلق أثناء التحميل
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="bg-white dark:bg-darkMode-bg rounded-2xl w-full max-w-2xl shadow-2xl p-6 sm:p-8 relative"
-            onClick={(e) => e.stopPropagation()} // منع الإغلاق عند النقر داخل المودال
+            className="relative bg-white dark:bg-darkMode-bg rounded-2xl w-full max-w-2xl shadow-2xl p-6 sm:p-8"
+            onClick={(e) => e.stopPropagation()}
           >
+            {/* Overlay تحميل شفاف فوق المودال */}
+            {isLoading && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center rounded-2xl z-20"
+              >
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                  className="text-white text-4xl mb-3"
+                >
+                  <FaSpinner />
+                </motion.div>
+                <p className="text-white text-sm font-medium tracking-wide">Sharing post...</p>
+              </motion.div>
+            )}
+
             {/* Header */}
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-2">
@@ -54,7 +72,10 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
               </div>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition text-xl hover:rotate-90 hover:scale-110"
+                disabled={isLoading}
+                className={`text-gray-400 text-xl transition hover:rotate-90 hover:scale-110 ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : "hover:text-gray-600 dark:hover:text-gray-300"
+                }`}
               >
                 ✕
               </button>
@@ -71,7 +92,10 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
               />
               <div className="flex-1 flex flex-col">
                 <textarea
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 bg-gray-50 dark:bg-darkMode-card text-gray-800 dark:text-gray-200 resize-none transition"
+                  disabled={isLoading}
+                  className={`w-full border border-gray-300 dark:border-gray-600 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 bg-gray-50 dark:bg-darkMode-card text-gray-800 dark:text-gray-200 resize-none transition ${
+                    isLoading && "opacity-50 cursor-not-allowed"
+                  }`}
                   rows={3}
                   placeholder="Say something about this post..."
                   value={customText}
@@ -136,15 +160,41 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
             <div className="flex justify-end gap-3 mt-5">
               <button
                 onClick={onClose}
-                className="px-5 py-2 rounded-xl bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+                disabled={isLoading}
+                className={`px-5 py-2 rounded-xl font-medium transition ${
+                  isLoading
+                    ? "bg-gray-300 dark:bg-gray-600 cursor-not-allowed text-gray-400"
+                    : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                }`}
               >
                 Cancel
               </button>
+
               <button
                 onClick={handleSubmit}
-                className="px-6 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium hover:scale-105 transition-transform shadow-lg flex items-center gap-2"
+                disabled={isLoading}
+                className={`px-6 py-2 rounded-xl font-medium text-white shadow-lg flex items-center gap-2 transition-transform ${
+                  isLoading
+                    ? "bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-purple-500 hover:scale-105"
+                }`}
               >
-                <FaShare /> Share
+                {isLoading ? (
+                  <>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                      className="text-white"
+                    >
+                      <FaSpinner />
+                    </motion.div>
+                    Sharing...
+                  </>
+                ) : (
+                  <>
+                    <FaShare /> Share
+                  </>
+                )}
               </button>
             </div>
           </motion.div>

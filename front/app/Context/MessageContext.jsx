@@ -6,6 +6,8 @@ import { useAuth } from "./AuthContext";
 import { useNotify } from "./NotifyContext";
 import { useAlert } from "./AlertContext";
 import { useSocket } from "./SocketContext";
+import { useMessageActions } from "../Custome/Message/useMesssageActions";
+import { useUnReadMessage } from "../Custome/Message/useUnReadMessage";
 
 export const MessageContext = createContext();
 
@@ -21,12 +23,11 @@ export const MessageContextProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
   const [isMessagesLoading, setIsMessagesLoading] = useState(true);
   const [messagesByUser, setMessagesByUser] = useState([]);
-  const [backgroundType, setBackgroundType] = useState('color');
-  const [backgroundValue, setBackgroundValue] = useState('#f0f0f0');
-
+  const [replyingTo, setReplyingTo] = useState(null);
   const [unReadedMessage, setUnReadedMessage] = useState(0);
   const [unreadCountPerUser, setUnreadCountPerUser] = useState({});
-
+  const {toggleLikeMessage , deleteMessage , deleteForMe , copyMessageText} = useMessageActions({ user, showAlert, setMessages });
+  const {fetchUnreadMessages,markAllAsReadBetweenUsers,updateUnreadCounters, } = useUnReadMessage({ user, setUnReadedMessage, setUnreadCountPerUser, unreadCountPerUser });
   // ----------------- Fetch Users -----------------
 
   useEffect(() => {
@@ -80,10 +81,11 @@ export const MessageContextProvider = ({ children }) => {
   }, [selectedUser, user]);
 
   // ----------------- Add New Message -----------------
-  const AddNewMessage = async (text, images) => {
+  const AddNewMessage = async (text, images, replyTo = null) => {
     if (!selectedUser || !user?.token) return;
 
     const tempId = Date.now().toString();
+
     const tempMessage = {
       _id: tempId,
       text,
@@ -93,16 +95,19 @@ export const MessageContextProvider = ({ children }) => {
       createdAt: new Date().toISOString(),
       isRead: false,
       pending: true,
+      ...(replyTo && { replyTo }), // ✅ إضافة الرد مؤقتًا في الواجهة
     };
 
     setMessages(prev => [...prev, tempMessage]);
 
     try {
       const formData = new FormData();
+
       if (images?.length > 0) {
         images.forEach(img => formData.append("image", img));
       }
-      formData.append("text", text);
+      if (text) formData.append("text", text);
+      if (replyTo) formData.append("replyTo", replyTo._id); // ✅ إرسال ID الرسالة الأصلية
 
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/message/send/${selectedUser._id}`,
@@ -117,12 +122,13 @@ export const MessageContextProvider = ({ children }) => {
       );
 
       await addNotify({
-        content: `${user.username} sent you a message`,
+        content: `${user.username} replied to your message`,
         type: "message",
         receiverId: selectedUser._id,
         actionRef: newMessage._id,
         actionModel: "Message"
       });
+
     } catch (err) {
       console.error("Error sending message:", err);
 
@@ -133,6 +139,7 @@ export const MessageContextProvider = ({ children }) => {
       showAlert("Failed to send message.");
     }
   };
+
 
   // ----------------- Fetch All Messages By User -----------------
   const fetchMessagesByUser = async () => {
@@ -148,69 +155,12 @@ export const MessageContextProvider = ({ children }) => {
     }
   };
 
-  // ----------------- Fetch Only Unread Messages -----------------
-  const fetchUnreadMessages = async () => {
-    if (!user || !user._id || !user.token) return;
-
-    try {
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/message/messages/unread`,
-        { headers: { Authorization: `Bearer ${user.token}` } }
-      );
-
-      const unreadMessages = res.data;
-
-      setUnReadedMessage(unreadMessages.length);
-
-      const unreadBySender = {};
-      unreadMessages.forEach(msg => {
-        const senderId = msg.sender?._id || msg.sender;
-        unreadBySender[senderId] = (unreadBySender[senderId] || 0) + 1;
-      });
-      setUnreadCountPerUser(unreadBySender);
-    } catch (err) {
-      console.error("Error fetching unread messages:", err);
-    }
-  };
-
+  
   useEffect(() => {
     fetchMessagesByUser();
-    fetchUnreadMessages();
   }, [user]);
 
-  // ----------------- Mark All Read -----------------
-  const markAllAsReadBetweenUsers = async (otherUserId) => {
-    try {
-      await axios.patch(`${process.env.NEXT_PUBLIC_BACK_URL}/api/message/read/${otherUserId}`, {}, {
-        headers: { authorization: `Bearer ${user.token}` }
-      });
 
-      setUnReadedMessage(prev => prev - (unreadCountPerUser[otherUserId] || 0));
-      setUnreadCountPerUser(prev => {
-        const updated = { ...prev };
-        delete updated[otherUserId];
-        return updated;
-      });
-    } catch (err) {
-      console.error('Error marking messages as read:', err);
-    }
-  };
-
-  // ----------------- Update Unread Counters Locally -----------------
-  const updateUnreadCounters = (message) => {
-    if (!message || !message.receiver || !message.sender) return;
-
-    const receiverId = message.receiver?._id || message.receiver;
-    const senderId = message.sender?._id || message.sender;
-
-    if (receiverId === user._id && !message.isRead) {
-      setUnReadedMessage(prev => prev + 1);
-      setUnreadCountPerUser(prev => ({
-        ...prev,
-        [senderId]: (prev[senderId] || 0) + 1
-      }));
-    }
-  };
 
   // ----------------- Socket -----------------
   useEffect(() => {
@@ -231,30 +181,6 @@ export const MessageContextProvider = ({ children }) => {
     };
   }, [socket, selectedUser]);
 
-  // ----------------- Background -----------------
-  useEffect(() => {
-    const savedType = localStorage.getItem('chatBackgroundType');
-    const savedValue = localStorage.getItem('chatBackgroundValue');
-    if (savedType && savedValue) {
-      setBackgroundType(savedType);
-      setBackgroundValue(savedValue);
-    }
-  }, []);
-
-  const handleBackgroundChange = (type, value) => {
-    setBackgroundType(type);
-    setBackgroundValue(value);
-    localStorage.setItem('chatBackgroundType', type);
-    localStorage.setItem('chatBackgroundValue', value);
-  };
-
-  const backgroundStyle = backgroundType === 'color'
-    ? { backgroundColor: backgroundValue }
-    : { backgroundImage: `url(${backgroundValue})`, backgroundSize: 'cover', backgroundPosition: 'center' };
-
-  useEffect(()=>{
-    console.log(unReadedMessage)
-  },[unReadedMessage])
   
   return (
     <MessageContext.Provider
@@ -268,12 +194,14 @@ export const MessageContextProvider = ({ children }) => {
         isMessagesLoading,
         messagesByUser,
         markAllAsReadBetweenUsers,
-        backgroundStyle,
-        handleBackgroundChange,
-        backgroundValue,
         unReadedMessage,
         unreadCountPerUser,
         fetchUnreadMessages,
+        toggleLikeMessage,
+        deleteMessage,
+        deleteForMe,
+        copyMessageText,
+        replyingTo, setReplyingTo
       }}
     >
       {children}

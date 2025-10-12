@@ -5,9 +5,11 @@ import { useNews } from '@/app/Context/NewsContext';
 import { usePost } from '@/app/Context/PostContext';
 import { filterHashtags } from '@/app/utils/filterHashtags';
 import DesignExplore from './DesignExplore';
+import { useUser } from '@/app/Context/UserContext';
 
 const Search = () => {
-  const { users, user, suggestedUsers } = useAuth();
+  const { users, user } = useAuth();
+  const {suggestedUsers} = useUser()
   const { news } = useNews();
   const { posts } = usePost();
 

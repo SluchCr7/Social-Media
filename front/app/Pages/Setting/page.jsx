@@ -9,139 +9,19 @@ import {
   FaUserCog,
   FaTrashAlt,
   FaHistory,
-  FaCheck,
-  FaShieldAlt,
 } from 'react-icons/fa'
 import { CiChat1 } from 'react-icons/ci'
 import { MdLanguage } from 'react-icons/md'
 import { useTheme } from '@/app/Context/ThemeContext'
-
-// NOTE: This component assumes Tailwind CSS is configured + Framer Motion installed.
-// It is a single-file, production-ready React component intended as a polished redesign
-// for your previous Settings UI. Customize handlers (props) and wiring as needed.
-
-const TABS = [
-  { id: 'appearance', label: 'Appearance', icon: <FaSun /> },
-  { id: 'security', label: 'Security', icon: <FaLock /> },
-  { id: 'chat', label: 'Chat Colors', icon: <CiChat1 /> },
-  { id: 'language', label: 'Language', icon: <MdLanguage /> },
-  { id: 'history', label: 'Login History', icon: <FaHistory /> },
-  { id: 'account', label: 'Account', icon: <FaUserCog /> },
-]
-
-const LANGUAGES = [
-  { code: 'en', name: 'English', flag: '🇬🇧' },
-  { code: 'ar', name: 'العربية', flag: '🇸🇦' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-]
-
-const DEFAULT_COLORS = [
-  { name: 'Ocean', value: '#06b6d4' },
-  { name: 'Sunset', value: '#fb923c' },
-  { name: 'Mint', value: '#34d399' },
-  { name: 'Lavender', value: '#a78bfa' },
-  { name: 'Rose', value: '#f43f5e' },
-  { name: 'Slate', value: '#64748b' },
-]
+import { TABS ,DEFAULT_COLORS, LANGUAGES } from '@/app/utils/Data'
+import MobileBottomNav from '@/app/Component/Setting/MobileBottomNav'
+import { getPasswordStrength } from '@/app/utils/getPasswordStrength'
+import ToggleSwitch from '@/app/Component/Setting/ToggleSwitch'
+import PasswordStrength from '@/app/Component/Setting/PasswordStrength'
+import LanguageCard from '@/app/Component/Setting/LanguageCard'
+import LoginHistoryTimeline from '@/app/Component/Setting/LoginHistoryTimeline'
 
 // small helper: password strength
-function getPasswordStrength(pw) {
-  let score = 0
-  if (!pw) return { score, label: 'Too short' }
-  if (pw.length >= 8) score++
-  if (/[A-Z]/.test(pw)) score++
-  if (/[0-9]/.test(pw)) score++
-  if (/[^A-Za-z0-9]/.test(pw)) score++
-  const label = score <= 1 ? 'Weak' : score === 2 ? 'Fair' : score === 3 ? 'Good' : 'Strong'
-  return { score, label }
-}
-
-function ToggleSwitch({ checked, onChange, onColor = 'bg-blue-500' }) {
-  return (
-    <button
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className={clsx(
-        'relative inline-flex h-8 w-14 items-center rounded-full p-1 transition-shadow focus:outline-none',
-        checked ? onColor : 'bg-gray-300 dark:bg-gray-700'
-      )}
-    >
-      <span
-        className={clsx(
-          'block h-6 w-6 transform rounded-full bg-white shadow transition-transform',
-          checked ? 'translate-x-6' : 'translate-x-0'
-        )}
-      />
-    </button>
-  )
-}
-
-function PasswordStrength({ password }) {
-  const { score, label } = getPasswordStrength(password)
-  const pct = (score / 4) * 100
-  return (
-    <div className="space-y-2">
-      <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-        <div
-          style={{ width: `${pct}%` }}
-          className={clsx('h-full rounded-full transition-all', {
-            'bg-red-500': score <= 1,
-            'bg-yellow-400': score === 2,
-            'bg-emerald-400': score >= 3,
-          })}
-        />
-      </div>
-      <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
-        <span>{label}</span>
-        <span>{password ? `${pct}%` : '0%'}</span>
-      </div>
-    </div>
-  )
-}
-
-function LanguageCard({ lang, active, onClick }) {
-  return (
-    <button
-      onClick={() => onClick(lang.code)}
-      className={clsx(
-        'p-3 border rounded-lg text-left w-full hover:shadow transition flex items-center gap-3',
-        active ? 'bg-gradient-to-r from-white/60 to-blue-50 dark:from-gray-800 dark:to-gray-900 ring-2 ring-offset-1 ring-blue-400' : 'bg-transparent'
-      )}
-    >
-      <div className="text-2xl">{lang.flag}</div>
-      <div className="flex-1">
-        <div className="font-medium">{lang.name}</div>
-        <div className="text-xs text-gray-500 dark:text-gray-400">{lang.code.toUpperCase()}</div>
-      </div>
-      {active && <FaCheck className="text-blue-600" />}
-    </button>
-  )
-}
-
-function LoginHistoryTimeline({ items = [] }) {
-  if (!items.length) return <div className="text-sm text-gray-500">No recent activity found.</div>
-  return (
-    <ul className="space-y-4">
-      {items.map((it, idx) => (
-        <li key={idx} className="flex gap-4 items-start">
-          <div className="w-3">
-            <div className="h-3 w-3 rounded-full bg-blue-500 mt-1" />
-            {idx !== items.length - 1 && <div className="w-px bg-gray-200 dark:bg-gray-800 flex-1 mx-auto" />}
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <div className="font-medium">{it.device} • {it.location}</div>
-              <div className="text-xs text-gray-500">{it.time}</div>
-            </div>
-            <div className="text-sm text-gray-500 mt-1">{it.ip}</div>
-          </div>
-        </li>
-      ))}
-    </ul>
-  )
-}
 
 export default function SettingsPage({
   user = {},
@@ -154,7 +34,6 @@ export default function SettingsPage({
   loginHistory = [],
 }) {
   const [activeTab, setActiveTab] = useState('appearance')
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   // استخدم الـ Context
   const { theme, toggleTheme } = useTheme()
 
@@ -211,23 +90,6 @@ export default function SettingsPage({
     setShowConfirmDelete(false)
   }
 
-  // small responsive change: bottom nav for mobile
-  const MobileBottomNav = () => (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-2xl md:hidden">
-      <div className="backdrop-blur bg-white/60 dark:bg-gray-900/60 border rounded-2xl p-2 flex justify-between">
-        {TABS.slice(0, 4).map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setActiveTab(t.id)}
-            className={clsx('flex-1 text-center p-2 rounded-lg', activeTab === t.id ? 'bg-blue-600 text-white' : 'text-gray-700 dark:text-gray-200')}
-          >
-            <div className="text-lg mx-auto">{t.icon}</div>
-            <div className="text-xs mt-1">{t.label.split(' ')[0]}</div>
-          </button>
-        ))}
-      </div>
-    </div>
-  )
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100 transition-colors pb-24 md:pb-8">
@@ -607,7 +469,7 @@ export default function SettingsPage({
       </div>
 
       {/* Mobile bottom nav */}
-      <MobileBottomNav />
+      <MobileBottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
   )
 }

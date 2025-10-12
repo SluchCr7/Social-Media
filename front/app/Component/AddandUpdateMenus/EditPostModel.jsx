@@ -8,9 +8,9 @@ import { IoImage, IoHappyOutline } from 'react-icons/io5';
 import EmojiPicker from 'emoji-picker-react';
 import { useCommunity } from '@/app/Context/CommunityContext';
 import { useAuth } from '@/app/Context/AuthContext';
-
+import { motion , AnimatePresence } from 'framer-motion';
 const EditPostModal = ({ post, onClose }) => {
-  const { editPost } = usePost();
+  const { editPost , isLoading } = usePost();
   const {communities} = useCommunity()
   const [text, setText] = useState('');
   const [existingPhotos, setExistingPhotos] = useState([]);
@@ -86,6 +86,28 @@ const EditPostModal = ({ post, onClose }) => {
     <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4 backdrop-blur-sm bg-black/60">
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
         
+        <AnimatePresence>
+          {isLoading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm z-30 flex flex-col items-center justify-center rounded-2xl"
+            >
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                className="text-white text-4xl mb-3"
+              >
+                <FaSpinner />
+              </motion.div>
+              <p className="text-white text-sm font-medium tracking-wide">
+                Updating post...
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
           <h2 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">Edit Post</h2>
@@ -242,11 +264,28 @@ const EditPostModal = ({ post, onClose }) => {
           >
             Cancel
           </button>
-          <button
+<button
             onClick={handleSubmit}
-            className="px-5 py-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition"
+            disabled={isLoading}
+            className={`px-6 py-2 rounded-full font-medium text-white flex items-center gap-2 transition-transform shadow-lg ${
+              isLoading
+                ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed'
+                : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:scale-105'
+            }`}
           >
-            Save Changes
+            {isLoading ? (
+              <>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                >
+                  <FaSpinner />
+                </motion.div>
+                Updating...
+              </>
+            ) : (
+              <>Save Changes</>
+            )}
           </button>
         </div>
       </div>

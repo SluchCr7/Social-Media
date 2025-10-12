@@ -1,15 +1,19 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri";
+import { FaSpinner } from "react-icons/fa";
 import Image from "next/image";
 import { HiBadgeCheck } from "react-icons/hi";
 import { IoEllipsisHorizontal, IoAdd } from "react-icons/io5";
-import { FaUserEdit, FaCamera } from "react-icons/fa";
-import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri";
+import { FaCamera } from "react-icons/fa";
 import StatBlock from "./StatBlock";
 import { SiGoogleanalytics } from "react-icons/si";
 import Link from "next/link";
+import { useAuth } from "@/app/Context/AuthContext";
+import { useUser } from "@/app/Context/UserContext";
 
 const ProfileHeader = ({
-  user,
+  user: profileUser, // ← غيرنا الاسم لتفادي التعارض
   isOwner = false,
   isFollowing = false,
   canSeePrivateContent = true,
@@ -24,16 +28,35 @@ const ProfileHeader = ({
   setOpenMenu,
   openMenu,
   onProfileClick,
-  renderOwnerMenu,     // JSX للمنيو في صفحة المالك
-  renderVisitorMenu    // JSX للمنيو في صفحة الزائر
+  renderOwnerMenu,
+  renderVisitorMenu
 }) => {
+  const { user: authUser } = useAuth(); // ← ده المستخدم الحقيقي
+  const { loading } = useUser()
+
+  const handleClick = async () => {
+    try {
+      if (isFollowing) {
+        await onUnfollow?.();
+      } else {
+        await onFollow?.();
+      }
+    }catch (error) {
+      console.error(error);
+    }
+  }
+
+  // إذا كان المستخدم الحقيقي هو صاحب الحساب الحالي لكن ليس في وضع المالك (view as user)
+  // لا تظهر أي أزرار
+  const hideActions = !isOwner && authUser?._id === profileUser?._id;
+
   return (
     <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 w-full">
       {/* Avatar */}
       <motion.div
         whileHover={{ scale: 1.05 }}
         className={`relative w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden shadow-xl cursor-pointer p-1
-          ${user?.stories?.length > 0
+          ${profileUser?.stories?.length > 0
             ? "border-[4px] sm:border-[5px] border-blue-500 animate-spin-slow"
             : "border-0 border-transparent"}`}
         onClick={!isOwner ? onProfileClick : undefined}
@@ -43,7 +66,7 @@ const ProfileHeader = ({
             src={
               image
                 ? URL.createObjectURL(image)
-                : user?.profilePhoto?.url || "/default-profile.png"
+                : profileUser?.profilePhoto?.url || "/default-profile.png"
             }
             alt="Profile photo"
             fill
@@ -71,25 +94,25 @@ const ProfileHeader = ({
 
       {/* User Info */}
       <div className="flex flex-col gap-3 flex-1 w-full items-center lg:items-start text-center lg:text-left">
-        
+
         {/* Username & Badge */}
         <div className="flex items-center gap-2 flex-wrap justify-center lg:justify-start">
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold break-words">
-            {user?.username || "Username"}
+            {profileUser?.username || "Username"}
           </h1>
-          {user?.isAccountWithPremiumVerify && (
+          {profileUser?.isAccountWithPremiumVerify && (
             <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
           )}
-          <div className="flex items-center gap-1">
-            <span
-              onClick={() => setOpenMenu(!openMenu)}
-              className="cursor-pointer text-gray-600 dark:text-gray-300"
-            >
-              <IoEllipsisHorizontal size={20} />
-            </span>
-            {
-              isOwner && (
-                <Link href="/Pages/Analytics">
+          {!hideActions && (
+            <div className="flex items-center gap-1">
+              <span
+                onClick={() => setOpenMenu(!openMenu)}
+                className="cursor-pointer text-gray-600 dark:text-gray-300"
+              >
+                <IoEllipsisHorizontal size={20} />
+              </span>
+              {isOwner && (
+                <Link href="/Pages/Analytics" className="pl-2">
                   <motion.span
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -98,20 +121,24 @@ const ProfileHeader = ({
                     <SiGoogleanalytics className="text-gray-600 dark:text-gray-300" size={20} />
                   </motion.span>
                 </Link>
-              )
-            }
-          </div>
-          {isOwner ? renderOwnerMenu?.() : renderVisitorMenu?.()}
+              )}
+            </div>
+          )}
+          {!hideActions && (isOwner ? renderOwnerMenu?.() : renderVisitorMenu?.())}
         </div>
 
         {/* Level & Progress */}
         <div className="w-full max-w-xs mx-auto lg:mx-0">
           <div className="flex justify-between text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">
             <span className="flex items-center gap-1">
-              {user?.userLevelRank || "Junior"} <span>🏅</span>
+              {profileUser?.userLevelRank || "Junior"} <span>🏅</span>
             </span>
-            <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-              {user?.userLevelPoints || 0} XP
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              {profileUser?.userLevelPoints || 0} XP
             </motion.span>
           </div>
           <div className="w-full h-3 bg-gray-300 dark:bg-gray-700 rounded-full mt-2 overflow-hidden shadow-inner">
@@ -119,7 +146,7 @@ const ProfileHeader = ({
               initial={{ width: 0 }}
               animate={{
                 width: `${Math.min(
-                  ((user?.userLevelPoints || 0) / (user?.nextLevelPoints || 500)) * 100,
+                  ((profileUser?.userLevelPoints || 0) / (profileUser?.nextLevelPoints || 500)) * 100,
                   100
                 )}%`,
               }}
@@ -129,7 +156,7 @@ const ProfileHeader = ({
           </div>
           <span className="block text-xs text-gray-500 mt-1 text-right">
             {`Next level in ${Math.max(
-              (user?.nextLevelPoints || 500) - (user?.userLevelPoints || 0),
+              (profileUser?.nextLevelPoints || 500) - (profileUser?.userLevelPoints || 0),
               0
             )} XP`}
           </span>
@@ -137,41 +164,59 @@ const ProfileHeader = ({
 
         {/* Bio */}
         <p className="text-sm sm:text-base text-gray-500 max-w-md break-words whitespace-pre-wrap mt-2">
-          {user?.description || "No bio yet."}
+          {profileUser?.description || "No bio yet."}
         </p>
 
         {/* Actions */}
-        {isOwner ? (
-          <div className="flex flex-wrap gap-3 mt-3 justify-center lg:justify-start">
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={onAddStory}
-              className="flex items-center gap-2 border px-4 sm:px-6 py-2 rounded-xl text-sm font-medium hover:bg-lightMode-hover dark:hover:bg-darkMode-hover hover:shadow-md transition"
-            >
-              <IoAdd /> Add story
-            </motion.button>
-          </div>
-        ) : (
-          <div className="flex gap-3 mt-4 justify-center lg:justify-start">
-            <button
-              onClick={isFollowing ? onUnfollow : onFollow}
-              className={`flex items-center gap-2 px-5 sm:px-6 py-2 rounded-xl border text-sm font-medium transition-all duration-300
-                ${isFollowing
-                  ? "text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
-                  : "text-green-600 border-green-600 hover:bg-green-600 hover:text-white"}`}
-            >
-              {isFollowing ? <RiUserUnfollowLine /> : <RiUserFollowLine />}
-              {isFollowing ? "Unfollow" : "Follow"}
-            </button>
-          </div>
+        {!hideActions && (
+          <>
+            {isOwner ? (
+              <div className="flex flex-wrap gap-3 mt-3 justify-center lg:justify-start">
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={onAddStory}
+                  className="flex items-center gap-2 border px-4 sm:px-6 py-2 rounded-xl text-sm font-medium hover:bg-lightMode-hover dark:hover:bg-darkMode-hover hover:shadow-md transition"
+                >
+                  <IoAdd /> Add story
+                </motion.button>
+              </div>
+            ) : (
+              <div className="flex gap-3 mt-4 justify-center lg:justify-start">
+                <button
+                  onClick={handleClick}
+                  disabled={loading}
+                  className={`flex items-center gap-2 px-5 sm:px-6 py-2 rounded-xl border text-sm font-medium transition-all duration-300
+                    ${
+                      isFollowing
+                        ? "text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
+                        : "text-green-600 border-green-600 hover:bg-green-600 hover:text-white"
+                    }
+                    ${loading ? "opacity-70 cursor-not-allowed" : ""}
+                  `}
+                >
+                  {loading ? (
+                    <>
+                      <FaSpinner className="animate-spin" />
+                      <span>{isFollowing ? "Unfollowing..." : "Following..."}</span>
+                    </>
+                  ) : (
+                    <>
+                      {isFollowing ? <RiUserUnfollowLine /> : <RiUserFollowLine />}
+                      <span>{isFollowing ? "Unfollow" : "Follow"}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </>
         )}
 
         {/* Stats */}
         {canSeePrivateContent && (
           <div className="flex justify-between sm:justify-center lg:justify-start gap-6 sm:gap-10 mt-5 w-full max-w-md">
-            <StatBlock label="Posts" value={user?.posts?.length} />
-            <StatBlock label="Followers" value={user?.followers?.length} onClick={onShowFollowers} />
-            <StatBlock label="Following" value={user?.following?.length} onClick={onShowFollowing} />
+            <StatBlock label="Posts" value={profileUser?.posts?.length} />
+            <StatBlock label="Followers" value={profileUser?.followers?.length} onClick={onShowFollowers} />
+            <StatBlock label="Following" value={profileUser?.following?.length} onClick={onShowFollowing} />
           </div>
         )}
       </div>
