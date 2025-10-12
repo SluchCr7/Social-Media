@@ -1,6 +1,6 @@
 import ToggleSwitch from '@/app/Component/Setting/ToggleSwitch';
 import React from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { FaUserCog, FaTrashAlt} from 'react-icons/fa'
 const AccountTab = ({
     user,
