@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import React from 'react'
+import { formatTime } from '@/app/utils/formatTime'
 
 const SidebarPlaylist = ({ myPlaylist, setTrack }) => (
   <div className="rounded-2xl p-4 bg-white/50 dark:bg-gray-900/50 border dark:border-gray-800">
