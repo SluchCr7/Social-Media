@@ -1,7 +1,6 @@
 const route = require('express').Router();
 const { verifyToken } = require('../Middelwares/verifyToken');
 const photoUpload = require('../Middelwares/uploadPhoto');
-
 const {
   getUsersInSideBar,
   getMessages,
@@ -9,9 +8,7 @@ const {
   getMessagesByUser,
   makeAllMessagesIsReadBetweenUsers,
   getUnreadMessages,
-  deleteMessage,
-  deleteFor,
-  addLike,
+  deleteMessageForMe,deleteMessage,addLike
 } = require('../Controllers/MessageController');
 
 // 🧩 قائمة المستخدمين في الـ Sidebar
@@ -48,7 +45,7 @@ route.route('/delete/:id')
 
 // 🧩 حذف الرسالة من عند المستخدم فقط (Soft delete)
 route.route('/deleteFor/:id')
-  .patch(verifyToken, deleteFor);
+  .patch(verifyToken, deleteMessageForMe);
 
 // 🧩 إضافة / إزالة لايك على الرسالة
 route.route('/like/:messageId')
