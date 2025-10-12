@@ -7,6 +7,7 @@ import { FaRegCommentDots } from 'react-icons/fa'
 import { IoIosShareAlt, IoIosHeart } from 'react-icons/io'
 import { LuLaugh } from "react-icons/lu"
 import { BiRepost } from "react-icons/bi"
+import { BsEye } from 'react-icons/bs'
 
 const PostActions = ({ post, user, likePost, hahaPost, sharePost, savePost, setOpenModel }) => {
   const [isInPostPage, setIsInPostPage] = useState(false)
