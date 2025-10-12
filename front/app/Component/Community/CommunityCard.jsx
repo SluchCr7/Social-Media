@@ -41,7 +41,7 @@ const CommunityCard = ({ comm }) => (
       </div>
 
       <h3 className="mt-3 text-lg font-semibold text-lightMode-fg dark:text-darkMode-fg">{comm.Name}</h3>
-      <p className="mt-1 text-sm text-lightMode-text2 dark:text-darkMode-text2 line-clamp-2">{comm.description}</p>
+      <p className="mt-1 text-sm text-lightMode-text2 dark:text-darkMode-text2 line-clamp-1">{comm.description}</p>
 
       <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
         <Badge className="bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text">{comm.Category}</Badge>

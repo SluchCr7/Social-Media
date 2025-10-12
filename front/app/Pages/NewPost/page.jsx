@@ -363,7 +363,7 @@ useEffect(() => {
 
           {/* Text Area */}
           <div className="relative w-full">
-            <div
+            {/* <div
               className={`absolute inset-0 p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed
                 ${/[\u0600-\u06FF]/.test(postText) ? 'text-right rtl' : 'text-left ltr'}
               `}
@@ -373,7 +373,7 @@ useEffect(() => {
               }}
             >
               {renderHighlightedText(postText)}
-            </div>
+            </div> */}
 
             <textarea
               ref={textareaRef}

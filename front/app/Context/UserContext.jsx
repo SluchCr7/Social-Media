@@ -265,11 +265,11 @@ const togglePrivateAccount = async () => {
         value={{
             suggestedUsers,
             saveMusicInPlayList,
-            togglePrivateAccount
+            togglePrivateAccount,
+            updatePassword
             ,getUserById,followUser,
             updatePhoto,
             updateProfile,
-            updatePassword,
             pinPost,
             onlineUsers,updateProfileLoading,loading
         }}
