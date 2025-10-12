@@ -7,6 +7,7 @@ import { useAlert } from "./AlertContext";
 import { useNotify } from "./NotifyContext";
 import { checkUserStatus } from "../utils/checkUserLog";
 import { usePostActions } from "../Custome/Post/usePostActions";
+import { usePostManagement } from "../Custome/Post/usePostManage";
 
 export const PostContext = createContext();
 
