@@ -1,5 +1,6 @@
 import React from 'react'
 import clsx from 'clsx'
+import { FaCheck } from 'react-icons/fa'
 
 function LanguageCard({ lang, active, onClick }) {
   return (

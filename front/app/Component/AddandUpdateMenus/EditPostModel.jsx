@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { usePost } from '../../Context/PostContext';
-import { FaTimes } from 'react-icons/fa';
+import { FaSpinner, FaTimes } from 'react-icons/fa';
 import { FaUsers } from 'react-icons/fa';
 import { IoImage, IoHappyOutline } from 'react-icons/io5';
 import EmojiPicker from 'emoji-picker-react';
@@ -120,7 +120,7 @@ const EditPostModal = ({ post, onClose }) => {
         <div className="px-6 py-4 space-y-4">
 
           {/* Community Selector */}
-          {ommunities.filter(com => com?.members.some(m => m._id === user._id)).length > 0 && (
+          {communities.filter(com => com?.members.some(m => m._id === user._id)).length > 0 && (
             <div className="mb-4">
               <label className="text-sm text-gray-700 dark:text-gray-300 mb-1 block">Community</label>
               <select

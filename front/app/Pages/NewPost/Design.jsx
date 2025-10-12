@@ -8,6 +8,7 @@ import { IoImage, IoHappyOutline } from 'react-icons/io5'
 import EmojiPicker from 'emoji-picker-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/app/Context/AuthContext'
+import PostPrivacySelector from '@/app/Component/Post/PostPrivacyAdd'
 
 const DesignPost = ({
   user,

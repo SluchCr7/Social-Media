@@ -1,5 +1,6 @@
 import { TABS } from '@/app/utils/Data'
 import React from 'react'
+import clsx from 'clsx'
 
 const MobileBottomNav = ({setActiveTab,activeTab}) => (
 <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-2xl md:hidden">

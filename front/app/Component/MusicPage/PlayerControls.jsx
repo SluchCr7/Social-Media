@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaPause, FaPlay, FaRandom, FaRedo, FaVolumeUp } from 'react-icons/fa';
+import { FaPause, FaPlay, FaRandom, FaRedo, FaStepBackward, FaStepForward, FaVolumeUp } from 'react-icons/fa';
 import ProgressBar from './ProgressBar';
 import { formatTime } from '@/app/utils/formatTime'
 

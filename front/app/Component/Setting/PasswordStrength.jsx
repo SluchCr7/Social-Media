@@ -1,5 +1,6 @@
 import { getPasswordStrength } from '@/app/utils/getPasswordStrength'
 import React from 'react'
+import clsx from 'clsx'
 
 function PasswordStrength({ password }) {
   const { score, label } = getPasswordStrength(password)
