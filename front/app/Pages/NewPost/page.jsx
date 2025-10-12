@@ -12,6 +12,7 @@ import { usePost } from '@/app/Context/PostContext'
 import { useCommunity } from '@/app/Context/CommunityContext'
 import PostPrivacySelector from '@/app/Component/Post/PostPrivacyAdd'
 
+
 const NewPost = () => {
   // ------------------- States -------------------
   const [postText, setPostText] = useState('')
@@ -361,7 +362,7 @@ useEffect(() => {
           </div>
 
           {/* Text Area */}
-          {/* <div className="relative w-full">
+          <div className="relative w-full">
             <div
               className={`absolute inset-0 p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed
                 ${/[\u0600-\u06FF]/.test(postText) ? 'text-right rtl' : 'text-left ltr'}
@@ -390,49 +391,6 @@ useEffect(() => {
                 background: 'transparent', // مهم جدًا
                 position: 'relative',
                 zIndex: 10, // فوق الهايلايت
-              }}
-            />
-          </div> */}
-          <div className="relative w-full">
-            {/* خلفية النص (الهايلايت) */}
-            <div
-              className={`absolute inset-0 p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed
-                ${/[\u0600-\u06FF]/.test(postText) ? 'text-right rtl' : 'text-left ltr'}
-              `}
-              style={{
-                direction: /[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr',
-                color: 'transparent',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                overflowWrap: 'break-word',
-                fontFamily: 'inherit',
-                fontSize: '1rem',
-                lineHeight: '1.625rem',
-              }}
-            >
-              {renderHighlightedText(postText)}
-            </div>
-
-            {/* مربع الكتابة */}
-            <textarea
-              ref={textareaRef}
-              value={postText}
-              onChange={handleTextareaChange}
-              rows={5}
-              placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
-              dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
-              className={`absolute top-0 left-0 w-full h-full p-5 text-base leading-relaxed bg-transparent border rounded-2xl resize-none shadow-inner caret-blue-600 z-10 selection:bg-blue-200 selection:text-black
-                ${errorText
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'bg-gray-50 dark:bg-darkMode-bg border-gray-300 dark:border-gray-600 focus:ring-blue-500'
-                } text-gray-900 dark:text-white`}
-              style={{
-                fontFamily: 'inherit',
-                fontSize: '1rem',
-                lineHeight: '1.625rem',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                overflowWrap: 'break-word',
               }}
             />
           </div>

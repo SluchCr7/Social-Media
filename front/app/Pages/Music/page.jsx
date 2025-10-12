@@ -24,15 +24,6 @@ export default function MusicPageContainer() {
   const [search, setSearch] = useState('')
   const [openModel, setOpenModel] = useState(false)
 
-  // جلب بيانات اليوزر عند وجود user._id
-  useEffect(() => {
-    if (!user?._id) return
-    setLoading(true)
-    getUserById(user._id)
-      .then(res => setUserData(res))
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [user?._id])
 
   // قائمة الأغاني المفلترة بالبحث
   const filtered = useMemo(() => {
