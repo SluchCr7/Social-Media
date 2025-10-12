@@ -87,52 +87,6 @@ const DesignPostSelect = ({
 
           {/* Main Content */}
           <div className="flex-1 flex flex-col gap-3">
-            {/* Header */}
-            {/* <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-              <div>
-                {isCommunityPost ? (
-                  <div className="flex flex-col text-sm">
-                    <Link href={`/Pages/Community/${post.community?._id}`} className="font-semibold hover:underline text-gray-900 dark:text-gray-100">
-                      {post.community?.Name}
-                    </Link>
-                    <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                      <span>@{post.owner?.username}</span>
-                      <span className="hidden sm:inline-block w-1 h-1 bg-gray-400 rounded-full" />
-                      <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col text-sm">
-                    <Link
-                      href={user?._id === post.owner?._id ? '/Pages/Profile' : `/Pages/User/${post.owner?._id}`}
-                      className="font-semibold hover:underline text-gray-900 dark:text-gray-100 flex items-center gap-1"
-                    >
-                      {post.owner?.username}
-                      {post?.owner?.isAccountWithPremiumVerify && (
-                        <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
-                      )}
-                    </Link>
-                    <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                      <span>{post.owner?.profileName}</span>
-                      <span className="hidden sm:inline-block w-1 h-1 bg-gray-400 rounded-full" />
-                      <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {isLogin && (
-                <div className="relative self-end sm:self-auto">
-                  <button
-                    onClick={() => setShowMenu(!showMenu)}
-                    className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                  >
-                    <BsThreeDots className="text-xl text-gray-500 hover:text-gray-700" />
-                  </button>
-                  <PostMenu post={post} showMenu={showMenu} setShowMenu={setShowMenu} />
-                </div>
-              )}
-            </div> */}
             <PostHeader
               post={post}
               user={post?.owner}

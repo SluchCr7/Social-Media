@@ -1,98 +1,24 @@
 'use client'
-
-import React, { useRef, useState } from 'react'
+import React from 'react'
 import Image from 'next/image'
-import { FiX, FiClock } from 'react-icons/fi'
-import { FaUsers } from 'react-icons/fa'
-import { IoImage, IoHappyOutline } from 'react-icons/io5'
-import EmojiPicker from 'emoji-picker-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useAuth } from '@/app/Context/AuthContext'
+import { FiX, FiClock } from 'react-icons/fi'
+import { IoImage, IoHappyOutline } from 'react-icons/io5'
+import { FaUsers } from 'react-icons/fa'
+import EmojiPicker from 'emoji-picker-react'
 import PostPrivacySelector from '@/app/Component/Post/PostPrivacyAdd'
 
-const DesignPost = ({
-  user,
-  communities,
-  selectedCommunity,
-  setSelectedCommunity,
-  renderHighlightedText,
-  postText,
-  setPostText,
-  images,
-  setImages,
-  textareaRef,
-  handleTextareaChange,
-  errorText,
-  removeImage,
-  handleImageChange,
-  showEmojiPicker,
-  setShowEmojiPicker,
-  handleEmojiClick,
-  handlePost,
-  setScheduleDate,
-  scheduleDate,
-  scheduleEnabled,
-  setScheduleEnabled,
-  links,
-  setLinks,
-  linkInput,
-  setLinkInput,
-  handleAddLink,
-  handleRemoveLink,
-  loading,setLoading
-}) => {
+const NewPostPresenter = (props) => {
+  const {
+    postText, handleTextareaChange, handlePost, loading, errorText,
+    showEmojiPicker, setShowEmojiPicker, handleEmojiClick,
+    images, handleImageChange, removeImage,
+    links, linkInput, setLinkInput, handleAddLink, handleRemoveLink,
+    scheduleEnabled, setScheduleEnabled, scheduleDate, setScheduleDate,
+    selectedUser, privacy, setPrivacy, communities, selectedCommunity, setSelectedCommunity,
+    filteredUsers, handleSelectMention, showMentionBox, mentionBoxPos, textareaRef
+  } = props
 
-// const textareaRef = useRef();
-  const [cursorPosition, setCursorPosition] = useState(0);
-  const [mentionQuery, setMentionQuery] = useState('');
-  const [showMentionBox, setShowMentionBox] = useState(false);
-  const [selectedMentions, setSelectedMentions] = useState([]);
-  const {users}= useAuth()
-  // ✅ تحديث موضع المؤشر لمعرفة الكلمة الحالية
-  const handleChange = (e) => {
-    const value = e.target.value;
-    const cursorPos = e.target.selectionStart;
-    setPostText(value);
-    setCursorPosition(cursorPos);
-
-    // استخرج الكلمة قبل المؤشر
-    const lastWord = value.slice(0, cursorPos).split(/\s+/).pop();
-    if (lastWord.startsWith('@')) {
-      const query = lastWord.slice(1).toLowerCase();
-      setMentionQuery(query);
-      setShowMentionBox(true);
-    } else {
-      setShowMentionBox(false);
-    }
-  };
-
-  // ✅ عند اختيار مستخدم من القائمة
-  const handleSelectMention = (mention) => {
-    const beforeCursor = postText.slice(0, cursorPosition);
-    const afterCursor = postText.slice(cursorPosition);
-    const lastWord = beforeCursor.split(/\s+/).pop();
-    const insertText =
-      beforeCursor.slice(0, beforeCursor.length - lastWord.length) +
-      `@${mention.username} `;
-
-    setPostText(insertText + afterCursor);
-    setSelectedMentions((prev) => {
-      if (!prev.some((m) => m._id === mention._id)) {
-        return [...prev, mention];
-      }
-      return prev;
-    });
-    setShowMentionBox(false);
-    setMentionQuery('');
-    setTimeout(() => textareaRef.current.focus(), 0);
-  };
-
-  const filteredUsers = users.filter(
-    (u) =>
-      mentionQuery &&
-      u.username.toLowerCase().includes(mentionQuery.toLowerCase()) &&
-      u._id !== user._id
-  );
   return (
     <main className="flex items-center justify-center w-full py-10 px-4 bg-gray-50 dark:bg-darkMode-bg transition-colors">
       <div className="w-full max-w-5xl mx-auto bg-lightMode-bg dark:bg-darkMode-bg rounded-3xl shadow-xl overflow-hidden transition-all duration-500 relative">
@@ -109,53 +35,53 @@ const DesignPost = ({
             />
             <div className="flex flex-col">
               <h2 className="text-lg font-bold text-gray-800 dark:text-white">
-                {selectedUser?.username}
+                {selectedUser?.username || 'Guest'}
               </h2>
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                {selectedUser?.profileName}
+                {selectedUser?.profileName || ''}
               </span>
             </div>
           </div>
 
-          <div className="w-full md:w-64 relative">
-            {communities.filter((com) =>
-              com?.members.some((m) => m._id === user._id)
-            ).length > 0 ? (
-              <div className="relative">
-                <FaUsers className="absolute left-3 top-3 text-gray-400" />
-                <select
-                  value={selectedCommunity}
-                  onChange={(e) => setSelectedCommunity(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-darkMode-bg border dark:border-gray-600 rounded-xl text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
-                >
-                  <option value="">Select a Community</option>
-                  {communities
-                    .filter((com) =>
-                      com.members.some((m) => m._id === user._id)
-                    )
-                    .map((com) => (
-                      <option key={com._id} value={com._id}>
-                        {com.Name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            ) : (
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                You haven’t joined any communities.
-              </span>
-            )}
+          <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-2 w-full md:w-auto">
+            <PostPrivacySelector defaultValue={privacy} onChange={(v) => setPrivacy(v)} />
+            <div className="border-l h-6 dark:border-gray-600 mx-2"></div>
+
+            <div className="relative flex-1 min-w-[160px]">
+              <FaUsers className="absolute left-3 top-3 text-gray-400" />
+              {communities.filter((com) =>
+                com?.members.some((m) => m._id === selectedUser?._id)
+              ).length > 0 ? (
+                <div className="relative">
+                  <FaUsers className="absolute left-3 top-3 text-gray-400" />
+                  <select
+                    value={selectedCommunity}
+                    onChange={(e) => setSelectedCommunity(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-darkMode-bg border dark:border-gray-600 rounded-xl text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+                  >
+                    <option value="">Select a Community</option>
+                    {communities
+                      .filter((com) =>
+                        com.members.some((m) => m._id === selectedUser?._id)
+                      )
+                      .map((com) => (
+                        <option key={com._id} value={com._id}>
+                          {com.Name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              ) : (
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  You haven’t joined any communities.
+                </span>
+              )}
+            </div>
           </div>
         </div>
-        <div className="flex items-center justify-between mb-4">
-          <PostPrivacySelector
-            defaultValue={privacy}
-            onChange={(value) => setPrivacy(value)}
-          />
-        </div>
+
         {/* Body */}
         <div className="relative p-6 pb-2">
-
           {/* Links */}
           {links?.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-2">
@@ -194,26 +120,19 @@ const DesignPost = ({
             />
             <button
               onClick={handleAddLink}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+              disabled={!linkInput.trim()}
+              className={`px-4 py-2 rounded-lg transition ${
+                linkInput.trim()
+                  ? 'bg-blue-500 text-white hover:bg-blue-600'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
             >
               Add
             </button>
           </div>
 
           {/* Text Area */}
-          {/* <div className="relative w-full">
-            <div
-              className={`absolute inset-0 p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed
-                ${/[\u0600-\u06FF]/.test(postText) ? 'text-right rtl' : 'text-left ltr'}
-              `}
-              style={{
-                direction: /[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr',
-                color: 'transparent', // <=== هذه مهمة جدًا
-              }}
-            >
-              {renderHighlightedText(postText)}
-            </div>
-
+          <div className="relative w-full">
             <textarea
               ref={textareaRef}
               value={postText}
@@ -222,61 +141,15 @@ const DesignPost = ({
               placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
               dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
               className={`relative w-full p-5 text-base leading-relaxed bg-transparent border rounded-2xl resize-none shadow-inner caret-blue-600 z-10 selection:bg-blue-200 selection:text-black
-                ${errorText
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'bg-gray-50 dark:bg-darkMode-bg border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                ${
+                  errorText
+                    ? 'border-red-500 focus:ring-red-500'
+                    : 'bg-gray-50 dark:bg-darkMode-bg border-gray-300 dark:border-gray-600 focus:ring-blue-500'
                 } text-gray-900 dark:text-white`}
-              style={{
-                background: 'transparent', // مهم جدًا
-                position: 'relative',
-                zIndex: 10, // فوق الهايلايت
-              }}
-            />
-          </div> */}
-          <div className="relative w-full">
-            {/* خلفية النص (الهايلايت) */}
-            <div
-              className={`absolute inset-0 p-5 whitespace-pre-wrap break-words rounded-2xl overflow-hidden pointer-events-none font-sans text-base leading-relaxed
-                ${/[\u0600-\u06FF]/.test(postText) ? 'text-right rtl' : 'text-left ltr'}
-              `}
-              style={{
-                direction: /[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr',
-                color: 'transparent',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                overflowWrap: 'break-word',
-                fontFamily: 'inherit',
-                fontSize: '1rem',
-                lineHeight: '1.625rem',
-              }}
-            >
-              {renderHighlightedText(postText)}
-            </div>
-
-            {/* مربع الكتابة */}
-            <textarea
-              ref={textareaRef}
-              value={postText}
-              onChange={handleTextareaChange}
-              rows={5}
-              placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
-              dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
-              className={`absolute top-0 left-0 w-full h-full p-5 text-base leading-relaxed bg-transparent border rounded-2xl resize-none shadow-inner caret-blue-600 z-10 selection:bg-blue-200 selection:text-black
-                ${errorText
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'bg-gray-50 dark:bg-darkMode-bg border-gray-300 dark:border-gray-600 focus:ring-blue-500'
-                } text-gray-900 dark:text-white`}
-              style={{
-                fontFamily: 'inherit',
-                fontSize: '1rem',
-                lineHeight: '1.625rem',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                overflowWrap: 'break-word',
-              }}
             />
           </div>
 
+          {/* Mention Box */}
           <AnimatePresence>
             {showMentionBox && filteredUsers.length > 0 && (
               <motion.ul
@@ -315,7 +188,6 @@ const DesignPost = ({
               </motion.ul>
             )}
           </AnimatePresence>
-
         </div>
 
         {/* Images */}
@@ -338,7 +210,7 @@ const DesignPost = ({
                   <img
                     src={img.url}
                     alt={`preview-${idx}`}
-                    className="w-full h-32 object-cover rounded-xl transform group-hover:scale-105 transition-transform duration-300"
+                    className="w-full aspect-square object-cover rounded-xl transform group-hover:scale-105 transition-transform duration-300"
                   />
                   <button
                     onClick={() => removeImage(idx)}
@@ -470,10 +342,9 @@ const DesignPost = ({
             )}
           </AnimatePresence>
         </div>
-        
       </div>
     </main>
   )
 }
 
-export default DesignPost
+export default NewPostPresenter
