@@ -18,6 +18,10 @@ import { useTranslate } from '../Context/TranslateContext';
 import { franc } from 'franc';
 import { languageMap , iso6391Map} from '../utils/Data';
 import PostLinks from './Post/PostLinks';
+import ProfileHeader from './UserComponents/ProfileHeader';
+import PostHashtags from './Post/PostHashtags';
+import SharedPost from './Post/SharedPost';
+import PostImage from './Post/PostImage';
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost();
   const [showMenu, setShowMenu] = useState(false);
@@ -30,7 +34,6 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
   const isShared = post?.isShared && post?.originalPost;
   const original = post?.originalPost;
   const isCommunityPost = post?.community !== null;
-  const isInCommunityPage = typeof window !== 'undefined' && window.location.href.includes('/Pages/Community/');
   const highlightedComment = getHighlightedComment(post);
    // فحص إذا كان يجب إظهار زر الترجمة
   useEffect(() => {
@@ -115,64 +118,21 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
         {isShared && <SharedTitle user={user} post={post} original={original} />}
 
         <div className="flex items-start gap-4">
-          {/* 👤 Profile Image */}
-          <div className="flex flex-col items-center">
-            <Image
-              src={isCommunityPost && !isInCommunityPage 
-                ? post?.community?.Picture?.url 
-                : post?.owner?.profilePhoto?.url}
-              alt="profile"
-              width={44}
-              height={44}
-              className={`rounded-full w-11 h-11 min-w-11 object-cover 
-                ${post?.owner?.stories?.length > 0 ? "ring-2 ring-pink-500 animate-pulse" : ""}
-              `}
-            />
-            <div className="hidden sm:block border border-gray-600 h-[70px] w-[1px] mt-2"></div>
-          </div>
+          <PostImage
+            post={post}
+            isCommunityPost={isCommunityPost}
+          />
 
           {/* 📄 Main Content */}
           <div className="flex flex-col w-full gap-3">
-            {/* 🔝 Header */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-              <div className="flex items-center gap-3">
-                <div className="flex flex-col leading-tight">
-                  <div className="flex items-center gap-1">
-                    <UserHoverCard userSelected={post?.owner}>
-                      <Link
-                        href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${post?.owner?._id}`}
-                        className="text-lightMode-fg dark:text-darkMode-fg font-semibold text-sm hover:underline truncate max-w-[150px] sm:max-w-[200px]"
-                      >
-                        {post?.owner?.username}
-                      </Link>
-                    </UserHoverCard>
-                    {post?.owner?.isAccountWithPremiumVerify && (
-                      <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500 flex-wrap">
-                    <span className="truncate max-w-[120px]">{post?.owner?.profileName}</span>
-                    <span className="hidden sm:inline w-1 h-1 bg-gray-400 rounded-full" />
-                    <span>{new Date(post?.createdAt).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 📋 Menu */}
-              {isLogin && (
-                <div className="relative self-end sm:self-auto">
-                  <button
-                    onClick={() => setShowMenu(!showMenu)}
-                    className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 
-                      text-xl text-gray-500 hover:text-gray-700 transition"
-                  >
-                    <BsThreeDots />
-                  </button>
-                  <PostMenu post={post} showMenu={showMenu} setShowMenu={setShowMenu} />
-                </div>
-              )}
-            </div>
-
+            <ProfileHeader 
+              post={post}
+              user={post?.owner}
+              isLogin={isLogin}
+              showMenu={showMenu}
+              setShowMenu={setShowMenu}
+              isCommunityPost={isCommunityPost}
+            />
             {/* 📝 Text */}
             <RenderPostText
               text={showOriginal ? translated : post?.text}
@@ -205,54 +165,11 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
 
             {/* 🖼️ Original Post if Shared */}
             {isShared && original && (
-              <Link href={`/Pages/Post/${original?._id}`} 
-                className="bg-white/40 dark:bg-white/5 backdrop-blur-md 
-                  border border-gray-200/40 dark:border-gray-700/40 
-                  rounded-xl p-4 flex flex-col gap-3 
-                  shadow-md hover:shadow-lg transition-all duration-300 
-                  border-l-4 border-blue-400"
-              >
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 md:gap-4">
-                  <Link
-                    href={user?._id === original?.owner?._id ? '/Pages/Profile' : `/Pages/User/${original?.owner?._id}`}
-                    className="flex items-center gap-3 hover:underline"
-                  >
-                    <Image
-                      src={original?.owner?.profilePhoto?.url}
-                      alt="Shared_profile_post"
-                      width={50}
-                      height={50}
-                      className="w-12 h-12 rounded-full object-cover border-2 border-blue-400"
-                    />
-                    <UserHoverCard userSelected={original?.owner}>
-                      <div className="flex flex-col">
-                        <div className='flex items-center gap-1'>
-                          <span className="font-semibold text-gray-900 dark:text-white">{original?.owner?.username}</span>
-                          {original?.owner?.isAccountWithPremiumVerify && (
-                            <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
-                          )}
-                        </div>
-                        <span className="text-gray-500 text-xs">{original?.owner?.profileName}</span>
-                      </div>
-                    </UserHoverCard>
-                  </Link>
-                  <span className="text-gray-400 text-xs whitespace-nowrap">
-                    {new Date(original?.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-
-                <RenderPostText
-                  text={original?.text}
-                  mentions={original?.mentions}
-                  hashtags={original?.Hashtags}
-                  italic={true}
-                />
-
-                {original?.Photos && (
-                  <PostPhotos photos={original?.Photos} setImageView={setImageView} postId={original?._id} />
-                )}
-                <PostLinks links={original?.links}/>
-              </Link>
+              <SharedPost
+                original={original}
+                user={user}
+                setImageView={setImageView}
+              />
             )}
 
             {/* 🖼️ Normal Post Photos */}
@@ -267,17 +184,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
 
             {/* 🔗 Hashtags */}
             {post?.Hashtags?.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {post?.Hashtags.map((tag, i) => (
-                  <Link
-                    href={`/Pages/Hashtag/${encodeURIComponent(tag)}`}
-                    key={i}
-                    className="bg-blue-100 dark:bg-blue-800/30 text-blue-600 dark:text-blue-300 text-xs font-semibold px-3 py-1 rounded-full"
-                  >
-                    #{tag}
-                  </Link>
-                ))}
-              </div>
+              <PostHashtags post={post} />
             )}
 
             {/* 🎛️ Actions */}

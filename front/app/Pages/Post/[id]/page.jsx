@@ -53,7 +53,18 @@ const PostPage = ({ params }) => {
   const isShared = post.isShared && post.originalPost;
   const original = post.originalPost;
   const isCommunityPost = post.community !== null;
+  const canComment = () => {
+    if (user?._id === post?.owner?._id) return true;
+    if (post.privacy === 'public') return true;
 
+    if (post.privacy === 'friends') {
+      const isFollower = post.owner?.followers?.some(f => f._id === user._id);
+      const isFollowing = post.owner?.following?.some(f => f._id === user._id);
+      return isFollower || isFollowing;
+    }
+
+    return false;
+  }
   return (
     <DesignPostSelect
       post={post}
@@ -77,6 +88,7 @@ const PostPage = ({ params }) => {
       handleAddComment={handleAddComment}
       openModel={openModel}
       setOpenModel={setOpenModel} 
+      canComment={canComment}
     />
   );
 };

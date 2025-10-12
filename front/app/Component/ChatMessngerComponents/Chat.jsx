@@ -6,10 +6,10 @@ import { useMessage } from '../../Context/MessageContext';
 import SenderMessage from './SenderMessage';
 import ReceiverMessage from './ReceiverMessage';
 import { isToday, isYesterday, format } from 'date-fns';
-
+import MessageSkeleton from '@/app/Skeletons/MessageSkeleton';
 const Chat = ({ onBack }) => {
   const { user } = useAuth();
-  const { selectedUser, messages } = useMessage();
+  const { selectedUser, messages,isMessagesLoading } = useMessage();
   const ContainerMessageRef = useRef(null);
 
   // --- Group messages by date ---
@@ -59,31 +59,47 @@ const Chat = ({ onBack }) => {
         scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 
         scrollbar-track-transparent"
       >
-        {sortedDates.map((dateKey) => (
-          <div key={dateKey}>
-            {/* 📅 Date separator */}
-            <div className="flex justify-center my-2 sm:my-3 md:my-4">
-              <div className="text-[10px] sm:text-xs md:text-sm text-gray-600 dark:text-gray-400 
-                              bg-gray-200 dark:bg-gray-700 
-                              px-3 py-1 rounded-full shadow-sm">
-                {getDisplayDate(dateKey)}
-              </div>
-            </div>
-
-            {/* Messages under this date */}
-            {groupedMessages[dateKey].map((msg, index) => {
-              const senderId = msg.sender?._id || msg.sender;
-              const isMine = senderId === user?._id;
-              return isMine ? (
-                <SenderMessage key={msg._id || index} message={msg} user={user} />
-              ) : (
-                <ReceiverMessage key={msg._id || index} message={msg} user={selectedUser} />
-              );
-            })}
+        {/* 🌀 حالة التحميل */}
+        {isMessagesLoading ? (
+          <div className="flex flex-col gap-4 mt-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <MessageSkeleton key={i} />
+            ))}
           </div>
-        ))}
+        ) : messages?.length === 0 ? (
+          // 📭 في حال لا توجد رسائل
+          <div className="flex justify-center items-center h-full text-gray-500 dark:text-gray-400 text-sm">
+            No messages yet
+          </div>
+        ) : (
+          // ✅ بعد تحميل الرسائل بنجاح
+          sortedDates.map((dateKey) => (
+            <div key={dateKey}>
+              {/* 📅 فاصل التاريخ */}
+              <div className="flex justify-center my-2 sm:my-3 md:my-4">
+                <div className="text-[10px] sm:text-xs md:text-sm text-gray-600 dark:text-gray-400 
+                                bg-gray-200 dark:bg-gray-700 
+                                px-3 py-1 rounded-full shadow-sm">
+                  {getDisplayDate(dateKey)}
+                </div>
+              </div>
+
+              {/* 💌 الرسائل لهذا التاريخ */}
+              {groupedMessages[dateKey].map((msg, index) => {
+                const senderId = msg.sender?._id || msg.sender;
+                const isMine = senderId === user?._id;
+                return isMine ? (
+                  <SenderMessage key={msg._id || index} message={msg} user={user} />
+                ) : (
+                  <ReceiverMessage key={msg._id || index} message={msg} user={selectedUser} />
+                );
+              })}
+            </div>
+          ))
+        )}
         <div ref={ContainerMessageRef}></div>
       </div>
+
 
       {/* 📝 Chat Input */}
       <div className="border-t border-gray-200 dark:border-gray-700 p-2 sm:p-3 md:p-4 bg-white dark:bg-darkMode-menu shadow-sm">

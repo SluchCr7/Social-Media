@@ -46,7 +46,6 @@ route.route('/follow/:id').put(verifyToken, makeFollow);
 route.route('/update').put(verifyToken, updateProfile);
 route.route('/update/pass').put(verifyToken, updatePassword);
 route.route('/pin/:id').put(verifyToken, pinPost);
-route.route('/pin/:id').put(verifyToken, pinPost);
 route.route('/social').put(verifyToken, updateLinksSocial);
 route.route('/deleteAll').delete(deleteAllUsers);
 route.route('/verify').put(verifyToken , MakeAccountPreimumVerify);

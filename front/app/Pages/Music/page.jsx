@@ -36,11 +36,6 @@ export default function MusicPageContainer() {
     )
   }, [songs, search])
 
-  // أسلوب التمييز للأغنية الحالية
-  const accentStyle = useMemo(() => ({
-    background: `linear-gradient(90deg, rgba(99,102,241,0.12), rgba(236,72,153,0.06))`,
-  }), [current?.cover])
-
   // قائمة الانتظار
   const queue = useMemo(() => {
     if (!songs.length) return []

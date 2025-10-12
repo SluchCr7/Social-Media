@@ -5,17 +5,13 @@ import clsx from 'clsx'
 import {
   FaSun, FaMoon, FaLock, FaUserCog, FaTrashAlt, FaHistory
 } from 'react-icons/fa'
-import { CiChat1 } from 'react-icons/ci'
 import { MdLanguage } from 'react-icons/md'
 import { TABS, DEFAULT_COLORS, LANGUAGES } from '@/app/utils/Data'
 import MobileBottomNav from '@/app/Component/Setting/MobileBottomNav'
-import ToggleSwitch from '@/app/Component/Setting/ToggleSwitch'
-import PasswordStrength from '@/app/Component/Setting/PasswordStrength'
 import LanguageCard from '@/app/Component/Setting/LanguageCard'
 import LoginHistoryTimeline from '@/app/Component/Setting/LoginHistoryTimeline'
 import AppearanceTab from './Tabs/Apperance'
 import Security from './Tabs/Security'
-import ChatTab from './Tabs/ChatTab'
 import AccountTab from './Tabs/AccountTab'
 
 export default function SettingsView({
@@ -52,15 +48,6 @@ export default function SettingsView({
       setOldPassword('')
       setNewPassword('')
       setConfirmPassword('')
-    }
-  }
-
-  const handleBackgroundChange = (type, value) => {
-    if (type === 'color') {
-      setBackgroundValue(value)
-    } else if (type === 'custom') {
-      setBackgroundValue(value)
-      setCustomColor(value)
     }
   }
 
@@ -156,15 +143,6 @@ export default function SettingsView({
                   passwordMessage={passwordMessage}
                   setPasswordMessage={setPasswordMessage}
                   submitPassword={submitPassword}
-                />
-              )}
-
-              {activeTab === 'chat' && (
-                <ChatTab 
-                  handleBackgroundChange={handleBackgroundChange}
-                  colors={colors}
-                  customColor={customColor}
-                  backgroundValue={backgroundValue}
                 />
               )}
 

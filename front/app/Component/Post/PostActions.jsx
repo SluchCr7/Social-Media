@@ -8,6 +8,7 @@ import { LuLaugh } from "react-icons/lu"
 import { BiRepost } from "react-icons/bi"
 
 const PostActions = ({ post, user, likePost, hahaPost, sharePost, savePost, setOpenModel }) => {
+  const isInPostPage = window.location.pathname === `/Pages/Post/`
   return (
     <div
       className="
@@ -67,22 +68,33 @@ const PostActions = ({ post, user, likePost, hahaPost, sharePost, savePost, setO
 
       {/* 💬 Comment */}
       {!post?.isCommentOff && (
-        <Link
-          href={`/Pages/Post/${post?._id}`}
-          title="Comments"
-          className="
-            flex flex-col sm:flex-row items-center justify-center
-            gap-1 sm:gap-2 p-2 sm:p-1 rounded-lg
-            hover:bg-white/10 dark:hover:bg-gray-700/30
-            transition-all duration-200 ease-in-out
-            active:scale-95
-          "
-        >
+          isInPostPage ? 
+            <motion.button 
+              whileTap={{ scale: 0.9 }} 
+              className="flex items-center gap-1 sm:gap-2 cursor-pointer min-w-[50px] justify-center sm:justify-start transition"
+            >
+              <FaRegCommentDots className="text-gray-500 dark:text-gray-400 text-xl sm:text-2xl" />
+              <span className="text-[10px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400">
+                {post?.comments?.length}
+              </span>
+            </motion.button>
+          :
+          <Link
+            href={`/Pages/Post/${post?._id}`}
+            title="Comments"
+            className="
+              flex flex-col sm:flex-row items-center justify-center
+              gap-1 sm:gap-2 p-2 sm:p-1 rounded-lg
+              hover:bg-white/10 dark:hover:bg-gray-700/30
+              transition-all duration-200 ease-in-out
+              active:scale-95
+            "
+          >
           <FaRegCommentDots className="text-gray-500 dark:text-gray-400 text-xl sm:text-2xl" />
           <span className="text-[10px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400">
             {post?.comments?.length}
           </span>
-        </Link>
+        </Link> 
       )}
       {/* 🔖 Save */}
       <div

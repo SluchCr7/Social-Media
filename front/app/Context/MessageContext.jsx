@@ -65,6 +65,7 @@ export const MessageContextProvider = ({ children }) => {
   useEffect(() => {
     const getMessagesBetweenUsers = async () => {
       if (!selectedUser || !user?.token) return;
+      setIsMessagesLoading(true);
       try {
         const res = await axios.get(
           `${process.env.NEXT_PUBLIC_BACK_URL}/api/message/messages/${selectedUser._id}`,
