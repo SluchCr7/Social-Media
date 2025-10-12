@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useMusic } from '../../Context/MusicContext'
 import { useMusicPlayer } from '../../Context/MusicPlayerContext'
 import { useAuth } from '@/app/Context/AuthContext'
-import MusicPagePresentation from './MusicPage.presentation'
+import MusicPagePresentation from './MusicPagePresentation'
 import { useUser } from '@/app/Context/UserContext'
 import { useGetData } from '@/app/Custome/useGetData'
 

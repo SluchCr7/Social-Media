@@ -1,5 +1,5 @@
 import axios from "axios";
-import { checkUserStatus } from "@/utils/checkUserStatus";
+import { checkUserStatus } from "@/app/utils/checkUserLog";
 
 export const useMessageActions = ({ user , showAlert, setMessages }) => {
   const headers = { Authorization: `Bearer ${user?.token}` };
