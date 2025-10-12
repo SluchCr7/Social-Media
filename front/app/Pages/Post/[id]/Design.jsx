@@ -18,6 +18,9 @@ import PostLinks from "@/app/Component/Post/PostLinks";
 import PostHashtags from "@/app/Component/Post/PostHashtags";
 import SharedPost from "@/app/Component/Post/SharedPost";
 import PostImage from "@/app/Component/Post/PostImage";
+import PostActions from "@/app/Component/Post/PostActions";
+import ProfileHeader from "@/app/Component/UserComponents/ProfileHeader";
+import { ShareModal } from "@/app/Component/AddandUpdateMenus/SharePost";
 
 const DesignPostSelect = ({
   post,
@@ -44,7 +47,7 @@ const DesignPostSelect = ({
 
   return (
     <div className="relative w-[90%] md:w-full mx-auto">
-      <ShareModal 
+      <ShareModal
         post={post} 
         isOpen={openModel} 
         onClose={() => setOpenModel(false)} 
@@ -129,7 +132,7 @@ const DesignPostSelect = ({
                 </div>
               )}
             </div> */}
-            <ProfileHeader 
+            <ProfileHeader
               post={post}
               user={post?.owner}
               isLogin={isLogin}
