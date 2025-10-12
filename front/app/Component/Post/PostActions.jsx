@@ -1,155 +1,126 @@
 'use client'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import { CiHeart, CiBookmark } from 'react-icons/ci'
 import { FaRegCommentDots } from 'react-icons/fa'
 import { IoIosShareAlt, IoIosHeart } from 'react-icons/io'
 import { LuLaugh } from "react-icons/lu"
 import { BiRepost } from "react-icons/bi"
-import { motion } from 'framer-motion'
+
 const PostActions = ({ post, user, likePost, hahaPost, sharePost, savePost, setOpenModel }) => {
-  const isInPostPage = window.location.pathname === `/Pages/Post/`
+  const [isInPostPage, setIsInPostPage] = useState(false)
+
+  useEffect(() => {
+    setIsInPostPage(window.location.pathname.startsWith('/Pages/Post/'))
+  }, [])
+
+  const ActionButton = ({ onClick, icon, label, active, color }) => (
+    <motion.button
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      onClick={onClick}
+      className={`
+        flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2
+        px-3 py-2 rounded-xl transition-all duration-200 ease-in-out
+        hover:bg-gradient-to-tr hover:from-white/20 hover:to-transparent
+        active:scale-95 select-none
+      `}
+    >
+      <span className={`${active ? color : 'text-gray-500 dark:text-gray-400'} text-[22px] sm:text-[24px]`}>
+        {icon}
+      </span>
+      <span className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium">
+        {label}
+      </span>
+    </motion.button>
+  )
+
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
       className="
-        grid grid-cols-4 sm:flex sm:flex-nowrap justify-around sm:justify-between
-        items-center gap-3 mt-3 p-3 sm:p-0
-        bg-white/30 dark:bg-gray-800/30 sm:bg-transparent
-        rounded-xl sm:rounded-none backdrop-blur-md sm:backdrop-blur-0
-        shadow-sm sm:shadow-none border border-white/10 sm:border-0
+        grid grid-cols-3 sm:flex sm:flex-nowrap justify-around sm:justify-between
+        items-center gap-3 mt-3 p-3
+        bg-white/30 dark:bg-gray-800/30 
+        backdrop-blur-lg rounded-2xl border border-white/10
+        shadow-md sm:shadow-none
       "
     >
 
       {/* ❤️ Like */}
-      <button
-        onClick={() => likePost(post?._id, post?.owner._id)}
-        title="Like"
-        className={`
-          flex flex-col sm:flex-row items-center justify-center
-          gap-1 sm:gap-2 p-2 sm:p-1 rounded-lg
-          transition-all duration-200 ease-in-out
-          hover:bg-white/10 dark:hover:bg-gray-700/30
-          active:scale-95
-          ${post?.hahas?.includes(user?._id) ? 'hidden' : 'flex'}
-        `}
-      >
-        {post?.likes?.includes(user?._id) ? (
-          <IoIosHeart className="text-red-500 text-xl sm:text-2xl" />
-        ) : (
-          <CiHeart className="text-gray-500 dark:text-gray-400 text-xl sm:text-2xl" />
-        )}
-        <span className="text-[10px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400">
-          {post?.likes?.length}
-        </span>
-      </button>
+      {!post?.hahas?.includes(user?._id) && (
+        <ActionButton
+          onClick={() => likePost(post?._id, post?.owner._id)}
+          icon={post?.likes?.includes(user?._id)
+            ? <IoIosHeart className="text-red-500" />
+            : <CiHeart />}
+          label={post?.likes?.length || 0}
+          active={post?.likes?.includes(user?._id)}
+          color="text-red-500"
+        />
+      )}
 
       {/* 😂 Haha */}
-      <button
-        onClick={() => hahaPost(post?._id)}
-        title="React Haha"
-        className={`
-          flex flex-col sm:flex-row items-center justify-center
-          gap-1 sm:gap-2 p-2 sm:p-1 rounded-lg
-          transition-all duration-200 ease-in-out
-          hover:bg-white/10 dark:hover:bg-gray-700/30
-          active:scale-95
-          ${post?.likes?.includes(user?._id) ? 'hidden' : 'flex'}
-        `}
-      >
-        {post?.hahas?.includes(user?._id) ? (
-          <LuLaugh className="text-yellow-500 text-xl sm:text-2xl" />
-        ) : (
-          <LuLaugh className="text-gray-500 dark:text-gray-400 text-xl sm:text-2xl" />
-        )}
-        <span className="text-[10px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400">
-          {post?.hahas?.length}
-        </span>
-      </button>
+      {!post?.likes?.includes(user?._id) && (
+        <ActionButton
+          onClick={() => hahaPost(post?._id)}
+          icon={<LuLaugh />}
+          label={post?.hahas?.length || 0}
+          active={post?.hahas?.includes(user?._id)}
+          color="text-yellow-400"
+        />
+      )}
 
       {/* 💬 Comment */}
       {!post?.isCommentOff && (
-          isInPostPage ? 
-            <motion.button 
-              whileTap={{ scale: 0.9 }} 
-              className="flex items-center gap-1 sm:gap-2 cursor-pointer min-w-[50px] justify-center sm:justify-start transition"
-            >
-              <FaRegCommentDots className="text-gray-500 dark:text-gray-400 text-xl sm:text-2xl" />
-              <span className="text-[10px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400">
-                {post?.comments?.length}
-              </span>
-            </motion.button>
-          :
-          <Link
-            href={`/Pages/Post/${post?._id}`}
-            title="Comments"
-            className="
-              flex flex-col sm:flex-row items-center justify-center
-              gap-1 sm:gap-2 p-2 sm:p-1 rounded-lg
-              hover:bg-white/10 dark:hover:bg-gray-700/30
-              transition-all duration-200 ease-in-out
-              active:scale-95
-            "
-          >
-          <FaRegCommentDots className="text-gray-500 dark:text-gray-400 text-xl sm:text-2xl" />
-          <span className="text-[10px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400">
-            {post?.comments?.length}
-          </span>
-        </Link> 
+        isInPostPage ? (
+          <ActionButton
+            icon={<FaRegCommentDots />}
+            label={post?.comments?.length || 0}
+          />
+        ) : (
+          <Link href={`/Pages/Post/${post?._id}`}>
+            <ActionButton
+              icon={<FaRegCommentDots />}
+              label={post?.comments?.length || 0}
+            />
+          </Link>
+        )
       )}
+
       {/* 🔖 Save */}
-      <div
-        title="Save Post"
+      <ActionButton
         onClick={() => savePost(post?._id)}
-        className="
-          flex flex-col sm:flex-row items-center justify-center
-          gap-1 sm:gap-2 p-2 sm:p-1 rounded-lg
-          hover:bg-white/10 dark:hover:bg-gray-700/30
-          transition-all duration-200 ease-in-out
-          active:scale-95 cursor-pointer
-        "
-      >
-        <CiBookmark
-          className={`
-            ${post?.saved?.includes(user?._id)
-              ? 'text-yellow-400'
-              : 'text-gray-500 dark:text-gray-400'
-            } text-xl sm:text-2xl
-          `}
-        />
-        <span className="text-[10px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400">
-          {post?.saved?.length}
-        </span>
-      </div>
+        icon={<CiBookmark />}
+        label={post?.saved?.length || 0}
+        active={post?.saved?.includes(user?._id)}
+        color="text-yellow-400"
+      />
+
       {/* 🔁 Share */}
-      <div
-        title="Share Post"
-        onClick={() => sharePost(post?.originalPost ? post?.originalPost?._id : post?._id, post?.owner?._id)}
-        className="
-          flex flex-col sm:flex-row items-center justify-center
-          gap-1 sm:gap-2 p-2 sm:p-1 rounded-lg
-          hover:bg-white/10 dark:hover:bg-gray-700/30
-          transition-all duration-200 ease-in-out
-          active:scale-95 cursor-pointer
-        "
-      >
-        <IoIosShareAlt className="text-gray-500 dark:text-gray-400 text-xl sm:text-2xl" />
-      </div>
+      <ActionButton
+        onClick={() => sharePost(post?.originalPost ? post.originalPost._id : post._id, post?.owner?._id)}
+        icon={<IoIosShareAlt />}
+        label="Share"
+      />
+      {
+        user?._id === post.owner?._id && (
+          <ActionButton
+            icon={<BsEye />}
+            label={post?.views?.length || 0}
+          />
+        )
+      }
 
       {/* 🔄 Repost */}
-      <div
-        title="Repost"
+      <ActionButton
         onClick={() => setOpenModel(true)}
-        className="
-          flex flex-col sm:flex-row items-center justify-center
-          gap-1 sm:gap-2 p-2 sm:p-1 rounded-lg
-          hover:bg-white/10 dark:hover:bg-gray-700/30
-          transition-all duration-200 ease-in-out
-          active:scale-95 cursor-pointer
-        "
-      >
-        <BiRepost className="text-gray-500 dark:text-gray-400 text-xl sm:text-2xl" />
-      </div>
-    </div>
+        icon={<BiRepost />}
+        label="Repost"
+      />
+    </motion.div>
   )
 }
 

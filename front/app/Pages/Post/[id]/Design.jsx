@@ -167,11 +167,6 @@ const DesignPostSelect = ({
             {/* Actions */}
             {isLogin && (
               <div className="flex flex-wrap items-center justify-between sm:justify-start gap-3 sm:gap-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                {/* <ActionIcon onClick={() => likePost(post._id, post.owner._id)} Icon={post.likes?.includes(user?._id) ? IoIosHeart : CiHeart} count={post.likes?.length} active={post.likes?.includes(user?._id)} />
-                <ActionIcon onClick={() => hahaPost(post._id)} Icon={LuLaugh} count={post.hahas?.length} activeHaha={post.hahas?.includes(user?._id)} />
-                {!post.isCommentOff && <ActionIcon Icon={FaRegCommentDots} count={comments?.length} />}
-                <ActionIcon onClick={() => sharePost(post._id)} Icon={IoIosShareAlt} count={post.shares?.length} />
-                <ActionIcon onClick={() => savePost(post._id)} Icon={CiBookmark} count={post.saved?.length} active={post.saved?.includes(user?._id)} /> */}
                 <PostActions
                   post={post}
                   user={user}
@@ -181,13 +176,6 @@ const DesignPostSelect = ({
                   savePost={savePost}
                   setOpenModel={setOpenModel}
                 />
-                {user?._id === post.owner?._id && (
-                  <div className="flex items-center gap-1 text-gray-400 text-xs sm:text-sm ml-auto sm:ml-0">
-                    <BsEye />
-                    <span>{post?.views?.length || 0}</span>
-                  </div>
-                )}
-                
               </div>
             )}
 
