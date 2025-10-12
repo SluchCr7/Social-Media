@@ -39,6 +39,7 @@ const DesignPostSelect = ({
 
   // 🔹 تحقق من صلاحية التعليق بناءً على الخصوصية
   const canComment = () => {
+    if (user?._id === post?.owner?._id) return true;
     if (post.privacy === 'public') return true;
 
     if (post.privacy === 'friends') {

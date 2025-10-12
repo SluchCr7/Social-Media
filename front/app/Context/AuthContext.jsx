@@ -119,6 +119,7 @@ export const AuthContextProvider = ({ children }) => {
         isAuthChecked,
         user,
         users,
+        setUser
       }}
     >
       {children}

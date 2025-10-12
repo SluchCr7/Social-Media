@@ -58,7 +58,7 @@ const ProfileMenu = ({
               {/* 👤 لو المالك */}
               {context === "owner" && (
                 <>
-                  <Link href={`/Pages/User/${userId}`}>
+                  <Link href={`/Pages/User/${user?._id}`}>
                     <MenuItem icon={<IoEyeSharp />}>View as Visitor</MenuItem>
                   </Link>
 
