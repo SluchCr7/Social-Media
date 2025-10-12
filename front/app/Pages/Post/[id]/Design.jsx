@@ -21,6 +21,7 @@ import PostImage from "@/app/Component/Post/PostImage";
 import PostActions from "@/app/Component/Post/PostActions";
 import ProfileHeader from "@/app/Component/UserComponents/ProfileHeader";
 import { ShareModal } from "@/app/Component/AddandUpdateMenus/SharePost";
+import PostHeader from "@/app/Component/Post/PostHeader";
 
 const DesignPostSelect = ({
   post,
@@ -132,7 +133,7 @@ const DesignPostSelect = ({
                 </div>
               )}
             </div> */}
-            <ProfileHeader
+            <PostHeader
               post={post}
               user={post?.owner}
               isLogin={isLogin}

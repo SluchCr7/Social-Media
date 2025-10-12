@@ -22,6 +22,7 @@ import ProfileHeader from './UserComponents/ProfileHeader';
 import PostHashtags from './Post/PostHashtags';
 import SharedPost from './Post/SharedPost';
 import PostImage from './Post/PostImage';
+import PostHeader from './Post/PostHeader';
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost();
   const [showMenu, setShowMenu] = useState(false);
@@ -125,7 +126,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
 
           {/* 📄 Main Content */}
           <div className="flex flex-col w-full gap-3">
-            <ProfileHeader 
+            <PostHeader 
               post={post}
               user={post?.owner}
               isLogin={isLogin}
