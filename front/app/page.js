@@ -4,10 +4,11 @@ import { useMusicPlayer } from "./Context/MusicPlayerContext";
 import { IoIosMusicalNotes } from "react-icons/io";
 import { FiPlus } from 'react-icons/fi';
 import Link from "next/link";
+import { useAuth } from "./Context/AuthContext";
 
 export default function Home() {
     const {expanded, setExpanded,viewMusicPlayer, setViewMusicPlayer} = useMusicPlayer()
-    const {user} = useAuth
+    const {user} = useAuth()
   return (
     <div className="flex items-start gap-3 w-full">
       <MainApp />
