@@ -62,10 +62,12 @@ const Comment = ({ comment }) => {
             {/* Header */}
             <div className="flex justify-between items-start flex-wrap gap-2">
               <div className="text-sm text-gray-700 dark:text-gray-300 break-words">
-                <span className="font-semibold text-black dark:text-white">{comment.owner.username}</span>
-                {comment.owner.isAccountWithPremiumVerify && (
-                  <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
-                )}
+                <div className='flex items-center gap-2'>
+                  <span className="font-semibold text-black dark:text-white">{comment.owner.username}</span>
+                  {comment.owner.isAccountWithPremiumVerify && (
+                    <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
+                  )}
+                </div>
                 <span className="ml-2 text-xs text-gray-500">{comment.owner.profileName}</span>
                 <span className="ml-2 text-xs text-gray-400">· {new Date(comment.createdAt).toLocaleDateString()}</span>
                 {comment?.isEdited && (
