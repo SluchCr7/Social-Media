@@ -279,46 +279,43 @@ useEffect(() => {
               </span>
             </div>
           </div>
-
-          <div className="w-full md:w-64 relative">
-            {communities.filter((com) =>
-              com?.members.some((m) => m._id === user._id)
-            ).length > 0 ? (
-              <div className="relative">
-                <FaUsers className="absolute left-3 top-3 text-gray-400" />
-                <select
-                  value={selectedCommunity}
-                  onChange={(e) => setSelectedCommunity(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-darkMode-bg border dark:border-gray-600 rounded-xl text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
-                >
-                  <option value="">Select a Community</option>
-                  {communities
-                    .filter((com) =>
-                      com.members.some((m) => m._id === user._id)
-                    )
-                    .map((com) => (
-                      <option key={com._id} value={com._id}>
-                        {com.Name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            ) : (
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                You haven’t joined any communities.
-              </span>
-            )}
+          <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-2 w-full md:w-auto">
+            <PostPrivacySelector defaultValue={privacy} onChange={(v) => setPrivacy(v)} />
+            <div className="border-l h-6 dark:border-gray-600 mx-2"></div>
+            <div className="relative flex-1 min-w-[160px]">
+              <FaUsers className="absolute left-3 top-3 text-gray-400" />
+              {communities.filter((com) =>
+                com?.members.some((m) => m._id === user._id)
+              ).length > 0 ? (
+                <div className="relative">
+                  <FaUsers className="absolute left-3 top-3 text-gray-400" />
+                  <select
+                    value={selectedCommunity}
+                    onChange={(e) => setSelectedCommunity(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-darkMode-bg border dark:border-gray-600 rounded-xl text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+                  >
+                    <option value="">Select a Community</option>
+                    {communities
+                      .filter((com) =>
+                        com.members.some((m) => m._id === user._id)
+                      )
+                      .map((com) => (
+                        <option key={com._id} value={com._id}>
+                          {com.Name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              ) : (
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  You haven’t joined any communities.
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-        <div className="flex items-center justify-between mb-4">
-          <PostPrivacySelector
-            defaultValue={privacy}
-            onChange={(value) => setPrivacy(value)}
-          />
         </div>
         {/* Body */}
         <div className="relative p-6 pb-2">
-
           {/* Links */}
           {links?.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-2">
