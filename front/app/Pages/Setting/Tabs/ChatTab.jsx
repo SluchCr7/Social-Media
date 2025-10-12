@@ -1,9 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { FaSun } from 'react-icons/fa'
 import clsx from 'clsx'
 import { CiChat1 } from 'react-icons/ci'
-import {FaSun} from 'react-icons/fa'
 const ChatTab = ({
     handleBackgroundChange,
     colors,

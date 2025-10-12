@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { useTheme } from '@/app/Context/ThemeContext'
 import { useAuth } from '@/app/Context/AuthContext'
 import { useUser } from '@/app/Context/UserContext'
-import { useAdmin } from '@/app/Context/AdminContext'
+import { useAdmin } from '@/app/Context/UserAdminContext'
 import { getPasswordStrength } from '@/app/utils/getPasswordStrength'
 import SettingsView from './Design'
 

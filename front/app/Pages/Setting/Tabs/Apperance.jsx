@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FaSun } from 'react-icons/fa'
 import clsx from 'clsx'
-import ToggleSwitch from '../ToggleSwitch'
+import ToggleSwitch from '@/app/Component/Setting/ToggleSwitch'
 import { DEFAULT_COLORS } from '@/app/utils/Data'
 
 const AppearanceTab = ({
