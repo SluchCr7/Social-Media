@@ -1,13 +1,14 @@
 import { GoHome, GoSearch } from "react-icons/go"
-import { CiUser, CiSettings } from "react-icons/ci"
+import { CiUser, CiSettings, CiChat1 } from "react-icons/ci"
 import { SiGoogledisplayandvideo360 } from "react-icons/si"
 import { FaPlus } from "react-icons/fa6"
 import { RiUserCommunityLine } from 'react-icons/ri'
 import { LuMessagesSquare } from "react-icons/lu"
-import { MdOutlineOndemandVideo } from "react-icons/md"
+import { MdLanguage, MdOutlineOndemandVideo } from "react-icons/md"
 import { IoTrophyOutline } from "react-icons/io5"
 import { SlCalender } from "react-icons/sl"
 import { IoIosMusicalNotes } from "react-icons/io";
+import { FaHistory, FaLock, FaSun, FaUserCog } from "react-icons/fa"
 
 export const colors = [
     {

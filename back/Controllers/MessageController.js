@@ -243,11 +243,7 @@ const deleteMessageForMe = asyncHandler(async (req, res) => {
 
   res.status(200).json({ message: "Message hidden for you" });
 });
-const asyncHandler = require("express-async-handler");
-const { Message } = require("../Modules/Message");
-const { messagePopulate } = require("../Populates/Populate");
-const { getReceiverSocketId, io } = require("../Config/socket");
-const mongoose = require("mongoose");
+
 
 // ✅ إضافة أو إزالة لايك
 const addLike = asyncHandler(async (req, res) => {
