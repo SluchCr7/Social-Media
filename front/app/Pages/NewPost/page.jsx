@@ -4,7 +4,7 @@ import React, { useRef, useState, useEffect } from 'react'
 import { useAuth } from '@/app/Context/AuthContext'
 import { usePost } from '@/app/Context/PostContext'
 import { useCommunity } from '@/app/Context/CommunityContext'
-import NewPostPresenter from './NewPostPresenter'
+import NewPostPresenter from './Design'
 
 const NewPostContainer = () => {
   const [postText, setPostText] = useState('')
