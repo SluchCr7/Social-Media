@@ -104,15 +104,29 @@ const NewPostContainer = () => {
 
   useEffect(() => {
     if (showMentionBox && textareaRef.current) {
-      const textarea = textareaRef.current
-      const { top, left } = getCaretCoordinates(textarea, textarea.selectionStart)
-      const rect = textarea.getBoundingClientRect()
-      setMentionBoxPos({
-        top: rect.top + window.scrollY + top + 25,
-        left: rect.left + window.scrollX + left,
-      })
+      const textarea = textareaRef.current;
+      const { top, left } = getCaretCoordinates(textarea, textarea.selectionStart);
+      const rect = textarea.getBoundingClientRect();
+      const boxWidth = 256; // نفس w-64 (64 * 4px)
+      const boxHeight = 224; // نفس max-h-56 (56 * 4px)
+
+      let finalTop = rect.top + window.scrollY + top + 25;
+      let finalLeft = rect.left + window.scrollX + left;
+
+      // لو خرج يمين الشاشة، نحركه لليسار
+      if (finalLeft + boxWidth > window.innerWidth) {
+        finalLeft = window.innerWidth - boxWidth - 16; // 16px مسافة أمان
+      }
+
+      // لو خرج أسفل الصفحة، نحطه فوق المؤشر بدل تحته
+      if (finalTop + boxHeight > window.scrollY + window.innerHeight) {
+        finalTop = rect.top + window.scrollY + top - boxHeight - 10;
+      }
+
+      setMentionBoxPos({ top: finalTop, left: finalLeft });
     }
-  }, [showMentionBox, postText, cursorPosition])
+  }, [showMentionBox, postText, cursorPosition]);
+
 
   // ---------- Links ----------
   const handleAddLink = () => {

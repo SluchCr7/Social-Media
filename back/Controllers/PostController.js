@@ -418,13 +418,7 @@ const sharePost = asyncHandler(async (req, res) => {
   }
 
   await sharedPost.save();
-  await sharedPost.populate([
-    { path: "owner", select: "username profileName profilePhoto" },
-    {
-      path: "originalPost",
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    },
-  ]);
+  await sharedPost.populate(postPopulate);
 
   // ✅ رجع بوست كامل فقط
   res.status(201).json(sharedPost);
@@ -544,14 +538,8 @@ const viewPost = asyncHandler(async (req, res) => {
     postId,
     { $addToSet: { views: req.user._id } }, // $addToSet يمنع التكرار
     { new: true }
-  )
-    .populate('owner', 'username profilePhoto')
-    .populate('community', 'Name Picture')
-    .populate('views', 'username profilePhoto') // المستخدمين الذين شاهدوا البوست
-    .populate({
-      path: "originalPost",
-      populate: { path: "owner", select: "username profileName profilePhoto" },
-    })
+  ).populate(postPopulate);
+  
   res.status(200).json({
     post: updatedPost
   });

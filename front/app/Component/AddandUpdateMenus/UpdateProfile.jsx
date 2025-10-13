@@ -203,7 +203,14 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">Prefered Language</label>
-              <input type="date" name="preferedLanguage" value={formData.preferedLanguage} onChange={handleChange} className={inputStyle} />
+              <input
+                type="text"
+                name="preferedLanguage"
+                value={formData.preferedLanguage}
+                onChange={handleChange}
+                className={inputStyle}
+                placeholder="Preferred Language"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">Gender</label>
@@ -348,132 +355,3 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
 }
 
 export default UpdateProfile
-
-
-// 'use client'
-// import React, { useReducer, useEffect, useState } from 'react';
-// import { FiX } from "react-icons/fi";
-// import { toast } from 'react-toastify';
-// import { useAuth } from '../../Context/AuthContext';
-// import ProfileBasicInfo from './ProfileBasicInfo';
-// import ProfileRelationship from './ProfileRelationship';
-// import ProfileInterests from './ProfileInterests';
-// import ProfileSocialLinks from './ProfileSocialLinks';
-
-// const initialState = {
-//   username: '',
-//   profileName: '',
-//   description: '',
-//   country: '',
-//   phone: '',
-//   city: '',
-//   gender: '',
-//   relationshipStatus: '',
-//   partner: '',
-//   dateOfBirth: '',
-//   preferedLanguage: '',
-//   interests: [],
-//   newInterest: '',
-//   socialLinks: {
-//     github: '',
-//     linkedin: '',
-//     twitter: '',
-//     facebook: '',
-//     website: '',
-//   },
-// };
-
-// function reducer(state, action) {
-//   switch(action.type) {
-//     case 'SET_FIELD':
-//       return { ...state, [action.field]: action.value };
-//     case 'SET_SOCIAL':
-//       return { ...state, socialLinks: { ...state.socialLinks, [action.field]: action.value }};
-//     case 'SET_INTERESTS':
-//       return { ...state, interests: action.interests };
-//     case 'SET_NEW_INTEREST':
-//       return { ...state, newInterest: action.value };
-//     case 'SET_ALL':
-//       return { ...state, ...action.data };
-//     default:
-//       return state;
-//   }
-// }
-
-// const UpdateProfile = ({ update, setUpdate, user }) => {
-//   const [state, dispatch] = useReducer(reducer, initialState);
-//   const [loading, setLoading] = useState(false);
-//   const { updateProfile } = useAuth();
-
-//   useEffect(() => {
-//     if(user) {
-//       dispatch({ type: 'SET_ALL', data: {
-//         username: user.username || '',
-//         profileName: user.profileName || '',
-//         description: user.description || '',
-//         country: user.country || '',
-//         phone: user.phone || '',
-//         city: user.city || '',
-//         gender: user.gender || '',
-//         relationshipStatus: user.relationshipStatus || '',
-//         partner: user.partner || '',
-//         dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
-//         preferedLanguage: user.preferedLanguage || '',
-//         interests: user.interests || [],
-//         socialLinks: {
-//           github: user.socialLinks?.github || '',
-//           linkedin: user.socialLinks?.linkedin || '',
-//           twitter: user.socialLinks?.twitter || '',
-//           facebook: user.socialLinks?.facebook || '',
-//           website: user.socialLinks?.website || '',
-//         }
-//       }});
-//     }
-//   }, [user]);
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     if(loading) return;
-//     setLoading(true);
-
-//     try {
-//       const payload = {
-//         ...state,
-//         socialLinks: { ...state.socialLinks },
-//         interests: Array.from(new Set([...(user.interests || []), ...state.interests]))
-//       };
-//       await updateProfile(payload);
-//       toast.success('Profile updated successfully!');
-//       setUpdate(false);
-//     } catch(err) {
-//       toast.error('Failed to update profile');
-//       console.error(err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   if(!update) return null;
-
-//   return (
-//     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
-//       <div className="bg-[#181818] text-white w-[95%] max-w-2xl rounded-2xl shadow-2xl p-6 relative animate-fade-in space-y-6 max-h-[90vh] overflow-y-auto">
-//         <button onClick={() => setUpdate(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl transition">
-//           <FiX />
-//         </button>
-//         <h2 className="text-3xl font-bold text-center border-b pb-3 border-gray-700">Edit Profile Info</h2>
-//         <form onSubmit={handleSubmit} className="space-y-5">
-//           <ProfileBasicInfo state={state} dispatch={dispatch} />
-//           <ProfileRelationship state={state} dispatch={dispatch} user={user} />
-//           <ProfileInterests state={state} dispatch={dispatch} />
-//           <ProfileSocialLinks state={state} dispatch={dispatch} />
-//           <button type="submit" disabled={loading} className="w-full mt-6 py-3 px-4 rounded-xl bg-green-600 hover:bg-green-500 transition text-white font-semibold text-lg shadow-lg">
-//             {loading ? 'Saving...' : 'Save Changes'}
-//           </button>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default UpdateProfile;

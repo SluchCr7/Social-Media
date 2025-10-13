@@ -100,28 +100,72 @@ export const UserContextProvider = ({ children }) => {
   };
 
   const updateProfile = async (fields) => {
-    const payload = {
-      username: fields.username ?? user.username,
-      description: fields.description ?? user.description,
-      profileName: fields.profileName ?? user.profileName,
-      country: fields.country ?? user.country,
-      city: fields.city ?? user.city,
-      phone: fields.phone ?? user.phone,
-      dateOfBirth: fields.dateOfBirth ?? user.dateOfBirth,
-      gender: fields.gender ?? user.gender,
-      interests: fields.interests ?? user.interests ?? [],
-      relationshipStatus: fields.relationshipStatus ?? user.relationshipStatus,
-      partner: fields.partner ?? user.partner ?? null,
-      preferedLanguage: fields.preferedLanguage ?? user.preferedLanguage,
-      socialLinks: {
-        github: fields.socialLinks?.github ?? user.socialLinks?.github ?? '',
-        twitter: fields.socialLinks?.twitter ?? user.socialLinks?.twitter ?? '',
-        linkedin: fields.socialLinks?.linkedin ?? user.socialLinks?.linkedin ?? '',
-        facebook: fields.socialLinks?.facebook ?? user.socialLinks?.facebook ?? '',
-        website: fields.socialLinks?.website ?? user.socialLinks?.website ?? '',
+    // ⚙️ تجهيز Payload نظيف يحتوي فقط على القيم التي تغيّرت فعلاً
+    const payload = {};
+
+    // قائمة الحقول النصية العادية
+    const normalFields = [
+      "username",
+      "profileName",
+      "description",
+      "country",
+      "city",
+      "phone",
+      "gender",
+      "preferedLanguage",
+      "relationshipStatus",
+    ];
+
+    for (const key of normalFields) {
+      const newValue = fields[key]?.trim?.() || fields[key];
+      if (newValue && newValue !== user[key]) {
+        payload[key] = newValue;
       }
-    };
-    setUpdateProfileLoading(true)
+    }
+
+    // 🎂 تاريخ الميلاد
+    if (fields.dateOfBirth && fields.dateOfBirth !== user.dateOfBirth) {
+      payload.dateOfBirth = fields.dateOfBirth;
+    }
+
+    // 💞 الشريك (partner)
+    if (fields.partner !== undefined && fields.partner !== user.partner) {
+      payload.partner = fields.partner || null;
+    }
+
+    // 🎯 الاهتمامات
+    if (
+      Array.isArray(fields.interests) &&
+      JSON.stringify(fields.interests) !== JSON.stringify(user.interests)
+    ) {
+      payload.interests = fields.interests;
+    }
+
+    // 🌐 الروابط الاجتماعية
+    if (fields.socialLinks) {
+      const socialPayload = {};
+      const socialKeys = ["github", "twitter", "linkedin", "facebook", "website"];
+
+      for (const key of socialKeys) {
+        const newVal = fields.socialLinks[key]?.trim?.() || "";
+        const oldVal = user.socialLinks?.[key] || "";
+        if (newVal && newVal !== oldVal) {
+          socialPayload[key] = newVal;
+        }
+      }
+
+      if (Object.keys(socialPayload).length > 0) {
+        payload.socialLinks = socialPayload;
+      }
+    }
+
+    // 🧾 لو مفيش أي تغييرات
+    if (Object.keys(payload).length === 0) {
+      showAlert("No changes detected to update.", "warning");
+      return;
+    }
+
+    setUpdateProfileLoading(true);
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update`,
@@ -130,27 +174,26 @@ export const UserContextProvider = ({ children }) => {
       );
 
       const newUserData = res.data.user || res.data;
+      const updatedUser = { ...user, ...newUserData, token: user.token };
 
-      const updatedUser = {
-        ...user,
-        ...newUserData,
-        token: user.token,
-      };
-
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      localStorage.setItem("user", JSON.stringify(updatedUser));
       setUser(updatedUser);
-      showAlert('Profile Updated Successfully.');
+
+      showAlert("Profile updated successfully.", "success");
+
+      // ✅ تحديث فوري بدون refresh ثقيل
+      // يمكنك إلغاء reload لو مش ضروري
       setTimeout(() => {
         window.location.reload();
-      }, 2000);
+      }, 1500);
     } catch (err) {
-      console.error(err);
+      console.error("Update error:", err);
+      showAlert("Failed to update profile.", "error");
     } finally {
-      setUpdateProfileLoading(false)
+      setUpdateProfileLoading(false);
     }
   };
-
-
+  
   const updatePassword = async (password) => {
     try {
       const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update/pass`, { password }, {

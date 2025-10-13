@@ -19,6 +19,7 @@ const { Notification } = require('../Modules/Notification');
 const { Report, ValidateReport } = require('../Modules/Report')
 const { validateStory, Story } = require("../Modules/Story");
 const { Music } = require('../Modules/Music')
+const {userOnePopulate} = require("../Populates/Populate")
 /**
  * @desc Register New User
  * @route POST /api/auth/register
@@ -226,93 +227,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
  */
 
 const getUserById = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id).populate('comments').populate('posts')
-      .populate({
-        path: 'audios',
-        populate: {
-          path: 'owner',
-          model: 'User',
-          select: 'username profilePhoto profileName', // Optional: limit fields
-        },
-      })
-      .populate({ path: "stories", populate: { path: "owner", model: "User", } })
-      .populate({path: "following",select: "profilePhoto username profileName",})
-      .populate({path: "followers",select: "profilePhoto username profileName",})
-      .populate("communities", "Name Picture members")
-      .populate('savedPosts' )
-      .populate("partner", "username profileName")
-      .populate({
-    path: 'posts',
-    populate: [
-      {
-        path: 'owner',
-        model: 'User',
-      },
-      {
-        path: 'comments',
-        model: 'Comment',
-      },
-      {
-        path: 'originalPost',
-        model: 'Post',
-        populate: {
-          path: 'owner',
-          model: 'User',
-        },
-      },
-    ],
-      })
-      .populate({
-        path: 'comments',
-        populate: [
-          {
-            path: 'owner',
-            model: 'User',
-          },
-          {
-            path: 'postId',
-            populate: {
-              path: 'owner',
-              model: 'User',
-            },
-          },
-        ],
-      })
-      .populate({
-        path: "pinsPosts",
-        populate: [
-          {
-            path: "owner",
-            model: "User",
-          },
-          {
-            path: "originalPost",
-            model: "Post",
-            populate: {
-              path: "owner",
-              model: "User",
-              select: "username profilePhoto profileName", // لو عايز تحدد الفيلدز
-            },
-          },
-        ],
-      })
-      .populate({
-        path: 'reels',
-        populate: {
-          path: 'owner',
-          model: 'User',
-          select: 'username profilePhoto profileName', // Optional: limit fields
-        },
-      })
-      .populate({
-        path: "myMusicPlaylist",
-        model: "Music",
-        populate: {
-          path: "owner",
-          model: "User",
-          select: "username profilePhoto profileName",
-        }
-      })
+  const user = await User.findById(req.params.id).populate(userOnePopulate)
   if (!user) {
         return res.status(404).json({ message: "User Not Found" })
     }

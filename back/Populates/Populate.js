@@ -42,6 +42,7 @@ const communityPopulate = [
 const messagePopulate = [
   { path: "sender", select: "username profilePhoto _id" },
   { path: "receiver", select: "username profilePhoto _id" },
+  { path: "replyTo", select: "text Photos sender", populate: { path: "sender", select: "name profilePhoto" } }
 ];
 const EventPopulate = [
   { path: "invitedUsers", select: userSelect },
@@ -90,4 +91,126 @@ const postPopulate = [
   },
 ];
 
-module.exports = { reelPopulate,EventPopulate,messagePopulate, storyPopulate ,postPopulate, commentPopulate,communityPopulate};
+
+const userOnePopulate = [
+  {
+    path: "audios",
+    populate: {
+      path: "owner",
+      model: "User",
+      select: userSelect,
+    },
+  },
+  {
+    path: "stories",
+    populate: {
+      path: "owner",
+      model: "User",
+      select: userSelect,
+    },
+  },
+  {
+    path: "following",
+    select: userSelect,
+  },
+  {
+    path: "followers",
+    select: userSelect,
+  },
+  {
+    path: "communities",
+    select: communitySelect,
+  },
+  {
+    path: "savedPosts",
+  },
+  {
+    path : "posts"
+  },
+  {
+    path : "comments"
+  },
+  {
+    path: "partner",
+    select: "username profileName",
+  },
+  {
+    path: "posts",
+    populate: [
+      {
+        path: "owner",
+        model: "User",
+        select: userSelect,
+      },
+      {
+        path: "comments",
+        model: "Comment",
+      },
+      {
+        path: "originalPost",
+        model: "Post",
+        populate: {
+          path: "owner",
+          model: "User",
+          select: userSelect,
+        },
+      },
+    ],
+  },
+  {
+    path: "comments",
+    populate: [
+      {
+        path: "owner",
+        model: "User",
+        select: userSelect,
+      },
+      {
+        path: "postId",
+        populate: {
+          path: "owner",
+          model: "User",
+          select: userSelect,
+        },
+      },
+    ],
+  },
+  {
+    path: "pinsPosts",
+    populate: [
+      {
+        path: "owner",
+        model: "User",
+        select: userSelect,
+      },
+      {
+        path: "originalPost",
+        model: "Post",
+        populate: {
+          path: "owner",
+          model: "User",
+          select: userSelect,
+        },
+      },
+    ],
+  },
+  {
+    path: "reels",
+    populate: {
+      path: "owner",
+      model: "User",
+      select: userSelect,
+    },
+  },
+  {
+    path: "myMusicPlaylist",
+    model: "Music",
+    populate: {
+      path: "owner",
+      model: "User",
+      select: userSelect,
+    },
+  },
+];
+
+module.exports = { reelPopulate,EventPopulate,messagePopulate, storyPopulate ,postPopulate, commentPopulate,communityPopulate,userOnePopulate};

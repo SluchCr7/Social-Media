@@ -81,26 +81,26 @@ const addNewStory = asyncHandler(async (req, res) => {
   user.updateLevelRank();
   await user.save();
 
-  const collaboratorIds = collaborators.map(c => {
-    if (typeof c === "string") return c;         
-    if (c?._id) return c._id.toString();         
-    return null;                                  
-  }).filter(Boolean);                            
+  // const collaboratorIds = collaborators.map(c => {
+  //   if (typeof c === "string") return c;         
+  //   if (c?._id) return c._id.toString();         
+  //   return null;                                  
+  // }).filter(Boolean);                            
 
-  await Promise.all(
-    collaboratorIds.map(id => {
-      if (String(id) === String(req.user._id)) return null; 
+  // await Promise.all(
+  //   collaboratorIds.map(id => {
+  //     if (String(id) === String(req.user._id)) return null; 
 
-      return sendNotificationHelper({
-        sender: req.user._id,
-        receiver: id, // الآن ID فقط
-        content: `${user.username} added you as a collaborator in a story 🎉`,
-        type: "collaborator",
-        actionRef: story._id,
-        actionModel: "Story",
-      }).catch(err => console.error(`Failed to notify ${id}:`, err.message));
-    })
-  );
+  //     return sendNotificationHelper({
+  //       sender: req.user._id,
+  //       receiver: id, // الآن ID فقط
+  //       content: `${user.username} added you as a collaborator in a story 🎉`,
+  //       type: "collaborator",
+  //       actionRef: story._id,
+  //       actionModel: "Story",
+  //     }).catch(err => console.error(`Failed to notify ${id}:`, err.message));
+  //   })
+  // );
 
   res.status(201).json({ message: "Story added successfully", story });
 });
