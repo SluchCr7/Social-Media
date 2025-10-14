@@ -3,7 +3,8 @@ const {
   getReports, 
   addNewReport, 
   deleteReport, 
-  updateReportStatus 
+  updateReportStatus,
+  clearAllReports
 } = require('../Controllers/ReportController');
 
 const { verifyToken, verifyAdmin } = require('../Middelwares/verifyToken');
@@ -20,4 +21,6 @@ route.delete('/delete/:id', verifyToken,  deleteReport);
 // 🔄 Update report status (Admin only)
 route.patch('/status/:id', verifyToken, updateReportStatus);
 
+// 🗑 Clear all reports (Admin only)
+route.delete('/clear', verifyToken, verifyAdmin, clearAllReports);
 module.exports = route;

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FaShare, FaSpinner } from "react-icons/fa";
@@ -11,7 +11,7 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
   const { user } = useAuth();
   const { isLoading } = usePost();
 
-  // إغلاق المودال عند الضغط على Escape
+  // Close modal on ESC
   useEffect(() => {
     const handleKey = (e) => e.key === "Escape" && !isLoading && onClose();
     document.addEventListener("keydown", handleKey);
@@ -29,27 +29,25 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
     <AnimatePresence>
       {isOpen && (
         <motion.div
+          className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4"
-          onClick={!isLoading ? onClose : undefined} // لا يُغلق أثناء التحميل
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="relative bg-white dark:bg-darkMode-bg rounded-2xl w-full max-w-2xl shadow-2xl p-6 sm:p-8"
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="relative w-full max-w-2xl rounded-2xl bg-white/90 dark:bg-gray-900/90 shadow-2xl border border-gray-200/40 dark:border-gray-700/40 p-6 sm:p-8 backdrop-blur-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Overlay تحميل شفاف فوق المودال */}
+            {/* Loading overlay */}
             {isLoading && (
               <motion.div
+                className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center rounded-2xl z-20"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center rounded-2xl z-20"
               >
                 <motion.div
                   animate={{ rotate: 360 }}
@@ -63,18 +61,24 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
             )}
 
             {/* Header */}
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-5 border-b border-gray-200/50 dark:border-gray-700/50 pb-3">
               <div className="flex items-center gap-2">
-                <FaShare className="text-blue-600 dark:text-blue-400 text-xl" />
-                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+                <motion.div
+                  initial={{ rotate: -20 }}
+                  animate={{ rotate: 0 }}
+                  className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md"
+                >
+                  <FaShare size={16} />
+                </motion.div>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100">
                   Share Post
                 </h2>
               </div>
               <button
                 onClick={onClose}
                 disabled={isLoading}
-                className={`text-gray-400 text-xl transition hover:rotate-90 hover:scale-110 ${
-                  isLoading ? "opacity-50 cursor-not-allowed" : "hover:text-gray-600 dark:hover:text-gray-300"
+                className={`text-gray-400 text-2xl leading-none hover:text-gray-600 dark:hover:text-gray-300 transition-transform ${
+                  isLoading ? "opacity-40 cursor-not-allowed" : "hover:rotate-90"
                 }`}
               >
                 ✕
@@ -82,22 +86,23 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
             </div>
 
             {/* Input */}
-            <div className="flex gap-3 mb-5">
+            <div className="flex gap-3 mb-6">
               <Image
                 src={user?.profilePhoto?.url || "/default-profile.png"}
-                alt="User Profile"
-                width={50}
-                height={50}
-                className="rounded-full w-12 h-12 min-w-10 aspect-square object-cover "
+                alt="User"
+                width={48}
+                height={48}
+                className="rounded-full w-12 h-12 object-cover border border-gray-300/60 dark:border-gray-600/60"
               />
               <div className="flex-1 flex flex-col">
                 <textarea
                   disabled={isLoading}
-                  className={`w-full border border-gray-300 dark:border-gray-600 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 bg-gray-50 dark:bg-darkMode-card text-gray-800 dark:text-gray-200 resize-none transition ${
+                  className={`w-full rounded-xl p-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-gray-100 resize-none transition ${
                     isLoading && "opacity-50 cursor-not-allowed"
                   }`}
                   rows={3}
-                  placeholder="Say something about this post..."
+                  maxLength={300}
+                  placeholder="Add your thoughts..."
                   value={customText}
                   onChange={(e) => setCustomText(e.target.value)}
                 />
@@ -108,34 +113,29 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
             </div>
 
             {/* Post Preview */}
-            <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-gray-50 dark:bg-darkMode-card hover:bg-gray-100 dark:hover:bg-darkMode-hover transition shadow-sm">
-              {/* Owner */}
+            <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/60 shadow-inner p-4 hover:bg-gray-100/60 dark:hover:bg-gray-800 transition-all">
               <div className="flex items-center gap-3 mb-3">
                 <Image
                   src={post?.owner?.profilePhoto?.url || "/default-profile.png"}
                   alt="Owner"
                   width={40}
                   height={40}
-                  className="rounded-full w-10 h-10 min-w-10 aspect-square object-cover "
+                  className="rounded-full border border-gray-300/60 dark:border-gray-600/60 object-cover"
                 />
                 <div>
-                  <p className="font-semibold text-gray-800 dark:text-gray-200">
+                  <p className="font-semibold text-gray-800 dark:text-gray-100 leading-tight">
                     {post?.owner?.profileName}
                   </p>
-                  <span className="text-sm text-gray-500">
-                    @{post?.owner?.username}
-                  </span>
+                  <span className="text-sm text-gray-500">@{post?.owner?.username}</span>
                 </div>
               </div>
 
-              {/* Post Text */}
               {post?.text && (
-                <p className="mb-3 text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-3">
+                <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-3 line-clamp-3">
                   {post?.text}
                 </p>
               )}
 
-              {/* Photos */}
               {post?.Photos?.length > 0 && (
                 <div
                   className={`grid gap-2 ${
@@ -143,28 +143,34 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
                   }`}
                 >
                   {post?.Photos.slice(0, 2).map((photo, i) => (
-                    <Image
+                    <motion.div
                       key={i}
-                      src={photo?.url}
-                      alt={`Post-${i}`}
-                      width={500}
-                      height={300}
-                      className="rounded-xl object-cover w-full h-[220px] hover:scale-105 transition-transform"
-                    />
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden rounded-xl"
+                    >
+                      <Image
+                        src={photo?.url}
+                        alt={`Post-${i}`}
+                        width={500}
+                        height={300}
+                        className="rounded-xl object-cover w-full h-[220px]"
+                      />
+                    </motion.div>
                   ))}
                 </div>
               )}
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end gap-3 mt-5">
+            <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={onClose}
                 disabled={isLoading}
                 className={`px-5 py-2 rounded-xl font-medium transition ${
                   isLoading
-                    ? "bg-gray-300 dark:bg-gray-600 cursor-not-allowed text-gray-400"
-                    : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                    ? "bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
+                    : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                 }`}
               >
                 Cancel
@@ -173,10 +179,10 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
               <button
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className={`px-6 py-2 rounded-xl font-medium text-white shadow-lg flex items-center gap-2 transition-transform ${
+                className={`px-6 py-2.5 rounded-xl font-semibold text-white shadow-md flex items-center gap-2 transition-transform ${
                   isLoading
                     ? "bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed"
-                    : "bg-gradient-to-r from-blue-500 to-purple-500 hover:scale-105"
+                    : "bg-gradient-to-r from-blue-500 to-purple-500 hover:scale-[1.03] hover:shadow-lg"
                 }`}
               >
                 {isLoading ? (

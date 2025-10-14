@@ -14,71 +14,13 @@ export const StoryContextProvider = ({ children }) => {
   const [stories, setStories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const {addNotify} = useNotify()
-  // ➕ إضافة قصة جديدة
-  // const addNewStory = async (storyData) => {
-  //   const formData = new FormData();
 
-  //   // ✅ إضافة النص لو موجود
-  //   if (storyData.text) {
-  //     formData.append('text', storyData.text);
-  //   }
-
-  //   // ✅ إضافة الصورة لو موجودة
-  //   if (storyData.file) {
-  //     formData.append('image', storyData.file);
-  //   }
-
-  //   // ✅ تحقق أنه على الأقل فيه نص أو صورة
-  //   if (!storyData.text && !storyData.file) {
-  //     showAlert("You must provide either an image, text, or both for the story.");
-  //     return;
-  //   }
-
-  //   if (storyData.collaborators) {
-  //     for (const collaborator of storyData.collaborators) {
-  //       formData.append('collaborators', collaborator);
-  //     }
-  //   }
-
-  //   try {
-  //     await axios.post(
-  //       `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/add`,
-  //       formData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${user.token}`,
-  //           'Content-Type': 'multipart/form-data',
-  //         },
-  //       }
-  //     );
-  //     // if (storyData.collaborators) {
-  //     //   for (const collaborator of storyData.collaborators) {
-  //     //     addNotify(
-  //     //       content=`${collaborator?.username} added you as a collaborator in a story 🎉`
-  //     //       , type = 'collaborator', receiverId={collaborator?._id}, actionRef={story._id}, actionModel
-  //     //     )
-  //     // }
-  //     showAlert("Story added successfully.");
-  //   } catch (err) {
-  //     console.error(err);
-  //     showAlert("Failed to add story.");
-  //   }
-  // };
-
-    const addNewStory = async (storyData) => {
+  const addNewStory = async (storyData) => {
     const formData = new FormData();
 
-    // ✅ إضافة النص لو موجود
-    if (storyData.text) {
-      formData.append('text', storyData.text);
-    }
+    if (storyData.text) formData.append('text', storyData.text);
+    if (storyData.file) formData.append('image', storyData.file);
 
-    // ✅ إضافة الصورة لو موجودة
-    if (storyData.file) {
-      formData.append('image', storyData.file);
-    }
-
-    // ✅ تحقق أنه على الأقل فيه نص أو صورة
     if (!storyData.text && !storyData.file) {
       showAlert("You must provide either an image, text, or both for the story.");
       return;
@@ -91,7 +33,6 @@ export const StoryContextProvider = ({ children }) => {
     }
 
     try {
-      // ✅ إرسال القصة للسيرفر
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/add`,
         formData,
@@ -103,9 +44,12 @@ export const StoryContextProvider = ({ children }) => {
         }
       );
 
-      const story = res.data?.story || res.data; // حسب استجابة السيرفر
+      const story = res.data?.story || res.data;
 
-      // ✅ إرسال إشعار لكل Collaborator
+      // ✅ إضافة القصة الجديدة إلى الـ state مباشرة بدون refresh
+      setStories((prev) => [story, ...prev]);
+
+      // ✅ إرسال إشعارات للمشاركين (collaborators)
       if (storyData.collaborators?.length > 0 && story?._id) {
         for (const collaborator of storyData.collaborators) {
           await addNotify({
@@ -124,6 +68,7 @@ export const StoryContextProvider = ({ children }) => {
       showAlert("Failed to add story.");
     }
   };
+
 
   // ➕ جلب قصص يوزر معين
 const getUserStories = async (userId) => {

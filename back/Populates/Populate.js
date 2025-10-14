@@ -211,6 +211,14 @@ const userOnePopulate = [
       select: userSelect,
     },
   },
+  {
+    path: "joinedCommunities",
+    select: communitySelect,
+  },
+  {
+    path: "adminCommunities",
+    select: communitySelect,
+  },
 ];
 
 module.exports = { reelPopulate,EventPopulate,messagePopulate, storyPopulate ,postPopulate, commentPopulate,communityPopulate,userOnePopulate};

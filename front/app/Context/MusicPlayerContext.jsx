@@ -34,9 +34,10 @@ export const MusicPlayerProvider = ({ children }) => {
 
   // ✨ ضبط src للأوديو عند تغير current
   useEffect(() => {
-    if (!audioRef.current || !current) return
+    if (!audioRef.current || !current?.url) return
     audioRef.current.src = current.url
     audioRef.current.load()
+    play()
   }, [current])
 
   // ⏯️ التحكم في الصوت
@@ -59,13 +60,21 @@ export const MusicPlayerProvider = ({ children }) => {
   const togglePlay = () => (playing ? pause() : play())
 
   // 🔊 تغيير المقطع الحالي
+  // const setTrack = (track, index = 0, allSongs = songs) => {
+  //   if (!track) return
+  //   setCurrent(track)
+  //   setCurrentIndex(index)
+  //   if (allSongs?.length) setSongs(allSongs)
+  //   viewMusic(track._id)
+  //   play()
+  // }
+
   const setTrack = (track, index = 0, allSongs = songs) => {
     if (!track) return
     setCurrent(track)
     setCurrentIndex(index)
     if (allSongs?.length) setSongs(allSongs)
     viewMusic(track._id)
-    play()
   }
 
   // ⏮️ السابق

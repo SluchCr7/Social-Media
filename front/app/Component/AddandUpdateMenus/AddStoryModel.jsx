@@ -7,6 +7,7 @@ import Select from 'react-select';
 import { useStory } from '../../Context/StoryContext';
 import { useAuth } from '../../Context/AuthContext';
 import { useUser } from '@/app/Context/UserContext';
+import { useGetData } from '@/app/Custome/useGetData';
 
 const AddStoryModel = ({ setIsStory, isStory }) => {
   const [storyText, setStoryText] = useState('');
@@ -17,16 +18,9 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [success, setSuccess] = useState(false);
   const [collaborators, setCollaborators] = useState([]);
-  const [userData, setUserData] = useState(null);
   const { addNewStory } = useStory();
   const { user } = useAuth();
-  const {getUserById} = useUser()
-  useEffect(() => {
-    if (!user?._id) return;
-    getUserById(user._id)
-      .then(res => setUserData(res))
-      .catch(err => console.log(err));
-  }, [user?._id]);
+  const {userData} = useGetData(user?._id)
 
   useEffect(() => {
     const saved = localStorage.getItem('storyDraft');

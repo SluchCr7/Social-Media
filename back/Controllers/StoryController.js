@@ -16,40 +16,6 @@ const { sendNotificationHelper } = require("../utils/SendNotification");
  * @access Private
  */
 
-// const addNewStory = asyncHandler(async (req, res) => {
-//   const { text } = req.body;
-//   let photoUrl = "";
-
-//   // ✅ رفع الصورة لو موجودة
-//   if (req.files && req.files.image && req.files.image.length > 0) {
-//     const image = req.files.image[0]; // أول صورة
-//     const result = await v2.uploader.upload(image.path, {
-//       resource_type: "image",
-//     });
-//     photoUrl = result.secure_url;
-
-//     // بعد الرفع إحذف الملف المحلي
-//     fs.unlinkSync(image.path);
-//   }
-
-//   // ✅ التأكد أن فيه نص أو صورة (واحدة على الأقل)
-//   if (!text && !photoUrl) {
-//     return res
-//       .status(400)
-//       .json({ message: "يجب إضافة نص أو صورة على الأقل." });
-//   }
-
-//   // ✅ إنشاء وحفظ القصة
-//   const story = new Story({
-//     text: text || "",      // نص (ممكن يكون موجود مع الصورة أو لوحده)
-//     Photo: photoUrl || "", // صورة (ممكن تكون مع النص أو لوحدها)
-//     owner: req.user._id,
-//   });
-
-//   await story.save();
-
-//   res.status(201).json({ message: "Story added successfully", story });
-// });
 const addNewStory = asyncHandler(async (req, res) => {
   const { text, collaborators = [] } = req.body;
   let photoUrl = "";
@@ -80,27 +46,6 @@ const addNewStory = asyncHandler(async (req, res) => {
   user.userLevelPoints += 5;
   user.updateLevelRank();
   await user.save();
-
-  // const collaboratorIds = collaborators.map(c => {
-  //   if (typeof c === "string") return c;         
-  //   if (c?._id) return c._id.toString();         
-  //   return null;                                  
-  // }).filter(Boolean);                            
-
-  // await Promise.all(
-  //   collaboratorIds.map(id => {
-  //     if (String(id) === String(req.user._id)) return null; 
-
-  //     return sendNotificationHelper({
-  //       sender: req.user._id,
-  //       receiver: id, // الآن ID فقط
-  //       content: `${user.username} added you as a collaborator in a story 🎉`,
-  //       type: "collaborator",
-  //       actionRef: story._id,
-  //       actionModel: "Story",
-  //     }).catch(err => console.error(`Failed to notify ${id}:`, err.message));
-  //   })
-  // );
 
   res.status(201).json({ message: "Story added successfully", story });
 });

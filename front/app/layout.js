@@ -26,6 +26,7 @@ import { MusicPlayerProvider } from "./Context/MusicPlayerContext";
 import { UserContextProvider } from "./Context/UserContext";
 import { UserAdminContextProvider } from "./Context/UserAdminContext";
 import { VerifyContextProvider } from "./Context/VerifyContext";
+import { AdminContextProvider } from "./Context/AdminContext";
 
 
 // 🟢 استيراد الخط الإنجليزي
@@ -78,9 +79,11 @@ export default function RootLayout({ children }) {
                                             <ThemeContextProvider>
                                               <TranslateContextProvider>
                                                 <AsideContextProvider>
-                                                  <LayoutComponent>
-                                                    {children}
-                                                  </LayoutComponent>
+                                                  <AdminContextProvider>
+                                                    <LayoutComponent>
+                                                      {children}
+                                                    </LayoutComponent>
+                                                  </AdminContextProvider>
                                                 </AsideContextProvider>
                                               </TranslateContextProvider>
                                             </ThemeContextProvider>

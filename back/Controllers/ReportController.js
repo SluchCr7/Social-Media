@@ -123,9 +123,15 @@ const deleteReport = asyncHandler(async (req, res) => {
   res.status(200).json({ message: 'Report removed' });
 });
 
+const clearAllReports = asyncHandler(async (req, res) => {
+  await Report.deleteMany();
+  res.status(200).json({ success: true, message: "All reports cleared" });
+});
+
 module.exports = {
   addNewReport,
   getReports,
   updateReportStatus,
-  deleteReport
+  deleteReport,
+  clearAllReports
 };

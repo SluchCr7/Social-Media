@@ -1,9 +1,8 @@
-
 'use client';
 import React, { useState } from 'react';
 import { useReport } from '../../Context/ReportContext';
 import { IoClose } from 'react-icons/io5';
-
+import { reasons } from '@/app/utils/Data';
 const AddNewReport = ({
   targetId,
   reportedOnType = "post", // "post", "comment", "user"
@@ -16,15 +15,7 @@ const AddNewReport = ({
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // قائمة الأسباب (تتوافق مع Backend)
-  const reasons = [
-    { label: 'Spam', value: 'spam' },
-    { label: 'Inappropriate Content', value: 'inappropriate' },
-    { label: 'Harassment or Hate Speech', value: 'harassment' },
-    { label: 'Misinformation', value: 'misinformation' },
-    { label: 'Copyright Violation', value: 'copyright' },
-    { label: 'Other', value: 'other' }
-  ];
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,7 +32,7 @@ const AddNewReport = ({
       await addReport({
         reportedOnType,
         targetId,
-        text: details || reason, // إذا لم توجد تفاصيل، نرسل السبب كـ text
+        text: details || reason,
         reason
       });
 
@@ -57,28 +48,39 @@ const AddNewReport = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center"
+      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className="bg-white rounded-2xl shadow-lg max-w-lg w-full p-6 relative transform transition-all scale-95 animate-fade-in">
-        {/* زر الإغلاق */}
+      <div
+        className="bg-lightMode-bg dark:bg-darkMode-bg
+                   border border-lightMode-menu/20 dark:border-darkMode-menu/20
+                   rounded-2xl shadow-xl max-w-lg w-full p-6 relative
+                   transform transition-all scale-95 animate-fade-in text-lightMode-fg dark:text-darkMode-fg"
+      >
+        {/* Close Button */}
         <button
-          className="absolute top-3 right-3 text-gray-500 hover:text-black text-xl"
+          className="absolute top-3 right-3 text-lightMode-text2 dark:text-darkMode-text2 hover:text-lightMode-text dark:hover:text-darkMode-text text-xl transition"
           onClick={onClose}
         >
           <IoClose />
         </button>
 
-        {/* العنوان */}
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+        {/* Title */}
+        <h2 className="text-2xl font-semibold text-lightMode-text dark:text-darkMode-text mb-4 text-center">
           {title}
         </h2>
 
-        {/* النموذج */}
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* قائمة الأسباب */}
+          {/* Reason Select */}
           <select
-            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+            className="w-full p-3 border border-lightMode-menu/30 dark:border-darkMode-menu/30
+                       rounded-xl bg-lightMode-menu dark:bg-darkMode-menu
+                       text-lightMode-fg dark:text-darkMode-fg
+                       focus:outline-none focus:ring-2
+                       focus:ring-lightMode-text/40 dark:focus:ring-darkMode-text/40
+                       focus:border-lightMode-text dark:focus:border-darkMode-text
+                       transition"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
           >
@@ -90,22 +92,32 @@ const AddNewReport = ({
             ))}
           </select>
 
-          {/* التفاصيل */}
+          {/* Details */}
           <textarea
-            className="w-full h-28 p-4 border border-gray-300 rounded-xl resize-none
-                       focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+            className="w-full h-28 p-4 border border-lightMode-menu/30 dark:border-darkMode-menu/30
+                       rounded-xl bg-lightMode-menu dark:bg-darkMode-menu
+                       text-lightMode-fg dark:text-darkMode-fg
+                       placeholder-gray-400 resize-none
+                       focus:outline-none focus:ring-2
+                       focus:ring-lightMode-text/40 dark:focus:ring-darkMode-text/40
+                       focus:border-lightMode-text dark:focus:border-darkMode-text
+                       transition"
             placeholder="Add more details (optional)..."
             value={details}
             onChange={(e) => setDetails(e.target.value)}
           />
 
-          {errorMsg && <p className="text-red-600 text-sm">{errorMsg}</p>}
+          {errorMsg && (
+            <p className="text-red-500 dark:text-red-400 text-sm">{errorMsg}</p>
+          )}
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-red-600 text-white py-2.5 rounded-xl hover:bg-red-700
-                       transition disabled:opacity-50 flex items-center justify-center"
+            className="w-full bg-lightMode-text dark:bg-darkMode-text
+                       text-white py-2.5 rounded-xl hover:opacity-90
+                       transition disabled:opacity-50 flex items-center justify-center font-semibold"
           >
             {loading ? (
               <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>

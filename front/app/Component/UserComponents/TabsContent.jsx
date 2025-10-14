@@ -51,7 +51,7 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
     <div className="mt-6 w-full">
       <AnimatePresence mode="wait" initial={false}>
         {activeTab === 'Posts' && (
-          <motion.div key="posts" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-[90%] mx-auto">
+          <motion.div key="posts" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-full">
             {filteredPosts?.length > 0
               ? filteredPosts.map((post) => <SluchitEntry key={post?._id} post={post} />)
               : Array.from({ length: 4 }).map((_, i) => (
@@ -63,7 +63,7 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
         )}
 
         {activeTab === 'Saved' && (
-          <motion.div key="saved" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-[90%] mx-auto">
+          <motion.div key="saved" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-full">
             {filteredPosts?.filter((p) => p.saved.includes(userSelected?._id)).length > 0
               ? filteredPosts
                   .filter((p) => p.saved.includes(userSelected?._id))
@@ -74,7 +74,7 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
         )}
 
         {activeTab === 'Comments' && (
-          <motion.div key="comments" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-[90%] mx-auto">
+          <motion.div key="comments" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-full">
             {userSelected?.comments?.length > 0
               ? userSelected.comments.map((comment) => (
                 <CommentCard key={comment?._id} comment={comment} />

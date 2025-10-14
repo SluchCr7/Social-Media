@@ -102,6 +102,18 @@ const NewPostContainer = () => {
     return { top, left }
   }
 
+  // useEffect(() => {
+  //   if (showMentionBox && textareaRef.current) {
+  //     const textarea = textareaRef.current
+  //     const { top, left } = getCaretCoordinates(textarea, textarea.selectionStart)
+  //     const rect = textarea.getBoundingClientRect()
+  //     setMentionBoxPos({
+  //       top: rect.top + window.scrollY + top + 25,
+  //       left: rect.left + window.scrollX + left,
+  //     })
+  //   }
+  // }, [showMentionBox, postText, cursorPosition])
+
   useEffect(() => {
     if (showMentionBox && textareaRef.current) {
       const textarea = textareaRef.current;

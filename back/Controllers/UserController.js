@@ -109,97 +109,149 @@ const RegisterNewUser = async (req, res) => {
 };
 
 
+// const LoginUser = asyncHandler(async (req, res) => {
+//   const { error } = LoginValidate(req.body);
+//   if (error) {
+//       return res.status(400).json({ message: error.details[0].message });
+//   }
+
+//   const user = await User.findOne({ email: req.body.email })
+//     .populate("following", "username profileName profilePhoto")
+//     .populate("followers", "username profileName profilePhoto");
+//   if (!user) {
+//       return res.status(400).json({ message: "Email or Password are not correct" });
+//   }
+
+//   const validPassword = await bcrypt.compare(req.body.password, user.password);
+//   if (!validPassword) {
+//       return res.status(400).json({ message: "Email or Password are not correct" });
+//   }
+
+//   // // Check email verification
+//   // if (!user.isVerify) {
+//   //     let verificationToken = await Verification.findOne({ userId: user._id });
+//   //     if (!verificationToken) {
+//   //         verificationToken = new Verification({
+//   //             userId: user._id,
+//   //             tokenVer: crypto.randomBytes(32).toString('hex'),
+//   //         });
+//   //         await verificationToken.save();
+//   //     }
+
+//   //     const link = `${process.env.DOMAIN_NAME}/Pages/UserVerify/${user._id}/verify/${verificationToken.tokenVer}`;
+//   //     const htmlTemp = `
+//   //     <div style="font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 40px;">
+//   //       <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+//   //         <tr>
+//   //           <td style="padding: 30px;">
+//   //             <h2 style="color: #333333;">Welcome to Sluchitt, ${user.username}!</h2>
+//   //             <p style="font-size: 16px; color: #555555; line-height: 1.6;">
+//   //               Thank you for signing up. To complete your registration, please verify your email address by clicking the button below.
+//   //             </p>
+    
+//   //             <div style="text-align: center; margin: 30px 0;">
+//   //               <a href="${link}" style="background-color: #28a745; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
+//   //                 Verify My Email
+//   //               </a>
+//   //             </div>
+    
+//   //             <p style="font-size: 14px; color: #999999;">
+//   //               If you didn’t sign up for this account, feel free to ignore this email. Your information will remain secure.
+//   //             </p>
+    
+//   //             <p style="font-size: 14px; margin-top: 30px; color: #555555;">
+//   //               Best regards,<br />
+//   //               <strong>Sluchitt Team</strong>
+//   //             </p>
+//   //           </td>
+//   //         </tr>
+    
+//   //         <tr>
+//   //           <td style="padding: 20px; text-align: center; font-size: 12px; color: #aaaaaa;">
+//   //             &copy; ${new Date().getFullYear()} Slucitt. All rights reserved.
+//   //           </td>
+//   //         </tr>
+//   //       </table>
+//   //     </div>
+//   //   `;
+//   //     await sendEmail(user.email, 'Verify Email', htmlTemp);
+
+//   //     return res.status(401).json({
+//   //         message: "Your email is not verified. A new verification email has been sent.",
+//   //         emailSent: true
+//   //     });
+//   // }
+
+//   // Email is verified: update last login & return token
+//   user.lastLogin = new Date();
+//   await user.save();
+  
+//   const token = jwt.sign(
+//       { _id: user._id, isAdmin: user.isAdmin },
+//       process.env.TOKEN_SECRET
+//   );
+  
+//   // استبعاد كلمة المرور وإضافة التوكن إلى بيانات المستخدم
+//   const { password, ...others } = user._doc;
+//   others.token = token; // هنا نضيف التوكن داخل كائن المستخدم
+  
+//   return res.status(200).json({
+//       message: "Login successful",
+//       user: others
+//   });
+// });
+
 const LoginUser = asyncHandler(async (req, res) => {
   const { error } = LoginValidate(req.body);
   if (error) {
-      return res.status(400).json({ message: error.details[0].message });
+    return res.status(400).json({ message: error.details[0].message });
   }
 
   const user = await User.findOne({ email: req.body.email })
     .populate("following", "username profileName profilePhoto")
     .populate("followers", "username profileName profilePhoto");
+
   if (!user) {
-      return res.status(400).json({ message: "Email or Password are not correct" });
+    return res.status(400).json({ message: "Email or Password are not correct" });
   }
 
   const validPassword = await bcrypt.compare(req.body.password, user.password);
   if (!validPassword) {
-      return res.status(400).json({ message: "Email or Password are not correct" });
+    return res.status(400).json({ message: "Email or Password are not correct" });
   }
 
-  // // Check email verification
-  // if (!user.isVerify) {
-  //     let verificationToken = await Verification.findOne({ userId: user._id });
-  //     if (!verificationToken) {
-  //         verificationToken = new Verification({
-  //             userId: user._id,
-  //             tokenVer: crypto.randomBytes(32).toString('hex'),
-  //         });
-  //         await verificationToken.save();
-  //     }
-
-  //     const link = `${process.env.DOMAIN_NAME}/Pages/UserVerify/${user._id}/verify/${verificationToken.tokenVer}`;
-  //     const htmlTemp = `
-  //     <div style="font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 40px;">
-  //       <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-  //         <tr>
-  //           <td style="padding: 30px;">
-  //             <h2 style="color: #333333;">Welcome to Sluchitt, ${user.username}!</h2>
-  //             <p style="font-size: 16px; color: #555555; line-height: 1.6;">
-  //               Thank you for signing up. To complete your registration, please verify your email address by clicking the button below.
-  //             </p>
-    
-  //             <div style="text-align: center; margin: 30px 0;">
-  //               <a href="${link}" style="background-color: #28a745; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
-  //                 Verify My Email
-  //               </a>
-  //             </div>
-    
-  //             <p style="font-size: 14px; color: #999999;">
-  //               If you didn’t sign up for this account, feel free to ignore this email. Your information will remain secure.
-  //             </p>
-    
-  //             <p style="font-size: 14px; margin-top: 30px; color: #555555;">
-  //               Best regards,<br />
-  //               <strong>Sluchitt Team</strong>
-  //             </p>
-  //           </td>
-  //         </tr>
-    
-  //         <tr>
-  //           <td style="padding: 20px; text-align: center; font-size: 12px; color: #aaaaaa;">
-  //             &copy; ${new Date().getFullYear()} Slucitt. All rights reserved.
-  //           </td>
-  //         </tr>
-  //       </table>
-  //     </div>
-  //   `;
-  //     await sendEmail(user.email, 'Verify Email', htmlTemp);
-
-  //     return res.status(401).json({
-  //         message: "Your email is not verified. A new verification email has been sent.",
-  //         emailSent: true
-  //     });
-  // }
-
-  // Email is verified: update last login & return token
+  // ✅ تحديث آخر تسجيل دخول
   user.lastLogin = new Date();
+
+  // ✅ إضافة سجل جديد إلى loginHistory
+  user.loginHistory.push({
+    date: new Date(),
+    ip: req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+    device: req.headers['user-agent'],
+  });
+
+  // ⚙️ يمكن وضع حد أقصى للسجلات (آخر 20 فقط)
+  if (user.loginHistory.length > 20) {
+    user.loginHistory = user.loginHistory.slice(-20);
+  }
+
   await user.save();
-  
+
+  // ✅ إنشاء التوكن
   const token = jwt.sign(
-      { _id: user._id, isAdmin: user.isAdmin },
-      process.env.TOKEN_SECRET
+    { _id: user._id, isAdmin: user.isAdmin },
+    process.env.TOKEN_SECRET
   );
-  
-  // استبعاد كلمة المرور وإضافة التوكن إلى بيانات المستخدم
+
   const { password, ...others } = user._doc;
-  others.token = token; // هنا نضيف التوكن داخل كائن المستخدم
-  
+  others.token = token;
+
   return res.status(200).json({
-      message: "Login successful",
-      user: others
+    message: "Login successful",
+    user: others,
   });
 });
+
 
 /**
  * @desc get All Users

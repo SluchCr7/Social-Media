@@ -24,7 +24,7 @@ const UserHoverCard = ({ userSelected, children, side = 'right' }) => {
   }, [])
 
   if (!userSelected) return null
-  const isFollowing = user?.following?.includes(userSelected._id)
+  const isFollowing = user?.following?.some(member => member._id === userSelected._id)
 
   // 🚫 لا يظهر في الشاشات الصغيرة
   if (isMobile) {

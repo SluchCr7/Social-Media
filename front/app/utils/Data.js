@@ -175,3 +175,17 @@ export const DEFAULT_COLORS = [
     { key: "following", label: "Following" },
     { key: "forYou", label: "For You" },
   ];
+
+  export const reasons = [
+    { label: 'Spam', value: 'spam' },
+    { label: 'Inappropriate Content', value: 'inappropriate' },
+    { label: 'Harassment or Hate Speech', value: 'harassment' },
+    { label: 'Misinformation', value: 'misinformation' },
+    { label: 'Copyright Violation', value: 'copyright' },
+    { label: 'Other', value: 'other' }
+  ];
+
+  export const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ]

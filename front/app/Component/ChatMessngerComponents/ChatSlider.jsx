@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/app/Context/UserContext';
 import SidebarSkeleton from '@/app/Skeletons/SidebarSkeleton';
+import MenuUser from './MenuUser';
 
 const ChatSlider = () => {
   const {
@@ -83,48 +84,10 @@ const ChatSlider = () => {
 
           <AnimatePresence>
             {menuOpen && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="absolute right-0 mt-2 w-48 bg-white dark:bg-darkMode-fg shadow-lg rounded-xl border border-gray-200 dark:border-darkMode-border z-50 overflow-hidden"
-              >
-                <button
-                  onClick={() => {
-                    router.push(`/Pages/Profile`);
-                    setMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                >
-                  <UserCheck className="w-4 h-4" />
-                  Profile
-                </button>
-
-                <button
-                  onClick={() => {
-                    users.forEach(u => markAllAsReadBetweenUsers(u._id));
-                    setMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                >
-                  <Users2 className="w-4 h-4" />
-                  Mark All as Read
-                </button>
-
-                <button
-                  onClick={() => {
-                    router.push('/Pages/Setting');
-                    setMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                >
-                  <Settings className="w-4 h-4" />
-                  Settings
-                </button>
-              </motion.div>
+              <MenuUser setMenuOpen={setMenuOpen} router={router} users={users} markAllAsReadBetweenUsers={markAllAsReadBetweenUsers}/>
             )}
           </AnimatePresence>
+
         </div>
       </div>
 

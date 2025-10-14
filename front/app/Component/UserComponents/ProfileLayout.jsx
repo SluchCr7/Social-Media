@@ -79,6 +79,7 @@ const ProfileLayout = ({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
+            className="w-full"
           >
             {activeTab === "Posts" && (
               <FilterBar filters={filters} setFilters={setFilters} years={postYears} />

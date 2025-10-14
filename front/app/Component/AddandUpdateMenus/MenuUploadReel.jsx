@@ -18,11 +18,9 @@ const ReelUploadModal = () => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Close on ESC key
+  // إغلاق بالـ ESC
   useEffect(() => {
-    const handleEsc = (e) => {
-      if (e.key === "Escape") setShowModelAddReel(false);
-    };
+    const handleEsc = (e) => e.key === "Escape" && setShowModelAddReel(false);
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, []);
@@ -30,10 +28,7 @@ const ReelUploadModal = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith("video")) {
-      showAlert("Please upload a valid video file.");
-      return;
-    }
+    if (!file.type.startsWith("video")) return showAlert("Please upload a valid video file.");
     setVideoFile(file);
     setPreviewUrl(URL.createObjectURL(file));
   };
@@ -42,10 +37,7 @@ const ReelUploadModal = () => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (!file) return;
-    if (!file.type.startsWith("video")) {
-      showAlert("Please upload a valid video file.");
-      return;
-    }
+    if (!file.type.startsWith("video")) return showAlert("Please upload a valid video file.");
     setVideoFile(file);
     setPreviewUrl(URL.createObjectURL(file));
   };
@@ -53,10 +45,10 @@ const ReelUploadModal = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!videoFile) return showAlert("Please select a video first.");
-
     setIsUploading(true);
     try {
       await uploadReel(videoFile, caption);
+      showAlert("✅ Reel uploaded successfully!");
     } finally {
       setIsUploading(false);
       setVideoFile(null);
@@ -70,67 +62,58 @@ const ReelUploadModal = () => {
     <AnimatePresence>
       {showModelAddReel && (
         <motion.div
-          className="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm flex justify-center items-center p-4"
+          className="fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm flex justify-center items-center p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-xl p-6 relative shadow-2xl flex flex-col"
-            initial={{ scale: 0.95, opacity: 0 }}
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="relative bg-lightMode-bg dark:bg-darkMode-bg border border-lightMode-menu dark:border-darkMode-menu
+                       rounded-2xl shadow-2xl p-6 w-full max-w-xl transition-colors duration-300"
           >
-            {/* Close Button */}
+            {/* زر الإغلاق */}
             <button
               aria-label="Close Modal"
-              className="absolute top-4 right-4 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              className="absolute top-4 right-4 text-lightMode-text2 dark:text-darkMode-text2 hover:text-red-500 transition"
               onClick={() => setShowModelAddReel(false)}
               disabled={isUploading}
             >
               <AiOutlineClose size={24} />
             </button>
 
-            <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">
+            {/* العنوان */}
+            <h2 className="text-2xl font-bold mb-5 text-lightMode-text dark:text-darkMode-text">
               Upload Reel
             </h2>
 
-            {/* Video Preview */}
+            {/* المعاينة */}
             {previewUrl && (
-              <div className="relative w-full aspect-video mb-4 rounded-xl overflow-hidden shadow-lg">
-                <video
-                  src={previewUrl}
-                  controls
-                  className="w-full h-full object-cover"
-                />
-
-                {/* Uploading Overlay */}
+              <div className="relative w-full aspect-video mb-5 rounded-xl overflow-hidden shadow-lg border border-lightMode-menu dark:border-darkMode-menu">
+                <video src={previewUrl} controls className="w-full h-full object-cover" />
                 {isUploading && (
                   <motion.div
-                    className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-4"
+                    className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center rounded-xl"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
                   >
-                    <BiLoaderAlt className="animate-spin text-white text-5xl mb-2" />
+                    <BiLoaderAlt className="animate-spin text-white text-5xl mb-3" />
                     <motion.p
-                      className="text-white text-lg font-semibold tracking-wide"
-                      animate={{ opacity: [0.4, 1, 0.4] }}
+                      className="text-white text-lg font-medium"
+                      animate={{ opacity: [0.5, 1, 0.5] }}
                       transition={{ repeat: Infinity, duration: 1.5 }}
                     >
-                      Uploading video...
+                      Uploading...
                     </motion.p>
-
-                    {/* Fake Progress Bar */}
-                    <motion.div
-                      className="w-3/4 h-2 bg-gray-600 rounded-full overflow-hidden"
-                    >
+                    <motion.div className="w-3/4 h-2 bg-gray-600 rounded-full mt-3 overflow-hidden">
                       <motion.div
                         className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
                         initial={{ width: "0%" }}
                         animate={{ width: ["10%", "70%", "100%"] }}
-                        transition={{ duration: 4, ease: "easeInOut", repeat: Infinity }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                       />
                     </motion.div>
                   </motion.div>
@@ -138,57 +121,74 @@ const ReelUploadModal = () => {
               </div>
             )}
 
+            {/* النموذج */}
             <form
               onSubmit={handleSubmit}
-              className="flex flex-col gap-4"
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
+              className="flex flex-col gap-4"
             >
-              {/* Drag & Drop + File Input */}
+              {/* منطقة السحب والإفلات */}
               <label
                 htmlFor="video-upload"
-                className={`border-2 border-dashed p-6 rounded-xl cursor-pointer transition flex flex-col items-center justify-center ${
-                  isUploading
-                    ? "opacity-50 pointer-events-none border-gray-400"
-                    : "border-gray-400 dark:border-gray-600 hover:border-blue-500"
-                } text-gray-600 dark:text-gray-300`}
+                className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all
+                  ${
+                    isUploading
+                      ? "opacity-50 cursor-not-allowed border-gray-400"
+                      : "hover:border-blue-500 border-lightMode-menu dark:border-darkMode-menu"
+                  }
+                  text-lightMode-text2 dark:text-darkMode-text2 bg-lightMode-menu/30 dark:bg-darkMode-menu/30`}
               >
-                {videoFile ? "Change Video" : "Drag & drop or click to select video"}
+                {videoFile ? (
+                  <p className="font-medium text-base">
+                    🎥 {videoFile.name}
+                  </p>
+                ) : (
+                  <>
+                    <AiOutlineCloudUpload className="mx-auto text-4xl mb-2 opacity-80" />
+                    <p>Drag & drop or click to select a video</p>
+                    <span className="text-sm text-gray-400">MP4, MOV or AVI • Max 60s</span>
+                  </>
+                )}
                 <input
+                  id="video-upload"
                   type="file"
                   accept="video/*"
-                  className="hidden"
-                  id="video-upload"
                   ref={fileInputRef}
                   onChange={handleFileChange}
                   disabled={isUploading}
+                  className="hidden"
                 />
               </label>
 
-              {/* Caption Input */}
+              {/* التسمية (Caption) */}
               <TextareaAutosize
                 placeholder="Write a caption..."
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
-                disabled={isUploading}
-                className="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-gray-100 resize-none"
                 minRows={3}
+                disabled={isUploading}
+                className="w-full p-4 rounded-xl border border-lightMode-menu dark:border-darkMode-menu
+                           bg-lightMode-menu/40 dark:bg-darkMode-menu/40 text-lightMode-text dark:text-darkMode-text
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition"
               />
 
-              {/* Submit Button */}
+              {/* الزر */}
               <button
                 type="submit"
                 disabled={isUploading}
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition shadow-lg flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700
+                           text-white font-semibold py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2
+                           disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {isUploading ? (
                   <>
-                    <BiLoaderAlt className="animate-spin mr-2" size={22} />
+                    <BiLoaderAlt className="animate-spin" size={22} />
                     Uploading...
                   </>
                 ) : (
                   <>
-                    <AiOutlineCloudUpload className="mr-2" size={22} />
+                    <AiOutlineCloudUpload size={22} />
                     Upload Reel
                   </>
                 )}

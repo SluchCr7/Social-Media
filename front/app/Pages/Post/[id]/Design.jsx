@@ -77,7 +77,7 @@ const DesignPostSelect = ({
         {isShared && <SharedTitle user={user} post={post} original={original} />}
 
         {/* Post Card */}
-        <div className="flex flex-col sm:flex-row gap-4 bg-white/30 dark:bg-black/30 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg p-4 sm:p-6 transition-transform hover:scale-[1.01]">
+        <div className="flex flex-row gap-4 bg-white/30 dark:bg-black/30 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg p-4 sm:p-6 transition-transform hover:scale-[1.01]">
           
           {/* Profile */}
           <PostImage
@@ -135,25 +135,41 @@ const DesignPostSelect = ({
 
             {!post.isCommentOff && isLogin && (
               canComment() ? (
-                <div className="flex items-center gap-2 mt-4 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-full focus-within:ring-2 focus-within:ring-blue-400 transition">
+                <div className="flex items-start sm:items-center gap-3 mt-4 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl focus-within:ring-2 focus-within:ring-blue-400 transition-all">
+                  {/* User Avatar */}
                   <Image
                     src={user?.profilePhoto?.url || '/default-profile.png'}
                     alt="User Profile"
-                    width={36}
-                    height={36}
-                    className="w-9 h-9 rounded-full object-cover"
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-full object-cover"
                   />
-                  <textarea
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    placeholder="Write a comment..."
-                    className="flex-1 bg-transparent text-sm resize-none outline-none placeholder-gray-400 dark:placeholder-gray-500 px-2 min-h-[36px]"
-                    rows={1}
-                  />
+
+                  {/* Textarea */}
+                  <div className="flex-1 relative">
+                    <textarea
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      placeholder="Write a comment..."
+                      rows={1}
+                      onInput={(e) => {
+                        e.target.style.height = 'auto'
+                        e.target.style.height = `${e.target.scrollHeight}px`
+                      }}
+                      className="w-full bg-transparent text-[15px] resize-none outline-none placeholder-gray-400 dark:placeholder-gray-500 px-2 py-1 leading-snug text-gray-800 dark:text-gray-100 min-h-[38px] max-h-[160px] overflow-y-auto"
+                    />
+                  </div>
+
+                  {/* Send Button */}
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={handleAddComment}
-                    className="p-2 rounded-full bg-blue-500 hover:bg-blue-400 transition"
+                    disabled={!commentText.trim()}
+                    className={`p-2.5 rounded-full transition-all ${
+                      commentText.trim()
+                        ? 'bg-blue-500 hover:bg-blue-400'
+                        : 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'
+                    }`}
                   >
                     <IoIosSend className="text-white text-lg" />
                   </motion.button>
@@ -187,16 +203,5 @@ const DesignPostSelect = ({
     </div>
   )
 }
-
-const ActionIcon = ({ Icon, count, onClick, active, activeHaha }) => (
-  <motion.button 
-    onClick={onClick} 
-    whileTap={{ scale: 0.9 }} 
-    className="flex items-center gap-1 sm:gap-2 cursor-pointer min-w-[50px] justify-center sm:justify-start transition"
-  >
-    <Icon className={`text-2xl ${activeHaha ? 'text-yellow-500' : ''} ${active ? 'text-red-500' : 'text-gray-400'} hover:scale-110 transition-transform`} />
-    <span className="text-gray-400 text-xs sm:text-sm">{count}</span>
-  </motion.button>
-);
 
 export default DesignPostSelect;

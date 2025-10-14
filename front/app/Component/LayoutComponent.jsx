@@ -36,6 +36,7 @@ const LayoutComponent = ({ children }) => {
   const {viewMusicPlayer, setViewMusicPlayer} = useMusicPlayer()
   // الصفحات التي لا يظهر فيها Aside أو Menu
   const hideLayout = [
+    '/Admin',
     '/Pages/Login',
     '/Pages/Register',
     '/Pages/Messanger',

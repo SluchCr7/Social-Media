@@ -15,39 +15,6 @@ const CommentsPopup = ({ reelId, isOpen, onClose }) => {
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // 🟢 جلب الكومنتس
-  const fetchComments = async () => {
-    try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/post/${reelId}`);
-      setComments(res.data || []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // 🟢 إرسال كومنت جديد
-  const addComment = async () => {
-    if (!newComment.trim()) return;
-    if (!user?.token) {
-      showAlert("You must be logged in to comment.");
-      return;
-    }
-
-    try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/${reelId}`,
-        { text: newComment },
-        { headers: { Authorization: `Bearer ${user.token}` } }
-      );
-
-      setComments(prev => [res.data.comment, ...prev]);
-      setNewComment('');
-    } catch (err) {
-      console.error(err);
-      showAlert("Failed to add comment.");
-    }
-  };
-
   // عند الفتح
   useEffect(() => {
     if (isOpen) fetchComments();

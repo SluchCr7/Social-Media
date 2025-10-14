@@ -3,11 +3,10 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import dayjs from 'dayjs'
-import { GrLanguage } from "react-icons/gr";
-
-import { 
-  FaPhone, FaGlobe, FaLinkedin, FaGithub, FaMapMarkerAlt, FaTwitter, 
-  FaFacebook, FaBirthdayCake, FaMars, FaVenus, FaHeart 
+import { GrLanguage } from "react-icons/gr"
+import {
+  FaPhone, FaGlobe, FaLinkedin, FaGithub, FaMapMarkerAlt, FaTwitter,
+  FaFacebook, FaBirthdayCake, FaMars, FaVenus, FaHeart
 } from 'react-icons/fa'
 import { BsCalendar2Date } from "react-icons/bs"
 
@@ -16,13 +15,16 @@ const InfoItem = ({ icon, label, value, bgColor, textColor }) => (
     variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
     className="flex items-center space-x-3 p-4 rounded-xl 
       bg-lightMode-bg dark:bg-darkMode-bg 
-      shadow-lg hover:shadow-2xl 
-      transition hover:-translate-y-1"
+      shadow-md hover:shadow-xl transition hover:-translate-y-1 
+      w-full"
   >
-    <div className={`w-10 h-10 flex items-center justify-center rounded-full ${bgColor} ${textColor}`}>
+    <div className={`min-w-10 min-h-10 flex items-center justify-center rounded-full ${bgColor} ${textColor}`}>
       {icon}
     </div>
-    <span><span className="font-semibold">{label}:</span> {value || "Not Provided"}</span>
+    <span className="text-sm sm:text-base break-words">
+      <span className="font-semibold">{label}:</span>{" "}
+      {value || "Not Provided"}
+    </span>
   </motion.div>
 )
 
@@ -32,8 +34,8 @@ const SocialIcon = ({ href, icon, bg, label }) => (
     target="_blank"
     rel="noopener noreferrer"
     title={label}
-    className={`w-12 h-12 flex items-center justify-center rounded-full 
-                bg-gradient-to-tr ${bg} text-white hover:scale-110 transition`}
+    className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full 
+                bg-gradient-to-tr ${bg} text-white hover:scale-110 transition-transform`}
   >
     {icon}
   </a>
@@ -52,11 +54,14 @@ const InfoAboutUser = ({ user }) => {
     <motion.div
       initial="hidden"
       animate="visible"
-      variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } }}
-      className="mt-8 w-full rounded-2xl bg-lightMode-menu dark:bg-darkMode-menu shadow-xl p-8"
+      variants={{
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+      }}
+      className="mt-8 w-full rounded-2xl bg-lightMode-menu dark:bg-darkMode-menu shadow-xl p-5 sm:p-8"
     >
       {/* العنوان */}
-      <h2 className="text-3xl font-bold mb-8 text-lightMode-text2 dark:text-darkMode-text2 border-b border-gray-300 dark:border-gray-700 pb-3">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-lightMode-text2 dark:text-darkMode-text2 border-b border-lightMode-menu/40 dark:border-darkMode-menu/40 pb-3">
         About
       </h2>
 
@@ -67,35 +72,47 @@ const InfoAboutUser = ({ user }) => {
             Personal Info
           </h3>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-lightMode-text dark:text-darkMode-text">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-lightMode-text dark:text-darkMode-text">
             {user?.phone && <InfoItem icon={<FaPhone />} label="Phone" value={user.phone} bgColor="bg-blue-100" textColor="text-blue-500" />}
             {user?.country && <InfoItem icon={<FaMapMarkerAlt />} label="Country" value={user.country} bgColor="bg-green-100" textColor="text-green-500" />}
             {user?.city && <InfoItem icon={<FaMapMarkerAlt />} label="City" value={user.city} bgColor="bg-teal-100" textColor="text-teal-500" />}
             {user?.gender && <InfoItem icon={user.gender.toLowerCase() === 'male' ? <FaMars /> : <FaVenus />} label="Gender" value={user.gender} bgColor="bg-pink-100" textColor="text-pink-500" />}
-            {user?.preferedLanguage && <InfoItem icon={<GrLanguage />} label="Perferd Language" value={user?.preferedLanguage} bgColor="bg-blue-200" textColor="text-blue-600" />}
+            {user?.preferedLanguage && <InfoItem icon={<GrLanguage />} label="Preferred Language" value={user.preferedLanguage} bgColor="bg-blue-200" textColor="text-blue-600" />}
             {user?.dateOfBirth && <InfoItem icon={<FaBirthdayCake />} label="Date of Birth" value={dayjs(user.dateOfBirth).format("MMMM D, YYYY")} bgColor="bg-yellow-100" textColor="text-yellow-500" />}
-            {user?.createdAt && <InfoItem icon={<BsCalendar2Date />} label="Date of Join" value={dayjs(user.createdAt).format("MMMM D, YYYY")} bgColor="bg-yellow-100" textColor="text-yellow-500" />}
+            {user?.createdAt && <InfoItem icon={<BsCalendar2Date />} label="Date Joined" value={dayjs(user.createdAt).format("MMMM D, YYYY")} bgColor="bg-yellow-100" textColor="text-yellow-500" />}
 
             {/* العلاقة العاطفية */}
             {user?.relationshipStatus && (
               <motion.div
                 variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
-                className="flex items-center space-x-3 p-4 rounded-xl bg-purple-50 dark:bg-purple-900 shadow-lg hover:shadow-2xl transition hover:-translate-y-1 col-span-1 sm:col-span-2"
+                className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl 
+                  bg-purple-50 dark:bg-purple-900/40 
+                  shadow-md hover:shadow-xl transition hover:-translate-y-1 
+                  col-span-1 sm:col-span-2"
               >
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-pink-100 text-pink-500">
+                <div className="min-w-10 min-h-10 flex items-center justify-center rounded-full bg-pink-100 text-pink-500">
                   <FaHeart />
                 </div>
-                <span className="text-sm">
+
+                <span className="text-sm sm:text-base leading-relaxed text-lightMode-text dark:text-darkMode-text break-words">
                   <span className="font-semibold">Relationship:</span>{" "}
                   {user.relationshipStatus === "single" && "Single"}
+
                   {(user.relationshipStatus === "In a Relationship" || user.relationshipStatus === "Married") && (
                     <>
-                      {user.relationshipStatus === "In a Relationship" ? "In a relationship with " : "Married to "}
+                      {user.relationshipStatus === "In a Relationship"
+                        ? "In a relationship with "
+                        : "Married to "}
                       {user.partner ? (
-                        <Link href={`/Pages/User/${user.partner._id}`} className="text-blue-500 hover:underline">
+                        <Link
+                          href={`/Pages/User/${user.partner._id}`}
+                          className="text-blue-500 hover:underline break-all"
+                        >
                           {user.partner.username}
                         </Link>
-                      ) : "Unknown"}
+                      ) : (
+                        "Unknown"
+                      )}
                     </>
                   )}
                 </span>
@@ -110,15 +127,17 @@ const InfoAboutUser = ({ user }) => {
             <h3 className="text-lg font-semibold mb-4 text-lightMode-text2 dark:text-darkMode-text2">
               Interests
             </h3>
-            <motion.div 
-              className="flex flex-wrap gap-3"
+            <motion.div
+              className="flex flex-wrap gap-2 sm:gap-3"
               variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}
             >
               {user.interests.map((interest, index) => (
                 <motion.span
                   key={index}
                   variants={{ hidden: { scale: 0.9, opacity: 0 }, visible: { scale: 1, opacity: 1 } }}
-                  className="px-4 py-2 rounded-full bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text shadow hover:shadow-lg transition text-sm font-medium"
+                  className="px-3 sm:px-4 py-2 rounded-full bg-lightMode-bg dark:bg-darkMode-bg 
+                    text-lightMode-text dark:text-darkMode-text 
+                    shadow hover:shadow-lg transition text-sm sm:text-base font-medium"
                 >
                   {interest}
                 </motion.span>
@@ -133,7 +152,7 @@ const InfoAboutUser = ({ user }) => {
             <h3 className="text-lg font-semibold mb-4 text-lightMode-text2 dark:text-darkMode-text2">
               Social Links
             </h3>
-            <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-3 sm:gap-5 flex-wrap">
               {Object.entries(user.socialLinks).map(([key, link]) =>
                 link && socialIcons[key] ? (
                   <SocialIcon key={key} href={link} {...socialIcons[key]} />

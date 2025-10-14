@@ -6,14 +6,13 @@ import { BsThreeDots } from 'react-icons/bs'
 import { HiBadgeCheck } from 'react-icons/hi'
 import PostMenu from '@/app/Component/PostMenu'
 import UserHoverCard from '../UserHoverCard'
-
+import { formatRelativeTime } from '@/app/utils/FormatDataCreatedAt'
 const PostHeader = ({ post, user, isLogin, showMenu, setShowMenu,isCommunityPost }) => {
   return (
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
               <div className="flex items-center gap-3">
                 <div className="flex flex-col leading-tight">
                   <div className="flex items-center gap-1">
-                    
                     <UserHoverCard userSelected={post?.owner}>
                       <Link
                         href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${post?.owner?._id}`}
@@ -29,7 +28,7 @@ const PostHeader = ({ post, user, isLogin, showMenu, setShowMenu,isCommunityPost
                   <div className="flex items-center gap-2 text-xs text-gray-500 flex-wrap">
                     <span className="truncate max-w-[120px]">{post?.owner?.profileName}</span>
                     <span className="hidden sm:inline w-1 h-1 bg-gray-400 rounded-full" />
-                    <span>{new Date(post?.createdAt).toLocaleDateString()}</span>
+                    <span>{formatRelativeTime(post?.createdAt)}</span>
                   </div>
                 </div>
               </div>

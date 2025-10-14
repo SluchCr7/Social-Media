@@ -6,6 +6,7 @@ import { useUser } from '@/app/Context/UserContext'
 import { useAdmin } from '@/app/Context/UserAdminContext'
 import { getPasswordStrength } from '@/app/utils/getPasswordStrength'
 import SettingsView from './Design'
+import { useGetData } from '@/app/Custome/useGetData'
 
 export default function SettingsContainer() {
   const { theme, toggleTheme } = useTheme()
@@ -15,7 +16,7 @@ export default function SettingsContainer() {
 
   const [activeTab, setActiveTab] = useState('appearance')
   const [loginHistory, setLoginHistory] = useState([])
-
+  const {userData} = useGetData(user?._id)
   const handlePasswordSubmit = (oldPassword, newPassword, confirmPassword) => {
     if (newPassword !== confirmPassword) {
       return { error: 'Passwords do not match' }
@@ -50,7 +51,7 @@ export default function SettingsContainer() {
       toggleTheme={toggleTheme}
       activeTab={activeTab}
       setActiveTab={setActiveTab}
-      loginHistory={loginHistory}
+      loginHistory={userData?.loginHistory || []}
       onChangePassword={handlePasswordSubmit}
       onDeleteAccount={handleDeleteAccount}
       onMakePremiumVerify={handleMakePremiumVerify}

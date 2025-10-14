@@ -9,7 +9,7 @@ import { useUser } from '@/app/Context/UserContext';
 
 const Search = () => {
   const { users, user } = useAuth();
-  const {suggestedUsers} = useUser()
+  const { suggestedUsers } = useUser();
   const { news } = useNews();
   const { posts } = usePost();
 
@@ -21,22 +21,22 @@ const Search = () => {
   });
   const [activeTab, setActiveTab] = useState('News');
 
-  // Collect all hashtags from posts
   const hashtagCount = {};
   filterHashtags(posts, hashtagCount);
   const topHashtags = Object.entries(hashtagCount).sort((a, b) => b[1] - a[1]);
 
-  // Debounce search
   useEffect(() => {
     const handler = setTimeout(() => {
-      if (!search.trim()) {
+      const trimmed = search.trim();
+      const searchLower = trimmed.toLowerCase();
+
+      if (!trimmed) {
         setSearchResults({ users: [], hashtags: [], posts: [] });
         return;
       }
 
-      // Hashtags search if starts with #
-      if (search.startsWith('#')) {
-        const query = search.slice(1).toLowerCase();
+      if (trimmed.startsWith('#')) {
+        const query = trimmed.slice(1).toLowerCase();
         const filteredTags = topHashtags.filter(([tag]) =>
           tag.toLowerCase().includes(query)
         );
@@ -46,25 +46,20 @@ const Search = () => {
           posts: []
         });
       } else {
-        // Users
         const filteredUsers = Array.isArray(users)
-          ? users.filter(
-              (u) =>
-                u.username.toLowerCase().includes(search.toLowerCase()) ||
-                (u.profileName &&
-                  u.profileName.toLowerCase().includes(search.toLowerCase()))
+          ? users.filter((u) =>
+              (u.username + ' ' + (u.profileName || '')).toLowerCase().includes(searchLower)
             )
           : [];
 
-        // Posts
         const filteredPosts = Array.isArray(posts)
           ? posts.filter(
               (p) =>
-                (p.text && p.text.toLowerCase().includes(search.toLowerCase())) ||
+                (p.text && p.text.toLowerCase().includes(searchLower)) ||
                 (p.Hashtags && p.Hashtags.some(tag => tag.toLowerCase().includes(searchLower))) ||
                 (p.owner?.username && p.owner.username.toLowerCase().includes(searchLower)) ||
                 (p.owner?.interests && p.owner.interests.some(interest => interest.toLowerCase().includes(searchLower))) ||
-                (p.community?.Name && p.community.Name.toLowerCase().includes(searchLower))
+                (p.community?.Name && p.community.Name.toLowerCase().includes(searchLower)) ||
                 (p.community?.tags && p.community.tags.some(tag => tag.toLowerCase().includes(searchLower)))
             )
           : [];
@@ -80,13 +75,11 @@ const Search = () => {
     return () => clearTimeout(handler);
   }, [search, users, posts, topHashtags]);
 
-  // Suggested Users
   const suggestedUsersArr = useMemo(() => {
     if (!Array.isArray(suggestedUsers)) return [];
     return suggestedUsers.slice(0, 8);
   }, [suggestedUsers, user]);
 
-  // ----------------- INTEREST BASED NEWS -----------------
   const userInterests = user?.interests?.filter(Boolean).slice(0, 2) || [];
   const interestTabs = userInterests
     .map((interest) => {
@@ -97,13 +90,18 @@ const Search = () => {
     })
     .filter(Boolean);
 
-  // Final Tabs: News always first + Interests + Hashtags
   const finalTabs = [{ name: 'News', news }].concat(interestTabs);
 
   return (
     <DesignExplore 
       user={user}
-      search={search} setSearch={setSearch}searchResults={searchResults} activeTab={activeTab} setActiveTab={setActiveTab} finalTabs={finalTabs} topHashtags={topHashtags}
+      search={search}
+      setSearch={setSearch}
+      searchResults={searchResults}
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      finalTabs={finalTabs}
+      topHashtags={topHashtags}
     />
   );
 };

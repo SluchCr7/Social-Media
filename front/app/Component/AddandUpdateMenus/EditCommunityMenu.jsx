@@ -17,7 +17,6 @@ const EditCommunityMenu = ({ community, onClose }) => {
     community?.Cover?.url || '/default-cover.png'
   );
 
-  // الحقول الجديدة
   const [tags, setTags] = useState(community?.tags || []);
   const [newTag, setNewTag] = useState('');
   const [rules, setRules] = useState(community?.rules || []);
@@ -26,7 +25,6 @@ const EditCommunityMenu = ({ community, onClose }) => {
   const { showAlert } = useAlert();
   const { editCommunity, updateCommunityPicture, updateCommunityCover } = useCommunity();
 
-  // رفع الصور
   const handleImageChange = async (e, type) => {
     const file = e.target.files[0];
     if (!file || !(file instanceof File)) {
@@ -45,20 +43,13 @@ const EditCommunityMenu = ({ community, onClose }) => {
         setPreviewCover(objectURL);
         const result = await updateCommunityCover(community._id, file);
         if (result?.url) setPreviewCover(result.url);
-      } else {
-        showAlert('Unsupported image type.');
       }
     } catch (err) {
       console.error('Image Upload Error:', err);
-      const message =
-        err?.response?.data?.message ||
-        err?.message ||
-        'An error occurred while uploading the image.';
-      showAlert(message);
+      showAlert(err?.response?.data?.message || 'Error uploading image.');
     }
   };
 
-  // إضافة tag
   const addTag = () => {
     const trimmed = newTag.trim();
     if (trimmed && !tags.includes(trimmed)) {
@@ -69,7 +60,6 @@ const EditCommunityMenu = ({ community, onClose }) => {
 
   const removeTag = (tag) => setTags(tags.filter((t) => t !== tag));
 
-  // إضافة rule
   const addRule = () => {
     const trimmed = newRule.trim();
     if (trimmed && !rules.includes(trimmed)) {
@@ -95,9 +85,7 @@ const EditCommunityMenu = ({ community, onClose }) => {
         await editCommunity(community._id, updatedData);
         showAlert('Community details updated successfully.');
       } catch (err) {
-        const message =
-          err?.response?.data?.message || err?.message || 'Failed to update community data.';
-        showAlert(message);
+        showAlert(err?.response?.data?.message || 'Failed to update community data.');
       }
     }
 
@@ -105,22 +93,24 @@ const EditCommunityMenu = ({ community, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-darkMode-bg rounded-xl p-6 w-full max-w-2xl relative shadow-lg overflow-y-auto max-h-[95vh]">
-        {/* Close button */}
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="w-full max-w-2xl relative bg-lightMode-bg dark:bg-darkMode-bg rounded-2xl p-6 shadow-2xl border border-lightMode-menu/30 dark:border-darkMode-menu/40 overflow-y-auto max-h-[95vh] transition-all">
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-2xl text-gray-500 hover:text-red-500"
+          className="absolute top-3 right-3 text-lightMode-text2 dark:text-darkMode-text2 hover:text-red-500 text-2xl transition"
         >
           <IoClose />
         </button>
 
-        <h2 className="text-2xl font-semibold mb-6 text-center">Edit Community</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-center text-lightMode-text dark:text-darkMode-text">
+          Edit Community
+        </h2>
 
         {/* Cover Image */}
-        <div className="relative w-full h-40 rounded-lg overflow-hidden mb-6">
+        <div className="relative w-full h-40 rounded-xl overflow-hidden mb-6">
           <Image src={previewCover} alt="Cover" fill className="object-cover" />
-          <label className="absolute top-2 right-2 bg-black bg-opacity-60 p-2 rounded-full cursor-pointer text-white">
+          <label className="absolute top-2 right-2 bg-black/60 p-2 rounded-full cursor-pointer text-white hover:bg-black/80 transition">
             <IoCamera />
             <input
               type="file"
@@ -132,9 +122,9 @@ const EditCommunityMenu = ({ community, onClose }) => {
         </div>
 
         {/* Profile Image */}
-        <div className="relative w-28 h-28 mx-auto -mt-16 border-4 border-white dark:border-darkMode-bg rounded-full overflow-hidden">
+        <div className="relative w-28 h-28 mx-auto -mt-16 border-4 border-lightMode-bg dark:border-darkMode-bg rounded-full overflow-hidden">
           <Image src={previewPicture} alt="Photo" fill className="object-cover" />
-          <label className="absolute bottom-1 right-1 bg-black bg-opacity-60 p-1 rounded-full cursor-pointer text-white">
+          <label className="absolute bottom-1 right-1 bg-black/60 p-1 rounded-full cursor-pointer text-white hover:bg-black/80 transition">
             <IoCamera size={16} />
             <input
               type="file"
@@ -147,49 +137,51 @@ const EditCommunityMenu = ({ community, onClose }) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="mt-6 space-y-4 px-2">
-
           <div>
-            <label className="block mb-1 font-medium">Community Name</label>
+            <label className="block mb-1 font-medium text-lightMode-text2 dark:text-darkMode-text2">
+              Community Name
+            </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-lightMode-menu dark:border-darkMode-menu bg-lightMode-bg dark:bg-darkMode-menu text-lightMode-fg dark:text-darkMode-fg rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-lightMode-text dark:focus:ring-darkMode-text transition"
             />
           </div>
 
           <div>
-            <label className="block mb-1 font-medium">Description</label>
+            <label className="block mb-1 font-medium text-lightMode-text2 dark:text-darkMode-text2">
+              Description
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-lightMode-menu dark:border-darkMode-menu bg-lightMode-bg dark:bg-darkMode-menu text-lightMode-fg dark:text-darkMode-fg rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-lightMode-text dark:focus:ring-darkMode-text transition"
               rows={4}
             />
           </div>
 
-          {/* isPrivate Checkbox */}
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
               id="isPrivate"
               checked={isPrivate}
               onChange={(e) => setIsPrivate(e.target.checked)}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              className="accent-blue-600 w-4 h-4"
             />
-            <label htmlFor="isPrivate" className="font-medium cursor-pointer">
+            <label htmlFor="isPrivate" className="text-lightMode-text2 dark:text-darkMode-text2">
               Private Community
             </label>
           </div>
 
           {/* Tags */}
           <div>
-            <label className="block mb-1 font-medium">Tags</label>
+            <label className="block mb-1 font-medium text-lightMode-text2 dark:text-darkMode-text2">Tags</label>
             <div className="flex gap-2 flex-wrap mb-2">
               {tags.map((t, idx) => (
                 <span
                   key={idx}
-                  className="bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 px-2 py-1 rounded-full flex items-center gap-1 cursor-pointer"
+                  className="bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text px-2 py-1 rounded-full flex items-center gap-1 cursor-pointer"
                   onClick={() => removeTag(t)}
                 >
                   {t} &times;
@@ -202,9 +194,13 @@ const EditCommunityMenu = ({ community, onClose }) => {
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 placeholder="Add new tag"
-                className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-lightMode-menu dark:border-darkMode-menu bg-lightMode-bg dark:bg-darkMode-menu text-lightMode-fg dark:text-darkMode-fg px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-lightMode-text dark:focus:ring-darkMode-text"
               />
-              <button type="button" onClick={addTag} className="px-3 py-2 bg-blue-600 text-white rounded-lg">
+              <button
+                type="button"
+                onClick={addTag}
+                className="px-3 py-2 bg-lightMode-text dark:bg-darkMode-text text-white rounded-lg transition hover:opacity-90"
+              >
                 <IoAdd />
               </button>
             </div>
@@ -212,12 +208,17 @@ const EditCommunityMenu = ({ community, onClose }) => {
 
           {/* Rules */}
           <div>
-            <label className="block mb-1 font-medium">Rules</label>
+            <label className="block mb-1 font-medium text-lightMode-text2 dark:text-darkMode-text2">Rules</label>
             <div className="flex flex-col gap-2 mb-2">
               {rules.map((r, idx) => (
-                <div key={idx} className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-lg">
-                  <span>{r}</span>
-                  <button type="button" onClick={() => removeRule(r)} className="text-red-500 font-bold">&times;</button>
+                <div
+                  key={idx}
+                  className="flex items-center justify-between bg-lightMode-menu dark:bg-darkMode-menu px-3 py-1 rounded-lg"
+                >
+                  <span className="text-lightMode-fg dark:text-darkMode-fg">{r}</span>
+                  <button type="button" onClick={() => removeRule(r)} className="text-red-500 font-bold">
+                    &times;
+                  </button>
                 </div>
               ))}
             </div>
@@ -227,9 +228,13 @@ const EditCommunityMenu = ({ community, onClose }) => {
                 value={newRule}
                 onChange={(e) => setNewRule(e.target.value)}
                 placeholder="Add new rule"
-                className="w-full border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-lightMode-menu dark:border-darkMode-menu bg-lightMode-bg dark:bg-darkMode-menu text-lightMode-fg dark:text-darkMode-fg px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-lightMode-text dark:focus:ring-darkMode-text"
               />
-              <button type="button" onClick={addRule} className="px-3 py-2 bg-blue-600 text-white rounded-lg">
+              <button
+                type="button"
+                onClick={addRule}
+                className="px-3 py-2 bg-lightMode-text dark:bg-darkMode-text text-white rounded-lg transition hover:opacity-90"
+              >
                 <IoAdd />
               </button>
             </div>
@@ -237,7 +242,7 @@ const EditCommunityMenu = ({ community, onClose }) => {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition duration-150"
+            className="w-full bg-lightMode-text dark:bg-darkMode-text hover:opacity-90 text-white py-2 rounded-lg font-semibold transition"
           >
             Save Changes
           </button>

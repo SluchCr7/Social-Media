@@ -29,32 +29,35 @@ export const UserContextProvider = ({ children }) => {
       showAlert(res.data.message);
 
       setUsers((prev) =>
-        prev.map((u) => {
-          if (u._id === id) {
-            return {
-              ...u,
-              followers:
-                res.data.message === "Followed"
-                  ? [...u.followers, { _id: user._id }]
-                  : u.followers.filter((f) => f._id !== user._id),
-            };
-          }
-          return u;
-        })
+        prev.map((u) =>
+          u._id === id
+            ? {
+                ...u,
+                followers:
+                  res.data.message === "Followed"
+                    ? [...u.followers, { _id: user._id }]
+                    : u.followers.filter((f) => f._id !== user._id),
+              }
+            : u
+        )
       );
 
-      // ✅ تحديث الـ user إذا كان هو نفس الشخص الذي فعل التغيير
-      if (user._id === id) {
-        const updatedUser = {
+      // تحديث قائمة following الخاصة بالمستخدم الحالي
+      let updatedUser;
+      if (res.data.message === "Followed") {
+        updatedUser = {
           ...user,
-          followers:
-            res.data.message === "Followed"
-              ? [...user.followers, { _id: user._id }]
-              : user.followers.filter((f) => f._id !== user._id),
+          following: [...user.following, { _id: id }],
         };
-        setUser(updatedUser);
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+      } else if (res.data.message === "Unfollowed") {
+        updatedUser = {
+          ...user,
+          following: user.following.filter((f) => f._id !== id),
+        };
       }
+
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
     } catch (err) {
       console.error(err);
     } finally {

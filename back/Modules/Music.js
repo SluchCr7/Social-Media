@@ -29,9 +29,9 @@ const MusicSchema = new mongoose.Schema({
         type: String,
         default: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200&q=80"
     },
-    // duration: {
-    //     type: Number, // بالثواني
-    // },
+    duration: {
+        type: Number, // بالثواني
+    },
     genre: {
         type: String,
         enum: ["Pop", "Rock", "HipHop", "Jazz", "Classical", "Other"],

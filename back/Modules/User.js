@@ -105,6 +105,16 @@ const UserSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+
+    loginHistory: [
+        {
+            date: { type: Date, default: Date.now }, // وقت تسجيل الدخول
+            ip: { type: String },                    // عنوان IP (اختياري)
+            device: { type: String },                // نوع الجهاز (اختياري)
+            location: { type: String },              // الدولة أو المدينة (اختياري)
+        }
+    ],
+
     accountStatus: {
         type: String,
         enum: ['active', 'banned', 'suspended'],
@@ -163,9 +173,9 @@ const UserSchema = new mongoose.Schema({
         type : String,
         default : "English"
     },
-    interests : {
-        type : [String],
-        default : []
+    interests: {
+        type: [String],
+        default: ["General"]
     },
     myMusicPlaylist: {
         type: Array,
@@ -199,6 +209,17 @@ UserSchema.virtual("communities", {
     localField: "_id",
     foreignField: "owner"
 })
+
+UserSchema.virtual("joinedCommunities", {
+  ref: "Community",              // الموديل المرتبط
+  localField: "_id",             // هذا المستخدم
+  foreignField: "members",       // مكان تخزين المستخدم في مجتمع
+});
+UserSchema.virtual("adminCommunities", {
+  ref: "Community",
+  localField: "_id",
+  foreignField: "Admins",
+});
 
 UserSchema.virtual("stories", {
     ref: "Story",

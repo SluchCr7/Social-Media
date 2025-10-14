@@ -1,34 +1,43 @@
-const { Music, musicValidation } = require('../Modules/Music');
-const { cloudUpload } = require('../Config/cloudUpload');
-const { cloudUploadMusic, cloudRemoveMusic } = require('../Config/cloudUploadMusic');
 const asyncHandler = require("express-async-handler");
-const mongoose = require('mongoose');
-const { User } = require('../Modules/User');
-const { sendNotificationHelper } = require('../utils/SendNotification');
+const mongoose = require("mongoose");
+const { Music } = require("../Modules/Music");
+const { User } = require("../Modules/User");
+const { cloudUpload } = require("../Config/cloudUpload");
+const { cloudUploadMusic } = require("../Config/cloudUploadMusic");
 
-// ✅ إنشاء أغنية جديدة مع حساب duration تلقائي
-// ✅ إنشاء أغنية جديدة مع حساب duration وضبط tags, releaseDate, language تلقائيًا
 const createMusic = asyncHandler(async (req, res) => {
   try {
-    // التأكد من وجود ملف صوتي
-    if (!req.files || !req.files.audio || !req.files.audio[0]) {
+    const audioFile = req.files?.audio?.[0];
+    if (!audioFile) {
       return res.status(400).json({ message: "Audio file is required" });
     }
 
-    // رفع الصوت
-    const audioUpload = await cloudUploadMusic(req.files.audio[0]);
+    // ✅ استدعاء ديناميكي للمكتبة داخل الدالة
+    const mm = await import("music-metadata");
+
+    // 🎧 قراءة metadata من Buffer مباشرة
+    let durationInSeconds = 0;
+    try {
+      const metadata = await mm.parseBuffer(audioFile.buffer, "audio/mpeg");
+      durationInSeconds = Math.round(metadata.format.duration || 0);
+    } catch (err) {
+      console.warn("⚠️ Failed to read metadata:", err.message);
+    }
+
+    // ☁️ رفع الصوت
+    const audioUpload = await cloudUploadMusic(audioFile);
     if (!audioUpload?.secure_url) {
       return res.status(500).json({ message: "Audio upload failed" });
     }
 
-    // رفع صورة الكوفر (اختياري)
+    // ☁️ رفع الصورة (اختياري)
     let coverUrl = null;
-    if (req.files.image && req.files.image[0]) {
+    if (req.files.image?.[0]) {
       const coverUpload = await cloudUpload(req.files.image[0]);
       coverUrl = coverUpload.secure_url;
     }
 
-    // إنشاء الوثيقة
+    // 📝 إنشاء وثيقة الموسيقى
     const newMusic = new Music({
       title: req.body.title,
       artist: req.body.artist,
@@ -36,16 +45,16 @@ const createMusic = asyncHandler(async (req, res) => {
       genre: req.body.genre || "Other",
       url: audioUpload.secure_url,
       cover: coverUrl,
-      // duration, 
+      duration: durationInSeconds,
       owner: req.user._id,
-      tags: Array.isArray(req.body.tags) ? req.body.tags : [], // إذا لم تُرسل، تصبح مصفوفة فارغة
-      releaseDate: Date.now(), 
-      language: req.body.language || "Unknown" // القيمة الافتراضية
+      tags: Array.isArray(req.body.tags) ? req.body.tags : [],
+      releaseDate: Date.now(),
+      language: req.body.language || "Unknown",
     });
 
     await newMusic.save();
 
-    // إضافة نقاط للمستخدم
+    // 🔼 تحديث مستوى المستخدم
     const user = await User.findById(req.user._id);
     user.userLevelPoints += 10;
     user.updateLevelRank();
@@ -55,10 +64,11 @@ const createMusic = asyncHandler(async (req, res) => {
 
     res.status(201).json(newMusic);
   } catch (error) {
-    console.error("Error creating music:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("❌ Error creating music:", error);
+    res.status(500).json({ message: error.message });
   }
 });
+
 
 
 // ✅ جلب كل الأغاني
