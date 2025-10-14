@@ -14,7 +14,7 @@ import {
   FiRefreshCw,
 } from 'react-icons/fi';
 
-const page = () => {
+const Admin = () => {
   const { stats, loading, getAdminStats } = useAdminUser();
 
   // بيانات وهمية مؤقتة للرسم البياني
@@ -101,4 +101,4 @@ const StatCard = ({ icon, title, value, color }) => {
   );
 };
 
-export default page;
+export default Admin;
