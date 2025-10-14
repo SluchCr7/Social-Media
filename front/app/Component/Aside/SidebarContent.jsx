@@ -1,16 +1,21 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { navSections } from '../../utils/Data'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { memo } from 'react'
 import { FiChevronLeft } from "react-icons/fi"
+import { useTranslation } from 'react-i18next';
 
 const baseStyle = `relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out`
 const activeStyle = `bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md`
 const inactiveStyle = `hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 text-lightMode-text dark:text-darkMode-text`
 
 const SidebarContent = memo(({ isCollapsed,setIsCollapsed, isMobile, setIsMobileMenuOpen, user, onlineUsers }) => {
+  const { t, i18n } = useTranslation();
+  useEffect(() => {
+    i18n.changeLanguage("ar")
+  },[])
   const pathname = usePathname(); 
   return (
     <>
@@ -36,7 +41,7 @@ const SidebarContent = memo(({ isCollapsed,setIsCollapsed, isMobile, setIsMobile
         {navSections.map(section => (
           <div key={section.title}>
             {!isCollapsed && (
-              <h4 className="px-3 mb-2 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{section.title}</h4>
+              <h4 className="px-3 mb-2 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{t(section.title)}</h4>
             )}
             <div className="flex flex-col gap-1">
               {section.items.map(({ icon, text, link }) => {

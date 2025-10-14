@@ -27,7 +27,7 @@ export const MessageContextProvider = ({ children }) => {
   const [unReadedMessage, setUnReadedMessage] = useState(0);
   const [unreadCountPerUser, setUnreadCountPerUser] = useState({});
   const {toggleLikeMessage , deleteMessage , deleteForMe , copyMessageText} = useMessageActions({ user, showAlert, setMessages });
-  const {fetchUnreadMessages,markAllAsReadBetweenUsers,updateUnreadCounters, } = useUnReadMessage({ user, setUnReadedMessage, setUnreadCountPerUser, unreadCountPerUser });
+  const {fetchUnreadMessages,markAllAsReadBetweenUsers,updateUnreadCounters} = useUnReadMessage({ user, setUnReadedMessage, setUnreadCountPerUser, unreadCountPerUser });
   // ----------------- Fetch Users -----------------
 
   useEffect(() => {
