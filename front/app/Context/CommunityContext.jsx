@@ -22,9 +22,33 @@ export const CommunityContextProvider = ({ children }) => {
     },
   };
   const { showAlert } = useAlert();
-  const {updateCommunityCover,updateCommunityRules,updateCommunityPicture,makeAdmin,editCommunity,removeMember} = useCommunityAdmin(user,communities,setCommunities,config,showAlert)
-  const {joinToCommunity,sendJoinRequest,approveJoinRequest,rejectJoinRequest} = useCommunityRequests(user,communities,setCommunities,config,showAlert)
-  
+  const {
+    updateCommunityCover,
+    updateCommunityRules,
+    updateCommunityPicture,
+    makeAdmin,
+    editCommunity,
+    removeMember,
+  } = useCommunityAdmin({
+    user,
+    communities,
+    setCommunities,
+    config,
+    showAlert,
+  });
+
+  const {
+    joinToCommunity,
+    sendJoinRequest,
+    approveJoinRequest,
+    rejectJoinRequest,
+  } = useCommunityRequests({
+    user,
+    communities,
+    setCommunities,
+    config,
+    showAlert,
+  });
   useEffect(() => {
     if (user?.token) {
       getData('community', setCommunities);

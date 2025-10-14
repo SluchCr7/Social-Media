@@ -17,7 +17,17 @@ export const CommentContextProvider = ({ children }) => {
   const { addNotify } = useNotify();
   const { showAlert } = useAlert();
   const [isLoading, setIsLoading] = useState(false);
-  const {fetchCommentsByPostId,AddComment,deleteComment,updateComment} = useCommentModify(user,showAlert,setComments,setIsLoading,)
+  const {
+    fetchCommentsByPostId,
+    AddComment,
+    deleteComment,
+    updateComment
+  } = useCommentModify({
+    user,
+    showAlert,
+    setComments,
+    setIsLoading,
+  });
 
   // 📌 لايك على كومنت
   const likeComment = async (id) => {
