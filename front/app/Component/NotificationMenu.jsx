@@ -8,6 +8,7 @@ import { BiMessageDetail } from 'react-icons/bi';
 import { useNotify } from '../Context/NotifyContext';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 
 // helper: relative time formatter
 const getRelativeTime = (dateString) => {
@@ -57,7 +58,7 @@ const NotificationMenu = ({ showNotifications, setShowNotifications }) => {
     markAllAsRead,
     clearAllNotifications,
   } = useNotify();
-
+  const {t} = useTranslation()
   useEffect(() => {
     if (showNotifications) {
       markAllAsRead();
@@ -80,7 +81,7 @@ const NotificationMenu = ({ showNotifications, setShowNotifications }) => {
         {/* Header */}
         <div className="flex justify-between items-center border-b pb-4 mb-4">
           <h2 className="text-xl font-bold text-lightMode-fg dark:text-darkMode-fg flex items-center gap-2">
-            Notifications
+            {t("Notifications")}
             {notificationsByUser.length > 0 && (
               <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
                 {notificationsByUser.length}
@@ -93,7 +94,7 @@ const NotificationMenu = ({ showNotifications, setShowNotifications }) => {
                 onClick={markAllAsRead}
                 className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
               >
-                Mark all as read
+                {t("Mark all as read")}
               </button>
             )}
             <button
@@ -159,7 +160,7 @@ const NotificationMenu = ({ showNotifications, setShowNotifications }) => {
             ))
           ) : (
             <div className="text-center text-gray-600 text-sm py-20">
-              No notifications
+              {t("No notifications")}
             </div>
           )}
         </div>
@@ -171,13 +172,13 @@ const NotificationMenu = ({ showNotifications, setShowNotifications }) => {
               onClick={markAllAsRead}
               className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm font-semibold py-3 rounded-xl transition hover:opacity-90"
             >
-              Mark all as read
+              {t("Mark all as read")}
             </button>
             <button
               onClick={clearAllNotifications}
               className="flex-1 bg-red-500 text-white text-sm font-semibold py-3 rounded-xl transition hover:bg-red-600"
             >
-              Clear All
+              {t("Clear All")}
             </button>
           </div>
         )}

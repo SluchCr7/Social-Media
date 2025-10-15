@@ -13,10 +13,11 @@ import {
   FiActivity,
   FiRefreshCw,
 } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 
 const Admin = () => {
   const { stats, loading, getAdminStats } = useAdminUser();
-
+  const {t} = useTranslation()
   // بيانات وهمية مؤقتة للرسم البياني
   const chartData = [
     { name: 'Mon', posts: 30 },
@@ -40,14 +41,14 @@ const Admin = () => {
       {/* 🧭 Topbar */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-gray-500">Welcome back, here’s the latest overview</p>
+          <h1 className="text-3xl font-bold">{t("Admin Dashboard")}</h1>
+          <p className="text-gray-500">{t("Welcome back, here’s the latest overview")}</p>
         </div>
         <button
           onClick={getAdminStats}
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition"
         >
-          <FiRefreshCw /> Refresh
+          <FiRefreshCw /> {t("Refresh")}
         </button>
       </div>
 
@@ -73,7 +74,7 @@ const Admin = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg"
       >
-        <h2 className="text-xl font-semibold mb-4">Weekly Posts Overview</h2>
+        <h2 className="text-xl font-semibold mb-4">{t("Weekly Posts Overview")}</h2>
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData}>
@@ -92,11 +93,12 @@ const Admin = () => {
 
 // 🧩 Component: Stat Card
 const StatCard = ({ icon, title, value, color }) => {
+  const {t} = useTranslation()
   return (
     <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow hover:shadow-lg transition flex flex-col items-center justify-center text-center">
       <div className={`${color} text-3xl mb-2`}>{icon}</div>
       <p className="text-2xl font-bold">{value ?? '--'}</p>
-      <p className="text-gray-500">{title}</p>
+      <p className="text-gray-500">{t(title)}</p>
     </div>
   );
 };

@@ -21,7 +21,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
   const videoRef = useRef(null);
   const { user } = useAuth();
   const { deleteReel, likeReel, viewReel, shareReel, setShowModelAddReel } = useReels();
-
+  const {t} = useTranslation()
   const [showComments, setShowComments] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showHeart, setShowHeart] = useState(false);
@@ -138,7 +138,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
             {/* إذا كانت هناك إعادة نشر */}
             {reel?.originalPost && reel?.originalPost?.owner && (
               <span className="text-[11px] sm:text-xs text-gray-300 flex items-center gap-1">
-                🔁 Reposted by{" "}
+                🔁 {t("Reshared by")}{" "}
                 <Link
                   href={`/Pages/User/${reel?.owner?._id}`}
                   className="hover:underline font-medium text-gray-200"
@@ -202,7 +202,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
           className="flex flex-col items-center hover:scale-110 transition-transform"
         >
           <IoLinkOutline  />
-          <span className="text-[10px] sm:text-xs">Copy</span>
+          <span className="text-[10px] sm:text-xs">{t("Copy")}</span>
         </button>
 
         {/* 🗑 Delete */}

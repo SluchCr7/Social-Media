@@ -1,10 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const PostLinks = ({ links }) => {
   if (!links?.length) return null;
-
+  const {t} = useTranslation()
   return (
     <div
       className="
@@ -77,7 +78,7 @@ const PostLinks = ({ links }) => {
                 opacity-0 group-hover:opacity-100 transition-opacity
               "
             >
-              Visit →
+              {t("Visit")} →
             </span>
           </Link>
         );

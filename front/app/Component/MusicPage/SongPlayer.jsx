@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
 import { useMusic } from '@/app/Context/MusicContext'
 import { useAuth } from '@/app/Context/AuthContext'
+import { useTranslation } from 'react-i18next'
 
 const SongPlayer = () => {
   const {
@@ -21,7 +22,7 @@ const SongPlayer = () => {
   const { user } = useAuth()
 
   const progressPercent = (progress / (duration || 1)) * 100
-
+  const {t} = useTranslation()
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 w-full px-2 sm:px-4">
       <motion.div
@@ -38,7 +39,7 @@ const SongPlayer = () => {
               <Image src={current.cover} alt={current.title} fill className="object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                No Cover
+                {t("No Cover")}
               </div>
             )}
           </div>

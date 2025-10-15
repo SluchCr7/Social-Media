@@ -10,6 +10,7 @@ import {
 } from 'react-icons/fa'
 import { MdEventAvailable } from 'react-icons/md'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 
 const typeIcons = {
   birthday: <FaBirthdayCake className="text-pink-500" />,
@@ -20,7 +21,7 @@ const typeIcons = {
 
 const MenuUpComingEvents = () => {
   const { upcomingEvents } = useEvent()
-
+  const {t} = useTranslation()
   if (!upcomingEvents || upcomingEvents.length === 0) {
     return (
       <motion.div
@@ -29,9 +30,9 @@ const MenuUpComingEvents = () => {
         className="w-full max-w-sm bg-white dark:bg-[#16181c] rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8 text-center"
       >
         <MdEventAvailable className="mx-auto text-5xl text-gray-400 dark:text-gray-600 mb-4" />
-        <p className="text-gray-500 dark:text-gray-400 mb-4">No upcoming events</p>
+        <p className="text-gray-500 dark:text-gray-400 mb-4">{t("No upcoming events")}</p>
         <Link href="/Pages/Calender" className="px-4 py-2 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white rounded-full text-sm font-medium transition">
-          Create Event
+          {t("Create Event")}
         </Link>
       </motion.div>
     )
@@ -46,7 +47,7 @@ const MenuUpComingEvents = () => {
       {/* Header */}
       <div className="flex justify-between items-center px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-500 to-indigo-500">
         <h2 className="flex items-center gap-2 text-white font-semibold text-lg">
-          <FaRegCalendarAlt className="text-white" /> Upcoming Events
+          <FaRegCalendarAlt className="text-white" /> {t("Upcoming Events")}
         </h2>
       </div>
 
@@ -79,7 +80,7 @@ const MenuUpComingEvents = () => {
                 </span>
                 {event.repeatYearly && (
                   <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-200 rounded-full text-xs">
-                    Yearly
+                    {t("Yearly")}
                   </span>
                 )}
               </div>
@@ -103,7 +104,7 @@ const MenuUpComingEvents = () => {
                     )}
                   </div>
                   <span className="text-gray-600 dark:text-gray-300 text-sm">
-                    {event.invitedUsers.length} invited
+                    {event.invitedUsers.length} {t("invited")}
                   </span>
                 </div>
               )}

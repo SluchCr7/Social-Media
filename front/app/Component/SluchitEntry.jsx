@@ -311,6 +311,7 @@ import PostHashtags from './Post/PostHashtags';
 import SharedPost from './Post/SharedPost';
 import PostImage from './Post/PostImage';
 import PostHeader from './Post/PostHeader';
+import { useTranslation } from 'react-i18next';
 
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost();
@@ -321,7 +322,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
   const [translated, setTranslated] = useState(null);
   const [showTranslateButton, setShowTranslateButton] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
-
+  const {t} = useTranslation()
   const isShared = post?.isShared && post?.originalPost;
   const original = post?.originalPost;
   const isCommunityPost = post?.community !== null;
@@ -393,13 +394,13 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
         {post?.isPinned && (
           <div className="bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 
             text-white text-xs font-bold px-3 py-1 rounded-full self-start shadow-md">
-            📌 Pinned 
+            📌 {t("Pinned")} 
           </div>
         )}
         {isShared && (
           <div className="bg-gradient-to-r from-cyan-500 to-blue-500 
             text-white text-xs font-bold px-3 py-1 rounded-full self-start shadow-md">
-            🔁 Shared 
+            🔁 {t("Shared")} 
           </div>
         )}
 
@@ -451,7 +452,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 onClick={handleShowOriginal}
                 className="text-blue-500 mt-2 hover:underline"
               >
-                Show Original
+                {t("Show Original")}
               </button>
             )}
 

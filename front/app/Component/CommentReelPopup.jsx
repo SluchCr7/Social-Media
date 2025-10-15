@@ -6,11 +6,12 @@ import { FaTimes } from 'react-icons/fa';
 import { useAuth } from '../Context/AuthContext';
 import { useAlert } from '../Context/AlertContext';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const CommentsPopup = ({ reelId, isOpen, onClose }) => {
   const { user } = useAuth();
   const { showAlert } = useAlert();
-
+  const {t} = useTranslation()
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,7 +35,7 @@ const CommentsPopup = ({ reelId, isOpen, onClose }) => {
           >
             {/* Header */}
             <div className="flex justify-between items-center px-4 py-3 border-b">
-              <h2 className="text-lg font-semibold">Comments</h2>
+              <h2 className="text-lg font-semibold">{t("Comments")}</h2>
               <button onClick={onClose} className="text-gray-500 hover:text-black">
                 <FaTimes size={20} />
               </button>

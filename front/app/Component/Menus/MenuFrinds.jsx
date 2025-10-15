@@ -5,12 +5,13 @@ import Image from 'next/image';
 import { FiUserPlus } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { useUser } from '@/app/Context/UserContext';
+import { useTranslation } from 'react-i18next';
 
 const MenuFriends = () => {
   const {  user } = useAuth();
   const {suggestedUsers, followUser,setShowAllSuggestedUsers} = useUser()
   const hasSuggestions = Array.isArray(suggestedUsers) && suggestedUsers.length > 0;
-
+  const {t} = useTranslation()
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -19,7 +20,7 @@ const MenuFriends = () => {
     >
       {/* Header */}
       <div className="flex justify-between items-center px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-500 to-indigo-500">
-        <h2 className="text-white font-semibold text-lg">Friends Recommendations</h2>
+        <h2 className="text-white font-semibold text-lg">{t("Friends Recommendations")}</h2>
       </div>
 
       {/* Friends List */}
@@ -44,14 +45,14 @@ const MenuFriends = () => {
               const posts = Array.isArray(userData.posts) ? userData.posts : [];
 
               const statusMessage = isFriend
-                ? 'You are friends'
+                ? t('You are friends')
                 : isNew
-                ? 'New here – welcome!'
+                ? t('New here – welcome!')
                 : mutualFriends.length > 0
-                ? `${mutualFriends.length} mutual friends`
+                ? `${mutualFriends.length} ${t("mutual friends")}`
                 : posts.length > 50
-                ? 'Active member'
-                : 'Suggested for you';
+                ? t('Active member')
+                : t('Suggested for you');
 
               return (
                 <motion.div
@@ -103,12 +104,12 @@ const MenuFriends = () => {
                 onClick={() => setShowAllSuggestedUsers(true)}
                 className="w-[90%] mx-auto my-3 py-2 font-semibold text-blue-600 dark:text-blue-400 border border-blue-600 dark:border-blue-400 rounded-lg transition-all duration-300 hover:bg-blue-600 hover:text-white"
               >
-                Show All Users
+                {t("Show All Users")}
               </motion.button>
             )}
           </>
         ) : (
-          <div className="text-gray-400 text-sm px-5 py-6 text-center">No friends to show</div>
+          <div className="text-gray-400 text-sm px-5 py-6 text-center">{t("No friends to show")}</div>
         )}
       </div>
     </motion.div>

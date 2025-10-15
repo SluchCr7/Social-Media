@@ -7,6 +7,7 @@ import SenderMessage from './SenderMessage';
 import ReceiverMessage from './ReceiverMessage';
 import { isToday, isYesterday, format } from 'date-fns';
 import MessageSkeleton from '@/app/Skeletons/MessageSkeleton';
+import { useTranslation } from 'react-i18next';
 const Chat = ({ onBack }) => {
   const { user } = useAuth();
   const { selectedUser, messages,isMessagesLoading } = useMessage();
@@ -43,7 +44,7 @@ const Chat = ({ onBack }) => {
       ContainerMessageRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
-
+  const {t} = useTranslation()
   return (
     <div className="flex flex-col w-full h-full bg-lightMode-bg dark:bg-darkMode-bg rounded-lg overflow-hidden shadow-md">
 
@@ -69,7 +70,7 @@ const Chat = ({ onBack }) => {
         ) : messages?.length === 0 ? (
           // 📭 في حال لا توجد رسائل
           <div className="flex justify-center items-center h-full text-gray-500 dark:text-gray-400 text-sm">
-            No messages yet
+            {t("No messages yet")}
           </div>
         ) : (
           // ✅ بعد تحميل الرسائل بنجاح

@@ -4,11 +4,12 @@ import { FaSortAmountDown } from "react-icons/fa"
 import { MdOutlineDateRange } from "react-icons/md"
 import { IoMdRefresh } from "react-icons/io"
 import { months } from "@/app/utils/Data"
+import { useTranslation } from "react-i18next"
 const FilterBar = ({ filters, setFilters, years }) => {
   const resetFilters = () => {
     setFilters({ year: "all", month: "all", sort: "latest" })
   }
-
+  const {t} = useTranslation()
   return (
     <div
       className="
@@ -34,7 +35,7 @@ const FilterBar = ({ filters, setFilters, years }) => {
             transition
           "
         >
-          <option value="all">All Years</option>
+          <option value="all">{t("All Years")}</option>
           {years.map((y) => (
             <option key={y} value={y}>{y}</option>
           ))}
@@ -57,7 +58,7 @@ const FilterBar = ({ filters, setFilters, years }) => {
             transition
           "
         >
-          <option value="all">All Months</option>
+          <option value="all">{t("All Months")}</option>
           {months.map(({name , value}, i) => (
             <option key={i + 1} value={value}>{name}</option>
           ))}
@@ -80,9 +81,9 @@ const FilterBar = ({ filters, setFilters, years }) => {
             transition
           "
         >
-          <option value="latest">🆕 Latest</option>
-          <option value="mostLiked">❤️ Most Liked</option>
-          <option value="mostCommented">💬 Most Commented</option>
+          <option value="latest">🆕 {t("Latest")}</option>
+          <option value="mostLiked">❤️ {t("Most Liked")}</option>
+          <option value="mostCommented">💬 {t("Most Commented")}</option>
         </select>
       </div>
 
@@ -100,7 +101,7 @@ const FilterBar = ({ filters, setFilters, years }) => {
         "
       >
         <IoMdRefresh className="text-base" />
-        Reset
+        {t("Reset")}
       </button>
     </div>
   )

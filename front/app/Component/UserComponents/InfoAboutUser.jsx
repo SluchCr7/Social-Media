@@ -9,6 +9,7 @@ import {
   FaFacebook, FaBirthdayCake, FaMars, FaVenus, FaHeart
 } from 'react-icons/fa'
 import { BsCalendar2Date } from "react-icons/bs"
+import { useTranslation } from 'react-i18next'
 
 const InfoItem = ({ icon, label, value, bgColor, textColor }) => (
   <motion.div
@@ -49,7 +50,7 @@ const InfoAboutUser = ({ user }) => {
     facebook: { icon: <FaFacebook />, bg: "from-blue-700 to-blue-900", label: "Facebook" },
     website: { icon: <FaGlobe />, bg: "from-purple-500 to-purple-700", label: "Website" },
   }
-
+  const {t} = useTranslation()
   return (
     <motion.div
       initial="hidden"
@@ -62,14 +63,14 @@ const InfoAboutUser = ({ user }) => {
     >
       {/* العنوان */}
       <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-lightMode-text2 dark:text-darkMode-text2 border-b border-lightMode-menu/40 dark:border-darkMode-menu/40 pb-3">
-        About
+        {t("About")}
       </h2>
 
       <div className="space-y-10">
         {/* القسم الأول: معلومات شخصية */}
         <div>
           <h3 className="text-lg font-semibold mb-4 text-lightMode-text2 dark:text-darkMode-text2">
-            Personal Info
+            {t("Personal Info")}
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-lightMode-text dark:text-darkMode-text">
@@ -125,7 +126,7 @@ const InfoAboutUser = ({ user }) => {
         {user?.interests?.length > 0 && (
           <div>
             <h3 className="text-lg font-semibold mb-4 text-lightMode-text2 dark:text-darkMode-text2">
-              Interests
+              {t("Interests")}
             </h3>
             <motion.div
               className="flex flex-wrap gap-2 sm:gap-3"
@@ -150,7 +151,7 @@ const InfoAboutUser = ({ user }) => {
         {(user?.socialLinks && Object.values(user.socialLinks).some(link => link?.trim())) && (
           <div>
             <h3 className="text-lg font-semibold mb-4 text-lightMode-text2 dark:text-darkMode-text2">
-              Social Links
+              {("Social Links")}
             </h3>
             <div className="flex items-center gap-3 sm:gap-5 flex-wrap">
               {Object.entries(user.socialLinks).map(([key, link]) =>

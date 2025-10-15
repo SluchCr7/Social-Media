@@ -6,10 +6,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { usePost } from '@/app/Context/PostContext'
 import PostSkeleton from '@/app/Skeletons/PostSkeleton'
 import MusicCard from './MusicCard'
+import { useTranslation } from 'react-i18next'
 
 const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
   const { setImageView , userIsLoading } = usePost()
-
+  const {t} = useTranslation()
   // ✅ فلترة وترتيب البوستات حسب الفلاتر
   const filteredPosts = useMemo(() => {
     let result = [...(combinedPosts || [])]
@@ -68,7 +69,7 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
               ? filteredPosts
                   .filter((p) => p.saved.includes(userSelected?._id))
                   .map((post) => <SluchitEntry key={post?._id} post={post} />)
-              : <div className="text-center text-gray-500 py-10">You haven’t saved any posts yet.</div>
+              : <div className="text-center text-gray-500 py-10">{t("You haven’t saved any posts yet.")}</div>
             }
           </motion.div>
         )}
@@ -79,7 +80,7 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
               ? userSelected.comments.map((comment) => (
                 <CommentCard key={comment?._id} comment={comment} />
               ))
-              : <div className="text-center text-gray-500 py-10">You haven’t commented yet.</div>}
+              : <div className="text-center text-gray-500 py-10">{t("You haven’t commented yet.")}</div>}
           </motion.div>
         )}
         {activeTab === 'Reels' && (
@@ -112,7 +113,7 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
               ))
             ) : (
               <div className="col-span-full text-center text-gray-500 py-10">
-                You haven’t uploaded any reels yet.
+                {t("You haven’t uploaded any reels yet.")}
               </div>
             )}
           </motion.div>
@@ -133,7 +134,7 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
                 ))
               ) : (
                 <div className="col-span-full text-center text-gray-500 py-10">
-                  You haven’t uploaded any music yet.
+                  {t("You haven’t uploaded any music yet.")}
                 </div>
               )}
             </motion.div>
@@ -166,7 +167,7 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
                 )))
             ) : (
               <div className="col-span-full text-center text-gray-500 py-10">
-                You haven’t uploaded any photos yet.
+                {t("You haven’t uploaded any photos yet.")}
               </div>
             )}
 

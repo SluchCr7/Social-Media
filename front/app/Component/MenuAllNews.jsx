@@ -4,6 +4,7 @@ import { useNews } from '../Context/NewsContext';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FiX } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 
 const categories = ['general', 'world', 'business', 'technology', 'sports', 'science', 'health'];
 const countries = ['us', 'gb', 'eg', 'fr', 'de'];
@@ -17,7 +18,7 @@ const MenuAllNews = ({ showAllNews, setShowAllNews }) => {
     lang: 'en',
   });
   const [numNews, setNumNews] = useState(10);
-
+  const {t} = useTranslation()
   // استدعاء الأخبار كل ما الفلاتر تتغير
   useEffect(() => {
     fetchAllNews(filters);
@@ -143,7 +144,7 @@ const MenuAllNews = ({ showAllNews, setShowAllNews }) => {
             onClick={() => setNumNews((prev) => prev + 10)}
             className="w-full bg-transparent text-lightMode-fg dark:text-darkMode-fg text-sm font-bold p-3 hover:bg-gray-200 dark:hover:bg-gray-800"
           >
-            View More
+            {t("View More")}
           </button>
         )}
       </div>

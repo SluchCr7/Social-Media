@@ -5,11 +5,12 @@ import { FiX } from "react-icons/fi";
 import { useMessage } from '../../Context/MessageContext';
 import { useAuth } from '../../Context/AuthContext';
 import { useUser } from '@/app/Context/UserContext';
+import { useTranslation } from 'react-i18next';
 
 const ChatHeader = () => {
   const { selectedUser, setSelectedUser, backgroundStyle } = useMessage();
   const { onlineUsers } = useUser();
-
+  const {t} = useTranslation()
   const isOnline = onlineUsers?.includes(selectedUser?._id);
 
   return (
@@ -41,7 +42,7 @@ const ChatHeader = () => {
               isOnline ? 'text-green-500' : 'text-gray-500 dark:text-gray-400'
             }`}
           >
-            {isOnline ? 'Online' : 'Offline'}
+            {isOnline ? t('Online') : t('Offline')}
           </span>
         </div>
       </div>

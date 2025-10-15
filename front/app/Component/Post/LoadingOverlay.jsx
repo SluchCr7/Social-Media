@@ -2,17 +2,18 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
-const messages = [
-  'Preparing your upload...',
-  'Uploading to server...',
-  'Processing your media...',
-  'Almost there...'
-];
 
 const LoadingOverlay = ({ isLoading, progress = null }) => {
   const [msgIndex, setMsgIndex] = useState(0);
-
+  const {t} = useTranslation()
+  const messages = [
+    'Preparing your upload...',
+    'Uploading to server...',
+    'Processing your media...',
+    'Almost there...'
+  ];
   // تغيير الرسائل تلقائيًا كل 3 ثواني
   useEffect(() => {
     if (!isLoading) return;

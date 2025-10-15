@@ -15,6 +15,7 @@ import { useCommunity } from '../Context/CommunityContext';
 import { SuggestionRow } from './SuggestedRow';
 import { useUser } from '../Context/UserContext';
 import { useGetData } from '../Custome/useGetData';
+import { useTranslation } from 'react-i18next';
 
 const Sluchits = ({ activeTab }) => {
   const { posts, isLoading, fetchPosts, hasMore, setPage, page,isLoadingPostCreated } = usePost();
@@ -22,7 +23,7 @@ const Sluchits = ({ activeTab }) => {
   const {suggestedUsers} = useUser()
   const { communities } = useCommunity();
   const {userData,loading} = useGetData(user?._id)
-
+  const {t} = useTranslation()
   const following = Array.isArray(userData?.following) ? userData.following : [];
   const userId = userData?._id;
 
@@ -174,8 +175,8 @@ const Sluchits = ({ activeTab }) => {
             <div key={`suggestion-${i}`} className="flex flex-col gap-3 px-1">
               <h2 className="text-base font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-1">
                 {item.type === 'user'
-                  ? <>✨ <span>People you may like</span></>
-                  : <>🌐 <span>Explore new communities</span></>}
+                  ? <>✨ <span>{t("People you may like")}</span></>
+                  : <>🌐 <span>{t("Explore new communities")}</span></>}
               </h2>
               <SuggestionRow type={item?.type} data={item?.data} />
             </div>

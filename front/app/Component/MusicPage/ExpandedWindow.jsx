@@ -9,8 +9,10 @@ import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
 import { useMusic } from '@/app/Context/MusicContext'
 import { formatTime } from '@/app/utils/formatTime'
 import { useAuth } from '@/app/Context/AuthContext'
+import { useTranslation } from 'react-i18next'
 
 const ExpandedWindow = () => {
+  const {t} = useTranslation()
   const { 
     current, playing, togglePlay, progress, duration, next, prev, 
     shuffle, setShuffle, repeatMode, setRepeatMode, expanded, setExpanded 
@@ -64,7 +66,7 @@ const ExpandedWindow = () => {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-300 dark:bg-gray-700 text-gray-500">
-                    No Cover
+                    {t("No Cover")}
                   </div>
                 )}
               </div>

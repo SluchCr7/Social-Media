@@ -2,9 +2,11 @@
 import React, { useState } from 'react'
 import { FiAlertCircle, FiMoreVertical, FiSlash, FiTrash2, FiUserX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const DropdownActions = ({ type, onDeleteReport, onDeleteTarget, onSuspend, onBan, onResolve }) => {
   const [open, setOpen] = useState(false);
+  const {t} = useTranslation()
   return (
     <div className="relative">
       <button
@@ -30,7 +32,7 @@ const DropdownActions = ({ type, onDeleteReport, onDeleteTarget, onSuspend, onBa
                 }}
                 className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                <FiTrash2 /> Delete Report
+                <FiTrash2 /> {t("Delete Report")}
               </button>
 
               {/* Post / Comment delete */}
@@ -42,7 +44,7 @@ const DropdownActions = ({ type, onDeleteReport, onDeleteTarget, onSuspend, onBa
                   }}
                   className="flex items-center gap-2 px-4 py-2 text-sm text-orange-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                  <FiAlertCircle /> Delete {type === 'post' ? 'Post' : 'Comment'}
+                  <FiAlertCircle /> {t("Delete")} {type === 'post' ? 'Post' : 'Comment'}
                 </button>
               )}
 
@@ -56,7 +58,7 @@ const DropdownActions = ({ type, onDeleteReport, onDeleteTarget, onSuspend, onBa
                     }}
                     className="flex items-center gap-2 px-4 py-2 text-sm text-yellow-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
-                    <FiSlash /> Suspend User
+                    <FiSlash /> {t("Suspend User")}
                   </button>
                   <button
                     onClick={() => {
@@ -65,7 +67,7 @@ const DropdownActions = ({ type, onDeleteReport, onDeleteTarget, onSuspend, onBa
                     }}
                     className="flex items-center gap-2 px-4 py-2 text-sm text-red-700 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
-                    <FiUserX /> Ban User
+                    <FiUserX /> {t("Ban User")}
                   </button>
                 </>
               )}
@@ -78,7 +80,7 @@ const DropdownActions = ({ type, onDeleteReport, onDeleteTarget, onSuspend, onBa
                 }}
                 className="flex items-center gap-2 px-4 py-2 text-sm text-green-600 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                ✅ Mark as Resolved
+                ✅ {t("Mark as Resolved")}
               </button>
             </div>
           </motion.div>

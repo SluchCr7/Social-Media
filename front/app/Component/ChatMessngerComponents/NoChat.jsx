@@ -3,8 +3,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const NoChat = () => {
+  const {t} = useTranslation()
   return (
     <div className="flex flex-col items-center justify-center flex-1 w-full px-4 bg-lightMode-bg dark:bg-darkMode-bg">
       
@@ -32,7 +34,7 @@ const NoChat = () => {
         transition={{ delay: 0.2, duration: 0.4 }}
         className="text-2xl font-semibold text-gray-800 dark:text-gray-100"
       >
-        Welcome to {process.env.WEBSITE_NAME || "Zocial"}!
+        {t("Welcome to")} {process.env.WEBSITE_NAME || "Zocial"}!
       </motion.h1>
 
       {/* Subtitle */}
@@ -42,7 +44,7 @@ const NoChat = () => {
         transition={{ delay: 0.3, duration: 0.4 }}
         className="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-sm text-center"
       >
-        Start a new conversation by selecting a chat from the sidebar or searching for a friend.
+        {t("Start a new conversation by selecting a chat from the sidebar or searching for a friend.")}
       </motion.p>
 
       {/* Hint */}
@@ -52,7 +54,7 @@ const NoChat = () => {
         transition={{ delay: 0.4, duration: 0.4 }}
         className="mt-6 text-xs text-gray-400 dark:text-gray-500"
       >
-        Your messages will appear here once you start chatting.
+        {t("Your messages will appear here once you start chatting.")}
       </motion.p>
     </div>
   );

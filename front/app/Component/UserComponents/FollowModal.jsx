@@ -3,10 +3,11 @@ import Image from 'next/image'
 import { FiX } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 
 const FollowModal = ({ visible, onClose, type, list }) => {
   if (!visible) return null
-
+  const {t} = useTranslation()
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end md:items-center justify-center">
       <AnimatePresence>
@@ -27,7 +28,7 @@ const FollowModal = ({ visible, onClose, type, list }) => {
           {/* Header */}
           <div className="flex justify-between items-center mb-4 border-b border-lightMode-text/10 dark:border-darkMode-text/20 pb-2">
             <h3 className="text-base sm:text-lg font-semibold text-lightMode-text2 dark:text-darkMode-text">
-              {type === 'followers' ? 'Followers' : 'Following'}
+              {type === 'followers' ? t('Followers') : t('Following')}
             </h3>
             <button
               onClick={onClose}
@@ -75,7 +76,7 @@ const FollowModal = ({ visible, onClose, type, list }) => {
             </div>
           ) : (
             <div className="text-center text-gray-500 dark:text-gray-400 py-8 text-sm">
-              No results found.
+              {t("No results found.")}
             </div>
           )}
         </motion.div>

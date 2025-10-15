@@ -3,14 +3,15 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaGlobe, FaUserFriends, FaCheck } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 const PostPrivacySelector = ({ onChange, defaultValue = 'public' }) => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(defaultValue);
-
+  const {t} = useTranslation()
   const options = [
-    { value: 'public', label: 'Public', icon: <FaGlobe /> },
-    { value: 'friends', label: 'Friends', icon: <FaUserFriends /> },
+    { value: 'public', label: t('Public'), icon: <FaGlobe /> },
+    { value: 'friends', label: t('Friends'), icon: <FaUserFriends /> },
   ];
 
   const handleSelect = (option) => {

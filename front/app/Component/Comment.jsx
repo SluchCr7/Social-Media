@@ -10,6 +10,7 @@ import { useAuth } from '../Context/AuthContext';
 import { useReport } from '@/app/Context/ReportContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiBadgeCheck } from 'react-icons/hi';
+import { useTranslation } from 'react-i18next';
 
 const Comment = ({ comment }) => {
   const [isReplying, setIsReplying] = useState(false);
@@ -18,7 +19,7 @@ const Comment = ({ comment }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(comment.text);
   const [loadingEdit, setLoadingEdit] = useState(false);
-
+  const {t} = useTranslation()
   const { likeComment, deleteComment, AddComment, updateComment } = useComment();
   const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport();
   const { user } = useAuth();
@@ -77,7 +78,7 @@ const Comment = ({ comment }) => {
                     className="ml-2 inline-flex items-center gap-1 bg-yellow-100 dark:bg-yellow-800/30 text-yellow-700 dark:text-yellow-300 text-xs px-2 py-0.5 rounded-full"
                   >
                     <MdOutlineContentCopy className="w-3 h-3" />
-                    Edited
+                    {t("Edited")}
                   </motion.span>
                 )}
               </div>
@@ -134,7 +135,7 @@ const Comment = ({ comment }) => {
                     }}
                     className="px-4 py-1.5 rounded-lg text-gray-600 dark:text-gray-300 text-sm hover:bg-gray-200 dark:hover:bg-gray-800"
                   >
-                    Cancel
+                    {t("Cancel")}
                   </button>
                 </div>
               </div>
@@ -184,7 +185,7 @@ const Comment = ({ comment }) => {
               >
                 <input
                   type="text"
-                  placeholder="Write a reply..."
+                  placeholder={t("Write a reply...")}
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendReply()}

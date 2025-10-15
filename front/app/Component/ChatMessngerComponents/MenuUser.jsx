@@ -1,12 +1,14 @@
 import { Settings, UserCheck, Users2 } from 'lucide-react';
 import React from 'react'
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 const MenuUser = ({
     setMenuOpen,
     router,
     users,
     markAllAsReadBetweenUsers
 }) => {
+  const {t} = useTranslation()
   return (
              <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: -10 }}
@@ -38,7 +40,7 @@ const MenuUser = ({
                     <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400">
                       <UserCheck className="w-4 h-4" />
                     </span>
-                    Profile
+                    {t("Profile")}
                   </button>
 
                   {/* Mark all as read */}
@@ -57,7 +59,7 @@ const MenuUser = ({
                     <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400">
                       <Users2 className="w-4 h-4" />
                     </span>
-                    Mark All as Read
+                    {t("Mark All as Read")}
                   </button>
 
                   {/* Settings */}
@@ -76,7 +78,7 @@ const MenuUser = ({
                     <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400">
                       <Settings className="w-4 h-4" />
                     </span>
-                    Settings
+                    {t("Settings")}
                   </button>
                 </div>
 

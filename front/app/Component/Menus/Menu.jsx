@@ -9,9 +9,11 @@ import News from './News';
 import MenuAllNews from '../MenuAllNews';
 import MenuFrinds from './MenuFrinds';
 import MenuUpComingEvents from './MenuUpComingEvents';
+import { useTranslation } from 'react-i18next';
 
 const Menu = () => {
   const { user, isLogin } = useAuth();
+  const {t} = useTranslation()
   const [showAllNews ,setShowAllNews] = useState(false)
   return (
     <div className="hidden lg:flex flex-col items-start gap-4 w-[35%] min-h-screen bg-lightMode-bg dark:bg-darkMode-bg px-6 py-8">
@@ -31,9 +33,9 @@ const Menu = () => {
               Built with passion for communities & real connections.
             </p>
             <div className="mt-3 flex justify-center gap-4 text-xs text-gray-400 dark:text-gray-500">
-              <Link href="/Pages/Privacy" className="hover:underline">Privacy Policy</Link>
+              <Link href="/Pages/Privacy" className="hover:underline">{t("Privacy Policy")}</Link>
               <span>•</span>
-              <Link href="/Pages/Terms" className="hover:underline">Terms of Service</Link>
+              <Link href="/Pages/Terms" className="hover:underline">{t("Terms of Service")}</Link>
             </div>
           </div>
         </>

@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FaPlus, FaUsers, FaSearch, FaLock, FaGlobe } from 'react-icons/fa'
 import { CATEGORY_OPTIONS } from '@/app/utils/Data'
 import Badge from './Badge'
+import { useTranslation } from 'react-i18next'
 const CreateCommunityModal = ({ show, onClose, form, setForm, handleCreate, isCreating }) => {
-
+  const {t} = useTranslation()
   // إضافة tag جديد
   const addTag = () => {
     const tag = form.newTag?.trim();
@@ -50,12 +51,12 @@ const CreateCommunityModal = ({ show, onClose, form, setForm, handleCreate, isCr
       {show && (
         <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <motion.div initial={{ y: 10, scale: 0.98 }} animate={{ y: 0, scale: 1 }} exit={{ y: 10, scale: 0.98 }} transition={{ type: 'spring', stiffness: 200 }} className="bg-lightMode-bg dark:bg-darkMode-bg rounded-2xl w-full max-w-lg p-6 mx-4 sm:mx-0 shadow-xl overflow-y-auto max-h-[90vh]">
-            <h3 className="text-xl font-semibold text-sky-600 flex items-center gap-2"><FaPlus /> Create Community</h3>
+            <h3 className="text-xl font-semibold text-sky-600 flex items-center gap-2"><FaPlus /> {t("Create Community")}</h3>
 
             <form onSubmit={handleCreate} className="mt-4 space-y-4">
               {/* Name */}
               <div>
-                <label className="text-sm text-lightMode-text2 dark:text-darkMode-text2">Name</label>
+                <label className="text-sm text-lightMode-text2 dark:text-darkMode-text2">{t("Name")}</label>
                 <input
                   value={form.Name}
                   onChange={(e) => setForm((p) => ({ ...p, Name: e.target.value }))}
@@ -67,7 +68,7 @@ const CreateCommunityModal = ({ show, onClose, form, setForm, handleCreate, isCr
 
               {/* Category */}
               <div>
-                <label className="text-sm text-lightMode-text2 dark:text-darkMode-text2">Category</label>
+                <label className="text-sm text-lightMode-text2 dark:text-darkMode-text2">{t("Category")}</label>
                 <select value={form.Category} onChange={(e) => setForm((p) => ({ ...p, Category: e.target.value }))} className="w-full mt-1 p-3 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text">
                   {CATEGORY_OPTIONS.filter(Boolean).map(({name,value}) => (
                     <option key={value} value={value}>{name}</option>
@@ -77,7 +78,7 @@ const CreateCommunityModal = ({ show, onClose, form, setForm, handleCreate, isCr
 
               {/* Description */}
               <div>
-                <label className="text-sm text-lightMode-text2 dark:text-darkMode-text2">Description</label>
+                <label className="text-sm text-lightMode-text2 dark:text-darkMode-text2">{t("Description")}</label>
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
@@ -90,7 +91,7 @@ const CreateCommunityModal = ({ show, onClose, form, setForm, handleCreate, isCr
 
               {/* Tags */}
               <div>
-                <label className="text-sm text-lightMode-text2 dark:text-darkMode-text2">Tags</label>
+                <label className="text-sm text-lightMode-text2 dark:text-darkMode-text2">{t("Tags")}</label>
                 <div className="flex gap-2 flex-wrap mt-1">
                   {(form.tags || []).map((tag) => (
                     <Badge key={tag} className="bg-sky-100 text-sky-700 dark:bg-sky-900/30 cursor-pointer" onClick={() => removeTag(tag)}>
@@ -111,7 +112,7 @@ const CreateCommunityModal = ({ show, onClose, form, setForm, handleCreate, isCr
 
               {/* Rules */}
               <div>
-                <label className="text-sm text-lightMode-text2 dark:text-darkMode-text2">Rules</label>
+                <label className="text-sm text-lightMode-text2 dark:text-darkMode-text2">{t("Rules")}</label>
                 <ul className="list-disc list-inside mt-1">
                   {(form.rules || []).map((rule) => (
                     <li key={rule} className="flex justify-between items-center gap-2">
@@ -133,7 +134,7 @@ const CreateCommunityModal = ({ show, onClose, form, setForm, handleCreate, isCr
 
               {/* Preview */}
               <div className="mt-2 border rounded-lg p-3 bg-lightMode-menu dark:bg-darkMode-menu">
-                <h4 className="font-semibold">Preview:</h4>
+                <h4 className="font-semibold">{t("Preview")}:</h4>
                 <p className="text-sm text-lightMode-text dark:text-darkMode-text">{form.Name || 'Community Name'}</p>
                 <p className="text-xs text-lightMode-text2 dark:text-darkMode-text2">{form.description || 'Community Description'}</p>
                 <div className="flex gap-2 flex-wrap mt-1">
@@ -146,8 +147,8 @@ const CreateCommunityModal = ({ show, onClose, form, setForm, handleCreate, isCr
 
               {/* Buttons */}
               <div className="flex justify-end items-center gap-3 flex-wrap">
-                <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border hover:bg-gray-100 dark:hover:bg-gray-800 transition">Cancel</button>
-                <button type="submit" disabled={isCreating} className="px-6 py-2 rounded-lg bg-sky-600 text-white font-semibold">{isCreating ? 'Creating...' : 'Create'}</button>
+                <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border hover:bg-gray-100 dark:hover:bg-gray-800 transition">{t("Cancel")}</button>
+                <button type="submit" disabled={isCreating} className="px-6 py-2 rounded-lg bg-sky-600 text-white font-semibold">{isCreating ? 'Creating...' : t('Create')}</button>
               </div>
             </form>
           </motion.div>

@@ -9,7 +9,7 @@ import { useStory } from '../Context/StoryContext'
 import { useAuth } from '../Context/AuthContext'
 import { useMessage } from '../Context/MessageContext'
 import Link from 'next/link'
-
+import { useTranslation } from 'react-i18next'
 const StoryViewer = ({ stories, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
@@ -21,7 +21,7 @@ const StoryViewer = ({ stories, onClose }) => {
   const { AddNewMessage, setSelectedUser } = useMessage()
   const story = stories[currentIndex]
   const timerRef = useRef(null)
-
+  const {t} = useTranslation()
   // 🔹 عند فتح ستوري جديدة
   useEffect(() => {
     if (story?._id) viewStory(story._id)
@@ -189,7 +189,7 @@ const StoryViewer = ({ stories, onClose }) => {
 
             {story?.originalStory && (
               <span className="text-[10px] sm:text-xs text-emerald-400 italic">
-                Reshared by @{story?.owner?.username}
+                {t("Reshared by")} @{story?.owner?.username}
               </span>
             )}
           </div>
@@ -274,7 +274,7 @@ const StoryViewer = ({ stories, onClose }) => {
         {/* عدد المشاهدات */}
         {user?._id === story?.owner?._id && (
           <div className="absolute top-4 right-4 text-white text-xs bg-black/50 px-3 py-1 rounded-lg shadow-md">
-            👁 {story?.views?.length || 0} Views
+            👁 {story?.views?.length || 0} {t("Views")}
           </div>
         )}
       </div>

@@ -4,15 +4,16 @@ import React from 'react';
 import { useNews } from '../../Context/NewsContext';
 import Link from 'next/link';
 import { FaExternalLinkAlt } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 const News = ({showAllNews ,setShowAllNews}) => {
   const { news } = useNews();
-
-  return (
+  const {t} = useTranslation()
+  return (  
     <div className="w-full bg-white dark:bg-[#16181c] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-500 to-indigo-500">
-        <h2 className="text-lg font-bold text-white">What is happening</h2>
+        <h2 className="text-lg font-bold text-white">{t("What is happening")}</h2>
       </div>
 
       <ul className="flex flex-col divide-y divide-gray-100 dark:divide-gray-700">
@@ -54,7 +55,7 @@ const News = ({showAllNews ,setShowAllNews}) => {
           <>
             <div className="p-3 border-t border-gray-200 dark:border-gray-700 text-center">
               <button onClick={()=> setShowAllNews(true)} className="text-sm font-semibold text-blue-500 hover:underline">
-                Show more
+                {t("Show more")}
               </button>
             </div>
           </>

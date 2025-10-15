@@ -5,9 +5,11 @@ import { useAuth } from '../../Context/AuthContext'
 import { FiX, FiUserPlus, FiCheck } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUser } from '@/app/Context/UserContext'
+import { useTranslation } from 'react-i18next'
 
 const MenuAllSuggestedFriends = () => {
-  const {  user } = useAuth()
+  const { user } = useAuth()
+  const {t} = useTranslation()
   const { setShowAllSuggestedUsers, suggestedUsers, followUser,showAllSuggestedUsers} = useUser();
   return (
     <AnimatePresence>
@@ -29,7 +31,7 @@ const MenuAllSuggestedFriends = () => {
             {/* Header */}
             <div className="flex justify-between items-center border-b px-5 py-4 bg-gradient-to-r from-indigo-500 to-blue-600">
               <h2 className="text-lg md:text-xl font-bold text-lightMode-fg dark:text-darkMode-fg">
-                Suggested Friends
+                {t("Suggested Friends")}
               </h2>
               <button
                 onClick={() => setShowAllSuggestedUsers(false)}
@@ -62,14 +64,14 @@ const MenuAllSuggestedFriends = () => {
                   const posts = Array.isArray(userData.posts) ? userData.posts : []
 
                   const statusMessage = isFriend
-                    ? 'You are friends'
+                    ? t('You are friends')
                     : isNew
-                    ? 'New here – welcome!'
+                    ? t('New here – welcome!')
                     : mutualFriends.length > 0
-                    ? `${mutualFriends.length} mutual friends`
+                    ? `${mutualFriends.length} ${t("mutual friends")}`
                     : posts.length > 50
-                    ? 'Active member'
-                    : 'Suggested for you'
+                    ? t('Active member')
+                    : t('Suggested for you')
 
                   return (
                     <div
@@ -108,7 +110,7 @@ const MenuAllSuggestedFriends = () => {
                           }`}
                       >
                         {isFriend ? <FiCheck size={16} /> : <FiUserPlus size={16} />}
-                        {isFriend ? 'Following' : 'Follow'}
+                        {isFriend ? t('Following') : t('Follow')}
                       </button>
                     </div>
                   )
@@ -122,7 +124,7 @@ const MenuAllSuggestedFriends = () => {
                     height={120}
                     className="mb-4 opacity-70"
                   />
-                  <p className="text-sm">No suggested users at the moment.</p>
+                  <p className="text-sm">{t("No suggested users at the moment.")}</p>
                 </div>
               )}
             </div>

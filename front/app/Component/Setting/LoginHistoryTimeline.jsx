@@ -3,15 +3,17 @@ import React from 'react'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/en'
+import { useTranslation } from 'react-i18next'
 
 dayjs.extend(relativeTime)
 dayjs.locale('en')
 
 function LoginHistoryTimeline({ items = [] }) {
+  const {t} = useTranslation()
   if (!items.length)
     return (
       <div className="text-center text-sm text-gray-500 dark:text-gray-400 py-6">
-        No recent login activity found.
+        {t("No recent login activity found.")}
       </div>
     )
 

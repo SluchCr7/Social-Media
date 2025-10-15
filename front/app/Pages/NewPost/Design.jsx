@@ -110,7 +110,7 @@ const NewPostPresenter = (props) => {
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
-              placeholder={t("Add a link...")}
+              placeholder={`${t("Add a link")}...`}
               value={linkInput}
               onChange={(e) => setLinkInput(e.target.value)}
               className="flex-1 px-4 py-2 border dark:border-gray-600 rounded-lg text-sm bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500"
@@ -124,7 +124,7 @@ const NewPostPresenter = (props) => {
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
-              Add
+              {t("Add")}
             </button>
           </div>
 
@@ -143,46 +143,46 @@ const NewPostPresenter = (props) => {
                   : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:ring-blue-500'
               } text-gray-900 dark:text-white`}
             />
-            {/* Mention Box */}
-            <AnimatePresence>
-              {showMentionBox && filteredUsers.length > 0 && (
-                <motion.ul
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 5 }}
-                  style={{
-                    top: mentionBoxPos.top,
-                    left: mentionBoxPos.left,
-                  }}
-                  className="absolute bg-white dark:bg-gray-800 shadow-xl rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 z-[9999] w-64 max-h-56 overflow-y-auto"
-                >
-                  {filteredUsers.map((mention) => (
-                    <li
-                      key={mention._id}
-                      onClick={() => handleSelectMention(mention)}
-                      className="flex items-center gap-2 px-3 py-2 hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer"
-                    >
-                      <Image
-                        src={mention.profilePhoto?.url || '/default.png'}
-                        alt=""
-                        width={28}
-                        height={28}
-                        className="rounded-full"
-                      />
-                      <div>
-                        <span className="text-sm font-semibold text-gray-700 dark:text-white">
-                          {mention.username}
-                        </span>
-                        <span className="text-xs text-gray-400 block">
-                          {mention.profileName || ''}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-                </motion.ul>
-              )}
-            </AnimatePresence>
           </div>
+          {/* Mention Box */}
+          <AnimatePresence>
+            {showMentionBox && filteredUsers.length > 0 && (
+              <motion.ul
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 5 }}
+                style={{
+                  top: mentionBoxPos.top,
+                  left: mentionBoxPos.left,
+                }}
+                className="absolute bg-white dark:bg-gray-800 shadow-xl rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 z-[9999] w-64 max-h-56 overflow-y-auto"
+              >
+                {filteredUsers.map((mention) => (
+                  <li
+                    key={mention._id}
+                    onClick={() => handleSelectMention(mention)}
+                    className="flex items-center gap-2 px-3 py-2 hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer"
+                  >
+                    <Image
+                      src={mention.profilePhoto?.url || '/default.png'}
+                      alt=""
+                      width={28}
+                      height={28}
+                      className="rounded-full"
+                    />
+                    <div>
+                      <span className="text-sm font-semibold text-gray-700 dark:text-white">
+                        {mention.username}
+                      </span>
+                      <span className="text-xs text-gray-400 block">
+                        {mention.profileName || ''}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Images */}

@@ -13,6 +13,7 @@ import { useUser } from '../Context/UserContext';
 import { useAdmin } from '../Context/UserAdminContext';
 import { useAlert } from '../Context/AlertContext';
 import { useGetData } from '../Custome/useGetData';
+import { useTranslation } from 'react-i18next';
 
 // ✅ زر فردي
 const MenuOption = ({ icon, text, action, className, loading }) => (
@@ -33,7 +34,8 @@ const MenuOption = ({ icon, text, action, className, loading }) => (
 
 const PostMenu = ({ showMenu, setShowMenu, post }) => {
   const { followUser, pinPost } = useUser()
-  const {blockOrUnblockUser}= useAdmin()
+  const { blockOrUnblockUser } = useAdmin()
+  const {t} = useTranslation()
   const { user } = useAuth();
   const { deletePost, setPostIsEdit, setShowPostModelEdit, displayOrHideComments, copyPostLink } = usePost();
   const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport();
@@ -73,7 +75,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
     },
     {
       icon: <AiOutlineDelete size={18} />,
-      text: 'Delete Post',
+      text: t('Delete Post'),
       action: () => setConfirmAction(() => async () => {
         setLoadingBtn(true);
         await deletePost(post?._id);
@@ -83,7 +85,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
     },
     {
       icon: <FaRegCommentDots size={18} />,
-      text: post?.isCommentOff ? 'Enable Comments' : 'Disable Comments',
+      text: post?.isCommentOff ? t('Enable Comments') : t('Disable Comments'),
       action: async () => {
         setLoadingBtn(true);
         await displayOrHideComments(post?._id);
@@ -102,8 +104,8 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
         ? <RiUserUnfollowLine className="text-lg" />
         : <RiUserFollowLine className="text-lg" />,
       text: user?.following?.includes(post?.owner?._id)
-        ? 'Unfollow User'
-        : 'Follow User',
+        ? t('Unfollow User')
+        : t('Follow User'),
 
 
       action: () => {
@@ -115,7 +117,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
     },
     {
       icon: <MdOutlineReport size={18} />,
-      text: 'Report Post',
+      text: t('Report Post'),
       action: () => {
         setIsTargetId(post?._id);
         setReportedOnType('post');
@@ -125,7 +127,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
     },
     {
       icon: <MdContentCopy size={18} />,
-      text: 'Copy Link',
+      text: t('Copy Link'),
       action: () => {
         copyPostLink(post?._id);
         showAlert('Post link copied!');
@@ -134,7 +136,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
     },
     {
       icon: <AiOutlineDelete size={18} />,
-      text: user?.blockedUsers?.includes(post?.owner?._id) ? 'Unblock User' : 'Block User',
+      text: user?.blockedUsers?.includes(post?.owner?._id) ? t('Unblock User') : t('Block User'),
       action: () => setConfirmAction(() => async () => {
         setLoadingBtn(true);
         await blockOrUnblockUser(post?.owner?._id);
@@ -202,17 +204,17 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
               className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg max-w-sm w-full text-center"
             >
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                Are you sure?
+                {t("Are you sure?")}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                This action cannot be undone.
+                {t("This action cannot be undone.")}
               </p>
               <div className="flex justify-center gap-4">
                 <button
                   onClick={() => setConfirmAction(null)}
                   className="px-4 py-2 rounded-lg border text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
-                  Cancel
+                  {t("Cancel")}
                 </button>
                 <button
                   onClick={() => {
@@ -221,7 +223,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
                   }}
                   className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
                 >
-                  Confirm
+                  {t("Confirm")}
                 </button>
               </div>
             </motion.div>

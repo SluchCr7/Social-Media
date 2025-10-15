@@ -5,11 +5,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '../../Context/AuthContext'
 import { FaPlus, FaCheck, FaUsers, FaHourglassHalf, FaCrown, FaUserShield } from 'react-icons/fa'
+import { useTranslation } from 'react-i18next'
 
 const Communities = () => {
   const { communities, joinToCommunity, sendJoinRequest } = useCommunity()
   const { user } = useAuth()
-
+  const {t} = useTranslation()
   const handleJoin = (community) => {
     if (community?.isPrivate) {
       sendJoinRequest(community._id)
@@ -23,7 +24,7 @@ const Communities = () => {
       
       {/* Header */}
       <div className="flex justify-between items-center px-5 py-4 border-b border-gray-300 dark:border-gray-600 bg-gradient-to-r from-purple-500 to-indigo-500">
-        <h2 className="text-white text-lg font-semibold">Communities</h2>
+        <h2 className="text-white text-lg font-semibold">{t("Communities")}</h2>
       </div>
 
       {/* Body */}
@@ -59,7 +60,7 @@ const Communities = () => {
                     <h2 className="text-gray-900 dark:text-gray-100 text-base font-semibold">{community?.Name}</h2>
                     <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
                       <FaUsers className="text-[10px]" />
-                      {community?.members?.length || 0} members
+                      {community?.members?.length || 0} {t("members")}
                     </span>
                   </div>
                 </Link>
@@ -85,7 +86,7 @@ const Communities = () => {
                     disabled
                     className="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-md border border-yellow-500 text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 cursor-not-allowed"
                   >
-                    <FaHourglassHalf className="text-sm" /> Pending
+                    <FaHourglassHalf className="text-sm" /> {t("Pending")}
                   </button>
                 ) : (
                   <button
@@ -97,7 +98,7 @@ const Communities = () => {
                     onClick={() => handleJoin(community)}
                   >
                     <FaPlus className="text-sm" />
-                    {community?.isPrivate ? 'Request Join' : 'Join'}
+                    {community?.isPrivate ? t('Request Join') : t('Join')}
                   </button>
                 )}
               </div>

@@ -12,10 +12,7 @@ const activeStyle = `bg-gradient-to-r from-indigo-500 to-purple-500 text-white s
 const inactiveStyle = `hover:bg-lightMode-bg/10 dark:hover:bg-darkMode-bg/10 text-lightMode-text dark:text-darkMode-text`
 
 const SidebarContent = memo(({ isCollapsed,setIsCollapsed, isMobile, setIsMobileMenuOpen, user, onlineUsers }) => {
-  const { t, i18n } = useTranslation();
-  useEffect(() => {
-    i18n.changeLanguage("ar")
-  },[])
+  const {t} = useTranslation()
   const pathname = usePathname(); 
   return (
     <>
@@ -54,7 +51,7 @@ const SidebarContent = memo(({ isCollapsed,setIsCollapsed, isMobile, setIsMobile
                     className={`${baseStyle} ${isActive ? activeStyle : inactiveStyle}`}
                   >
                     <span className="text-xl">{icon}</span>
-                    {!isCollapsed && <span className="flex-1">{text}</span>}
+                    {!isCollapsed && <span className="flex-1">{t(text)}</span>}
                   </Link>
                 )
               })}

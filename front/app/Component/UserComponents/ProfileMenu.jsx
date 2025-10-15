@@ -7,6 +7,7 @@ import { IoEyeSharp } from 'react-icons/io5'
 import { HiLockClosed, HiLockOpen, HiLink } from 'react-icons/hi'
 import Link from 'next/link'
 import { useAuth } from '../../Context/AuthContext'
+import { useTranslation } from 'react-i18next'
 
 const MenuItem = ({ icon, children, onClick, danger }) => (
   <button
@@ -40,7 +41,7 @@ const ProfileMenu = ({
     alert("✅ Profile link copied!")
     setOpen(false)
   }
-
+  const {t} = useTranslation()
   return (
     <div className="relative inline-block text-left">
       <AnimatePresence>
@@ -59,12 +60,12 @@ const ProfileMenu = ({
               {context === "owner" && (
                 <>
                   <Link href={`/Pages/User/${user?._id}`}>
-                    <MenuItem icon={<IoEyeSharp />}>View as Visitor</MenuItem>
+                    <MenuItem icon={<IoEyeSharp />}>{t("View as Visitor")}</MenuItem>
                   </Link>
 
                   {actions.setUpdate && (
                     <MenuItem icon={<FaUserEdit />} onClick={() => { setOpen(false); actions.setUpdate(true) }}>
-                      Edit Profile
+                      {t("Edit Profile")}
                     </MenuItem>
                   )}
 
@@ -73,7 +74,7 @@ const ProfileMenu = ({
                       icon={isPrivate ? <HiLockOpen /> : <HiLockClosed />} 
                       onClick={actions.updatePrivacy}
                     >
-                      {isPrivate ? "Make Account Public" : "Make Account Private"}
+                      {isPrivate ? `${t("Make Account Public")}` : `${t("Make Account Private")}`}
                     </MenuItem>
                   )}
                 </>
@@ -84,7 +85,7 @@ const ProfileMenu = ({
                 <>
                   {actions.handleReport && (
                     <MenuItem onClick={actions.handleReport} danger>
-                      🚩 Report User
+                      🚩 {t("Report User")}
                     </MenuItem>
                   )}
 
@@ -93,7 +94,7 @@ const ProfileMenu = ({
                       onClick={() => actions.blockOrUnblockUser(userId)} 
                       danger
                     >
-                      {isBlockedByMe ? "🔓 Unblock User" : "⛔ Block User"}
+                      {isBlockedByMe ? `${t("Unblock User")}` : `${t("Block User")}`}
                     </MenuItem>
                   )}
                 </>
@@ -103,7 +104,7 @@ const ProfileMenu = ({
 
               {/* مشترك */}
               <MenuItem icon={<HiLink />} onClick={copyToClipboard}>
-                Copy Profile Link
+                {t("Copy Profile Link")}
               </MenuItem>
             </div>
           </motion.div>

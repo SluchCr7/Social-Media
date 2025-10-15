@@ -250,7 +250,7 @@ const DesignPostSelect = ({
   const { t } = useTranslation();
 
   return (
-    <div className="relative w-[90%] md:w-full mx-auto">
+    <div className="relative w-[95%] md:w-full mx-auto">
       {/* Share Modal */}
       <ShareModal
         post={post}
@@ -258,9 +258,8 @@ const DesignPostSelect = ({
         onClose={() => setOpenModel(false)}
         onShare={(id, customText) => sharePost(id, post?.owner?._id, customText)}
       />
-
       <motion.div
-        className="w-full max-w-5xl mx-auto p-3 sm:p-6 flex flex-col gap-6"
+        className="w-full p-3 sm:p-6 flex flex-col gap-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -282,7 +281,7 @@ const DesignPostSelect = ({
         {isShared && <SharedTitle user={user} post={post} original={original} />}
 
         {/* Post Card */}
-        <div className="flex flex-col sm:flex-row gap-4 bg-white/30 dark:bg-black/30 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg p-4 sm:p-6 transition-transform hover:scale-[1.01]">
+        <div className="flex flex-col sm:flex-row items-start gap-4 bg-white/30 dark:bg-black/30 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg p-4 sm:p-6 transition-transform hover:scale-[1.01]">
 
           {/* Profile / Post Image */}
           <PostImage

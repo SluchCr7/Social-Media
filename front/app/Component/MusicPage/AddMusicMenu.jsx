@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { IoClose, IoImage, IoMusicalNotes } from "react-icons/io5";
 import Image from "next/image";
 import { useMusic } from "../../Context/MusicContext";
+import { useTranslation } from "react-i18next";
 
 const genres = ["Pop", "Rock", "HipHop", "Jazz", "Classical", "Other"];
 
@@ -19,7 +20,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
   const [tags, setTags] = useState("");
   const [loading, setLoading] = useState(false);
   const { uploadMusic } = useMusic();
-
+  const {t} = useTranslation()
   const handleCoverChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -81,7 +82,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
             </button>
 
             <h2 className="text-center text-2xl sm:text-3xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-              🎵 Add New Music
+              🎵 {t("Add New Music")}
             </h2>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -99,7 +100,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
                       />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-3 transition">
                         <label className="px-3 py-1.5 bg-white/90 dark:bg-gray-800 text-sm rounded-lg font-medium cursor-pointer hover:bg-white dark:hover:bg-gray-700 transition">
-                          Change
+                          {t("Change")}
                           <input
                             type="file"
                             accept="image/*"
@@ -115,7 +116,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
                           }}
                           className="px-3 py-1.5 bg-red-500 text-white text-sm rounded-lg font-medium hover:bg-red-600 transition"
                         >
-                          Clear
+                          {t("Clear")}
                         </button>
                       </div>
                     </>
@@ -141,7 +142,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
                 { label: "Album (Optional)", value: album, set: setAlbum, placeholder: "Enter album name" },
               ].map((f, i) => (
                 <div key={i}>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">{f.label}</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">{t(f.label)}</label>
                   <input
                     type="text"
                     value={f.value}
@@ -154,7 +155,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
 
               {/* Genre */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Genre</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">{t("Genre")}</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {genres.map((g) => (
                     <label
@@ -180,7 +181,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
 
               {/* Language */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Language</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">{t("Language")}</label>
                 <input
                   type="text"
                   value={language}
@@ -192,7 +193,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
 
               {/* Tags */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Tags (comma separated)</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">{t("Tags")} (comma separated)</label>
                 <input
                   type="text"
                   value={tags}
@@ -204,7 +205,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
 
               {/* Audio Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Upload Music File</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">{t("Upload Music File")}</label>
                 <input
                   type="file"
                   accept="audio/*"
@@ -235,7 +236,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
                 ) : (
                   <>
                     <IoMusicalNotes className="inline-block text-xl mr-2" />
-                    Save Music
+                    {t("Save Music")}
                   </>
                 )}
               </motion.button>

@@ -7,13 +7,15 @@ import { motion } from "framer-motion";
 import { useCommunity } from "../Context/CommunityContext";
 import { useAuth } from "../Context/AuthContext";
 import { useUser } from "../Context/UserContext";
+import { useTranslate } from "../Context/TranslateContext";
+import { useTranslation } from "react-i18next";
 
 export const SuggestionRow = ({ type, data }) => {
   const { joinToCommunity } = useCommunity();
   const {  user } = useAuth(); // تأكد أن لديك user من context
   const {followUser} = useUser()
   if (!data || data.length === 0) return null;
-
+  const {t} = useTranslation()
   return (
     <div className="w-full grid gap-6 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
       {data.map((item, idx) => {
@@ -55,7 +57,7 @@ export const SuggestionRow = ({ type, data }) => {
                 </div>
               )}
               <span className="absolute bottom-0 right-0 bg-blue-500 text-white text-[10px] font-medium px-2 py-0.5 rounded-full shadow-md">
-                {isUserType ? "User" : "Community"}
+                {isUserType ? `${t("User")}` : `${t("Community")}`}
               </span>
             </div>
 
@@ -93,7 +95,7 @@ export const SuggestionRow = ({ type, data }) => {
                   {isUserType ? (
                     isFollowing ? (
                       <div className="mt-5 w-full py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800">
-                        ✅ Following
+                        ✅ {t("Following")}
                       </div>
                     ) : (
                       <motion.button
@@ -101,12 +103,12 @@ export const SuggestionRow = ({ type, data }) => {
                         onClick={() => followUser(item._id)}
                         className="mt-5 w-full py-2.5 rounded-xl text-sm font-medium text-white shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500"
                       >
-                        <FiUserPlus size={16} /> Follow
+                        <FiUserPlus size={16} /> {t("Follow")}
                       </motion.button>
                     )
                   ) : isMember ? (
                     <div className="mt-5 w-full py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800">
-                      ✅ Joined
+                      ✅ {t("Joined")}
                     </div>
                   ) : (
                     <motion.button
@@ -114,7 +116,7 @@ export const SuggestionRow = ({ type, data }) => {
                       onClick={() => joinToCommunity(item._id)}
                       className="mt-5 w-full py-2.5 rounded-xl text-sm font-medium text-white shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 bg-gradient-to-r from-green-400 to-blue-500"
                     >
-                      <Users size={16} /> Join
+                      <Users size={16} /> {t("Join")}
                     </motion.button>
                   )}
                 </>

@@ -11,6 +11,7 @@ import Link from "next/link";
 import StatBlock from "./StatBlock";
 import { useAuth } from "@/app/Context/AuthContext";
 import { useUser } from "@/app/Context/UserContext";
+import { useTranslation } from "react-i18next";
 
 const ProfileHeader = ({
   user: profileUser,
@@ -33,7 +34,7 @@ const ProfileHeader = ({
 }) => {
   const { user: authUser } = useAuth();
   const { loading } = useUser();
-
+const {t} = useTranslation()
   const handleClick = async () => {
     try {
       if (isFollowing) await onUnfollow?.();
@@ -135,7 +136,7 @@ const ProfileHeader = ({
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
             >
-              {profileUser?.userLevelPoints || 0} XP
+              {profileUser?.userLevelPoints || 0} {t("XP")}
             </motion.span>
           </div>
           <div className="w-full h-3 bg-gray-300 dark:bg-gray-700 rounded-full mt-2 overflow-hidden shadow-inner">
@@ -154,7 +155,7 @@ const ProfileHeader = ({
             />
           </div>
           <span className="block text-xs text-gray-500 mt-1 text-right">
-            Next level in{" "}
+            {t("Next level in")}{" "}
             {Math.max(
               (profileUser?.nextLevelPoints || 500) -
                 (profileUser?.userLevelPoints || 0),
@@ -179,7 +180,7 @@ const ProfileHeader = ({
                   onClick={onAddStory}
                   className="flex items-center gap-2 border px-4 sm:px-6 py-2 rounded-lg text-sm font-medium hover:bg-lightMode-hover dark:hover:bg-darkMode-hover hover:shadow transition"
                 >
-                  <IoAdd /> Add Story
+                  <IoAdd /> {t("Add Story")}
                 </motion.button>
               </div>
             ) : (
@@ -204,7 +205,7 @@ const ProfileHeader = ({
                   ) : (
                     <>
                       {isFollowing ? <RiUserUnfollowLine /> : <RiUserFollowLine />}
-                      <span>{isFollowing ? "Unfollow" : "Follow"}</span>
+                      <span>{isFollowing ? t("Unfollow") : t("Follow")}</span>
                     </>
                   )}
                 </button>

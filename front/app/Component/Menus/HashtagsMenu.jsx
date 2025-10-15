@@ -3,10 +3,11 @@ import { usePost } from '../../Context/PostContext';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import Link from 'next/link';
 import { filterHashtags } from '../../utils/filterHashtags';
+import { useTranslation } from 'react-i18next';
 
 const HashtagsMenu = () => {
   const { posts } = usePost();
-
+  const {t} = useTranslation()
   // Collect all hashtags from all posts
   const hashtagCount = {};
   filterHashtags(posts, hashtagCount);
@@ -22,7 +23,7 @@ const HashtagsMenu = () => {
       {/* Header */}
       <div className="flex justify-between items-center px-5 py-3 border-b border-gray-300 dark:border-gray-600 bg-gradient-to-r from-purple-500 to-indigo-500">
         <h2 className="text-white text-lg font-semibold">
-          Trending Hashtags
+          {t("Trending Hashtags")}
         </h2>
       </div>
 
@@ -30,7 +31,7 @@ const HashtagsMenu = () => {
       <div className="flex flex-col w-full px-4 py-3 space-y-2">
         {topHashtags.length === 0 ? (
           <div className="flex items-center justify-center py-10 text-gray-500 dark:text-gray-400 text-sm">
-            No trending hashtags yet.
+            {t("No trending hashtags yet.")}
           </div>
         ) : (
           topHashtags.map(([tag, count], index) => {
@@ -44,7 +45,7 @@ const HashtagsMenu = () => {
               >
                 <div className="flex flex-col">
                   <span className="text-gray-900 dark:text-gray-100 font-medium">#{tag}</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{count} posts</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{count} {t("posts")}</span>
                 </div>
                 <div className={`flex items-center justify-center w-6 h-6 rounded-full ${isTrendingUp ? 'bg-green-100 dark:bg-green-800' : 'bg-red-100 dark:bg-red-800'}`}>
                   {isTrendingUp ? (
