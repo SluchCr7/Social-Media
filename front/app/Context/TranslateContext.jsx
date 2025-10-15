@@ -1,6 +1,7 @@
 'use client'
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import i18n from '@/app/i18n';
 
 const TranslateContext = createContext();
 
