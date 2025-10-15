@@ -88,23 +88,23 @@ const LayoutComponent = ({ children }) => {
           />
         )}
 
-        <div
-          className={`flex items-start transition-all duration-300 ${
-            hideLayout
-              ? `w-full`
-              : isLogin
-              ? `w-full ${
-                  isCollapsed
-                    ? isRTL
-                      ? 'md:mr-[85px]'   // RTL: margin-right
-                      : 'md:ml-[85px]'   // LTR: margin-left
-                    : isRTL
-                    ? 'md:mr-[260px]'
-                    : 'md:ml-[260px]'
-                }`
-              : 'w-[90%] md:w-[80%] mx-auto'
-          }`}
-        >
+                <div
+        className={`flex items-start transition-all duration-300 ${
+          hideLayout
+            ? `w-full`
+            : isLogin
+            ? `w-full ${
+                isCollapsed
+                  ? isRTL
+                    ? 'md:mr-[85px]'   // RTL: margin-right
+                    : 'md:ml-[85px]'   // LTR: margin-left
+                  : isRTL
+                  ? 'md:mr-[280px]'
+                  : 'md:ml-[260px]'
+              }`
+            : 'w-[90%] md:w-[80%] mx-auto'
+        }`}
+      >
 
           <Alert />
 

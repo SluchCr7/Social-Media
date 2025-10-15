@@ -42,7 +42,7 @@ const Aside = ({isCollapsed, setIsCollapsed}) => {
       <motion.aside
         animate={{ width: isCollapsed ? 80 : 260 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className={`hidden fixed top-0 ${isRTL ? 'right-0' : 'left-0'} flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r p-3 hover-expanded`}
+        className={`hidden md:flex fixed top-0 ${isRTL ? 'right-0' : 'left-0'} flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r p-3 hover-expanded`}
       >
 
         <SidebarContent
