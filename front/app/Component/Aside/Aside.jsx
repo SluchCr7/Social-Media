@@ -9,6 +9,7 @@ import { useAuth } from '../../Context/AuthContext'
 import { useAside } from '../../Context/AsideContext'
 import SidebarContent from './SidebarContent'
 import { useUser } from '@/app/Context/UserContext'
+import { useTranslate } from '@/app/Context/TranslateContext'
 
 
 
@@ -18,7 +19,8 @@ const Aside = ({isCollapsed, setIsCollapsed}) => {
   const {onlineUsers} = useUser()
   const { isMobile, setIsMobile, isMobileMenuOpen, setIsMobileMenuOpen } = useAside()
   // const [isCollapsed, setIsCollapsed] = useState(false)
-
+  const { language } = useTranslate();
+  const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language); // true لو RTL
   // Detect mobile safely (SSR safe)
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -40,8 +42,9 @@ const Aside = ({isCollapsed, setIsCollapsed}) => {
       <motion.aside
         animate={{ width: isCollapsed ? 80 : 260 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="hidden fixed top-0 left-0 lg:flex flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r p-3 hover-expanded"
+        className={`hidden fixed top-0 ${isRTL ? 'right-0' : 'left-0'} flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r p-3 hover-expanded`}
       >
+
         <SidebarContent
           isCollapsed={isCollapsed}
           isMobile={false}
@@ -59,13 +62,21 @@ const Aside = ({isCollapsed, setIsCollapsed}) => {
             className="fixed inset-0 bg-black/40"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <motion.aside
+          {/* <motion.aside
             initial={{ x: -300 }}
             animate={{ x: 0 }}
             exit={{ x: -300 }}
             transition={{ type: 'spring', stiffness: 260, damping: 25 }}
             className="relative w-72 bg-lightMode-menu dark:bg-darkMode-menu p-4 flex flex-col"
+          > */}
+          <motion.aside
+            initial={{ x: isRTL ? 300 : -300 }}
+            animate={{ x: 0 }}
+            exit={{ x: isRTL ? 300 : -300 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 25 }}
+            className={`relative w-72 bg-lightMode-menu dark:bg-darkMode-menu p-4 flex flex-col ${isRTL ? 'right-0' : 'left-0'}`}
           >
+
             <button
               onClick={() => setIsMobileMenuOpen(false)}
               className="absolute top-4 right-4 text-2xl text-lightMode-text dark:text-darkMode-text"

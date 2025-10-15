@@ -1,9 +1,11 @@
 import React from 'react'
 import ReelCard from '../../Component/ReelCard';
 import ReelSkeleton from '../../Skeletons/ReelSkeleton';
+import { useTranslation } from 'react-i18next';
 const DesignReels = ({
     containerRef , reels , currentIndex , reelRefs , isLoading , lastReelRef , isMuted , setIsMuted
 }) => {
+  const { t } = useTranslation()
   return (
     <div
       ref={containerRef}
@@ -35,7 +37,7 @@ const DesignReels = ({
 
       {reels.length === 0 && !isLoading && (
         <p className="text-lightMode-fg dark:text-darkMode-fg text-center py-10">
-          No reels available
+          {t("No reels available")}
         </p>
       )}
       </div>

@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import AddEventModal from '@/app/Component/AddandUpdateMenus/AddEventModal';
 import EventDetailsModal from '@/app/Component/AddandUpdateMenus/EventDetailsModal';
 import ShowAllEvents from '@/app/Component/AddandUpdateMenus/ShowAllEvents';
+import { useTranslation } from 'react-i18next';
 
 
 const DesignCalender = ({
@@ -27,7 +28,7 @@ const DesignCalender = ({
 
   // helper to format day key
   const dayKey = (d) => d.format('YYYY-MM-DD')
-
+  const {t} = useTranslation()
   return (
     <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto
       bg-gradient-to-b from-white/2 dark:from-black/40 to-transparent
@@ -51,10 +52,10 @@ const DesignCalender = ({
                 onClick={() => setCurrentDate(dayjs())}
                 className="text-sm text-blue-500 hover:underline"
               >
-                Today
+                {t("Today")}
               </button>
               <span>·</span>
-              <span>{days.length} days</span>
+              <span>{days.length} {t("days")}</span>
             </div>
           </div>
 
@@ -76,13 +77,13 @@ const DesignCalender = ({
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg shadow"
             title="Add event"
           >
-            <FaPlus /> <span className="text-sm hidden sm:inline">Add Event</span>
+            <FaPlus /> <span className="text-sm hidden sm:inline">{t("Add Event")}</span>
           </button>
 
           <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <span className="flex items-center gap-1"><FaBirthdayCake /> Birthday</span>
-            <span className="flex items-center gap-1"><FaUsers /> Meeting</span>
-            <span className="flex items-center gap-1"><FaCalendarAlt /> Public</span>
+            <span className="flex items-center gap-1"><FaBirthdayCake /> {t("Birthday")}</span>
+            <span className="flex items-center gap-1"><FaUsers /> {t("Meeting")}</span>
+            <span className="flex items-center gap-1"><FaCalendarAlt /> {t("Public")}</span>
           </div>
         </div>
       </div>
@@ -177,13 +178,13 @@ const DesignCalender = ({
                           setShowDayEvents(dayEvents)
                         }}
                       >
-                        +{moreCount} more
+                        +{moreCount} {t("more")}
                       </button>
                     )}
 
                     {/* empty hint */}
                     {dayEvents.length === 0 && (
-                      <div className="text-[12px] text-gray-500 mt-1">No events</div>
+                      <div className="text-[12px] text-gray-500 mt-1">{t("No events")}</div>
                     )}
                   </div>
                 </motion.div>

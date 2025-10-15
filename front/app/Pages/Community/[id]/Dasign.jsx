@@ -7,6 +7,8 @@ import Link from 'next/link'
 import { FaBook } from 'react-icons/fa' // أيقونة القوانين
 import { motion, AnimatePresence } from 'framer-motion'
 import EditCommunityMenu from '@/app/Component/AddandUpdateMenus/EditCommunityMenu'
+import { useTranslation } from 'react-i18next'
+
 const ActionButton = ({ children, onClick, variant = 'primary', className = '' }) => {
   const styles = {
     primary: 'bg-blue-600 hover:bg-blue-700',
@@ -24,12 +26,37 @@ const ActionButton = ({ children, onClick, variant = 'primary', className = '' }
     </button>
   )
 }
+
 const DasignCommunitySelect = ({
-    CommunitySelected,setShowEdit,showMembers,setShowMembers,showRequests,setShowRequests,searchTerm,setSearchTerm,activeMemberTab,setActiveMemberTab,showRules,setShowRules,
-    isJoined,hasPendingRequest,handleJoinToggle,handleMakeAdmin,handleRemoveMember,handleApprove,handleReject,
-    setCommunitySelected,postsFiltered,showEdit,setPostsFiltered
-    ,filteredMembers,isOwner,isAdmin,posts,user
+  CommunitySelected,
+  setShowEdit,
+  showMembers,
+  setShowMembers,
+  showRequests,
+  setShowRequests,
+  searchTerm,
+  setSearchTerm,
+  activeMemberTab,
+  setActiveMemberTab,
+  showRules,
+  setShowRules,
+  isJoined,
+  hasPendingRequest,
+  handleJoinToggle,
+  handleMakeAdmin,
+  handleRemoveMember,
+  handleApprove,
+  handleReject,
+  setCommunitySelected,
+  postsFiltered,
+  filteredMembers,
+  isOwner,
+  isAdmin,
+  posts,
+  user
 }) => {
+  const { t } = useTranslation() // استدعاء دالة الترجمة
+
   return (
     <div className="w-full text-lightMode-text dark:text-darkMode-text bg-lightMode-bg dark:bg-darkMode-bg min-h-screen pb-12">
 
@@ -38,7 +65,7 @@ const DasignCommunitySelect = ({
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative">
           <Image
             src={CommunitySelected?.Cover?.url || '/default-cover.jpg'}
-            alt="Cover"
+            alt={t('Cover')}
             width={1200}
             height={300}
             className="w-full h-[220px] sm:h-[260px] object-cover rounded-b-xl shadow"
@@ -50,7 +77,7 @@ const DasignCommunitySelect = ({
           <div className="absolute left-6 -bottom-12">
             <Image
               src={CommunitySelected?.Picture?.url || '/default-avatar.png'}
-              alt="Avatar"
+              alt={t('Avatar')}
               width={100}
               height={100}
               className="w-24 h-24 rounded-full border-4 border-white object-cover shadow-md"
@@ -62,19 +89,19 @@ const DasignCommunitySelect = ({
             {(isOwner(user?._id) || isAdmin(user?._id)) && (
               <div className="flex gap-2">
                 <ActionButton onClick={() => setShowEdit(true)} variant="warning">
-                  <FaEdit /> Edit
+                  <FaEdit /> {t('Edit')}
                 </ActionButton>
               </div>
             )}
             <ActionButton onClick={() => setShowRules(true)} variant="dark">
-              <FaBook /> Rules
+              <FaBook /> {t('Rules')}
             </ActionButton>
 
             {user && !isOwner(user._id) && (
               <>
                 {isJoined ? (
                   <ActionButton onClick={handleJoinToggle} variant="danger">
-                    Leave
+                    {t('Leave')}
                   </ActionButton>
                 ) : hasPendingRequest ? (
                   <ActionButton
@@ -82,16 +109,15 @@ const DasignCommunitySelect = ({
                     className="opacity-60 cursor-not-allowed"
                     onClick={null} // منع الضغط
                   >
-                    Pending...
+                    {t('Pending...')}
                   </ActionButton>
                 ) : (
                   <ActionButton onClick={handleJoinToggle} variant="primary">
-                    <FaPlus /> {CommunitySelected.isPrivate ? 'Request Join' : 'Join'}
+                    <FaPlus /> {CommunitySelected.isPrivate ? t('Request Join') : t('Join')}
                   </ActionButton>
                 )}
               </>
             )}
-
           </div>
         </motion.div>
       </div>
@@ -101,9 +127,9 @@ const DasignCommunitySelect = ({
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold flex items-center gap-3">
             {CommunitySelected?.Name}
-            <span className="text-xs text-lightMode-text dark:text-darkMode-text px-2 py-0.5 rounded">{CommunitySelected?.isPrivate ? 'Private' : 'Public'}</span>
+            <span className="text-xs text-lightMode-text dark:text-darkMode-text px-2 py-0.5 rounded">{CommunitySelected?.isPrivate ? t('Private') : t('Public')}</span>
           </h1>
-          <div className="text-sm text-gray-500">Created: {new Date(CommunitySelected?.createdAt).toLocaleDateString()}</div>
+          <div className="text-sm text-gray-500">{t('Created')}: {new Date(CommunitySelected?.createdAt).toLocaleDateString()}</div>
         </div>
 
         <p className="text-sm text-gray-900 dark:text-gray-200 whitespace-pre-wrap break-words leading-relaxed p-4 rounded-md shadow-sm">
@@ -113,7 +139,7 @@ const DasignCommunitySelect = ({
         {/* Members Summary */}
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm text-gray-500 flex items-center gap-2">
-            <FaUser /> {CommunitySelected?.members?.length || 0} Members
+            <FaUser /> {CommunitySelected?.members?.length || 0} {t('Members')}
           </p>
 
           <div className="flex items-center gap-2">
@@ -122,11 +148,11 @@ const DasignCommunitySelect = ({
                 onClick={() => setShowRequests(true)}
                 className="text-sm px-3 py-1 rounded-md bg-yellow-400 hover:bg-yellow-500 text-white"
               >
-                Requests ({CommunitySelected?.joinRequests?.length || 0})
+                {t('Requests')} ({CommunitySelected?.joinRequests?.length || 0})
               </button>
             )}
             <button onClick={() => setShowMembers(true)} className="text-sm px-3 py-1 rounded-md bg-lightMode-bg dark:bg-darkMode-bg hover:bg-lightMode-menu dark:hover:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text">
-              See all
+              {t('See all')}
             </button>
           </div>
         </div>
@@ -141,16 +167,15 @@ const DasignCommunitySelect = ({
             postsFiltered.map((post) => <SluchitEntry post={post} key={post?._id} />)
           ) : (
             <div className="text-center text-sm py-12 rounded-lg shadow-sm">
-              This community has no posts yet.
+              {t('This community has no posts yet.')}
             </div>
           )
         ) : (
           <div className="text-center text-sm py-12 text-gray-500">
-            You need to join this private community to view posts.
+            {t('You need to join this private community to view posts.')}
           </div>
         )}
       </div>
-
       {/* Edit Modal */}
       <AnimatePresence>
         {showEdit && (
@@ -264,7 +289,7 @@ const DasignCommunitySelect = ({
                     </div>
                   ))
                 ) : (
-                  <div className="text-center text-gray-500 py-12">No pending requests.</div>
+                  <div className="text-center text-gray-500 py-12">{t("No pending requests.")}</div>
                 )}
               </div>
             </motion.div>
@@ -294,7 +319,7 @@ const DasignCommunitySelect = ({
               </button>
 
               <h3 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-6 flex items-center justify-center gap-2">
-                <FaBook /> Community Rules
+                <FaBook /> {t("Community Rules")}
               </h3>
 
               {CommunitySelected?.rules?.length > 0 ? (
@@ -308,7 +333,7 @@ const DasignCommunitySelect = ({
                 </ul>
               ) : (
                 <p className="text-center text-gray-500 dark:text-gray-400 py-12">
-                  No rules have been set for this community yet.
+                  {t("No rules have been set for this community yet.")}
                 </p>
               )}
             </motion.div>

@@ -2,14 +2,11 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import clsx from 'clsx'
-import {
-  FaSun, FaMoon, FaLock, FaUserCog, FaTrashAlt, FaHistory
-} from 'react-icons/fa'
-import { MdLanguage } from 'react-icons/md'
+import { FaSun, FaMoon } from 'react-icons/fa'
+import { useTranslation } from 'react-i18next'
+
 import { TABS, DEFAULT_COLORS } from '@/app/utils/Data'
 import MobileBottomNav from '@/app/Component/Setting/MobileBottomNav'
-import LanguageCard from '@/app/Component/Setting/LanguageCard'
-import LoginHistoryTimeline from '@/app/Component/Setting/LoginHistoryTimeline'
 import AppearanceTab from './Tabs/Apperance'
 import Security from './Tabs/Security'
 import AccountTab from './Tabs/AccountTab'
@@ -31,6 +28,7 @@ export default function SettingsView({
   language,
   handleLanguageChange
 }) {
+  const { t } = useTranslation()
   const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -72,7 +70,7 @@ export default function SettingsView({
                     {(user?.username || 'U').charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <div className="font-semibold">{user?.profileName || user?.username || 'User'}</div>
+                    <div className="font-semibold">{user?.profileName || user?.username || t('User')}</div>
                     <div className="text-xs text-gray-500">@{user?.username || 'username'}</div>
                   </div>
                 </div>
@@ -90,7 +88,7 @@ export default function SettingsView({
                       )}
                     >
                       <div className="text-lg">{tab.icon}</div>
-                      <div className="flex-1 text-left">{tab.label}</div>
+                      <div className="flex-1 text-left">{t(tab.label)}</div>
                       {activeTab === tab.id && (
                         <div className="w-2 h-2 rounded-full bg-white/40" />
                       )}
@@ -100,15 +98,15 @@ export default function SettingsView({
               </div>
 
               <div className="mt-4">
-                <div className="text-xs text-gray-500 mb-2">Theme</div>
+                <div className="text-xs text-gray-500 mb-2">{t('Theme')}</div>
                 <div className="flex items-center gap-3">
-                  <button 
+                  <button
                     onClick={toggleTheme}
                     className="p-2 rounded-md shadow hover:scale-105 transition bg-white/50 dark:bg-gray-800/50"
                   >
                     {darkMode ? <FaMoon /> : <FaSun />}
                   </button>
-                  <div className="text-sm">{darkMode ? 'Dark' : 'Light'}</div>
+                  <div className="text-sm">{darkMode ? t('Dark') : t('Light')}</div>
                 </div>
               </div>
             </div>
@@ -119,13 +117,13 @@ export default function SettingsView({
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h1 className="text-2xl font-bold">Settings</h1>
+                <h1 className="text-2xl font-bold">{t('Settings')}</h1>
                 <p className="text-sm text-gray-500">
-                  Manage your account, privacy and appearance
+                  {t('Manage your account, privacy and appearance')}
                 </p>
               </div>
               <div className="hidden md:flex items-center gap-3">
-                <div className="text-sm text-gray-500">Signed in as</div>
+                <div className="text-sm text-gray-500">{t('Signed in as')}</div>
                 <div className="font-medium">@{user?.username || 'username'}</div>
               </div>
             </div>
@@ -136,7 +134,7 @@ export default function SettingsView({
               )}
 
               {activeTab === 'security' && (
-                <Security  
+                <Security
                   oldPassword={oldPassword}
                   setOldPassword={setOldPassword}
                   newPassword={newPassword}
@@ -150,10 +148,11 @@ export default function SettingsView({
               )}
 
               {activeTab === 'language' && (
-                  <LanguageTab language={language} handleLanguageChange={handleLanguageChange}/>
+                <LanguageTab language={language} handleLanguageChange={handleLanguageChange} />
               )}
+
               {activeTab === 'history' && (
-                <HistoryTab loginHistory={loginHistory}/>
+                <HistoryTab loginHistory={loginHistory} />
               )}
 
               {activeTab === 'account' && (

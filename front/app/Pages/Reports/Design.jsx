@@ -2,6 +2,7 @@ import ConfirmModal from '@/app/Component/ReportsComponents/ConfirmModal'
 import ReportsTable from '@/app/Component/ReportsComponents/ReportsTable'
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 
 const DesignReports = ({
@@ -16,24 +17,25 @@ const DesignReports = ({
     openModal,      
     handleAction,   
 }) => {
+  const { t } = useTranslation()
   return (
     <div className="min-h-screen bg-lightMode-bg dark:bg-darkMode-bg p-6 w-full">
       <h1 className="text-3xl font-bold mb-6 text-lightMode-text2 dark:text-darkMode-text2">
-        Reports Management
+        {t("Reports Management")}
       </h1>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="p-4 bg-white dark:bg-darkMode-card rounded-xl shadow">
-          <p className="text-sm text-gray-500">Total Reports</p>
+          <p className="text-sm text-gray-500">{t("Total Reports")}</p>
           <p className="text-2xl font-bold">{reports.length}</p>
         </div>
         <div className="p-4 bg-white dark:bg-darkMode-card rounded-xl shadow">
-          <p className="text-sm text-gray-500">Posts</p>
+          <p className="text-sm text-gray-500">{t("Posts")}</p>
           <p className="text-2xl font-bold">{postsReports.length}</p>
         </div>
         <div className="p-4 bg-white dark:bg-darkMode-card rounded-xl shadow">
-          <p className="text-sm text-gray-500">Users</p>
+          <p className="text-sm text-gray-500">{t("Users")}</p>
           <p className="text-2xl font-bold">{usersReports.length}</p>
         </div>
       </div>
@@ -57,7 +59,7 @@ const DesignReports = ({
 
       {/* Reports Table */}
       {loading ? (
-        <p>Loading...</p>
+        <p>{t("Loading")}...</p>
       ) : activeTab === 'post' ? (
         <ReportsTable reports={postsReports} type="post" openModal={openModal} />
       ) : activeTab === 'comment' ? (

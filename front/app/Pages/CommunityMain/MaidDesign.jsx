@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import CommunityCard from '@/app/Component/Community/CommunityCard'
 import CreateCommunityModal from '@/app/Component/Community/CreateCommunityModal'
 import CommunityFilter from '@/app/Component/Community/CommunityFilter'
+import { useTranslation } from 'react-i18next'
 
 
 const MaidDesign = ({
@@ -23,6 +24,7 @@ const MaidDesign = ({
   handleCreate,                
   isCreating                   
 }) => {
+  const {t} = useTranslation()
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-10 space-y-10 bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text">
 
@@ -31,17 +33,17 @@ const MaidDesign = ({
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="w-full md:w-2/3 space-y-4">
             <h1 className="text-3xl md:text-4xl font-extrabold flex items-center gap-2">
-              🌐 Community Hub
+              🌐 {t("Community Hub")}
             </h1>
             <p className="text-sm md:text-base opacity-95 max-w-full">
-              Discover, create, and join active groups around your interests.
+              {t("Discover, create, and join active groups around your interests.")}
             </p>
             <div className="flex gap-4 flex-wrap">
               <button
                 onClick={() => setShowCreateModal(true)}
                 className="inline-flex items-center gap-2 bg-lightMode-fg dark:bg-darkMode-fg text-lightMode-bg dark:text-darkMode-bg px-4 py-2 rounded-xl font-semibold shadow hover:scale-105 transition-transform"
               >
-                <FaPlus /> Create Community
+                <FaPlus /> {t("Create Community")}
               </button>
             </div>
           </div>
@@ -72,15 +74,15 @@ const MaidDesign = ({
             <div className="w-32 h-32 bg-lightMode-bg dark:bg-darkMode-bg rounded-lg flex items-center justify-center text-4xl">
               📭
             </div>
-            <h3 className="text-lg font-semibold">No communities found</h3>
+            <h3 className="text-lg font-semibold">{t("No communities found")}</h3>
             <p className="text-sm text-lightMode-text2 dark:text-darkMode-text2">
-              Try a different filter or create a new community.
+              {t("Try a different filter or create a new community.")}
             </p>
             <button
               onClick={() => setShowCreateModal(true)}
               className="mt-3 px-4 py-2 bg-sky-600 text-white rounded-lg"
             >
-              Create community
+              {t("Create community")}
             </button>
           </div>
         ) : (

@@ -3,8 +3,10 @@ import React, { useState } from 'react'
 import { useAuth } from '@/app/Context/AuthContext'
 import { FiEye, FiEyeOff, FiMail, FiUser, FiLock } from 'react-icons/fi'
 import { FcGoogle } from 'react-icons/fc'
+import { useTranslation } from 'react-i18next'
 
 const Register = () => {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState({ email: '', password: '', username: '' })
   const [agreeTerms, setAgreeTerms] = useState(false)
   const [error, setError] = useState('')
@@ -27,14 +29,14 @@ const Register = () => {
       const { email, password, username } = formData
 
       if (!agreeTerms) {
-        setError('You must agree to the Terms and Conditions to register.')
+        setError(t('You must agree to the Terms and Conditions to register.'))
         return
       }
 
       if (email && password && username) {
         registerNewUser(username, email, password)
       } else {
-        setError('Please fill all required fields correctly.')
+        setError(t('Please fill all required fields correctly.'))
       }
     }, 1500)
   }
@@ -46,16 +48,16 @@ const Register = () => {
         <div className="hidden md:flex items-center justify-center bg-blue-50">
           <img
             src="/register2.svg"
-            alt="Register Illustration"
+            alt={t('Register Illustration')}
             className="w-3/4 h-auto"
           />
         </div>
 
         {/* Right Side (Form) */}
         <div className="p-10 md:p-16 flex flex-col justify-center">
-          <h2 className="text-4xl font-bold text-center mb-3">Create Account 👋</h2>
+          <h2 className="text-4xl font-bold text-center mb-3">{t('Create Account 👋')}</h2>
           <p className="text-center text-gray-500 mb-8">
-            Join our community and start your journey today!
+            {t('Join our community and start your journey today!')}
           </p>
 
           {error && (
@@ -71,7 +73,7 @@ const Register = () => {
               <input
                 type="email"
                 name="email"
-                placeholder="you@example.com"
+                placeholder={t('you@example.com')}
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -85,7 +87,7 @@ const Register = () => {
               <input
                 type="text"
                 name="username"
-                placeholder="John Doe"
+                placeholder={t('John Doe')}
                 value={formData.username}
                 onChange={handleChange}
                 required
@@ -99,7 +101,7 @@ const Register = () => {
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
-                placeholder="••••••••"
+                placeholder={t('••••••••')}
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -123,9 +125,9 @@ const Register = () => {
                 className="h-4 w-4 text-blue-600 border-gray-300 rounded"
               />
               <label htmlFor="terms" className="text-sm text-gray-600">
-                I agree to the{' '}
+                {t('I agree to the')}{' '}
                 <a href="/Pages/Terms" className="text-blue-500 hover:underline">
-                  Terms and Conditions
+                  {t('Terms and Conditions')}
                 </a>
               </label>
             </div>
@@ -136,25 +138,27 @@ const Register = () => {
               disabled={loading}
               className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition disabled:opacity-50"
             >
-              {loading ? 'Creating Account...' : 'Register'}
+              {loading ? t('Creating Account...') : t('Register')}
             </button>
           </form>
 
           {/* Divider */}
           <div className="my-6 flex items-center">
             <hr className="flex-grow border-gray-300" />
-            <span className="px-3 text-gray-400 text-sm">OR</span>
+            <span className="px-3 text-gray-400 text-sm">{t('OR')}</span>
             <hr className="flex-grow border-gray-300" />
           </div>
 
           {/* Social Register */}
           <button className="w-full flex items-center justify-center gap-2 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 transition">
-            <FcGoogle size={22} /> Sign up with Google
+            <FcGoogle size={22} /> {t('Sign up with Google')}
           </button>
 
           <p className="text-sm text-center text-gray-500 mt-6">
-            Already have an account?{' '}
-            <a href="/Pages/Login" className="text-blue-500 hover:underline">Login</a>
+            {t('Already have an account?')}{' '}
+            <a href="/Pages/Login" className="text-blue-500 hover:underline">
+              {t('Login')}
+            </a>
           </p>
         </div>
       </div>

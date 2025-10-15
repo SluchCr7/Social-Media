@@ -5,12 +5,13 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
 import { IoIosSearch } from "react-icons/io";
+import { useTranslation } from 'react-i18next';
 
 const DesignExplore = ({
   search, setSearch, searchResults, activeTab, setActiveTab,
   finalTabs, topHashtags, user, trendingPosts = []
 }) => {
-
+  const {t} = useTranslation()
   // فلتر الصور من الأشخاص الذين تتابعهم
   // const followingPhotos = user?.following?.flatMap(f =>
   //   f.posts?.flatMap(p => (p?.Photos?.filter(m => m.type === 'image') || [])) || []
@@ -66,10 +67,10 @@ const DesignExplore = ({
           className="text-4xl font-extrabold flex items-center gap-2 justify-center w-full
             text-lightMode-fg dark:text-darkMode-fg"
         >
-          <IoIosSearch /> Explore
+          <IoIosSearch /> {t("Explore")}
         </motion.h2>
         <p className="mt-2 text-lightMode-text2 dark:text-darkMode-text2">
-          Discover friends, creators, trending topics and news.
+          {t("Discover friends, creators, trending topics and news.")}
         </p>
       </div>
 
@@ -167,7 +168,7 @@ const DesignExplore = ({
                     hover:bg-lightMode-bg dark:hover:bg-darkMode-bg transition"
                 >
                   <span className="font-medium">#{tag}</span>
-                  <span className="text-xs text-lightMode-text2 dark:text-darkMode-text2">{count} posts</span>
+                  <span className="text-xs text-lightMode-text2 dark:text-darkMode-text2">{count} {t("posts")}</span>
                 </Link>
               ))}
             </div>
@@ -175,7 +176,7 @@ const DesignExplore = ({
 
           {searchResults.posts.length > 0 && (
             <div>
-              <h4 className="text-sm font-bold mb-2 text-indigo-600 dark:text-indigo-400">Posts</h4>
+              <h4 className="text-sm font-bold mb-2 text-indigo-600 dark:text-indigo-400">{t("Posts")}</h4>
               {searchResults.posts.map((p) => (
                 <Link
                   key={p._id}
@@ -185,9 +186,6 @@ const DesignExplore = ({
                   <p className="text-sm font-semibold text-lightMode-text dark:text-darkMode-text line-clamp-1">
                     {p.text || 'Untitled Post'}
                   </p>
-                  {/* <p className="text-xs text-lightMode-text2 dark:text-darkMode-text2 line-clamp-2">
-                    {p.content}
-                  </p> */}
                 </Link>
               ))}
             </div>
@@ -197,7 +195,7 @@ const DesignExplore = ({
            searchResults.hashtags.length === 0 &&
            searchResults.posts.length === 0 && (
             <p className="text-center text-lightMode-text2 dark:text-darkMode-text2 py-4">
-              No results found for{' '}
+              {t("No results found for")}{' '}
               <span className="font-medium text-indigo-600 dark:text-indigo-400">{search}</span>
             </p>
           )}
@@ -245,7 +243,7 @@ const DesignExplore = ({
                             timeFilter === 'today' ? 'bg-indigo-600 text-white shadow' : 'text-lightMode-text2 dark:text-darkMode-text2'
                           }`}
                         >
-                          Today
+                          {t("Today")}
                         </button>
                         <button
                           onClick={() => setTimeFilter('week')}
@@ -253,7 +251,7 @@ const DesignExplore = ({
                             timeFilter === 'week' ? 'bg-indigo-600 text-white shadow' : 'text-lightMode-text2 dark:text-darkMode-text2'
                           }`}
                         >
-                          This Week
+                          {t("This Week")}
                         </button>
                       </div>
                     </div>
@@ -296,7 +294,7 @@ const DesignExplore = ({
                                   )
                                 ) : (
                                   <div className="flex items-center justify-center w-full h-full text-sm text-lightMode-text2 dark:text-darkMode-text2">
-                                    No preview
+                                    {t("No preview")}
                                   </div>
                                 )}
                               </div>
@@ -330,7 +328,7 @@ const DesignExplore = ({
                                     <span>💬 {comments}</span>
                                   </div>
                                   <div className="text-xs">
-                                    Score {Math.round(post.score || 0)}
+                                    {t("Score")} {Math.round(post.score || 0)}
                                   </div>
                                 </div>
                               </div>
@@ -339,7 +337,7 @@ const DesignExplore = ({
                         );
                       }) : (
                         <p className="text-center text-lightMode-text2 dark:text-darkMode-text2 py-8 col-span-full">
-                          No trending content for the selected timeframe.
+                          {t("No trending content for the selected timeframe.")}
                         </p>
                       )}
                     </div>
@@ -362,7 +360,7 @@ const DesignExplore = ({
                             #{tag}
                           </span>
                           <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {count} posts
+                            {count} {t("posts")}
                           </span>
                         </div>
                         <div className={`flex items-center justify-center w-6 h-6 rounded-full ${isTrendingUp ? 'bg-green-100 dark:bg-green-800' : 'bg-red-100 dark:bg-red-800'}`}>
@@ -400,7 +398,7 @@ const DesignExplore = ({
                       ))
                     ) : (
                       <p className="text-center text-lightMode-text2 dark:text-darkMode-text2 py-8 col-span-full">
-                        No photos from people you follow yet.
+                        {t("No photos from people you follow yet.")}
                       </p>
                     )}
                   </div>

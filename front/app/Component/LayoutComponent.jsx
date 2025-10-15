@@ -18,6 +18,7 @@ import ReelUploadModal from './AddandUpdateMenus/MenuUploadReel';
 import { useMusicPlayer } from '../Context/MusicPlayerContext';
 import SongPlayer from './MusicPage/SongPlayer';
 import ExpandedWindow from './MusicPage/ExpandedWindow';
+import { useTranslate } from '../Context/TranslateContext';
 const LayoutComponent = ({ children }) => {
   const [loading, setLoading] = useState(true); // للتحكم في الـ Loader
 
@@ -34,7 +35,9 @@ const LayoutComponent = ({ children }) => {
   const { showMenuReport, setShowMenuReport, isPostId, isTargetId, reportedOnType } = useReport();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const {viewMusicPlayer, setViewMusicPlayer} = useMusicPlayer()
+  const { viewMusicPlayer, setViewMusicPlayer } = useMusicPlayer()
+    const { language } = useTranslate();
+    const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language); // true لو RTL
   // الصفحات التي لا يظهر فيها Aside أو Menu
   const hideLayout = [
     '/Admin',
@@ -88,12 +91,21 @@ const LayoutComponent = ({ children }) => {
         <div
           className={`flex items-start transition-all duration-300 ${
             hideLayout
-              ? `w-full `
+              ? `w-full`
               : isLogin
-              ? `w-full ${isCollapsed ? 'md:ml-[85px]' : 'md:ml-[260px]'}`
+              ? `w-full ${
+                  isCollapsed
+                    ? isRTL
+                      ? 'md:mr-[85px]'   // RTL: margin-right
+                      : 'md:ml-[85px]'   // LTR: margin-left
+                    : isRTL
+                    ? 'md:mr-[260px]'
+                    : 'md:ml-[260px]'
+                }`
               : 'w-[90%] md:w-[80%] mx-auto'
           }`}
         >
+
           <Alert />
 
           {children}

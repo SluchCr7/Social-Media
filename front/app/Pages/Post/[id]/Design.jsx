@@ -22,6 +22,7 @@ import PostActions from "@/app/Component/Post/PostActions";
 import ProfileHeader from "@/app/Component/UserComponents/ProfileHeader";
 import { ShareModal } from "@/app/Component/AddandUpdateMenus/SharePost";
 import PostHeader from "@/app/Component/Post/PostHeader";
+import { useTranslation } from "react-i18next";
 
 const DesignPostSelect = ({
   post,
@@ -45,7 +46,7 @@ const DesignPostSelect = ({
   openModel, setOpenModel,
   canComment
 }) => {
-
+  const {t} = useTranslation()
   return (
     <div className="relative w-[90%] md:w-full mx-auto">
       <ShareModal
@@ -63,12 +64,12 @@ const DesignPostSelect = ({
         <div className="flex flex-wrap gap-2">
           {post.isPinned && (
             <span className="px-3 py-1 text-xs font-bold text-white bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 rounded-full shadow-md">
-              📌 Pinned
+              📌 {t("Pinned")}
             </span>
           )}
           {isShared && (
             <span className="px-3 py-1 text-xs font-bold text-white bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full shadow-md">
-              🔁 Shared
+              🔁 {t("Shared")}
             </span>
           )}
         </div>
@@ -150,7 +151,7 @@ const DesignPostSelect = ({
                     <textarea
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
-                      placeholder="Write a comment..."
+                      placeholder={`${t("Write a comment")}...`}
                       rows={1}
                       onInput={(e) => {
                         e.target.style.height = 'auto'
@@ -176,7 +177,7 @@ const DesignPostSelect = ({
                 </div>
               ) : (
                 <div className="flex items-center gap-2 mt-4 px-3 py-2 bg-yellow-100 dark:bg-yellow-900 rounded-xl text-sm text-yellow-800 dark:text-yellow-300">
-                  You must follow or be followed by @{post.owner?.username} to comment on this post.
+                  {t("You must follow or be followed by")} @{post.owner?.username} to comment on this post.
                 </div>
               )
             )}
@@ -185,7 +186,7 @@ const DesignPostSelect = ({
             <div className="flex flex-col gap-4 border-t border-gray-700 pt-6">
               {post.isCommentOff ? (
                 <div className="flex flex-col items-center justify-center py-6 text-black dark:text-white">
-                  <p>Comments are turned off</p>
+                  <p>{t("Comments are turned off")}</p>
                 </div>
               ) : isLoading ? (
                 Array.from({ length: 3 }).map((_, i) => <CommentSkeleton key={i} />)
@@ -193,7 +194,7 @@ const DesignPostSelect = ({
                 comments.map((comment) => <Comment key={comment._id} comment={comment} />)
               ) : (
                 <div className="flex flex-col items-center justify-center py-6 text-black dark:text-white">
-                  <p>No comments yet</p>
+                  <p>{t("No comments yet")}</p>
                 </div>
               )}
             </div>

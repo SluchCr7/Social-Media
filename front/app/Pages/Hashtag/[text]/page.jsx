@@ -2,13 +2,14 @@
 import SluchitEntry from '@/app/Component/SluchitEntry'
 import { usePost } from '@/app/Context/PostContext'
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { FaHashtag } from 'react-icons/fa'
 
 const Page = ({ params }) => {
   const [postsRelated, setPostsRelated] = useState([])
   const { posts } = usePost()
   const text = params.text
-
+  const {t} = useTranslation()
   useEffect(() => {
     const filteredPosts = posts.filter((post) => post.Hashtags.includes(text))
     setPostsRelated(filteredPosts)
@@ -35,7 +36,7 @@ const Page = ({ params }) => {
 
         {/* Badge عدد البوستات */}
         <span className="px-4 py-1 rounded-full bg-blue-100 text-blue-600 text-sm font-medium">
-          {postsRelated.length} results
+          {postsRelated.length} {t("results")}
         </span>
       </div>
 
@@ -58,13 +59,13 @@ const Page = ({ params }) => {
               <FaHashtag className="text-gray-500" />
             </div>
             <p className="text-gray-500 text-lg">
-              No posts found with <span className="font-semibold text-darkMode-fg">#{text}</span>
+              {t("No posts found with")} <span className="font-semibold text-darkMode-fg">#{text}</span>
             </p>
             <button
               onClick={() => window.history.back()}
               className="mt-2 px-5 py-2 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition"
             >
-              Go Back
+              {t("Go Back")}
             </button>
           </div>
         )}

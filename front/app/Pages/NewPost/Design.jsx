@@ -7,6 +7,7 @@ import { IoImage, IoHappyOutline } from 'react-icons/io5'
 import { FaUsers } from 'react-icons/fa'
 import EmojiPicker from 'emoji-picker-react'
 import PostPrivacySelector from '@/app/Component/Post/PostPrivacyAdd'
+import { useTranslation } from 'react-i18next'
 
 const NewPostPresenter = (props) => {
   const {
@@ -18,7 +19,7 @@ const NewPostPresenter = (props) => {
     selectedUser, privacy, setPrivacy, communities, selectedCommunity, setSelectedCommunity,
     filteredUsers, handleSelectMention, showMentionBox, mentionBoxPos, textareaRef
   } = props
-
+  const {t} = useTranslation()
   return (
     <main className="flex items-center justify-center w-full py-10 px-4 bg-gray-100 dark:bg-darkMode-bg transition-colors min-h-screen">
       <div className="w-full max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800 transition-all duration-500 relative">
@@ -55,7 +56,7 @@ const NewPostPresenter = (props) => {
                   onChange={(e) => setSelectedCommunity(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-xl text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 transition"
                 >
-                  <option value="">Select Community</option>
+                  <option value="">{t("Select Community")}</option>
                   {communities
                     .filter((com) =>
                       com.members.some((m) => m._id === selectedUser?._id)
@@ -68,7 +69,7 @@ const NewPostPresenter = (props) => {
                 </select>
               ) : (
                 <span className="text-sm text-gray-500 dark:text-gray-400">
-                  No joined communities.
+                  {t("No joined communities.")}
                 </span>
               )}
               <FaUsers className="absolute left-2 top-2.5 text-gray-400" />
@@ -109,7 +110,7 @@ const NewPostPresenter = (props) => {
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
-              placeholder="Add a link..."
+              placeholder={t("Add a link...")}
               value={linkInput}
               onChange={(e) => setLinkInput(e.target.value)}
               className="flex-1 px-4 py-2 border dark:border-gray-600 rounded-lg text-sm bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500"
@@ -134,7 +135,7 @@ const NewPostPresenter = (props) => {
               value={postText}
               onChange={handleTextareaChange}
               rows={5}
-              placeholder="What's on your mind? Add #hashtags, @mentions or 😊 emojis..."
+              placeholder={t("What's on your mind? Add #hashtags, @mentions or 😊 emojis...")}
               dir={/[\u0600-\u06FF]/.test(postText) ? 'rtl' : 'ltr'}
               className={`w-full p-5 text-base leading-relaxed rounded-2xl resize-none shadow-inner caret-blue-600 border transition-all focus:ring-2 ${
                 errorText
@@ -246,7 +247,7 @@ const NewPostPresenter = (props) => {
                 >
                   <div className="flex justify-between items-center bg-gray-200 dark:bg-gray-700 px-3 py-2">
                     <span className="text-gray-700 dark:text-gray-200 font-semibold">
-                      Emojis
+                      {t("Emojis")}
                     </span>
                     <button
                       onClick={() => setShowEmojiPicker(false)}
@@ -276,10 +277,10 @@ const NewPostPresenter = (props) => {
             {loading ? (
               <>
                 <motion.span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Posting...</span>
+                <span>{t("Posting")}...</span>
               </>
             ) : (
-              <span>Post</span>
+              <span>{t("Post")}</span>
             )}
           </button>
         </div>
@@ -295,7 +296,7 @@ const NewPostPresenter = (props) => {
             }`}
           >
             <FiClock size={18} />
-            Schedule Post
+            {t("Schedule Post")}
           </button>
 
           <AnimatePresence>
