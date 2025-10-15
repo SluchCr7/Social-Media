@@ -264,7 +264,7 @@ const EditPostModal = ({ post, onClose }) => {
           >
             Cancel
           </button>
-<button
+          <button
             onClick={handleSubmit}
             disabled={isLoading}
             className={`px-6 py-2 rounded-full font-medium text-white flex items-center gap-2 transition-transform shadow-lg ${

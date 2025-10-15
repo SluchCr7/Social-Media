@@ -76,11 +76,27 @@ export const navSections = [
 ]
 
 export const CATEGORY_OPTIONS = [
-  'All', 'Technology', 'Art', 'Science', 'Gaming', 'Music',
-  'Food', 'Travel', 'Health', 'Business', 'Politics', 'Sports', 'Other'
-]
+  { name: 'All', value: 'All' },
+  { name: 'Technology', value: 'Technology' },
+  { name: 'Art', value: 'Art' },
+  { name: 'Science', value: 'Science' },
+  { name: 'Gaming', value: 'Gaming' },
+  { name: 'Music', value: 'Music' },
+  { name: 'Food', value: 'Food' },
+  { name: 'Travel', value: 'Travel' },
+  { name: 'Health', value: 'Health' },
+  { name: 'Business', value: 'Business' },
+  { name: 'Politics', value: 'Politics' },
+  { name: 'Sports', value: 'Sports' },
+  { name: 'Other', value: 'Other' }
+];
 
-export const SORT_OPTIONS = ['Newest', 'Most Members', 'A-Z']
+export const SORT_OPTIONS = [
+  { name: 'Newest', value: 'Newest' },
+  { name: 'Most Members', value: 'Most Members' },
+  { name: 'A-Z', value: 'A-Z' }
+];
+
 
 export const languageMap = {
   Arabic: "ar",
@@ -154,13 +170,6 @@ export const TABS = [
   { id: 'account', label: 'Account', icon: <FaUserCog /> },
 ]
 
-export const LANGUAGES = [
-  { code: 'en', name: 'English', flag: '🇬🇧' },
-  { code: 'ar', name: 'العربية', flag: '🇸🇦' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-]
-
 export const DEFAULT_COLORS = [
   { name: 'Ocean', value: '#06b6d4' },
   { name: 'Sunset', value: '#fb923c' },
@@ -177,7 +186,7 @@ export const DEFAULT_COLORS = [
   ];
 
   export const reasons = [
-    { label: 'Spam', value: 'spam' },
+    { label: 'Spam Content', value: 'spam' },
     { label: 'Inappropriate Content', value: 'inappropriate' },
     { label: 'Harassment or Hate Speech', value: 'harassment' },
     { label: 'Misinformation', value: 'misinformation' },
@@ -185,7 +194,31 @@ export const DEFAULT_COLORS = [
     { label: 'Other', value: 'other' }
   ];
 
-  export const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ]
+ export const months = [
+  { name: "January", value: "January" },
+  { name: "February", value: "February" },
+  { name: "March", value: "March" },
+  { name: "April", value: "April" },
+  { name: "May", value: "May" },
+  { name: "June", value: "June" },
+  { name: "July", value: "July" },
+  { name: "August", value: "August" },
+  { name: "September", value: "September" },
+  { name: "October", value: "October" },
+  { name: "November", value: "November" },
+  { name: "December", value: "December" }
+];
+
+
+export const availableLanguages = [
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+  { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+  { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
+  { code: 'zh', name: '中文', flag: '🇨🇳' },
+  { code: 'ja', name: '日本語', flag: '🇯🇵' },
+  { code: 'ko', name: '한국어', flag: '🇰🇷' },
+];

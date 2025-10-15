@@ -59,9 +59,9 @@ const CommunityFilter = ({
         onChange={(e) => setSortBy(e.target.value)}
         className="p-2 rounded-lg border text-sm bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text min-w-[120px] focus:ring-2 focus:ring-sky-500 focus:outline-none"
       >
-        {SORT_OPTIONS.map((s) => (
-          <option key={s} value={s}>
-            {s}
+        {SORT_OPTIONS.map(({name,value}) => (
+          <option key={value} value={value}>
+            {name}
           </option>
         ))}
       </select>

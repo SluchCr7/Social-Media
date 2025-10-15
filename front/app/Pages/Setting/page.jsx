@@ -7,7 +7,8 @@ import { useAdmin } from '@/app/Context/UserAdminContext'
 import { getPasswordStrength } from '@/app/utils/getPasswordStrength'
 import SettingsView from './Design'
 import { useGetData } from '@/app/Custome/useGetData'
-
+import i18n from '@/app/i18n'; // تأكد من المسار الصحيح إلى ملف i18n
+import { useTranslate } from '@/app/Context/TranslateContext'
 export default function SettingsContainer() {
   const { theme, toggleTheme } = useTheme()
   const { user } = useAuth()
@@ -15,8 +16,9 @@ export default function SettingsContainer() {
   const { togglePrivateAccount, updatePassword } = useUser()
 
   const [activeTab, setActiveTab] = useState('appearance')
-  const [loginHistory, setLoginHistory] = useState([])
-  const {userData} = useGetData(user?._id)
+  const { userData } = useGetData(user?._id)
+  const { language, handleLanguageChange } = useTranslate();
+
   const handlePasswordSubmit = (oldPassword, newPassword, confirmPassword) => {
     if (newPassword !== confirmPassword) {
       return { error: 'Passwords do not match' }
@@ -56,6 +58,8 @@ export default function SettingsContainer() {
       onDeleteAccount={handleDeleteAccount}
       onMakePremiumVerify={handleMakePremiumVerify}
       onTogglePrivate={handleTogglePrivate}
+      language={language}
+      handleLanguageChange={handleLanguageChange}
     />
   )
 }

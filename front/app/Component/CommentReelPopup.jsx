@@ -15,11 +15,6 @@ const CommentsPopup = ({ reelId, isOpen, onClose }) => {
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // عند الفتح
-  useEffect(() => {
-    if (isOpen) fetchComments();
-  }, [isOpen]);
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -76,7 +71,7 @@ const CommentsPopup = ({ reelId, isOpen, onClose }) => {
                 className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
-                onClick={addComment}
+                // onClick={addComment}
                 disabled={loading}
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
               >

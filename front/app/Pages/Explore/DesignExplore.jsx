@@ -183,11 +183,11 @@ const DesignExplore = ({
                   className="block p-2 rounded-lg hover:bg-lightMode-bg dark:hover:bg-darkMode-bg transition"
                 >
                   <p className="text-sm font-semibold text-lightMode-text dark:text-darkMode-text line-clamp-1">
-                    {p.title || 'Untitled Post'}
+                    {p.text || 'Untitled Post'}
                   </p>
-                  <p className="text-xs text-lightMode-text2 dark:text-darkMode-text2 line-clamp-2">
+                  {/* <p className="text-xs text-lightMode-text2 dark:text-darkMode-text2 line-clamp-2">
                     {p.content}
-                  </p>
+                  </p> */}
                 </Link>
               ))}
             </div>

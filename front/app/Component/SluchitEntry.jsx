@@ -105,13 +105,13 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
         {post?.isPinned && (
           <div className="bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 
             text-white text-xs font-bold px-3 py-1 rounded-full self-start shadow-md">
-            📌 Pinned Post
+            📌 Pinned 
           </div>
         )}
         {isShared && (
           <div className="bg-gradient-to-r from-cyan-500 to-blue-500 
             text-white text-xs font-bold px-3 py-1 rounded-full self-start shadow-md">
-            🔁 Shared Post
+            🔁 Shared 
           </div>
         )}
 

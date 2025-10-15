@@ -58,8 +58,8 @@ const FilterBar = ({ filters, setFilters, years }) => {
           "
         >
           <option value="all">All Months</option>
-          {months.map((name, i) => (
-            <option key={i + 1} value={i + 1}>{name}</option>
+          {months.map(({name , value}, i) => (
+            <option key={i + 1} value={value}>{name}</option>
           ))}
         </select>
       </div>

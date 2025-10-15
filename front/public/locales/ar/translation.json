@@ -1,5 +1,390 @@
 {
-    "Community" : "المجتمع",
-    "Main" : "الرئيسيه",
-    "Personal" : "الشخصية"
+    "Total Reports": "إجمالي البلاغات",
+    "Posts": "المنشورات",
+    "Users": "المستخدمون",
+    "I agree to the": "أوافق على",
+    "Terms and Conditions": "الشروط والأحكام",
+    "Creating Account": "جارٍ إنشاء الحساب",
+    "Register": "تسجيل",
+    "OR": "أو",
+    "Sign up with Google": "سجل باستخدام جوجل",
+    "Already have an account?": "هل لديك حساب بالفعل؟",
+    "No reels available": "لا توجد مقاطع قصيرة متاحة",
+    "Social App": "تطبيق اجتماعي",
+    "Pinned": "مثبت",
+    "Shared": "مشترك",
+    "Select Community": "اختر مجتمعًا",
+    "No joined communities.": "لم تنضم إلى أي مجتمع بعد.",
+    "Add": "إضافة",
+    "What's on your mind? Add #hashtags, @mentions or 😊 emojis...": "ما الذي يدور في ذهنك؟ أضف وسوماً أو إشارات أو رموزاً تعبيرية...",
+    "Emojis": "الرموز التعبيرية",
+    "Posting": "جارٍ النشر",
+    "Post": "نشر",
+    "Schedule Post": "جدولة المنشور",
+    "Login to continue exploring communities": "سجّل الدخول لمتابعة استكشاف المجتمعات",
+    "Email Address": "عنوان البريد الإلكتروني",
+    "Password": "كلمة المرور",
+    "Forgot your password?": "هل نسيت كلمة المرور؟",
+    "Continue with Google": "تابع باستخدام جوجل",
+    "Don’t have an account?": "ليس لديك حساب؟",
+    "results": "النتائج",
+    "No posts found with": "لم يتم العثور على منشورات تحتوي على",
+    "Go Back": "العودة",
+    "Discover friends, creators, trending topics and news.": "اكتشف الأصدقاء والمبدعين والمواضيع الرائجة والأخبار.",
+    "Search users, #hashtags or posts...": "ابحث عن مستخدمين أو وسوم أو منشورات...",
+    "No results found for": "لم يتم العثور على نتائج لـ",
+    "Today": "اليوم",
+    "This Week": "هذا الأسبوع",
+    "No preview": "لا توجد معاينة",
+    "Score": "النقاط",
+    "No trending content for the selected timeframe.": "لا يوجد محتوى رائج للفترة الزمنية المحددة.",
+    "No photos from people you follow yet.": "لا توجد صور من الأشخاص الذين تتابعهم بعد.",
+    "Create community": "إنشاء مجتمع",
+    "Try a different filter or create a new community.": "جرّب فلترًا مختلفًا أو أنشئ مجتمعًا جديدًا.",
+    "No communities found": "لم يتم العثور على مجتمعات",
+    "Edit": "تعديل",
+    "Rules": "القواعد",
+    "Leave": "مغادرة",
+    "Pending": "قيد الانتظار",
+    "Created": "تم الإنشاء",
+    "Members": "الأعضاء",
+    "Requests": "الطلبات",
+    "See all": "عرض الكل",
+    "This community has no posts yet.": "لا توجد منشورات في هذا المجتمع بعد.",
+    "You need to join this private community to view posts.": "يجب أن تنضم إلى هذا المجتمع الخاص لعرض منشوراته.",
+    "Admins": "المسؤولون",
+    "Owner": "المالك",
+    "Community Rules": "قواعد المجتمع",
+    "No rules have been set for this community yet.": "لم يتم تحديد قواعد لهذا المجتمع بعد.",
+    "No pending requests.": "لا توجد طلبات معلقة.",
+    "Coming Soon!": "قريبًا!",
+    "The Challenges feature is under development and will be available soon. Stay tuned for exciting new competitions and activities!": "ميزة التحديات قيد التطوير وستتوفر قريبًا. ترقّبوا مسابقات وأنشطة جديدة شيقة!",
+    "days": "أيام",
+    "Add Event": "إضافة حدث",
+    "Birthday": "عيد ميلاد",
+    "Meeting": "اجتماع",
+    "Public": "عام",
+    "more": "المزيد",
+    "Analytics": "التحليلات",
+    "Quick overview of": "نظرة سريعة على",
+    "Last 7 days": "آخر 7 أيام",
+    "Last 30 days": "آخر 30 يومًا",
+    "Last 90 days": "آخر 90 يومًا",
+    "Exporting": "جارٍ التصدير",
+    "Export CSV": "تصدير بصيغة CSV",
+    "Followers": "المتابعون",
+    "Engagement": "التفاعل",
+    "Likes": "الإعجابات",
+    "Activity Over Time": "النشاط عبر الزمن",
+    "Top Posts": "أفضل المنشورات",
+    "Peak Hours": "ساعات الذروة",
+    "Following": "يتابع",
+    "Follow": "متابعة",
+    "User": "المستخدم",
+    "Joined": "انضم",
+    "Join": "انضمام",
+    "People you may like": "أشخاص قد يعجبونك",
+    "Explore new communities": "استكشف مجتمعات جديدة",
+    "Start following people or join a community!": "ابدأ بمتابعة أشخاص أو انضم إلى مجتمع!",
+    "No posts yet": "لا توجد منشورات بعد",
+    "Show Original": "عرض الأصل",
+    "Copy": "نسخ",
+    "Reposted by": "أُعيد نشره بواسطة",
+    "Processing": "جارٍ المعالجة",
+    "Pin Post": "تثبيت المنشور",
+    "Unpin Post": "إلغاء تثبيت المنشور",
+    "Edit Post": "تعديل المنشور",
+    "Delete Post": "حذف المنشور",
+    "Enable Comments": "تفعيل التعليقات",
+    "Disable Comments": "تعطيل التعليقات",
+    "Report Post": "الإبلاغ عن منشور",
+    "Copy Post": "نسخ المنشور",
+    "Unblock User": "إلغاء حظر المستخدم",
+    "Block User": "حظر المستخدم",
+    "Unfollow User": "إلغاء المتابعة",
+    "Follow User": "متابعة المستخدم",
+    "Are you sure?": "هل أنت متأكد؟",
+    "This action cannot be undone.": "لا يمكن التراجع عن هذا الإجراء.",
+    "Cancel": "إلغاء",
+    "Confirm": "تأكيد",
+    "Clear All": "مسح الكل",
+    "Mark all as read": "تحديد الكل كمقروء",
+    "No notifications": "لا توجد إشعارات",
+    "Notifications": "الإشعارات",
+    "View More": "عرض المزيد",
+    "All News": "كل الأخبار",
+    "Send": "إرسال",
+    "Add a comment": "أضف تعليقًا",
+    "No comments yet": "لا توجد تعليقات بعد",
+    "Comments": "التعليقات",
+    "Edited": "مُعدّل",
+    "Saving": "جارٍ الحفظ",
+    "Save": "حفظ",
+    "Write a reply": "اكتب ردًا",
+    "No recent login activity found.": "لم يتم العثور على نشاط تسجيل دخول حديث.",
+    "All Months": "كل الشهور",
+    "Latest": "الأحدث",
+    "Most Liked": "الأكثر إعجابًا",
+    "Most Commented": "الأكثر تعليقًا",
+    "Reset": "إعادة تعيين",
+    "No results found.": "لم يتم العثور على نتائج.",
+    "About": "نبذة",
+    "Personal Info": "المعلومات الشخصية",
+    "Relationship": "الحالة الاجتماعية",
+    "In a relationship with": "مرتبط بـ",
+    "Married to": "متزوج من",
+    "Interests": "الاهتمامات",
+    "Social Links": "الروابط الاجتماعية",
+    "Album": "الألبوم",
+    "No audio available": "لا توجد ملفات صوتية متاحة",
+    "Next level in": "المستوى التالي خلال",
+    "XP": "نقاط الخبرة",
+    "Add Story": "أضف قصة",
+    "View as Visitor": "عرض كزائر",
+    "Edit Profile": "تعديل الملف الشخصي",
+    "Make Account Public": "اجعل الحساب عامًا",
+    "Make Account Private": "اجعل الحساب خاصًا",
+    "Report User": "الإبلاغ عن مستخدم",
+    "Copy Profile Link": "نسخ رابط الملف الشخصي",
+    "Photos": "الصور",
+    "Saved": "المحفوظات",
+    "Reels": "المقاطع القصيرة",
+    "You haven’t saved any posts yet.": "لم تحفظ أي منشورات بعد.",
+    "You haven’t commented yet.": "لم تكتب أي تعليق بعد.",
+    "You haven’t uploaded any reels yet.": "لم ترفع أي مقاطع قصيرة بعد.",
+    "You haven’t uploaded any music yet.": "لم ترفع أي موسيقى بعد.",
+    "You haven’t uploaded any photos yet.": "لم ترفع أي صور بعد.",
+    "This account has been banned": "تم حظر هذا الحساب",
+    "account is permanently disabled due to policy violations.": "تم تعطيل الحساب نهائيًا بسبب مخالفات للسياسات.",
+    "You cannot View This Page": "لا يمكنك عرض هذه الصفحة",
+    "This account is suspended": "تم تعليق هذا الحساب",
+    "Delete Report": "حذف البلاغ",
+    "Delete Comment": "حذف التعليق",
+    "Suspend User": "تعليق المستخدم",
+    "Ban User": "حظر المستخدم",
+    "Mark as Resolved": "وضع علامة تم الحل",
+    "Target": "الهدف",
+    "Reporter": "المبلِّغ",
+    "Reason": "السبب",
+    "Status": "الحالة",
+    "Actions": "الإجراءات",
+    "Preparing your upload": "جارٍ تجهيز التحميل",
+    "Uploading to server": "جارٍ الرفع إلى الخادم",
+    "Processing your media": "جارٍ معالجة الوسائط",
+    "Almost there": "اقتربنا من الانتهاء",
+    "Uploading": "جارٍ التحميل",
+    "Friends": "الأصدقاء",
+    "shared a post from": "شارك منشورًا من",
+    "Pop": "بوب",
+    "Rock": "روك",
+    "HipHop": "هيب هوب",
+    "Jazz": "جاز",
+    "Classical": "كلاسيكي",
+    "Other": "أخرى",
+    "Add New Music": "إضافة موسيقى جديدة",
+    "Change": "تغيير",
+    "Upload Cover": "رفع الغلاف",
+    "Title": "العنوان",
+    "Artist": "الفنان",
+    "Tags": "الوسوم",
+    "Upload Music File": "رفع ملف موسيقي",
+    "Save Music": "حفظ الموسيقى",
+    "All Songs": "كل الأغاني",
+    "No Cover": "بدون غلاف",
+    "Search songs, artists, albums...": "ابحث عن أغاني أو فنانين أو ألبومات...",
+    "Now Playing": "يُشغَّل الآن",
+    "Plays": "مرات التشغيل",
+    "Up Next": "التالي",
+    "Songs": "الأغاني",
+    "My Playlist": "قائمتي الموسيقية",
+    "No saved songs yet.": "لا توجد أغاني محفوظة بعد.",
+    "Trending Now": "الرائج الآن",
+    "Communities": "المجتمعات",
+    "See More Communities": "عرض المزيد من المجتمعات",
+    "Trending Hashtags": "الوسوم الرائجة",
+    "No trending hashtags yet.": "لا توجد وسوم رائجة بعد.",
+    "Privacy Policy": "سياسة الخصوصية",
+    "Terms of Service": "شروط الخدمة",
+    "Suggested Friends": "الأصدقاء المقترحون",
+    "You are friends": "أنتم أصدقاء",
+    "New here – welcome!": "مرحبًا بك، أنت جديد هنا!",
+    "Active member": "عضو نشط",
+    "mutual friends": "أصدقاء مشتركون",
+    "Suggested for you": "مقترح لك",
+    "No suggested users at the moment": "لا يوجد مستخدمون مقترحون في الوقت الحالي",
+    "Messages from Last 24 Hours": "الرسائل خلال آخر 24 ساعة",
+    "No messages from the past 24 hours.": "لا توجد رسائل خلال آخر 24 ساعة.",
+    "No upcoming events": "لا توجد فعاليات قادمة",
+    "Create Event": "إنشاء حدث",
+    "Upcoming Events": "الفعاليات القادمة",
+    "Yearly": "سنوياً",
+    "invited": "مدعو",
+    "What is happening": "ما الذي يحدث",
+    "Show more": "عرض المزيد",
+    "Spam Content": "محتوى مزعج",
+    "Inappropriate Content": "محتوى غير لائق",
+    "Harassment or Hate Speech": "تحرّش أو خطاب كراهية",
+    "Misinformation": "معلومات مضللة",
+    "Copyright Violation": "انتهاك حقوق النشر",
+    "Private": "خاص",
+    "View": "عرض",
+    "No": "لا",
+    "categories": "الفئات",
+    "Search": "بحث",
+    "Create Community": "إنشاء مجتمع",
+    "Category": "الفئة",
+    "Description": "الوصف",
+    "Preview": "معاينة",
+    "Create": "إنشاء",
+    "Creating": "جارٍ الإنشاء",
+    "No messages yet": "لا توجد رسائل بعد",
+    "Online": "متصل",
+    "Offline": "غير متصل",
+    "Replying to": "يُرد على",
+    "content": "المحتوى",
+    "found": "تم العثور عليه",
+    "Welcome to": "مرحبًا بك في",
+    "Start a new conversation by selecting a chat from the sidebar or searching for a friend": "ابدأ محادثة جديدة عن طريق اختيار دردشة من الشريط الجانبي أو البحث عن صديق",
+    "Your messages will appear here once you start chatting.": "ستظهر رسائلك هنا بمجرد بدء المحادثة.",
+    "Photo message": "رسالة بصورة",
+    "Repeat every year": "يتكرر كل عام",
+    "Event": "حدث",
+    "Add Event on": "إضافة حدث في",
+    "Select a reason": "اختر سببًا",
+    "Add more details ": "أضف مزيدًا من التفاصيل",
+    "optional": "اختياري",
+    "Submit Report": "إرسال البلاغ",
+    "Uploading Story": "جارٍ رفع القصة",
+    "Story": "قصة",
+    "Story shared successfully!": "تمت مشاركة القصة بنجاح!",
+    "Upload": "رفع",
+    "Image": "صورة",
+    "Camera": "كاميرا",
+    "Collaborators": "المتعاونون",
+    "Select": "اختيار",
+    "Share Story": "مشاركة القصة",
+    "Edit Community": "تعديل المجتمع",
+    "Add new tag": "إضافة وسم جديد",
+    "Cover": "الغلاف",
+    "Photo": "صورة",
+    "Invalid file selected": "تم اختيار ملف غير صالح",
+    "Failed to update community data.": "فشل في تحديث بيانات المجتمع.",
+    "Community details updated successfully.": "تم تحديث تفاصيل المجتمع بنجاح.",
+    "Error uploading image.": "حدث خطأ أثناء رفع الصورة.",
+    "Updating post": "جارٍ تحديث المنشور",
+    "What's on your mind? Add #hashtags, @mentions or emojis...": "ما الذي يدور في ذهنك؟ أضف وسوماً أو إشارات أو رموزاً تعبيرية...",
+    "Add a link": "إضافة رابط",
+    "Add Photos": "إضافة صور",
+    "Save Changes": "حفظ التغييرات",
+    "Details": "التفاصيل",
+    "Date": "التاريخ",
+    "Reel": "مقطع قصير",
+    "Drag & drop or click to select a video": "اسحب وأفلت أو انقر لاختيار فيديو",
+    "Write a caption": "اكتب وصفًا",
+    "Share Post": "مشاركة المنشور",
+    "Add your thoughts": "أضف أفكارك",
+    "Day Events": "فعاليات اليوم",
+
+    "Cookies Policy": "سياسة ملفات تعريف الارتباط",
+    "We use cookies to enhance your experience, analyze site usage, and deliver personalized content.": "نستخدم ملفات تعريف الارتباط لتحسين تجربتك، وتحليل استخدام الموقع، وتقديم محتوى مخصص.",
+    "Accept All": "قبول الكل",
+    "Manage Preferences": "إدارة التفضيلات",
+    "Essential · Analytics · Marketing": "الأساسية · التحليلية · التسويقية",
+    "You can change these anytime.": "يمكنك تغيير هذه الإعدادات في أي وقت.",
+    "Reading progress: {progress}%": "تقدّم القراءة: ‎{progress}‎٪",
+    "All rights reserved.": "جميع الحقوق محفوظة.",
+
+    "Manage Cookie Preferences": "إدارة تفضيلات ملفات تعريف الارتباط",
+    "Choose which cookie categories you want to allow. You can always change these later.": "اختر فئات ملفات تعريف الارتباط التي ترغب في السماح بها. يمكنك تعديل هذه الإعدادات لاحقاً.",
+    "Close preferences": "إغلاق التفضيلات",
+    "Save Preferences": "حفظ التفضيلات",
+    "Note: Essential cookies are always active to ensure the site works properly.": "ملاحظة: تظل ملفات تعريف الارتباط الأساسية مفعّلة دائماً لضمان عمل الموقع بشكل صحيح.",
+    "Essential Cookies": "ملفات تعريف الارتباط الأساسية",
+    "Required for basic functionality and security (cannot be disabled).": "مطلوبة للوظائف الأساسية والأمان (لا يمكن تعطيلها).",
+    "Analytics Cookies": "ملفات تعريف الارتباط التحليلية",
+    "Help us measure and improve the product experience.": "تساعدنا على قياس وتحسين تجربة المنتج.",
+    "Marketing Cookies": "ملفات تعريف الارتباط التسويقية",
+    "Used to show relevant content and ads.": "تُستخدم لعرض محتوى وإعلانات ذات صلة.",
+
+    "What are Cookies?": "ما هي ملفات تعريف الارتباط؟",
+    "Cookies are small text files stored on your device when you visit a website. They help us recognize your device, remember preferences (like language), and provide a personalized experience.": "ملفات تعريف الارتباط هي ملفات نصية صغيرة تُخزَّن على جهازك عند زيارة موقع إلكتروني. تساعدنا على التعرف على جهازك وتذكر تفضيلاتك (مثل اللغة) وتقديم تجربة مخصصة.",
+    "Cookies can be first-party (set by this site) or third-party (set by external services we use). We use several types of cookies to deliver the best experience while respecting your privacy.": "قد تكون ملفات تعريف الارتباط من الطرف الأول (يُحدّدها هذا الموقع) أو من الطرف الثالث (يُحدّدها مزوّدو خدمات خارجيون). نستخدم عدة أنواع من ملفات تعريف الارتباط لتقديم أفضل تجربة مع احترام خصوصيتك.",
+
+    "How We Use Cookies": "كيفية استخدامنا لملفات تعريف الارتباط",
+    "To remember your login and settings for a smoother experience.": "لتذكر بيانات تسجيل الدخول والإعدادات لتجربة أكثر سلاسة.",
+    "To analyze traffic and improve the product (analytics cookies).": "لتحليل حركة المرور وتحسين المنتج (ملفات تعريف الارتباط التحليلية).",
+    "To show personalized content and recommended items (marketing cookies).": "لعرض محتوى مخصص وعناصر مقترحة (ملفات تعريف الارتباط التسويقية).",
+    "To secure the service and detect fraud.": "لتأمين الخدمة وكشف الاحتيال.",
+
+    "Types of Cookies We Use": "أنواع ملفات تعريف الارتباط التي نستخدمها",
+    "Required for core functionality (login, security, accessibility). These are always active.": "مطلوبة للوظائف الأساسية (تسجيل الدخول، الأمان، سهولة الوصول). وهي مفعّلة دائماً.",
+    "Performance & Analytics": "الأداء والتحليلات",
+    "Help us understand how users interact with the site to improve features and performance.": "تساعدنا على فهم كيفية تفاعل المستخدمين مع الموقع لتحسين الأداء والميزات.",
+    "Functional Cookies": "ملفات تعريف الارتباط الوظيفية",
+    "Remember choices and preferences to provide personalized features.": "تتذكر اختياراتك وتفضيلاتك لتقديم ميزات مخصصة.",
+    "Advertising & Marketing": "الإعلانات والتسويق",
+    "Used by third-party partners to display relevant ads and track ad performance.": "تُستخدم من قبل شركاء خارجيين لعرض إعلانات ذات صلة وتتبع أداء الإعلانات.",
+
+    "Your Choices": "اختياراتك",
+    "You can accept all cookies, or manage preferences to enable only the categories you want. Disabling some cookies may reduce functionality or personalization.": "يمكنك قبول جميع ملفات تعريف الارتباط أو إدارة التفضيلات لتفعيل الفئات التي ترغب بها فقط. قد يؤدي تعطيل بعض الملفات إلى تقليل الوظائف أو تخصيص التجربة.",
+    "Accept All Cookies": "قبول جميع ملفات تعريف الارتباط",
+    "Contact Us": "اتصل بنا",
+    "For questions about this policy or your preferences, email us at": "للاستفسار حول هذه السياسة أو تفضيلاتك، راسلنا عبر البريد الإلكتروني على",
+    "Last updated": "آخر تحديث",
+    "Last updated:": "آخر تحديث:",
+    "Back to top": "العودة إلى الأعلى",
+    "Contents": "المحتويات",
+    "Table of contents": "جدول المحتويات",
+    "Tip: click any section to jump to it": "نصيحة: انقر على أي قسم للانتقال إليه",
+    "Collapse": "طيّ",
+    "Expand": "توسيع",
+    "Collapse section": "طيّ القسم",
+    "Expand section": "توسيع القسم",
+    "1. Information We Collect": "1. المعلومات التي نجمعها",
+    "We may collect information you provide directly such as name, email, profile picture, posts, messages, and other content. We may also collect IP address, device info, browser type, and usage data automatically.": "قد نجمع المعلومات التي تقدمها مباشرة مثل الاسم، البريد الإلكتروني، صورة الملف الشخصي، المنشورات، الرسائل والمحتوى الآخر. كما قد نجمع عنوان IP، معلومات الجهاز، نوع المتصفح، وبيانات الاستخدام تلقائياً.",
+    "2. How We Use Your Information": "2. كيفية استخدامنا لمعلوماتك",
+    "We use your information to operate and improve our platform, personalize your experience, respond to inquiries, and provide customer support. Notifications and updates may also be sent.": "نستخدم معلوماتك لتشغيل منصتنا وتحسينها، وتخصيص تجربتك، والرد على الاستفسارات، وتقديم الدعم الفني. قد نرسل أيضاً إشعارات وتحديثات.",
+    "3. Sharing of Information": "3. مشاركة المعلومات",
+    "We do not sell your personal information. We may share it with trusted service providers, legal authorities if required, or in case of a business transfer.": "لا نقوم ببيع معلوماتك الشخصية. قد نشاركها مع مزودي خدمات موثوقين، أو السلطات القانونية عند الحاجة، أو في حالة نقل الملكية التجارية.",
+    "4. Data Security": "4. أمان البيانات",
+    "We implement reasonable security measures to protect your data. However, no method of transmission over the internet is completely secure.": "نطبّق تدابير أمان معقولة لحماية بياناتك، ولكن لا توجد وسيلة نقل عبر الإنترنت آمنة تماماً.",
+    "5. Your Choices": "5. اختياراتك",
+    "You may update your profile, delete your account, or request data removal at any time. Contact us for assistance.": "يمكنك تحديث ملفك الشخصي أو حذف حسابك أو طلب حذف بياناتك في أي وقت. تواصل معنا للمساعدة.",
+    "6. Changes to This Policy": "6. التغييرات على هذه السياسة",
+    "We may update this policy occasionally. Continued use of the platform means you agree to the updated terms.": "قد نقوم بتحديث هذه السياسة من حين لآخر. استمرارك في استخدام المنصة يعني موافقتك على الشروط المحدّثة.",
+    "7. Contact": "7. الاتصال بنا",
+    "If you have any questions regarding our Privacy Policy, please contact us at:": "إذا كانت لديك أي أسئلة بخصوص سياسة الخصوصية، يرجى التواصل معنا عبر:",
+    "Your privacy matters. This privacy policy explains what data we collect and how we use it. We aim to keep things transparent and straightforward.": "خصوصيتك تهمنا. تشرح سياسة الخصوصية هذه البيانات التي نجمعها وكيفية استخدامها. نسعى للحفاظ على الشفافية والبساطة.",
+    "Stay Secure & Informed": "ابقَ آمناً ومطلعاً",
+    "Review your settings and keep your account safe. Manage your privacy preferences in Settings.": "راجع إعداداتك وحافظ على أمان حسابك. يمكنك إدارة تفضيلات الخصوصية من الإعدادات.",
+    "Go to Settings": "اذهب إلى الإعدادات",
+    "Open contents": "فتح المحتويات",
+    "Welcome to our Social Media App. By accessing or using our platform, you agree to be bound by the following terms and conditions.": "مرحباً بك في تطبيقنا للتواصل الاجتماعي. باستخدامك لمنصتنا، فإنك توافق على الالتزام بالشروط والأحكام التالية.",
+    "1. Eligibility": "1. الأهلية",
+    "You must be at least 13 years old to use this platform.": "يجب أن يكون عمرك 13 عاماً على الأقل لاستخدام هذه المنصة.",
+    "2. User Conduct": "2. سلوك المستخدم",
+    "You agree not to post any content that is illegal, harmful, abusive, hateful, or otherwise inappropriate. Harassment, spam, and impersonation are strictly prohibited.": "توافق على عدم نشر أي محتوى غير قانوني أو ضار أو مسيء أو يحض على الكراهية أو غير لائق بأي شكل من الأشكال. يُحظر تماماً التحرش أو الرسائل المزعجة أو انتحال الهوية.",
+    "3. Account Responsibility": "3. مسؤولية الحساب",
+    "You are responsible for maintaining the confidentiality of your account credentials and for all activities under your account.": "أنت مسؤول عن الحفاظ على سرية بيانات الدخول الخاصة بحسابك وعن جميع الأنشطة التي تتم من خلاله.",
+    "4. Content Ownership": "4. ملكية المحتوى",
+    "You retain ownership of your content but grant us a license to use, display, and distribute it within the platform.": "تحتفظ بملكية المحتوى الذي تنشره، ولكنك تمنحنا ترخيصاً لاستخدامه وعرضه وتوزيعه داخل المنصة.",
+    "5. Termination": "5. الإنهاء",
+    "We reserve the right to suspend or delete your account if you violate these terms or engage in harmful behavior.": "نحتفظ بالحق في تعليق أو حذف حسابك إذا انتهكت هذه الشروط أو شاركت في سلوك ضار.",
+    "6. Changes to Terms": "6. التغييرات على الشروط",
+    "We may update these Terms from time to time. Continued use of the platform indicates your acceptance of any changes.": "قد نقوم بتحديث هذه الشروط من حين لآخر. استمرارك في استخدام المنصة يعني موافقتك على أي تعديلات يتم إدخالها.",
+    "7. Contact Us": "7. تواصل معنا",
+    "If you have any questions about these Terms, please contact us at:": "إذا كانت لديك أي أسئلة بخصوص هذه الشروط، يرجى التواصل معنا عبر:",
+    "support@socialmediaapp.com": "support@socialmediaapp.com",
+    "Users Management": "إدارة المستخدمين",
+    "Search users...": "ابحث عن المستخدمين...",
+    "All Users": "جميع المستخدمين",
+
+    "Admin": "مدير",
+    "🚫 Banned": "🚫 محظور",
+    "Verified": "موثق",
+    "Make Admin": "تعيين كمدير",
+    "Ban": "حظر",
+    "Unban": "إلغاء الحظر",
+    "Delete": "حذف",
+    "No users found.": "لم يتم العثور على مستخدمين."
 }

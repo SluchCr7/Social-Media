@@ -69,8 +69,8 @@ const CreateCommunityModal = ({ show, onClose, form, setForm, handleCreate, isCr
               <div>
                 <label className="text-sm text-lightMode-text2 dark:text-darkMode-text2">Category</label>
                 <select value={form.Category} onChange={(e) => setForm((p) => ({ ...p, Category: e.target.value }))} className="w-full mt-1 p-3 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text">
-                  {CATEGORY_OPTIONS.filter(Boolean).map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                  {CATEGORY_OPTIONS.filter(Boolean).map(({name,value}) => (
+                    <option key={value} value={value}>{name}</option>
                   ))}
                 </select>
               </div>

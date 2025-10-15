@@ -115,7 +115,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
                           }}
                           className="px-3 py-1.5 bg-red-500 text-white text-sm rounded-lg font-medium hover:bg-red-600 transition"
                         >
-                          Remove
+                          Clear
                         </button>
                       </div>
                     </>

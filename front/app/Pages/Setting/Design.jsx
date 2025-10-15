@@ -6,13 +6,15 @@ import {
   FaSun, FaMoon, FaLock, FaUserCog, FaTrashAlt, FaHistory
 } from 'react-icons/fa'
 import { MdLanguage } from 'react-icons/md'
-import { TABS, DEFAULT_COLORS, LANGUAGES } from '@/app/utils/Data'
+import { TABS, DEFAULT_COLORS } from '@/app/utils/Data'
 import MobileBottomNav from '@/app/Component/Setting/MobileBottomNav'
 import LanguageCard from '@/app/Component/Setting/LanguageCard'
 import LoginHistoryTimeline from '@/app/Component/Setting/LoginHistoryTimeline'
 import AppearanceTab from './Tabs/Apperance'
 import Security from './Tabs/Security'
 import AccountTab from './Tabs/AccountTab'
+import LanguageTab from './Tabs/LanguageTab'
+import HistoryTab from './Tabs/HistoryTab'
 
 export default function SettingsView({
   user = {},
@@ -26,6 +28,8 @@ export default function SettingsView({
   onTogglePrivate,
   onMakePremiumVerify,
   loginHistory = [],
+  language,
+  handleLanguageChange
 }) {
   const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -33,7 +37,6 @@ export default function SettingsView({
   const [passwordMessage, setPasswordMessage] = useState('')
   const [backgroundValue, setBackgroundValue] = useState(DEFAULT_COLORS[0].value)
   const [customColor, setCustomColor] = useState('')
-  const [language, setLanguage] = useState('en')
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
   const [isPrivate, setIsPrivate] = useState(user?.isPrivate || false)
   const [isVerified, setIsVerified] = useState(user?.isAccountWithPremiumVerify || false)
@@ -147,49 +150,10 @@ export default function SettingsView({
               )}
 
               {activeTab === 'language' && (
-                <motion.section
-                  key="language"
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.28 }}
-                  className="p-6 rounded-2xl bg-white/60 dark:bg-gray-900/60 border shadow"
-                >
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 text-white shadow-lg"><MdLanguage /></div>
-                    <div>
-                      <h2 className="text-lg font-semibold">Language</h2>
-                      <p className="text-sm text-gray-500">Select your preferred language for the UI.</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {LANGUAGES.map((l) => (
-                      <LanguageCard key={l.code} lang={l} active={language === l.code} onClick={setLanguage} />
-                    ))}
-                  </div>
-                </motion.section>
+                  <LanguageTab language={language} handleLanguageChange={handleLanguageChange}/>
               )}
-
               {activeTab === 'history' && (
-                <motion.section
-                  key="history"
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.28 }}
-                  className="p-6 rounded-2xl bg-white/60 dark:bg-gray-900/60 border shadow"
-                >
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-gray-400 to-gray-600 text-white shadow-lg"><FaHistory /></div>
-                    <div>
-                      <h2 className="text-lg font-semibold">Login History</h2>
-                      <p className="text-sm text-gray-500">Recent sign-ins and devices.</p>
-                    </div>
-                  </div>
-
-                  <LoginHistoryTimeline items={loginHistory} />
-                </motion.section>
+                <HistoryTab loginHistory={loginHistory}/>
               )}
 
               {activeTab === 'account' && (
