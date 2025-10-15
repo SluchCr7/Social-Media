@@ -4,8 +4,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 const PostLinks = ({ links }) => {
-  if (!links?.length) return null;
   const {t} = useTranslation()
+  if (!links?.length) return null;
   return (
     <div
       className="

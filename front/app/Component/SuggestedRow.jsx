@@ -14,8 +14,8 @@ export const SuggestionRow = ({ type, data }) => {
   const { joinToCommunity } = useCommunity();
   const {  user } = useAuth(); // تأكد أن لديك user من context
   const {followUser} = useUser()
-  if (!data || data.length === 0) return null;
   const {t} = useTranslation()
+  if (!data || data.length === 0) return null;
   return (
     <div className="w-full grid gap-6 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
       {data.map((item, idx) => {

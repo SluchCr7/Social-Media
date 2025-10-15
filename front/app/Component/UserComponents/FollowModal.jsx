@@ -6,8 +6,8 @@ import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 
 const FollowModal = ({ visible, onClose, type, list }) => {
-  if (!visible) return null
   const {t} = useTranslation()
+  if (!visible) return null
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end md:items-center justify-center">
       <AnimatePresence>
