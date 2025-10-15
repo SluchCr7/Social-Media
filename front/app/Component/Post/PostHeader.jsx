@@ -9,7 +9,7 @@ import UserHoverCard from '../UserHoverCard'
 import { formatRelativeTime } from '@/app/utils/FormatDataCreatedAt'
 const PostHeader = ({ post, user, isLogin, showMenu, setShowMenu,isCommunityPost }) => {
   return (
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+            <div className="flex flex-row justify-between items-center gap-2">
               <div className="flex items-center gap-3">
                 <div className="flex flex-col leading-tight">
                   <div className="flex items-center gap-1">
