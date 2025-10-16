@@ -221,23 +221,29 @@ export const MusicPlayerProvider = ({ children }) => {
 
   // ✨ ضبط src للأوديو عند تغير current
   useEffect(() => {
-    if (!audioRef.current || !current?.url) return
-    audioRef.current.src = current.url
-    audioRef.current.load()
-    if (!firstLoad) play()
-    else setFirstLoad(false)
-  }, [current])
+    if (!audioRef.current || !current?.url) return;
+    audioRef.current.src = current.url;
+    audioRef.current.load();
+
+    // لا تشغل تلقائياً إلا إذا المستخدم ضغط play أو اختار أغنية
+    if (!firstLoad && playing) play();
+    else setFirstLoad(false);
+  }, [current]);
 
   // ⏯️ التحكم في الصوت
   const play = async () => {
-    if (!audioRef.current) return
-    try {
-      await audioRef.current.play()
-      setPlaying(true)
-    } catch (err) {
-      console.error('Play failed:', err)
+    if (!audioRef.current) return;
+    if (!audioRef.current.src && current?.url) {
+      audioRef.current.src = current.url;
+      await audioRef.current.load();
     }
-  }
+    try {
+      await audioRef.current.play();
+      setPlaying(true);
+    } catch (err) {
+      console.warn('Playback blocked by browser policy');
+    }
+  };
 
   const pause = () => {
     if (!audioRef.current) return
@@ -249,13 +255,19 @@ export const MusicPlayerProvider = ({ children }) => {
 
   // 🔊 تغيير المقطع الحالي
   const setTrack = (track, index = 0, allSongs = songs, autoPlay = true) => {
-    if (!track) return
-    setCurrent(track)
-    setCurrentIndex(index)
-    if (allSongs?.length) setSongs(allSongs)
-    viewMusic(track._id)
-    if (autoPlay) play()
-  }
+    if (!track) return;
+    pause(); // ✅ أوقف السابقة قبل التحميل الجديد
+    setCurrent(track);
+    setCurrentIndex(index);
+    if (allSongs?.length) setSongs(allSongs);
+    viewMusic(track._id);
+    if (autoPlay) {
+      setPlaying(true);
+    } else {
+      setPlaying(false);
+    }
+  };
+
 
   // ⏮️ السابق
   const prev = () => {

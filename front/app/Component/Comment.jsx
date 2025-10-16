@@ -70,7 +70,7 @@ const Comment = ({ comment }) => {
                   )}
                 </div>
                 <span className="ml-2 text-xs text-gray-500">{comment.owner.profileName}</span>
-                <span className="ml-2 text-xs text-gray-400">· {new Date(comment.createdAt).toLocaleDateString()}</span>
+                <span className="ml-2 text-xs text-gray-400">· {formatRelativeTime(comment?.createdAt)}</span>
                 {comment?.isEdited && (
                   <motion.span
                     initial={{ opacity: 0 }}
@@ -169,7 +169,7 @@ const Comment = ({ comment }) => {
               onClick={() => setIsReplying(!isReplying)}
               className="flex items-center gap-1 cursor-pointer hover:text-blue-500 transition"
             >
-              <FaRegCommentDots className="text-lg sm:text-xl" />
+              <FaRegCommentDots className="text-lg" />
               <span>{comment.replies?.length || 0}</span>
             </div>
           </div>
