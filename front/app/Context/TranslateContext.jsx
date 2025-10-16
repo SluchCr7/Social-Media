@@ -7,9 +7,9 @@ import { useTranslation } from "react-i18next";
 const TranslateContext = createContext();
 
 export const TranslateContextProvider = ({ children }) => {
+  const {i18n} = useTranslation()
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState(i18n.language || 'en');
-  const {i18n} = useTranslation()
   // ✅ تحديث اللغة في i18next عند تغيير المستخدم
   const handleLanguageChange = (langCode) => {
     i18n.changeLanguage(langCode);
