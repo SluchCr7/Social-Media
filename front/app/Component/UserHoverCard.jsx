@@ -1,5 +1,4 @@
 'use client'
-
 import * as HoverCard from '@radix-ui/react-hover-card'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -26,10 +25,8 @@ const UserHoverCard = ({ userSelected, children, side = 'right' }) => {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  if (!userSelected) return null
   const isFollowing = userData?.following?.some(member => member._id === userSelected._id)
   const {t} = useTranslation()
-  // 🚫 لا يظهر في الشاشات الصغيرة
   if (isMobile) {
     return (
       <Link
@@ -40,8 +37,7 @@ const UserHoverCard = ({ userSelected, children, side = 'right' }) => {
       </Link>
     )
   }
-
-  // ✅ يظهر فقط في الشاشات الكبيرة
+  if (!userSelected) return null
   return (
     <HoverCard.Root openDelay={200} closeDelay={150}>
       <HoverCard.Trigger asChild>
