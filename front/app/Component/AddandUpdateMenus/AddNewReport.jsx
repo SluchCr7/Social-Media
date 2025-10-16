@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useReport } from '../../Context/ReportContext';
 import { IoClose } from 'react-icons/io5';
 import { reasons } from '@/app/utils/Data';
+import { useTranslation } from 'react-i18next';
 const AddNewReport = ({
   targetId,
   reportedOnType = "post", // "post", "comment", "user"
@@ -14,7 +15,7 @@ const AddNewReport = ({
   const [details, setDetails] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-
+  const {t} = useTranslation()
 
 
   const handleSubmit = async (e) => {
@@ -84,7 +85,7 @@ const AddNewReport = ({
             value={reason}
             onChange={(e) => setReason(e.target.value)}
           >
-            <option value="">Select a reason...</option>
+            <option value="">{t("Select a reason...")}</option>
             {reasons.map((r, idx) => (
               <option key={idx} value={r.value}>
                 {r.label}
@@ -122,7 +123,7 @@ const AddNewReport = ({
             {loading ? (
               <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
             ) : (
-              "Submit Report"
+              t("Submit Report")
             )}
           </button>
         </form>

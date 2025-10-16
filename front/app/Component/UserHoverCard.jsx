@@ -9,12 +9,15 @@ import { useState, useEffect } from 'react'
 import { FaUserPlus, FaUserCheck } from 'react-icons/fa'
 import { useUser } from '../Context/UserContext'
 import { HiBadgeCheck } from 'react-icons/hi'
+import { useGetData } from '../Custome/useGetData'
+import { useTranslation } from 'react-i18next'
 
 const UserHoverCard = ({ userSelected, children, side = 'right' }) => {
   const { user } = useAuth()
   const [isHovered, setIsHovered] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const {followUser} = useUser()
+  const {userData} = useGetData(user?._id)
   // 🧩 التحقق من حجم الشاشة لتجنب عرض الكارد في الموبايل
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 640)
@@ -24,8 +27,8 @@ const UserHoverCard = ({ userSelected, children, side = 'right' }) => {
   }, [])
 
   if (!userSelected) return null
-  const isFollowing = user?.following?.some(member => member._id === userSelected._id)
-
+  const isFollowing = userData?.following?.some(member => member._id === userSelected._id)
+  const {t} = useTranslation()
   // 🚫 لا يظهر في الشاشات الصغيرة
   if (isMobile) {
     return (
@@ -110,10 +113,10 @@ const UserHoverCard = ({ userSelected, children, side = 'right' }) => {
               {/* Stats */}
               <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
                 <span>
-                  <b>{userSelected?.followers?.length || 0}</b> Followers
+                  <b>{userSelected?.followers?.length || 0}</b> {t("Followers")}
                 </span>
                 <span>
-                  <b>{userSelected?.following?.length || 0}</b> Following
+                  <b>{userSelected?.following?.length || 0}</b> {t("Following")}
                 </span>
               </div>
 
@@ -128,7 +131,7 @@ const UserHoverCard = ({ userSelected, children, side = 'right' }) => {
                         : 'bg-blue-500 hover:bg-blue-600 text-white shadow-sm'}`}
                   >
                     {isFollowing ? <FaUserCheck size={14} /> : <FaUserPlus size={14} />}
-                    {isFollowing ? 'Following' : 'Follow'}
+                    {isFollowing ? t('Following') : t('Follow')}
                   </button>
                 </div>
               )}

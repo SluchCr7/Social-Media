@@ -2,7 +2,9 @@ import LoginHistoryTimeline from '@/app/Component/Setting/LoginHistoryTimeline'
 import React from 'react'
 import { motion } from 'framer-motion'
 import { FaHistory } from 'react-icons/fa'
-const HistoryTab = ({loginHistory}) => {
+import { useTranslation } from 'react-i18next'
+const HistoryTab = ({ loginHistory }) => {
+  const {t} = useTranslation()
   return (
     <motion.section
         key="history"
@@ -15,8 +17,8 @@ const HistoryTab = ({loginHistory}) => {
         <div className="flex items-center gap-4 mb-4">
             <div className="p-3 rounded-xl bg-gradient-to-br from-gray-400 to-gray-600 text-white shadow-lg"><FaHistory /></div>
             <div>
-            <h2 className="text-lg font-semibold">Login History</h2>
-            <p className="text-sm text-gray-500">Recent sign-ins and devices.</p>
+            <h2 className="text-lg font-semibold">{t("Login History")}</h2>
+            <p className="text-sm text-gray-500">{t("Recent sign-ins and devices.")}</p>
             </div>
         </div>
 

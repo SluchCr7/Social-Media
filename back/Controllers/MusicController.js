@@ -160,15 +160,23 @@ const toggleLike = asyncHandler(async (req, res) => {
     music.likes.push(userId);
 
     // إرسال إشعار للمالك إذا كان المستخدم ليس هو المالك
-    if (!music.owner.equals(userId)) {
-      await sendNotificationHelper({
-        sender: userId,
-        receiver: music.owner,
-        content: "liked your music",
-        type: "like",
-        actionRef: music._id,
-        actionModel: "Music",
-      });
+    if (!music.owner._id.equals(userId)) {
+
+      // ✅ التأكد أن المالك لم يحظر هذا المستخدم من الإشعارات
+      const isBlocked = music.owner.BlockedNotificationFromUsers?.some(
+        (blockedId) => blockedId.equals(userId)
+      );
+
+      if (!isBlocked) {
+        await sendNotificationHelper({
+          sender: userId,
+          receiver: music.owner._id,
+          content: "liked your music 🎵",
+          type: "like",
+          actionRef: music._id,
+          actionModel: "Music",
+        });
+      }
     }
   }
 

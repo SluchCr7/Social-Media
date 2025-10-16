@@ -92,7 +92,7 @@ const DesignCalender = ({
       <div className="hidden sm:grid grid-cols-7 text-center font-semibold text-xs sm:text-sm
         text-lightMode-text2 dark:text-darkMode-text2 mb-2 uppercase tracking-wider">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-          <div key={day} className="py-2">{day}</div>
+          <div key={day} className="py-2">{t(day)}</div>
         ))}
       </div>
 

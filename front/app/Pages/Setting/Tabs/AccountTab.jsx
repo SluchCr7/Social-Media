@@ -2,6 +2,7 @@ import ToggleSwitch from '@/app/Component/Setting/ToggleSwitch';
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaUserCog, FaTrashAlt} from 'react-icons/fa'
+import { useTranslation } from 'react-i18next';
 const AccountTab = ({
     user,
     isVerified,
@@ -11,6 +12,7 @@ const AccountTab = ({
     setShowConfirmDelete,
     handleDelete
 }) => {
+  const {t} = useTranslation()
   return (
                 <motion.section
                   key="account"
@@ -23,8 +25,8 @@ const AccountTab = ({
                   <div className="flex items-center gap-4 mb-2">
                     <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg"><FaUserCog /></div>
                     <div>
-                      <h2 className="text-lg font-semibold">Account</h2>
-                      <p className="text-sm text-gray-500">Manage privacy, verification and account actions.</p>
+                      <h2 className="text-lg font-semibold">{t("Account")}</h2>
+                      <p className="text-sm text-gray-500">{t("Manage privacy, verification and account actions.")}</p>
                     </div>
                   </div>
 
@@ -33,8 +35,8 @@ const AccountTab = ({
                     <div className="rounded-lg p-4 border bg-white/50 dark:bg-gray-800/50">
                       <div className="flex items-start justify-between">
                         <div>
-                          <div className="font-medium">Premium verified</div>
-                          <div className="text-sm text-gray-500">Get a verified badge and priority support.</div>
+                          <div className="font-medium">{t("Premium verified")}</div>
+                          <div className="text-sm text-gray-500">{t("Get a verified badge and priority support.")}</div>
                         </div>
                         <ToggleSwitch checked={isVerified} onChange={(v) => { setIsVerified(v); onMakePremiumVerify(v) }} onColor={'bg-yellow-400'} />
                       </div>
@@ -43,21 +45,21 @@ const AccountTab = ({
                     <div className="md:col-span-2 rounded-lg p-4 border bg-white/50 dark:bg-gray-800/50">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-medium">Danger zone</div>
-                          <div className="text-sm text-gray-500">Delete account and data permanently.</div>
+                          <div className="font-medium">{t("Danger zone")}</div>
+                          <div className="text-sm text-gray-500">{t("Delete account and data permanently.")}</div>
                         </div>
                         <button onClick={() => setShowConfirmDelete(true)} className="flex items-center gap-2 bg-red-600 text-white px-3 py-2 rounded-lg">
-                          <FaTrashAlt /> Delete account
+                          <FaTrashAlt /> {t("Delete account")}
                         </button>
                       </div>
 
                       <AnimatePresence>
                         {showConfirmDelete && (
                           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="mt-4 p-4 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-600">
-                            <div className="text-sm">Are you sure? This action cannot be undone.</div>
+                            <div className="text-sm">{t("Are you sure? This action cannot be undone.")}</div>
                             <div className="flex gap-3 mt-3">
-                              <button onClick={handleDelete} className="px-4 py-2 rounded-lg bg-red-600 text-white">Yes, delete</button>
-                              <button onClick={() => setShowConfirmDelete(false)} className="px-4 py-2 rounded-lg border">Cancel</button>
+                              <button onClick={handleDelete} className="px-4 py-2 rounded-lg bg-red-600 text-white">{t("Yes, delete")}</button>
+                              <button onClick={() => setShowConfirmDelete(false)} className="px-4 py-2 rounded-lg border">{t("Cancel")}</button>
                             </div>
                           </motion.div>
                         )}

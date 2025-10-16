@@ -175,21 +175,50 @@ const DesignExplore = ({
           )}
 
           {searchResults.posts.length > 0 && (
-            <div>
-              <h4 className="text-sm font-bold mb-2 text-indigo-600 dark:text-indigo-400">{t("Posts")}</h4>
-              {searchResults.posts.map((p) => (
-                <Link
-                  key={p._id}
-                  href={`/Pages/Post/${p._id}`}
-                  className="block p-2 rounded-lg hover:bg-lightMode-bg dark:hover:bg-darkMode-bg transition"
-                >
-                  <p className="text-sm font-semibold text-lightMode-text dark:text-darkMode-text line-clamp-1">
-                    {p.text || 'Untitled Post'}
-                  </p>
-                </Link>
-              ))}
+            <div className="mt-4">
+              <h4 className="text-sm font-bold mb-3 text-indigo-600 dark:text-indigo-400">
+                {t("Posts")}
+              </h4>
+
+              <div className="space-y-3">
+                {searchResults.posts.map((p) => (
+                  <Link
+                    key={p._id}
+                    href={`/Pages/Post/${p._id}`}
+                    className="block bg-white dark:bg-darkMode-bg border border-gray-200 dark:border-gray-700 
+                              rounded-2xl p-3 shadow-sm hover:shadow-md transition-all duration-300"
+                  >
+                    {/* Header (User Info) */}
+                    <div className="flex items-center mb-2">
+                      <div className="w-10 h-10 rounded-full overflow-hidden mr-3">
+                        <Image
+                          width={100}
+                          height={100}
+                          src={p.owner?.profilePhoto.url || "/default-avatar.png"}
+                          alt={p.owner?.username || "User"}
+                          className="w-8 h-8 object-cover"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-sm text-gray-800 dark:text-gray-100">
+                          {p.owner?.username || t("Unknown User")}
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          @{p.owner?.profileName || "user"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Post Content */}
+                    <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-3">
+                      {p.text || t("Untitled Post")}
+                    </p>
+                  </Link>
+                ))}
+              </div>
             </div>
           )}
+
 
           {searchResults.users.length === 0 &&
            searchResults.hashtags.length === 0 &&

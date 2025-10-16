@@ -9,6 +9,7 @@ import EmojiPicker from 'emoji-picker-react';
 import { useCommunity } from '@/app/Context/CommunityContext';
 import { useAuth } from '@/app/Context/AuthContext';
 import { motion , AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 const EditPostModal = ({ post, onClose }) => {
   const { editPost , isLoading } = usePost();
   const {communities} = useCommunity()
@@ -22,7 +23,7 @@ const EditPostModal = ({ post, onClose }) => {
   const [mentionSearch, setMentionSearch] = useState('');
   const [showMentionList, setShowMentionList] = useState(false);
   const [filteredMentions, setFilteredMentions] = useState([]);
-
+  const {t} = useTranslation()
   // Links
   const [links, setLinks] = useState([]);
   const [linkInput, setLinkInput] = useState('');
@@ -102,7 +103,7 @@ const EditPostModal = ({ post, onClose }) => {
                 <FaSpinner />
               </motion.div>
               <p className="text-white text-sm font-medium tracking-wide">
-                Updating post...
+                {t("Updating post...")}
               </p>
             </motion.div>
           )}
@@ -128,7 +129,7 @@ const EditPostModal = ({ post, onClose }) => {
                 onChange={(e) => setSelectedCommunity(e.target.value)}
                 className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-darkMode-bg text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Select a Community</option>
+                <option value="">{t("Select a Community")}</option>
                 {communities
                     .filter(com => com.members.some(m => m._id === user._id))
                     .map((com) => (
@@ -146,7 +147,7 @@ const EditPostModal = ({ post, onClose }) => {
             className="w-full h-32 md:h-40 p-4 text-gray-800 dark:text-white bg-gray-100 dark:bg-gray-800 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="What's on your mind? Add #hashtags, @mentions or emojis..."
+            placeholder={t("What's on your mind? Add #hashtags, @mentions or emojis...")}
           />
 
           {/* Mentions Chips */}
@@ -187,7 +188,7 @@ const EditPostModal = ({ post, onClose }) => {
               className="flex-1 px-3 py-2 border dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-darkMode-bg text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500"
             />
             <button onClick={handleAddLink} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-              Add
+              {t("Add")}
             </button>
           </div>
 
@@ -262,7 +263,7 @@ const EditPostModal = ({ post, onClose }) => {
             onClick={onClose}
             className="px-5 py-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition"
           >
-            Cancel
+            {t("Cancel")}
           </button>
           <button
             onClick={handleSubmit}
@@ -281,10 +282,10 @@ const EditPostModal = ({ post, onClose }) => {
                 >
                   <FaSpinner />
                 </motion.div>
-                Updating...
+                {t("Updating")}...
               </>
             ) : (
-              <>Save Changes</>
+              <>{t("Save Changes")}</>
             )}
           </button>
         </div>

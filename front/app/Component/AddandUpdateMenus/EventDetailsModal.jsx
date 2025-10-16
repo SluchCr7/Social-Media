@@ -3,6 +3,7 @@ import React from 'react'
 import { FaEdit, FaTrash } from 'react-icons/fa'
 import { motion } from 'framer-motion'
 import dayjs from "dayjs";
+import { useTranslation } from 'react-i18next';
 
 const EventDetailsModal = ({
   handleUpdateEvent,
@@ -10,6 +11,7 @@ const EventDetailsModal = ({
   selectedEvent,
   setSelectedEvent
 }) => {
+  const {t} = useTranslation()
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <motion.div
@@ -22,7 +24,7 @@ const EventDetailsModal = ({
       >
         {/* العنوان */}
         <h3 className="text-xl font-semibold mb-4 text-lightMode-text dark:text-darkMode-text">
-          Event Details
+          {t("Event Details")}
         </h3>
 
         {/* عنوان الحدث */}
@@ -53,10 +55,10 @@ const EventDetailsModal = ({
           value={selectedEvent.type}
           onChange={(e) => setSelectedEvent({ ...selectedEvent, type: e.target.value })}
         >
-          <option value="birthday">🎂 Birthday</option>
-          <option value="meeting">👥 Meeting</option>
-          <option value="public">📅 Public</option>
-          <option value="custom">⭐ Custom</option>
+          <option value="birthday">🎂 {t("Birthday")}</option>
+          <option value="meeting">👥 {t("Meeting")}</option>
+          <option value="public">📅 {t("Public")}</option>
+          <option value="custom">⭐ {t("Custom")}</option>
         </select>
 
         {/* التكرار */}
@@ -72,13 +74,13 @@ const EventDetailsModal = ({
             htmlFor="repeatYearlyEdit"
             className="text-sm text-lightMode-text2 dark:text-darkMode-text2 select-none"
           >
-            Repeat every year
+            {t("Repeat every year")}
           </label>
         </div>
 
         {/* التاريخ */}
         <p className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mb-4">
-          Date: <span className="font-medium">{dayjs(selectedEvent.date).format("DD MMM YYYY")}</span>
+          {t("Date")}: <span className="font-medium">{dayjs(selectedEvent.date).format("DD MMM YYYY")}</span>
         </p>
 
         {/* الأزرار */}
@@ -89,7 +91,7 @@ const EventDetailsModal = ({
                        transition-all duration-300"
             onClick={() => setSelectedEvent(null)}
           >
-            Close
+            {t("Close")}
           </button>
 
           <div className="flex gap-2">
@@ -98,7 +100,7 @@ const EventDetailsModal = ({
                          hover:scale-105 flex items-center gap-2 transition-all shadow"
               onClick={handleUpdateEvent}
             >
-              <FaEdit /> Save
+              <FaEdit /> {t("Save")}
             </button>
 
             <button
@@ -106,7 +108,7 @@ const EventDetailsModal = ({
                          hover:scale-105 flex items-center gap-2 transition-all shadow"
               onClick={handleDeleteEvent}
             >
-              <FaTrash /> Delete
+              <FaTrash /> {t("Delete")}
             </button>
           </div>
         </div>

@@ -99,16 +99,22 @@ const likeReel = async (req, res) => {
       await Reel.findByIdAndUpdate(req.params.id, { $pull: { likes: req.user._id } });
     } else {
       await Reel.findByIdAndUpdate(req.params.id, { $push: { likes: req.user._id } });
-
       if (!reel.owner.equals(req.user._id)) {
-        await sendNotificationHelper({
-          sender: req.user._id,
-          receiver: reel.owner,
-          content: "liked your reel",
-          type: "like",
-          actionRef: reel._id,
-          actionModel: "Reel",
-        });
+        const reelOwner = await User.findById(reel.owner).select('BlockedNotificationFromUsers');
+        const isBlocked = reelOwner.BlockedNotificationFromUsers.some(
+          id => id.toString() === req.user._id.toString()
+        );
+
+        if (!isBlocked) {
+          await sendNotificationHelper({
+            sender: req.user._id,
+            receiver: reel.owner,
+            content: 'liked your reel',
+            type: 'like',
+            actionRef: reel._id,
+            actionModel: 'Reel',
+          });
+        }
       }
     }
 
@@ -158,14 +164,21 @@ const shareReel = asyncHandler(async (req, res) => {
       owner: req.user._id,
   });
   if (!originalPost.owner.equals(req.user._id)) {
+    const reelOwner = await User.findById(originalPost.owner).select('BlockedNotificationFromUsers');
+    const isBlocked = reelOwner.BlockedNotificationFromUsers.some(
+      id => id.toString() === req.user._id.toString()
+    );
+
+    if (!isBlocked) {
       await sendNotificationHelper({
         sender: req.user._id,
         receiver: originalPost.owner,
-        content: "Shared your reel",
-        type: "share",
+        content: 'shared your reel',
+        type: 'share',
         actionRef: sharedReel._id,
-        actionModel: "Reel",
+        actionModel: 'Reel',
       });
+    }
   }
   await sharedReel.save();
   await sharedReel.populate(reelPopulate);

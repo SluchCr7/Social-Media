@@ -395,50 +395,49 @@ const uploadPhoto = asyncHandler(async (req, res) => {
 
 
 const makeFollow = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id); // الشخص اللي هيتعمله follow
-  const currentUser = await User.findById(req.user._id); // المستخدم الحالي
+  const user = await User.findById(req.params.id).select("username profilePhoto BlockedNotificationFromUsers followers");
+  const currentUser = await User.findById(req.user._id).select("username profilePhoto following");
 
   if (!user) {
-    res.status(404);
-    throw new Error("User not found");
+    return res.status(404).json({ message: "User not found" });
   }
 
-  if (user.followers.includes(req.user._id)) {
-    // 🔴 Unfollow
-    await User.findByIdAndUpdate(req.params.id, {
-      $pull: { followers: req.user._id },
-    });
-    await User.findByIdAndUpdate(req.user._id, {
-      $pull: { following: req.params.id },
-    });
+  const isFollowing = user.followers.includes(req.user._id);
+
+  if (isFollowing) {
+    // 🔴 إلغاء المتابعة (Unfollow)
+    await User.findByIdAndUpdate(user._id, { $pull: { followers: req.user._id } });
+    await User.findByIdAndUpdate(currentUser._id, { $pull: { following: user._id } });
 
     return res.status(200).json({
-      message: "Unfollowed",
+      message: "Unfollowed successfully",
       user,
     });
   } else {
-    // 🟢 Follow
-    await User.findByIdAndUpdate(req.params.id, {
-      $push: { followers: req.user._id },
-    });
-    await User.findByIdAndUpdate(req.user._id, {
-      $push: { following: req.params.id },
-    });
+    // 🟢 متابعة (Follow)
+    await User.findByIdAndUpdate(user._id, { $push: { followers: req.user._id } });
+    await User.findByIdAndUpdate(currentUser._id, { $push: { following: user._id } });
 
-    // ✅ إرسال Notification لصاحب الحساب
-    if (user._id.toString() !== currentUser._id.toString()) {
-      await sendNotificationHelper({
-        sender: currentUser._id,
-        receiver: user._id,
-        content: "started following you",
-        type: "follow",
-        actionRef: currentUser._id, // ممكن نخلي المرجع هو المستخدم نفسه
-        actionModel: "User",
-      });
+    // ✅ إرسال إشعار فقط إذا المالك لم يحظر هذا المستخدم
+    if (!user._id.equals(currentUser._id)) {
+      const isBlocked = user.BlockedNotificationFromUsers?.some((blockedId) =>
+        blockedId.equals(currentUser._id)
+      );
+
+      if (!isBlocked) {
+        await sendNotificationHelper({
+          sender: currentUser._id,
+          receiver: user._id,
+          content: `${currentUser.username} started following you 👥`,
+          type: "follow",
+          actionRef: currentUser._id, // مرجع المستخدم الذي قام بالمتابعة
+          actionModel: "User",
+        });
+      }
     }
 
     return res.status(200).json({
-      message: "Followed",
+      message: "Followed successfully",
       user,
     });
   }
@@ -957,6 +956,53 @@ const acceptCookies = asyncHandler(async (req, res) => {
   await user.save();
 })
 
+const toggleBlockNotification = async (req, res) => {
+  try {
+    const { userId } = req.params; // المستخدم الذي نريد حظره أو إلغاء حظره
+    const currentUserId = req.user._id; // المستخدم الحالي (من التوكن)
+
+    if (userId === String(currentUserId)) {
+      return res.status(400).json({ message: "لا يمكنك حظر نفسك من الإشعارات." });
+    }
+
+    const currentUser = await User.findById(currentUserId);
+
+    if (!currentUser) {
+      return res.status(404).json({ message: "المستخدم الحالي غير موجود." });
+    }
+
+    const isBlocked = currentUser.BlockedNotificationFromUsers.includes(userId);
+
+    let message;
+
+    if (isBlocked) {
+      // 🔓 إلغاء الحظر
+      currentUser.BlockedNotificationFromUsers = currentUser.BlockedNotificationFromUsers.filter(
+        (id) => id.toString() !== userId
+      );
+      message = "تم إلغاء حظر الإشعارات من هذا المستخدم.";
+    } else {
+      // 🚫 إضافة للحظر
+      currentUser.BlockedNotificationFromUsers.push(userId);
+      message = "تم حظر الإشعارات من هذا المستخدم.";
+    }
+
+    await currentUser.save();
+
+    res.status(200).json({
+      success: true,
+      message,
+      blockedUsers: currentUser.BlockedNotificationFromUsers,
+    });
+  } catch (error) {
+    console.error("Error toggling block notifications:", error);
+    res.status(500).json({
+      success: false,
+      message: "حدث خطأ أثناء تحديث حالة الحظر.",
+    });
+  }
+};
+
 module.exports = {
   updateAccountStatus,
   makeUserAdmin,
@@ -969,6 +1015,6 @@ module.exports = {
   updateProfile, pinPost, updateLinksSocial,
   getRelationship,
   updateRelationship,
-  toggleSongInPlaylist,acceptCookies
+  toggleSongInPlaylist,acceptCookies,toggleBlockNotification
 }
 

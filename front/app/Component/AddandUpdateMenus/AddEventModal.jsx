@@ -2,6 +2,7 @@
 import React from 'react'
 import { FaPlus, FaSpinner } from 'react-icons/fa'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
 const AddEventModal = ({
   newEvent,
@@ -11,6 +12,7 @@ const AddEventModal = ({
   selectedDate,
   isCreating
 }) => {
+  const {t} = useTranslation()
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <motion.div
@@ -22,7 +24,7 @@ const AddEventModal = ({
                    rounded-2xl p-6 w-full max-w-md shadow-2xl transition-colors duration-300"
       >
         <h3 className="text-xl font-semibold mb-5 text-center text-lightMode-text dark:text-darkMode-text">
-          Add Event on {selectedDate.format("DD MMM YYYY")}
+          {t("Add Event on")} {selectedDate.format("DD MMM YYYY")}
         </h3>
 
         {/* Title Input */}
@@ -62,10 +64,10 @@ const AddEventModal = ({
           value={newEvent.type}
           onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })}
         >
-          <option value="birthday">🎂 Birthday</option>
-          <option value="meeting">👥 Meeting</option>
-          <option value="public">📅 Public</option>
-          <option value="custom">⭐ Custom</option>
+          <option value="birthday">🎂 {t("Birthday")}</option>
+          <option value="meeting">👥 {t("Meeting")}</option>
+          <option value="public">📅 {t("Public")}</option>
+          <option value="custom">⭐ {t("Custom")}</option>
         </select>
 
         {/* Repeat yearly */}
@@ -78,7 +80,7 @@ const AddEventModal = ({
             className="accent-lightMode-text dark:accent-darkMode-text w-4 h-4"
           />
           <label htmlFor="repeatYearly" className="text-sm text-lightMode-text2 dark:text-darkMode-text2">
-            Repeat every year
+            {t("Repeat every year")}
           </label>
         </div>
 
@@ -91,7 +93,7 @@ const AddEventModal = ({
             onClick={() => setSelectedDate(null)}
             disabled={isCreating}
           >
-            Cancel
+            {t("Cancel")}
           </button>
 
           <motion.button
@@ -106,11 +108,11 @@ const AddEventModal = ({
           >
             {isCreating ? (
               <>
-                <FaSpinner className="animate-spin" /> Creating...
+                <FaSpinner className="animate-spin" /> {t("Creating")}...
               </>
             ) : (
               <>
-                <FaPlus /> Add Event
+                <FaPlus /> {t("Add Event")}
               </>
             )}
           </motion.button>

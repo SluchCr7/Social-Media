@@ -293,7 +293,15 @@ const hahaPost = asyncHandler(async (req, res) => {
       { $push: { hahas: req.user._id } }
     );
 
-    if (!post.owner.equals(req.user._id)) {
+    const postOwner = await User.findById(post.owner).select("BlockedNotificationFromUsers");
+
+    // 👇 لا ترسل إشعار لنفسك ولا لمن حظرك من الإشعارات
+    if (
+      !post.owner.equals(req.user._id) && 
+      !postOwner.BlockedNotificationFromUsers
+        .map(id => id.toString())
+        .includes(req.user._id.toString())
+    ) {
       await sendNotificationHelper({
         sender: req.user._id,
         receiver: post.owner,
@@ -334,10 +342,14 @@ const likePost = asyncHandler(async (req, res) => {
       { $push: { likes: req.user._id } }
     );
 
-    // إنشاء إشعار لصاحب البوست
-// ✅ إرسال إشعار فقط إذا اللايك ليس على بوستك
-      if (!post.owner.equals(req.user._id)) {
-        await sendNotificationHelper({
+    const postOwner = await User.findById(post.owner).select("BlockedNotificationFromUsers");
+    if (
+      !post.owner.equals(req.user._id) && 
+      !postOwner.BlockedNotificationFromUsers
+        .map(id => id.toString())
+        .includes(req.user._id.toString())
+    ) {
+      await sendNotificationHelper({
           sender: req.user._id,
           receiver: post.owner,
           content: "liked your post",
@@ -345,8 +357,7 @@ const likePost = asyncHandler(async (req, res) => {
           actionRef: post._id,
           actionModel: "Post",
         });
-      }
-
+    }
   }
 
   // جلب البوست كامل بعد التعديل مع كل populate
@@ -406,17 +417,22 @@ const sharePost = asyncHandler(async (req, res) => {
     originalPost: originalPost._id,
     isShared: true,
   });
-  if (!originalPost.owner.equals(req.user._id)) {
-    await sendNotificationHelper({
-      sender: req.user._id,
-      receiver: originalPost.owner,
-      content: "shared your post",
-      type: "share",
-      actionRef: sharedPost._id,
-      actionModel: "Post",
-    });
+  const postOwner = await User.findById(originalPost.owner).select("BlockedNotificationFromUsers");
+    if (
+      !originalPost.owner.equals(req.user._id) && 
+      !postOwner.BlockedNotificationFromUsers
+        .map(id => id.toString())
+        .includes(req.user._id.toString())
+    ) {
+      await sendNotificationHelper({
+        sender: req.user._id,
+        receiver: originalPost.owner,
+        content: "shared your post",
+        type: "share",
+        actionRef: sharedPost._id,
+        actionModel: "Post",
+      });
   }
-
   await sharedPost.save();
   await sharedPost.populate(postPopulate);
 

@@ -131,33 +131,36 @@ const viewStory = asyncHandler(async (req, res) => {
 
 
 const toggleLoveStory = asyncHandler(async (req, res) => {
-
-  // جلب البوست الأساسي
   const story = await Story.findById(req.params.id);
   if (!story) {
-    res.status(404);
-    throw new Error("Story not found");
+    return res.status(404).json({ message: "Story not found" });
   }
 
-  // إذا كان المستخدم قد أعجب بالبوست مسبقًا → إلغاء اللايك
+  // جلب بيانات صاحب الستوري
+  const owner = await User.findById(story.owner);
+
+  // إذا كان المستخدم قد أعجب مسبقًا → إلغاء اللايك
   if (story.loves.includes(req.user._id)) {
-    await Story.findByIdAndUpdate(
-      req.params.id,
-      { $pull: { loves: req.user._id } }
-    );
+    await Story.findByIdAndUpdate(req.params.id, {
+      $pull: { loves: req.user._id },
+    });
   } else {
     // إضافة لايك
-    await Story.findByIdAndUpdate(
-      req.params.id,
-      { $push: { loves: req.user._id } }
-    );
+    await Story.findByIdAndUpdate(req.params.id, {
+      $push: { loves: req.user._id },
+    });
 
-
-    if (!story.owner.equals(req.user._id)) {
+    // ✅ إرسال إشعار فقط إذا:
+    // - المستخدم الحالي ليس هو صاحب الستوري
+    // - وصاحب الستوري لم يقم بحظر الإشعارات منه
+    if (
+      !story.owner.equals(req.user._id) &&
+      !owner.BlockedNotificationFromUsers.includes(req.user._id)
+    ) {
       await sendNotificationHelper({
         sender: req.user._id,
         receiver: story.owner,
-        content: "love your Story",
+        content: "❤️ Liked your Story",
         type: "like",
         actionRef: story._id,
         actionModel: "Story",
@@ -165,12 +168,10 @@ const toggleLoveStory = asyncHandler(async (req, res) => {
     }
   }
 
-  // جلب البوست كامل بعد التعديل مع كل populate
-  const updatedStory = await Story.findById(req.params.id)
-    .populate(storyPopulate);
-  
+  const updatedStory = await Story.findById(req.params.id).populate(storyPopulate);
   res.status(200).json(updatedStory);
 });
+
 
 
 const getRecentStories = asyncHandler(async (req, res) => {
@@ -198,37 +199,40 @@ const getUserStories = asyncHandler(async (req, res) => {
   res.json(stories);
 });
 
-
 const shareStory = asyncHandler(async (req, res) => {
   const originalStory = await Story.findById(req.params.id).populate(
     "owner",
-    "username profileName profilePhoto"
+    "username profileName profilePhoto BlockedNotificationFromUsers"
   );
 
   if (!originalStory) {
     return res.status(404).json({ message: "Story not found" });
   }
 
-  const sharedStory = new Story({ 
-      text: originalStory.text,
-      Photo: originalStory.Photo,
-      originalStory: originalStory._id,
-      owner: req.user._id,
+  const sharedStory = new Story({
+    text: originalStory.text,
+    Photo: originalStory.Photo,
+    originalStory: originalStory._id,
+    owner: req.user._id,
   });
-  if (!originalStory.owner.equals(req.user._id)) {
-      await sendNotificationHelper({
-        sender: req.user._id,
-        receiver: originalStory.owner,
-        content: "Shared your Story",
-        type: "share",
-        actionRef: sharedStory._id,
-        actionModel: "Story",
-      });
+
+  // ✅ إرسال إشعار فقط إذا لم يكن المستخدم هو نفس المالك ولم يتم حظره
+  if (
+    !originalStory.owner._id.equals(req.user._id) &&
+    !originalStory.owner.BlockedNotificationFromUsers.includes(req.user._id)
+  ) {
+    await sendNotificationHelper({
+      sender: req.user._id,
+      receiver: originalStory.owner._id,
+      content: "🔁 Shared your Story",
+      type: "share",
+      actionRef: sharedStory._id,
+      actionModel: "Story",
+    });
   }
+
   await sharedStory.save();
   await sharedStory.populate(storyPopulate);
-
-  // ✅ رجع بوست كامل فقط
   res.status(201).json(sharedStory);
 });
 

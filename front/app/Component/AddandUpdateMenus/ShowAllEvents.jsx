@@ -2,7 +2,9 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import dayjs from "dayjs";
+import { useTranslation } from 'react-i18next';
 const ShowAllEvents = ({setSelectedEvent,showDayEvents ,setShowDayEvents,typeColors,typeIcons}) => {
+  const {t} = useTranslation()
   return (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
           <motion.div
@@ -12,7 +14,7 @@ const ShowAllEvents = ({setSelectedEvent,showDayEvents ,setShowDayEvents,typeCol
             className="bg-gradient-to-br from-white/3 to-transparent dark:from-black/60 backdrop-blur-xl
               rounded-2xl p-5 sm:p-6 w-full max-w-lg shadow-2xl border border-white/6 max-h-[80vh] overflow-y-auto"
           >
-            <h3 className="text-lg font-semibold mb-4">Day Events</h3>
+            <h3 className="text-lg font-semibold mb-4">{t("Day Events")}</h3>
             {showDayEvents.map((ev) => (
               <div
                 key={ev._id}
@@ -33,7 +35,7 @@ const ShowAllEvents = ({setSelectedEvent,showDayEvents ,setShowDayEvents,typeCol
             ))}
             <div className="flex justify-end">
               <button className="px-4 py-2 rounded bg-white/5" onClick={() => setShowDayEvents(null)}>
-                Close
+                {t("Close")}
               </button>
             </div>
           </motion.div>

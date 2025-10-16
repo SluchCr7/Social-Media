@@ -52,7 +52,7 @@ const DesignReports = ({
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
             }`}
           >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)} Reports
+            {tab.charAt(0).toUpperCase() + tab.slice(1)} {t("Reports")}
           </button>
         ))}
       </div>

@@ -6,6 +6,7 @@ import { FaSun } from 'react-icons/fa'
 import clsx from 'clsx'
 import ToggleSwitch from '@/app/Component/Setting/ToggleSwitch'
 import { DEFAULT_COLORS } from '@/app/utils/Data'
+import { useTranslation } from 'react-i18next'
 
 const AppearanceTab = ({
   darkMode,
@@ -15,7 +16,7 @@ const AppearanceTab = ({
   const [backgroundValue, setBackgroundValue] = useState(initialColor)
   const [customColor, setCustomColor] = useState('')
   const colors = DEFAULT_COLORS
-
+  const {t} = useTranslation()
   const handleBackgroundChange = (type, value) => {
     if (type === 'color') {
       setBackgroundValue(value)
@@ -40,9 +41,9 @@ const AppearanceTab = ({
           <FaSun />
         </div>
         <div>
-          <h2 className="text-lg font-semibold">Appearance</h2>
+          <h2 className="text-lg font-semibold">{t("Appearance")}</h2>
           <p className="text-sm text-gray-500">
-            Personalize theme, layout and accent color.
+            {t("Personalize theme, layout and accent color.")}
           </p>
         </div>
       </div>
@@ -54,21 +55,21 @@ const AppearanceTab = ({
           {/* Theme */}
           <div className="rounded-lg p-4 bg-white/60 dark:bg-gray-800/60 border">
             <div className="flex items-center justify-between">
-              <div className="font-medium">Theme</div>
+              <div className="font-medium">{t("Theme")}</div>
               <div className="flex items-center gap-3">
-                <div className="text-xs text-gray-500">Light</div>
+                <div className="text-xs text-gray-500">{t("Light")}</div>
                 <ToggleSwitch checked={darkMode} onChange={toggleTheme} />
-                <div className="text-xs text-gray-500">Dark</div>
+                <div className="text-xs text-gray-500">{t("Dark")}</div>
               </div>
             </div>
             <p className="text-sm text-gray-500 mt-2">
-              Toggle dark mode across the site.
+              {t("Toggle dark mode across the site.")}
             </p>
           </div>
 
           {/* Accent color */}
           <div className="rounded-lg p-4 bg-white/60 dark:bg-gray-800/60 border">
-            <div className="font-medium mb-2">Accent color</div>
+            <div className="font-medium mb-2">{t("Accent color")}</div>
             <div className="flex flex-wrap gap-3">
               {colors.map((c) => (
                 <button
@@ -97,7 +98,7 @@ const AppearanceTab = ({
               </div>
             </div>
             <div className="mt-3 text-sm text-gray-500">
-              Selected:{' '}
+              {t("Selected")}:{' '}
               <span
                 className="font-medium"
                 style={{ color: backgroundValue }}
@@ -112,23 +113,23 @@ const AppearanceTab = ({
         <div className="space-y-4">
           {/* Layout */}
           <div className="rounded-lg p-4 bg-white/60 dark:bg-gray-800/60 border">
-            <div className="font-medium">Layout</div>
+            <div className="font-medium">{t("Layout")}</div>
             <p className="text-sm text-gray-500 mt-2">
-              Choose a compact or relaxed layout for lists and posts.
+              {t("Choose a compact or relaxed layout for lists and posts.")}
             </p>
             <div className="mt-3 flex gap-3">
               <button className="px-3 py-2 rounded-lg border hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                Compact
+                {t("Compact")}
               </button>
               <button className="px-3 py-2 rounded-lg border bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow">
-                Relaxed
+                {t("Relaxed")}
               </button>
             </div>
           </div>
 
           {/* Preview */}
           <div className="rounded-lg p-4 bg-white/60 dark:bg-gray-800/60 border">
-            <div className="font-medium">Preview</div>
+            <div className="font-medium">{t("Preview")}</div>
             <div className="mt-3 p-3 rounded-lg border bg-white/30 dark:bg-gray-800/30">
               <div className="flex items-center gap-3">
                 <div
@@ -136,8 +137,8 @@ const AppearanceTab = ({
                   style={{ backgroundColor: backgroundValue }}
                 />
                 <div>
-                  <div className="font-medium">Preview name</div>
-                  <div className="text-xs text-gray-500">@preview</div>
+                  <div className="font-medium">{t("Preview name")}</div>
+                  <div className="text-xs text-gray-500">@{t("preview")}</div>
                 </div>
               </div>
             </div>

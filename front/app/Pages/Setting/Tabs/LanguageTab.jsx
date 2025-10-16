@@ -4,11 +4,12 @@ import { motion } from 'framer-motion';
 import { MdLanguage } from 'react-icons/md';
 import { availableLanguages } from '@/app/utils/Data';
 import LanguageCard from '@/app/Component/Setting/LanguageCard';
+import { useTranslation } from 'react-i18next';
 
 const LanguageTab = ({
     language, handleLanguageChange
 }) => {
-
+  const {t} = useTranslation()
   return (
     <motion.section
       key="language"
@@ -24,9 +25,9 @@ const LanguageTab = ({
           <MdLanguage />
         </div>
         <div>
-          <h2 className="text-lg font-semibold">Language</h2>
+          <h2 className="text-lg font-semibold">{t("Language")}</h2>
           <p className="text-sm text-gray-500">
-            Select your preferred language for the UI.
+            {t("Select your preferred language for the UI.")}
           </p>
         </div>
       </div>

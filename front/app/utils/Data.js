@@ -164,7 +164,7 @@ export const iso6391Map = {
 export const TABS = [
   { id: 'appearance', label: 'Appearance', icon: <FaSun /> },
   { id: 'security', label: 'Security', icon: <FaLock /> },
-  { id: 'chat', label: 'Chat Colors', icon: <CiChat1 /> },
+  // { id: 'chat', label: 'Chat Colors', icon: <CiChat1 /> },
   { id: 'language', label: 'Language', icon: <MdLanguage /> },
   { id: 'history', label: 'Login History', icon: <FaHistory /> },
   { id: 'account', label: 'Account', icon: <FaUserCog /> },

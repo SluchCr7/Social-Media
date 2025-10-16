@@ -6,6 +6,7 @@ import { usePost } from '@/app/Context/PostContext';
 import { filterHashtags } from '@/app/utils/filterHashtags';
 import DesignExplore from './DesignExplore';
 import { useUser } from '@/app/Context/UserContext';
+import { useGetData } from '@/app/Custome/useGetData';
 
 const Search = () => {
   const { users, user } = useAuth();
@@ -20,7 +21,7 @@ const Search = () => {
     posts: []
   });
   const [activeTab, setActiveTab] = useState('News');
-
+  const {userData} = useGetData(user?._id)
   const hashtagCount = {};
   filterHashtags(posts, hashtagCount);
   const topHashtags = Object.entries(hashtagCount).sort((a, b) => b[1] - a[1]);
@@ -80,7 +81,7 @@ const Search = () => {
     return suggestedUsers.slice(0, 8);
   }, [suggestedUsers, user]);
 
-  const userInterests = user?.interests?.filter(Boolean).slice(0, 2) || [];
+  const userInterests = userData?.interests?.filter(Boolean).slice(0, 2) || [];
   const interestTabs = userInterests
     .map((interest) => {
       const relatedNews = news.filter(item =>
@@ -94,7 +95,7 @@ const Search = () => {
 
   return (
     <DesignExplore 
-      user={user}
+      user={userData}
       search={search}
       setSearch={setSearch}
       searchResults={searchResults}

@@ -29,7 +29,7 @@ const Page = ({ params }) => {
               #{text}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {postsRelated.length} {postsRelated.length === 1 ? "post" : "posts"} found
+              {postsRelated.length} {postsRelated.length === 1 ? t("post") : t("posts")} {t("found")}
             </p>
           </div>
         </div>

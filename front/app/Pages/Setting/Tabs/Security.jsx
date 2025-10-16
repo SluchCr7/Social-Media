@@ -25,15 +25,15 @@ const Security = ({
                   <div className="flex items-center gap-4 mb-4">
                     <div className="p-3 rounded-xl bg-gradient-to-br from-red-400 to-pink-500 text-white shadow-lg"><FaLock /></div>
                     <div>
-                      <h2 className="text-lg font-semibold">Security</h2>
-                      <p className="text-sm text-gray-500">Manage password, two-factor and account safety.</p>
+                      <h2 className="text-lg font-semibold">{t("Security")}</h2>
+                      <p className="text-sm text-gray-500">{t("Manage password, two-factor and account safety.")}</p>
                     </div>
                   </div>
 
                   <form onSubmit={submitPassword} className="grid gap-4">
                     <input
                       type="password"
-                      placeholder="Current password"
+                      placeholder={t("Current password")}
                       value={oldPassword}
                       onChange={(e) => setOldPassword(e.target.value)}
                       className="p-3 rounded-lg border bg-white/50 dark:bg-gray-800/50"
@@ -41,7 +41,7 @@ const Security = ({
                     />
                     <input
                       type="password"
-                      placeholder="New password"
+                      placeholder={t("New password")}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       className="p-3 rounded-lg border bg-white/50 dark:bg-gray-800/50"
@@ -49,7 +49,7 @@ const Security = ({
                     />
                     <input
                       type="password"
-                      placeholder="Confirm new password"
+                      placeholder={t("Confirm new password")}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       className="p-3 rounded-lg border bg-white/50 dark:bg-gray-800/50"
@@ -68,11 +68,11 @@ const Security = ({
                   <div className="mt-6 border-t pt-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="font-medium">Two-factor Authentication</div>
-                        <div className="text-sm text-gray-500">Add an extra layer of protection to your account.</div>
+                        <div className="font-medium">{t("Two-factor Authentication")}</div>
+                        <div className="text-sm text-gray-500">{t("Add an extra layer of protection to your account.")}</div>
                       </div>
                       <div>
-                        <button className="px-3 py-2 rounded-lg border">Manage</button>
+                        <button className="px-3 py-2 rounded-lg border">{t("Manage")}</button>
                       </div>
                     </div>
                   </div>

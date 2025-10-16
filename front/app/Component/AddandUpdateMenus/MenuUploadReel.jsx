@@ -7,11 +7,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TextareaAutosize from 'react-textarea-autosize';
 import { AiOutlineCloudUpload, AiOutlineClose } from "react-icons/ai";
 import { BiLoaderAlt } from "react-icons/bi";
+import { useTranslation } from 'react-i18next';
 
 const ReelUploadModal = () => {
   const { uploadReel, setShowModelAddReel, showModelAddReel } = useReels();
   const { showAlert } = useAlert();
-
+  const {t} = useTranslation()
   const [videoFile, setVideoFile] = useState(null);
   const [caption, setCaption] = useState("");
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -87,7 +88,7 @@ const ReelUploadModal = () => {
 
             {/* العنوان */}
             <h2 className="text-2xl font-bold mb-5 text-lightMode-text dark:text-darkMode-text">
-              Upload Reel
+              {t("Upload Reel")}
             </h2>
 
             {/* المعاينة */}
@@ -106,7 +107,7 @@ const ReelUploadModal = () => {
                       animate={{ opacity: [0.5, 1, 0.5] }}
                       transition={{ repeat: Infinity, duration: 1.5 }}
                     >
-                      Uploading...
+                      {t("Uploading")}...
                     </motion.p>
                     <motion.div className="w-3/4 h-2 bg-gray-600 rounded-full mt-3 overflow-hidden">
                       <motion.div
@@ -146,7 +147,7 @@ const ReelUploadModal = () => {
                 ) : (
                   <>
                     <AiOutlineCloudUpload className="mx-auto text-4xl mb-2 opacity-80" />
-                    <p>Drag & drop or click to select a video</p>
+                    <p>{t("Drag & drop or click to select a video")}</p>
                     <span className="text-sm text-gray-400">MP4, MOV or AVI • Max 60s</span>
                   </>
                 )}
@@ -163,7 +164,7 @@ const ReelUploadModal = () => {
 
               {/* التسمية (Caption) */}
               <TextareaAutosize
-                placeholder="Write a caption..."
+                placeholder={t("Write a caption...")}
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
                 minRows={3}
@@ -184,12 +185,12 @@ const ReelUploadModal = () => {
                 {isUploading ? (
                   <>
                     <BiLoaderAlt className="animate-spin" size={22} />
-                    Uploading...
+                    {t("Uploading")}...
                   </>
                 ) : (
                   <>
                     <AiOutlineCloudUpload size={22} />
-                    Upload Reel
+                    {t("Upload Reel")}
                   </>
                 )}
               </button>

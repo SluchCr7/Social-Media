@@ -23,6 +23,7 @@ const {
   MakeAccountPreimumVerify,
   togglePrivateAccount,
   updateAccountStatus,
+  toggleBlockNotification,
   // 🔹 Controllers الجدد
   getRelationship,
   updateRelationship
@@ -54,6 +55,7 @@ route.route('/save/music/:songId').put(verifyToken, toggleSongInPlaylist);
 // 🔹 Account status & suspension
 route.route('/status/:userId').put(verifyToken, updateAccountStatus);
 route.route('/cookies/:id').put(verifyToken, acceptCookies);
+route.route('/block/notify/:userId').post(verifyToken, toggleBlockNotification);
 
 // 🔹 Relationship routes
 route.route('/relationship/:userId').get(verifyToken, getRelationship); // جلب حالة العلاقة

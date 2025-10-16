@@ -85,20 +85,17 @@ const addNewComment = asyncHandler(async (req, res) => {
   const { error } = ValidateComment({ ...req.body, postId: req.params.postId });
   if (error) return res.status(400).json({ message: error.details[0].message });
 
-  // ✅ التأكد من وجود البوست
   const post = await Post.findById(req.params.postId);
   if (!post) {
     res.status(404);
     throw new Error("Post not found");
   }
 
-  // ✅ لو الكومنتات مقفولة
   if (post.isCommentOff) {
     res.status(403);
     throw new Error("Comments are disabled for this post");
   }
 
-  // ✅ إنشاء الكومنت
   const comment = new Comment({
     text: req.body.text,
     owner: req.user._id,
@@ -106,51 +103,56 @@ const addNewComment = asyncHandler(async (req, res) => {
     parent: req.body.parent || null,
   });
 
-  // ✅ تحديث مستوى المستخدم
   const user = await User.findById(req.user._id);
   user.userLevelPoints += 3;
   user.updateLevelRank();
   await Promise.all([user.save(), comment.save()]);
 
-  // ✅ populate للكومنت الجديد
   const populatedComment = await Comment.findById(comment._id).populate(commentPopulate);
 
-  // ✅ لو الكومنت رد (reply)
+  // ✅ حالة الرد (Reply)
   if (comment.parent) {
-    const parentComment = await Comment.findById(comment.parent).populate(commentPopulate);
+    const parentComment = await Comment.findById(comment.parent).populate("owner", "BlockedNotificationFromUsers");
 
-    // ✨ إرسال إشعار لصاحب الكومنت الأب
     if (parentComment && !parentComment.owner.equals(req.user._id)) {
-      await sendNotificationHelper({
-        sender: req.user._id,
-        receiver: parentComment.owner,
-        content: "replied to your comment",
-        type: "reply",
-        actionRef: parentComment._id,
-        actionModel: "Comment",
-      });
+      // ⚡ لا ترسل إشعار إذا صاحب الكومنت الأب حظر المستخدم الحالي
+      if (!parentComment.owner.BlockedNotificationFromUsers.includes(req.user._id)) {
+        await sendNotificationHelper({
+          sender: req.user._id,
+          receiver: parentComment.owner,
+          content: "replied to your comment",
+          type: "reply",
+          actionRef: parentComment._id,
+          actionModel: "Comment",
+        });
+      }
     }
 
-    return res
-      .status(201)
-      .json({ message: "Reply added", comment: populatedComment, parentComment });
+    return res.status(201).json({
+      message: "Reply added",
+      comment: populatedComment,
+      parentComment,
+    });
   }
 
-  // ✅ لو الكومنت على البوست نفسه
+  // ✅ حالة التعليق على البوست نفسه
   if (!post.owner.equals(req.user._id)) {
-    await sendNotificationHelper({
-      sender: req.user._id,
-      receiver: post.owner,
-      content: "commented on your post",
-      type: "comment",
-      actionRef: post._id,
-      actionModel: "Post",
-    });
+    const postOwner = await User.findById(post.owner);
+
+    if (!postOwner.BlockedNotificationFromUsers.includes(req.user._id)) {
+      await sendNotificationHelper({
+        sender: req.user._id,
+        receiver: post.owner,
+        content: "commented on your post",
+        type: "comment",
+        actionRef: post._id,
+        actionModel: "Post",
+      });
+    }
   }
 
   res.status(201).json({ message: "Comment added", comment: populatedComment });
 });
-
 
 // ================== Delete Comment (with cascade replies) ==================
 const deleteComment = asyncHandler(async (req, res) => {
@@ -207,16 +209,18 @@ const likeComment = asyncHandler(async (req, res) => {
 
   // ✨ إرسال إشعار لصاحب الكومنت
   if (comment.owner._id.toString() !== req.user._id.toString()) {
-    await sendNotificationHelper({
-      sender: req.user._id,
-      receiver: comment.owner._id,
-      content: "liked your comment",
-      type: "like-comment",
-      actionRef: comment._id,
-      actionModel: "Comment",
-    });
+    const commentOwner = await User.findById(comment.owner._id);
+    if (!commentOwner.BlockedNotificationFromUsers.includes(req.user._id)) {
+      await sendNotificationHelper({
+        sender: req.user._id,
+        receiver: comment.owner._id,
+        content: "liked your comment",
+        type: "like-comment",
+        actionRef: comment._id,
+        actionModel: "Comment",
+      });
+    }
   }
-
   res.status(200).json({ message: "Comment Liked", comment });
 });
 

@@ -5,6 +5,7 @@ import { IoClose, IoCamera, IoAdd } from 'react-icons/io5';
 import { useCommunity } from '../../Context/CommunityContext';
 import Image from 'next/image';
 import { useAlert } from '../../Context/AlertContext';
+import { useTranslation } from 'react-i18next';
 
 const EditCommunityMenu = ({ community, onClose }) => {
   const [name, setName] = useState(community?.Name || '');
@@ -16,7 +17,7 @@ const EditCommunityMenu = ({ community, onClose }) => {
   const [previewCover, setPreviewCover] = useState(
     community?.Cover?.url || '/default-cover.png'
   );
-
+  const {t} = useTranslation()
   const [tags, setTags] = useState(community?.tags || []);
   const [newTag, setNewTag] = useState('');
   const [rules, setRules] = useState(community?.rules || []);
@@ -104,7 +105,7 @@ const EditCommunityMenu = ({ community, onClose }) => {
         </button>
 
         <h2 className="text-2xl font-semibold mb-6 text-center text-lightMode-text dark:text-darkMode-text">
-          Edit Community
+          {t("Edit Community")}
         </h2>
 
         {/* Cover Image */}
@@ -139,7 +140,7 @@ const EditCommunityMenu = ({ community, onClose }) => {
         <form onSubmit={handleSubmit} className="mt-6 space-y-4 px-2">
           <div>
             <label className="block mb-1 font-medium text-lightMode-text2 dark:text-darkMode-text2">
-              Community Name
+              {t("Community Name")}
             </label>
             <input
               type="text"
@@ -151,7 +152,7 @@ const EditCommunityMenu = ({ community, onClose }) => {
 
           <div>
             <label className="block mb-1 font-medium text-lightMode-text2 dark:text-darkMode-text2">
-              Description
+              {t("Description")}
             </label>
             <textarea
               value={description}
@@ -170,7 +171,7 @@ const EditCommunityMenu = ({ community, onClose }) => {
               className="accent-blue-600 w-4 h-4"
             />
             <label htmlFor="isPrivate" className="text-lightMode-text2 dark:text-darkMode-text2">
-              Private Community
+              {t("Private Community")}
             </label>
           </div>
 
@@ -244,7 +245,7 @@ const EditCommunityMenu = ({ community, onClose }) => {
             type="submit"
             className="w-full bg-lightMode-text dark:bg-darkMode-text hover:opacity-90 text-white py-2 rounded-lg font-semibold transition"
           >
-            Save Changes
+            {t("Save Changes")}
           </button>
         </form>
       </div>

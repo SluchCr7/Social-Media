@@ -14,6 +14,8 @@ import { useAdmin } from '../Context/UserAdminContext';
 import { useAlert } from '../Context/AlertContext';
 import { useGetData } from '../Custome/useGetData';
 import { useTranslation } from 'react-i18next';
+import { IoVolumeMute } from "react-icons/io5";
+import { GoUnmute } from "react-icons/go";
 
 // ✅ زر فردي
 const MenuOption = ({ icon, text, action, className, loading }) => (
@@ -33,7 +35,7 @@ const MenuOption = ({ icon, text, action, className, loading }) => (
 );
 
 const PostMenu = ({ showMenu, setShowMenu, post }) => {
-  const { followUser, pinPost } = useUser()
+  const { followUser, pinPost , toggleBlockNotification } = useUser()
   const { blockOrUnblockUser } = useAdmin()
   const {t} = useTranslation()
   const { user } = useAuth();
@@ -100,18 +102,30 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
   // ✅ خيارات الزائر
   const visitorOptions = useMemo(() => [
     {
-      icon: user?.following?.includes(post?.owner?._id)
+      icon: userData?.BlockedNotificationFromUsers?.includes(post?.owner?._id)
+        ? <GoUnmute className="text-lg" />
+        : <IoVolumeMute className="text-lg" />,
+      text: userData?.BlockedNotificationFromUsers?.includes(post?.owner?._id)
+        ? t('UnMute Notifications From User')
+        : t('Mute Notifications From User'),
+      action: () => {
+        toggleBlockNotification(post?.owner?._id)
+      },
+      className: userData?.BlockedNotificationFromUsers?.includes(post?.owner?._id) ?
+        'text-red-400 hover:bg-red-100'
+        : 'text-blue-400 hover:bg-blue-100',
+    },
+    {
+      icon: userData?.following?.includes(post?.owner?._id)
         ? <RiUserUnfollowLine className="text-lg" />
         : <RiUserFollowLine className="text-lg" />,
-      text: user?.following?.includes(post?.owner?._id)
+      text: userData?.following?.includes(post?.owner?._id)
         ? t('Unfollow User')
         : t('Follow User'),
-
-
       action: () => {
         followUser(post?.owner?._id)
       },
-      className: user?.following?.includes(post?.owner?._id) ?
+      className: userData?.following?.includes(post?.owner?._id) ?
         'text-red-600 hover:bg-red-100'
         : 'text-blue-600 hover:bg-blue-100',
     },
@@ -136,13 +150,13 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
     },
     {
       icon: <AiOutlineDelete size={18} />,
-      text: user?.blockedUsers?.includes(post?.owner?._id) ? t('Unblock User') : t('Block User'),
+      text: userData?.blockedUsers?.includes(post?.owner?._id) ? t('Unblock User') : t('Block User'),
       action: () => setConfirmAction(() => async () => {
         setLoadingBtn(true);
         await blockOrUnblockUser(post?.owner?._id);
         setLoadingBtn(false);
       }),
-      className: user?.blockedUsers?.includes(post?.owner?._id)
+      className: userData?.blockedUsers?.includes(post?.owner?._id)
         ? 'text-green-600 hover:bg-green-100'
         : 'text-red-600 hover:bg-red-100',
     }

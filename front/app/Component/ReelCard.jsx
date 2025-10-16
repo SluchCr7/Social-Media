@@ -16,6 +16,7 @@ import {
 import { RiShareForwardLine } from "react-icons/ri";
 import { IoLinkOutline } from "react-icons/io5";
 import CommentsPopup from './CommentReelPopup';
+import { useTranslation } from 'react-i18next';
 
 const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
   const videoRef = useRef(null);

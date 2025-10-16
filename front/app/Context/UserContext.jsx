@@ -271,6 +271,38 @@ const togglePrivateAccount = async () => {
       return null;
     }
   };
+  const toggleBlockNotification = async (targetUserId) => {
+    if (!user?.token) return showAlert("You must be logged in");
+
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/block/notify/${targetUserId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+
+      // ✅ تحديث بيانات المستخدم المحلي (blocked list)
+      const updatedUser = {
+        ...user,
+        BlockedNotificationFromUsers: res.data.blockedUsers || [],
+      };
+
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      showAlert(res.data.message || "Notification preference updated");
+      return res.data;
+    } catch (err) {
+      console.error("Error toggling notification block:", err);
+      showAlert(
+        err?.response?.data?.message || "Failed to update notification block"
+      );
+    }
+  };
 
   // =====================================
 
@@ -317,7 +349,7 @@ const togglePrivateAccount = async () => {
             updatePhoto,
             updateProfile,
             pinPost,
-            onlineUsers,updateProfileLoading,loading
+            onlineUsers,updateProfileLoading,loading,toggleBlockNotification
         }}
     >
       {children}

@@ -7,6 +7,7 @@ import {
 import Image from 'next/image';
 import { toast } from 'react-toastify';
 import { useUser } from '@/app/Context/UserContext';
+import { useTranslation } from 'react-i18next';
 
 // --------------------------- إعدادات الأنماط العامة ---------------------------
 const inputStyle =
@@ -25,7 +26,7 @@ const socialFields = [
 // ============================================================================
 const UpdateProfile = ({ update, setUpdate, user }) => {
   const { updateProfile, updateProfileLoading } = useUser();
-
+  const {t} = useTranslation()
   // --------------------------- الحالة (State) ---------------------------
   const [formData, setFormData] = useState({
     username: '',
@@ -126,20 +127,31 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
     });
 
     // الاهتمامات
-    if (formData.interests.length > 0)
-      payload.interests = Array.from(new Set([...(user?.interests || []), ...formData.interests]));
+    if (
+      formData.interests.length > 0 &&
+      JSON.stringify(formData.interests) !== JSON.stringify(user?.interests || [])
+    ) {
+      payload.interests = formData.interests;
+    }
 
     // الروابط الاجتماعية
     const links = Object.fromEntries(
       Object.entries(formData.socialLinks).filter(([_, v]) => v.trim() !== '')
     );
-    if (Object.keys(links).length > 0) payload.socialLinks = links;
+    if (
+      Object.keys(links).length > 0 &&
+      JSON.stringify(links) !== JSON.stringify(user?.socialLinks || {})
+    ) {
+      payload.socialLinks = links;
+    }
 
+    // تحقق إذا لم يكن هناك أي تغيير
     if (Object.keys(payload).length === 0)
-      return toast.error("Please fill in at least one field.");
+      return toast.error("Please change at least one field before saving.");
 
     updateProfile(payload);
   };
+
 
   // ========================================================================
   // واجهة المستخدم
@@ -214,17 +226,17 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
             <label className="block text-sm font-medium text-gray-300 mb-1">Relationship Status</label>
             <select name="relationshipStatus" value={formData.relationshipStatus} onChange={handleChange} className={inputStyle}>
               <option value="">Select</option>
-              <option>Single</option>
-              <option>In a Relationship</option>
-              <option>Married</option>
-              <option>Divorced</option>
+              <option>{t("Single")}</option>
+              <option>{t("In a Relationship")}</option>
+              <option>{t("Married")}</option>
+              <option>{t("Divorced")}</option>
             </select>
           </div>
 
           {/* اختيار الشريك */}
           {(formData.relationshipStatus === "In a Relationship" || formData.relationshipStatus === "Married") && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Choose Partner</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">{t("Choose Partner")}</label>
               <div className="max-h-48 overflow-y-auto border border-gray-700 rounded-xl">
                 {user?.following?.length ? (
                   user.following.map(f => (
@@ -244,12 +256,12 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500 p-3">You must follow someone to choose a partner.</p>
+                  <p className="text-sm text-gray-500 p-3">{t("You must follow someone to choose a partner.")}</p>
                 )}
               </div>
               {formData.partner && (
                 <button type="button" onClick={() => setFormData(prev => ({ ...prev, partner: '' }))} className="mt-2 text-sm text-red-400 hover:underline">
-                  Clear Selection
+                  {t("Clear Selection")}
                 </button>
               )}
             </div>
@@ -257,7 +269,7 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
 
           {/* -------------------- الاهتمامات -------------------- */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Interests</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">{t("Interests")}</label>
             <div className="flex flex-wrap gap-2 mb-2">
               {formData.interests.map((interest, i) => (
                 <span key={i} className="flex items-center gap-1 px-3 py-1 bg-gray-700 rounded-full text-sm">
@@ -281,12 +293,12 @@ const UpdateProfile = ({ update, setUpdate, user }) => {
                 <FaPlus />
               </button>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Add multiple interests, then press Enter or click +</p>
+            <p className="text-xs text-gray-500 mt-1">{t("Add multiple interests, then press Enter or click ")} +</p>
           </div>
 
           {/* -------------------- الروابط الاجتماعية -------------------- */}
           <div className="mt-6">
-            <h3 className="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Social Links</h3>
+            <h3 className="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">{t("Social Links")}</h3>
             <div className="space-y-4">
               {socialFields.map(({ name, label, icon }) => (
                 <div key={name} className="flex items-center gap-3">

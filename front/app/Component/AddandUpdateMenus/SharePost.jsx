@@ -5,12 +5,13 @@ import { FaShare, FaSpinner } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../Context/AuthContext";
 import { usePost } from "@/app/Context/PostContext";
+import { useTranslation } from "react-i18next";
 
 export function ShareModal({ post, isOpen, onClose, onShare }) {
   const [customText, setCustomText] = useState("");
   const { user } = useAuth();
   const { isLoading } = usePost();
-
+  const {t} = useTranslation()
   // Close modal on ESC
   useEffect(() => {
     const handleKey = (e) => e.key === "Escape" && !isLoading && onClose();
@@ -71,7 +72,7 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
                   <FaShare size={16} />
                 </motion.div>
                 <h2 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100">
-                  Share Post
+                  {t("Share Post")}
                 </h2>
               </div>
               <button
@@ -173,7 +174,7 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
                     : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                 }`}
               >
-                Cancel
+                {t("Cancel")}
               </button>
 
               <button
@@ -194,11 +195,11 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
                     >
                       <FaSpinner />
                     </motion.div>
-                    Sharing...
+                    {t("Sharing")}...
                   </>
                 ) : (
                   <>
-                    <FaShare /> Share
+                    <FaShare /> {t("Share")}
                   </>
                 )}
               </button>

@@ -8,6 +8,7 @@ import { useStory } from '../../Context/StoryContext';
 import { useAuth } from '../../Context/AuthContext';
 import { useUser } from '@/app/Context/UserContext';
 import { useGetData } from '@/app/Custome/useGetData';
+import { useTranslation } from 'react-i18next';
 
 const AddStoryModel = ({ setIsStory, isStory }) => {
   const [storyText, setStoryText] = useState('');
@@ -21,7 +22,7 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
   const { addNewStory } = useStory();
   const { user } = useAuth();
   const {userData} = useGetData(user?._id)
-
+  const {t} = useTranslation()
   useEffect(() => {
     const saved = localStorage.getItem('storyDraft');
     if (saved) setStoryText(saved);
@@ -151,7 +152,7 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
                     <IoCloudUploadOutline />
                   </motion.div>
 
-                  <p className="text-gray-200 font-medium mb-2">Uploading Story...</p>
+                  <p className="text-gray-200 font-medium mb-2">{t("Uploading Story")}</p>
 
                   <div className="w-3/4 h-2 bg-gray-700 rounded-full overflow-hidden mt-2">
                     <motion.div
@@ -180,7 +181,7 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
 
             <h2 className="text-center text-3xl font-extrabold text-transparent 
                            bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">
-              Add Story
+              {t("Add Story")}
             </h2>
 
             {/* Success Animation */}
@@ -193,7 +194,7 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
                   className="flex flex-col items-center justify-center text-green-400"
                 >
                   <IoCheckmarkCircleOutline className="text-5xl mb-2" />
-                  <p className="font-semibold">Story shared successfully!</p>
+                  <p className="font-semibold">{t("Story shared successfully!")}</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -205,7 +206,7 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
             <textarea
               value={storyText}
               onChange={handleTextChange}
-              placeholder="Share your thoughts or upload an image..."
+              placeholder={t("Share your thoughts or upload an image...")}
               rows={4}
               maxLength={300}
               className="w-full p-4 rounded-2xl bg-gradient-to-b from-gray-100/10 
@@ -225,7 +226,7 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
                                     py-2 px-4 rounded-2xl transition shadow-md hover:shadow-xl 
                                     transform hover:scale-105">
                     <IoImage className="text-xl" />
-                    <span>Upload Image</span>
+                    <span>{t("Upload Image")}</span>
                     <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                   </label>
                   <label className="flex items-center justify-center gap-2 cursor-pointer 
@@ -233,7 +234,7 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
                                     hover:to-blue-700 text-white font-semibold py-2 px-4 rounded-2xl 
                                     transition shadow-md hover:shadow-xl transform hover:scale-105">
                     <IoCamera className="text-xl" />
-                    <span>Camera</span>
+                    <span>{t("Camera")}</span>
                     <input type="file" accept="image/*" capture="camera" onChange={handleImageChange} className="hidden" />
                   </label>
                 </div>
@@ -266,7 +267,7 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
             {userData?.following?.length > 0 && (
               <div className="w-full">
                 <label className="block text-gray-300 text-sm mb-2">
-                  Add Collaborators (optional)
+                  {t("Add Collaborators")} ({t("optional")})
                 </label>
                 <Select
                   isMulti
@@ -332,11 +333,11 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
                     transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
                     className="border-t-2 border-white w-5 h-5 rounded-full"
                   />
-                  <span>Posting your story...</span>
+                  <span>{t("Posting your story")}...</span>
                 </>
               ) : (
                 <>
-                  <IoImage className="text-xl" /> Share Story
+                  <IoImage className="text-xl" /> {t("Share Story")}
                 </>
               )}
             </motion.button>
