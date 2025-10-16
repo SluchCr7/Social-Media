@@ -2,13 +2,14 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import i18n from '@/app/i18n';
+import { useTranslation } from "react-i18next";
 
 const TranslateContext = createContext();
 
 export const TranslateContextProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState(i18n.language || 'en');
-
+  const {i18n} = useTranslation()
   // ✅ تحديث اللغة في i18next عند تغيير المستخدم
   const handleLanguageChange = (langCode) => {
     i18n.changeLanguage(langCode);
