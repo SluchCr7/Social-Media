@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState, useMemo } from 'react';
-import { useReport } from '../../Context/ReportContext';
-import { useAuth } from '../../Context/AuthContext';
+import { useReport } from '@/app/Context/ReportContext';
+import { useAuth } from '@/app/Context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import {
