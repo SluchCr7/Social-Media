@@ -19,6 +19,7 @@ import { useMusicPlayer } from '../Context/MusicPlayerContext';
 import SongPlayer from './MusicPage/SongPlayer';
 import ExpandedWindow from './MusicPage/ExpandedWindow';
 import { useTranslate } from '../Context/TranslateContext';
+import CookieConsent from './CookieConsent';
 const LayoutComponent = ({ children }) => {
   const [loading, setLoading] = useState(true); // للتحكم في الـ Loader
 
@@ -144,6 +145,7 @@ const LayoutComponent = ({ children }) => {
               <SongPlayer/>
             )
           } */}
+          {/* <CookieConsent/> */}
           <ExpandedWindow/>
         </div>
       </div>

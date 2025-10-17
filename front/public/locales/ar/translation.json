@@ -497,5 +497,12 @@
     "Manage your account, privacy and appearance": "إدارة حسابك، الخصوصية والمظهر.",
     "Signed in as": "مسجل الدخول باسم",
     "History": "السجل",
-    "Banned": "المحظورون"
+    "Banned": "المحظورون",
+    "Mute Notifications From User": "كتم إشعارات هذا المستخدم",
+    "UnMute Notifications From User": "إلغاء كتم إشعارات هذا المستخدم",
+    "Copy Link": "نسخ الرابط",
+    "Post link copied!": "تم نسخ رابط المنشور!",
+    "Processing...": "جارٍ المعالجة...",
+    "Friends Recommendations" : "اقتراحات صداقه",
+    "Show All Users" : "روؤية الكل"
 }

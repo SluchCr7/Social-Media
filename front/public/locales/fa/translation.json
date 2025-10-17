@@ -1,0 +1,501 @@
+{
+    "Total Reports": "گزارش‌های کل",
+    "Posts": "پست‌ها",
+    "Users": "کاربران",
+    "I agree to the": "من موافقم با",
+    "Terms and Conditions": "شرایط و ضوابط",
+    "Creating Account": "ایجاد حساب",
+    "Register": "ثبت نام",
+    "OR": "یا",
+    "Sign up with Google": "ثبت نام با گوگل",
+    "Already have an account?": "قبلاً حساب کاربری دارید؟",
+    "No reels available": "هیچ ریلزی در دسترس نیست",
+    "Social App": "برنامه اجتماعی",
+    "Pinned": "سنجاق شده",
+    "Shared": "اشتراک‌گذاری شده",
+    "Select Community": "انتخاب انجمن",
+    "No joined communities.": "به هیچ انجمنی ملحق نشده‌اید.",
+    "Add": "افزودن",
+    "What's on your mind? Add #hashtags, @mentions or 😊 emojis...": "در ذهن شما چیست؟ #هشتگ‌ها، @منشن‌ها یا 😊 ایموجی‌ها را اضافه کنید...",
+    "Emojis": "ایموجی‌ها",
+    "Posting": "در حال ارسال",
+    "Post": "ارسال",
+    "Schedule Post": "زمان‌بندی پست",
+    "Login to continue exploring communities": "برای ادامه کاوش در انجمن‌ها، وارد شوید",
+    "Email Address": "آدرس ایمیل",
+    "Password": "گذرواژه",
+    "Forgot your password?": "گذرواژه خود را فراموش کرده‌اید؟",
+    "Continue with Google": "ادامه با گوگل",
+    "Don’t have an account?": "حساب کاربری ندارید؟",
+    "results": "نتایج",
+    "No posts found with": "هیچ پستی با",
+    "Go Back": "بازگشت",
+    "Discover friends, creators, trending topics and news.": "دوستان، تولیدکنندگان محتوا، موضوعات پرطرفدار و اخبار را کشف کنید.",
+    "Search users, #hashtags or posts...": "جستجوی کاربران، #هشتگ‌ها یا پست‌ها...",
+    "No results found for": "نتیجه‌ای برای",
+    "Today": "امروز",
+    "This Week": "این هفته",
+    "No preview": "بدون پیش‌نمایش",
+    "Score": "امتیاز",
+    "No trending content for the selected timeframe.": "هیچ محتوای پرطرفداری برای بازه زمانی انتخاب شده وجود ندارد.",
+    "No photos from people you follow yet.": "هنوز عکسی از افرادی که دنبال می‌کنید، وجود ندارد.",
+    "Create community": "ایجاد انجمن",
+    "Try a different filter or create a new community.": "یک فیلتر متفاوت را امتحان کنید یا یک انجمن جدید ایجاد کنید.",
+    "No communities found": "هیچ انجمنی پیدا نشد",
+    "Edit": "ویرایش",
+    "Rules": "قوانین",
+    "Leave": "ترک",
+    "Pending": "در انتظار",
+    "Created": "ایجاد شده",
+    "Members": "اعضا",
+    "Requests": "درخواست‌ها",
+    "See all": "مشاهده همه",
+    "This community has no posts yet.": "این انجمن هنوز هیچ پستی ندارد.",
+    "You need to join this private community to view posts.": "برای مشاهده پست‌ها باید به این انجمن خصوصی بپیوندید.",
+    "Admins": "مدیران",
+    "Owner": "مالک",
+    "Community Rules": "قوانین انجمن",
+    "No rules have been set for this community yet.": "هنوز هیچ قانونی برای این انجمن تعیین نشده است.",
+    "No pending requests.": "هیچ درخواست در انتظاری وجود ندارد.",
+    "Coming Soon!": "به زودی!",
+    "The Challenges feature is under development and will be available soon. Stay tuned for exciting new competitions and activities!": "قابلیت چالش‌ها در حال توسعه است و به زودی در دسترس خواهد بود. برای مسابقات و فعالیت‌های جدید و هیجان‌انگیز، با ما همراه باشید!",
+    "days": "روز",
+    "Add Event": "افزودن رویداد",
+    "Birthday": "تولد",
+    "Meeting": "جلسه",
+    "Public": "عمومی",
+    "more": "بیشتر",
+    "Analytics": "تجزیه و تحلیل",
+    "Quick overview of": "مرور سریع",
+    "Last 7 days": "۷ روز گذشته",
+    "Last 30 days": "۳۰ روز گذشته",
+    "Last 90 days": "۹۰ روز گذشته",
+    "Exporting": "در حال استخراج",
+    "Export CSV": "استخراج CSV",
+    "Followers": "دنبال‌کنندگان",
+    "Engagement": "تعامل",
+    "Likes": "لایک‌ها",
+    "Activity Over Time": "فعالیت در طول زمان",
+    "Top Posts": "پست‌های برتر",
+    "Peak Hours": "ساعات اوج",
+    "Following": "دنبال می‌کنید",
+    "Follow": "دنبال کردن",
+    "User": "کاربر",
+    "Joined": "ملحق شده",
+    "Join": "ملحق شدن",
+    "People you may like": "افرادی که ممکن است دوست داشته باشید",
+    "Explore new communities": "کشف انجمن‌های جدید",
+    "Start following people or join a community!": "دنبال کردن افراد را شروع کنید یا به یک انجمن بپیوندید!",
+    "No posts yet": "هنوز پستی وجود ندارد",
+    "Show Original": "نمایش اصلی",
+    "Copy": "کپی",
+    "Reposted by": "بازنشر شده توسط",
+    "Processing": "در حال پردازش",
+    "Pin Post": "پست را سنجاق کن",
+    "Unpin Post": "پست سنجاق شده را بردار",
+    "Edit Post": "ویرایش پست",
+    "Delete Post": "حذف پست",
+    "Enable Comments": "فعال کردن نظرات",
+    "Disable Comments": "غیرفعال کردن نظرات",
+    "Report Post": "گزارش پست",
+    "Copy Post": "کپی کردن پست",
+    "Unblock User": "لغو مسدود کردن کاربر",
+    "Block User": "مسدود کردن کاربر",
+    "Unfollow User": "لغو دنبال کردن کاربر",
+    "Follow User": "دنبال کردن کاربر",
+    "Are you sure?": "مطمئن هستید؟",
+    "This action cannot be undone.": "این عمل قابل بازگشت نیست.",
+    "Cancel": "لغو",
+    "Confirm": "تأیید",
+    "Clear All": "پاک کردن همه",
+    "Mark all as read": "علامت‌گذاری همه به عنوان خوانده شده",
+    "No notifications": "هیچ اعلانی وجود ندارد",
+    "Notifications": "اعلان‌ها",
+    "View More": "مشاهده بیشتر",
+    "All News": "همه اخبار",
+    "Send": "ارسال",
+    "Add a comment": "افزودن نظر",
+    "No comments yet": "هنوز نظری وجود ندارد",
+    "Comments": "نظرات",
+    "Edited": "ویرایش شده",
+    "Saving": "در حال ذخیره",
+    "Save": "ذخیره",
+    "Write a reply": "پاسخ بنویسید",
+    "No recent login activity found.": "هیچ فعالیت ورود اخیر یافت نشد.",
+    "All Months": "تمام ماه‌ها",
+    "Latest": "جدیدترین",
+    "Most Liked": "بیشترین لایک",
+    "Most Commented": "بیشترین نظر",
+    "Reset": "بازنشانی",
+    "No results found.": "نتیجه‌ای یافت نشد.",
+    "About": "درباره",
+    "Personal Info": "اطلاعات شخصی",
+    "Relationship": "وضعیت رابطه",
+    "In a relationship with": "در رابطه با",
+    "Married to": "متاهل با",
+    "Interests": "علاقمندی‌ها",
+    "Social Links": "لینک‌های اجتماعی",
+    "Album": "آلبوم",
+    "No audio available": "فایل صوتی در دسترس نیست",
+    "Next level in": "سطح بعدی در",
+    "XP": "امتیاز تجربه",
+    "Add Story": "افزودن استوری",
+    "View as Visitor": "مشاهده به عنوان بازدیدکننده",
+    "Edit Profile": "ویرایش نمایه",
+    "Make Account Public": "حساب را عمومی کن",
+    "Make Account Private": "حساب را خصوصی کن",
+    "Report User": "گزارش کاربر",
+    "Copy Profile Link": "کپی لینک نمایه",
+    "Photos": "عکس‌ها",
+    "Saved": "ذخیره شده",
+    "Reels": "ریلز",
+    "You haven’t saved any posts yet.": "شما هنوز پستی را ذخیره نکرده‌اید.",
+    "You haven’t commented yet.": "شما هنوز نظری نداده‌اید.",
+    "You haven’t uploaded any reels yet.": "شما هنوز هیچ ریلزی آپلود نکرده‌اید.",
+    "You haven’t uploaded any music yet.": "شما هنوز موسیقی‌ای آپلود نکرده‌اید.",
+    "You haven’t uploaded any photos yet.": "شما هنوز هیچ عکسی آپلود نکرده‌اید.",
+    "This account has been banned": "این حساب مسدود شده است",
+    "account is permanently disabled due to policy violations.": "حساب به دلیل نقض سیاست‌ها به طور دائم غیرفعال شده است.",
+    "You cannot View This Page": "نمی‌توانید این صفحه را مشاهده کنید",
+    "This account is suspended": "این حساب تعلیق شده است",
+    "Delete Report": "حذف گزارش",
+    "Delete Comment": "حذف نظر",
+    "Suspend User": "تعلیق کاربر",
+    "Ban User": "مسدود کردن کاربر",
+    "Mark as Resolved": "علامت‌گذاری به عنوان حل شده",
+    "Target": "هدف",
+    "Reporter": "گزارش‌دهنده",
+    "Reason": "دلیل",
+    "Status": "وضعیت",
+    "Actions": "عملیات",
+    "Preparing your upload": "در حال آماده‌سازی آپلود شما",
+    "Uploading to server": "در حال آپلود به سرور",
+    "Processing your media": "در حال پردازش رسانه شما",
+    "Almost there": "تقریباً تمام است",
+    "Uploading": "در حال آپلود",
+    "Friends": "دوستان",
+    "shared a post from": "یک پست را از",
+    "Pop": "پاپ",
+    "Rock": "راک",
+    "HipHop": "هیپ هاپ",
+    "Jazz": "جاز",
+    "Classical": "کلاسیک",
+    "Other": "سایر",
+    "Add New Music": "افزودن موسیقی جدید",
+    "Change": "تغییر",
+    "Upload Cover": "آپلود کاور",
+    "Title": "عنوان",
+    "Artist": "هنرمند",
+    "Tags": "برچسب‌ها",
+    "Upload Music File": "آپلود فایل موسیقی",
+    "Save Music": "ذخیره موسیقی",
+    "All Songs": "همه آهنگ‌ها",
+    "No Cover": "بدون کاور",
+    "Search songs, artists, albums...": "جستجوی آهنگ‌ها، هنرمندان، آلبوم‌ها...",
+    "Now Playing": "در حال پخش",
+    "Plays": "تعداد پخش",
+    "Up Next": "بعدی",
+    "Songs": "آهنگ‌ها",
+    "My Playlist": "لیست پخش من",
+    "No saved songs yet.": "هنوز آهنگ ذخیره شده‌ای وجود ندارد.",
+    "Trending Now": "در حال حاضر پرطرفدار",
+    "Communities": "انجمن‌ها",
+    "See More Communities": "مشاهده انجمن‌های بیشتر",
+    "Trending Hashtags": "هشتگ‌های پرطرفدار",
+    "No trending hashtags yet.": "هنوز هشتگ پرطرفداری وجود ندارد.",
+    "Privacy Policy": "سیاست حفظ حریم خصوصی",
+    "Terms of Service": "شرایط خدمات",
+    "Suggested Friends": "دوستان پیشنهادی",
+    "You are friends": "شما دوست هستید",
+    "New here – welcome!": "تازه وارد – خوش آمدید!",
+    "Active member": "عضو فعال",
+    "mutual friends": "دوستان مشترک",
+    "Suggested for you": "پیشنهادی برای شما",
+    "No suggested users at the moment": "در حال حاضر کاربر پیشنهادی وجود ندارد",
+    "Messages from Last 24 Hours": "پیام‌های ۲۴ ساعت گذشته",
+    "No messages from the past 24 hours.": "هیچ پیامی از ۲۴ ساعت گذشته وجود ندارد.",
+    "No upcoming events": "هیچ رویداد آینده‌ای وجود ندارد",
+    "Create Event": "ایجاد رویداد",
+    "Upcoming Events": "رویدادهای آینده",
+    "Yearly": "سالانه",
+    "invited": "دعوت شده",
+    "What is happening": "چه اتفاقی در حال رخ دادن است",
+    "Show more": "نمایش بیشتر",
+    "Spam Content": "محتوای هرزنامه (اسپم)",
+    "Inappropriate Content": "محتوای نامناسب",
+    "Harassment or Hate Speech": "آزار و اذیت یا سخنان نفرت‌انگیز",
+    "Misinformation": "اطلاعات غلط",
+    "Copyright Violation": "نقض حق تکثیر",
+    "Private": "خصوصی",
+    "View": "مشاهده",
+    "No": "خیر",
+    "categories": "دسته‌بندی‌ها",
+    "Search": "جستجو",
+    "Create Community": "ایجاد انجمن",
+    "Category": "دسته‌بندی",
+    "Description": "توضیحات",
+    "Preview": "پیش‌نمایش",
+    "Create": "ایجاد",
+    "Creating": "در حال ایجاد",
+    "No messages yet": "هنوز پیامی وجود ندارد",
+    "Online": "آنلاین",
+    "Offline": "آفلاین",
+    "Replying to": "در حال پاسخ به",
+    "content": "محتوا",
+    "found": "یافت شد",
+    "Welcome to": "خوش آمدید به",
+    "Start a new conversation by selecting a chat from the sidebar or searching for a friend": "با انتخاب یک چت از نوار کناری یا جستجوی یک دوست، مکالمه جدیدی را شروع کنید",
+    "Your messages will appear here once you start chatting.": "پیام‌های شما پس از شروع چت در اینجا ظاهر خواهند شد.",
+    "Photo message": "پیام عکس",
+    "Repeat every year": "تکرار هر سال",
+    "Event": "رویداد",
+    "Add Event on": "افزودن رویداد در",
+    "Select a reason": "یک دلیل انتخاب کنید",
+    "Add more details ": "جزئیات بیشتری اضافه کنید",
+    "optional": "اختیاری",
+    "Submit Report": "ارسال گزارش",
+    "Uploading Story": "در حال آپلود استوری",
+    "Story": "استوری",
+    "Story shared successfully!": "استوری با موفقیت به اشتراک گذاشته شد!",
+    "Upload": "آپلود",
+    "Image": "تصویر",
+    "Camera": "دوربین",
+    "Collaborators": "همکاران",
+    "Select": "انتخاب",
+    "Share Story": "اشتراک‌گذاری استوری",
+    "Edit Community": "ویرایش انجمن",
+    "Add new tag": "افزودن برچسب جدید",
+    "Cover": "کاور",
+    "Photo": "عکس",
+    "Invalid file selected": "فایل نامعتبر انتخاب شده است",
+    "Failed to update community data.": "به روزرسانی داده‌های انجمن ناموفق بود.",
+    "Community details updated successfully.": "جزئیات انجمن با موفقیت به روز شد.",
+    "Error uploading image.": "خطا در آپلود تصویر.",
+    "Updating post": "در حال به روزرسانی پست",
+    "What's on your mind? Add #hashtags, @mentions or emojis...": "در ذهن شما چیست؟ #هشتگ‌ها، @منشن‌ها یا ایموجی‌ها را اضافه کنید...",
+    "Add a link": "افزودن یک لینک",
+    "Add Photos": "افزودن عکس",
+    "Save Changes": "ذخیره تغییرات",
+    "Details": "جزئیات",
+    "Date": "تاریخ",
+    "Reel": "ریلز",
+    "Drag & drop or click to select a video": "برای انتخاب یک ویدیو، بکشید و رها کنید یا کلیک کنید",
+    "Write a caption": "یک کپشن بنویسید",
+    "Share Post": "اشتراک‌گذاری پست",
+    "Add your thoughts": "افکار خود را اضافه کنید",
+    "Day Events": "رویدادهای روز",
+    "Cookies Policy": "سیاست کوکی‌ها",
+    "We use cookies to enhance your experience, analyze site usage, and deliver personalized content.": "ما از کوکی‌ها برای بهبود تجربه شما، تحلیل استفاده از سایت و ارائه محتوای شخصی‌سازی شده استفاده می‌کنیم.",
+    "Accept All": "پذیرش همه",
+    "Manage Preferences": "مدیریت ترجیحات",
+    "Essential · Analytics · Marketing": "ضروری · تحلیلی · بازاریابی",
+    "You can change these anytime.": "شما می‌توانید این موارد را در هر زمان تغییر دهید.",
+    "Reading progress: {progress}%": "پیشرفت خواندن: {progress}٪",
+    "All rights reserved.": "تمام حقوق محفوظ است.",
+    "Manage Cookie Preferences": "مدیریت ترجیحات کوکی",
+    "Choose which cookie categories you want to allow. You can always change these later.": "انتخاب کنید که کدام دسته‌های کوکی را می‌خواهید مجاز کنید. همیشه می‌توانید این موارد را بعداً تغییر دهید.",
+    "Close preferences": "بستن ترجیحات",
+    "Save Preferences": "ذخیره ترجیحات",
+    "Note: Essential cookies are always active to ensure the site works properly.": "توجه: کوکی‌های ضروری همیشه فعال هستند تا از عملکرد صحیح سایت اطمینان حاصل شود.",
+    "Essential Cookies": "کوکی‌های ضروری",
+    "Required for basic functionality and security (cannot be disabled).": "برای عملکرد و امنیت پایه لازم است (قابل غیرفعال‌سازی نیست).",
+    "Analytics Cookies": "کوکی‌های تحلیلی",
+    "Help us measure and improve the product experience.": "به ما در اندازه‌گیری و بهبود تجربه محصول کمک می‌کنند.",
+    "Marketing Cookies": "کوکی‌های بازاریابی",
+    "Used to show relevant content and ads.": "برای نمایش محتوا و تبلیغات مرتبط استفاده می‌شود.",
+    "What are Cookies?": "کوکی‌ها چیستند؟",
+    "Cookies are small text files stored on your device when you visit a website. They help us recognize your device, remember preferences (like language), and provide a personalized experience.": "کوکی‌ها فایل‌های متنی کوچکی هستند که هنگام بازدید از یک وب‌سایت در دستگاه شما ذخیره می‌شوند. آن‌ها به ما کمک می‌کنند تا دستگاه شما را شناسایی کنیم، ترجیحات (مانند زبان) را به خاطر بسپاریم و تجربه‌ای شخصی‌سازی شده ارائه دهیم.",
+    "Cookies can be first-party (set by this site) or third-party (set by external services we use). We use several types of cookies to deliver the best experience while respecting your privacy.": "کوکی‌ها می‌توانند شخص اول (تنظیم شده توسط این سایت) یا شخص ثالث (تنظیم شده توسط خدمات خارجی که ما استفاده می‌کنیم) باشند. ما از انواع مختلفی از کوکی‌ها برای ارائه بهترین تجربه ضمن احترام به حریم خصوصی شما استفاده می‌کنیم.",
+    "How We Use Cookies": "چگونه از کوکی‌ها استفاده می‌کنیم",
+    "To remember your login and settings for a smoother experience.": "برای به خاطر سپردن ورود و تنظیمات شما برای تجربه‌ای روان‌تر.",
+    "To analyze traffic and improve the product (analytics cookies).": "برای تجزیه و تحلیل ترافیک و بهبود محصول (کوکی‌های تحلیلی).",
+    "To show personalized content and recommended items (marketing cookies).": "برای نمایش محتوای شخصی‌سازی شده و موارد پیشنهادی (کوکی‌های بازاریابی).",
+    "To secure the service and detect fraud.": "برای امن کردن سرویس و شناسایی تقلب.",
+    "Types of Cookies We Use": "انواع کوکی‌هایی که استفاده می‌کنیم",
+    "Required for core functionality (login, security, accessibility). These are always active.": "برای عملکردهای اصلی (ورود، امنیت، دسترسی) لازم هستند. این‌ها همیشه فعال هستند.",
+    "Performance & Analytics": "عملکرد و تحلیل",
+    "Help us understand how users interact with the site to improve features and performance.": "به ما کمک می‌کنند تا نحوه تعامل کاربران با سایت را برای بهبود ویژگی‌ها و عملکرد بفهمیم.",
+    "Functional Cookies": "کوکی‌های عملکردی",
+    "Remember choices and preferences to provide personalized features.": "انتخاب‌ها و ترجیحات را برای ارائه ویژگی‌های شخصی‌سازی شده به خاطر می‌آورند.",
+    "Advertising & Marketing": "تبلیغات و بازاریابی",
+    "Used by third-party partners to display relevant ads and track ad performance.": "توسط شرکای شخص ثالث برای نمایش تبلیغات مرتبط و پیگیری عملکرد تبلیغات استفاده می‌شود.",
+    "Your Choices": "انتخاب‌های شما",
+    "You can accept all cookies, or manage preferences to enable only the categories you want. Disabling some cookies may reduce functionality or personalization.": "شما می‌توانید همه کوکی‌ها را بپذیرید، یا ترجیحات را مدیریت کنید تا فقط دسته‌های مورد نظر خود را فعال کنید. غیرفعال کردن برخی کوکی‌ها ممکن است عملکرد یا شخصی‌سازی را کاهش دهد.",
+    "Accept All Cookies": "پذیرش همه کوکی‌ها",
+    "Contact Us": "تماس با ما",
+    "For questions about this policy or your preferences, email us at": "برای سوالات در مورد این سیاست یا ترجیحات شما، به ما ایمیل بزنید به",
+    "Last updated": "آخرین به‌روزرسانی",
+    "Last updated:": "آخرین به‌روزرسانی:",
+    "Back to top": "بازگشت به بالا",
+    "Contents": "محتویات",
+    "Table of contents": "فهرست مطالب",
+    "Tip: click any section to jump to it": "نکته: برای پرش به هر بخش روی آن کلیک کنید",
+    "Collapse": "جمع کردن",
+    "Expand": "گسترش",
+    "Collapse section": "جمع کردن بخش",
+    "Expand section": "گسترش بخش",
+    "1. Information We Collect": "۱. اطلاعاتی که جمع‌آوری می‌کنیم",
+    "We may collect information you provide directly such as name, email, profile picture, posts, messages, and other content. We may also collect IP address, device info, browser type, and usage data automatically.": "ممکن است اطلاعاتی را که مستقیماً ارائه می‌دهید مانند نام، ایمیل، عکس نمایه، پست‌ها، پیام‌ها و سایر محتواها جمع‌آوری کنیم. همچنین ممکن است آدرس IP، اطلاعات دستگاه، نوع مرورگر و داده‌های استفاده را به طور خودکار جمع‌آوری کنیم.",
+    "2. How We Use Your Information": "۲. چگونه از اطلاعات شما استفاده می‌کنیم",
+    "We use your information to operate and improve our platform, personalize your experience, respond to inquiries, and provide customer support. Notifications and updates may also be sent.": "ما از اطلاعات شما برای اداره و بهبود پلتفرم، شخصی‌سازی تجربه شما، پاسخ به سوالات و ارائه پشتیبانی مشتری استفاده می‌کنیم. اعلان‌ها و به‌روزرسانی‌ها نیز ممکن است ارسال شوند.",
+    "3. Sharing of Information": "۳. اشتراک‌گذاری اطلاعات",
+    "We do not sell your personal information. We may share it with trusted service providers, legal authorities if required, or in case of a business transfer.": "ما اطلاعات شخصی شما را نمی‌فروشیم. ممکن است آن را با ارائه‌دهندگان خدمات مورد اعتماد، مقامات قانونی در صورت لزوم، یا در صورت انتقال کسب و کار به اشتراک بگذاریم.",
+    "4. Data Security": "۴. امنیت داده‌ها",
+    "We implement reasonable security measures to protect your data. However, no method of transmission over the internet is completely secure.": "ما اقدامات امنیتی معقولی را برای محافظت از داده‌های شما اجرا می‌کنیم. با این حال، هیچ روش انتقال از طریق اینترنت کاملاً ایمن نیست.",
+    "5. Your Choices": "۵. انتخاب‌های شما",
+    "You may update your profile, delete your account, or request data removal at any time. Contact us for assistance.": "شما می‌توانید نمایه خود را به‌روزرسانی کنید، حساب خود را حذف کنید یا در هر زمان درخواست حذف داده‌ها را داشته باشید. برای کمک با ما تماس بگیرید.",
+    "6. Changes to This Policy": "۶. تغییرات در این سیاست",
+    "We may update this policy occasionally. Continued use of the platform means you agree to the updated terms.": "ممکن است این سیاست را گهگاه به‌روزرسانی کنیم. استفاده مداوم از پلتفرم به این معنی است که شما با شرایط به‌روز شده موافق هستید.",
+    "7. Contact": "۷. تماس",
+    "If you have any questions regarding our Privacy Policy, please contact us at:": "اگر در مورد سیاست حفظ حریم خصوصی ما سوالی دارید، لطفا با ما تماس بگیرید از طریق:",
+    "Your privacy matters. This privacy policy explains what data we collect and how we use it. We aim to keep things transparent and straightforward.": "حریم خصوصی شما مهم است. این سیاست حفظ حریم خصوصی توضیح می‌دهد که چه داده‌هایی را جمع‌آوری می‌کنیم و چگونه از آن‌ها استفاده می‌کنیم. هدف ما حفظ شفافیت و سادگی است.",
+    "Stay Secure & Informed": "ایمن و آگاه بمانید",
+    "Review your settings and keep your account safe. Manage your privacy preferences in Settings.": "تنظیمات خود را مرور کنید و حساب خود را ایمن نگه دارید. ترجیحات حفظ حریم خصوصی خود را در تنظیمات مدیریت کنید.",
+    "Go to Settings": "رفتن به تنظیمات",
+    "Open contents": "باز کردن محتویات",
+    "Welcome to our Social Media App. By accessing or using our platform, you agree to be bound by the following terms and conditions.": "به برنامه رسانه اجتماعی ما خوش آمدید. با دسترسی یا استفاده از پلتفرم ما، شما موافقت می‌کنید که توسط شرایط و ضوابط زیر محدود شوید.",
+    "1. Eligibility": "۱. صلاحیت",
+    "You must be at least 13 years old to use this platform.": "برای استفاده از این پلتفرم باید حداقل ۱۳ سال داشته باشید.",
+    "2. User Conduct": "۲. رفتار کاربر",
+    "You agree not to post any content that is illegal, harmful, abusive, hateful, or otherwise inappropriate. Harassment, spam, and impersonation are strictly prohibited.": "شما موافقت می‌کنید که هیچ محتوای غیرقانونی، مضر، توهین‌آمیز، نفرت‌انگیز یا به هر نحو دیگری نامناسب ارسال نکنید. آزار و اذیت، هرزنامه و جعل هویت اکیداً ممنوع است.",
+    "3. Account Responsibility": "۳. مسئولیت حساب",
+    "You are responsible for maintaining the confidentiality of your account credentials and for all activities under your account.": "شما مسئول حفظ محرمانه بودن اطلاعات حساب خود و تمام فعالیت‌های تحت حساب خود هستید.",
+    "4. Content Ownership": "۴. مالکیت محتوا",
+    "You retain ownership of your content but grant us a license to use, display, and distribute it within the platform.": "شما مالکیت محتوای خود را حفظ می‌کنید اما به ما مجوز استفاده، نمایش و توزیع آن را در داخل پلتفرم می‌دهید.",
+    "5. Termination": "۵. خاتمه",
+    "We reserve the right to suspend or delete your account if you violate these terms or engage in harmful behavior.": "ما حق تعلیق یا حذف حساب شما را در صورت نقض این شرایط یا انجام رفتارهای مضر برای خود محفوظ می‌داریم.",
+    "6. Changes to Terms": "۶. تغییرات در شرایط",
+    "We may update these Terms from time to time. Continued use of the platform indicates your acceptance of any changes.": "ممکن است این شرایط را گهگاه به‌روزرسانی کنیم. استفاده مداوم از پلتفرم نشان‌دهنده پذیرش هرگونه تغییر توسط شما است.",
+    "7. Contact Us": "۷. تماس با ما",
+    "If you have any questions about these Terms, please contact us at:": "اگر در مورد این شرایط سوالی دارید، لطفا با ما تماس بگیرید از طریق:",
+    "support@socialmediaapp.com": "support@socialmediaapp.com",
+    "Users Management": "مدیریت کاربران",
+    "Search users...": "جستجوی کاربران...",
+    "All Users": "همه کاربران",
+    "Admin": "مدیر",
+    "🚫 Banned": "🚫 مسدود شده",
+    "Verified": "تأیید شده",
+    "Make Admin": "مدیر کردن",
+    "Ban": "مسدود کردن",
+    "Unban": "لغو مسدودیت",
+    "Delete": "حذف",
+    "No users found.": "هیچ کاربری یافت نشد.",
+    "Reshared by": "بازنشر شده توسط",
+    "Select a reason...": "یک دلیل انتخاب کنید...",
+    "Share your thoughts or upload an image...": "افکار خود را به اشتراک بگذارید یا یک تصویر آپلود کنید...",
+    "Updating post...": "در حال به‌روزرسانی پست...",
+    "Write a caption...": "یک کپشن بنویسید...",
+    "In a Relationship": "در یک رابطه",
+    "Married": "متاهل",
+    "Divorced": "طلاق گرفته",
+    "Clear Selection": "پاک کردن انتخاب",
+    "Add multiple interests, then press Enter or click ": "چندین علاقه را اضافه کنید، سپس Enter را فشار دهید یا کلیک کنید",
+    "Single": "مجرد",
+    "Engaged": "نامزد",
+    "You must follow someone to choose a partner.": "برای انتخاب شریک باید کسی را دنبال کنید.",
+    "Community Hub": "مرکز انجمن",
+    "Discover, create, and join active groups around your interests.": "گروه‌های فعال پیرامون علایق خود را کشف، ایجاد و به آن‌ها بپیوندید.",
+    "Previous month": "ماه قبل",
+    "Next month": "ماه بعد",
+    "Add event": "افزودن رویداد",
+    "Sun": "خورشید",
+    "Mon": "دوشنبه",
+    "Tue": "سه‌شنبه",
+    "Wed": "چهارشنبه",
+    "Thu": "پنجشنبه",
+    "Fri": "جمعه",
+    "Sat": "شنبه",
+    "Happening today": "امروز در حال وقوع",
+    "Tomorrow": "فردا",
+    "yr": "سال",
+    "No events": "هیچ رویدادی",
+    "Explore": "کاوش",
+    "No bio": "بدون بیوگرافی",
+    "Hashtags": "هشتگ‌ها",
+    "posts": "پست‌ها",
+    "Untitled Post": "پست بدون عنوان",
+    "Trending": "پرطرفدار",
+    "Hashtags Tab": "برگه هشتگ‌ها",
+    "Search Hashtags...": "جستجوی هشتگ‌ها...",
+    "No Hashtags found.": "هیچ هشتگی یافت نشد.",
+    "Reports Management": "مدیریت گزارش‌ها",
+    "Reports": "گزارش‌ها",
+    "Loading": "در حال بارگیری",
+    "No reports found.": "هیچ گزارشی یافت نشد.",
+    "Appearance": "ظاهر",
+    "Security": "امنیت",
+    "Chat Colors": "رنگ‌های چت",
+    "Language": "زبان",
+    "Login History": "تاریخچه ورود",
+    "Account": "حساب کاربری",
+    "Newest": "جدیدترین",
+    "Most Members": "بیشترین اعضا",
+    "Most Active": "فعال‌ترین",
+    "All": "همه",
+    "Technology": "فناوری",
+    "Art": "هنر",
+    "Science": "علم",
+    "Gaming": "بازی",
+    "Music": "موسیقی",
+    "Food": "غذا",
+    "Travel": "سفر",
+    "Health": "سلامت",
+    "Business": "تجارت",
+    "Politics": "سیاست",
+    "Sports": "ورزش",
+    "Main": "اصلی",
+    "Home": "خانه",
+    "Videos": "ویدیوها",
+    "Community": "انجمن",
+    "Messenger": "پیام‌رسان",
+    "Personal": "شخصی",
+    "Shorts": "کوتاه‌ها",
+    "Challenge": "چالش",
+    "Calendar": "تقویم",
+    "Profile": "نمایه",
+    "Settings": "تنظیمات",
+    "For You": "برای شما",
+    "Manage privacy, verification and account actions.": "مدیریت حریم خصوصی، تأیید و اقدامات حساب.",
+    "Premium verified": "تأیید شده ویژه",
+    "Get a verified badge and priority support.": "یک نشان تأیید و پشتیبانی اولویت‌دار دریافت کنید.",
+    "Danger zone": "منطقه خطر",
+    "Delete account and data permanently.": "حذف دائمی حساب و داده‌ها.",
+    "Delete account": "حذف حساب",
+    "Are you sure? This action cannot be undone.": "مطمئن هستید؟ این عمل قابل بازگشت نیست.",
+    "Yes, delete": "بله، حذف کن",
+    "Personalize theme, layout and accent color.": "شخصی‌سازی تم، طرح‌بندی و رنگ برجسته.",
+    "Theme": "تم",
+    "Light": "روشن",
+    "Dark": "تاریک",
+    "Toggle dark mode across the site.": "فعال/غیرفعال کردن حالت تاریک در سراسر سایت.",
+    "Accent color": "رنگ برجسته",
+    "Selected": "انتخاب شده",
+    "Layout": "طرح‌بندی",
+    "Choose a compact or relaxed layout for lists and posts.": "یک طرح‌بندی فشرده یا راحت برای لیست‌ها و پست‌ها انتخاب کنید.",
+    "Compact": "فشرده",
+    "Relaxed": "راحت",
+    "Preview name": "نام پیش‌نمایش",
+    "preview": "پیش‌نمایش",
+    "Choose custom accent color": "انتخاب رنگ برجسته سفارشی",
+    "Recent sign-ins and devices.": "ورودهای اخیر و دستگاه‌ها.",
+    "Select your preferred language for the UI.": "زبان مورد نظر خود را برای رابط کاربری انتخاب کنید.",
+    "Manage password, two-factor and account safety.": "مدیریت گذرواژه، احراز هویت دو عاملی و امنیت حساب.",
+    "Current password": "گذرواژه فعلی",
+    "New password": "گذرواژه جدید",
+    "Confirm new password": "تأیید گذرواژه جدید",
+    "Update password": "به‌روزرسانی گذرواژه",
+    "Two-factor Authentication": "احراز هویت دو عاملی",
+    "Add an extra layer of protection to your account.": "یک لایه محافظت اضافی به حساب خود اضافه کنید.",
+    "Manage": "مدیریت",
+    "Manage your account, privacy and appearance": "مدیریت حساب، حریم خصوصی و ظاهر شما.",
+    "Signed in as": "ورود با نام",
+    "History": "تاریخچه",
+    "Banned": "مسدود شده‌ها",
+    "Mute Notifications From User": "بی‌صدا کردن اعلان‌ها از کاربر",
+    "UnMute Notifications From User": "لغو بی‌صدا کردن اعلان‌ها از کاربر",
+    "Copy Link": "کپی لینک",
+    "Post link copied!": "لینک پست کپی شد!",
+    "Processing...": "در حال پردازش...",
+    "Friends Recommendations": "توصیه‌های دوستان",
+    "Show All Users": "نمایش همه کاربران"
+}
