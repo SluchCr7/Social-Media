@@ -220,3 +220,13 @@ export const availableLanguages = [
   { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
   { code: 'fa', name: 'الفارسيه', flag: '🇮🇷' },
 ];
+
+export const chartData = [
+    { name: 'Mon', posts: 30 },
+    { name: 'Tue', posts: 50 },
+    { name: 'Wed', posts: 80 },
+    { name: 'Thu', posts: 60 },
+    { name: 'Fri', posts: 100 },
+    { name: 'Sat', posts: 70 },
+    { name: 'Sun', posts: 40 },
+  ];
