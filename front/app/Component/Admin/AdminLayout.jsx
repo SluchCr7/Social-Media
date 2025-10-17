@@ -7,14 +7,19 @@ import MobileSidebar from './MobileAside';
 
 const AdminLayout = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('dashboard'); // ✅ التاب الافتراضي
+  const [activeTab, setActiveTab] = useState('Dashboard'); // ✅ الحالة
+
+  // ✅ نغلف children بـ React.cloneElement لإضافة prop جديدة له
+  const childrenWithProps = children
+    ? React.cloneElement(children, { activeTab, setActiveTab })
+    : null;
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* ✅ Sidebar for desktop */}
       <aside className="hidden md:block w-64 bg-white dark:bg-gray-800 p-6 shadow-lg">
         <h2 className="text-2xl font-bold mb-6">Admin Panel</h2>
-        <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} /> {/* ✅ تمرير setter */}
+        <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       </aside>
 
       {/* ✅ Mobile Topbar */}
@@ -38,7 +43,7 @@ const AdminLayout = ({ children }) => {
 
       {/* ✅ Main content */}
       <main className="flex-1 p-4 pt-16 md:pt-6 md:ml-64">
-        {typeof children === 'function' ? children({ activeTab }) : children}
+        {childrenWithProps}
       </main>
     </div>
   );

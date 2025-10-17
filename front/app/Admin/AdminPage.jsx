@@ -96,6 +96,7 @@ const Admin = ({activeTab}) => {
       {
         activeTab === "Reports" && <AdminReportsPage />
       }
+      {!activeTab && <p>Select a tab</p>}
     </div>
   );
 };
