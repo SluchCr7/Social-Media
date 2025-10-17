@@ -12,12 +12,13 @@ import {
   FiRefreshCw,
 } from 'react-icons/fi';
 import { chartData } from '@/app/utils/Data';
+import { useTranslation } from 'react-i18next';
 const DashboardTab = ({
-    t,
     stats,
     loading,
     getAdminStats
 }) => {
+    const {t} = useTranslation();
   return (
         <motion.div
           initial={{ opacity: 0 }}

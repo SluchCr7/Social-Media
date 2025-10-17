@@ -2,14 +2,13 @@
 
 import React from 'react';
 import { useAdminUser } from '@/app/Context/AdminContext';
-import { useTranslation } from 'react-i18next';
 import AdminUsersPage from '../Component/Admin/Users/UsersTab';
 import AdminReportsPage from '../Component/Admin/Reports/ReportsTab';
 import DashboardTab from '../Component/Admin/DashboardTab';
+import { useTranslation } from 'react-i18next';
 
 const Admin = ({ activeTab }) => {
   const { stats, loading, getAdminStats } = useAdminUser();
-  const { t } = useTranslation();
 
   if (loading)
     return (
@@ -21,7 +20,7 @@ const Admin = ({ activeTab }) => {
   return (
     <div className="min-h-screen w-full flex flex-col bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text2 dark:text-darkMode-text2">
       {activeTab === 'Dashboard' && (
-        <DashboardTab t={t} stats={stats} loading={loading} getAdminStats={getAdminStats} />
+        <DashboardTab stats={stats} loading={loading} getAdminStats={getAdminStats} />
       )}
 
       {activeTab === 'Users' && (
