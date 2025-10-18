@@ -2,7 +2,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next';
 
-const page = () => {
+const Page = () => {
   const { t } = useTranslation();
   return (
     <div className="flex flex-col w-full items-center justify-center min-h-[100vh] text-center px-4">
@@ -23,4 +23,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page
