@@ -13,8 +13,10 @@ body {
 }
 
 /* أي نص عربي */
-:lang(ar),
-[dir="rtl"] {
+[dir="rtl"]:lang(ar),
+[dir="rtl"]:lang(fa),
+[dir="rtl"]:lang(he),
+[dir="rtl"]:lang(ur) {
   font-family: var(--font-arabic);
 }
 
