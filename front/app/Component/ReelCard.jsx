@@ -17,17 +17,19 @@ import { RiShareForwardLine } from "react-icons/ri";
 import { IoLinkOutline } from "react-icons/io5";
 import CommentsPopup from './CommentReelPopup';
 import { useTranslation } from 'react-i18next';
+import { useTranslate } from '../Context/TranslateContext';
 
 const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
   const videoRef = useRef(null);
   const { user } = useAuth();
   const { deleteReel, likeReel, viewReel, shareReel, setShowModelAddReel } = useReels();
-  const {t,language} = useTranslation()
+  const {t} = useTranslation()
   const [showComments, setShowComments] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showHeart, setShowHeart] = useState(false);
   const [viewed, setViewed] = useState(false);
-    const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language); // true لو RTL
+  const { language } = useTranslate();
+  const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language); // true لو RTL
   // 🎬 Auto play/pause and view count
   useEffect(() => {
     const videoEl = videoRef.current;
@@ -106,7 +108,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
       <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-black via-transparent to-transparent" />
 
       {/* 📄 Bottom Info */}
-      <div className="absolute bottom-5 left-4 md:left-6 text-white max-w-[80%] sm:max-w-[65%] md:max-w-[55%]">
+      <div className={`absolute bottom-5 ${isRTL ? "right-4 md:right-6" : "left-4 md:left-6"} text-white max-w-[80%] sm:max-w-[65%] md:max-w-[55%]`}>
         {/* 🔹 صور المالك الأصلي + من أعاد النشر */}
         <div className="relative flex items-center gap-3 sm:gap-4">
           <div className="relative">
@@ -160,7 +162,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
       </div>
 
       {/* 🎛️ Right-side actions */}
-      <div className="absolute right-3 sm:right-5 bottom-20 flex flex-col gap-5 sm:gap-6 text-white items-center">
+      <div className={`absolute ${isRTL ? "left-3 sm:left-5" : "right-3 sm:right-5"} bottom-20 flex flex-col gap-5 sm:gap-6 text-white items-center`}>
         {/* 👁 Views */}
         <div className="flex flex-col items-center text-gray-300">
           <FaEye />
@@ -218,7 +220,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
       </div>
 
       {/* 🔊 Controls (Mute / Add Reel) */}
-      <div className="absolute top-4 right-3 sm:right-5 flex items-center gap-2 sm:gap-4">
+      <div className={`absolute top-4 ${isRTL ? "left-3 sm:left-5" : "right-3 sm:right-5"} flex items-center gap-2 sm:gap-4`}>
         <button
           onClick={toggleMute}
           className="bg-black/40 p-2 sm:p-3 rounded-full text-white hover:bg-black/60 transition"
