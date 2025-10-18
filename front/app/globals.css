@@ -214,7 +214,9 @@ html[dir="ltr"] {
   direction: ltr;
   text-align: left;
 }
-
-html[lang="ar"] {
+html[lang="ar"],
+html[lang="fa"],
+html[lang="he"],
+html[lang="ur"] {
   font-family: 'Cairo', sans-serif;
 }
