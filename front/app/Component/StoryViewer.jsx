@@ -317,6 +317,7 @@ import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import TimeAgo from 'react-timeago'
 import { useTranslate } from '../Context/TranslateContext' // تأكد من وجود هذا
+import { formatRelativeTime } from '../utils/FormatDataCreatedAt'
 
 const StoryViewer = ({ stories, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
