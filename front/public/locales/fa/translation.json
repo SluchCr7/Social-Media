@@ -497,5 +497,58 @@
     "Post link copied!": "لینک پست کپی شد!",
     "Processing...": "در حال پردازش...",
     "Friends Recommendations": "توصیه‌های دوستان",
-    "Show All Users": "نمایش همه کاربران"
+    "Show All Users": "نمایش همه کاربران",
+  "Select a tab": "یک تب را انتخاب کنید",
+  "Admin Dashboard": "داشبورد مدیر",
+  "Welcome back, here’s the latest overview": "خوش آمدید، در اینجا آخرین خلاصه وجود دارد",
+  "Refresh": "تازه‌سازی",
+  "Today’s Posts": "پست‌های امروز",
+  "Admin Panel": "پنل مدیریت",
+  "📌 Pinned Comment": "📌 نظر سنجاق‌شده",
+  "✍️ Author Reply": "✍️ پاسخ نویسنده",
+  "⭐ Top Comment": "⭐ نظر برتر",
+  "🕒 Recent Comment": "🕒 نظر اخیر",
+  "members": "اعضا",
+  "No friends to show": "دوستی برای نمایش وجود ندارد",
+  "Level Up Your Journey": "سفر خود را ارتقا دهید",
+  "Earn points by engaging, posting, and connecting with the community.": "با تعامل، ارسال پست و ارتباط با جامعه امتیاز کسب کنید.",
+  "Junior": "مبتدی",
+  "Challenger": "چالش‌گر",
+  "Warrior": "جنگجو",
+  "Elite": "نخبه",
+  "Master": "استاد",
+  "Legend": "افسانه",
+  "Points": "امتیاز",
+  "Create posts and comments": "ایجاد پست و نظر",
+  "Follow other users": "دنبال کردن کاربران دیگر",
+  "React to posts": "واکنش به پست‌ها",
+  "Upload images in posts": "آپلود تصاویر در پست‌ها",
+  "Create one private community": "ایجاد یک جامعه خصوصی",
+  "Access basic insights": "دسترسی به تحلیل‌های پایه",
+  "Post short videos or Reels": "ارسال ویدیوهای کوتاه یا ریلز",
+  "Add social links": "افزودن لینک‌های اجتماعی",
+  "Report users or posts": "گزارش کاربران یا پست‌ها",
+  "Access advanced analytics": "دسترسی به تحلیل‌های پیشرفته",
+  "Pin a post in your profile": "سنجاق کردن پست در پروفایل",
+  "Elite badge next to your name": "نشان نخبه در کنار نام شما",
+  "Co-admin communities": "مدیریت مشترک جوامع",
+  "Post featured content": "ارسال محتوای ویژه",
+  "Priority in search results": "اولویت در نتایج جستجو",
+  "✅ Blue verification badge": "✅ نشان تأیید آبی",
+  "Full profile customization": "سفارشی‌سازی کامل پروفایل",
+  "Monetization and exclusive perks": "درآمدزایی و مزایای انحصاری",
+  "How to Earn Points": "چگونه امتیاز کسب کنیم",
+  "Like a post": "لایک کردن پست",
+  "Comment on a post": "نظر دادن در پست",
+  "Share a post": "اشتراک‌گذاری پست",
+  "Create a new post": "ایجاد پست جدید",
+  "Gain a new follower": "به‌دست آوردن دنبال‌کننده جدید",
+  "Daily login": "ورود روزانه",
+  "Rewards & Achievements": "جوایز و دستاوردها",
+  " Reach higher levels to unlock exclusive features, profile customization, analytics tools, and even the blue verification badge.": "به سطوح بالاتر برسید تا ویژگی‌های ویژه، سفارشی‌سازی پروفایل، ابزارهای تحلیل و نشان آبی تأیید را باز کنید.",
+  "The": " ",
+  "Blue Verified Badge": "نشان آبی تأیید",
+  "and access to monetization programs.": "و دسترسی به برنامه‌های درآمدزایی.",
+  "Start Your Journey Now!": "اکنون سفر خود را آغاز کنید!",
+  "Go to Dashboard": "رفتن به داشبورد"
 }

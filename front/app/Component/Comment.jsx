@@ -11,6 +11,7 @@ import { useReport } from '@/app/Context/ReportContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiBadgeCheck } from 'react-icons/hi';
 import { useTranslation } from 'react-i18next';
+import { formatRelativeTime } from '@/app/utils/FormatDataCreatedAt'
 
 const Comment = ({ comment }) => {
   const [isReplying, setIsReplying] = useState(false);

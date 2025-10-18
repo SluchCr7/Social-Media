@@ -38,7 +38,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
                     : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
               >
-                {tab.label}
+                {t(tab.label)}
                 {activeTab === tab.key && (
                   <motion.div
                     layoutId="activeTabIndicator"

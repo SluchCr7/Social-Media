@@ -20,7 +20,7 @@ const Security = ({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.28 }}
-                  className="p-6 rounded-2xl bg-white/60 dark:bg-gray-900/60 border shadow"
+                  className="p-6 rounded-2xl w-full bg-white/60 dark:bg-gray-900/60 border shadow"
                 >
                   <div className="flex items-center gap-4 mb-4">
                     <div className="p-3 rounded-xl bg-gradient-to-br from-red-400 to-pink-500 text-white shadow-lg"><FaLock /></div>

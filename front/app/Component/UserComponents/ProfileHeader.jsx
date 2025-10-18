@@ -12,6 +12,7 @@ import StatBlock from "./StatBlock";
 import { useAuth } from "@/app/Context/AuthContext";
 import { useUser } from "@/app/Context/UserContext";
 import { useTranslation } from "react-i18next";
+import { MdInfo } from "react-icons/md";
 
 const ProfileHeader = ({
   user: profileUser,
@@ -131,13 +132,16 @@ const {t} = useTranslation()
             <span className="flex items-center gap-1">
               {profileUser?.userLevelRank || "Junior"} 🏅
             </span>
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              {profileUser?.userLevelPoints || 0} {t("XP")}
-            </motion.span>
+            <div className="flex items-center gap-2">
+              <Link href={"/Pages/Levels"} className="text-lightMode-text dark:text-darkMode-text"><MdInfo/></Link>
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                {profileUser?.userLevelPoints || 0} {t("XP")}
+              </motion.span>
+            </div>
           </div>
           <div className="w-full h-3 bg-gray-300 dark:bg-gray-700 rounded-full mt-2 overflow-hidden shadow-inner">
             <motion.div

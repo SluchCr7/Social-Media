@@ -20,7 +20,7 @@ const AccountTab = ({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.28 }}
-                  className="p-6 rounded-2xl bg-white/60 dark:bg-gray-900/60 border shadow space-y-4"
+                  className="p-6 rounded-2xl bg-white/60 dark:bg-gray-900/60 border shadow space-y-4 w-full"
                 >
                   <div className="flex items-center gap-4 mb-2">
                     <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg"><FaUserCog /></div>

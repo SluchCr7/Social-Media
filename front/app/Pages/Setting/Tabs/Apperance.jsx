@@ -33,7 +33,7 @@ const AppearanceTab = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.28 }}
-      className="p-6 rounded-2xl bg-gradient-to-r from-white/60 to-blue-50 dark:from-gray-900/60 dark:to-gray-900/40 border shadow"
+      className="p-6 rounded-2xl w-full bg-gradient-to-r from-white/60 to-blue-50 dark:from-gray-900/60 dark:to-gray-900/40 border shadow"
     >
       {/* Header */}
       <div className="flex items-center gap-4 mb-4">

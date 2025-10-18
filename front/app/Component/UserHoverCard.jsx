@@ -24,7 +24,9 @@ const UserHoverCard = ({ userSelected, children, side = 'right' }) => {
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
-
+  useEffect(() => {
+    console.log(userData)
+  }, [userData])
   const isFollowing = userData?.following?.some(member => member._id === userSelected._id)
   const {t} = useTranslation()
   if (isMobile) {

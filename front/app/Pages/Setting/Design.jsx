@@ -58,9 +58,9 @@ export default function SettingsView({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100 transition-colors pb-24 md:pb-8">
-      <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-8">
-        <div className="flex gap-6">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100 transition-colors pb-24 md:pb-8 w-full">
+      <div className="w-full px-4 md:px-6 lg:px-8 py-8">
+        <div className="flex gap-6 w-full">
           {/* Sidebar */}
           <aside className="hidden md:block w-72 sticky top-8 h-[calc(100vh-64px)] self-start">
             <div className="h-full p-4 rounded-2xl backdrop-blur-lg bg-white/60 dark:bg-gray-900/60 border dark:border-gray-800 shadow-lg flex flex-col justify-between">
@@ -113,7 +113,7 @@ export default function SettingsView({
           </aside>
 
           {/* Main content */}
-          <main className="flex-1">
+          <main className="flex-1 w-full">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div>

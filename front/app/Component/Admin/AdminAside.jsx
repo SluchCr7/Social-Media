@@ -17,6 +17,7 @@ const navItems = [
   { label: 'Reports', Tag: "Reports", icon: <FiBarChart2 /> },
 ];
 
+
 const AdminSidebar = ({ activeTab , setActiveTab }) => {
 
   const { t } = useTranslation();

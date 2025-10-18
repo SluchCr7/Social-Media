@@ -504,5 +504,62 @@
     "Post link copied!": "تم نسخ رابط المنشور!",
     "Processing...": "جارٍ المعالجة...",
     "Friends Recommendations" : "اقتراحات صداقه",
-    "Show All Users" : "روؤية الكل"
+    "Show All Users" : "روؤية الكل",
+
+
+
+    "Select a tab" : "اختر تبويب",
+    "Admin Dashboard" : "لوحة التحكم",
+    "Welcome back, here’s the latest overview" : "مرحبا بعودتك، هذه هي التفاصيل الحديثة",
+    "Refresh" : "تحديث",
+    "Today’s Posts" : "المنشورات اليومية",
+    "Admin Panel" : "لوحة التحكم",
+    "📌 Pinned Comment" : "📌 تعليق مثبت",
+    "✍️ Author Reply": "✍️ تعليق الكاتب",
+    "⭐ Top Comment" : "⭐ افضل كومنت",
+    "🕒 Recent Comment" : "🕒 احدث كومنت",
+    "members" : "اعضاء",
+    "No friends to show" : "لا يوجد صداقات لعرضها",
+    "Level Up Your Journey": "ارتقِ برحلتك",
+    "Earn points by engaging, posting, and connecting with the community.": "اكسب النقاط من خلال التفاعل، والنشر، والتواصل مع المجتمع.",
+    "Junior": "مبتدئ",
+    "Challenger": "متحدي",
+    "Warrior": "محارب",
+    "Elite": "نخبة",
+    "Master": "ماستر",
+    "Legend": "أسطورة",
+    "Points": "النقاط",
+    "Create posts and comments": "إنشاء المنشورات والتعليقات",
+    "Follow other users": "متابعة المستخدمين الآخرين",
+    "React to posts": "التفاعل مع المنشورات",
+    "Upload images in posts": "رفع الصور في المنشورات",
+    "Create one private community": "إنشاء مجتمع خاص واحد",
+    "Access basic insights": "الوصول إلى التحليلات الأساسية",
+    "Post short videos or Reels": "نشر مقاطع فيديو قصيرة أو ريلز",
+    "Add social links": "إضافة الروابط الاجتماعية",
+    "Report users or posts": "الإبلاغ عن المستخدمين أو المنشورات",
+    "Access advanced analytics": "الوصول إلى التحليلات المتقدمة",
+    "Pin a post in your profile": "تثبيت منشور في ملفك الشخصي",
+    "Elite badge next to your name": "شارة النخبة بجانب اسمك",
+    "Co-admin communities": "إدارة المجتمعات كمشرف مشارك",
+    "Post featured content": "نشر محتوى مميز",
+    "Priority in search results": "أولوية في نتائج البحث",
+    "✅ Blue verification badge": "✅ شارة التحقق الزرقاء",
+    "Full profile customization": "تخصيص كامل للملف الشخصي",
+    "Monetization and exclusive perks": "الربح والمزايا الحصرية",
+    "How to Earn Points": "كيفية كسب النقاط",
+    "Like a post": "إعجاب بمنشور",
+    "Comment on a post": "تعليق على منشور",
+    "Share a post": "مشاركة منشور",
+    "Create a new post": "إنشاء منشور جديد",
+    "Gain a new follower": "الحصول على متابع جديد",
+    "Daily login": "تسجيل الدخول اليومي",
+    "Rewards & Achievements": "المكافآت والإنجازات",
+    " Reach higher levels to unlock exclusive features, profile customization, analytics tools, and even the blue verification badge.": "ارتقِ إلى مستويات أعلى لفتح الميزات الحصرية، وتخصيص الملف الشخصي، وأدوات التحليل، وحتى شارة التحقق الزرقاء.",
+    "The": "الـ",
+    "Blue Verified Badge": "شارة التحقق الزرقاء",
+    "and access to monetization programs.": "والوصول إلى برامج الربح.",
+    "Start Your Journey Now!": "ابدأ رحلتك الآن!",
+    "Go to Dashboard": "اذهب إلى لوحة التحكم"
 }
+

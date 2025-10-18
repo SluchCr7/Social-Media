@@ -37,7 +37,7 @@ const Admin = ({ activeTab }) => {
 
       {!activeTab && (
         <div className="flex-1 flex justify-center items-center text-gray-400">
-          <p>Select a tab</p>
+          <p>{t("Select a tab")}</p>
         </div>
       )}
     </div>

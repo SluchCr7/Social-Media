@@ -17,7 +17,7 @@ const LanguageTab = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.28 }}
-      className="p-6 rounded-2xl bg-white/60 dark:bg-gray-900/60 border shadow"
+      className="p-6 rounded-2xl w-full bg-white/60 dark:bg-gray-900/60 border shadow"
     >
       {/* 🗣 العنوان */}
       <div className="flex items-center gap-4 mb-4">

@@ -1,8 +1,11 @@
+'use client'
 import React from 'react'
 import Image from 'next/image'
+import { useTranslation } from 'react-i18next'
 const HighlightedComment = ({
     highlightedComment
 }) => {
+    const { t } = useTranslation()
     return (
         <div
         className="
@@ -39,7 +42,7 @@ const HighlightedComment = ({
                     text-blue-700 dark:text-blue-300
                     whitespace-nowrap
                 ">
-                    {highlightedComment?.label}
+                    {t(highlightedComment?.label)}
                 </span>
                 )}
             </div>

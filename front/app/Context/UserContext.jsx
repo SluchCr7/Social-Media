@@ -276,7 +276,7 @@ const togglePrivateAccount = async () => {
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/block/notify/${targetUserId}`,
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/block/notify/${targetUserId}`,
         {},
         {
           headers: {
