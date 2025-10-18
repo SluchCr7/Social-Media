@@ -16,7 +16,7 @@ const Menu = () => {
   const {t} = useTranslation()
   const [showAllNews ,setShowAllNews] = useState(false)
   return (
-    <div className="hidden lg:flex flex-col items-start gap-4 w-[35%] min-h-screen bg-lightMode-bg dark:bg-darkMode-bg px-6 py-8">
+    <div className="hidden xl:flex flex-col items-start gap-4 w-[35%] min-h-screen bg-lightMode-bg dark:bg-darkMode-bg px-6 py-8">
       {isLogin ? (
         <>
           <MenuUpComingEvents/>
@@ -29,8 +29,8 @@ const Menu = () => {
           <MenuAllNews showAllNews={showAllNews} setShowAllNews={setShowAllNews} />
           <div className="mt-auto border-t pt-4 w-full border-gray-300 dark:border-gray-700">
             <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
-              Sluchit v1.0.0 — © 2025 All rights reserved.<br />
-              Built with passion for communities & real connections.
+              {t("Sluchit v1.0.0 — © 2025 All rights reserved.")}<br />
+              {t("Built with passion for communities & real connections.")}
             </p>
             <div className="mt-3 flex justify-center gap-4 text-xs text-gray-400 dark:text-gray-500">
               <Link href="/Pages/Privacy" className="hover:underline">{t("Privacy Policy")}</Link>

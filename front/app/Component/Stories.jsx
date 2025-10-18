@@ -98,9 +98,9 @@ const Stories = () => {
               </div>
 
               {/* User name */}
-              <p className="text-xs mt-2 text-black dark:text-white text-center truncate w-16">
+              {/* <p className="text-xs mt-2 text-black dark:text-white text-center truncate w-16">
                 {group?.user?.username}
-              </p>
+              </p> */}
 
               {/* Story count */}
               {group.stories.length > 1 && (

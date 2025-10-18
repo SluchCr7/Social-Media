@@ -180,6 +180,7 @@ export const MusicProvider = ({ children }) => {
         setShowModelAddMusic,
         currentMusic,
         setCurrentMusic,
+        addListen
       }}
     >
       {children}
