@@ -13,10 +13,8 @@ body {
 }
 
 /* أي نص عربي */
-[dir="rtl"]:lang(ar),
-[dir="rtl"]:lang(fa),
-[dir="rtl"]:lang(he),
-[dir="rtl"]:lang(ur) {
+:lang(ar),
+[dir="rtl"] {
   font-family: var(--font-arabic);
 }
 
@@ -214,9 +212,7 @@ html[dir="ltr"] {
   direction: ltr;
   text-align: left;
 }
-html[lang="ar"],
-html[lang="fa"],
-html[lang="he"],
-html[lang="ur"] {
+
+html[lang="ar"] {
   font-family: 'Cairo', sans-serif;
 }
