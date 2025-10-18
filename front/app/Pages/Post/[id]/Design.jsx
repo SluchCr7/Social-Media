@@ -363,16 +363,12 @@ const DesignPostSelect = ({
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <div className="flex-1 relative">
-                    <textarea
+                    <input
+                      type="text"
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
                       placeholder={`${t("Write a comment")}...`}
-                      rows={1}
-                      onInput={(e) => {
-                        e.target.style.height = 'auto'
-                        e.target.style.height = `${e.target.scrollHeight}px`
-                      }}
-                      className="w-full bg-transparent text-[15px] resize-none outline-none placeholder-gray-400 dark:placeholder-gray-500 px-2 py-1 leading-snug text-gray-800 dark:text-gray-100 min-h-[38px] max-h-[160px] overflow-y-auto"
+                      className="w-full bg-transparent text-[12px] resize-none outline-none placeholder-gray-400 dark:placeholder-gray-500 px-2 py-1 leading-snug text-gray-800 dark:text-gray-100 overflow-y-auto"
                     />
                   </div>
                   <motion.button

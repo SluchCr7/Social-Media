@@ -240,6 +240,7 @@ export const MusicPlayerProvider = ({ children }) => {
     try {
       await audioRef.current.play();
       setPlaying(true);
+      addListen(current._id);
     } catch (err) {
       console.warn('Playback blocked by browser policy');
     }
@@ -329,11 +330,6 @@ export const MusicPlayerProvider = ({ children }) => {
       audio.removeEventListener('ended', onEnd)
     }
   }, [repeatMode, songs, currentIndex, shuffle])
-  useEffect(() => {
-    if (playing && current?._id) {
-      addListen(current._id);
-    }
-  }, [playing, current]);
   return (
     <MusicPlayerContext.Provider
       value={{

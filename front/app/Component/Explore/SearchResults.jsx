@@ -94,11 +94,12 @@ const SearchResults = ({ searchResults, searchQuery, user, t }) => {
                                 <div className="flex items-center mb-2">
                                     <div className="w-10 h-10 rounded-full overflow-hidden mr-3">
                                         <Image
-                                            width={100}
-                                            height={100}
+                                            width={40}
+                                            height={40}
                                             src={p.owner?.profilePhoto?.url || "/default-avatar.png"}
                                             alt={p.owner?.username || "User"}
-                                            className="w-8 h-8 object-cover"
+                                            // className="w-8 h-8 object-cover"
+                                            className="rounded-full w-8 h-8 min-w-8 aspect-square object-cover "
                                         />
                                     </div>
                                     <div className="flex flex-col">
