@@ -208,6 +208,25 @@ const addView = asyncHandler(async (req, res) => {
   res.status(200).json(updatedMusic);
 });
 
+const addListen = asyncHandler(async (req, res) => {
+  const musicId = req.params.id;
+
+  const music = await Music.findById(musicId);
+  if (!music) {
+    return res.status(404).json({ message: "Music not found" });
+  }
+
+  // ✅ زيادة عدد المشاهدات (الاستماعات) بمقدار 1
+  const updatedMusic = await Music.findByIdAndUpdate(
+    musicId,
+    { $inc: { listenCount: 1 } },
+    { new: true }
+  ).populate("owner", "username profilePhoto");
+
+  res.status(200).json(updatedMusic);
+});
+
+
 module.exports = {
   createMusic,
   getAllMusic,
@@ -216,4 +235,5 @@ module.exports = {
   deleteMusic,
   toggleLike,
   addView,
+  addListen
 };

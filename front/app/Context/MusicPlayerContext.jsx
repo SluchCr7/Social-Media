@@ -192,7 +192,7 @@ const MusicPlayerContext = createContext()
 
 export const MusicPlayerProvider = ({ children }) => {
   const audioRef = useRef(null)
-  const { viewMusic, music } = useMusic()
+  const { viewMusic, music,addListen } = useMusic()
 
   // ✨ الحالة الأولية
   const [songs, setSongs] = useState(music || [])
@@ -329,7 +329,11 @@ export const MusicPlayerProvider = ({ children }) => {
       audio.removeEventListener('ended', onEnd)
     }
   }, [repeatMode, songs, currentIndex, shuffle])
-
+  useEffect(() => {
+    if (playing && current?._id) {
+      addListen(current._id);
+    }
+  }, [playing, current]);
   return (
     <MusicPlayerContext.Provider
       value={{

@@ -501,7 +501,7 @@ const StoryViewer = ({ stories, onClose }) => {
         </AnimatePresence>
 
         {/* معلومات المستخدم */}
-        <div className={`absolute top-4 ${isRTL ? 'right-4 flex-row-reverse' : 'left-4'} flex items-center gap-3 z-30`}>
+        <div className={`absolute top-4 ${isRTL ? 'right-4' : 'left-4'} flex items-center gap-3 z-30`}>
           <Link href={`/Pages/User/${story?.owner?._id || story?.originalStory?.owner?._id}`} className="relative block">
             <Image
               src={
@@ -527,7 +527,7 @@ const StoryViewer = ({ stories, onClose }) => {
             </Link>
 
             <span className="text-gray-300 text-xs">
-              <TimeAgo date={story?.createdAt} />
+              <span>{formatRelativeTime(story?.createdAt)}</span>
               {story?.originalStory && (
                 <span className={`ml-2 text-emerald-400 italic ${isRTL ? 'mr-2 ml-0' : ''}`}>
                   • {t("Reshared")} @{story?.owner?.username}

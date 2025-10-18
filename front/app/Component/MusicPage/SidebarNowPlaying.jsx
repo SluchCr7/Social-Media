@@ -17,7 +17,7 @@ const SidebarNowPlaying = ({ current }) => {
         </div>
       </div>
       <div className="mt-3 text-xs text-gray-500">
-        {t("Plays")}: {current?.views?.length ?? 0} • {t("Likes")}: {current?.likes?.length ?? 0}
+        {t("Plays")}: {current?.listenCount ?? 0} • {t("Likes")}: {current?.likes?.length ?? 0}
       </div>
     </div>
   )

@@ -148,6 +148,21 @@ export const MusicProvider = ({ children }) => {
     [isLoading, hasMore, page, fetchMusic]
   );
 
+  const addListen = async (musicId) => {
+    try {
+      const { data } = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/music/listen/${musicId}`,
+        {},
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+      // تحديث الموسيقى في الـ state
+      setMusic((prev) =>
+        prev.map((m) => (m._id === data._id ? data : m))
+      );
+      return data;
+    } catch (error) {
+      console.error('Error adding listen:', error);
+    }
+  };
   return (
     <MusicContext.Provider
       value={{

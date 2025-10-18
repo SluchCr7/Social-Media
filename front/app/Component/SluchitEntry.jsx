@@ -220,7 +220,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                     />
                   ))}
                 </div>
-                <span className="text-gray-500 text-xs">{post?.comments?.length} comments</span>
+                <span className="text-gray-500 text-xs">{post?.comments?.length} {t("comments")}</span>
               </div>
             )}
 

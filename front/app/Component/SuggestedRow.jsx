@@ -154,7 +154,6 @@ const isContained = (list, userId) => {
     );
 };
 
-// **[جديد]** مكون البطاقة المفصولة لتحسين وضوح الكود
 const SuggestionCard = ({ item, type, delay }) => {
     const { joinToCommunity } = useCommunity();
     const { user } = useAuth();
@@ -169,14 +168,14 @@ const SuggestionCard = ({ item, type, delay }) => {
     const isOwner = !isUserType && item?.owner?._id === user?._id;
     
     // ✨ تحديد المسار للملف الشخصي أو المجتمع
-    const hrefPath = isUserType ? `/profile/${item?._id}` : `/community/${item?._id}`;
+    const hrefPath = isUserType ? `/Pages/User/${item?._id}` : `/Pages/Community/${item?._id}`;
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: delay }}
-            className="flex flex-col justify-between bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 group 
+            className="flex flex-col justify-between w-full bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 group 
                        hover:shadow-2xl hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300"
         >
             <Link href={hrefPath} className="text-center block">
@@ -286,7 +285,7 @@ export const SuggestionRow = ({ type, data }) => {
     }
     
     return (
-        <div className="w-full grid gap-6 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
+        <div className="w-[90%] md:w-full mx-auto grid gap-6 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
             {data.map((item, idx) => (
                 <SuggestionCard 
                     key={item?._id || item.id || idx}
