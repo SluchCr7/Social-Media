@@ -10,12 +10,13 @@ import { FiMenu } from "react-icons/fi";
 import { useAside } from '../Context/AsideContext';
 import { motion } from "framer-motion";
 import { tabsHeader } from '../utils/Data';
+import { useTranslation } from 'react-i18next';
 
 const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab }) => {
   const { unreadCount } = useNotify();
   const { isLogin } = useAuth();
   const { isMobile, setIsMobileMenuOpen } = useAside();
-
+  const { t } = useTranslation();
   const handleBellClick = () => {
     setShowNotifications(true);
   };
