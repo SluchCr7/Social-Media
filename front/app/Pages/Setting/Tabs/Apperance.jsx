@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 const AppearanceTab = ({
   darkMode,
   toggleTheme,
+  user,
   initialColor = DEFAULT_COLORS[0].value,
 }) => {
   const [backgroundValue, setBackgroundValue] = useState(initialColor)
@@ -137,8 +138,8 @@ const AppearanceTab = ({
                   style={{ backgroundColor: backgroundValue }}
                 />
                 <div>
-                  <div className="font-medium">{t("Preview name")}</div>
-                  <div className="text-xs text-gray-500">@{t("preview")}</div>
+                  <div className="font-medium">{user?.username}</div>
+                  <div className="text-xs text-gray-500">@{user?.profileName}</div>
                 </div>
               </div>
             </div>

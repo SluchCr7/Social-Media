@@ -8,14 +8,14 @@ function ToggleSwitch({ checked, onChange, onColor = 'bg-blue-500' }) {
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={clsx(
-        'relative inline-flex h-8 w-14 items-center rounded-full p-1 transition-shadow focus:outline-none',
-        checked ? onColor : 'bg-gray-300 dark:bg-gray-700'
+        'relative inline-flex h-8 w-14 rounded-full transition-colors focus:outline-none',
+        checked ? 'bg-gray-700' : 'bg-yellow-400'
       )}
     >
       <span
         className={clsx(
-          'block h-6 w-6 transform rounded-full bg-white shadow transition-transform',
-          checked ? 'translate-x-6' : 'translate-x-0'
+          'absolute left-1 top-1 h-6 w-6 rounded-full bg-white shadow transform transition-transform duration-300',
+          checked ? 'translate-x-0' : 'translate-x-6'
         )}
       />
     </button>

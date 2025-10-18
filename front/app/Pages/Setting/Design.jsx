@@ -130,7 +130,7 @@ export default function SettingsView({
 
             <AnimatePresence mode="wait">
               {activeTab === 'appearance' && (
-                <AppearanceTab darkMode={darkMode} toggleTheme={toggleTheme} />
+                <AppearanceTab user={user} darkMode={darkMode} toggleTheme={toggleTheme} />
               )}
 
               {activeTab === 'security' && (

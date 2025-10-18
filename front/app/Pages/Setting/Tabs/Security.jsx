@@ -2,6 +2,7 @@ import PasswordStrength from '@/app/Component/Setting/PasswordStrength';
 import React from 'react'
 import { motion } from 'framer-motion'
 import { FaLock} from 'react-icons/fa'
+import { useTranslation } from 'react-i18next';
 const Security = ({
     oldPassword,
     setOldPassword,
@@ -13,6 +14,7 @@ const Security = ({
     setPasswordMessage,
     submitPassword
 }) => {
+  const {t} = useTranslation()
   return (
                 <motion.section
                   key="security"
