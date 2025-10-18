@@ -49,6 +49,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
   const {userData} = useGetData(user?._id)
   // إغلاق القائمة عند الضغط خارجها
   useEffect(() => {
+
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) setShowMenu(false);
     };
@@ -103,30 +104,30 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
   const visitorOptions = useMemo(() => [
     {
       icon: userData?.BlockedNotificationFromUsers?.includes(post?.owner?._id)
-        ? <GoUnmute className="text-lg" />
-        : <IoVolumeMute className="text-lg" />,
+        ? <IoVolumeMute className="text-lg" />
+        : <GoUnmute className="text-lg" />,
       text: userData?.BlockedNotificationFromUsers?.includes(post?.owner?._id)
-        ? t('UnMute Notifications From User')
-        : t('Mute Notifications From User'),
+        ? t('Mute Notifications From User')
+        : t('UnMute Notifications From User'),
       action: () => {
         toggleBlockNotification(post?.owner?._id)
       },
-      className: userData?.BlockedNotificationFromUsers?.includes(post?.owner?._id) ?
-        'text-red-400 hover:bg-red-100'
-        : 'text-blue-400 hover:bg-blue-100',
+      className: userData?.BlockedNotificationFromUsers?.includes(post?.owner?._id)
+        ?'text-blue-400 hover:bg-blue-100'
+        :'text-red-400 hover:bg-red-100' ,
     },
     {
-      icon: userData?.following?.includes(post?.owner?._id)
+      icon: userData?.following?.some((f) => f._id === post?.owner?._id)
         ? <RiUserUnfollowLine className="text-lg" />
         : <RiUserFollowLine className="text-lg" />,
-      text: userData?.following?.includes(post?.owner?._id)
+      text: userData?.following?.some((f) => f._id === post?.owner?._id)
         ? t('Unfollow User')
         : t('Follow User'),
       action: () => {
         followUser(post?.owner?._id)
       },
-      className: userData?.following?.includes(post?.owner?._id) ?
-        'text-red-600 hover:bg-red-100'
+      className: userData?.following?.some((f) => f._id === post?.owner?._id)
+        ?'text-red-600 hover:bg-red-100'
         : 'text-blue-600 hover:bg-blue-100',
     },
     {
