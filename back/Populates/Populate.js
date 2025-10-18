@@ -202,10 +202,10 @@ const userOnePopulate = [
       select: userSelect,
     },
   },
-  {
-    path: "BlockedNotificationFromUsers", 
-    select: userSelect
-  }
+  // {
+  //   path: "BlockedNotificationFromUsers",
+  //   select: userSelect,
+  // },
   {
     path: "myMusicPlaylist",
     model: "Music",
