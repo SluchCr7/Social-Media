@@ -203,6 +203,10 @@ const userOnePopulate = [
     },
   },
   {
+    path: "BlockedNotificationFromUsers", 
+    select: userSelect
+  }
+  {
     path: "myMusicPlaylist",
     model: "Music",
     populate: {
