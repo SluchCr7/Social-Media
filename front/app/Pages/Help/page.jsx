@@ -47,7 +47,7 @@ export default function HelpCenter() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#071027] to-[#0a1624] text-[#e6eef8] py-16 px-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="w-full">
         {/* Hero */}
         <motion.header initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight flex items-center justify-center gap-3">
