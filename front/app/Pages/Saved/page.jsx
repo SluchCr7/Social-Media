@@ -51,7 +51,7 @@ export default function SavedPage() {
   const {userData} = useGetData()
 
   // فلاتر البيانات
-  const filteredPosts = useMemo(() => posts?.saved?.includes(user?._id).filter(p => (p.text + p.username).toLowerCase().includes(query.toLowerCase())), [query, combinedPosts])
+  const filteredPosts = useMemo(() => posts?.saved?.includes(user?._id).filter(p => (p.text + p.username).toLowerCase().includes(query.toLowerCase())), [query, posts?.saved?.includes(user?._id)])
   
   // استخدام قائمة التشغيل الحقيقية، والرجوع إلى البيانات الثابتة في حال عدم وجودها
   const filteredMusic = useMemo(() => 
