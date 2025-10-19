@@ -56,7 +56,7 @@ export default function HelpCenter() {
             </span>
             Help Center
           </h1>
-          <p className="mt-3 text-gray-300 max-w-2xl mx-auto">Find articles, troubleshooting guides and contact options. We're here to help 24/7.</p>
+          <p className="mt-3 text-gray-300 max-w-2xl mx-auto">Find articles, troubleshooting guides and contact options. We&apos;re here to help 24/7.</p>
 
           <div className="mt-6">
             <motion.div whileFocus={{ scale: 1.01 }} className="mx-auto max-w-3xl">

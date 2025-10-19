@@ -20,13 +20,6 @@ import {
 } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
 
-/*
-  LevelsPage.Dark.Design.jsx
-  - نسخة Dark Modern Futuristic من صفحة الـ Levels
-  - متطلب: TailwindCSS + Framer Motion + react-icons
-  - استبدل/مرر currentPoints كمعلومة حقيقية من الـ backend لتفعيل الـ progress.
-*/
-
 const LEVELS = [
   { name: 'Junior', min: 0, max: 1999, color: 'from-violet-600 to-indigo-500', icon: <FaUserGraduate className="text-4xl" /> },
   { name: 'Challenger', min: 2000, max: 3999, color: 'from-blue-500 to-cyan-400', icon: <FaMedal className="text-4xl" /> },
@@ -54,7 +47,7 @@ function getCurrentLevel(points) {
 }
 
 export default function LevelsPage({ currentPoints = 3625 }) {
-  const { t } = useTranslation ? useTranslation() : { t: (s) => s }
+  const { t } = useTranslation() 
 
   const currentLevel = useMemo(() => getCurrentLevel(currentPoints), [currentPoints])
 
