@@ -12,6 +12,7 @@ import { useAuth } from '@/app/Context/AuthContext'
 import { useGetData } from '@/app/Custome/useGetData'
 import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
 import Image from 'next/image'
+import { usePost } from '@/app/Context/PostContext'
 
 /*
   SavedPage.Dark.jsx - تصميم احترافي ومحسن
@@ -39,7 +40,7 @@ export default function SavedPage() {
   const tabs = ['posts', 'music', 'reels']
   const [active, setActive] = useState('posts')
   const [query, setQuery] = useState('')
-  
+  const {posts} = usePost()
   // 2. استخدام المشغل الموسيقي العالمي
   const { current, playing, play, pause, setTrack, setSongs } = useMusicPlayer()
 
@@ -50,7 +51,7 @@ export default function SavedPage() {
   const {userData} = useGetData()
 
   // فلاتر البيانات
-  const filteredPosts = useMemo(() => combinedPosts.filter(p => (p.text + p.username).toLowerCase().includes(query.toLowerCase())), [query, combinedPosts])
+  const filteredPosts = useMemo(() => posts?.saved?.includes(user?._id).filter(p => (p.text + p.username).toLowerCase().includes(query.toLowerCase())), [query, combinedPosts])
   
   // استخدام قائمة التشغيل الحقيقية، والرجوع إلى البيانات الثابتة في حال عدم وجودها
   const filteredMusic = useMemo(() => 
@@ -156,7 +157,7 @@ export default function SavedPage() {
           {/* تبويب Posts */}
           {active === 'posts' && (
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 gap-6">
-              {filteredPosts?.filter((p) => p.saved.includes(user?._id)).length === 0 ? (
+              {filteredPosts.length === 0 ? (
                 <EmptyState />
               ) : (
                 filteredPosts.map((post) => <SluchitEntry key={post?._id} post={post} />)

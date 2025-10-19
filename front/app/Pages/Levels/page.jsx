@@ -67,7 +67,7 @@ export default function LevelsPage({ currentPoints = 3625 }) {
       </div>
 
       {/* Content wrapper */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
+      <div className="relative z-10 w-full px-6 py-20">
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12">
           <div>
