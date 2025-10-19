@@ -13,7 +13,7 @@ import { useGetData } from '@/app/Custome/useGetData'
 import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
 import Image from 'next/image'
 import { usePost } from '@/app/Context/PostContext'
-import { set } from 'date-fns'
+import SavedPageSkeleton from '@/app/Skeletons/SavedSkeleton'
 
 /*
   SavedPage.Dark.jsx - تصميم احترافي ومحسن
@@ -41,7 +41,7 @@ export default function SavedPage() {
   const tabs = ['posts', 'music', 'reels']
   const [active, setActive] = useState('posts')
   const [query, setQuery] = useState('')
-  const {posts} = usePost()
+  const {posts, isLoading: postsLoading} = usePost()
   // 2. استخدام المشغل الموسيقي العالمي
   const { current, playing, play, pause, setTrack, setSongs,expanded, setExpanded } = useMusicPlayer()  
 
@@ -49,8 +49,8 @@ export default function SavedPage() {
   const [openReel, setOpenReel] = useState(null)
   const {combinedPosts} =  useProfilePosts()
   const {user} = useAuth()
-  const {userData} = useGetData(user?._id)
-
+  const {userData, loading: userLoading} = useGetData(user?._id)
+  const isLoading = postsLoading || userLoading; // أو أي منطق تحميل آخر
   // فلاتر البيانات
   const filteredPosts = useMemo(() => posts.filter(p => (p.text + p.username).toLowerCase().includes(query.toLowerCase())), [query, posts])
   
@@ -84,6 +84,11 @@ export default function SavedPage() {
     }
   }, [active, filteredMusic, setSongs])
 
+
+  if (isLoading) {
+    // يمكنك تمرير التبويب النشط لعرض الهيكل المناسب
+    return <SavedPageSkeleton activeTab={active} />;
+  }
   return (
     <div className="min-h-screen w-full py-12 px-6 bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-fg dark:text-darkMode-fg">
       <div className="max-w-7xl w-full mx-auto">
