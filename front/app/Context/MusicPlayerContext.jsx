@@ -240,7 +240,7 @@ export const MusicPlayerProvider = ({ children }) => {
     try {
       await audioRef.current.play();
       setPlaying(true);
-      addListen(current._id);
+      // addListen(current._id);
     } catch (err) {
       console.warn('Playback blocked by browser policy');
     }
@@ -262,6 +262,7 @@ export const MusicPlayerProvider = ({ children }) => {
     setCurrentIndex(index);
     if (allSongs?.length) setSongs(allSongs);
     viewMusic(track._id);
+    addListen(track._id)
     if (autoPlay) {
       setPlaying(true);
     } else {
