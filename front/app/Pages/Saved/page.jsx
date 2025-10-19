@@ -214,7 +214,7 @@ export default function SavedPage() {
                           // منع انتشار النقر لمنع استدعاء handleMusicAction مرتين
                           onClick={(e) => {
                             e.stopPropagation(); handleMusicAction(track); 
-                            isPlayingThis ? setIsPlaying(false) : setIsPlaying(true);
+                            isPlayingThis ? setExpanded(false) : setExpanded(true);
                           }} 
                         >
                           {isPlayingThis ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5 ml-0.5" />}
