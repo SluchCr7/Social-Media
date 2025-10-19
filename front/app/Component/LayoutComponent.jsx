@@ -47,6 +47,7 @@ const LayoutComponent = ({ children }) => {
     '/Pages/Levels',
     '/Pages/Register',
     '/Pages/Messanger',
+    '/Pages/Saved',
     '/Pages/Forgot',
     '/Pages/Setting',
     '/Pages/Privacy',

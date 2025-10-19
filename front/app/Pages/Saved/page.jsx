@@ -13,6 +13,7 @@ import { useGetData } from '@/app/Custome/useGetData'
 import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
 import Image from 'next/image'
 import { usePost } from '@/app/Context/PostContext'
+import { set } from 'date-fns'
 
 /*
   SavedPage.Dark.jsx - تصميم احترافي ومحسن
@@ -42,7 +43,7 @@ export default function SavedPage() {
   const [query, setQuery] = useState('')
   const {posts} = usePost()
   // 2. استخدام المشغل الموسيقي العالمي
-  const { current, playing, play, pause, setTrack, setSongs } = useMusicPlayer()
+  const { current, playing, play, pause, setTrack, setSongs,expanded, setExpanded } = useMusicPlayer()  
 
   // reel modal
   const [openReel, setOpenReel] = useState(null)
@@ -51,7 +52,7 @@ export default function SavedPage() {
   const {userData} = useGetData(user?._id)
 
   // فلاتر البيانات
-  const filteredPosts = useMemo(() => posts?.saved?.includes(user?._id).filter(p => (p.text + p.username).toLowerCase().includes(query.toLowerCase())), [query, posts?.saved?.includes(user?._id)])
+  const filteredPosts = useMemo(() => posts.filter(p => (p.text + p.username).toLowerCase().includes(query.toLowerCase())), [query, posts])
   
   // استخدام قائمة التشغيل الحقيقية، والرجوع إلى البيانات الثابتة في حال عدم وجودها
   const filteredMusic = useMemo(() => 
@@ -168,10 +169,10 @@ export default function SavedPage() {
           {/* تبويب Posts */}
           {active === 'posts' && (
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 gap-6">
-              {posts?.filter((p) => p?.saved?.includes(userData?._id))?.length === 0 ? (
+              {filteredPosts?.filter((p) => p?.saved?.includes(userData?._id))?.length === 0 ? (
                 <EmptyState />
               ) : (
-                posts
+                filteredPosts
                   ?.filter((p) => p?.saved?.includes(userData?._id))
                   ?.map((post) => <SluchitEntry key={post?._id} post={post} />)
               )}
@@ -211,7 +212,10 @@ export default function SavedPage() {
                               : 'bg-gradient-to-br from-indigo-600 to-cyan-500 text-black shadow-xl shadow-indigo-500/30'
                           }`}
                           // منع انتشار النقر لمنع استدعاء handleMusicAction مرتين
-                          onClick={(e) => { e.stopPropagation(); handleMusicAction(track); }} 
+                          onClick={(e) => {
+                            e.stopPropagation(); handleMusicAction(track); 
+                            isPlayingThis ? setIsPlaying(false) : setIsPlaying(true);
+                          }} 
                         >
                           {isPlayingThis ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5 ml-0.5" />}
                         </button>
