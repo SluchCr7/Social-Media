@@ -16,7 +16,6 @@ import {
   FaUserPlus,
   FaCalendarCheck,
   FaChevronRight,
-  FaStar
 } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
 
