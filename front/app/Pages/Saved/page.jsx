@@ -89,7 +89,11 @@ export default function SavedPage() {
   
   useEffect(()=>{
     console.log(posts?.saved?.includes(user?._id))
-  },[posts])
+  }, [posts])
+  
+  useEffect(()=>{
+    console.log(`myUserData :- ${userData}`)
+  },[userData])
 
   return (
     <div className="min-h-screen py-12 px-6 bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-fg dark:text-darkMode-fg">
