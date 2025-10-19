@@ -86,6 +86,11 @@ export default function SavedPage() {
   useEffect(()=>{
     console.log(filteredPosts)
   },[filteredPosts])
+  
+  useEffect(()=>{
+    console.log(posts?.saved?.includes(user?._id))
+  },[posts])
+
   return (
     <div className="min-h-screen py-12 px-6 bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-fg dark:text-darkMode-fg">
       <div className="max-w-7xl mx-auto">
@@ -159,10 +164,12 @@ export default function SavedPage() {
           {/* تبويب Posts */}
           {active === 'posts' && (
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 gap-6">
-              {filteredPosts?.length === 0 ? (
+              {posts?.filter((p) => p?.saved?.includes(userSelected?._id))?.length === 0 ? (
                 <EmptyState />
               ) : (
-                filteredPosts?.map((post) => <SluchitEntry key={post?._id} post={post} />)
+                posts
+                  ?.filter((p) => p?.saved?.includes(userSelected?._id))
+                  ?.map((post) => <SluchitEntry key={post?._id} post={post} />)
               )}
             </motion.div>
           )}
