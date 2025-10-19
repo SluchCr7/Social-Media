@@ -54,9 +54,9 @@ export default function SavedPage() {
   
   // استخدام قائمة التشغيل الحقيقية، والرجوع إلى البيانات الثابتة في حال عدم وجودها
   const filteredMusic = useMemo(() => 
-    (userData?.myMusicPlaylist?.length > 0 ? userData.myMusicPlaylist : savedMusic)
+    (userData?.myMusicPlaylist?.length > 0 ? userData?.myMusicPlaylist : savedMusic)
       .filter(m => (m.title + m.artist).toLowerCase().includes(query.toLowerCase())), 
-    [query, userData.myMusicPlaylist]
+    [query, userData?.myMusicPlaylist]
   )
   
   const filteredReels = useMemo(() => savedReels.filter(r => (r.title).toLowerCase().includes(query.toLowerCase())), [query])
