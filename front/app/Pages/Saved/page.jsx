@@ -157,10 +157,10 @@ export default function SavedPage() {
           {/* تبويب Posts */}
           {active === 'posts' && (
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 gap-6">
-              {filteredPosts.length === 0 ? (
+              {filteredPosts?.length === 0 ? (
                 <EmptyState />
               ) : (
-                filteredPosts.map((post) => <SluchitEntry key={post?._id} post={post} />)
+                filteredPosts?.map((post) => <SluchitEntry key={post?._id} post={post} />)
               )}
             </motion.div>
           )}
