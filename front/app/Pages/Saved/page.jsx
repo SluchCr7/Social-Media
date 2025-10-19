@@ -48,7 +48,7 @@ export default function SavedPage() {
   const [openReel, setOpenReel] = useState(null)
   const {combinedPosts} =  useProfilePosts()
   const {user} = useAuth()
-  const {userData} = useGetData()
+  const {userData} = useGetData(user?._id)
 
   // فلاتر البيانات
   const filteredPosts = useMemo(() => posts?.saved?.includes(user?._id).filter(p => (p.text + p.username).toLowerCase().includes(query.toLowerCase())), [query, posts?.saved?.includes(user?._id)])
