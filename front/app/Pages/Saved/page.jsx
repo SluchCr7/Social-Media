@@ -1,167 +1,134 @@
 'use client'
 
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useMemo, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { FaBookmark, FaMusic, FaRegImage, FaPlay, FaPause, FaTimes, FaShareAlt, FaHeart } from 'react-icons/fa'
+// 1. استيراد useMusicPlayer من المشغل العالمي
+
+// استيرادات المكتبات المحلية
+import { useProfilePosts } from '@/app/Custome/useProfilePosts'
+import SluchitEntry from '@/app/Component/SluchitEntry'
+import { useAuth } from '@/app/Context/AuthContext'
+import { useGetData } from '@/app/Custome/useGetData'
+import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
+import Image from 'next/image'
 
 /*
-  SavedPage.Dark.jsx
-  - صفحة Saved احترافية (Dark) متوافقة مع نظام الألوان الحالي للموقع
-  - متطلبات: TailwindCSS, Framer Motion, react-icons
-  - تحتوي على بيانات static arrays لتجربة الصفحة
-  - استخدم الفئات اللونية الموجودة في المشروع: (مثلاً) bg-lightMode-bg dark:bg-darkMode-bg و text-lightMode-fg dark:text-darkMode-fg
+  SavedPage.Dark.jsx - تصميم احترافي ومحسن
 */
 
+// البيانات الثابتة (للتجربة في حال عدم توفر بيانات حية)
 const savedPosts = [
-  {
-    id: 'p1',
-    user: 'Ahmed',
-    avatar: '/Home.jpg',
-    image: '/Home.jpg',
-    caption: 'Sunset vibes at the coast 🌅 — a short story about the day.',
-    date: 'Oct 12, 2025',
-  },
-  {
-    id: 'p2',
-    user: 'Lina',
-    avatar: '/Home.jpg',
-    image: '/Home.jpg',
-    caption: "My workspace — minimal and cozy.",
-    date: 'Sep 20, 2025'
-  },
-  {
-    id: 'p3',
-    user: 'Mona',
-    avatar: '/Home.jpg',
-    image: '/Home.jpg',
-    caption: 'Street photography — light & shadow.',
-    date: 'Aug 14, 2025'
-  }
+  { id: 'p1', user: 'Ahmed', avatar: '/Home.jpg', image: '/Home.jpg', caption: 'Sunset vibes at the coast 🌅 — a short story about the day.', date: 'Oct 12, 2025' },
+  { id: 'p2', user: 'Lina', avatar: '/Home.jpg', image: '/Home.jpg', caption: "My workspace — minimal and cozy.", date: 'Sep 20, 2025' },
 ]
 
 const savedMusic = [
-  {
-    id: 'm1',
-    title: 'Lost in Time',
-    artist: 'Nova',
-    cover: '/Home.jpg',
-    url: '/song1.mp3',
-    duration: '3:42'
-  },
-  {
-    id: 'm2',
-    title: 'Dreamstate',
-    artist: 'Orion',
-    cover: '/Home.jpg',
-    url: '/song2.mp3',
-    duration: '4:05'
-  },
-  {
-    id: 'm3',
-    title: 'Midnight Loop',
-    artist: 'Echoes',
-    cover: '/Home.jpg',
-    url: '/song3.mp3',
-    duration: '2:58'
-  }
+  { id: 'm1', title: 'Lost in Time', artist: 'Nova', cover: '/Home.jpg', url: '/song1.mp3', duration: '3:42' },
+  { id: 'm2', title: 'Dreamstate', artist: 'Orion', cover: '/Home.jpg', url: '/song2.mp3', duration: '4:05' },
+  { id: 'm3', title: 'Midnight Loop', artist: 'Echoes', cover: '/Home.jpg', url: '/song3.mp3', duration: '2:58' }
 ]
 
 const savedReels = [
-  {
-    id: 'r1',
-    thumbnail: '/reels/thumb1.jpg',
-    video: '/video1.mp4',
-    title: 'Quick Tips for Productivity'
-  },
-  {
-    id: 'r2',
-    thumbnail: '/reels/thumb2.jpg',
-    video: '/video2.mp4',
-    title: 'Street Photography - 60s'
-  },
-  {
-    id: 'r3',
-    thumbnail: '/reels/thumb3.jpg',
-    video: '/video3.mp4',
-    title: 'Mini-Recipe: 1 minute pasta'
-  }
+  { id: 'r1', thumbnail: '/reels/thumb1.jpg', video: '/video1.mp4', title: 'Quick Tips for Productivity' },
+  { id: 'r2', thumbnail: '/reels/thumb2.jpg', video: '/video2.mp4', title: 'Street Photography - 60s' },
 ]
+
 
 export default function SavedPage() {
   const tabs = ['posts', 'music', 'reels']
   const [active, setActive] = useState('posts')
   const [query, setQuery] = useState('')
-
-  // audio player state
-  const audioRef = useRef(null)
-  const [playingId, setPlayingId] = useState(null)
+  
+  // 2. استخدام المشغل الموسيقي العالمي
+  const { current, playing, play, pause, setTrack, setSongs } = useMusicPlayer()
 
   // reel modal
   const [openReel, setOpenReel] = useState(null)
+  const {combinedPosts} =  useProfilePosts()
+  const {user} = useAuth()
+  const {userData} = useGetData()
 
-  const filteredPosts = useMemo(() => savedPosts.filter(p => (p.caption + p.user).toLowerCase().includes(query.toLowerCase())), [query])
-  const filteredMusic = useMemo(() => savedMusic.filter(m => (m.title + m.artist).toLowerCase().includes(query.toLowerCase())), [query])
+  // فلاتر البيانات
+  const filteredPosts = useMemo(() => combinedPosts.filter(p => (p.text + p.username).toLowerCase().includes(query.toLowerCase())), [query, combinedPosts])
+  
+  // استخدام قائمة التشغيل الحقيقية، والرجوع إلى البيانات الثابتة في حال عدم وجودها
+  const filteredMusic = useMemo(() => 
+    (userData?.myMusicPlaylist?.length > 0 ? userData.myMusicPlaylist : savedMusic)
+      .filter(m => (m.title + m.artist).toLowerCase().includes(query.toLowerCase())), 
+    [query, userData.myMusicPlaylist]
+  )
+  
   const filteredReels = useMemo(() => savedReels.filter(r => (r.title).toLowerCase().includes(query.toLowerCase())), [query])
 
-  // play/pause logic for saved music (single audio element)
-  const handlePlay = async (track) => {
-    if (!audioRef.current) return
 
-    // if clicking the same track toggle pause/play
-    if (playingId === track.id) {
-      if (!audioRef.current.paused) {
-        audioRef.current.pause()
-        setPlayingId(null)
-      } else {
-        try {
-          await audioRef.current.play()
-          setPlayingId(track.id)
-        } catch (e) {
-          console.warn('playback blocked')
-        }
-      }
-      return
-    }
-
-    // new track
-    audioRef.current.src = track.url
-    audioRef.current.load()
-    try {
-      await audioRef.current.play()
-      setPlayingId(track.id)
-    } catch (err) {
-      console.warn('playback blocked')
+  // 3. دالة موحدة لتشغيل/إيقاف الموسيقى باستخدام المشغل العالمي
+  const handleMusicAction = (track) => {
+    // إذا كانت الأغنية الحالية هي نفس الأغنية: تبديل
+    if (current && current.id === track.id) {
+      playing ? pause() : play();
+    } else {
+      // إذا كانت أغنية جديدة: اضبط المسار وشغل
+      const trackIndex = filteredMusic.findIndex(m => m.id === track.id);
+      setTrack(track, trackIndex, filteredMusic); 
     }
   }
 
-  const handlePause = () => {
-    if (!audioRef.current) return
-    audioRef.current.pause()
-    setPlayingId(null)
-  }
+  // 4. مزامنة قائمة الأغاني مع المشغل العالمي عند تفعيل تبويب الموسيقى
+  useEffect(() => {
+    if (active === 'music' && filteredMusic.length) {
+      // نرسل القائمة المفلترة إلى المشغل العالمي ليعرف التسلسل التالي/السابق
+      setSongs(filteredMusic)
+    }
+  }, [active, filteredMusic, setSongs])
+
 
   return (
     <div className="min-h-screen py-12 px-6 bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-fg dark:text-darkMode-fg">
-      <div className="max-w-6xl mx-auto">
-        {/* header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* ========================================= */}
+        {/* 5. تصميم الهيدر المحسن */}
+        {/* ========================================= */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
+          
+          {/* العنوان الرئيسي */}
           <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold flex items-center gap-3">
-              <span className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow"> 
+            <h1 className="text-4xl md:text-5xl font-extrabold flex items-center gap-4">
+              <span className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-xl shadow-indigo-500/30"> 
                 <FaBookmark />
               </span>
-              {"Saved"}
+              {"Saved Items"}
             </h1>
-            <p className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mt-1">All your saved posts, music and reels in one place.</p>
+            <p className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mt-2">All your saved posts, music and reels in one place.</p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search your saved items..." className="pl-4 pr-4 py-2 rounded-lg bg-white/5 border border-white/6 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+          {/* شريط البحث والتبويبات للشاشات الكبيرة */}
+          <div className="flex flex-col md:flex-row items-end gap-3 w-full md:w-auto">
+            
+            {/* حقل البحث الأنيق */}
+            <div className="relative w-full md:w-64">
+                <input 
+                    value={query} 
+                    onChange={(e) => setQuery(e.target.value)} 
+                    placeholder="Search saved content..." 
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-lightMode-fg/5 dark:bg-white/5 border border-lightMode-fg/10 dark:border-white/10 placeholder:text-lightMode-text2 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition shadow-inner dark:shadow-none" 
+                />
+                <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-lightMode-text2 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
-            <div className="hidden md:flex items-center bg-white/5 border border-white/6 rounded-xl px-3 py-2 gap-2">
+
+            {/* التبويبات (Pills Design) للشاشات الكبيرة */}
+            <div className="hidden md:flex items-center bg-lightMode-fg/5 dark:bg-white/5 border border-lightMode-fg/10 dark:border-white/10 rounded-xl p-1 gap-1 shadow-md backdrop-blur-sm">
               {tabs.map(tab => (
-                <button key={tab} onClick={() => setActive(tab)} className={`px-3 py-1 rounded-lg font-medium ${active === tab ? 'bg-gradient-to-r from-indigo-600 to-cyan-500 text-black' : 'text-lightMode-text dark:text-darkMode-text2'}`}>
+                <button 
+                  key={tab} 
+                  onClick={() => setActive(tab)} 
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    active === tab 
+                      ? 'bg-gradient-to-r from-indigo-600 to-cyan-500 text-white shadow-lg shadow-indigo-500/50' 
+                      : 'text-lightMode-text2 dark:text-darkMode-text2 hover:bg-white/10'
+                  }`}
+                >
                   {tab === 'posts' && <span className="inline-flex items-center gap-2"> <FaRegImage /> Posts</span>}
                   {tab === 'music' && <span className="inline-flex items-center gap-2"> <FaMusic /> Music</span>}
                   {tab === 'reels' && <span className="inline-flex items-center gap-2"> <FaPlay /> Reels</span>}
@@ -170,87 +137,109 @@ export default function SavedPage() {
             </div>
           </div>
         </div>
-
-        {/* tabs for mobile */}
-        <div className="flex md:hidden gap-3 mb-6">
+        
+        {/* ========================================= */}
+        {/* 6. التبويبات للجوال (Mobile Tabs) */}
+        {/* ========================================= */}
+        <div className="flex md:hidden gap-3 mb-8">
           {tabs.map(tab => (
-            <button key={tab} onClick={() => setActive(tab)} className={`flex-1 py-2 rounded-lg text-sm font-medium ${active === tab ? 'bg-gradient-to-r from-indigo-600 to-cyan-500 text-black' : 'bg-white/5 text-lightMode-text dark:text-darkMode-text2'}`}>
+            <button key={tab} onClick={() => setActive(tab)} className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${active === tab ? 'bg-gradient-to-r from-indigo-600 to-cyan-500 text-white shadow-md' : 'bg-white/5 text-lightMode-text dark:text-darkMode-text2 border border-white/5'}`}>
               {tab}
             </button>
           ))}
         </div>
 
-        {/* content */}
+        {/* ========================================= */}
+        {/* 7. المحتوى (Content) */}
+        {/* ========================================= */}
         <div>
+          {/* تبويب Posts */}
           {active === 'posts' && (
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredPosts.length === 0 ? (
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 gap-6">
+              {filteredPosts?.filter((p) => p.saved.includes(user?._id)).length === 0 ? (
                 <EmptyState />
               ) : (
-                filteredPosts.map(p => (
-                  <motion.article key={p.id} whileHover={{ translateY: -6 }} className="rounded-2xl overflow-hidden bg-white/3 border border-white/6 backdrop-blur-md shadow-lg">
-                    <div className="relative">
-                      <img src={p.image} alt={p.caption} className="w-full h-52 object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 hover:opacity-100 transition flex items-end p-4">
-                        <div className="flex-1 text-white">
-                          <div className="font-semibold">{p.user}</div>
-                          <div className="text-xs mt-1">{p.date}</div>
-                        </div>
-                        <div className="flex gap-2">
-                          <button className="p-2 rounded-lg bg-white/10"><FaHeart /></button>
-                          <button className="p-2 rounded-lg bg-white/10"><FaShareAlt /></button>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <p className="text-sm text-lightMode-text2 dark:text-darkMode-text2">{p.caption}</p>
-                    </div>
-                  </motion.article>
-                ))
+                filteredPosts.map((post) => <SluchitEntry key={post?._id} post={post} />)
               )}
             </motion.div>
           )}
 
+          {/* تبويب Music - تصميم قائمة المسارات المحسن */}
           {active === 'music' && (
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white/3 border border-white/6 rounded-2xl p-4 backdrop-blur-md shadow-lg">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white/3 border border-white/6 rounded-3xl p-6 backdrop-blur-md shadow-2xl dark:shadow-inner">
               {filteredMusic.length === 0 ? <EmptyState /> : (
-                <div className="space-y-3">
-                  {filteredMusic.map(track => (
-                    <div key={track.id} className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
-                      <img src={track.cover} alt={track.title} className="w-14 h-14 rounded-lg object-cover" />
-                      <div className="flex-1">
-                        <div className="font-medium">{track.title}</div>
-                        <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2">{track.artist}</div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mr-2">{track.duration}</div>
-                        {playingId === track.id ? (
-                          <button onClick={handlePause} className="px-3 py-2 rounded-lg bg-gradient-to-br from-indigo-600 to-cyan-500 text-black"><FaPause /></button>
-                        ) : (
-                          <button onClick={() => handlePlay(track)} className="px-3 py-2 rounded-lg bg-gradient-to-br from-indigo-600 to-cyan-500 text-black"><FaPlay /></button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                <div className="space-y-4">
+                  {filteredMusic.map(track => {
+                    const isPlayingThis = playing && current && current.id === track.id
+                    
+                    return (
+                      <motion.div 
+                        key={track.id} 
+                        whileHover={{ scale: 1.015, boxShadow: '0 6px 15px rgba(0,0,0,0.2)' }} 
+                        transition={{ duration: 0.2 }}
+                        className={`flex items-center gap-4 p-3 rounded-2xl transition duration-200 cursor-pointer ${isPlayingThis ? 'bg-indigo-900/40 border border-indigo-700/50 shadow-lg' : 'bg-white/5 hover:bg-white/10'}`} 
+                        onClick={() => handleMusicAction(track)} // جعل السطر بأكمله تفاعلياً
+                      >
+                        <Image width={800} height={800} src={track.cover} alt={track.title} className="w-16 h-16 rounded-xl object-cover shadow-lg" />
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className={`font-semibold text-lg truncate ${isPlayingThis ? 'text-cyan-400' : 'text-lightMode-fg dark:text-darkMode-fg'}`}>{track.title}</div> 
+                          <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mt-0.5">{track.artist}</div>
+                        </div>
+                        
+                        <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2 hidden sm:block">{track.duration}</div>
+
+                        {/* زر التشغيل/الإيقاف المحسن */}
+                        <button 
+                          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 ${
+                            isPlayingThis 
+                              ? 'bg-red-500/90 text-white shadow-xl shadow-red-500/30' 
+                              : 'bg-gradient-to-br from-indigo-600 to-cyan-500 text-black shadow-xl shadow-indigo-500/30'
+                          }`}
+                          // منع انتشار النقر لمنع استدعاء handleMusicAction مرتين
+                          onClick={(e) => { e.stopPropagation(); handleMusicAction(track); }} 
+                        >
+                          {isPlayingThis ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5 ml-0.5" />}
+                        </button>
+
+                      </motion.div>
+                    )
+                  })}
                 </div>
               )}
-
-              {/* hidden audio element */}
-              <audio ref={audioRef} preload="metadata" />
+              {/* ملاحظة: تم إزالة عنصر <audio> المحلي، حيث يعتمد الآن على المشغل العالمي */}
             </motion.div>
           )}
 
+          {/* تبويب Reels - تصميم شبكة المقاطع المحسن */}
           {active === 'reels' && (
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {filteredReels.length === 0 ? <EmptyState /> : (
                 filteredReels.map(r => (
-                  <motion.div key={r.id} whileHover={{ scale: 1.02 }} className="relative rounded-2xl overflow-hidden bg-white/3 border border-white/6">
-                    <img src={r.thumbnail} alt={r.title} className="w-full h-48 object-cover" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <button onClick={() => setOpenReel(r)} className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-600 to-cyan-500 text-black flex items-center justify-center shadow-lg"><FaPlay /></button>
+                  <motion.div 
+                    key={r.id} 
+                    whileHover={{ scale: 1.05, boxShadow: '0 8px 25px rgba(0,0,0,0.4)' }} 
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    className="relative rounded-2xl overflow-hidden bg-white/3 border border-white/6 group cursor-pointer shadow-xl"
+                    onClick={() => setOpenReel(r)} 
+                  >
+                    <div className="relative w-full h-48 md:h-60 overflow-hidden">
+                      <img src={r.thumbnail} alt={r.title} className="w-full h-full object-cover transition duration-500 group-hover:scale-110" />
+                      
+                      {/* طبقة تظليل ديناميكية مع أيقونة التشغيل البارزة */}
+                      <div className="absolute inset-0 bg-black/40 transition duration-300 group-hover:bg-black/10 flex items-center justify-center">
+                        <motion.button 
+                            whileTap={{ scale: 0.9 }}
+                            className="w-14 h-14 rounded-full bg-white/30 backdrop-blur-sm text-white flex items-center justify-center shadow-2xl opacity-80 group-hover:opacity-100 transition duration-300"
+                            onClick={(e) => { e.stopPropagation(); setOpenReel(r); }}
+                        >
+                            <FaPlay className="ml-1" />
+                        </motion.button>
+                      </div>
                     </div>
+                    
                     <div className="p-3">
-                      <div className="font-medium">{r.title}</div>
+                      <div className="font-semibold text-sm truncate">{r.title}</div>
                     </div>
                   </motion.div>
                 ))
@@ -261,13 +250,18 @@ export default function SavedPage() {
 
         {/* Reel Modal */}
         {openReel && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div onClick={() => setOpenReel(null)} className="absolute inset-0 bg-black/60" />
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative z-10 w-full max-w-3xl bg-lightMode-bg dark:bg-darkMode-bg rounded-2xl p-4">
-              <button onClick={() => setOpenReel(null)} className="absolute top-4 right-4 p-2 rounded-full bg-white/6"><FaTimes /></button>
-              <video src={openReel.video} controls className="w-full rounded-lg" />
-              <div className="mt-3">
-                <div className="font-semibold">{openReel.title}</div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div onClick={() => setOpenReel(null)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+            <motion.div 
+                initial={{ scale: 0.8, opacity: 0 }} 
+                animate={{ scale: 1, opacity: 1 }} 
+                exit={{ scale: 0.8, opacity: 0 }}
+                className="relative z-10 w-full max-w-3xl bg-lightMode-bg dark:bg-darkMode-bg rounded-3xl p-6 shadow-2xl"
+            >
+              <button onClick={() => setOpenReel(null)} className="absolute top-3 right-3 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition z-20"><FaTimes /></button>
+              <video src={openReel.video} controls className="w-full rounded-xl shadow-xl" />
+              <div className="mt-4">
+                <div className="font-semibold text-xl">{openReel.title}</div>
                 <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mt-1">Saved reel — {openReel.id}</div>
               </div>
             </motion.div>
@@ -281,11 +275,11 @@ export default function SavedPage() {
 
 function EmptyState() {
   return (
-    <div className="col-span-full p-12 rounded-2xl bg-white/3 border border-white/6 text-center">
-      <div className="text-4xl mb-4">📁</div>
-      <div className="font-semibold mb-2">No saved items yet</div>
-      <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mb-4">Save posts, tracks and reels to find them quickly later.</div>
-      <button className="px-4 py-2 rounded-lg bg-gradient-to-br from-indigo-600 to-cyan-500 text-black">Explore Content</button>
+    <div className="col-span-full p-16 rounded-3xl bg-white/3 border border-white/6 text-center shadow-inner">
+      <div className="text-5xl mb-4">✨</div>
+      <div className="font-bold text-xl mb-2">No saved items yet</div>
+      <div className="text-md text-lightMode-text2 dark:text-darkMode-text2 mb-6">Save posts, tracks and reels to find them quickly later.</div>
+      <button className="px-6 py-2.5 rounded-xl bg-gradient-to-br from-indigo-600 to-cyan-500 text-black font-semibold shadow-lg hover:shadow-xl transition">Explore Content</button>
     </div>
   )
 }

@@ -43,6 +43,8 @@ const LayoutComponent = ({ children }) => {
   const hideLayout = [
     '/Admin',
     '/Pages/Login',
+    '/Pages/Help',
+    '/Pages/Levels',
     '/Pages/Register',
     '/Pages/Messanger',
     '/Pages/Forgot',

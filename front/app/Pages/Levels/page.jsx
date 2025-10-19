@@ -16,7 +16,7 @@ import {
   FaUserPlus,
   FaCalendarCheck,
   FaChevronRight,
-  FaSparkles
+  FaStar
 } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
 
@@ -74,7 +74,7 @@ export default function LevelsPage({ currentPoints = 3625 }) {
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight flex items-center gap-3">
               <span className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 shadow-lg">
-                <FaSparkles className="text-white text-xl" />
+                <FaStar className="text-white text-xl" />
               </span>
               {t('Level Up — Dark Edition')}
             </h1>
