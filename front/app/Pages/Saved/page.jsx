@@ -97,8 +97,8 @@ export default function SavedPage() {
   },[userData])
 
   return (
-    <div className="min-h-screen py-12 px-6 bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-fg dark:text-darkMode-fg">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen w-full py-12 px-6 bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-fg dark:text-darkMode-fg">
+      <div className="max-w-7xl w-full mx-auto">
         
         {/* ========================================= */}
         {/* 5. تصميم الهيدر المحسن */}
