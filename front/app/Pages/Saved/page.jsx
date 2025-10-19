@@ -164,11 +164,11 @@ export default function SavedPage() {
           {/* تبويب Posts */}
           {active === 'posts' && (
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 gap-6">
-              {posts?.filter((p) => p?.saved?.includes(userSelected?._id))?.length === 0 ? (
+              {posts?.filter((p) => p?.saved?.includes(userData?._id))?.length === 0 ? (
                 <EmptyState />
               ) : (
                 posts
-                  ?.filter((p) => p?.saved?.includes(userSelected?._id))
+                  ?.filter((p) => p?.saved?.includes(userData?._id))
                   ?.map((post) => <SluchitEntry key={post?._id} post={post} />)
               )}
             </motion.div>
