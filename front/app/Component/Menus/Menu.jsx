@@ -32,10 +32,13 @@ const Menu = () => {
               {t("Sluchit v1.0.0 — © 2025 All rights reserved.")}<br />
               {t("Built with passion for communities & real connections.")}
             </p>
-            <div className="mt-3 flex justify-center gap-4 text-xs text-gray-400 dark:text-gray-500">
-              <Link href="/Pages/Privacy" className="hover:underline">{t("Privacy Policy")}</Link>
-              <span>•</span>
-              <Link href="/Pages/Terms" className="hover:underline">{t("Terms of Service")}</Link>
+            <div className="mt-3 flex flex-col items-center justify-center gap-4 text-xs text-gray-400 dark:text-gray-500">
+              <div className="flex items-center gap-2 justify-center">
+                <Link href="/Pages/Privacy" className="hover:underline">{t("Privacy Policy")}</Link>
+                <span>•</span>
+                <Link href="/Pages/Terms" className="hover:underline">{t("Terms of Service")}</Link>
+              </div>
+              <Link href="/Pages/Help" className="hover:underline">{t("Help Center")}</Link>
             </div>
           </div>
         </>

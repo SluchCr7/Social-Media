@@ -8,7 +8,7 @@ import { MdLanguage, MdOutlineOndemandVideo } from "react-icons/md"
 import { IoTrophyOutline } from "react-icons/io5"
 import { SlCalender } from "react-icons/sl"
 import { IoIosMusicalNotes } from "react-icons/io";
-import { FaHistory, FaLock, FaSun, FaUserCog } from "react-icons/fa"
+import { FaHistory, FaLock, FaSun, FaUserCog,FaBookmark } from "react-icons/fa"
 
 export const colors = [
     {
@@ -51,6 +51,7 @@ export const navSections = [
     items: [
       { icon: <GoHome />, text: "Home", link: "/" },
       { icon: <GoSearch />, text: "Explore", link: "/Pages/Explore" },
+      { icon: <FaBookmark />, text: "Saved", link: "/Pages/Saved" },
       { icon: <MdOutlineOndemandVideo />, text: "Videos", link: "/Pages/Videos" },
       { icon: <IoIosMusicalNotes />, text: "Music", link: "/Pages/Music" },
     ]

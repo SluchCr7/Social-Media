@@ -84,18 +84,6 @@ export default function SavedPage() {
     }
   }, [active, filteredMusic, setSongs])
 
-  useEffect(()=>{
-    console.log(filteredPosts)
-  },[filteredPosts])
-  
-  useEffect(()=>{
-    console.log(posts?.saved?.includes(user?._id))
-  }, [posts])
-  
-  useEffect(()=>{
-    console.log(`myUserData :- ${userData}`)
-  },[userData])
-
   return (
     <div className="min-h-screen w-full py-12 px-6 bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-fg dark:text-darkMode-fg">
       <div className="max-w-7xl w-full mx-auto">
