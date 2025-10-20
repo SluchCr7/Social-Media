@@ -283,6 +283,7 @@ export default function SavedPage() {
 }
 
 function EmptyState() {
+  const {t} = useTranslation()
   return (
     <div className="col-span-full p-16 rounded-3xl bg-white/3 border border-white/6 text-center shadow-inner">
       <div className="text-5xl mb-4">✨</div>
