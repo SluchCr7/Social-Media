@@ -139,8 +139,8 @@ export default function HelpCenter() {
   };
 
   return (
-    <div className="min-h-screen bg-[#000000] text-[#e6eef8] py-16 px-6">
-      <div className="w-full max-w-7xl mx-auto">
+    <div className="min-h-screen w-full bg-[#000000] text-[#e6eef8] py-16 px-6">
+      <div className="w-full">
         {/* Header */}
         <motion.header initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-extrabold flex items-center justify-center gap-3">

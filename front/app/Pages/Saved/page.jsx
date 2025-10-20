@@ -157,7 +157,7 @@ export default function SavedPage() {
         <div>
           {/* تبويب Posts */}
           {active === 'posts' && (
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 gap-6">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredPosts?.filter((p) => p?.saved?.includes(userData?._id))?.length === 0 ? (
                 <EmptyState />
               ) : (
