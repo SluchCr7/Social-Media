@@ -1,3 +1,4 @@
+'use client'
 import React, { useState } from 'react';
 import MenuFollowers from './MenuFollowers';
 import MenuMessagesFromMe from './MenuMessagesFromMe';
