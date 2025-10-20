@@ -167,7 +167,7 @@ const TermsOfServicePage = () => {
           <p className='mt-2'>
              {t("You can also contact us by mail at:")}
              <br/>
-             **[اسم الشركة]**
+              Zocial
              <br/>
              **[العنوان الفعلي الكامل، مثل: 123 Street Name, City, State, ZIP Code]**
           </p>

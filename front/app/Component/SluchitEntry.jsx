@@ -20,6 +20,7 @@ import PostImage from './Post/PostImage';
 import PostHeader from './Post/PostHeader';
 import { useTranslation } from 'react-i18next';
 import HighlightedComment from './Post/highlightedComment';
+import { usePathname } from 'next/navigation';
 
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost();
@@ -35,7 +36,8 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
   const original = post?.originalPost;
   const isCommunityPost = post?.community !== null;
   const highlightedComment = getHighlightedComment(post);
-
+  const pathname = usePathname();
+  const isView = pathname?.includes('/Pages/Saved');
   // فحص إذا كان يجب إظهار زر الترجمة
   useEffect(() => {
     if (!post?.text || !post?.owner?.preferredLanguage) return;
@@ -202,30 +204,34 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 />
               </div>
             )}
-
-            {/* 💬 Comment Avatars */}
-            {post?.comments?.length > 0 && (
-              <div className="flex items-center gap-2 pt-2">
-                <div className="flex -space-x-2">
-                  {post?.comments?.slice(0, 3).map((comment, i) => (
-                    <Image
-                      key={i}
-                      src={comment?.owner?.profilePhoto?.url}
-                      alt="comment-avatar"
-                      width={24}
-                      height={24}
-                      className="rounded-full border-2 border-white dark:border-black w-6 h-6 object-cover"
-                    />
-                  ))}
-                </div>
-                <span className="text-gray-500 text-xs">{post?.comments?.length} {t("comments")}</span>
-              </div>
-            )}
-
-            {/* 📨 Highlighted Comment */}
-            {highlightedComment && (
-              <HighlightedComment highlightedComment={highlightedComment}/>
-            )}
+            {
+              !isView && (
+                <>
+                  {post?.comments?.length > 0 && (
+                    <div className="flex items-center gap-2 pt-2">
+                      <div className="flex -space-x-2">
+                        {post?.comments?.slice(0, 3).map((comment, i) => (
+                          <Image
+                            key={i}
+                            src={comment?.owner?.profilePhoto?.url}
+                            alt="comment-avatar"
+                            width={24}
+                            height={24}
+                            className="rounded-full border-2 border-white dark:border-black w-6 h-6 object-cover"
+                          />
+                        ))}
+                      </div>
+                      <span className="text-gray-500 text-xs">{post?.comments?.length} {t("comments")}</span>
+                    </div>
+                  )}
+      
+                  {/* 📨 Highlighted Comment */}
+                  {highlightedComment && (
+                    <HighlightedComment highlightedComment={highlightedComment}/>
+                  )}
+                </>
+              )
+            }
           </div>
         </div>
       </div>

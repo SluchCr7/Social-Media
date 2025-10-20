@@ -21,9 +21,9 @@ export default function AnalyticsPresentation({
 }) {
   const {t} = useTranslation()
   return (
-    <div className="p-6 max-w-7xl mx-auto text-lightMode-fg dark:text-darkMode-fg bg-lightMode-bg dark:bg-darkMode-bg">
+    <div className="p-6 max-w-7xl mx-auto w-full text-lightMode-fg dark:text-darkMode-fg bg-lightMode-bg dark:bg-darkMode-bg">
       {/* Header */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col md:flex-row w-full items-start md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold">{t("Analytics")}</h1>
           <p className="text-sm text-gray-300 mt-1">
@@ -55,7 +55,7 @@ export default function AnalyticsPresentation({
       </div>
 
       {/* Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 w-full gap-4 mb-6">
         <OverviewCard title={t("Posts")} value={userPosts.length} formatNumber={formatNumber} />
         <OverviewCard title={t("Followers")} value={followers.length} formatNumber={formatNumber} />
         <OverviewCard title={t("Likes")} value={totalLikes} formatNumber={formatNumber} />
@@ -105,7 +105,7 @@ export default function AnalyticsPresentation({
       </div>
 
       {/* Bottom Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 w-full lg:grid-cols-3 gap-4">
         {/* Top Posts */}
         <div className="lg:col-span-2 p-4 rounded-2xl bg-gradient-to-br from-gray-900/60 to-gray-900/40 border border-gray-800">
           <h4 className="text-lg font-semibold mb-3">{t("Top Posts")}</h4>
