@@ -1,28 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
-import { motion } from 'framer-motion'
-import { FiSearch, FiHelpCircle, FiMail, FiMessageCircle, FiPhone, FiChevronDown, FiClock, FiGlobe, FiShield } from 'react-icons/fi'
-
-// HelpCenter.Dark.jsx
-// Requirements: TailwindCSS, Framer Motion, react-icons
-
-const TOPICS = [
-  { key: 'account', icon: <FiHelpCircle />, title: 'Account & Profile', desc: 'Sign in, account recovery, profile settings, and verification.' },
-  { key: 'music', icon: <FiGlobe />, title: 'Music & Playback', desc: 'Playback issues, uploads, playlists, and player controls.' },
-  { key: 'reels', icon: <FiMessageCircle />, title: 'Reels & Videos', desc: 'Upload, editing, visibility and sound sync problems.' },
-  { key: 'privacy', icon: <FiShield />, title: 'Privacy & Security', desc: 'Reporting, blocking, data and privacy controls.' },
-  { key: 'billing', icon: <FiClock />, title: 'Subscriptions & Billing', desc: 'Payments, refunds, and subscription management.' },
-  { key: 'community', icon: <FiPhone />, title: 'Community & Moderation', desc: 'Guidelines, reports, moderation, and appeals.' }
-]
-
-const FAQ = [
-  { q: 'How do I reset my password?', a: 'Go to Settings → Account → Reset password. You will receive an email with further instructions. If you do not receive it, check spam or contact support.' },
-  { q: 'Why is my music not playing in background?', a: 'Background playback depends on browser and OS policies. Ensure the tab is allowed to play media, and that battery-saving or focus modes are disabled.' },
-  { q: 'How can I report a user or post?', a: 'Open the post or profile, click the three dots menu, and select Report. Provide details and any screenshots to help moderation.' },
-  { q: 'How do I request account verification?', a: 'Go to your profile → Verification, and follow the steps. Verification is reviewed manually and may take several days.' },
-  { q: 'How do subscriptions & billing work?', a: 'Subscriptions are managed on your billing page. You can cancel anytime; refunds are processed according to our policy.' }
-]
+import React, { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { FiSearch, FiHelpCircle, FiMail, FiMessageCircle, FiPhone, FiChevronDown, FiClock, FiGlobe, FiShield, FiUser, FiFilm, FiCreditCard, FiUsers } from 'react-icons/fi'
+import { TOPICS, FAQ } from '@/app/utils/Data'
+// =================================================================
+// 2. المكون الرئيسي (HelpCenter Component)
+// =================================================================
 
 export default function HelpCenter() {
   const [query, setQuery] = useState('')
@@ -32,42 +16,75 @@ export default function HelpCenter() {
   const [contactData, setContactData] = useState({ email: '', subject: '', message: '' })
   const [sent, setSent] = useState(false)
 
+  // -------------------------------------------------------------
+  // 3. تحسين منطق الفلترة (Filtered Topics & FAQ)
+  // -------------------------------------------------------------
+
   const filteredTopics = TOPICS.filter(t => (
     t.title.toLowerCase().includes(query.toLowerCase()) || t.desc.toLowerCase().includes(query.toLowerCase())
   ))
 
+  // فلترة أسئلة FAQ بناءً على الاستعلام (Query) والموضوع المحدد (Topic)
+  const finalFaq = useMemo(() => {
+    return FAQ.filter(f => {
+      const topicMatch = !selectedTopic || f.topicKey === selectedTopic;
+      const queryMatch = f.q.toLowerCase().includes(query.toLowerCase()) || f.a.toLowerCase().includes(query.toLowerCase());
+      
+      // إذا كان هناك استعلام بحث، نعرض جميع النتائج المطابقة له بغض النظر عن الموضوع
+      // وإذا لم يكن هناك استعلام، نعرض النتائج بناءً على الموضوع المحدد فقط
+      if (query) {
+          return queryMatch;
+      }
+      return topicMatch;
+    }).slice(0, 10); // عرض 10 نتائج فقط لتجنب الإفراط
+  }, [query, selectedTopic]);
+
   const handleContactSubmit = (e) => {
     e.preventDefault()
-    // replace this with real API call
+    // [LOGIC]: يجب إضافة التحقق من صحة البيانات هنا
+    // محاكاة إرسال ناجح عبر API
     setTimeout(() => {
       setSent(true)
-      setContactData({ email: '', subject: '', message: '' })
+      // لا نقوم بمسح البيانات حتى لا يفقد المستخدم ما كتبه
     }, 700)
   }
 
+  // -------------------------------------------------------------
+  // 4. دمج الألوان المخصصة في Tailwind
+  // -------------------------------------------------------------
+  // ملاحظة: تم استخدام الألوان مباشرةً في الكود (Inline) لضمان تطبيقها دون الحاجة لتعديل ملف tailwind.config.js
+  // الألوان المستخدمة:
+  // - اللون الأساسي الداكن (Accent Primary): #fbbf24 (Amber/Yellow-400)
+  // - اللون الثانوي الفاتح (Accent Secondary): #5558f1 (Indigo/Violet)
+  // - الخلفية: #000000 (Dark Mode Bg)
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#071027] to-[#0a1624] text-[#e6eef8] py-16 px-6">
-      <div className="w-full">
-        {/* Hero */}
+    <div className="min-h-screen bg-[#000000] text-[#e6eef8] py-16 px-6">
+      <div className="w-full max-w-7xl mx-auto">
+        
+        {/* Hero & Search */}
         <motion.header initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight flex items-center justify-center gap-3">
-            <span className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 shadow-lg">
-              <FiHelpCircle className="text-white text-2xl" />
+            <span className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-[#fbbf24] shadow-lg shadow-[#fbbf24]/30">
+              <FiHelpCircle className="text-black text-2xl" />
             </span>
             Help Center
           </h1>
-          <p className="mt-3 text-gray-300 max-w-2xl mx-auto">Find articles, troubleshooting guides and contact options. We&apos;re here to help 24/7.</p>
+          <p className="mt-3 text-gray-400 max-w-2xl mx-auto">ابحث عن مقالات الدعم، أدلة استكشاف الأخطاء وإصلاحها، وخيارات الاتصال. نحن هنا للمساعدة.</p>
 
-          <div className="mt-6">
+          <div className="mt-8">
             <motion.div whileFocus={{ scale: 1.01 }} className="mx-auto max-w-3xl">
               <label htmlFor="search" className="relative block">
-                <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
                 <input
                   id="search"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search for help articles, issues or topics..."
-                  className="w-full pl-12 pr-4 py-3 rounded-2xl bg-white/6 border border-white/6 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                  onChange={(e) => {
+                    setQuery(e.target.value)
+                    setOpenFaq(null) // إغلاق أي FAQ مفتوح عند البحث
+                  }}
+                  placeholder="ابحث عن مقالات مساعدة، مشاكل تقنية، أو مواضيع محددة..."
+                  className="w-full pl-12 pr-4 py-3 rounded-2xl bg-[#111827] border border-white/10 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#fbbf24] transition"
                 />
               </label>
             </motion.div>
@@ -75,124 +92,115 @@ export default function HelpCenter() {
         </motion.header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Topics */}
-          <section className="lg:col-span-2 space-y-6">
+          
+          {/* Main Content: Topics & FAQ */}
+          <section className="lg:col-span-2 space-y-8">
+            
+            {/* Topics Grid */}
             <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="grid sm:grid-cols-2 gap-4">
               {filteredTopics.map((t, idx) => (
                 <motion.button
                   key={t.key}
-                  whileHover={{ scale: 1.02 }}
+                  whileHover={{ scale: 1.02, backgroundColor: '#1f2937' }}
                   onClick={() => setSelectedTopic(t.key)}
-                  className={`text-left p-5 rounded-2xl bg-white/3 border border-white/6 backdrop-blur-md shadow-md flex gap-4 items-start transition ${selectedTopic === t.key ? 'ring-2 ring-indigo-500/40' : ''}`}
+                  className={`text-right p-5 rounded-2xl bg-gray-900/50 border border-white/10 backdrop-blur-sm shadow-md flex gap-4 items-start transition ${selectedTopic === t.key ? 'ring-2 ring-[#fbbf24] bg-gray-800' : ''}`}
                 >
-                  <div className="w-12 h-12 rounded-lg bg-white/6 flex items-center justify-center text-xl">
+                  <div className="text-gray-400 text-sm mt-1">المزيد</div>
+                  <div className="flex-1 text-right">
+                    <div className="font-semibold text-white">{t.title}</div>
+                    <div className="text-sm text-gray-400 mt-1">{t.desc}</div>
+                  </div>
+                  <div className={`w-12 h-12 rounded-lg bg-[#5558f1]/20 flex items-center justify-center text-xl text-[#5558f1]`}>
                     {t.icon}
                   </div>
-                  <div className="flex-1">
-                    <div className="font-semibold">{t.title}</div>
-                    <div className="text-sm text-gray-300 mt-1">{t.desc}</div>
-                  </div>
-                  <div className="text-gray-300 text-sm">More</div>
                 </motion.button>
               ))}
             </motion.div>
 
-            {/* Selected topic details (mock) */}
-            {selectedTopic && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 p-6 rounded-2xl bg-gradient-to-br from-white/4 to-transparent border border-white/6">
-                <h3 className="text-xl font-bold mb-3">{TOPICS.find(x => x.key === selectedTopic)?.title}</h3>
-                <p className="text-gray-300 mb-4">Detailed help articles, step-by-step guides and troubleshooting tips for {TOPICS.find(x => x.key === selectedTopic)?.title}.</p>
-                <ul className="space-y-3">
-                  <li className="p-3 bg-white/6 rounded-lg">
-                    <div className="font-medium">Getting started & common fixes</div>
-                    <div className="text-sm text-gray-400">Easy steps to resolve the most common issues.</div>
-                  </li>
-                  <li className="p-3 bg-white/6 rounded-lg">
-                    <div className="font-medium">Advanced settings & privacy</div>
-                    <div className="text-sm text-gray-400">How to manage settings and data access.</div>
-                  </li>
-                </ul>
-              </motion.div>
-            )}
-
-            {/* FAQ Accordion */}
-            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-6 p-6 rounded-2xl bg-white/3 border border-white/6 backdrop-blur-md">
-              <h3 className="font-bold text-lg mb-4">Frequently Asked Questions</h3>
-              <div className="space-y-3">
-                {FAQ.map((f, i) => (
-                  <div key={i} className="rounded-lg overflow-hidden bg-white/6">
-                    <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between p-4 text-left">
-                      <div>
-                        <div className="font-medium">{f.q}</div>
-                        {openFaq === i && <div className="text-sm text-gray-300 mt-2">{f.a}</div>}
-                      </div>
-                      <FiChevronDown className={`transition transform ${openFaq === i ? 'rotate-180' : 'rotate-0'}`} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Resources / Useful Links */}
-            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-6 p-6 rounded-2xl bg-gradient-to-br from-white/4 to-transparent border border-white/6">
-              <h4 className="font-semibold mb-3">Helpful Resources</h4>
-              <ul className="text-sm text-gray-300 space-y-2">
-                <li><a className="underline" href="#">Community Guidelines</a></li>
-                <li><a className="underline" href="#">Privacy Policy</a></li>
-                <li><a className="underline" href="#">Terms & Conditions</a></li>
-                <li><a className="underline" href="#">Report a bug</a></li>
-              </ul>
+            {/* FAQ Accordion - Display based on selection/query */}
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-6 rounded-2xl bg-[#111827] border border-white/10 backdrop-blur-sm">
+              <h3 className="font-bold text-xl mb-4 text-[#fbbf24]">الأسئلة الأكثر شيوعاً ({selectedTopic ? TOPICS.find(x => x.key === selectedTopic)?.title : 'عام'})</h3>
+              
+              {finalFaq.length === 0 ? (
+                <p className="text-gray-400 py-4 text-center">
+                  عذراً، لم يتم العثور على أي أسئلة مطابقة لاستعلامك أو الموضوع المحدد.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {finalFaq.map((f, i) => (
+                    <div key={i} className="rounded-xl overflow-hidden bg-white/5 border border-white/10">
+                      <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between p-4 text-right">
+                        <FiChevronDown className={`transition transform ${openFaq === i ? 'rotate-180 text-[#fbbf24]' : 'rotate-0 text-gray-500'}`} />
+                        <div className="flex-1 px-4">
+                          <div className="font-medium text-white">{f.q}</div>
+                          {/* استخدام AnimatePresence للحركة عند الفتح/الإغلاق */}
+                          <AnimatePresence>
+                            {openFaq === i && (
+                              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }} className="text-sm text-gray-400 mt-3 pt-3 border-t border-white/5 text-right">
+                                {f.a}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </motion.div>
           </section>
 
-          {/* Right column: Contact & Quick Help */}
+          {/* Right Column: Contact & Quick Links */}
           <aside className="space-y-6">
-            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-6 rounded-2xl bg-gradient-to-br from-indigo-600 to-cyan-500 text-black shadow-2xl">
-              <h4 className="font-bold text-lg mb-2">Need more help?</h4>
-              <p className="text-sm mb-4">Contact our support team or start a live chat. We typically respond within a few hours.</p>
+            
+            {/* Contact Card (Accent Color) */}
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-6 rounded-2xl bg-[#5558f1] text-white shadow-2xl shadow-[#5558f1]/40">
+              <h4 className="font-bold text-lg mb-2">هل تحتاج إلى مساعدة إضافية؟ 📞</h4>
+              <p className="text-sm mb-4 opacity-90">تواصل مع فريق الدعم لدينا أو ابدأ محادثة مباشرة. عادةً ما نستجيب خلال ساعة واحدة.</p>
               <div className="grid gap-3">
-                <button onClick={() => setShowContact(true)} className="w-full py-3 rounded-xl bg-black/10 font-semibold">Contact Support</button>
-                <a href="/support/live-chat" className="w-full inline-block text-center py-3 rounded-xl bg-black/20">Live Chat</a>
-                <a href="mailto:support@example.com" className="w-full inline-block text-center py-3 rounded-xl bg-black/10">Email: support@example.com</a>
+                <button onClick={() => setShowContact(true)} className="w-full py-3 rounded-xl bg-black/20 text-white font-semibold hover:bg-black/30 transition">اتصل بالدعم</button>
+                <a href="/support/live-chat" className="w-full inline-block text-center py-3 rounded-xl bg-white/20 text-white font-semibold hover:bg-white/30 transition">محادثة مباشرة 💬</a>
               </div>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-6 rounded-2xl bg-white/3 border border-white/6 backdrop-blur-md">
-              <h5 className="font-semibold mb-3">Support Hours</h5>
-              <div className="text-sm text-gray-300">24 / 7 — We strive to respond quickly to all requests.</div>
+            {/* Quick Links & Status */}
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-6 rounded-2xl bg-[#111827] border border-white/10 backdrop-blur-sm">
+              <h5 className="font-semibold mb-3">الموارد السريعة</h5>
+              <div className="text-sm text-gray-400 mb-4">الدعم الفني متاح على مدار الساعة طوال أيام الأسبوع.</div>
 
               <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
-                <div className="p-3 rounded-lg bg-white/6">Report Abuse</div>
-                <div className="p-3 rounded-lg bg-white/6">System Status</div>
-                <div className="p-3 rounded-lg bg-white/6">API Docs</div>
-                <div className="p-3 rounded-lg bg-white/6">Developer Center</div>
+                <a href="#" className="p-3 rounded-lg bg-white/5 text-center hover:bg-white/10 transition">حالة النظام</a>
+                <a href="#" className="p-3 rounded-lg bg-white/5 text-center hover:bg-white/10 transition">إبلاغ عن إساءة</a>
+                <a href="#" className="p-3 rounded-lg bg-white/5 text-center hover:bg-white/10 transition">إرشادات المجتمع</a>
+                <a href="#" className="p-3 rounded-lg bg-white/5 text-center hover:bg-white/10 transition">المركز للمطورين</a>
               </div>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-6 rounded-2xl bg-white/3 border border-white/6 backdrop-blur-md">
-              <h5 className="font-semibold mb-3">Report a bug</h5>
-              <p className="text-sm text-gray-300 mb-3">Found an issue? Send details to our team and we’ll investigate.</p>
-              <a className="inline-block py-2 px-3 bg-indigo-600 rounded-lg font-medium" href="/support/report">Report</a>
             </motion.div>
           </aside>
         </div>
 
         {/* Contact Modal */}
         {showContact && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div onClick={() => setShowContact(false)} className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative z-10 w-full max-w-2xl p-6 rounded-2xl bg-gradient-to-br from-white/4 to-transparent border border-white/6">
-              <h3 className="text-xl font-bold mb-2">Contact Support</h3>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div onClick={() => { setShowContact(false); setSent(false); }} className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative z-10 w-full max-w-2xl p-8 rounded-2xl bg-[#111827] border border-white/10 shadow-2xl">
+              <h3 className="text-2xl font-bold mb-4 text-[#fbbf24]">تواصل مع الدعم الفني 📧</h3>
+              <button onClick={() => { setShowContact(false); setSent(false); }} className="absolute top-4 left-4 text-gray-400 hover:text-white transition">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+              
               {sent ? (
-                <div className="text-green-400">Thanks — your message was sent. Our team will reply soon.</div>
+                <div className="text-green-400 p-6 bg-green-900/30 rounded-xl text-center">
+                  ✅ شكراً لك! تم إرسال رسالتك بنجاح. سيقوم فريقنا بمراجعتها والرد عليك في أقرب وقت ممكن على بريدك الإلكتروني.
+                </div>
               ) : (
-                <form onSubmit={handleContactSubmit} className="space-y-3">
-                  <input value={contactData.email} onChange={(e) => setContactData({ ...contactData, email: e.target.value })} placeholder="Your email" className="w-full p-3 rounded-lg bg-white/6 border border-white/6" />
-                  <input value={contactData.subject} onChange={(e) => setContactData({ ...contactData, subject: e.target.value })} placeholder="Subject" className="w-full p-3 rounded-lg bg-white/6 border border-white/6" />
-                  <textarea value={contactData.message} onChange={(e) => setContactData({ ...contactData, message: e.target.value })} placeholder="How can we help?" rows={5} className="w-full p-3 rounded-lg bg-white/6 border border-white/6" />
-                  <div className="flex items-center gap-3">
-                    <button type="submit" className="px-6 py-3 rounded-xl bg-indigo-600 font-semibold">Send Message</button>
-                    <button type="button" onClick={() => setShowContact(false)} className="px-4 py-2 rounded-xl border">Close</button>
+                <form onSubmit={handleContactSubmit} className="space-y-4">
+                  <input required type="email" value={contactData.email} onChange={(e) => setContactData({ ...contactData, email: e.target.value })} placeholder="بريدك الإلكتروني (مطلوب)" className="w-full p-3 rounded-lg bg-white/5 border border-white/10 placeholder:text-gray-500 focus:ring-[#fbbf24] focus:border-[#fbbf24] transition" />
+                  <input required value={contactData.subject} onChange={(e) => setContactData({ ...contactData, subject: e.target.value })} placeholder="الموضوع" className="w-full p-3 rounded-lg bg-white/5 border border-white/10 placeholder:text-gray-500 focus:ring-[#fbbf24] focus:border-[#fbbf24] transition" />
+                  <textarea required value={contactData.message} onChange={(e) => setContactData({ ...contactData, message: e.target.value })} placeholder="كيف يمكننا مساعدتك بالتحديد؟" rows={5} className="w-full p-3 rounded-lg bg-white/5 border border-white/10 placeholder:text-gray-500 focus:ring-[#fbbf24] focus:border-[#fbbf24] transition" />
+                  
+                  <div className="flex items-center justify-end gap-3 pt-2">
+                    <button type="button" onClick={() => { setShowContact(false); setSent(false); }} className="px-5 py-2 rounded-xl border border-gray-600 text-white hover:bg-gray-800 transition">إلغاء</button>
+                    <button type="submit" className="px-6 py-3 rounded-xl bg-[#fbbf24] text-black font-bold hover:bg-[#ffc94e] transition">إرسال الرسالة</button>
                   </div>
                 </form>
               )}
@@ -201,14 +209,14 @@ export default function HelpCenter() {
         )}
 
         {/* Footer quick links */}
-        <footer className="mt-12 text-center text-sm text-gray-400">
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <a href="/terms" className="underline">Terms</a>
-            <a href="/privacy" className="underline">Privacy</a>
-            <a href="/cookies" className="underline">Cookies</a>
-            <a href="/contact" className="underline">Contact</a>
+        <footer className="mt-16 text-center text-sm text-gray-600">
+          <div className="flex flex-wrap items-center justify-center gap-6">
+            <a href="/Pages/Terms" className="hover:text-[#fbbf24] transition">شروط الخدمة</a>
+            <a href="/Pages/Privacy" className="hover:text-[#fbbf24] transition">سياسة الخصوصية</a>
+            <a href="/Pages/Cookies" className="hover:text-[#fbbf24] transition">سياسة الكوكيز</a>
+            <a href="/Pages/Contact" className="hover:text-[#fbbf24] transition">معلومات الاتصال</a>
           </div>
-          <div className="mt-4">Last updated: Oct 19, 2025</div>
+          <div className="mt-4">آخر تحديث: أكتوبر 20, 2025</div>
         </footer>
       </div>
     </div>

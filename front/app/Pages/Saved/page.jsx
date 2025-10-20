@@ -14,6 +14,7 @@ import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
 import Image from 'next/image'
 import { usePost } from '@/app/Context/PostContext'
 import SavedPageSkeleton from '@/app/Skeletons/SavedSkeleton'
+import { useTranslation } from 'react-i18next'
 
 /*
   SavedPage.Dark.jsx - تصميم احترافي ومحسن
@@ -44,7 +45,7 @@ export default function SavedPage() {
   const {posts, isLoading: postsLoading} = usePost()
   // 2. استخدام المشغل الموسيقي العالمي
   const { current, playing, play, pause, setTrack, setSongs,expanded, setExpanded } = useMusicPlayer()  
-
+  const {t} = useTranslation()
   // reel modal
   const [openReel, setOpenReel] = useState(null)
   const {combinedPosts} =  useProfilePosts()
@@ -100,13 +101,13 @@ export default function SavedPage() {
           
           {/* العنوان الرئيسي */}
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold flex items-center gap-4">
+            <h1 className="text-2xl md:text-3xl font-extrabold flex items-center gap-4">
               <span className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-xl shadow-indigo-500/30"> 
                 <FaBookmark />
               </span>
-              {"Saved Items"}
+              {t("Saved Items")}
             </h1>
-            <p className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mt-2">All your saved posts, music and reels in one place.</p>
+            <p className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mt-2">{t("All your saved posts, music and reels in one place.")}</p>
           </div>
 
           {/* شريط البحث والتبويبات للشاشات الكبيرة */}
@@ -117,7 +118,7 @@ export default function SavedPage() {
                 <input 
                     value={query} 
                     onChange={(e) => setQuery(e.target.value)} 
-                    placeholder="Search saved content..." 
+                    placeholder={t("Search saved content..." )}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-lightMode-fg/5 dark:bg-white/5 border border-lightMode-fg/10 dark:border-white/10 placeholder:text-lightMode-text2 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition shadow-inner dark:shadow-none" 
                 />
                 <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-lightMode-text2 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -135,9 +136,9 @@ export default function SavedPage() {
                       : 'text-lightMode-text2 dark:text-darkMode-text2 hover:bg-white/10'
                   }`}
                 >
-                  {tab === 'posts' && <span className="inline-flex items-center gap-2"> <FaRegImage /> Posts</span>}
-                  {tab === 'music' && <span className="inline-flex items-center gap-2"> <FaMusic /> Music</span>}
-                  {tab === 'reels' && <span className="inline-flex items-center gap-2"> <FaPlay /> Reels</span>}
+                  {tab === 'posts' && <span className="inline-flex items-center gap-2"> <FaRegImage /> {t("Posts")}</span>}
+                  {tab === 'music' && <span className="inline-flex items-center gap-2"> <FaMusic /> {t("Music")}</span>}
+                  {tab === 'reels' && <span className="inline-flex items-center gap-2"> <FaPlay /> {t("Reels")}</span>}
                 </button>
               ))}
             </div>
@@ -150,7 +151,7 @@ export default function SavedPage() {
         <div className="flex md:hidden gap-3 mb-8">
           {tabs.map(tab => (
             <button key={tab} onClick={() => setActive(tab)} className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${active === tab ? 'bg-gradient-to-r from-indigo-600 to-cyan-500 text-white shadow-md' : 'bg-white/5 text-lightMode-text dark:text-darkMode-text2 border border-white/5'}`}>
-              {tab}
+              {t(tab)}
             </button>
           ))}
         </div>
@@ -205,10 +206,7 @@ export default function SavedPage() {
                               : 'bg-gradient-to-br from-indigo-600 to-cyan-500 text-black shadow-xl shadow-indigo-500/30'
                           }`}
                           // منع انتشار النقر لمنع استدعاء handleMusicAction مرتين
-                          onClick={(e) => {
-                            e.stopPropagation(); handleMusicAction(track); 
-                            isPlayingThis ? setExpanded(false) : setExpanded(true);
-                          }} 
+                          onClick={(e) => {e.stopPropagation(); handleMusicAction(track)}} 
                         >
                           {isPlayingThis ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5 ml-0.5" />}
                         </button>
@@ -273,7 +271,7 @@ export default function SavedPage() {
               <video src={openReel.video} controls className="w-full rounded-xl shadow-xl" />
               <div className="mt-4">
                 <div className="font-semibold text-xl">{openReel.title}</div>
-                <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mt-1">Saved reel — {openReel.id}</div>
+                <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mt-1">{t("Saved reel —")} {openReel.id}</div>
               </div>
             </motion.div>
           </div>
@@ -288,9 +286,9 @@ function EmptyState() {
   return (
     <div className="col-span-full p-16 rounded-3xl bg-white/3 border border-white/6 text-center shadow-inner">
       <div className="text-5xl mb-4">✨</div>
-      <div className="font-bold text-xl mb-2">No saved items yet</div>
-      <div className="text-md text-lightMode-text2 dark:text-darkMode-text2 mb-6">Save posts, tracks and reels to find them quickly later.</div>
-      <button className="px-6 py-2.5 rounded-xl bg-gradient-to-br from-indigo-600 to-cyan-500 text-black font-semibold shadow-lg hover:shadow-xl transition">Explore Content</button>
+      <div className="font-bold text-xl mb-2">{t("No saved items yet")}</div>
+      <div className="text-md text-lightMode-text2 dark:text-darkMode-text2 mb-6">{t("Save posts, tracks and reels to find them quickly later.")}</div>
+      <button className="px-6 py-2.5 rounded-xl bg-gradient-to-br from-indigo-600 to-cyan-500 text-black font-semibold shadow-lg hover:shadow-xl transition">{t("Explore Content")}</button>
     </div>
   )
 }
