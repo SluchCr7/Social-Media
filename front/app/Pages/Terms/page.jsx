@@ -1,13 +1,7 @@
 'use client';
-import { generateMeta } from '@/app/utils/MetaDataHelper';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-// ملاحظة: يجب تعديل دالة generateMeta في ملف MetaDataHelper لتنعكس هذه التغييرات
-export const metadata = generateMeta({
-  title: 'Terms of Service | [اسم التطبيق]',
-  description: 'القواعد والشروط التي تحكم استخدام منصتنا لوسائل التواصل الاجتماعي. يرجى القراءة بعناية.',
-});
 
 const TermsOfServicePage = () => {
   const { t } = useTranslation();
