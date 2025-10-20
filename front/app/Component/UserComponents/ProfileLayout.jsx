@@ -10,6 +10,7 @@ import Tabs from "./Tabs"
 import TabsContent from "./TabsContent"
 import FilterBar from "./FilterBar"
 import Image from "next/image"
+import PostSkeleton from "@/app/Skeletons/PostSkeleton"
 
 const ProfileLayout = ({
   user,
@@ -94,7 +95,9 @@ const ProfileLayout = ({
 
             {userHasMore && (
               <div ref={loaderRef} className="flex justify-center py-6">
-                <span className="text-gray-500">Loading more...</span>
+                <span className="text-gray-500">
+                  <PostSkeleton className="animate-pulse" />
+                </span>
               </div>
             )}
           </motion.div>
