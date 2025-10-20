@@ -12,7 +12,6 @@ import Security from './Tabs/Security'
 import AccountTab from './Tabs/AccountTab'
 import LanguageTab from './Tabs/LanguageTab'
 import HistoryTab from './Tabs/HistoryTab'
-import UpdateProfile from '@/app/Component/AddandUpdateMenus/UpdateProfile'
 
 export default function SettingsView({
   user = {},

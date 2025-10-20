@@ -117,43 +117,6 @@ export const MusicPlayerProvider = ({ children }) => {
     }
     
   }, [current, play]) // يعتمد على current و play (التي هي نفسها useCallback)
-
-
-  // 🎧 أحداث الصوت والتحكم بالتكرار
-  const onEnd = useCallback(() => {
-    setPlaying(false) 
-    
-    if (repeatMode === 'one') {
-      // إعادة تشغيل المقطع فوراً
-      if (audioRef.current) audioRef.current.currentTime = 0;
-      play(true); 
-    } else {
-      next(); // الانتقال للمقطع التالي
-    }
-  }, [repeatMode, next, play])
-
-  useEffect(() => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    const onTime = () => setProgress(audio.currentTime)
-    const onLoaded = () => setDuration(audio.duration)
-    
-    // ربط المستمعين
-    audio.addEventListener('timeupdate', onTime)
-    audio.addEventListener('loadedmetadata', onLoaded)
-    audio.addEventListener('ended', onEnd)
-    
-    // ملاحظة: تم نقل تسجيل الاستماع إلى دالة 'play' نفسها للتعامل مع التشغيل الناجح.
-
-    return () => {
-      // إزالة المستمعين
-      audio.removeEventListener('timeupdate', onTime)
-      audio.removeEventListener('loadedmetadata', onLoaded)
-      audio.removeEventListener('ended', onEnd)
-    }
-  }, [onEnd]) // التبعيات: فقط onEnd لأنها تستخدم next و repeatMode
-
   // 🎧 السابق
   const prev = useCallback(() => {
     if (!songs.length) return
@@ -195,6 +158,43 @@ export const MusicPlayerProvider = ({ children }) => {
     }
     setTrack(songs[nextIndex], nextIndex)
   }, [songs, currentIndex, shuffle, repeatMode, setTrack, playing]) // أضف playing كتبعية
+
+
+  // 🎧 أحداث الصوت والتحكم بالتكرار
+  const onEnd = useCallback(() => {
+    setPlaying(false) 
+    
+    if (repeatMode === 'one') {
+      // إعادة تشغيل المقطع فوراً
+      if (audioRef.current) audioRef.current.currentTime = 0;
+      play(true); 
+    } else {
+      next(); // الانتقال للمقطع التالي
+    }
+  }, [repeatMode, next, play])
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const onTime = () => setProgress(audio.currentTime)
+    const onLoaded = () => setDuration(audio.duration)
+    
+    // ربط المستمعين
+    audio.addEventListener('timeupdate', onTime)
+    audio.addEventListener('loadedmetadata', onLoaded)
+    audio.addEventListener('ended', onEnd)
+    
+    // ملاحظة: تم نقل تسجيل الاستماع إلى دالة 'play' نفسها للتعامل مع التشغيل الناجح.
+
+    return () => {
+      // إزالة المستمعين
+      audio.removeEventListener('timeupdate', onTime)
+      audio.removeEventListener('loadedmetadata', onLoaded)
+      audio.removeEventListener('ended', onEnd)
+    }
+  }, [onEnd]) // التبعيات: فقط onEnd لأنها تستخدم next و repeatMode
+
 
 
   // ⏱️ التقدم (Seek)
