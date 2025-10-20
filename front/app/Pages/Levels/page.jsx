@@ -20,22 +20,23 @@ import {
 import { useTranslation } from 'react-i18next'
 
 const LEVELS = [
-  { name: 'Junior', min: 0, max: 1999, color: 'from-violet-600 to-indigo-500', icon: <FaUserGraduate className="text-4xl" /> },
-  { name: 'Challenger', min: 2000, max: 3999, color: 'from-blue-500 to-cyan-400', icon: <FaMedal className="text-4xl" /> },
-  { name: 'Warrior', min: 4000, max: 6999, color: 'from-orange-400 to-yellow-400', icon: <FaFireAlt className="text-4xl" /> },
-  { name: 'Elite', min: 7000, max: 9999, color: 'from-teal-400 to-green-400', icon: <FaStar className="text-4xl" /> },
-  { name: 'Master', min: 10000, max: 14999, color: 'from-indigo-600 to-purple-600', icon: <FaTrophy className="text-4xl" /> },
-  { name: 'Legend', min: 15000, max: Infinity, color: 'from-yellow-400 to-amber-500', icon: <FaCrown className="text-4xl" /> }
+  { name: 'Junior', min: 0, max: 1999, color: 'from-violet-600 to-indigo-500', icon: FaUserGraduate },
+  { name: 'Challenger', min: 2000, max: 3999, color: 'from-blue-500 to-cyan-400', icon: FaMedal },
+  { name: 'Warrior', min: 4000, max: 6999, color: 'from-orange-400 to-yellow-400', icon: FaFireAlt },
+  { name: 'Elite', min: 7000, max: 9999, color: 'from-teal-400 to-green-400', icon: FaStar },
+  { name: 'Master', min: 10000, max: 14999, color: 'from-indigo-600 to-purple-600', icon: FaTrophy },
+  { name: 'Legend', min: 15000, max: Infinity, color: 'from-yellow-400 to-amber-500', icon: FaCrown },
 ]
 
 const EARN_METHODS = [
-  { icon: <FaThumbsUp />, text: 'Like a post', points: 5 },
-  { icon: <FaCommentDots />, text: 'Comment on a post', points: 10 },
-  { icon: <FaShareAlt />, text: 'Share a post', points: 20 },
-  { icon: <FaPenNib />, text: 'Create a post', points: 50 },
-  { icon: <FaUserPlus />, text: 'Gain a follower', points: 15 },
-  { icon: <FaCalendarCheck />, text: 'Daily login', points: 25 }
+  { icon: FaThumbsUp, text: 'Like a post', points: 5 },
+  { icon: FaCommentDots, text: 'Comment on a post', points: 10 },
+  { icon: FaShareAlt, text: 'Share a post', points: 20 },
+  { icon: FaPenNib, text: 'Create a post', points: 50 },
+  { icon: FaUserPlus, text: 'Gain a follower', points: 15 },
+  { icon: FaCalendarCheck, text: 'Daily login', points: 25 },
 ]
+
 
 function formatPoints(num) {
   return num.toLocaleString()
@@ -118,7 +119,7 @@ export default function LevelsPage({ currentPoints = 3625 }) {
                     <motion.div key={lvl.name} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.06 }} className={`relative p-5 rounded-2xl border border-white/6 backdrop-blur-md overflow-hidden flex items-center gap-6 ${isCurrent ? 'ring-2 ring-cyan-400/40' : ''}`}>
 
                       <div className={`flex-shrink-0 w-20 h-20 rounded-xl flex items-center justify-center bg-gradient-to-br ${lvl.color} shadow-2xl transform transition-transform group-hover:scale-105`}>
-                        {lvl.icon}
+                        {React.createElement(lvl.icon, { className: 'text-4xl' })}
                       </div>
 
                       <div className="flex-1">
@@ -173,7 +174,7 @@ export default function LevelsPage({ currentPoints = 3625 }) {
                   {EARN_METHODS.map((m, i) => (
                     <motion.div key={i} initial={{ opacity: 0, x: 8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="flex items-center justify-between gap-4 p-3 rounded-lg bg-white/3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-white/6 flex items-center justify-center">{m.icon}</div>
+                        <div className="w-10 h-10 rounded-lg bg-white/6 flex items-center justify-center">{React.createElement(m.icon, { className: 'text-lg' })}</div>
                         <div>
                           <div className="text-sm font-medium">{t(m.text)}</div>
                           <div className="text-xs text-gray-400">{m.points} XP</div>
