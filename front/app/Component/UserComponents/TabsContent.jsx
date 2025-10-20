@@ -63,16 +63,6 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
           </motion.div>
         )}
 
-        {activeTab === 'Saved' && (
-          <motion.div key="saved" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-full">
-            {filteredPosts?.filter((p) => p.saved.includes(userSelected?._id)).length > 0
-              ? filteredPosts
-                  .filter((p) => p.saved.includes(userSelected?._id))
-                  .map((post) => <SluchitEntry key={post?._id} post={post} />)
-              : <div className="text-center text-gray-500 py-10">{t("You haven’t saved any posts yet.")}</div>
-            }
-          </motion.div>
-        )}
 
         {activeTab === 'Comments' && (
           <motion.div key="comments" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-4 w-full">

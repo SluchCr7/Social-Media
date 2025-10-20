@@ -1,7 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 
-const tabs = ['Posts', 'Saved', 'Comments', 'Reels', 'Photos', 'Music']
+const tabs = ['Posts', 'Comments', 'Reels', 'Photos', 'Music']
 
 const Tabs = ({ activeTab, setActiveTab }) => (
   <div className="mt-6 border-b w-full border-gray-200 dark:border-gray-700 overflow-x-auto scrollbar-hide">

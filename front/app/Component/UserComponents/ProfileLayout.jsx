@@ -92,11 +92,11 @@ const ProfileLayout = ({
               filters={filters}
             />
 
-            {/* {userHasMore && (
+            {userHasMore && (
               <div ref={loaderRef} className="flex justify-center py-6">
                 <span className="text-gray-500">Loading more...</span>
               </div>
-            )} */}
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
