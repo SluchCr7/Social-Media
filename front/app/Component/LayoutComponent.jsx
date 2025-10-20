@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import '../i18n'; // ✅ هذا السطر يجعل الترجمة تعمل فقط على الـ Client
+import '../i18n'; 
 import Aside from './Aside/Aside';
 import Menu from './Menus/Menu';
 import { usePathname } from 'next/navigation';

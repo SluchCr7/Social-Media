@@ -28,8 +28,6 @@ import { UserAdminContextProvider } from "./Context/UserAdminContext";
 import { VerifyContextProvider } from "./Context/VerifyContext";
 import { AdminContextProvider } from "./Context/AdminContext";
 
-// import i18n (needs to be bundled ;)) 
-import './i18n';
 
 // 🟢 استيراد الخط الإنجليزي
 const jetBrainsMono = JetBrains_Mono({
