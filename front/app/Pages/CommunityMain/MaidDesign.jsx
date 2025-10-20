@@ -1,3 +1,4 @@
+'use client';
 import React from 'react'
 import { FaPlus, FaUsers } from 'react-icons/fa'
 import { motion } from 'framer-motion'

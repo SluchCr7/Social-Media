@@ -1,3 +1,4 @@
+'use client'
 import LoginHistoryTimeline from '@/app/Component/Setting/LoginHistoryTimeline'
 import React from 'react'
 import { motion } from 'framer-motion'

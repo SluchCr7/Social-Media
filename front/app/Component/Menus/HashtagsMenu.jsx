@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import { usePost } from '../../Context/PostContext';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';

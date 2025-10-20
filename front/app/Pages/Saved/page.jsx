@@ -1,11 +1,7 @@
 'use client'
-
 import React, { useMemo, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { FaBookmark, FaMusic, FaRegImage, FaPlay, FaPause, FaTimes, FaShareAlt, FaHeart } from 'react-icons/fa'
-// 1. استيراد useMusicPlayer من المشغل العالمي
-
-// استيرادات المكتبات المحلية
 import { useProfilePosts } from '@/app/Custome/useProfilePosts'
 import SluchitEntry from '@/app/Component/SluchitEntry'
 import { useAuth } from '@/app/Context/AuthContext'
@@ -15,7 +11,6 @@ import Image from 'next/image'
 import { usePost } from '@/app/Context/PostContext'
 import SavedPageSkeleton from '@/app/Skeletons/SavedSkeleton'
 import { useTranslation } from 'react-i18next'
-
 /*
   SavedPage.Dark.jsx - تصميم احترافي ومحسن
 */

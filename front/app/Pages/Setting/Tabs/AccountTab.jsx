@@ -1,3 +1,4 @@
+'use client'
 import ToggleSwitch from '@/app/Component/Setting/ToggleSwitch';
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'

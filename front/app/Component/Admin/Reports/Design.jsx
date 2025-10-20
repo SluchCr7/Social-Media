@@ -1,3 +1,4 @@
+'use client';
 import ConfirmModal from '@/app/Component/ReportsComponents/ConfirmModal'
 import ReportsTable from '@/app/Component/ReportsComponents/ReportsTable'
 import React from 'react'

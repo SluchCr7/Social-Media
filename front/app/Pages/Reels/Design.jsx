@@ -1,3 +1,4 @@
+'use client';
 import React from 'react'
 import ReelCard from '../../Component/ReelCard';
 import ReelSkeleton from '../../Skeletons/ReelSkeleton';

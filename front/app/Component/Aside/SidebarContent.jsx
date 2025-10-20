@@ -1,3 +1,4 @@
+'use client';
 import React, { useEffect } from 'react'
 import { navSections } from '../../utils/Data'
 import Link from 'next/link'

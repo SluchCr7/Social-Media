@@ -4,11 +4,7 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
-
 const Loader = () => {
-
-
-
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden">
       

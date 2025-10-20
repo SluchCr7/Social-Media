@@ -1,3 +1,4 @@
+'use client';
 import React from 'react'
 import SongItem from './SongItem'
 import { useTranslation } from 'react-i18next'

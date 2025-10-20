@@ -1,8 +1,5 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/app/Context/AuthContext';
-import { generateMeta } from '@/app/utils/MetaDataHelper';
-import { useUser } from '@/app/Context/UserContext';
 import { useVerify } from '@/app/Context/VerifyContext';
 
 

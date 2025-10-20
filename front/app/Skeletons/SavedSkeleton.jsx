@@ -1,11 +1,6 @@
-// SavedPageSkeleton.jsx
 
 import React from 'react';
 import { FaBookmark, FaRegImage, FaMusic, FaPlay } from 'react-icons/fa';
-
-// -----------------------------------------------------
-// 1. الهيكل الأساسي المعزز (Enhanced Base Skeleton)
-// -----------------------------------------------------
 
 /**
  * مكون الهيكل الأساسي (Skeleton)

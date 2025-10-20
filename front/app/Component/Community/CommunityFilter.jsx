@@ -1,3 +1,4 @@
+'use client';
 import { SORT_OPTIONS } from '@/app/utils/Data'
 import React from 'react'
 import { motion } from 'framer-motion'

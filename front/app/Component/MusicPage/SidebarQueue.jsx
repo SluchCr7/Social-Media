@@ -1,3 +1,4 @@
+'use client';
 import React from 'react'
 import { formatTime } from '@/app/utils/formatTime'
 import Image from 'next/image'

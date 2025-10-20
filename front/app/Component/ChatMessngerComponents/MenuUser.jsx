@@ -1,3 +1,4 @@
+'use client';
 import { Settings, UserCheck, Users2 } from 'lucide-react';
 import React from 'react'
 import { motion } from 'framer-motion';

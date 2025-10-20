@@ -1,3 +1,4 @@
+'use client';
 import React from 'react'
 import SluchitEntry from '@/app/Component/SluchitEntry'
 import Image from 'next/image'
