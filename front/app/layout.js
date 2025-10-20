@@ -27,6 +27,7 @@ import { UserContextProvider } from "./Context/UserContext";
 import { UserAdminContextProvider } from "./Context/UserAdminContext";
 import { VerifyContextProvider } from "./Context/VerifyContext";
 import { AdminContextProvider } from "./Context/AdminContext";
+import I18nProvider from "./providers/I18nProvider.jsx";
 
 
 // 🟢 استيراد الخط الإنجليزي
@@ -58,53 +59,55 @@ export default function RootLayout({ children }) {
       <body
         className={`antialiased bg-lightMode-bg dark:bg-darkMode-bg transition-all duration-500`}
       >
-        <AlertContextProvider>
-          <AuthContextProvider>
-            <SocketProvider>
-              <UserContextProvider>
-                <VerifyContextProvider>
-                  <UserAdminContextProvider>
-                    <NotifyContextProvider>
-                      <MessageContextProvider>
-                        <PostContextProvider>
-                          <CommentContextProvider>
-                            <CommunityContextProvider>
-                              <StoryContextProvider>
-                                <NewsContextProvider>
-                                  <ReportContextProvider>
-                                    <ReelsProvider>
-                                      <EventProvider>
-                                        <MusicProvider>
-                                          <MusicPlayerProvider>
-                                            <ThemeContextProvider>
-                                              <TranslateContextProvider>
-                                                <AsideContextProvider>
-                                                  <AdminContextProvider>
-                                                    <LayoutComponent>
-                                                      {children}
-                                                    </LayoutComponent>
-                                                  </AdminContextProvider>
-                                                </AsideContextProvider>
-                                              </TranslateContextProvider>
-                                            </ThemeContextProvider>
-                                          </MusicPlayerProvider>
-                                        </MusicProvider>
-                                      </EventProvider>
-                                    </ReelsProvider>
-                                  </ReportContextProvider>
-                                </NewsContextProvider>
-                              </StoryContextProvider>
-                            </CommunityContextProvider>
-                          </CommentContextProvider>
-                        </PostContextProvider>
-                      </MessageContextProvider>
-                    </NotifyContextProvider>
-                  </UserAdminContextProvider>
-                </VerifyContextProvider>
-              </UserContextProvider>
-            </SocketProvider>
-          </AuthContextProvider>
-        </AlertContextProvider>
+        <I18nProvider>
+          <AlertContextProvider>
+            <AuthContextProvider>
+              <SocketProvider>
+                <UserContextProvider>
+                  <VerifyContextProvider>
+                    <UserAdminContextProvider>
+                      <NotifyContextProvider>
+                        <MessageContextProvider>
+                          <PostContextProvider>
+                            <CommentContextProvider>
+                              <CommunityContextProvider>
+                                <StoryContextProvider>
+                                  <NewsContextProvider>
+                                    <ReportContextProvider>
+                                      <ReelsProvider>
+                                        <EventProvider>
+                                          <MusicProvider>
+                                            <MusicPlayerProvider>
+                                              <ThemeContextProvider>
+                                                <TranslateContextProvider>
+                                                  <AsideContextProvider>
+                                                    <AdminContextProvider>
+                                                      <LayoutComponent>
+                                                        {children}
+                                                      </LayoutComponent>
+                                                    </AdminContextProvider>
+                                                  </AsideContextProvider>
+                                                </TranslateContextProvider>
+                                              </ThemeContextProvider>
+                                            </MusicPlayerProvider>
+                                          </MusicProvider>
+                                        </EventProvider>
+                                      </ReelsProvider>
+                                    </ReportContextProvider>
+                                  </NewsContextProvider>
+                                </StoryContextProvider>
+                              </CommunityContextProvider>
+                            </CommentContextProvider>
+                          </PostContextProvider>
+                        </MessageContextProvider>
+                      </NotifyContextProvider>
+                    </UserAdminContextProvider>
+                  </VerifyContextProvider>
+                </UserContextProvider>
+              </SocketProvider>
+            </AuthContextProvider>
+          </AlertContextProvider>
+        </I18nProvider>
       </body>
     </html>
   );
