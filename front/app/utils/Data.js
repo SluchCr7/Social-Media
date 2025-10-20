@@ -1,5 +1,6 @@
 import { GoHome, GoSearch } from "react-icons/go"
-
+import { CgProfile } from "react-icons/cg";
+import { MdOutlinePaid } from "react-icons/md";
 import { CiUser, CiSettings, CiChat1 } from "react-icons/ci"
 import { SiGoogledisplayandvideo360 } from "react-icons/si"
 import { FaPlus } from "react-icons/fa6"
@@ -162,7 +163,7 @@ export const iso6391Map = {
     heb: "he",
     msa: "ms",
 };
-  
+
 
 export const TABS = [
   { id: 'appearance', label: 'Appearance', icon: <FaSun /> },
@@ -171,6 +172,9 @@ export const TABS = [
   { id: 'language', label: 'Language', icon: <MdLanguage /> },
   { id: 'history', label: 'Login History', icon: <FaHistory /> },
   { id: 'account', label: 'Account', icon: <FaUserCog /> },
+  { id: 'profile', label: 'Profile', icon: <CgProfile />,view : false },
+  { id: 'billing', label: 'Billing', icon: <MdOutlinePaid />,view : false},
+  { id: 'notification', label: 'Notifications', icon: <MdOutlinePaid />,view : false},
 ]
 
 export const DEFAULT_COLORS = [

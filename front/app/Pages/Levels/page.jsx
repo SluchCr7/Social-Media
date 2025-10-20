@@ -18,6 +18,8 @@ import {
   FaChevronRight,
 } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
+import { useGetData } from '@/app/Custome/useGetData'
+import { useAuth } from '@/app/Context/AuthContext'
 
 const LEVELS = [
   { name: 'Junior', min: 0, max: 1999, color: 'from-indigo-500 to-indigo-700', icon: FaUserGraduate },
@@ -41,20 +43,54 @@ function formatPoints(num) {
   return num.toLocaleString()
 }
 
-function getCurrentLevel(points) {
-  return LEVELS.find((l) => points >= l.min && points <= (l.max === Infinity ? Infinity : l.max)) || LEVELS[0]
+// تم تعديل هذه الدالة لتحديد المستوى بناءً على اسم المستوى المحفوظ في قاعدة البيانات
+function getCurrentLevel(levelName) {
+    return LEVELS.find((l) => l.name === levelName) || LEVELS[0]
 }
 
-export default function LevelsPage({ currentPoints = 3625 }) {
+export default function LevelsPage() {
   const { t } = useTranslation()
-  const currentLevel = useMemo(() => getCurrentLevel(currentPoints), [currentPoints])
+  const { user } = useAuth()
+  // افتراض أن userData يحتوي على الخصائص المطلوبة
+  const { userData } = useGetData(user?._id)
+
+  // تحديد النقاط والمستوى الحالي من بيانات المستخدم
+  const currentPoints = userData?.userLevelPoints || 0
+  const userLevelRank = userData?.userLevelRank || LEVELS[0].name
+  const nextLevelPoints = userData?.nextLevelPoints || LEVELS[1].min
+
+  const currentLevel = useMemo(() => getCurrentLevel(userLevelRank), [userLevelRank])
 
   const progressToNext = useMemo(() => {
-    if (currentLevel.max === Infinity) return 100
-    const range = currentLevel.max - currentLevel.min
-    const currentInRange = Math.max(0, Math.min(currentPoints - currentLevel.min, range))
+    if (currentLevel.max === Infinity) return 100 // إذا كان المستوى الحالي هو Legend
+    
+    // الحد الأدنى للمستوى الحالي
+    const currentMin = currentLevel.min
+    // الحد الأقصى للمستوى الحالي، وهو ما يُفترض أن يكون nextLevelPoints في السكيما لغير مستوى Legend
+    const currentMax = nextLevelPoints 
+
+    // إذا كانت النقاط الحالية أقل من الحد الأدنى للمستوى، نعيد 0 (حالة غير متوقعة إذا كانت البيانات صحيحة)
+    if (currentPoints < currentMin) return 0
+    
+    // حساب المدى الكلي للنقاط في المستوى الحالي
+    const range = currentMax - currentMin
+    
+    // إذا كان المدى صفرًا (مثل 0 - 0) لتجنب القسمة على صفر، نعيد 100
+    if (range <= 0) return 100
+
+    // النقاط التي تم كسبها في هذا المستوى
+    const currentInRange = Math.max(0, currentPoints - currentMin)
+    
+    // حساب النسبة المئوية
     return Math.round((currentInRange / range) * 100)
-  }, [currentLevel, currentPoints])
+  }, [currentLevel, currentPoints, nextLevelPoints])
+  
+  // لتبسيط عرض المستوى التالي، نجد المستوى التالي في مصفوفة LEVELS
+  const nextLevelIndex = LEVELS.findIndex(l => l.name === currentLevel.name) + 1
+  const nextLevel = nextLevelIndex < LEVELS.length ? LEVELS[nextLevelIndex] : null
+  const requiredPointsForNextLevel = nextLevel ? nextLevel.min : currentPoints
+  const pointsRemaining = nextLevel ? Math.max(0, requiredPointsForNextLevel - currentPoints) : 0
+
 
   return (
     <div className="min-h-screen bg-black text-white antialiased">
@@ -82,6 +118,7 @@ export default function LevelsPage({ currentPoints = 3625 }) {
           <div className="flex items-center gap-4">
             <div className="text-right">
               <div className="text-sm text-gray-400">{t('Current Points')}</div>
+              {/* استخدام النقاط الديناميكية */}
               <div className="text-2xl font-semibold text-amber-400">{formatPoints(currentPoints)} XP</div>
             </div>
 
@@ -97,7 +134,8 @@ export default function LevelsPage({ currentPoints = 3625 }) {
           <section className="lg:col-span-2">
             <div className="bg-gradient-to-b from-gray-900/50 to-gray-800/50 border border-gray-700 backdrop-blur-md rounded-3xl p-6 shadow-2xl">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-amber-400">{t('Your Levels')}</h2>
+                {/* عرض المستوى الحالي */}
+                <h2 className="text-lg font-bold text-amber-400">{t('Your Level:')} {t(currentLevel.name)}</h2>
                 <div className="text-sm text-gray-300">{t('Progress:')} {progressToNext}%</div>
               </div>
 
@@ -105,17 +143,31 @@ export default function LevelsPage({ currentPoints = 3625 }) {
               <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden mb-6">
                 <motion.div
                   initial={{ width: 0 }}
+                  // استخدام النسبة المئوية المحسوبة ديناميكياً
                   animate={{ width: `${progressToNext}%` }}
                   transition={{ duration: 0.8 }}
                   className="h-3 bg-gradient-to-r from-indigo-500 to-cyan-400"
                 />
               </div>
+              
+              {/* رسالة النقاط المتبقية للمستوى التالي */}
+              {nextLevel && (
+                  <div className="text-center text-sm text-gray-300 mb-6">
+                    {t('You need')} <strong className="text-cyan-400">{formatPoints(pointsRemaining)} XP</strong> {t('to reach')} <strong className="text-amber-400">{t(nextLevel.name)}</strong>
+                  </div>
+              )}
+
 
               {/* Level Cards */}
               <div className="space-y-6">
                 {LEVELS.map((lvl, idx) => {
+                  // تحديد حالة البطاقة بناءً على المستوى الديناميكي
                   const isCurrent = currentLevel.name === lvl.name
-                  const completed = currentPoints >= lvl.max && lvl.max !== Infinity
+                  const completed = currentPoints >= (lvl.max === Infinity ? Infinity : lvl.max + 1) && !isCurrent
+                  
+                  // ملاحظة: تم تعديل شرط completed قليلاً ليتوافق مع طريقة تحديد المستوى في الدالة getCurrentLevel
+                  // ولكن الاعتماد الأساسي هو على userLevelRank من السكيما.
+
                   return (
                     <motion.div
                       key={lvl.name}
@@ -161,6 +213,7 @@ export default function LevelsPage({ currentPoints = 3625 }) {
                             <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
                               <motion.div
                                 initial={{ width: 0 }}
+                                // استخدام النسبة المئوية المحسوبة ديناميكياً
                                 animate={{ width: `${progressToNext}%` }}
                                 transition={{ duration: 0.8 }}
                                 className="h-2 bg-gradient-to-r from-indigo-400 to-cyan-300"

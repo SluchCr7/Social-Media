@@ -1,20 +1,24 @@
 'use client'
 
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react'
-import { useMusic } from './MusicContext'
+import { useMusic } from './MusicContext' // افتراض أن هذا المسار صحيح
 
 const MusicPlayerContext = createContext()
 
 export const MusicPlayerProvider = ({ children }) => {
   const audioRef = useRef(null)
-  const { viewMusic, music } = useMusic() // 'viewMusic' هي دالة تسجيل الاستماع
-  const trackViewed = useRef(null) // لتتبع المقطع الذي تم تسجيل استماعه بالفعل
+  // 'viewMusic' هي دالة تسجيل الاستماع، 'music' هي قائمة المقاطع
+  const { viewMusic, music } = useMusic() 
+  // لتتبع الـ ID الذي تم تسجيل استماعه بالفعل (لمنع التكرار)
+  const trackViewed = useRef(null) 
+  // لتتبع ما إذا كان التشغيل مطلوبًا بعد تغيير المقطع (مهم لمقاومة منع التشغيل التلقائي)
+  const isPlaybackRequested = useRef(false);
 
   // ✨ الحالة الأولية (بدون تغيير كبير)
   const [songs, setSongs] = useState(music || [])
   const [current, setCurrent] = useState(music && music.length ? music[0] : null)
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [playing, setPlaying] = useState(false)
+  const [playing, setPlaying] = useState(false) // حالة التشغيل الفعلية
   const [progress, setProgress] = useState(0)
   const [duration, setDuration] = useState(0)
   const [volume, setVolume] = useState(0.9)
@@ -24,103 +28,158 @@ export const MusicPlayerProvider = ({ children }) => {
   const [expanded, setExpanded] = useState(false)
   const [viewMusicPlayer, setViewMusicPlayer] = useState(false)
 
-  // 1. تحديث songs و current عند تغير music
+  // 1. مزامنة songs و current مع 'music' الخارجية
   useEffect(() => {
     if (music && music.length) {
       setSongs(music)
-      // إذا لم يكن هناك مقطع قيد التشغيل بالفعل، ابدأ من الأول
-      if (!current) {
+      // إذا لم يكن هناك مقطع قيد التشغيل بالفعل أو كانت قائمة المقاطع الجديدة مختلفة
+      if (!current || !music.some(m => m._id === current._id)) {
         setCurrent(music[0])
         setCurrentIndex(0)
       }
+    } else if (!music?.length) {
+        setSongs([]);
+        setCurrent(null);
+        setCurrentIndex(0);
+        // لا داعي لإيقاف التشغيل هنا، useEffect التالي سيتعامل مع ذلك
     }
   }, [music, current])
 
-  // 2. تحديث src وضبط التشغيل التلقائي/اليدوي
-  useEffect(() => {
+  // ⏯️ دالة التشغيل (مع تحسين تسجيل الاستماع والتعامل مع أخطاء المتصفح)
+  const play = useCallback(async (isUserAction = false) => {
     const audio = audioRef.current
-    if (!audio || !current?.url) return
+    if (!audio || playing) return
 
-    // تحديث SRC فقط إذا كان مختلفًا
-    if (audio.src !== current.url) {
-        audio.src = current.url
-        audio.load()
-        trackViewed.current = null; // إعادة تعيين حالة المشاهدة عند تحميل مقطع جديد
+    // تسجيل أن المستخدم طلب التشغيل (مهم لـ useEffect التالي)
+    if (isUserAction) {
+        isPlaybackRequested.current = true;
     }
-    
-    // محاولة التشغيل التلقائي إذا كنا في وضع "تشغيل" سابق
-    if (playing) {
-        play();
-    }
-
-  }, [current]) // يجب أن تعتمد فقط على current
-
-  // ⏯️ التحكم في الصوت
-  const play = async (forcePlay = false) => {
-    const audio = audioRef.current
-    if (!audio || (!forcePlay && playing)) return
 
     try {
       await audio.play()
-      setPlaying(true)
-
-      // 🎶 تسجيل الاستماع بشكل احترافي
+      setPlaying(true) // تحديث الحالة عند بدء التشغيل بنجاح
+      
+      // 🎶 تسجيل الاستماع بشكل احترافي عند بدء التشغيل الفعلي
       if (current?._id && trackViewed.current !== current._id) {
+        // تأكد من عدم وجود تسجيل مسبق قبل الإرسال
         viewMusic(current._id)
         trackViewed.current = current._id // قم بتسجيل الـ ID لتجنب التكرار
-        console.log(`View recorded for track ID: ${current._id}`); // للتتبع
+        console.log(`View recorded for track ID: ${current._id}`);
       }
     } catch (err) {
       console.error('Play failed (Autoplay prevented?):', err)
-      // إذا فشل التشغيل التلقائي (وهو شائع في المتصفحات)، نضبط الحالة على True فقط لنحاول لاحقاً
-      setPlaying(true);
+      // إذا فشل التشغيل التلقائي، نقوم فقط بتحديث الحالة على أنها 'Playing'
+      // وندع المستخدم يضغط على الزر لإعادة المحاولة.
+      setPlaying(true); // نعتبره 'قيد التشغيل' ليتمكن زر التشغيل/الإيقاف المؤقت من العمل
+      // isPlaybackRequested ستبقى 'true'، مما سيجعلنا نحاول مجدداً في useEffect التالي.
     }
-  }
+  }, [playing, current, viewMusic])
 
   const pause = useCallback(() => {
-    if (!audioRef.current) return
+    if (!audioRef.current || !playing) return
     audioRef.current.pause()
     setPlaying(false)
-  }, [])
+    isPlaybackRequested.current = false; // إلغاء طلب التشغيل
+  }, [playing])
 
-  const togglePlay = () => (playing ? pause() : play(true)) // forcePlay عند الضغط اليدوي
+  const togglePlay = () => (playing ? pause() : play(true)) // isUserAction = true عند الضغط اليدوي
 
-  // 🔊 تغيير المقطع الحالي
+  // 🔊 تغيير المقطع الحالي (الخطوة 1: تحديث المقطع)
   const setTrack = useCallback((track, index = 0, allSongs = songs) => {
     if (!track) return
     setCurrent(track)
     setCurrentIndex(index)
     if (allSongs?.length) setSongs(allSongs)
-    // لا ندعو play() هنا، بل ندعوها في useEffect بعد تحديث current
-    // هذه هي الطريقة الأكثر احترافية للتعامل مع تحديث الـ SRC والتحميل
+    // لا ندعو play() هنا، بل نعتمد على useEffect 
   }, [songs])
 
+
+  // 2. تحديث src والتحميل (الخطوة 2: تغيير المصدر)
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio || !current?.url) return
+
+    // إذا كان المسار مختلفاً أو لم يكن هناك مسار محمل
+    if (audio.src !== current.url) {
+      // إيقاف التشغيل الحالي قبل تغيير المصدر
+      audio.pause();
+      audio.src = current.url
+      audio.load()
+      trackViewed.current = null; // إعادة تعيين حالة المشاهدة
+      setProgress(0); // إعادة تعيين شريط التقدم
+      setDuration(0); // إعادة تعيين المدة
+    }
+    
+    // إذا كان التشغيل مطلوبًا بعد تغيير المقطع (مثل الانتقال التلقائي أو اليدوي)
+    if (isPlaybackRequested.current) {
+        // نستخدم play(true) لنتأكد من أننا نطلب التشغيل
+        play(true);
+    }
+    
+  }, [current, play]) // يعتمد على current و play (التي هي نفسها useCallback)
+
+
+  // 🎧 أحداث الصوت والتحكم بالتكرار
+  const onEnd = useCallback(() => {
+    setPlaying(false) 
+    
+    if (repeatMode === 'one') {
+      // إعادة تشغيل المقطع فوراً
+      if (audioRef.current) audioRef.current.currentTime = 0;
+      play(true); 
+    } else {
+      next(); // الانتقال للمقطع التالي
+    }
+  }, [repeatMode, next, play])
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const onTime = () => setProgress(audio.currentTime)
+    const onLoaded = () => setDuration(audio.duration)
+    
+    // ربط المستمعين
+    audio.addEventListener('timeupdate', onTime)
+    audio.addEventListener('loadedmetadata', onLoaded)
+    audio.addEventListener('ended', onEnd)
+    
+    // ملاحظة: تم نقل تسجيل الاستماع إلى دالة 'play' نفسها للتعامل مع التشغيل الناجح.
+
+    return () => {
+      // إزالة المستمعين
+      audio.removeEventListener('timeupdate', onTime)
+      audio.removeEventListener('loadedmetadata', onLoaded)
+      audio.removeEventListener('ended', onEnd)
+    }
+  }, [onEnd]) // التبعيات: فقط onEnd لأنها تستخدم next و repeatMode
 
   // 🎧 السابق
   const prev = useCallback(() => {
     if (!songs.length) return
-    pause() // إيقاف التشغيل مؤقتاً لتغيير المقطع
+    isPlaybackRequested.current = playing; // حفظ حالة التشغيل المطلوبة
+
     if (shuffle) {
       let rand;
       do {
         rand = Math.floor(Math.random() * songs.length);
-      } while (rand === currentIndex && songs.length > 1); // تأكد من أنه ليس نفس المقطع
+      } while (rand === currentIndex && songs.length > 1); 
       return setTrack(songs[rand], rand)
     }
     const newIndex = (currentIndex - 1 + songs.length) % songs.length
     setTrack(songs[newIndex], newIndex)
-    play(true); // بدء التشغيل بعد تغيير المقطع
-  }, [songs, currentIndex, shuffle, setTrack, pause])
+  }, [songs, currentIndex, shuffle, setTrack, playing]) // أضف playing كتبعية
 
   // ⏭️ التالي
   const next = useCallback(() => {
     if (!songs.length) return
-    pause() // إيقاف التشغيل مؤقتاً لتغيير المقطع
+    isPlaybackRequested.current = playing; // حفظ حالة التشغيل المطلوبة
+
     if (shuffle) {
       let rand;
       do {
         rand = Math.floor(Math.random() * songs.length);
-      } while (rand === currentIndex && songs.length > 1); // تأكد من أنه ليس نفس المقطع
+      } while (rand === currentIndex && songs.length > 1); 
       return setTrack(songs[rand], rand)
     }
     let nextIndex = currentIndex + 1
@@ -128,62 +187,23 @@ export const MusicPlayerProvider = ({ children }) => {
       if (repeatMode === 'all') nextIndex = 0
       else {
         // إذا انتهت القائمة وليس هناك تكرار للكل
-        setPlaying(false); // تأكيد إيقاف الحالة
+        setPlaying(false); 
+        isPlaybackRequested.current = false;
+        // setTrack(songs[currentIndex], currentIndex); // البقاء على المقطع الأخير
         return; 
       }
     }
     setTrack(songs[nextIndex], nextIndex)
-    play(true); // بدء التشغيل بعد تغيير المقطع
-  }, [songs, currentIndex, shuffle, repeatMode, setTrack, pause])
+  }, [songs, currentIndex, shuffle, repeatMode, setTrack, playing]) // أضف playing كتبعية
 
-
-  // 🎧 أحداث الصوت (تم تحسين التبعيات)
-  useEffect(() => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    const onTime = () => setProgress(audio.currentTime)
-    const onLoaded = () => setDuration(audio.duration)
-    const onEnd = () => {
-      setPlaying(false) // تأكيد إيقاف التشغيل
-      if (repeatMode === 'one') {
-        audio.currentTime = 0
-        play(true) // إعادة تشغيل المقطع فوراً
-      } else next()
-    }
-    
-    // يجب أن تكون الدالة play متاحة في نطاق useEffect
-    const attemptPlay = () => {
-      if (playing) {
-        // تسجيل الاستماع عند بدء التشغيل الناجح
-        if (current?._id && trackViewed.current !== current._id) {
-            viewMusic(current._id)
-            trackViewed.current = current._id
-        }
-      }
-    };
-    
-    // إضافة المستمعين
-    audio.addEventListener('timeupdate', onTime)
-    audio.addEventListener('loadedmetadata', onLoaded)
-    audio.addEventListener('ended', onEnd)
-    audio.addEventListener('play', attemptPlay) // تسجيل الاستماع عند بدء التشغيل الفعلي
-    
-    return () => {
-      // إزالة المستمعين
-      audio.removeEventListener('timeupdate', onTime)
-      audio.removeEventListener('loadedmetadata', onLoaded)
-      audio.removeEventListener('ended', onEnd)
-      audio.removeEventListener('play', attemptPlay)
-    }
-  }, [repeatMode, next, play, current, viewMusic]) // التبعيات يجب أن تشمل الدوال والحالات المستخدمة
 
   // ⏱️ التقدم (Seek)
   const seek = (time) => {
     if (!audioRef.current) return
     audioRef.current.currentTime = time
     setProgress(time)
-    play() // محاولة استئناف التشغيل بعد التحريك
+    // عند تحريك شريط التقدم، نعتبره طلباً للتشغيل إذا لم يكن قيد التشغيل بالفعل
+    if (!playing) play(true); 
   }
 
   // 🔊 الصوت
@@ -229,7 +249,6 @@ export const MusicPlayerProvider = ({ children }) => {
         setViewMusicPlayer
       }}
     >
-      {/* Preload metadata يساعد في تحميل مدة المقطع بشكل أسرع */}
       <audio ref={audioRef} preload="metadata" hidden /> 
       {children}
     </MusicPlayerContext.Provider>
@@ -237,195 +256,3 @@ export const MusicPlayerProvider = ({ children }) => {
 }
 
 export const useMusicPlayer = () => useContext(MusicPlayerContext)
-
-// 'use client'
-
-// import { createContext, useContext, useEffect, useRef, useState } from 'react'
-// import { useMusic } from './MusicContext'
-
-// const MusicPlayerContext = createContext()
-
-// export const MusicPlayerProvider = ({ children }) => {
-//   const audioRef = useRef(null)
-//   const { viewMusic, music,addListen } = useMusic()
-
-//   // ✨ الحالة الأولية
-//   const [songs, setSongs] = useState(music || [])
-//   const [current, setCurrent] = useState(music && music.length ? music[0] : null)
-//   const [currentIndex, setCurrentIndex] = useState(0)
-//   const [playing, setPlaying] = useState(false)
-//   const [progress, setProgress] = useState(0)
-//   const [duration, setDuration] = useState(0)
-//   const [volume, setVolume] = useState(0.9)
-//   const [muted, setMuted] = useState(false)
-//   const [shuffle, setShuffle] = useState(false)
-//   const [repeatMode, setRepeatMode] = useState('off') // 'off' | 'one' | 'all'
-//   const [expanded, setExpanded] = useState(false)
-//   const [viewMusicPlayer, setViewMusicPlayer] = useState(false)
-
-//   const [firstLoad, setFirstLoad] = useState(true) // ✅ لمنع التشغيل التلقائي
-
-//   // ✨ تحديث songs و current عند تغير music
-//   useEffect(() => {
-//     if (music && music.length) {
-//       setSongs(music)
-//       setCurrent(music[0])
-//       setCurrentIndex(0)
-//     }
-//   }, [music])
-
-//   // ✨ ضبط src للأوديو عند تغير current
-//   useEffect(() => {
-//     if (!audioRef.current || !current?.url) return;
-//     audioRef.current.src = current.url;
-//     audioRef.current.load();
-
-//     // لا تشغل تلقائياً إلا إذا المستخدم ضغط play أو اختار أغنية
-//     if (!firstLoad && playing) play();
-//     else setFirstLoad(false);
-//   }, [current]);
-
-//   // ⏯️ التحكم في الصوت
-//   const play = async () => {
-//     if (!audioRef.current) return;
-//     if (!audioRef.current.src && current?.url) {
-//       audioRef.current.src = current.url;
-//       await audioRef.current.load();
-//     }
-//     try {
-//       await audioRef.current.play();
-//       setPlaying(true);
-//       // addListen(current._id);
-//     } catch (err) {
-//       console.warn('Playback blocked by browser policy');
-//     }
-//   };
-
-//   const pause = () => {
-//     if (!audioRef.current) return
-//     audioRef.current.pause()
-//     setPlaying(false)
-//   }
-
-//   const togglePlay = () => (playing ? pause() : play())
-
-//   // 🔊 تغيير المقطع الحالي
-//   const setTrack = (track, index = 0, allSongs = songs, autoPlay = true) => {
-//     if (!track) return;
-//     pause(); // ✅ أوقف السابقة قبل التحميل الجديد
-//     setCurrent(track);
-//     setCurrentIndex(index);
-//     if (allSongs?.length) setSongs(allSongs);
-//     viewMusic(track._id);
-//     addListen(track._id)
-//     if (autoPlay) {
-//       setPlaying(true);
-//     } else {
-//       setPlaying(false);
-//     }
-//   };
-
-
-//   // ⏮️ السابق
-//   const prev = () => {
-//     if (!songs.length) return
-//     if (shuffle) {
-//       const rand = Math.floor(Math.random() * songs.length)
-//       return setTrack(songs[rand], rand)
-//     }
-//     const newIndex = (currentIndex - 1 + songs.length) % songs.length
-//     setTrack(songs[newIndex], newIndex)
-//   }
-
-//   // ⏭️ التالي
-//   const next = () => {
-//     if (!songs.length) return
-//     if (shuffle) {
-//       const rand = Math.floor(Math.random() * songs.length)
-//       return setTrack(songs[rand], rand)
-//     }
-//     let nextIndex = currentIndex + 1
-//     if (nextIndex >= songs.length) {
-//       if (repeatMode === 'all') nextIndex = 0
-//       else return pause()
-//     }
-//     setTrack(songs[nextIndex], nextIndex)
-//   }
-
-//   // ⏱️ التقدم
-//   const seek = (time) => {
-//     if (!audioRef.current) return
-//     audioRef.current.currentTime = time
-//     setProgress(time)
-//   }
-
-//   // 🔊 الصوت
-//   useEffect(() => {
-//     if (!audioRef.current) return
-//     audioRef.current.volume = muted ? 0 : volume
-//   }, [volume, muted])
-
-//   // 🎧 أحداث الصوت
-//   useEffect(() => {
-//     const audio = audioRef.current
-//     if (!audio) return
-//     const onTime = () => setProgress(audio.currentTime)
-//     const onLoaded = () => setDuration(audio.duration)
-//     const onEnd = () => {
-//       if (repeatMode === 'one') {
-//         audio.currentTime = 0
-//         play()
-//       } else next()
-//     }
-//     audio.addEventListener('timeupdate', onTime)
-//     audio.addEventListener('loadedmetadata', onLoaded)
-//     audio.addEventListener('ended', onEnd)
-//     return () => {
-//       audio.removeEventListener('timeupdate', onTime)
-//       audio.removeEventListener('loadedmetadata', onLoaded)
-//       audio.removeEventListener('ended', onEnd)
-//     }
-//   }, [repeatMode, songs, currentIndex, shuffle])
-//   return (
-//     <MusicPlayerContext.Provider
-//       value={{
-//         audioRef,
-//         current,
-//         setCurrent,
-//         playing,
-//         play,
-//         pause,
-//         togglePlay,
-//         progress,
-//         setProgress,
-//         duration,
-//         setDuration,
-//         volume,
-//         setVolume,
-//         muted,
-//         setMuted,
-//         shuffle,
-//         setShuffle,
-//         repeatMode,
-//         setRepeatMode,
-//         next,
-//         prev,
-//         seek,
-//         setTrack,
-//         songs,
-//         setSongs,
-//         currentIndex,
-//         setCurrentIndex,
-//         expanded,
-//         setExpanded,
-//         viewMusicPlayer,
-//         setViewMusicPlayer
-//       }}
-//     >
-//       <audio ref={audioRef} preload="metadata" hidden />
-//       {children}
-//     </MusicPlayerContext.Provider>
-//   )
-// }
-
-// export const useMusicPlayer = () => useContext(MusicPlayerContext)

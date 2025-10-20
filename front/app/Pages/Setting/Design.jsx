@@ -12,6 +12,7 @@ import Security from './Tabs/Security'
 import AccountTab from './Tabs/AccountTab'
 import LanguageTab from './Tabs/LanguageTab'
 import HistoryTab from './Tabs/HistoryTab'
+import UpdateProfile from '@/app/Component/AddandUpdateMenus/UpdateProfile'
 
 export default function SettingsView({
   user = {},
@@ -82,6 +83,7 @@ export default function SettingsView({
                       onClick={() => setActiveTab(tab.id)}
                       className={clsx(
                         'flex items-center gap-3 w-full p-3 rounded-lg text-sm font-medium transition',
+                        tab.view == false && 'pointer-events-none opacity-50',
                         activeTab === tab.id
                           ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md'
                           : 'hover:bg-gray-100 dark:hover:bg-gray-800'

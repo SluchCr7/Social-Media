@@ -21,8 +21,8 @@ const NewPostPresenter = (props) => {
   } = props
   const {t} = useTranslation()
   return (
-    <main className="flex items-center justify-center w-full py-10 px-4 bg-gray-100 dark:bg-darkMode-bg transition-colors min-h-screen">
-      <div className="w-full max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800 transition-all duration-500 relative">
+    <main className="flex items-center justify-center w-full py-10 px-4 bg-lightMode-bg dark:bg-darkMode-bg transition-colors min-h-screen">
+      <div className="w-full max-w-4xl mx-auto bg-lightMode-menu dark:bg-darkMode-menu rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800 transition-all duration-500 relative">
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full p-6 border-b border-gray-200 dark:border-gray-700 gap-4 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
