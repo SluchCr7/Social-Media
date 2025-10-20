@@ -201,7 +201,10 @@ export default function SavedPage() {
                               : 'bg-gradient-to-br from-indigo-600 to-cyan-500 text-black shadow-xl shadow-indigo-500/30'
                           }`}
                           // منع انتشار النقر لمنع استدعاء handleMusicAction مرتين
-                          onClick={(e) => {e.stopPropagation(); handleMusicAction(track)}} 
+                          onClick={(e) => {
+                            e.stopPropagation(); handleMusicAction(track)
+                            isPlayingThis ? setExpanded(false) : setExpanded(true)
+                          }} 
                         >
                           {isPlayingThis ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5 ml-0.5" />}
                         </button>

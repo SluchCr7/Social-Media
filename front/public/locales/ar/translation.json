@@ -675,6 +675,57 @@
     "How can I request a refund for my Premium subscription?": "كيف أطلب استرداد الأموال لاشتراك Premium؟",
     "Refund policies depend on the purchase platform (App Store, Google Play, or our website). Generally, refunds are possible within 14 days if you haven't used the features. Go to the billing page to submit a request.": "تعتمد سياسة استرداد الأموال على منصة الشراء (App Store، Google Play، أو الموقع). عادةً يمكن استرداد المبلغ خلال 14 يومًا من الشراء إذا لم تُستخدم الميزات. انتقل إلى صفحة الفواتير لتقديم الطلب.",
     "How can I appeal a moderation decision?": "كيف أقدم استئنافًا ضد قرار الإشراف على المحتوى؟",
-    "If your account or content was removed, you’ll receive a notice with an 'Appeal' option. Follow the instructions and explain why you believe the decision was incorrect.": "إذا تم حظر حسابك أو إزالة محتوى خاص بك، ستتلقى إشعارًا يحتوي على خيار 'تقديم استئناف'. اتبع التعليمات واشرح سبب اعتقادك أن القرار كان خاطئًا."
+    "If your account or content was removed, you’ll receive a notice with an 'Appeal' option. Follow the instructions and explain why you believe the decision was incorrect.": "إذا تم حظر حسابك أو إزالة محتوى خاص بك، ستتلقى إشعارًا يحتوي على خيار 'تقديم استئناف'. اتبع التعليمات واشرح سبب اعتقادك أن القرار كان خاطئًا.",
+    "Effective Date:": "تاريخ السريان:",
+    "Quick Navigation": "تصفح سريع",
+    "Welcome to our Social Media App. By accessing or using our platform, you agree to be bound by the following comprehensive terms and conditions (the 'Terms'). If you do not agree, do not use the service.": "مرحباً بك في تطبيقنا للتواصل الاجتماعي. من خلال الوصول إلى منصتنا أو استخدامها، فإنك توافق على الالتزام بالشروط والأحكام الشاملة التالية ('الشروط'). إذا كنت لا توافق، فيُرجى عدم استخدام الخدمة.",
+
+    "Quick Summary": "ملخص تنفيذي",
+    "Here are the essential points you must know:": "إليك النقاط الأساسية التي يجب عليك معرفتها:",
+    "You must be at least **13 years old** to use the platform.": "يجب أن يكون عمرك **13 عامًا على الأقل** لاستخدام المنصة.",
+    "You are responsible for all content posted under your account, and **illegal or hateful content is strictly prohibited**.": "أنت مسؤول عن جميع المحتويات المنشورة ضمن حسابك، و**يُحظر منعًا باتًا المحتوى غير القانوني أو الذي يحض على الكراهية**.",
+    "You **retain ownership** of your content, but grant us a broad license to operate the service.": "أنت **تحتفظ بملكية** المحتوى الخاص بك، ولكنك تمنحنا ترخيصاً واسعاً لتشغيل الخدمة.",
+    "We reserve the right to **suspend or terminate** your account for serious violations.": "نحتفظ بالحق في **تعليق أو إنهاء** حسابك في حالة الانتهاكات الجسيمة.",
+    "Our liability is **limited** as detailed in Section 7.": "مسؤوليتنا **محدودة** كما هو مفصل في القسم 7.",
+
+    "1. Eligibility and Accounts": "1. الأهلية والحسابات",
+    "You confirm that you are **at least 13 years old**. If you are under the legal age of majority in your jurisdiction (usually 18), you must have permission from a parent or legal guardian to use the service.": "أنت تؤكد أن عمرك **13 عامًا على الأقل**. إذا كنت دون السن القانونية للرشد في ولايتك القضائية (عادة 18 عامًا)، يجب أن تحصل على إذن من ولي الأمر أو الوصي القانوني لاستخدام الخدمة.",
+    "Account Responsibility:": "مسؤولية الحساب:",
+    "You are solely responsible for maintaining the confidentiality and security of your account credentials. You must **immediately notify us** of any unauthorized use or security breach of your account.": "أنت وحدك المسؤول عن الحفاظ على سرية وأمان بيانات اعتماد حسابك. يجب عليك **إبلاغنا فوراً** بأي استخدام غير مصرح به أو اختراق أمني لحسابك.",
+
+    "2. User Conduct and Restrictions": "2. سلوك المستخدم والقيود",
+    "You agree to use the Service lawfully and ethically. Prohibited activities include:": "أنت توافق على استخدام الخدمة بشكل قانوني وأخلاقي. تشمل الأنشطة المحظورة ما يلي:",
+    "**Hateful or Illegal Content**: Posting or promoting content that is violent, abusive, harassing, defamatory, or hateful towards any group.": "**المحتوى الذي يحض على الكراهية أو غير القانوني**: نشر أو الترويج لمحتوى عنيف، مسيء، مضايق، تشهيري، أو يحض على الكراهية تجاه أي مجموعة.",
+    "**Harmful Activities**: Distributing malware, spam, or engaging in phishing or impersonation of others.": "**الأنشطة الضارة**: توزيع البرامج الضارة، البريد العشوائي (Spam)، أو الانخراط في التصيد الاحتيالي أو انتحال شخصية الآخرين.",
+    "**Data Mining**: Scraping or collecting data from the Service without express written permission.": "**تعدين البيانات**: استخراج أو جمع البيانات من الخدمة دون إذن كتابي صريح.",
+    "**Minors Safety**: Posting any content that exploits or harms children.": "**سلامة القصر**: نشر أي محتوى يستغل أو يضر بالأطفال.",
+
+    "3. Content Ownership and License": "3. ملكية المحتوى والترخيص",
+    "You retain all ownership rights in the content you post ('Your Content').": "أنت تحتفظ بجميع حقوق الملكية في المحتوى الذي تنشره ('المحتوى الخاص بك').",
+    "License Grant to Us:": "منح الترخيص لنا:",
+    "By posting Your Content, you grant us a **worldwide, non-exclusive, royalty-free, sublicensable, and transferable license** to use, display, reproduce, distribute, and modify Your Content in connection with the Service and our business, including for promotion.": "بمجرد نشر المحتوى الخاص بك، فإنك تمنحنا **ترخيصاً عالمياً، غير حصري، خالياً من حقوق الملكية، قابلاً للترخيص من الباطن والتحويل** لاستخدام وعرض واستنساخ وتوزيع وتعديل المحتوى الخاص بك فيما يتعلق بالخدمة وعملنا، بما في ذلك الترويج.",
+
+    "4. Our Intellectual Property Rights": "4. حقوق الملكية الفكرية الخاصة بنا",
+    "The Service, including its code, design, graphics, trademarks, and all other components (excluding Your Content), are the **exclusive property** of [اسم الشركة/التطبيق]. You may not copy, modify, distribute, or create derivative works of our intellectual property.": "تُعد الخدمة، بما في ذلك الكود، التصميم، الرسومات، العلامات التجارية، وجميع المكونات الأخرى (باستثناء المحتوى الخاص بك)، **ملكية حصرية** لـ [اسم الشركة/التطبيق]. لا يجوز لك نسخ، تعديل، توزيع، أو إنشاء أعمال مشتقة من ملكيتنا الفكرية.",
+
+    "5. Termination and Suspension": "5. الإنهاء والتعليق",
+    "We reserve the right to **suspend or permanently delete** your account immediately, with or without notice, if we believe you have violated these Terms or engaged in behavior that harms the platform or other users. We are not liable for any loss of data or content upon termination.": "نحتفظ بالحق في **تعليق أو حذف حسابك بشكل دائم** فوراً، بإشعار أو بدونه، إذا اعتقدنا أنك انتهكت هذه الشروط أو انخرطت في سلوك يضر بالمنصة أو المستخدمين الآخرين. نحن لسنا مسؤولين عن أي فقدان للبيانات أو المحتوى عند الإنهاء.",
+
+    "6. Disclaimer of Warranties (As-Is)": "6. إخلاء المسؤولية عن الضمانات (كما هي)",
+    "THE SERVICE IS PROVIDED ON AN **'AS IS'** AND **'AS AVAILABLE'** BASIS. WE EXPRESSLY DISCLAIM ALL WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.": "يتم تقديم الخدمة على أساس **'كما هي'** و **'كما هي متاحة'**. نحن نتنصل صراحةً من جميع الضمانات من أي نوع، سواء كانت صريحة أو ضمنية، بما في ذلك الضمانات الضمنية لقابلية التسويق والملاءمة لغرض معين وعدم الانتهاك.",
+
+    "7. Limitation of Liability and Indemnity": "7. تحديد المسؤولية والتعويض",
+    "TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, [اسم الشركة/التطبيق] SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, ARISING FROM YOUR USE OF THE SERVICE.": "إلى أقصى حد يسمح به القانون المعمول به، لن تكون [اسم الشركة/التطبيق] مسؤولة عن أي أضرار غير مباشرة، عرضية، خاصة، تبعية، أو عقابية، أو أي خسارة في الأرباح أو الإيرادات، سواء تكبدت بشكل مباشر أو غير مباشر، تنشأ عن استخدامك للخدمة.",
+    "Indemnification:": "التعويض:",
+    "You agree to **indemnify, defend, and hold harmless** [اسم الشركة/التطبيق] from and against any and all claims, liabilities, damages, losses, and expenses, arising from your breach of these Terms or your violation of any third-party right, including without exclusion any intellectual property or privacy right.": "أنت توافق على **تعويض، والدفاع عن، وحماية** [اسم الشركة/التطبيق] من وضد أي وجميع المطالبات، الالتزامات، الأضرار، الخسائر، والمصروفات، الناشئة عن خرقك لهذه الشروط أو انتهاكك لأي حق لطرف ثالث، بما في ذلك ودون استثناء أي حق من حقوق الملكية الفكرية أو الخصوصية.",
+
+    "8. Governing Law and Disputes": "8. القانون الحاكم والنزاعات",
+    "These Terms shall be governed by the laws of **[اسم الدولة/الولاية]**, without regard to its conflict of law provisions. Any dispute arising out of or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts located in **[اسم المدينة/المحكمة]**.": "تخضع هذه الشروط لقوانين **[اسم الدولة/الولاية]**، بغض النظر عن أحكام تعارض القوانين فيها. أي نزاع ينشأ عن أو يتعلق بهذه الشروط يخضع للاختصاص القضائي الحصري للمحاكم الواقعة في **[اسم المدينة/المحكمة]**.",
+
+    "9. Changes to Terms": "9. التغييرات على الشروط",
+    "We may update these Terms from time to time. We will notify you of any material changes by posting the new Terms on the Service or sending an email, at least **30 days** prior to the effective date. Your continued use of the platform indicates your acceptance of any changes.": "قد نقوم بتحديث هذه الشروط من وقت لآخر. سنقوم بإخطارك بأي تغييرات جوهرية عن طريق نشر الشروط الجديدة على الخدمة أو إرسال بريد إلكتروني، قبل **30 يومًا على الأقل** من تاريخ السريان. يشير استمرارك في استخدام المنصة إلى موافقتك على أي تغييرات.",
+
+    "10. Contact Us": "10. التواصل معنا",
+    "You can also contact us by mail at:": "يمكنك أيضاً الاتصال بنا عبر البريد على العنوان التالي:"
 }
 
