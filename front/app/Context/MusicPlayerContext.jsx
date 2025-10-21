@@ -52,6 +52,7 @@ export const MusicPlayerProvider = ({ children }) => {
 
 
   // ⏸️ دالة الإيقاف المؤقت (Pause)
+  // تم التأكد من وجود setPlaying(false) هنا وهو أساس الحل
   const pause = useCallback(() => {
     if (!audioRef.current) return
     audioRef.current.pause()
