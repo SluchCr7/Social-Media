@@ -248,7 +248,7 @@ export default function SavedPage() {
                     onClick={() => setOpenReel(r)} 
                   >
                     <div className="relative w-full h-48 md:h-60 overflow-hidden">
-                      <img src={r.thumbnail} alt={r.title} className="w-full h-full object-cover transition duration-500 group-hover:scale-110" />
+                      <img src={r.thumbnailUrl} alt={r.caption} className="w-full h-full object-cover transition duration-500 group-hover:scale-110" />
                       
                       {/* طبقة تظليل ديناميكية مع أيقونة التشغيل البارزة */}
                       <div className="absolute inset-0 bg-black/40 transition duration-300 group-hover:bg-black/10 flex items-center justify-center">
@@ -263,7 +263,7 @@ export default function SavedPage() {
                     </div>
                     
                     <div className="p-3">
-                      <div className="font-semibold text-sm truncate">{r.title}</div>
+                      <div className="font-semibold text-sm truncate">{r.caption}</div>
                     </div>
                   </motion.div>
                 ))
@@ -283,10 +283,10 @@ export default function SavedPage() {
                 className="relative z-10 w-full max-w-3xl bg-lightMode-bg dark:bg-darkMode-bg rounded-3xl p-6 shadow-2xl"
             >
               <button onClick={() => setOpenReel(null)} className="absolute top-3 right-3 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition z-20"><FaTimes /></button>
-              <video src={openReel.video} controls className="w-full rounded-xl shadow-xl" />
+              <video src={openReel.videoUrl} controls className="w-full rounded-xl shadow-xl" />
               <div className="mt-4">
-                <div className="font-semibold text-xl">{openReel.title}</div>
-                <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mt-1">{t("Saved reel —")} {openReel.id}</div>
+                <div className="font-semibold text-xl">{openReel.caption}</div>
+                <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mt-1">{t("Saved reel —")} {openReel._id}</div>
               </div>
             </motion.div>
           </div>

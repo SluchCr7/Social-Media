@@ -308,13 +308,14 @@ export const MusicPlayerProvider = ({ children }) => {
         setPlaying(false);
         isPlaybackRequested.current = false;
     }
-  }, [music, current, playing]) // أضفت playing للتبعية
+  }, [music, current, playing])
 
 
   // ⏯️ دالة التشغيل الرئيسية (Play)
   const play = useCallback(async (isUserAction = false) => {
     const audio = audioRef.current
-    if (!audio || (playing && !isUserAction)) return
+    // لن نخرج إذا كانت قيد التشغيل ونفذنا إجراء مستخدم (isUserAction) لضمان التحديث
+    if (!audio || (playing && !isUserAction)) return 
 
     // تسجيل أن المستخدم طلب التشغيل (مهم لـ useEffect التالي)
     if (isUserAction) {
@@ -325,25 +326,23 @@ export const MusicPlayerProvider = ({ children }) => {
       await audio.play()
       setPlaying(true) // تحديث الحالة عند بدء التشغيل بنجاح
       
-      // 🎶 منطق تسجيل الاستماع المحسّن: يسجل مرة واحدة فقط لكل أغنية عند بدء التشغيل اليدوي/التلقائي
+      // 🎶 منطق تسجيل الاستماع المحسّن: يسجل مرة واحدة فقط لكل أغنية
       if (current?._id && trackViewed.current !== current._id) {
-        // التعديل 2: استخدام 'listenMusic'
         listenMusic(current._id)
         trackViewed.current = current._id // قم بتسجيل الـ ID لتجنب التكرار
       }
     } catch (err) {
       console.error('Play failed (Autoplay prevented?):', err)
-      setPlaying(false); // إذا فشل التشغيل نؤكد حالة الإيقاف
-      // isPlaybackRequested ستبقى 'true' إذا كان actionFromUser هو true، مما سيتيح للمستخدم
-      // محاولة التشغيل مرة أخرى يدوياً دون الحاجة لإعادة ضبط setTrack.
+      // ✨ الإصلاح الهام: إذا فشل التشغيل التلقائي، نؤكد حالة الإيقاف
+      setPlaying(false); 
     }
-  }, [playing, current, listenMusic]) // التعديل 1: التبعية على listenMusic
+  }, [playing, current, listenMusic]) 
 
   // ⏸️ دالة الإيقاف المؤقت (Pause)
   const pause = useCallback(() => {
     if (!audioRef.current || !playing) return
     audioRef.current.pause()
-    setPlaying(false)
+    setPlaying(false) // ✨ الإصلاح: تحديث حالة الإيقاف
     isPlaybackRequested.current = false; // إلغاء طلب التشغيل
   }, [playing])
 
@@ -363,55 +362,34 @@ export const MusicPlayerProvider = ({ children }) => {
 
 
   // 2. تحديث src والتحميل
-//   useEffect(() => {
-//     const audio = audioRef.current
-//     if (!audio || !current?.url) {
-//         if(playing) pause();
-//         return;
-//     }
-
-//     // إذا كان المسار مختلفاً
-//     if (audio.src !== current.url) {
-//       // إيقاف التشغيل الحالي قبل تغيير المصدر
-//       audio.pause();
-//       audio.src = current.url
-//       audio.load()
-//       trackViewed.current = null; // إعادة تعيين حالة المشاهدة لتمكين التسجيل الجديد
-//       setProgress(0); // إعادة تعيين شريط التقدم
-//       setDuration(0); // إعادة تعيين المدة
-//       setPlaying(false); // التأكد من حالة الإيقاف المؤقت أثناء التحميل
-//     }
-//     
-//     // إذا كان التشغيل مطلوبًا بعد تغيير المقطع (نتيجة لـ setTrack أو التنقل)
-//     if (isPlaybackRequested.current) {
-//         // نستخدم play(false) لنتأكد من أننا نطلب التشغيل دون تفعيل isUserAction مرة أخرى
-//         play(false);
-//     }
-//     
-//   }, [current, play, pause, playing]) // أضفت pause و playing للتبعية
-
-        useEffect(() => {
-        const audio = audioRef.current;
-        if (!audio || !current?.url) {
-        if (playing) pause();
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio || !current?.url) {
+        if(playing) pause();
         return;
-        }
+    }
 
-        if (audio.src !== current.url) {
-        audio.pause();
-        audio.src = current.url;
-        audio.load();
-        trackViewed.current = null;
-        setProgress(0);
-        setDuration(0);
-        setPlaying(false);
-        }
+    // إذا كان المسار مختلفاً
+    if (audio.src !== current.url) {
+      // إيقاف التشغيل الحالي قبل تغيير المصدر
+      audio.pause();
+      audio.src = current.url
+      audio.load()
+      trackViewed.current = null; // إعادة تعيين حالة المشاهدة لتمكين التسجيل الجديد
+      setProgress(0); // إعادة تعيين شريط التقدم
+      setDuration(0); // إعادة تعيين المدة
+      setPlaying(false); // التأكد من حالة الإيقاف المؤقت أثناء التحميل
+    }
+    
+    // إذا كان التشغيل مطلوبًا بعد تغيير المقطع (نتيجة لـ setTrack أو التنقل)
+    if (isPlaybackRequested.current) {
+        // نستخدم play(false) لأن هذا ليس ضغطة زر مباشرة
+        play(false);
+    }
+    
+  }, [current, play, pause]) // تم إزالة 'playing' من التبعيات لتجنب الحلقات اللانهائية
 
-        // ✅ إصلاح: لا نقوم بالتشغيل إلا إذا تم طلبه صراحة ولم نكن في وضع الإيقاف اليدوي
-        if (isPlaybackRequested.current && !audio.paused) {
-        play(false);
-        }
-        }, [current, play, pause]);
+
   // 🎧 السابق
   const prev = useCallback(() => {
     if (!songs.length) return
