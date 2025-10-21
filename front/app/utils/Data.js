@@ -10,9 +10,15 @@ import { MdLanguage, MdOutlineOndemandVideo } from "react-icons/md"
 import { IoTrophyOutline } from "react-icons/io5"
 import { SlCalender } from "react-icons/sl"
 import { IoIosMusicalNotes } from "react-icons/io";
-import { FaHistory, FaLock, FaSun, FaUserCog,FaBookmark } from "react-icons/fa"
-import { FiCreditCard, FiGlobe, FiMessageCircle, FiShield, FiUser, FiUsers } from "react-icons/fi"
-
+import { FaHistory, FaLock, FaSun, FaUserCog,FaBookmark, FaBell } from "react-icons/fa"
+import {
+  FiMessageCircle,
+  FiShield,
+  FiUser,
+  FiGlobe,
+  FiCreditCard,
+  FiUsers
+} from 'react-icons/fi';
 export const colors = [
     {
         name : "warmCream",
@@ -172,9 +178,9 @@ export const TABS = [
   { id: 'language', label: 'Language', icon: <MdLanguage /> },
   { id: 'history', label: 'Login History', icon: <FaHistory /> },
   { id: 'account', label: 'Account', icon: <FaUserCog /> },
-  { id: 'profile', label: 'Profile', icon: <CgProfile />,view : false },
-  { id: 'billing', label: 'Billing', icon: <MdOutlinePaid />,view : false},
-  { id: 'notification', label: 'Notifications', icon: <MdOutlinePaid />,view : false},
+  { id: 'profile', label: 'Profile', icon: <CgProfile />},
+  { id: 'notification', label: 'Notifications', icon: <FaBell />},
+  { id: 'billing', label: 'Billing', icon: <MdOutlinePaid />,view : false}
 ]
 
 export const DEFAULT_COLORS = [
@@ -239,24 +245,87 @@ export const chartData = [
   ];
 
   export const TOPICS = [
-    { key: 'account', icon: <FiUser />, title: 'Account & Profile', desc: 'إنشاء الحساب، تسجيل الدخول، استعادة كلمة المرور، وإعدادات الملف الشخصي.' },
-    { key: 'content', icon: <FiGlobe />, title: 'Content & Posting', desc: 'مشاكل النشر، الصور، مقاطع الفيديو، حقوق النشر، والحذف.' },
-    { key: 'messaging', icon: <FiMessageCircle />, title: 'Messaging & Chat', desc: 'الرسائل الخاصة، المحادثات الجماعية، الإشعارات، ومشاكل الإرسال.' },
-    { key: 'privacy', icon: <FiShield />, title: 'Privacy & Security', desc: 'إعدادات الخصوصية، الحظر، الإبلاغ عن المحتوى المسيء، وتأمين الحساب.' },
-    { key: 'billing', icon: <FiCreditCard />, title: 'Subscriptions & Ads', desc: 'إدارة الاشتراكات المدفوعة (Premium)، الفواتير، وحسابات المعلنين.' },
-    { key: 'community', icon: <FiUsers />, title: 'Community & Guidelines', desc: 'قواعد المجتمع، الإبلاغ عن انتهاكات، وعمليات الاستئناف.' }
-  ]
-  
-  export const FAQ = [
-    { topicKey: 'account', q: 'كيف يمكنني استعادة كلمة المرور إذا نسيتها؟', a: 'في شاشة تسجيل الدخول، اضغط على "نسيت كلمة المرور". أدخل بريدك الإلكتروني أو رقم هاتفك لتلقي رابط أو رمز لإعادة التعيين. تأكد من فحص مجلد الرسائل غير المرغوب فيها (Spam).' },
-    { topicKey: 'account', q: 'ما هي خطوات التحقق من حسابي (Verification)؟', a: 'اذهب إلى الإعدادات > الملف الشخصي > طلب التحقق. املأ النموذج وقدم هوية صالحة (مثل جواز السفر). يُرجى ملاحظة أن عملية المراجعة قد تستغرق ما يصل إلى 7 أيام عمل.' },
-    { topicKey: 'content', q: 'لماذا تم حظر أو إزالة منشوري؟', a: 'عادةً ما تتم إزالة المنشورات التي تنتهك إرشادات المحتوى لدينا (مثل العنف، الكراهية، أو حقوق النشر). راجع إشعار الحظر لمعرفة السبب المحدد، ويمكنك تقديم استئناف إذا كنت تعتقد أنه خطأ.' },
-    { topicKey: 'content', q: 'كيف يمكنني نشر مقطع فيديو بجودة عالية (4K/HD)؟', a: 'تأكد من أن جودة الفيديو الأصلي عالية. نحن ندعم جودة عالية، لكن قد يتم ضغط الفيديو عند التحميل لتسريع العرض. استخدم تطبيقنا الأصلي بدلاً من متصفح الويب للتحميل.' },
-    { topicKey: 'messaging', q: 'كيف أقوم بتعطيل إيصالات القراءة (Read Receipts) في الرسائل؟', a: 'اذهب إلى الإعدادات > الخصوصية > الرسائل. قم بإلغاء تفعيل "عرض إيصالات القراءة". لن يتمكن المستخدمون الآخرون بعد ذلك من معرفة ما إذا قرأت رسائلهم أم لا.' },
-    { topicKey: 'privacy', q: 'ماذا يحدث عندما أقوم بحظر مستخدم؟', a: 'عند حظر مستخدم، لا يمكنه رؤية ملفك الشخصي، منشوراتك، أو إرسال رسائل إليك. لن يتم إخطارهم بأنك قمت بحظرهم. يمكنك إلغاء الحظر في أي وقت من قائمة "الحسابات المحظورة" في الإعدادات.' },
-    { topicKey: 'billing', q: 'كيف أطلب استرداد الأموال لاشتراك Premium؟', a: 'تعتمد سياسة استرداد الأموال على منصة الشراء (App Store، Google Play، أو الموقع مباشرة). بشكل عام، يمكن استرداد المبلغ خلال 14 يومًا من الشراء إذا لم تستخدم الميزات. انتقل إلى صفحة الفواتير لتقديم الطلب.' },
-    { topicKey: 'community', q: 'كيف أقدم استئنافًا ضد قرار الإشراف على المحتوى؟', a: 'إذا تم حظر حسابك أو إزالة محتوى خاص بك، ستتلقى إشعارًا يحتوي على خيار "تقديم استئناف". اتبع التعليمات واشرح سبب اعتقادك أن القرار كان خاطئًا.' },
-  ]
+  {
+    key: 'account',
+    icon: <FiUser />,
+    title: 'Account & Profile',
+    desc: 'Creating an account, logging in, resetting passwords, and managing your profile settings.'
+  },
+  {
+    key: 'content',
+    icon: <FiGlobe />,
+    title: 'Content & Posting',
+    desc: 'Posting issues, images, videos, copyrights, and deletion problems.'
+  },
+  {
+    key: 'messaging',
+    icon: <FiMessageCircle />,
+    title: 'Messaging & Chat',
+    desc: 'Private messages, group chats, notifications, and message delivery issues.'
+  },
+  {
+    key: 'privacy',
+    icon: <FiShield />,
+    title: 'Privacy & Security',
+    desc: 'Privacy settings, blocking users, reporting abuse, and securing your account.'
+  },
+  {
+    key: 'billing',
+    icon: <FiCreditCard />,
+    title: 'Subscriptions & Ads',
+    desc: 'Managing Premium subscriptions, billing, and advertiser accounts.'
+  },
+  {
+    key: 'community',
+    icon: <FiUsers />,
+    title: 'Community & Guidelines',
+    desc: 'Community rules, reporting violations, and submitting appeals.'
+  }
+];
+
+export const FAQ = [
+  {
+    topicKey: 'account',
+    q: 'How can I reset my password if I forgot it?',
+    a: 'On the login screen, tap "Forgot Password". Enter your email or phone number to receive a reset link or code. Check your spam folder if you don’t see it.'
+  },
+  {
+    topicKey: 'account',
+    q: 'What are the steps to verify my account?',
+    a: 'Go to Settings > Profile > Request Verification. Fill out the form and upload valid identification (e.g., passport). Review may take up to 7 business days.'
+  },
+  {
+    topicKey: 'content',
+    q: 'Why was my post removed or blocked?',
+    a: 'Posts are usually removed for violating our content guidelines (e.g., violence, hate, or copyright issues). Review the notice and appeal if you believe it’s a mistake.'
+  },
+  {
+    topicKey: 'content',
+    q: 'How can I upload videos in high quality (4K/HD)?',
+    a: 'Ensure your original video is high quality. Uploads may be compressed for faster playback. Use our native app instead of a browser for better quality.'
+  },
+  {
+    topicKey: 'messaging',
+    q: 'How do I disable read receipts in messages?',
+    a: 'Go to Settings > Privacy > Messages and turn off "Read Receipts". Others won’t see if you’ve read their messages.'
+  },
+  {
+    topicKey: 'privacy',
+    q: 'What happens when I block a user?',
+    a: 'Blocked users can’t see your profile, posts, or message you. They won’t be notified about the block. You can unblock anytime from your blocked accounts list.'
+  },
+  {
+    topicKey: 'billing',
+    q: 'How do I request a refund for Premium?',
+    a: 'Refund policies depend on your purchase platform (App Store, Google Play, or website). Generally, refunds are available within 14 days if unused.'
+  },
+  {
+    topicKey: 'community',
+    q: 'How can I appeal a moderation decision?',
+    a: 'If your content or account was removed, you’ll get a notification with an “Appeal” option. Follow the steps and explain why you think it was wrong.'
+  }
+];
+
 
   export const savedPosts = [
     { id: 'p1', user: 'Ahmed', avatar: '/Home.jpg', image: '/Home.jpg', caption: 'Sunset vibes at the coast 🌅 — a short story about the day.', date: 'Oct 12, 2025' },

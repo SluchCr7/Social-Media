@@ -24,6 +24,7 @@ const {
   togglePrivateAccount,
   updateAccountStatus,
   toggleBlockNotification,
+  saveReel,
   // 🔹 Controllers الجدد
   getRelationship,
   updateRelationship
@@ -52,6 +53,7 @@ route.route('/deleteAll').delete(deleteAllUsers);
 route.route('/verify').put(verifyToken , MakeAccountPreimumVerify);
 route.route('/account/private').put(verifyToken, togglePrivateAccount);
 route.route('/save/music/:songId').put(verifyToken, toggleSongInPlaylist);
+route.route('/save/reel/:reelId').put(verifyToken, saveReel);
 // 🔹 Account status & suspension
 route.route('/status/:userId').put(verifyToken, updateAccountStatus);
 route.route('/cookies/:id').put(verifyToken, acceptCookies);

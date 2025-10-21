@@ -202,13 +202,22 @@ const userOnePopulate = [
       select: userSelect,
     },
   },
-  // {
-  //   path: "BlockedNotificationFromUsers",
-  //   select: userSelect,
-  // },
+  {
+    path: "BlockedNotificationFromUsers",
+    select: userSelect,
+  },
   {
     path: "myMusicPlaylist",
     model: "Music",
+    populate: {
+      path: "owner",
+      model: "User",
+      select: userSelect,
+    },
+  },
+  {
+    path: "savedReels",
+    model: "Reel",
     populate: {
       path: "owner",
       model: "User",

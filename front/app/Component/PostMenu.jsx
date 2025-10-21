@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { CiEdit, CiMapPin } from 'react-icons/ci';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { MdOutlineReport, MdContentCopy } from "react-icons/md";
-import { FaRegCommentDots, FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa';
+import { FaRegCommentDots } from 'react-icons/fa';
 import { useAuth } from '../Context/AuthContext';
 import { usePost } from '../Context/PostContext';
 import { useReport } from '../Context/ReportContext';
@@ -17,7 +17,6 @@ import { useTranslation } from 'react-i18next';
 import { IoVolumeMute } from "react-icons/io5";
 import { GoUnmute } from "react-icons/go";
 
-// ✅ زر فردي
 const MenuOption = ({ icon, text, action, className, loading }) => (
   <motion.button
     whileHover={{ x: 4 }}
@@ -35,21 +34,25 @@ const MenuOption = ({ icon, text, action, className, loading }) => (
 );
 
 const PostMenu = ({ showMenu, setShowMenu, post }) => {
-  const { followUser, pinPost , toggleBlockNotification } = useUser()
+  const { followUser, pinPost, toggleBlockNotification } = useUser()
   const { blockOrUnblockUser } = useAdmin()
-  const {t} = useTranslation()
+  const { t, i18n } = useTranslation()
   const { user } = useAuth();
   const { deletePost, setPostIsEdit, setShowPostModelEdit, displayOrHideComments, copyPostLink } = usePost();
   const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport();
-  const {showAlert} = useAlert()
+  const { showAlert } = useAlert()
   const menuRef = useRef();
   const isOwner = post?.owner?._id === user?._id;
   const [confirmAction, setConfirmAction] = useState(null);
   const [loadingBtn, setLoadingBtn] = useState(false);
-  const {userData} = useGetData(user?._id)
-  // إغلاق القائمة عند الضغط خارجها
-  useEffect(() => {
+  const { userData } = useGetData(user?._id)
 
+  // ✅ تحديد اتجاه اللغة
+  const currentLang = i18n.language || 'en';
+  const isRTL = ['ar', 'fa', 'he', 'ur'].includes(currentLang);
+
+  // ✅ إغلاق القائمة عند الضغط خارجها
+  useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) setShowMenu(false);
     };
@@ -61,7 +64,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
   const ownerOptions = useMemo(() => [
     {
       icon: <CiMapPin size={18} />,
-      text: userData?.pinsPosts?.some((p) => p?.id === post?._id) ? 'Unpin Post' : 'Pin Post',
+      text: userData?.pinsPosts?.some((p) => p?.id === post?._id) ? t('Unpin Post') : t('Pin Post'),
       action: async () => {
         setLoadingBtn(true);
         await pinPost(post?._id);
@@ -70,7 +73,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
     },
     {
       icon: <CiEdit size={18} />,
-      text: 'Edit Post',
+      text: t('Edit Post'),
       action: () => {
         setPostIsEdit(post);
         setShowPostModelEdit(true);
@@ -103,18 +106,16 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
   // ✅ خيارات الزائر
   const visitorOptions = useMemo(() => [
     {
-      icon: userData?.BlockedNotificationFromUsers?.includes(post?.owner?._id)
+      icon: userData?.BlockedNotificationFromUsers?.some((userBlock)=> userBlock._id === post?.owner?._id)
         ? <IoVolumeMute className="text-lg" />
         : <GoUnmute className="text-lg" />,
-      text: userData?.BlockedNotificationFromUsers?.includes(post?.owner?._id)
+      text: userData?.BlockedNotificationFromUsers?.some((userBlock)=> userBlock._id === post?.owner?._id)
         ? t('Mute Notifications From User')
         : t('UnMute Notifications From User'),
-      action: () => {
-        toggleBlockNotification(post?.owner?._id)
-      },
-      className: userData?.BlockedNotificationFromUsers?.includes(post?.owner?._id)
-        ?'text-blue-400 hover:bg-blue-100'
-        :'text-red-400 hover:bg-red-100' ,
+      action: () => toggleBlockNotification(post?.owner?._id),
+      className: userData?.BlockedNotificationFromUsers?.some((userBlock)=> userBlock._id === post?.owner?._id)
+        ? 'text-blue-400 hover:bg-blue-100'
+        : 'text-red-400 hover:bg-red-100',
     },
     {
       icon: userData?.following?.some(f => f._id === post?.owner?._id)
@@ -123,11 +124,9 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
       text: userData?.following?.some(f => f._id === post?.owner?._id)
         ? t('Unfollow User')
         : t('Follow User'),
-      action: () => {
-        followUser(post?.owner?._id)
-      },
+      action: () => followUser(post?.owner?._id),
       className: userData?.following?.some(f => f._id === post?.owner?._id)
-        ?'text-red-600 hover:bg-red-100'
+        ? 'text-red-600 hover:bg-red-100'
         : 'text-blue-600 hover:bg-blue-100',
     },
     {
@@ -151,7 +150,9 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
     },
     {
       icon: <AiOutlineDelete size={18} />,
-      text: userData?.blockedUsers?.includes(post?.owner?._id) ? t('Unblock User') : t('Block User'),
+      text: userData?.blockedUsers?.includes(post?.owner?._id)
+        ? t('Unblock User')
+        : t('Block User'),
       action: () => setConfirmAction(() => async () => {
         setLoadingBtn(true);
         await blockOrUnblockUser(post?.owner?._id);
@@ -175,9 +176,11 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-900 
+            // ✅ هنا نحدد موقع القائمة حسب اللغة
+            className={`absolute mt-2 w-64 bg-white dark:bg-gray-900 
                       border border-gray-200 dark:border-gray-700 
-                      rounded-xl shadow-lg z-[3000]"
+                      rounded-xl shadow-lg z-[3000]
+                      ${isRTL ? 'left-0' : 'right-0'}`}
             role="menu"
           >
             <motion.div
@@ -205,7 +208,7 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
         )}
       </AnimatePresence>
 
-      {/* ✅ Confirmation Modal */}
+      {/* ✅ نافذة التأكيد */}
       <AnimatePresence>
         {confirmAction && (
           <motion.div

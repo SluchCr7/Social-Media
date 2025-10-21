@@ -20,6 +20,7 @@ const { Report, ValidateReport } = require('../Modules/Report')
 const { validateStory, Story } = require("../Modules/Story");
 const { Music } = require('../Modules/Music')
 const {userOnePopulate} = require("../Populates/Populate")
+const Reel = require('../Modules/Reel')
 /**
  * @desc Register New User
  * @route POST /api/auth/register
@@ -1003,6 +1004,35 @@ const toggleBlockNotification = async (req, res) => {
   }
 };
 
+const saveReel = asyncHandler(async (req, res) => {
+  const userId = req.user._id; // المستخدم الحالي
+  const reelId = req.params.reelId; // ID الأغنية
+
+  const user = await User.findById(userId);
+  if (!user) {
+      return res.status(404).json({ message: "User not found" });
+  }
+  const reel = await Reel.findById(reelId);
+  if (!reel) return res.status(404).json({ message: "Reel not found" });
+  const videoExists = user.savedReels.includes(reelId);
+  if (videoExists) {
+      // 🔴 إزالة الأغنية
+      user.savedReels = user.savedReels.filter(
+          id => id.toString() !== reelId
+      );
+      await user.save();
+      return res.status(200).json({ message: "Reel removed from playlist", playlist: user.myMusicPlaylist });
+  } else {
+      // 🟢 إضافة الأغنية
+      user.savedReels.push(reelId);
+      await user.save();
+      return res.status(200).json({ message: "Reel added to playlist", playlist: user.myMusicPlaylist });
+  }
+})
+
+
+
+
 module.exports = {
   updateAccountStatus,
   makeUserAdmin,
@@ -1015,6 +1045,6 @@ module.exports = {
   updateProfile, pinPost, updateLinksSocial,
   getRelationship,
   updateRelationship,
-  toggleSongInPlaylist,acceptCookies,toggleBlockNotification
+  toggleSongInPlaylist,acceptCookies,toggleBlockNotification,saveReel
 }
 

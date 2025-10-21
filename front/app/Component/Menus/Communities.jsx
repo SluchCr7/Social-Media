@@ -10,7 +10,8 @@ import { useTranslation } from 'react-i18next'
 const Communities = () => {
   const { communities, joinToCommunity, sendJoinRequest } = useCommunity()
   const { user } = useAuth()
-  const {t} = useTranslation()
+  const { t } = useTranslation()
+  const {userData} = useAuth(user?._id)
   const handleJoin = (community) => {
     if (community?.isPrivate) {
       sendJoinRequest(community._id)
@@ -24,15 +25,15 @@ const Communities = () => {
       
       {/* Header */}
       <div className="flex justify-between items-center px-5 py-4 border-b border-gray-300 dark:border-gray-600 bg-gradient-to-r from-purple-500 to-indigo-500">
-        <h2 className="text-white text-lg font-semibold">{t("Communities")}</h2>
+        <h2 className="text-white text-lg font-semibold">{t("My Communities")}</h2>
       </div>
 
       {/* Body */}
       <div className="flex flex-col w-full px-4 py-3 space-y-3 overflow-y-auto">
-        {communities?.length === 0 ? (
+        {userData?.joinedCommunities?.length === 0 ? (
           <p className="text-center text-gray-500 dark:text-gray-400 py-6">No communities to join.</p>
         ) : (
-          communities?.slice(0, 3).map((community) => {
+          userData?.joinedCommunities?.slice(0, 3).map((community) => {
             const isOwner = community?.owner?._id === user._id
             const isAdmin = community?.Admins?.some((admin) => admin._id === user._id)
             const isJoined = community?.members?.some((member) => member._id === user._id)
@@ -111,7 +112,7 @@ const Communities = () => {
       {communities?.length > 3 && (
         <div className="px-4 py-3 border-t border-gray-300 dark:border-gray-600">
           <Link
-            href="/Pages/Communities"
+            href="/Pages/CommunityMain"
             className="w-full text-center text-sm font-medium text-blue-500 hover:underline"
           >
             See More Communities

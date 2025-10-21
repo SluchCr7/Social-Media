@@ -67,8 +67,11 @@ const ReportsTable = ({ reports, type, openModal }) => {
                 <StatusBadge status={report.status} />
               </td>
 
-              {/* Actions */}
-              <td className="px-6 py-4 text-center">
+              {/* Actions - التعديل هنا: إضافة relative و style={{ overflow: 'visible' }} */}
+              <td 
+                className="px-6 py-4 text-center relative" 
+                style={{ overflow: 'visible' }}
+              >
                 <DropdownActions
                   type={type}
                   onDeleteReport={() => openModal('deleteReport', report)}

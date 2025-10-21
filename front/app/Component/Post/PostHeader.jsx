@@ -33,9 +33,9 @@ const PostHeader = ({ post, user, isLogin, showMenu, setShowMenu,isCommunityPost
         </div>
       </div>
 
-      {/* 📋 Menu */}
+      {/* 📋 Menu - التعديل هنا: إضافة z-50 لرفع سياق الترتيب (Stacking Context) */}
       {isLogin && (
-        <div className="relative self-end sm:self-auto">
+        <div className="relative self-end sm:self-auto z-50">
           <button
             onClick={() => setShowMenu(!showMenu)}
             className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 

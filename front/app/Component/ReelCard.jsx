@@ -12,16 +12,20 @@ import {
   FaVolumeUp,
   FaEye,
   FaPlus,
+  FaBookmark,
 } from "react-icons/fa";
 import { RiShareForwardLine } from "react-icons/ri";
 import { IoLinkOutline } from "react-icons/io5";
 import CommentsPopup from './CommentReelPopup';
 import { useTranslation } from 'react-i18next';
 import { useTranslate } from '../Context/TranslateContext';
+import { useUser } from '../Context/UserContext';
+import { useGetData } from '../Custome/useGetData';
 
 const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
   const videoRef = useRef(null);
   const { user } = useAuth();
+  const {toggleSaveReel} = useUser()
   const { deleteReel, likeReel, viewReel, shareReel, setShowModelAddReel } = useReels();
   const {t} = useTranslation()
   const [showComments, setShowComments] = useState(false);
@@ -30,6 +34,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
   const [viewed, setViewed] = useState(false);
   const { language } = useTranslate();
   const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language); // true لو RTL
+  const {userData} = useGetData(user?._id)
   // 🎬 Auto play/pause and view count
   useEffect(() => {
     const videoEl = videoRef.current;
@@ -82,6 +87,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
 
   return (
     <div
+      id={reel?._id}
       ref={ref}
       className="relative w-full h-screen flex flex-col justify-end bg-black overflow-hidden"
       onDoubleClick={handleDoubleClick}
@@ -189,6 +195,16 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
         >
           <FaRegCommentDots />
           <span className="text-[10px] sm:text-xs">{reel?.comments?.length || 0}</span>
+        </button>
+        <button
+          onClick={() => toggleSaveReel(reel?._id)}
+          className={`flex flex-col items-center transition-transform ${
+            userData?.savedReels?.some((reelUser)=> reelUser?._id === reel?._id)
+              ? "scale-125 text-red-500"
+              : "hover:scale-110"
+            }`}
+        >
+          <FaBookmark />
         </button>
 
         {/* 🔁 Share */}

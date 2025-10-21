@@ -303,7 +303,22 @@ const togglePrivateAccount = async () => {
       );
     }
   };
-
+  const toggleSaveReel = async (reelId) => {
+    try {
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/save/reel/${reelId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${user?.token}` },
+        }
+      );
+      showAlert(res.data.message || 'Reel saved successfully');
+      return res.data;
+    } catch (err) {
+      console.error("Error saving music in playlist:", err);
+      return null;
+    }
+  };
   // =====================================
 
   useEffect(() => {

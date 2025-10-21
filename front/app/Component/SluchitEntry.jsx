@@ -27,7 +27,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
   const [showMenu, setShowMenu] = useState(false);
   const { user, isLogin } = useAuth();
   const [openModel, setOpenModel] = useState(false);
-  const { translate, loading } = useTranslate();
+  const { translate, loading, language } = useTranslate(); // 💡 التعديل هنا لإضافة language
   const [translated, setTranslated] = useState(null);
   const [showTranslateButton, setShowTranslateButton] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
@@ -39,39 +39,47 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
   const pathname = usePathname();
   const isView = pathname?.includes('/Pages/Saved');
   // فحص إذا كان يجب إظهار زر الترجمة
+  // داخل SluchitEntry.jsx
+
+  // فحص إذا كان يجب إظهار زر الترجمة
   useEffect(() => {
-    if (!post?.text || !post?.owner?.preferredLanguage) return;
+      // 🔑 التعديل 1: نستخدم اللغة الحالية للمستخدم (language) بدلاً من لغة مالك المنشور
+      if (!post?.text || !language) return; 
 
-    const preferredLangText = post.owner.preferredLanguage;
-    const preferredLang = languageMap[preferredLangText];
-    if (!preferredLang) return;
+      // اللغة المستهدفة هي اللغة التي يعرض بها المستخدم حاليًا
+      const targetLang = language; 
 
-    if (post.text.length < 3) {
-      setShowTranslateButton(false);
-      return;
-    }
+      if (post.text.length < 3) {
+        setShowTranslateButton(false);
+        return;
+      }
 
-    let langCode3 = franc(post.text, { minLength: 3 });
-    if (langCode3 === 'und') {
-      setShowTranslateButton(false);
-      return;
-    }
+      let langCode3 = franc(post.text, { minLength: 3 });
+      if (langCode3 === 'und') {
+        setShowTranslateButton(false);
+        return;
+      }
 
-    const textLang = iso6391Map[langCode3] || 'en';
-    setShowTranslateButton(textLang !== preferredLang);
-  }, [post?.text, post?.owner?.preferredLanguage]);
+      const textLang = iso6391Map[langCode3] || 'en';
+      // 🔑 التعديل 2: قارن لغة النص بلغة المستخدم الحالية
+      setShowTranslateButton(textLang !== targetLang); 
+  }, [post?.text, language]); // 🔑 التعديل 3: التبعية على language بدلاً من post?.owner?.preferredLanguage
 
   // دالة الترجمة
   const handleTranslate = async () => {
-    if (!post?.text || !post?.owner?.preferredLanguage) return;
+      // 🔑 التعديل 1: لا نحتاج للتحقق من preferredLanguage لمالك المنشور
+      if (!post?.text || !language) return; 
 
-    const targetLang = languageMap[post.owner.preferredLanguage];
-    if (!targetLang) return;
+      // 🔑 التعديل 2: اللغة المستهدفة هي لغة المستخدم الحالية (language)
+      const targetLang = language; 
 
-    const result = await translate(post.text, targetLang);
-    setTranslated(result);
-    setShowOriginal(true);
-    setShowTranslateButton(false);
+      // ملاحظة: لا حاجة لتحويل targetLang باستخدام languageMap ما دامت language هي كود ISO 639-1 (مثل 'ar', 'en')
+      // إذا كانت دالة useTranslate تتوقع كود الـ ISO 639-1 ('ar')، فهذا صحيح.
+
+      const result = await translate(post.text, targetLang);
+      setTranslated(result);
+      setShowOriginal(true);
+      setShowTranslateButton(false);
   };
 
   const handleShowOriginal = () => {
@@ -81,7 +89,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
   };
 
   return (
-    <div ref={ref} className="relative w-[90%] md:w-full mx-auto">
+    <div id={post?._id} ref={ref} className="relative w-[90%] md:w-full mx-auto">
       {/* 🔄 Share Modal */}
       <ShareModal 
         post={post} 

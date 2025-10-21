@@ -13,7 +13,7 @@ export default function SettingsContainer() {
   const { theme, toggleTheme } = useTheme()
   const { user } = useAuth()
   const { deleteUser ,makeAccountPremiumVerify} = useAdmin()
-  const { togglePrivateAccount, updatePassword } = useUser()
+  const { togglePrivateAccount, updatePassword ,toggleBlockNotification} = useUser()
 
   const [activeTab, setActiveTab] = useState('appearance')
   const { userData } = useGetData(user?._id)
@@ -45,9 +45,13 @@ export default function SettingsContainer() {
     togglePrivateAccount(v)
   }
 
+  const handleToggleNotificationBlock = () => {
+    toggleBlockNotification(user?._id)
+  }
+
   return (
     <SettingsView
-      user={user}
+      user={userData}
       theme={theme}
       darkMode={theme === 'dark'}
       toggleTheme={toggleTheme}
@@ -60,6 +64,7 @@ export default function SettingsContainer() {
       onTogglePrivate={handleTogglePrivate}
       language={language}
       handleLanguageChange={handleLanguageChange}
+      onToggleNotificationBlock={handleToggleNotificationBlock}
     />
   )
 }

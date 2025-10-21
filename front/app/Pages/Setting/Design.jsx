@@ -12,6 +12,8 @@ import Security from './Tabs/Security'
 import AccountTab from './Tabs/AccountTab'
 import LanguageTab from './Tabs/LanguageTab'
 import HistoryTab from './Tabs/HistoryTab'
+import UpdateProfile from '@/app/Component/AddandUpdateMenus/UpdateProfile'
+import NotificationTab from './Tabs/NotificationTab'
 
 export default function SettingsView({
   user = {},
@@ -26,7 +28,7 @@ export default function SettingsView({
   onMakePremiumVerify,
   loginHistory = [],
   language,
-  handleLanguageChange
+  handleLanguageChange,onToggleNotificationBlock
 }) {
   const { t } = useTranslation()
   const [oldPassword, setOldPassword] = useState('')
@@ -147,7 +149,9 @@ export default function SettingsView({
                   submitPassword={submitPassword}
                 />
               )}
-
+              {activeTab === 'profile' && (
+                <UpdateProfile user={user} />
+              )}
               {activeTab === 'language' && (
                 <LanguageTab language={language} handleLanguageChange={handleLanguageChange} />
               )}
@@ -155,7 +159,13 @@ export default function SettingsView({
               {activeTab === 'history' && (
                 <HistoryTab loginHistory={loginHistory} />
               )}
-
+              {activeTab === 'notifications' && (
+                <NotificationTab
+                  user={user} 
+                  onToggleNotificationBlock={onToggleNotificationBlock}
+                  // يمكنك تمرير حالة التحميل هنا إذا كانت موجودة في المكون الأب
+                />
+              )}
               {activeTab === 'account' && (
                 <AccountTab
                   user={user}

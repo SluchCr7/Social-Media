@@ -56,19 +56,30 @@ export default function SavedPage() {
       .filter(m => (m.title + m.artist).toLowerCase().includes(query.toLowerCase())), 
     [query, userData?.myMusicPlaylist]
   )
+  const filteredReels = useMemo(() => 
+    (userData?.savedReels?.length > 0 ? userData?.savedReels : savedReels)
+      .filter(m => (m.caption).toLowerCase().includes(query.toLowerCase())), 
+    [query, userData?.savedReels]
+  )
   
-  const filteredReels = useMemo(() => savedReels.filter(r => (r.title).toLowerCase().includes(query.toLowerCase())), [query])
 
 
   // 3. دالة موحدة لتشغيل/إيقاف الموسيقى باستخدام المشغل العالمي
+// 3. دالة موحدة لتشغيل/إيقاف الموسيقى باستخدام المشغل العالمي
   const handleMusicAction = (track) => {
     // إذا كانت الأغنية الحالية هي نفس الأغنية: تبديل
     if (current && current.id === track.id) {
-      playing ? pause() : play();
+      playing ? pause() : play(true); // يجب تمرير true لـ play لضمان محاولة التشغيل وتحديث isPlaybackRequested
+      // 💡 التعديل 1: فتح النافذة الموسعة عند تشغيل المقطع الحالي
+      if (!playing) setExpanded(true); // إذا لم يكن قيد التشغيل، افتح النافذة عند الضغط على تشغيل
     } else {
       // إذا كانت أغنية جديدة: اضبط المسار وشغل
       const trackIndex = filteredMusic.findIndex(m => m.id === track.id);
       setTrack(track, trackIndex, filteredMusic); 
+      // 💡 التعديل 2: عند تغيير الأغنية، نطلب فتح النافذة دائماً
+      setExpanded(true); 
+      // ملاحظة: لا حاجة لـ play() هنا، حيث أن setTrack ستؤدي إلى useEffect في MusicPlayerContext 
+      // الذي سيقوم بدوره بتشغيل play(true) لأننا في تبويب 'music' ونفترض أن التشغيل مطلوب.
     }
   }
 
@@ -77,10 +88,14 @@ export default function SavedPage() {
     if (active === 'music' && filteredMusic.length) {
       // نرسل القائمة المفلترة إلى المشغل العالمي ليعرف التسلسل التالي/السابق
       setSongs(filteredMusic)
+      // 💡 التعديل 3: عند العودة إلى تبويب الموسيقى، إذا كان هناك مقطع حالي
+      // يجب أن نتأكد من أنه موجود في قائمة filteredMusic.
+      if (current && !filteredMusic.some(m => m.id === current.id)) {
+        // إذا كان المقطع الحالي غير موجود في القائمة الجديدة، قم بتعيين أول مقطع كجديد
+        setTrack(filteredMusic[0], 0, filteredMusic);
+      }
     }
-  }, [active, filteredMusic, setSongs])
-
-
+  }, [active, filteredMusic, setSongs, current, setTrack])
   if (isLoading) {
     // يمكنك تمرير التبويب النشط لعرض الهيكل المناسب
     return <SavedPageSkeleton activeTab={active} />;
@@ -167,57 +182,57 @@ export default function SavedPage() {
               )}
             </motion.div>
           )}
+          {active === 'music' && (
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white/3 border border-white/6 rounded-3xl p-6 backdrop-blur-md shadow-2xl dark:shadow-inner">
+              {filteredMusic.length === 0 ? <EmptyState /> : (
+                <div className="space-y-4">
+                  {filteredMusic.map(track => {
+                    const isPlayingThis = playing && current && current.id === track.id
+                    
+                    return (
+                      <motion.div 
+                        key={track.id} 
+                        whileHover={{ scale: 1.015, boxShadow: '0 6px 15px rgba(0,0,0,0.2)' }} 
+                        transition={{ duration: 0.2 }}
+                        className={`flex items-center gap-4 p-3 rounded-2xl transition duration-200 cursor-pointer ${isPlayingThis ? 'bg-indigo-900/40 border border-indigo-700/50 shadow-lg' : 'bg-white/5 hover:bg-white/10'}`} 
+                        onClick={() => {
+                            handleMusicAction(track);
+                            setExpanded(true); // 💡 التعديل هنا: فتح النافذة عند النقر على عنصر الأغنية
+                        }} 
+                      >
+                        <Image width={800} height={800} src={track.cover} alt={track.title} className="w-16 h-16 rounded-xl object-cover shadow-lg" />
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className={`font-semibold text-lg truncate ${isPlayingThis ? 'text-cyan-400' : 'text-lightMode-fg dark:text-darkMode-fg'}`}>{track.title}</div> 
+                          <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mt-0.5">{track.artist}</div>
+                        </div>
+                        
+                        <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2 hidden sm:block">{track.duration}</div>
 
-          {/* تبويب Music - تصميم قائمة المسارات المحسن */}
-          {active === 'music' && (
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white/3 border border-white/6 rounded-3xl p-6 backdrop-blur-md shadow-2xl dark:shadow-inner">
-              {filteredMusic.length === 0 ? <EmptyState /> : (
-                <div className="space-y-4">
-                  {filteredMusic.map(track => {
-                    const isPlayingThis = playing && current && current.id === track.id
-                    
-                    return (
-                      <motion.div 
-                        key={track.id} 
-                        whileHover={{ scale: 1.015, boxShadow: '0 6px 15px rgba(0,0,0,0.2)' }} 
-                        transition={{ duration: 0.2 }}
-                        className={`flex items-center gap-4 p-3 rounded-2xl transition duration-200 cursor-pointer ${isPlayingThis ? 'bg-indigo-900/40 border border-indigo-700/50 shadow-lg' : 'bg-white/5 hover:bg-white/10'}`} 
-                        onClick={() => handleMusicAction(track)} // جعل السطر بأكمله تفاعلياً
-                      >
-                        <Image width={800} height={800} src={track.cover} alt={track.title} className="w-16 h-16 rounded-xl object-cover shadow-lg" />
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className={`font-semibold text-lg truncate ${isPlayingThis ? 'text-cyan-400' : 'text-lightMode-fg dark:text-darkMode-fg'}`}>{track.title}</div> 
-                          <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mt-0.5">{track.artist}</div>
-                        </div>
-                        
-                        <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2 hidden sm:block">{track.duration}</div>
+                        {/* زر التشغيل/الإيقاف المحسن */}
+                        <button 
+                          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 ${
+                            isPlayingThis 
+                              ? 'bg-red-500/90 text-white shadow-xl shadow-red-500/30' 
+                              : 'bg-gradient-to-br from-indigo-600 to-cyan-500 text-black shadow-xl shadow-indigo-500/30'
+                          }`}
+                          // منع انتشار النقر لمنع استدعاء handleMusicAction مرتين
+                          onClick={(e) => {
+                            e.stopPropagation(); 
+                            handleMusicAction(track);
+                            setExpanded(true); // 💡 التعديل هنا: فتح النافذة عند النقر على زر التشغيل/الإيقاف
+                          }} 
+                        >
+                          {isPlayingThis ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5 ml-0.5" />}
+                        </button>
 
-                        {/* زر التشغيل/الإيقاف المحسن */}
-                        <button 
-                          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 ${
-                            isPlayingThis 
-                              ? 'bg-red-500/90 text-white shadow-xl shadow-red-500/30' 
-                              : 'bg-gradient-to-br from-indigo-600 to-cyan-500 text-black shadow-xl shadow-indigo-500/30'
-                          }`}
-                          // منع انتشار النقر لمنع استدعاء handleMusicAction مرتين
-                          onClick={(e) => {
-                            e.stopPropagation(); handleMusicAction(track)
-                            // isPlayingThis ? setExpanded(false) : setExpanded(true)
-                          }} 
-                        >
-                          {isPlayingThis ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5 ml-0.5" />}
-                        </button>
-
-                      </motion.div>
-                    )
-                  })}
-                </div>
-              )}
-              {/* ملاحظة: تم إزالة عنصر <audio> المحلي، حيث يعتمد الآن على المشغل العالمي */}
-            </motion.div>
-          )}
-
+                      </motion.div>
+                    )
+                  })}
+                </div>
+              )}
+            </motion.div>
+          )}
           {/* تبويب Reels - تصميم شبكة المقاطع المحسن */}
           {active === 'reels' && (
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
