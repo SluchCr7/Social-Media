@@ -28,8 +28,8 @@ const savedMusic = [
 ]
 
 const savedReels = [
-  { id: 'r1', thumbnail: '/reels/thumb1.jpg', video: '/video1.mp4', title: 'Quick Tips for Productivity' },
-  { id: 'r2', thumbnail: '/reels/thumb2.jpg', video: '/video2.mp4', title: 'Street Photography - 60s' },
+  { id: 'r1', thumbnail: '/reels/thumb1.jpg', video: '/video1.mp4', caption: 'Quick Tips for Productivity' },
+  { id: 'r2', thumbnail: '/reels/thumb2.jpg', video: '/video2.mp4', caption: 'Street Photography - 60s' },
 ]
 
 
@@ -58,7 +58,7 @@ export default function SavedPage() {
   )
   const filteredReels = useMemo(() => 
     (userData?.savedReels?.length > 0 ? userData?.savedReels : savedReels)
-      .filter(m => (m.caption).toLowerCase().includes(query.toLowerCase())), 
+      .filter(m => m.caption.toLowerCase().includes(query.toLowerCase())), 
     [query, userData?.savedReels]
   )
   
