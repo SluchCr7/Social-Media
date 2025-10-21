@@ -5,6 +5,7 @@ import { IoIosMusicalNotes } from "react-icons/io";
 import { FiPlus } from 'react-icons/fi';
 import Link from "next/link";
 import { useAuth } from "./Context/AuthContext";
+import { useTranslate } from "./Context/TranslateContext";
 
 export default function Home() {
     const {expanded, setExpanded,viewMusicPlayer, setViewMusicPlayer} = useMusicPlayer()
