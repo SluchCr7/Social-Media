@@ -8,7 +8,7 @@ const NowPlaying = ({
   shuffle, setShuffle, repeatMode, setRepeatMode,
   progress, setProgress, duration, volume, setVolume, muted, setMuted,
   expanded, setExpanded, likeMusic, saveMusicInPlayList,
-  userData, myPlaylist, accentStyle, setTrack, songs, currentIndex
+  userData, myPlaylist, accentStyle, setTrack, songs, currentIndex,isReady
 }) => (
   <div className="rounded-2xl p-6 relative shadow-sm border dark:border-gray-800" style={accentStyle}>
     <div className="flex flex-col md:flex-row items-center gap-6">
@@ -40,6 +40,7 @@ const NowPlaying = ({
           setVolume={setVolume}
           muted={muted}
           setMuted={setMuted}
+          isReady={isReady}
         />
       </div>
     </div>

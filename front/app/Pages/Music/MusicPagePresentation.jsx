@@ -13,7 +13,7 @@ import SidebarNowPlaying from '@/app/Component/MusicPage/SidebarNowPlaying'
 
 export default function MusicPagePresentation(props) {
   const {
-    songs, filtered, current, playing, togglePlay, next, prev,
+    songs, filtered, current, playing, togglePlay, next, prev,isReady,
     shuffle, setShuffle, repeatMode, setRepeatMode,
     progress, setProgress, duration, volume, setVolume, muted, setMuted,
     setTrack, currentIndex, expanded, setExpanded,
@@ -51,6 +51,7 @@ export default function MusicPagePresentation(props) {
                 togglePlay={togglePlay}
                 next={next}
                 prev={prev}
+                isReady={isReady}
                 shuffle={shuffle}
                 setShuffle={setShuffle}
                 repeatMode={repeatMode}
