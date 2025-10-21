@@ -6,7 +6,7 @@ import { FaSearch } from 'react-icons/fa';
 
 export default function NotFound() {
   return (
-    <div className="w-screen h-screen flex flex-col items-center justify-center bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text px-4">
+    <div className="w-full h-screen flex flex-col items-center justify-center bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text px-4">
       {/* Icon */}
       <motion.div
         initial={{ scale: 0 }}

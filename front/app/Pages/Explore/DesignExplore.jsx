@@ -265,7 +265,7 @@ const DesignExplore = ({
                          {/* رابط/زر "مشاهدة المزيد" ينقلك إلى صفحة النتائج الكاملة */}
                         <div className="text-center mt-4 pt-2 border-t border-lightMode-border dark:border-darkMode-border">
                             <a 
-                                href={`/Pages/Search/results?q=${encodeURIComponent(search.trim())}`} 
+                                href={`/Pages/Search?q=${encodeURIComponent(search.trim())}`} 
                                 className="text-primary-color dark:text-primary-dark hover:underline font-medium text-sm transition"
                             >
                                 {t("See all results for '")}{search.trim()}{t("'")}

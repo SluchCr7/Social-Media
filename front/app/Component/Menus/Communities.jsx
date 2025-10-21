@@ -6,12 +6,14 @@ import Image from 'next/image'
 import { useAuth } from '../../Context/AuthContext'
 import { FaPlus, FaCheck, FaUsers, FaHourglassHalf, FaCrown, FaUserShield } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
+import { useGetData } from '@/app/Custome/useGetData'
 
 const Communities = () => {
   const { communities } = useCommunity()
   const { user } = useAuth()
   const { t } = useTranslation()
-  const {userData} = useAuth(user?._id)
+  const {userData} = useGetData(user?._id)
+  
   return (
     <div className="w-full max-h-[500px] overflow-hidden bg-white dark:bg-[#16181c] rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 flex flex-col">
       
