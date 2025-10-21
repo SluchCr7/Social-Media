@@ -313,190 +313,192 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
   }
 
   return (
-    <motion.div
-      ref={ref}
-      id={post?._id}
-      whileHover={{ y: -2 }}
-      transition={{ type: 'spring', stiffness: 200, damping: 18 }}
-      className="
-        relative w-[95%] md:w-full mx-auto mb-6
-        rounded-2xl overflow-hidden shadow-[0_0_25px_-10px_rgba(0,0,0,0.3)]
-        bg-white/90 dark:bg-black/40 backdrop-blur-xl
-        border border-gray-200/70 dark:border-gray-700/60
-        transition-all duration-300
-      "
-    >
-      {/* ======= Share Modal ======= */}
+    <div className="relative w-full">
       <ShareModal
         post={post}
         isOpen={openModel}
         onClose={() => setOpenModel(false)}
         onShare={(id, customText) => sharePost(id, post?.owner?._id, customText)}
       />
+      <motion.div
+        ref={ref}
+        id={post?._id}
+        whileHover={{ y: -2 }}
+        transition={{ type: 'spring', stiffness: 200, damping: 18 }}
+        className="
+          relative w-[95%] md:w-full mx-auto mb-6
+          rounded-2xl overflow-hidden shadow-[0_0_25px_-10px_rgba(0,0,0,0.3)]
+          bg-white/90 dark:bg-black/40 backdrop-blur-xl
+          border border-gray-200/70 dark:border-gray-700/60
+          transition-all duration-300
+        "
+      >
+        {/* ======= Share Modal ======= */}
 
-      {/* ======= Post Content ======= */}
-      <div className="p-4 sm:p-6 flex flex-col gap-5">
-        {/* ======= Pinned or Shared Badges ======= */}
-        <div className="flex flex-wrap items-center gap-2">
-          {post?.isPinned && (
-            <span className="px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 shadow-md">
-              📌 {t('Pinned')}
-            </span>
-          )}
-          {isShared && (
-            <span className="px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r from-cyan-500 to-blue-600 shadow-md">
-              🔁 {t('Shared')}
-            </span>
-          )}
-        </div>
-
-        {/* ======= Shared Info ======= */}
-        {isShared && <SharedTitle user={user} post={post} original={original} />}
-
-        <div className="flex flex-col sm:flex-row gap-5">
-          {/* ======= Optional Image on Side ======= */}
-          <PostImage
-            post={post}
-            isCommunityPost={!!post?.community}
-            className="w-full sm:w-[160px] h-auto rounded-xl"
-          />
-
-          {/* ======= Main Content ======= */}
-          <div className="flex flex-col flex-1 gap-3">
-            <PostHeader
-              post={post}
-              user={post?.owner}
-              isLogin={isLogin}
-              showMenu={showMenu}
-              setShowMenu={setShowMenu}
-              isCommunityPost={!!post?.community}
-            />
-
-            {/* ======= Post Text ======= */}
-            <RenderPostText
-              text={post?.text}
-              mentions={post?.mentions}
-              hashtags={post?.Hashtags}
-              italic={post?.isShared}
-            />
-
-            {/* ======= Links ======= */}
-            {post?.links && <PostLinks links={post?.links} />}
-
-            {/* ======= Translation Section ======= */}
-            <div className="mt-2 space-y-3">
-              {showTranslateButton && !showOriginal && (
-                <button
-                  onClick={handleTranslate}
-                  disabled={loading}
-                  className="
-                    flex items-center gap-2 text-sm font-semibold px-4 py-1.5 w-fit
-                    text-blue-600 dark:text-blue-400
-                    border border-blue-500/40 rounded-full
-                    hover:bg-blue-500/10 dark:hover:bg-blue-500/20
-                    transition-all duration-300
-                  "
-                >
-                  {loading ? `${t('Translating')}...` : t('Translate')}
-                  {loading && (
-                    <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full opacity-60" />
-                  )}
-                </button>
-              )}
-
-              {translated && showOriginal && (
-                <div className="
-                  bg-blue-50 dark:bg-blue-950/30 p-4 rounded-xl 
-                  border border-blue-200 dark:border-blue-900/60 shadow-inner
-                ">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
-                      {t('Translation')}
-                    </span>
-                    <button
-                      onClick={handleShowOriginal}
-                      className="text-xs font-medium text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-300 underline"
-                    >
-                      {t('Show Original')}
-                    </button>
-                  </div>
-
-                  <RenderPostText
-                    text={translated}
-                    mentions={post?.mentions}
-                    hashtags={post?.Hashtags}
-                    italic={post?.isShared}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* ======= Shared or Normal Post ======= */}
-            {isShared && original && (
-              <SharedPost
-                original={original}
-                user={user}
-                setImageView={setImageView}
-              />
+        {/* ======= Post Content ======= */}
+        <div className="p-4 sm:p-6 flex flex-col gap-5">
+          {/* ======= Pinned or Shared Badges ======= */}
+          <div className="flex flex-wrap items-center gap-2">
+            {post?.isPinned && (
+              <span className="px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 shadow-md">
+                📌 {t('Pinned')}
+              </span>
             )}
-
-            {!isShared && post?.Photos?.length > 0 && (
-              <PostPhotos
-                photos={post.Photos}
-                setImageView={setImageView}
-                postId={post._id}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl overflow-hidden"
-              />
-            )}
-
-            {/* ======= Hashtags ======= */}
-            {post?.Hashtags?.length > 0 && <PostHashtags post={post} />}
-
-            {/* ======= Actions ======= */}
-            {isLogin && (
-              <PostActions
-                post={post}
-                user={user}
-                likePost={likePost}
-                hahaPost={hahaPost}
-                sharePost={sharePost}
-                savePost={savePost}
-                setOpenModel={setOpenModel}
-              />
-            )}
-
-            {/* ======= Comments + Highlighted ======= */}
-            {!isView && (
-              <>
-                {post?.comments?.length > 0 && (
-                  <div className="flex items-center gap-2 pt-3">
-                    <div className="flex -space-x-2">
-                      {post.comments.slice(0, 3).map((comment, i) => (
-                        <Image
-                          key={i}
-                          src={comment?.owner?.profilePhoto?.url}
-                          alt="comment-avatar"
-                          width={24}
-                          height={24}
-                          className="rounded-full border-2 border-white dark:border-black w-6 h-6 object-cover"
-                        />
-                      ))}
-                    </div>
-                    <span className="text-gray-500 text-xs">
-                      {post.comments.length} {t('comments')}
-                    </span>
-                  </div>
-                )}
-
-                {highlightedComment && (
-                  <HighlightedComment highlightedComment={highlightedComment} />
-                )}
-              </>
+            {isShared && (
+              <span className="px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r from-cyan-500 to-blue-600 shadow-md">
+                🔁 {t('Shared')}
+              </span>
             )}
           </div>
+
+          {/* ======= Shared Info ======= */}
+          {isShared && <SharedTitle user={user} post={post} original={original} />}
+
+          <div className="flex flex-col sm:flex-row gap-5">
+            {/* ======= Optional Image on Side ======= */}
+            <PostImage
+              post={post}
+              isCommunityPost={!!post?.community}
+              className="w-full sm:w-[160px] h-auto rounded-xl"
+            />
+
+            {/* ======= Main Content ======= */}
+            <div className="flex flex-col flex-1 gap-3">
+              <PostHeader
+                post={post}
+                user={user}
+                isLogin={isLogin}
+                showMenu={showMenu}
+                setShowMenu={setShowMenu}
+                isCommunityPost={!!post?.community}
+              />
+
+              {/* ======= Post Text ======= */}
+              <RenderPostText
+                text={post?.text}
+                mentions={post?.mentions}
+                hashtags={post?.Hashtags}
+                italic={post?.isShared}
+              />
+
+              {/* ======= Links ======= */}
+              {post?.links && <PostLinks links={post?.links} />}
+
+              {/* ======= Translation Section ======= */}
+              <div className="mt-2 space-y-3">
+                {showTranslateButton && !showOriginal && (
+                  <button
+                    onClick={handleTranslate}
+                    disabled={loading}
+                    className="
+                      flex items-center gap-2 text-sm font-semibold px-4 py-1.5 w-fit
+                      text-blue-600 dark:text-blue-400
+                      border border-blue-500/40 rounded-full
+                      hover:bg-blue-500/10 dark:hover:bg-blue-500/20
+                      transition-all duration-300
+                    "
+                  >
+                    {loading ? `${t('Translating')}...` : t('Translate')}
+                    {loading && (
+                      <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full opacity-60" />
+                    )}
+                  </button>
+                )}
+
+                {translated && showOriginal && (
+                  <div className="
+                    bg-blue-50 dark:bg-blue-950/30 p-4 rounded-xl 
+                    border border-blue-200 dark:border-blue-900/60 shadow-inner
+                  ">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                        {t('Translation')}
+                      </span>
+                      <button
+                        onClick={handleShowOriginal}
+                        className="text-xs font-medium text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-300 underline"
+                      >
+                        {t('Show Original')}
+                      </button>
+                    </div>
+
+                    <RenderPostText
+                      text={translated}
+                      mentions={post?.mentions}
+                      hashtags={post?.Hashtags}
+                      italic={post?.isShared}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* ======= Shared or Normal Post ======= */}
+              {isShared && original && (
+                <SharedPost
+                  original={original}
+                  user={user}
+                  setImageView={setImageView}
+                />
+              )}
+
+              {!isShared && post?.Photos?.length > 0 && (
+                <PostPhotos
+                  photos={post.Photos}
+                  setImageView={setImageView}
+                  postId={post._id}
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl overflow-hidden"
+                />
+              )}
+
+              {/* ======= Hashtags ======= */}
+              {post?.Hashtags?.length > 0 && <PostHashtags post={post} />}
+
+              {/* ======= Actions ======= */}
+              {isLogin && (
+                <PostActions
+                  post={post}
+                  user={user}
+                  likePost={likePost}
+                  hahaPost={hahaPost}
+                  sharePost={sharePost}
+                  savePost={savePost}
+                  setOpenModel={setOpenModel}
+                />
+              )}
+
+              {/* ======= Comments + Highlighted ======= */}
+              {!isView && (
+                <>
+                  {post?.comments?.length > 0 && (
+                    <div className="flex items-center gap-2 pt-3">
+                      <div className="flex -space-x-2">
+                        {post.comments.slice(0, 3).map((comment, i) => (
+                          <Image
+                            key={i}
+                            src={comment?.owner?.profilePhoto?.url}
+                            alt="comment-avatar"
+                            width={24}
+                            height={24}
+                            className="rounded-full border-2 border-white dark:border-black w-6 h-6 object-cover"
+                          />
+                        ))}
+                      </div>
+                      <span className="text-gray-500 text-xs">
+                        {post.comments.length} {t('comments')}
+                      </span>
+                    </div>
+                  )}
+
+                  {highlightedComment && (
+                    <HighlightedComment highlightedComment={highlightedComment} />
+                  )}
+                </>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   )
 })
 

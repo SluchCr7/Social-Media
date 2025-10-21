@@ -63,11 +63,11 @@ const ProfileMenu = ({
                     <MenuItem icon={<IoEyeSharp />}>{t("View as Visitor")}</MenuItem>
                   </Link>
 
-                  {actions.setUpdate && (
+                  {/* {actions.setUpdate && (
                     <MenuItem icon={<FaUserEdit />} onClick={() => { setOpen(false); actions.setUpdate(true) }}>
                       {t("Edit Profile")}
                     </MenuItem>
-                  )}
+                  )} */}
 
                   {actions.updatePrivacy && (
                     <MenuItem 

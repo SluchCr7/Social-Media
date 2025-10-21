@@ -9,13 +9,15 @@ import { useAuth } from "./Context/AuthContext";
 export default function Home() {
     const {expanded, setExpanded,viewMusicPlayer, setViewMusicPlayer} = useMusicPlayer()
     const {user} = useAuth()
+    const { language } = useTranslate()
+    const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language)
   return (
     <div className="flex items-start gap-3 w-full">
       <MainApp />
       {
         user &&
         <div
-          className={`fixed z-50 flex items-center gap-3 transition-all duration-300 right-5 ${
+          className={`fixed z-50 flex items-center gap-3 transition-all duration-300 ${isRTL ? "left-5" : "right-5"} ${
             viewMusicPlayer ? "bottom-[160px]" : "bottom-5"
           }`}
         >

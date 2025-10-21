@@ -8,24 +8,16 @@ import { FaPlus, FaCheck, FaUsers, FaHourglassHalf, FaCrown, FaUserShield } from
 import { useTranslation } from 'react-i18next'
 
 const Communities = () => {
-  const { communities, joinToCommunity, sendJoinRequest } = useCommunity()
+  const { communities } = useCommunity()
   const { user } = useAuth()
   const { t } = useTranslation()
   const {userData} = useAuth(user?._id)
-  const handleJoin = (community) => {
-    if (community?.isPrivate) {
-      sendJoinRequest(community._id)
-    } else {
-      joinToCommunity(community._id)
-    }
-  }
-
   return (
     <div className="w-full max-h-[500px] overflow-hidden bg-white dark:bg-[#16181c] rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 flex flex-col">
       
       {/* Header */}
       <div className="flex justify-between items-center px-5 py-4 border-b border-gray-300 dark:border-gray-600 bg-gradient-to-r from-purple-500 to-indigo-500">
-        <h2 className="text-white text-lg font-semibold">{t("My Communities")}</h2>
+        <h2 className="text-white text-lg font-semibold">{t("Communities")}</h2>
       </div>
 
       {/* Body */}
@@ -34,11 +26,7 @@ const Communities = () => {
           <p className="text-center text-gray-500 dark:text-gray-400 py-6">No communities to join.</p>
         ) : (
           userData?.joinedCommunities?.slice(0, 3).map((community) => {
-            const isOwner = community?.owner?._id === user._id
-            const isAdmin = community?.Admins?.some((admin) => admin._id === user._id)
-            const isJoined = community?.members?.some((member) => member._id === user._id)
-            const isPending = community?.joinRequests?.some((req) => req._id === user._id)
-
+            const isJoined = community?.members?.includes(user._id)
             return (
               <div
                 key={community?._id}
@@ -67,39 +55,12 @@ const Communities = () => {
                 </Link>
 
                 {/* Role / Join Button */}
-                {isOwner ? (
-                  <p className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-md border border-yellow-500 text-yellow-600">
-                    <FaCrown className="text-yellow-500" />
-                  </p>
-                ) : isAdmin ? (
-                  <p className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-md border border-purple-500 text-purple-500">
-                    <FaUserShield className="text-purple-500" /> 
-                  </p>
-                ) : isJoined ? (
+                {isJoined && (
                   <button
                     disabled
                     className="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-md border border-gray-400 text-gray-400 cursor-not-allowed opacity-60"
                   >
                     <FaCheck className="text-sm" />
-                  </button>
-                ) : isPending ? (
-                  <button
-                    disabled
-                    className="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-md border border-yellow-500 text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 cursor-not-allowed"
-                  >
-                    <FaHourglassHalf className="text-sm" /> {t("Pending")}
-                  </button>
-                ) : (
-                  <button
-                    className={`flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-md border transition-all duration-200 ${
-                      community?.isPrivate
-                        ? 'border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-white'
-                        : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white'
-                    }`}
-                    onClick={() => handleJoin(community)}
-                  >
-                    <FaPlus className="text-sm" />
-                    {community?.isPrivate ? t('Request Join') : t('Join')}
                   </button>
                 )}
               </div>
@@ -109,7 +70,7 @@ const Communities = () => {
       </div>
 
       {/* See More Button */}
-      {communities?.length > 3 && (
+      {userData?.joinedCommunities?.length > 3 && (
         <div className="px-4 py-3 border-t border-gray-300 dark:border-gray-600">
           <Link
             href="/Pages/CommunityMain"

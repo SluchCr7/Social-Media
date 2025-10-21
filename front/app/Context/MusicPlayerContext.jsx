@@ -363,34 +363,55 @@ export const MusicPlayerProvider = ({ children }) => {
 
 
   // 2. تحديث src والتحميل
-  useEffect(() => {
-    const audio = audioRef.current
-    if (!audio || !current?.url) {
-        if(playing) pause();
+//   useEffect(() => {
+//     const audio = audioRef.current
+//     if (!audio || !current?.url) {
+//         if(playing) pause();
+//         return;
+//     }
+
+//     // إذا كان المسار مختلفاً
+//     if (audio.src !== current.url) {
+//       // إيقاف التشغيل الحالي قبل تغيير المصدر
+//       audio.pause();
+//       audio.src = current.url
+//       audio.load()
+//       trackViewed.current = null; // إعادة تعيين حالة المشاهدة لتمكين التسجيل الجديد
+//       setProgress(0); // إعادة تعيين شريط التقدم
+//       setDuration(0); // إعادة تعيين المدة
+//       setPlaying(false); // التأكد من حالة الإيقاف المؤقت أثناء التحميل
+//     }
+//     
+//     // إذا كان التشغيل مطلوبًا بعد تغيير المقطع (نتيجة لـ setTrack أو التنقل)
+//     if (isPlaybackRequested.current) {
+//         // نستخدم play(false) لنتأكد من أننا نطلب التشغيل دون تفعيل isUserAction مرة أخرى
+//         play(false);
+//     }
+//     
+//   }, [current, play, pause, playing]) // أضفت pause و playing للتبعية
+
+        useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio || !current?.url) {
+        if (playing) pause();
         return;
-    }
+        }
 
-    // إذا كان المسار مختلفاً
-    if (audio.src !== current.url) {
-      // إيقاف التشغيل الحالي قبل تغيير المصدر
-      audio.pause();
-      audio.src = current.url
-      audio.load()
-      trackViewed.current = null; // إعادة تعيين حالة المشاهدة لتمكين التسجيل الجديد
-      setProgress(0); // إعادة تعيين شريط التقدم
-      setDuration(0); // إعادة تعيين المدة
-      setPlaying(false); // التأكد من حالة الإيقاف المؤقت أثناء التحميل
-    }
-    
-    // إذا كان التشغيل مطلوبًا بعد تغيير المقطع (نتيجة لـ setTrack أو التنقل)
-    if (isPlaybackRequested.current) {
-        // نستخدم play(false) لنتأكد من أننا نطلب التشغيل دون تفعيل isUserAction مرة أخرى
-        play(false);
-    }
-    
-  }, [current, play, pause, playing]) // أضفت pause و playing للتبعية
+        if (audio.src !== current.url) {
+        audio.pause();
+        audio.src = current.url;
+        audio.load();
+        trackViewed.current = null;
+        setProgress(0);
+        setDuration(0);
+        setPlaying(false);
+        }
 
-
+        // ✅ إصلاح: لا نقوم بالتشغيل إلا إذا تم طلبه صراحة ولم نكن في وضع الإيقاف اليدوي
+        if (isPlaybackRequested.current && !audio.paused) {
+        play(false);
+        }
+        }, [current, play, pause]);
   // 🎧 السابق
   const prev = useCallback(() => {
     if (!songs.length) return

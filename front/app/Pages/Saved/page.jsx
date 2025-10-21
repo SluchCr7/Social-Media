@@ -67,21 +67,23 @@ export default function SavedPage() {
   // 3. دالة موحدة لتشغيل/إيقاف الموسيقى باستخدام المشغل العالمي
 // 3. دالة موحدة لتشغيل/إيقاف الموسيقى باستخدام المشغل العالمي
   const handleMusicAction = (track) => {
-    // إذا كانت الأغنية الحالية هي نفس الأغنية: تبديل
     if (current && current.id === track.id) {
-      playing ? pause() : play(true); // يجب تمرير true لـ play لضمان محاولة التشغيل وتحديث isPlaybackRequested
-      // 💡 التعديل 1: فتح النافذة الموسعة عند تشغيل المقطع الحالي
-      if (!playing) setExpanded(true); // إذا لم يكن قيد التشغيل، افتح النافذة عند الضغط على تشغيل
+      if (playing) {
+        pause();
+        setExpanded(false);
+      } else {
+        play(true);
+        setExpanded(true);
+      }
     } else {
-      // إذا كانت أغنية جديدة: اضبط المسار وشغل
       const trackIndex = filteredMusic.findIndex(m => m.id === track.id);
-      setTrack(track, trackIndex, filteredMusic); 
-      // 💡 التعديل 2: عند تغيير الأغنية، نطلب فتح النافذة دائماً
-      setExpanded(true); 
-      // ملاحظة: لا حاجة لـ play() هنا، حيث أن setTrack ستؤدي إلى useEffect في MusicPlayerContext 
-      // الذي سيقوم بدوره بتشغيل play(true) لأننا في تبويب 'music' ونفترض أن التشغيل مطلوب.
+      setTrack(track, trackIndex, filteredMusic);
+      setExpanded(true);
+      // نطلب التشغيل اليدوي فور تغيير الأغنية
+      play(true);
     }
-  }
+  };
+
 
   // 4. مزامنة قائمة الأغاني مع المشغل العالمي عند تفعيل تبويب الموسيقى
   useEffect(() => {
@@ -187,7 +189,7 @@ export default function SavedPage() {
               {filteredMusic.length === 0 ? <EmptyState /> : (
                 <div className="space-y-4">
                   {filteredMusic.map(track => {
-                    const isPlayingThis = playing && current && current.id === track.id
+                    const isPlayingThis = playing && current && current.id === track.id;
                     
                     return (
                       <motion.div 

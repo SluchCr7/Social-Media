@@ -363,7 +363,7 @@ const togglePrivateAccount = async () => {
             ,getUserById,followUser,
             updatePhoto,
             updateProfile,
-            pinPost,
+            pinPost,toggleSaveReel,
             onlineUsers,updateProfileLoading,loading,toggleBlockNotification
         }}
     >
