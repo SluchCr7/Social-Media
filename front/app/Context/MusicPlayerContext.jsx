@@ -9,12 +9,12 @@ export const MusicPlayerProvider = ({ children }) => {
   const audioRef = useRef(null)
   const { listenMusic, music } = useMusic() 
   const trackViewed = useRef(null) 
-  // 💡 متغير حالة جديد: لتتبع ما إذا كان مصدر الصوت قد تم تحميله وجاهزاً
+  // ✅ حالة الجاهزية (لمؤشر التحميل)
   const [isReady, setIsReady] = useState(false); 
-  // 💡 متغير جديد: لتتبع ما إذا كان المستخدم (أو النظام) طلب تشغيلاً
+  // ✅ طلب التشغيل (لمقاومة منع التشغيل التلقائي)
   const isPlaybackRequested = useRef(false);
 
-  // ✨ الحالة الأولية (بدون تغيير)
+  // ✨ الحالة الأولية 
   const [songs, setSongs] = useState(music || [])
   const [current, setCurrent] = useState(music && music.length ? music[0] : null)
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -24,11 +24,12 @@ export const MusicPlayerProvider = ({ children }) => {
   const [volume, setVolume] = useState(0.9)
   const [muted, setMuted] = useState(false)
   const [shuffle, setShuffle] = useState(false)
-  const [repeatMode, setRepeatMode] = useState('off') // 'off' | 'one' | 'all'
+  const [repeatMode, setRepeatMode] = useState('off') 
   const [expanded, setExpanded] = useState(false)
   const [viewMusicPlayer, setViewMusicPlayer] = useState(false)
 
-  // 1. مزامنة songs و current مع 'music' الخارجية
+
+  // 1. مزامنة songs و current مع 'music' الخارجية (لتحسين التحديث)
   useEffect(() => {
     if (music && music.length) {
       setSongs(music)
@@ -48,54 +49,47 @@ export const MusicPlayerProvider = ({ children }) => {
 
 
   // =============================================================
-  // ⏸️ دالة الإيقاف المؤقت (Pause) - ✅ تحسين
-  // تم جعلها بسيطة ومباشرة: أوقف الصوت، وحدّث الحالة، وألغِ طلب التشغيل.
+  // ⏸️ دالة الإيقاف المؤقت (Pause)
   const pause = useCallback(() => {
     if (!audioRef.current) return
     audioRef.current.pause()
-    setPlaying(false) 
+    // ⚠️ يتم تحديث setPlaying(false) بواسطة مستمع 'pause' في useEffect
     isPlaybackRequested.current = false; 
-    console.log('Music paused by user/system.')
+    console.log('Pause requested.')
   }, []) 
   // =============================================================
 
 
   // =============================================================
-  // ⏯️ دالة التشغيل الرئيسية (Play) - ✅ تحسين
-  // تم فصلها عن تحديث حالة isReady. تعتمد على isPlaybackRequested.
+  // ⏯️ دالة التشغيل الرئيسية (Play)
   const play = useCallback(async (isUserAction = false) => {
     const audio = audioRef.current
-    if (!audio || !current?.url || playing || !isReady) return 
-    
-    // إذا لم يكن جاهزاً بعد، أو كان قيد التشغيل بالفعل، نخرج.
-    if (!isReady) {
-        console.log('Audio not ready, deferring play.')
-        return
-    }
+    // نخرج إذا لم يكن هناك صوت أو مقطع، أو لم يكن جاهزاً بعد.
+    if (!audio || !current?.url || !isReady) return 
 
-    // إذا كانت ضغطة من المستخدم، نسجل ذلك ليتم التشغيل لاحقاً في useEffect إذا لم يتم فوراً
     if (isUserAction) {
         isPlaybackRequested.current = true;
     }
     
-    if (!isPlaybackRequested.current) return; // لا تشغل إلا إذا كان هناك طلب تشغيل فعال
+    // التشغيل يتم فقط إذا كان مطلوباً (مستخدم ضغط، أو بعد تحميل مسار جديد)
+    if (!isPlaybackRequested.current) return; 
 
     try {
       await audio.play()
-      setPlaying(true) 
-      console.log('Music playing.')
+      // ⚠️ يتم تحديث setPlaying(true) بواسطة مستمع 'play' في useEffect
+      console.log('Play requested.')
       
-      // منطق تسجيل الاستماع
       if (current?._id && trackViewed.current !== current._id) {
         listenMusic(current._id)
         trackViewed.current = current._id 
       }
     } catch (err) {
       console.error('Play failed (Autoplay prevented?):', err)
+      // إذا فشل التشغيل (عادةً بسبب المتصفح)، نؤكد حالة الإيقاف
       setPlaying(false); 
       isPlaybackRequested.current = false;
     }
-  }, [playing, current, listenMusic, isReady]) // ✅ إضافة isReady للـ dependencies
+  }, [current, listenMusic, isReady]) 
   // =============================================================
 
 
@@ -106,12 +100,53 @@ export const MusicPlayerProvider = ({ children }) => {
   // 🔊 تغيير المقطع الحالي
   const setTrack = useCallback((track, index = 0, allSongs = songs) => {
     if (!track) return
-    // 💡 التعديل: عند طلب تغيير المسار يدوياً، نعتبر التشغيل مطلوباً
-    isPlaybackRequested.current = true; 
+    isPlaybackRequested.current = true; // طلب تشغيل بعد تغيير المسار
     setCurrent(track)
     setCurrentIndex(index)
     if (allSongs?.length) setSongs(allSongs)
   }, [songs])
+
+
+  // ⏭️ التالي
+  const next = useCallback(() => {
+    if (!songs.length) return
+    isPlaybackRequested.current = playing || isPlaybackRequested.current; 
+
+    if (shuffle) {
+      let rand;
+      do {
+        rand = Math.floor(Math.random() * songs.length);
+      } while (rand === currentIndex && songs.length > 1); 
+      return setTrack(songs[rand], rand, songs)
+    }
+    let nextIndex = currentIndex + 1
+    if (nextIndex >= songs.length) {
+      if (repeatMode === 'all') nextIndex = 0
+      else {
+        pause(); // إيقاف التشغيل
+        if (songs.length > 0) setTrack(songs[0], 0, songs);
+        return; 
+      }
+    }
+    setTrack(songs[nextIndex], nextIndex, songs)
+  }, [songs, currentIndex, shuffle, repeatMode, setTrack, playing, pause])
+
+
+  // 🎧 السابق
+  const prev = useCallback(() => {
+    if (!songs.length) return
+    isPlaybackRequested.current = playing || isPlaybackRequested.current; 
+
+    if (shuffle) {
+      let rand;
+      do {
+        rand = Math.floor(Math.random() * songs.length);
+      } while (rand === currentIndex && songs.length > 1); 
+      return setTrack(songs[rand], rand, songs)
+    }
+    const newIndex = (currentIndex - 1 + songs.length) % songs.length
+    setTrack(songs[newIndex], newIndex, songs)
+  }, [songs, currentIndex, shuffle, setTrack, playing]) 
 
 
   // 2. تحديث src والتحميل
@@ -129,7 +164,7 @@ export const MusicPlayerProvider = ({ children }) => {
       audio.src = current.url;
       audio.load();
       
-      // إعادة تعيين كل حالات التشغيل والتقدم
+      // إعادة تعيين حالات التشغيل والتقدم
       setPlaying(false); 
       setIsReady(false); // ليس جاهزاً حتى يتم التحميل
       trackViewed.current = null;
@@ -137,111 +172,74 @@ export const MusicPlayerProvider = ({ children }) => {
       setDuration(0);
     }
     
-  }, [current, pause]) // ✅ إزالة `play` لتجنب الحلقات اللانهائية
- // ⏭️ التالي
-  const next = useCallback(() => {
-    if (!songs.length) return
-    // إذا كان المقطع يلعب، فالانتقال للمقطع التالي يعني استمرار التشغيل
-    isPlaybackRequested.current = playing || isPlaybackRequested.current; 
-
-    if (shuffle) {
-      let rand;
-      do {
-        rand = Math.floor(Math.random() * songs.length);
-      } while (rand === currentIndex && songs.length > 1); 
-      return setTrack(songs[rand], rand, songs)
-    }
-    let nextIndex = currentIndex + 1
-    if (nextIndex >= songs.length) {
-      if (repeatMode === 'all') nextIndex = 0
-      else {
-        setPlaying(false); 
-        isPlaybackRequested.current = false;
-        if (songs.length > 0) setTrack(songs[0], 0, songs);
-        return; 
-      }
-    }
-    setTrack(songs[nextIndex], nextIndex, songs)
-  }, [songs, currentIndex, shuffle, repeatMode, setTrack, playing])
+  }, [current, pause]) 
 
 
-  // 🎧 السابق (بدون تغيير)
-  const prev = useCallback(() => {
-    if (!songs.length) return
-    isPlaybackRequested.current = playing || isPlaybackRequested.current; 
-
-    if (shuffle) {
-      let rand;
-      do {
-        rand = Math.floor(Math.random() * songs.length);
-      } while (rand === currentIndex && songs.length > 1); 
-      return setTrack(songs[rand], rand, songs)
-    }
-    const newIndex = (currentIndex - 1 + songs.length) % songs.length
-    setTrack(songs[newIndex], newIndex, songs)
-  }, [songs, currentIndex, shuffle, setTrack, playing]) 
-
-
-
-  // 3. مستمعو أحداث عنصر الـ <audio> - ✅ تحسين ومزامنة
+  // 3. مستمعو أحداث عنصر الـ <audio> - ✅ الحل لمشكلة الـ Pause (المزامنة)
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
+
+    // 💡 المستمعات التي تضمن حل مشكلة الـ Pause:
+    const onPlaying = () => setPlaying(true);
+    const onPaused = () => setPlaying(false);
     
-    // تحديث حالة الجاهزية
+    // المستمع الخاص بالجاهزية والتحميل
     const onLoadedData = () => {
         setIsReady(true);
         setDuration(audio.duration);
-        console.log('Audio data loaded. Ready to play.');
-        // 💡 منطق التشغيل المؤجل: محاولة التشغيل فور الجاهزية إذا كان مطلوباً
+        // محاولة التشغيل المؤجل فور الجاهزية إذا كان مطلوباً
         if (isPlaybackRequested.current) {
-            play(false); // ليس عمل مستخدم مباشر، بل متابعة لطلب سابق
+            play(false); 
         }
     }
     
-    // تحديث شريط التقدم
-    const onTime = () => setProgress(audio.currentTime);
+    const onTime = () => setProgress(audio.currentTime)
     
-    // عند الانتهاء
     const onEnd = () => {
-        setPlaying(false) 
+        // حالة الانتهاء
         if (repeatMode === 'one') {
-          if (audioRef.current) audioRef.current.currentTime = 0;
-          isPlaybackRequested.current = true; // طلب تشغيل للتكرار
+          if (audio) audio.currentTime = 0;
+          isPlaybackRequested.current = true; 
           play(false); 
         } else {
           next(); 
         }
+        // حالة 'playing' سيتم تحديثها إلى false بواسطة مستمع 'pause' 
     }
     
     // ربط المستمعين
     audio.addEventListener('loadeddata', onLoadedData)
     audio.addEventListener('timeupdate', onTime)
     audio.addEventListener('ended', onEnd)
+    audio.addEventListener('play', onPlaying) // ✅ المتصفح بدأ التشغيل
+    audio.addEventListener('pause', onPaused) // ✅ المتصفح أوقف التشغيل
+
     
     return () => {
       // إزالة المستمعين
       audio.removeEventListener('loadeddata', onLoadedData)
       audio.removeEventListener('timeupdate', onTime)
       audio.removeEventListener('ended', onEnd)
+      audio.removeEventListener('play', onPlaying)
+      audio.removeEventListener('pause', onPaused)
     }
-  }, [repeatMode, next, play]) // ✅ إضافة play و next للـ deps
+  }, [repeatMode, next, play])
 
 
- 
-  // ⏱️ التقدم (Seek) - ✅ تحسين
+  // ⏱️ التقدم (Seek) 
   const seek = (time) => {
     if (!audioRef.current) return
     audioRef.current.currentTime = time
     setProgress(time)
-    // عند تحريك شريط التقدم، نعتبره طلباً للتشغيل إذا لم يكن قيد الإيقاف بالفعل
+    // عند تحريك شريط التقدم، نعتبره طلباً للتشغيل إذا لم يكن قيد التشغيل بالفعل
     if (!playing) {
         isPlaybackRequested.current = true;
-        play(false); // نستخدم play(false) هنا لأنها ليست ضغطة زر
+        play(false); 
     }
   }
 
-  // 🔊 الصوت (بدون تغيير)
+  // 🔊 الصوت
   useEffect(() => {
     if (!audioRef.current) return
     audioRef.current.volume = muted ? 0 : volume
@@ -282,7 +280,7 @@ export const MusicPlayerProvider = ({ children }) => {
         setExpanded,
         viewMusicPlayer,
         setViewMusicPlayer,
-        isReady // ✅ إضافة isReady للقيمة
+        isReady // ✅ إرسال isReady
       }}
     >
       <audio ref={audioRef} preload="metadata" hidden /> 
