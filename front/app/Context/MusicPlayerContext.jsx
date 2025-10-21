@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react'
-import { useMusic } from './MusicContext' // افترض أن هذا المسار صحيح
+import { useMusic } from './MusicContext' 
 
 const MusicPlayerContext = createContext()
 
@@ -9,9 +9,7 @@ export const MusicPlayerProvider = ({ children }) => {
   const audioRef = useRef(null)
   const { listenMusic, music } = useMusic() 
   const trackViewed = useRef(null) 
-  // ✅ حالة الجاهزية (لمؤشر التحميل)
   const [isReady, setIsReady] = useState(false); 
-  // ✅ طلب التشغيل (لمقاومة منع التشغيل التلقائي)
   const isPlaybackRequested = useRef(false);
 
   // ✨ الحالة الأولية 
@@ -29,7 +27,7 @@ export const MusicPlayerProvider = ({ children }) => {
   const [viewMusicPlayer, setViewMusicPlayer] = useState(false)
 
 
-  // 1. مزامنة songs و current مع 'music' الخارجية (لتحسين التحديث)
+  // 1. مزامنة songs و current مع 'music' الخارجية
   useEffect(() => {
     if (music && music.length) {
       setSongs(music)
@@ -49,11 +47,10 @@ export const MusicPlayerProvider = ({ children }) => {
 
 
   // =============================================================
-  // ⏸️ دالة الإيقاف المؤقت (Pause)
+  // ⏸️ دالة الإيقاف المؤقت (Pause) - ✅ لا تحدّث حالة playing مباشرة
   const pause = useCallback(() => {
     if (!audioRef.current) return
     audioRef.current.pause()
-    // ⚠️ يتم تحديث setPlaying(false) بواسطة مستمع 'pause' في useEffect
     isPlaybackRequested.current = false; 
     console.log('Pause requested.')
   }, []) 
@@ -61,22 +58,20 @@ export const MusicPlayerProvider = ({ children }) => {
 
 
   // =============================================================
-  // ⏯️ دالة التشغيل الرئيسية (Play)
+  // ⏯️ دالة التشغيل الرئيسية (Play) - ✅ لا تحدّث حالة playing مباشرة
   const play = useCallback(async (isUserAction = false) => {
     const audio = audioRef.current
-    // نخرج إذا لم يكن هناك صوت أو مقطع، أو لم يكن جاهزاً بعد.
     if (!audio || !current?.url || !isReady) return 
 
     if (isUserAction) {
         isPlaybackRequested.current = true;
     }
     
-    // التشغيل يتم فقط إذا كان مطلوباً (مستخدم ضغط، أو بعد تحميل مسار جديد)
     if (!isPlaybackRequested.current) return; 
 
     try {
       await audio.play()
-      // ⚠️ يتم تحديث setPlaying(true) بواسطة مستمع 'play' في useEffect
+      // setPlaying(true) يتم تحديثها الآن عبر مستمع 'play'
       console.log('Play requested.')
       
       if (current?._id && trackViewed.current !== current._id) {
@@ -85,7 +80,6 @@ export const MusicPlayerProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Play failed (Autoplay prevented?):', err)
-      // إذا فشل التشغيل (عادةً بسبب المتصفح)، نؤكد حالة الإيقاف
       setPlaying(false); 
       isPlaybackRequested.current = false;
     }
@@ -97,17 +91,16 @@ export const MusicPlayerProvider = ({ children }) => {
   const togglePlay = () => (playing ? pause() : play(true)) // isUserAction = true
 
 
-  // 🔊 تغيير المقطع الحالي
+  // 🔊 تغيير المقطع الحالي (setTrack, next, prev, seek - كما كانت)
   const setTrack = useCallback((track, index = 0, allSongs = songs) => {
     if (!track) return
-    isPlaybackRequested.current = true; // طلب تشغيل بعد تغيير المسار
+    isPlaybackRequested.current = true; 
     setCurrent(track)
     setCurrentIndex(index)
     if (allSongs?.length) setSongs(allSongs)
   }, [songs])
 
-
-  // ⏭️ التالي
+  // ... (Prev and Next functions remain the same) ...
   const next = useCallback(() => {
     if (!songs.length) return
     isPlaybackRequested.current = playing || isPlaybackRequested.current; 
@@ -123,7 +116,7 @@ export const MusicPlayerProvider = ({ children }) => {
     if (nextIndex >= songs.length) {
       if (repeatMode === 'all') nextIndex = 0
       else {
-        pause(); // إيقاف التشغيل
+        pause(); 
         if (songs.length > 0) setTrack(songs[0], 0, songs);
         return; 
       }
@@ -131,8 +124,6 @@ export const MusicPlayerProvider = ({ children }) => {
     setTrack(songs[nextIndex], nextIndex, songs)
   }, [songs, currentIndex, shuffle, repeatMode, setTrack, playing, pause])
 
-
-  // 🎧 السابق
   const prev = useCallback(() => {
     if (!songs.length) return
     isPlaybackRequested.current = playing || isPlaybackRequested.current; 
@@ -146,7 +137,7 @@ export const MusicPlayerProvider = ({ children }) => {
     }
     const newIndex = (currentIndex - 1 + songs.length) % songs.length
     setTrack(songs[newIndex], newIndex, songs)
-  }, [songs, currentIndex, shuffle, setTrack, playing]) 
+  }, [songs, currentIndex, shuffle, setTrack, playing])
 
 
   // 2. تحديث src والتحميل
@@ -158,15 +149,13 @@ export const MusicPlayerProvider = ({ children }) => {
         return;
     }
 
-    // إذا كان المسار مختلفاً: قم بتغيير المصدر وإعادة التعيين
     if (audio.src !== current.url) {
       audio.pause();
       audio.src = current.url;
       audio.load();
       
-      // إعادة تعيين حالات التشغيل والتقدم
       setPlaying(false); 
-      setIsReady(false); // ليس جاهزاً حتى يتم التحميل
+      setIsReady(false); 
       trackViewed.current = null;
       setProgress(0);
       setDuration(0);
@@ -175,20 +164,18 @@ export const MusicPlayerProvider = ({ children }) => {
   }, [current, pause]) 
 
 
-  // 3. مستمعو أحداث عنصر الـ <audio> - ✅ الحل لمشكلة الـ Pause (المزامنة)
+  // 3. مستمعو أحداث عنصر الـ <audio> - ✅ هذا هو الجزء الذي يحل مشكلة الأيقونة
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
 
-    // 💡 المستمعات التي تضمن حل مشكلة الـ Pause:
+    // 💡 NEW: يتم تحديث حالة playing فقط عندما يطلق عنصر الصوت الحدث
     const onPlaying = () => setPlaying(true);
     const onPaused = () => setPlaying(false);
     
-    // المستمع الخاص بالجاهزية والتحميل
     const onLoadedData = () => {
         setIsReady(true);
         setDuration(audio.duration);
-        // محاولة التشغيل المؤجل فور الجاهزية إذا كان مطلوباً
         if (isPlaybackRequested.current) {
             play(false); 
         }
@@ -197,7 +184,6 @@ export const MusicPlayerProvider = ({ children }) => {
     const onTime = () => setProgress(audio.currentTime)
     
     const onEnd = () => {
-        // حالة الانتهاء
         if (repeatMode === 'one') {
           if (audio) audio.currentTime = 0;
           isPlaybackRequested.current = true; 
@@ -205,16 +191,16 @@ export const MusicPlayerProvider = ({ children }) => {
         } else {
           next(); 
         }
-        // حالة 'playing' سيتم تحديثها إلى false بواسطة مستمع 'pause' 
+        // حالة 'playing' سيتم تحديثها إلى false بواسطة مستمع 'pause' الذي يتم إطلاقه تلقائياً
     }
     
     // ربط المستمعين
     audio.addEventListener('loadeddata', onLoadedData)
     audio.addEventListener('timeupdate', onTime)
     audio.addEventListener('ended', onEnd)
-    audio.addEventListener('play', onPlaying) // ✅ المتصفح بدأ التشغيل
-    audio.addEventListener('pause', onPaused) // ✅ المتصفح أوقف التشغيل
-
+    // 🎧 المستمعات الجديدة التي تضمن المزامنة:
+    audio.addEventListener('play', onPlaying) 
+    audio.addEventListener('pause', onPaused)
     
     return () => {
       // إزالة المستمعين
@@ -232,7 +218,6 @@ export const MusicPlayerProvider = ({ children }) => {
     if (!audioRef.current) return
     audioRef.current.currentTime = time
     setProgress(time)
-    // عند تحريك شريط التقدم، نعتبره طلباً للتشغيل إذا لم يكن قيد التشغيل بالفعل
     if (!playing) {
         isPlaybackRequested.current = true;
         play(false); 
@@ -249,38 +234,12 @@ export const MusicPlayerProvider = ({ children }) => {
   return (
     <MusicPlayerContext.Provider
       value={{
-        audioRef,
-        current,
-        setCurrent,
-        playing,
-        play,
-        pause,
-        togglePlay,
-        progress,
-        setProgress,
-        duration,
-        setDuration,
-        volume,
-        setVolume,
-        muted,
-        setMuted,
-        shuffle,
-        setShuffle,
-        repeatMode,
-        setRepeatMode,
-        next,
-        prev,
-        seek,
-        setTrack,
-        songs,
-        setSongs,
-        currentIndex,
-        setCurrentIndex,
-        expanded,
-        setExpanded,
-        viewMusicPlayer,
-        setViewMusicPlayer,
-        isReady // ✅ إرسال isReady
+        audioRef, current, setCurrent, playing, play, pause, togglePlay,
+        progress, setProgress, duration, setDuration, volume, setVolume,
+        muted, setMuted, shuffle, setShuffle, repeatMode, setRepeatMode,
+        next, prev, seek, setTrack, songs, setSongs, currentIndex,
+        setCurrentIndex, expanded, setExpanded, viewMusicPlayer,
+        setViewMusicPlayer, isReady
       }}
     >
       <audio ref={audioRef} preload="metadata" hidden /> 
