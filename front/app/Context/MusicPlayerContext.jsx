@@ -8,7 +8,7 @@ const MusicPlayerContext = createContext()
 export const MusicPlayerProvider = ({ children }) => {
   const audioRef = useRef(null)
   // 'viewMusic' هي دالة تسجيل الاستماع، 'music' هي قائمة المقاطع
-  const { addListen, music } = useMusic() 
+  const { addListen, music,viewMusic } = useMusic() 
   // لتتبع الـ ID الذي تم تسجيل استماعه بالفعل (لمنع التكرار)
   const trackViewed = useRef(null) 
   // لتتبع ما إذا كان التشغيل مطلوبًا بعد تغيير المقطع (مهم لمقاومة منع التشغيل التلقائي)
