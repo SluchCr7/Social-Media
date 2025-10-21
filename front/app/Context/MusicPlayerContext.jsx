@@ -138,6 +138,49 @@ export const MusicPlayerProvider = ({ children }) => {
     }
     
   }, [current, pause]) // ✅ إزالة `play` لتجنب الحلقات اللانهائية
+ // ⏭️ التالي
+  const next = useCallback(() => {
+    if (!songs.length) return
+    // إذا كان المقطع يلعب، فالانتقال للمقطع التالي يعني استمرار التشغيل
+    isPlaybackRequested.current = playing || isPlaybackRequested.current; 
+
+    if (shuffle) {
+      let rand;
+      do {
+        rand = Math.floor(Math.random() * songs.length);
+      } while (rand === currentIndex && songs.length > 1); 
+      return setTrack(songs[rand], rand, songs)
+    }
+    let nextIndex = currentIndex + 1
+    if (nextIndex >= songs.length) {
+      if (repeatMode === 'all') nextIndex = 0
+      else {
+        setPlaying(false); 
+        isPlaybackRequested.current = false;
+        if (songs.length > 0) setTrack(songs[0], 0, songs);
+        return; 
+      }
+    }
+    setTrack(songs[nextIndex], nextIndex, songs)
+  }, [songs, currentIndex, shuffle, repeatMode, setTrack, playing])
+
+
+  // 🎧 السابق (بدون تغيير)
+  const prev = useCallback(() => {
+    if (!songs.length) return
+    isPlaybackRequested.current = playing || isPlaybackRequested.current; 
+
+    if (shuffle) {
+      let rand;
+      do {
+        rand = Math.floor(Math.random() * songs.length);
+      } while (rand === currentIndex && songs.length > 1); 
+      return setTrack(songs[rand], rand, songs)
+    }
+    const newIndex = (currentIndex - 1 + songs.length) % songs.length
+    setTrack(songs[newIndex], newIndex, songs)
+  }, [songs, currentIndex, shuffle, setTrack, playing]) 
+
 
 
   // 3. مستمعو أحداث عنصر الـ <audio> - ✅ تحسين ومزامنة
@@ -185,50 +228,7 @@ export const MusicPlayerProvider = ({ children }) => {
   }, [repeatMode, next, play]) // ✅ إضافة play و next للـ deps
 
 
-  // ⏭️ التالي
-  const next = useCallback(() => {
-    if (!songs.length) return
-    // إذا كان المقطع يلعب، فالانتقال للمقطع التالي يعني استمرار التشغيل
-    isPlaybackRequested.current = playing || isPlaybackRequested.current; 
-
-    if (shuffle) {
-      let rand;
-      do {
-        rand = Math.floor(Math.random() * songs.length);
-      } while (rand === currentIndex && songs.length > 1); 
-      return setTrack(songs[rand], rand, songs)
-    }
-    let nextIndex = currentIndex + 1
-    if (nextIndex >= songs.length) {
-      if (repeatMode === 'all') nextIndex = 0
-      else {
-        setPlaying(false); 
-        isPlaybackRequested.current = false;
-        if (songs.length > 0) setTrack(songs[0], 0, songs);
-        return; 
-      }
-    }
-    setTrack(songs[nextIndex], nextIndex, songs)
-  }, [songs, currentIndex, shuffle, repeatMode, setTrack, playing])
-
-
-  // 🎧 السابق (بدون تغيير)
-  const prev = useCallback(() => {
-    if (!songs.length) return
-    isPlaybackRequested.current = playing || isPlaybackRequested.current; 
-
-    if (shuffle) {
-      let rand;
-      do {
-        rand = Math.floor(Math.random() * songs.length);
-      } while (rand === currentIndex && songs.length > 1); 
-      return setTrack(songs[rand], rand, songs)
-    }
-    const newIndex = (currentIndex - 1 + songs.length) % songs.length
-    setTrack(songs[newIndex], newIndex, songs)
-  }, [songs, currentIndex, shuffle, setTrack, playing]) 
-
-
+ 
   // ⏱️ التقدم (Seek) - ✅ تحسين
   const seek = (time) => {
     if (!audioRef.current) return
