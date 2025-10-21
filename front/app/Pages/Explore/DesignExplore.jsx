@@ -266,7 +266,8 @@ const DesignExplore = ({
                         <div className="text-center mt-4 pt-2 border-t border-lightMode-border dark:border-darkMode-border">
                             {/* استخدم مكون Link من Next.js بدلاً من 'a' لتطبيق أفضل */}
                             <a 
-                                href={`/search/results?q=${encodeURIComponent(search.trim())}`} 
+                                // تأكد من أن المسار هو /search/results
+                                href={`/Pages/Search/results?q=${encodeURIComponent(search.trim())}`} 
                                 className="text-primary-color dark:text-primary-dark hover:underline font-medium text-sm transition"
                             >
                                 {t("See all results for '")}{search.trim()}{t("'")}
