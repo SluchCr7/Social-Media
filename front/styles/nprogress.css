@@ -4,7 +4,7 @@
 }
 
 #nprogress .bar {
-  background: #e11d48; /* لون الشريط (أحمر مثلاً) */
+  background: #5558f1; /* لون الشريط (أحمر مثلاً) */
   position: fixed;
   z-index: 9999;
   top: 0;

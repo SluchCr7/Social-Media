@@ -15,7 +15,7 @@ const ExpandedWindow = () => {
   const {t} = useTranslation()
   const { 
     current, playing, togglePlay, progress, duration, next, prev, 
-    shuffle, setShuffle, repeatMode, setRepeatMode, expanded, setExpanded 
+    shuffle, setShuffle, repeatMode, setRepeatMode, expanded, setExpanded,isReady 
   } = useMusicPlayer()
 
   const { likeMusic } = useMusic()
