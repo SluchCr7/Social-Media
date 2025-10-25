@@ -20,6 +20,8 @@ import SongPlayer from './MusicPage/SongPlayer';
 import ExpandedWindow from './MusicPage/ExpandedWindow';
 import { useTranslate } from '../Context/TranslateContext';
 import CookieConsent from './CookieConsent';
+import NProgress from 'nprogress'
+import '@/styles/nprogress.css'
 const LayoutComponent = ({ children }) => {
   const [loading, setLoading] = useState(true); // للتحكم في الـ Loader
 
@@ -60,7 +62,19 @@ const LayoutComponent = ({ children }) => {
     '/Pages/ResetPassword/[id]/[token]',
     '/Pages/UserVerify/[id]/verify/[token]',
   ].includes(pathname);
+  const pathname = usePathname()
 
+  useEffect(() => {
+    NProgress.start()
+    const timeout = setTimeout(() => {
+      NProgress.done()
+    }, 400) // لتنعيم الحركة
+
+    return () => {
+      clearTimeout(timeout)
+      NProgress.done()
+    }
+  }, [pathname])
   // تشغيل الـ Loader فقط في أول مرة يدخل فيها المستخدم الموقع
   useEffect(() => {
     const hasVisited = sessionStorage.getItem("hasVisited");

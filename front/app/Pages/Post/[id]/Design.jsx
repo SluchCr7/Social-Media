@@ -13,7 +13,10 @@ import PostPhotos from "@/app/Component/Post/PostPhotos";
 import PostHashtags from "@/app/Component/Post/PostHashtags";
 import PostActions from "@/app/Component/Post/PostActions";
 import SharedTitle from "@/app/Component/Post/SharedTitle";
-import Comment from "@/app/Component/Comment";
+// import Comment from "@/app/Component/Comment";
+const Comment = dynamic(() => import("@/app/Component/Comment"), {
+  loading: () => <p>Loading comment...</p>,
+})
 import CommentSkeleton from "@/app/Skeletons/CommentSkeleton";
 import { useTranslation } from "react-i18next";
 
