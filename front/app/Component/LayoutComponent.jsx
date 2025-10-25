@@ -62,7 +62,6 @@ const LayoutComponent = ({ children }) => {
     '/Pages/ResetPassword/[id]/[token]',
     '/Pages/UserVerify/[id]/verify/[token]',
   ].includes(pathname);
-  const pathname = usePathname()
 
   useEffect(() => {
     NProgress.start()
