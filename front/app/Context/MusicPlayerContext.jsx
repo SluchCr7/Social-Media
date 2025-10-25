@@ -85,20 +85,46 @@ export const MusicPlayerProvider = ({ children }) => {
   }, [playing, play, pause, isReady])
 
   // تغيير المسار
+  // const setTrack = useCallback(
+  //   (track, index = 0, allSongs = songs) => {
+  //     if (!track) return
+  //     const audio = audioRef.current
+  //     audio?.pause()
+  //     setPlaying(false)
+  //     isPlaybackRequested.current = true
+  //     setCurrent(track)
+  //     setCurrentIndex(index)
+  //     if (allSongs?.length) setSongs(allSongs)
+  //     console.log('🎵 Track changed:', track.title)
+  //   },
+  //   [songs]
+  // )
   const setTrack = useCallback(
     (track, index = 0, allSongs = songs) => {
-      if (!track) return
-      const audio = audioRef.current
-      audio?.pause()
-      setPlaying(false)
-      isPlaybackRequested.current = true
-      setCurrent(track)
-      setCurrentIndex(index)
-      if (allSongs?.length) setSongs(allSongs)
-      console.log('🎵 Track changed:', track.title)
+      if (!track) return;
+      const audio = audioRef.current;
+      if (audio) {
+        audio.pause();
+        audio.src = ''; // ✅ تنظيف المصدر قبل تعيين الجديد
+      }
+
+      setPlaying(false);
+      isPlaybackRequested.current = true;
+      setCurrent(track);
+      setCurrentIndex(index);
+      if (allSongs?.length) setSongs(allSongs);
+
+      // ✅ تحميل المصدر مباشرة بعد التحديث
+      setTimeout(() => {
+        if (audioRef.current && track?.url) {
+          audioRef.current.src = track.url;
+          audioRef.current.load();
+          console.log('🎵 Track switched to:', track.title);
+        }
+      }, 50);
     },
     [songs]
-  )
+  );
 
   // التالي
   const next = useCallback(() => {

@@ -6,6 +6,7 @@ import PostPhotos from './PostPhotos'
 import PostLinks from './PostLinks'
 import Link from 'next/link'
 import Image from 'next/image'
+import { formatRelativeTime } from '@/app/utils/FormatDataCreatedAt'
 
 const SharedPost = ({
     original,
@@ -45,7 +46,7 @@ const SharedPost = ({
             </UserHoverCard>
             </Link>
             <span className="text-gray-400 text-xs whitespace-nowrap">
-            {new Date(original?.createdAt).toLocaleDateString()}
+                {formatRelativeTime(original?.createdAt)}
             </span>
         </div>
 

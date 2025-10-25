@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useCommunity } from '@/app/Context/CommunityContext'
 import { useAuth } from '@/app/Context/AuthContext'
 import MaidDesign from './MaidDesign'
+import { useGetData } from '@/app/Custome/useGetData'
 
 // ================= Main CommunityPage =================
 export default function CommunityPage() {
@@ -15,7 +16,7 @@ export default function CommunityPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [sortBy, setSortBy] = useState('Newest')
   const [showCreateModal, setShowCreateModal] = useState(false)
-
+  const {userData} = useGetData(user?._id)
   const [form, setForm] = useState({
     Name: '',
     description: '',
@@ -122,6 +123,7 @@ export default function CommunityPage() {
 
   return (
     <MaidDesign
+      user={userData}
       categories={categories}
       activeCategory={activeCategory}
       setActiveCategory={setActiveCategory}

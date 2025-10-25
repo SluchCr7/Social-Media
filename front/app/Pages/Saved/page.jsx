@@ -66,7 +66,8 @@ export default function SavedPage() {
 
   // 3. دالة موحدة لتشغيل/إيقاف الموسيقى باستخدام المشغل العالمي
 // 3. دالة موحدة لتشغيل/إيقاف الموسيقى باستخدام المشغل العالمي
-  const handleMusicAction = (track) => {
+  const handleMusicAction = async (track) => {
+    // إذا كانت الأغنية الحالية هي نفسها
     if (current && current.id === track.id) {
       if (playing) {
         pause();
@@ -75,14 +76,25 @@ export default function SavedPage() {
         play(true);
         setExpanded(true);
       }
-    } else {
-      const trackIndex = filteredMusic.findIndex(m => m.id === track.id);
-      setTrack(track, trackIndex, filteredMusic);
-      setExpanded(true);
-      // نطلب التشغيل اليدوي فور تغيير الأغنية
-      play(true);
+      return;
     }
+
+    // 🟢 إيقاف الصوت الحالي بالكامل أولاً قبل التبديل
+    pause();
+
+    // 🕒 ننتظر لحظة لتحديث src داخل MusicPlayerContext قبل التشغيل
+    const trackIndex = filteredMusic.findIndex(m => m.id === track.id);
+    setTrack(track, trackIndex, filteredMusic);
+
+    // نفتح واجهة الموسيقى الموسعة
+    setExpanded(true);
+
+    // ⚡ ننتظر حتى يقوم context بتحميل الأغنية الجديدة ثم نشغلها
+    setTimeout(() => {
+      play(true);
+    }, 150); // 150ms كافية لتهيئة الـ audioRef بدون تأخير ملحوظ
   };
+
 
 
   // 4. مزامنة قائمة الأغاني مع المشغل العالمي عند تفعيل تبويب الموسيقى
