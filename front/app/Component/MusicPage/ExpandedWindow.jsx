@@ -119,12 +119,16 @@ const ExpandedWindow = () => {
               </button>
 
               <button
-                onClick={togglePlay}
+                onClick={() => {
+                  if (!isReady) return; // لا تشغل قبل تحميل الملف
+                  togglePlay();
+                }}
                 className="p-4 sm:p-5 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 
-                           text-white shadow-lg hover:scale-110 transition-transform"
+                          text-white shadow-lg hover:scale-110 transition-transform"
               >
                 {playing ? <FaPause size={22} /> : <FaPlay size={22} />}
               </button>
+
 
               <button onClick={next} className="p-2.5 sm:p-3 text-gray-300 hover:text-white transition">
                 <FaStepForward size={18} className="sm:text-xl" />
