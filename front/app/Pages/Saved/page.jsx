@@ -184,57 +184,112 @@ export default function SavedPage() {
               )}
             </motion.div>
           )}
-          {active === 'music' && (
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white/3 border border-white/6 rounded-3xl p-6 backdrop-blur-md shadow-2xl dark:shadow-inner">
-              {filteredMusic.length === 0 ? <EmptyState /> : (
-                <div className="space-y-4">
-                  {filteredMusic.map(track => {
+          {active === 'music' && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-gradient-to-b from-white/10 to-white/5 dark:from-black/40 dark:to-black/20 rounded-3xl p-6 backdrop-blur-xl border border-white/10 shadow-xl"
+            >
+              {filteredMusic.length === 0 ? (
+                <EmptyState />
+              ) : (
+                <div className="space-y-4">
+                  {filteredMusic.map((track, index) => {
                     const isPlayingThis = playing && current && current.id === track.id;
-                    
-                    return (
-                      <motion.div 
-                        key={track.id} 
-                        whileHover={{ scale: 1.015, boxShadow: '0 6px 15px rgba(0,0,0,0.2)' }} 
-                        transition={{ duration: 0.2 }}
-                        className={`flex items-center gap-4 p-3 rounded-2xl transition duration-200 cursor-pointer ${isPlayingThis ? 'bg-indigo-900/40 border border-indigo-700/50 shadow-lg' : 'bg-white/5 hover:bg-white/10'}`} 
-                        onClick={() => {
-                            handleMusicAction(track);
-                            setExpanded(true); // 💡 التعديل هنا: فتح النافذة عند النقر على عنصر الأغنية
-                        }} 
-                      >
-                        <Image width={800} height={800} src={track.cover} alt={track.title} className="w-16 h-16 rounded-xl object-cover shadow-lg" />
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className={`font-semibold text-lg truncate ${isPlayingThis ? 'text-cyan-400' : 'text-lightMode-fg dark:text-darkMode-fg'}`}>{track.title}</div> 
-                          <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2 mt-0.5">{track.artist}</div>
-                        </div>
-                        
-                        <div className="text-sm text-lightMode-text2 dark:text-darkMode-text2 hidden sm:block">{track.duration}</div>
 
-                        {/* زر التشغيل/الإيقاف المحسن */}
-                        <button 
-                          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 ${
-                            isPlayingThis 
-                              ? 'bg-red-500/90 text-white shadow-xl shadow-red-500/30' 
-                              : 'bg-gradient-to-br from-indigo-600 to-cyan-500 text-black shadow-xl shadow-indigo-500/30'
-                          }`}
-                          // منع انتشار النقر لمنع استدعاء handleMusicAction مرتين
-                          onClick={(e) => {
-                            e.stopPropagation(); 
-                            handleMusicAction(track);
-                            setExpanded(true); // 💡 التعديل هنا: فتح النافذة عند النقر على زر التشغيل/الإيقاف
-                          }} 
-                        >
-                          {isPlayingThis ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5 ml-0.5" />}
-                        </button>
+                    return (
+                      <motion.div
+                        key={track.id}
+                        whileHover={{ scale: 1.02 }}
+                        transition={{ duration: 0.2 }}
+                        onClick={() => {
+                          handleMusicAction(track);
+                          setExpanded(true);
+                        }}
+                        className={`relative flex items-center gap-5 p-4 rounded-2xl border transition-all cursor-pointer
+                          ${
+                            isPlayingThis
+                              ? 'bg-gradient-to-r from-indigo-600/70 to-cyan-500/50 border-indigo-400 shadow-lg shadow-indigo-500/40'
+                              : 'bg-white/5 hover:bg-white/10 dark:hover:bg-white/5 border-white/10'
+                          }`}
+                      >
+                        {/* رقم التراك */}
+                        <div className="hidden sm:block w-6 text-center text-sm font-semibold text-gray-400">
+                          {index + 1}
+                        </div>
 
-                      </motion.div>
-                    )
-                  })}
-                </div>
-              )}
-            </motion.div>
-          )}
+                        {/* صورة الكوفر */}
+                        <div className="relative flex-shrink-0">
+                          <Image
+                            width={64}
+                            height={64}
+                            src={track.cover}
+                            alt={track.title}
+                            className={`w-16 h-16 rounded-xl object-cover shadow-md ${
+                              isPlayingThis ? 'ring-2 ring-cyan-400 ring-offset-2' : ''
+                            }`}
+                          />
+                          {/* مؤشر تشغيل مصغر */}
+                          {isPlayingThis && (
+                            <motion.div
+                              className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-xl"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <FaPause className="text-white text-xl" />
+                            </motion.div>
+                          )}
+                        </div>
+
+                        {/* تفاصيل التراك */}
+                        <div className="flex-1 min-w-0">
+                          <div
+                            className={`font-semibold truncate text-lg ${
+                              isPlayingThis
+                                ? 'text-white drop-shadow-md'
+                                : 'text-lightMode-fg dark:text-darkMode-fg'
+                            }`}
+                          >
+                            {track.title}
+                          </div>
+                          <div className="text-sm text-gray-400 mt-1 truncate">
+                            {track.artist}
+                          </div>
+                        </div>
+
+                        {/* مدة التشغيل */}
+                        <div className="text-sm text-gray-400 hidden md:block">
+                          {track.duration}
+                        </div>
+
+                        {/* زر التشغيل / الإيقاف */}
+                        <motion.button
+                          whileTap={{ scale: 0.9 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMusicAction(track);
+                            setExpanded(true);
+                          }}
+                          className={`w-12 h-12 flex items-center justify-center rounded-full transition-all shadow-lg ${
+                            isPlayingThis
+                              ? 'bg-red-500/90 hover:bg-red-500 text-white'
+                              : 'bg-gradient-to-br from-indigo-600 to-cyan-500 text-black hover:opacity-90'
+                          }`}
+                        >
+                          {isPlayingThis ? (
+                            <FaPause className="w-5 h-5" />
+                          ) : (
+                            <FaPlay className="w-5 h-5 ml-0.5" />
+                          )}
+                        </motion.button>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+            </motion.div>
+          )}
           {/* تبويب Reels - تصميم شبكة المقاطع المحسن */}
           {active === 'reels' && (
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
