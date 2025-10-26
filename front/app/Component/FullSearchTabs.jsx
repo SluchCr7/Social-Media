@@ -164,7 +164,7 @@ const FullSearchTabs = ({ searchResults, searchQuery, user, t }) => {
             {/* 1. شريط التبويبات الثابت (Sticky Tabs) */}
             <div className="sticky top-0 z-20 bg-lightMode-bg dark:bg-darkMode-bg border-b dark:border-darkMode-border mb-6">
                 <ExploreTabs 
-                    tabs={TABS(t)} 
+                    allTabs={TABS(t)} 
                     activeTab={activeTab} 
                     setActiveTab={setActiveTab} 
                 />
