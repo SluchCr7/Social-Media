@@ -1,108 +1,126 @@
-import { useMemo, useRef, useCallback, useEffect } from "react";
+// ملف جديد: ../Custome/useFeedLogic.js
 
-export const useFeedData = ({
-  posts,
-  following,
-  activeTab,
-  userData,
-  suggestedUsers,
-  communities,
-  hasMore,
-  isLoading,
-  setPage,
-}) => {
-  const userId = userData?._id;
+import { useMemo } from 'react';
 
-  // 🧩 فلترة المنشورات
-  const filteredPosts = useMemo(() => {
-    if (!Array.isArray(posts)) return [];
+/**
+ * Hook مخصص لإدارة منطق فرز وتصفية ودمج المنشورات والاقتراحات.
+ * الهدف: فصل منطق التغذية عن المكون Sluchits لجعله أنظف وأسهل في الصيانة.
+ * * @param {string} activeTab - التبويب النشط ('foryou' أو 'following').
+ * @param {Array} posts - قائمة المنشورات الخام.
+ * @param {Array} suggestedUsers - قائمة المستخدمين المقترحين.
+ * @param {Array} communities - قائمة المجتمعات.
+ * @param {object} userData - بيانات المستخدم الحالية (للاهتمامات والمتابعين).
+ * @returns {Array} - قائمة مُدمجة جاهزة للعرض (منشورات واقتراحات).
+ */
+export const useFeedLogic = (activeTab, posts, suggestedUsers, communities, userData) => {
+    const following = Array.isArray(userData?.following) ? userData.following : [];
+    const userId = userData?._id;
 
-    const sortedByDate = (arr) =>
-      arr.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    // 🎯 1. فلترة وترتيب المنشورات (Post Sorting & Filtering)
+    const filteredPosts = useMemo(() => {
+        if (!Array.isArray(posts)) return [];
 
-    switch (activeTab) {
-      case "following":
-        return sortedByDate(
-          posts.filter((p) => following?.includes(p?.owner?._id))
+        // 🟢 Following feed
+        if (activeTab === 'following') {
+            // منطق يفضل المنشورات من المتابَعين (نفس المنطق الحالي)
+            return posts.slice().sort((a, b) => {
+                const isAFollowed = following?.includes(a?.owner?._id);
+                const isBFollowed = following?.includes(b?.owner?._id);
+                if (isAFollowed && !isBFollowed) return -1;
+                if (!isAFollowed && isBFollowed) return 1;
+                return new Date(b?.createdAt) - new Date(a?.createdAt);
+            });
+        }
+
+        // 🟣 For You feed
+        if (activeTab === 'foryou') {
+            if (!userData?.interests || userData.interests.length === 0) {
+                // العودة إلى ترتيب زمني عادي إذا لم تتوفر اهتمامات
+                return posts.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            }
+
+            const matched = posts
+                .map(post => {
+                    const text = (
+                        `${post?.text || ''} ${post?.Hashtags?.join(' ') || ''} ${post?.owner?.description || ''}`
+                    ).toLowerCase();
+
+                    let score = 0;
+                    userData.interests.forEach(interest => {
+                        if (text.includes(interest.toLowerCase())) score += 1;
+                    });
+
+                    return { post, score };
+                })
+                .filter(item => item.score > 0)
+                .sort((a, b) => {
+                    if (a.score !== b.score) return b.score - a.score;
+                    return new Date(b.post.createdAt) - new Date(a.post.createdAt);
+                })
+                .map(item => item.post);
+
+            // في حالة عدم التطابق، العودة إلى الترتيب الزمني
+            return matched.length > 0
+                ? matched
+                : posts.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+
+        // 🟡 Default feed (غالباً لا نحتاجها، لكنها تبقى كخيار)
+        return posts.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }, [posts, following, activeTab, userData?.interests]);
+
+    // 🔹 2. فلترة المستخدمين والمجتمعات المقترحة
+    const filteredUsers = useMemo(() => {
+        if (!Array.isArray(suggestedUsers)) return [];
+        // التأكد من أن المستخدمين المقترحين ليسوا من المتابَعين حالياً
+        const followingIds = new Set(following.map(f => f?._id || f));
+        return suggestedUsers.filter(u => u?._id && !followingIds.has(u._id));
+    }, [suggestedUsers, following]);
+
+    const filteredCommunities = useMemo(() => {
+        if (!Array.isArray(communities)) return [];
+        // التأكد من أن المجتمعات المقترحة لم يتم الانضمام إليها
+        return communities.filter(
+            c => !c.members?.some(member => member?._id === userId)
         );
+    }, [communities, userId]);
 
-      case "foryou":
-        if (!userData?.interests?.length) return sortedByDate(posts);
+    // 📦 3. دمج المنشورات مع الاقتراحات بشكل ديناميكي
+    const combinedItems = useMemo(() => {
+        if (!Array.isArray(filteredPosts)) return [];
 
-        const matched = posts
-          .map((post) => {
-            const text = `
-              ${post?.text || ""}
-              ${post?.Hashtags?.join(" ") || ""}
-              ${post?.owner?.description || ""}
-            `.toLowerCase();
+        const items = [];
+        // حساب الفترة الزمنية لإظهار الاقتراح (مقترح كل 6 منشورات)
+        const suggestionsInterval = 6; 
+        let userSuggestionIndex = 0;
+        let communitySuggestionIndex = 0;
 
-            const score = userData.interests.reduce(
-              (acc, interest) =>
-                text.includes(interest.toLowerCase()) ? acc + 1 : acc,
-              0
-            );
+        filteredPosts.forEach((post, index) => {
+            if (post) items.push({ type: 'post', data: post });
 
-            return { post, score };
-          })
-          .filter((i) => i.score > 0)
-          .sort((a, b) => b.score - a.score)
-          .map((i) => i.post);
+            // اقتراح مستخدمين كل فترة
+            if ((index + 1) % suggestionsInterval === 0 && filteredUsers.length > userSuggestionIndex * 3) {
+                const start = userSuggestionIndex * 3;
+                items.push({ 
+                    type: 'user', 
+                    data: filteredUsers.slice(start, start + 3) 
+                });
+                userSuggestionIndex++;
+            }
 
-        return matched.length ? matched : sortedByDate(posts);
+            // اقتراح مجتمعات كل ضعف الفترة
+            if ((index + 1) % (suggestionsInterval * 2) === 0 && filteredCommunities.length > communitySuggestionIndex * 3) {
+                const start = communitySuggestionIndex * 3;
+                items.push({ 
+                    type: 'community', 
+                    data: filteredCommunities.slice(start, start + 3) 
+                });
+                communitySuggestionIndex++;
+            }
+        });
 
-      default:
-        return sortedByDate(posts);
-    }
-  }, [posts, following, activeTab, userData?.interests]);
+        return items;
+    }, [filteredPosts, filteredUsers, filteredCommunities]);
 
-  // 🧩 اقتراحات المستخدمين والمجتمعات
-  const filteredUsers = useMemo(
-    () =>
-      (suggestedUsers || []).filter(
-        (u) => !following?.some((f) => f?._id === u?._id)
-      ),
-    [suggestedUsers, following]
-  );
-
-  const filteredCommunities = useMemo(
-    () =>
-      (communities || []).filter(
-        (c) => !c.members?.some((m) => m?._id === userId)
-      ),
-    [communities, userId]
-  );
-
-  // 🧩 دمج المحتوى والاقتراحات
-  const combinedItems = useMemo(() => {
-    if (!Array.isArray(filteredPosts)) return [];
-    const items = [];
-    const interval = Math.floor(filteredPosts.length / 4) || 5;
-
-    filteredPosts.forEach((post, i) => {
-      items.push({ type: "post", data: post });
-      if ((i + 1) % interval === 0 && filteredUsers.length)
-        items.push({ type: "user", data: filteredUsers.slice(0, 3) });
-      if ((i + 1) % (interval * 2) === 0 && filteredCommunities.length)
-        items.push({ type: "community", data: filteredCommunities.slice(0, 3) });
-    });
-
-    return items;
-  }, [filteredPosts, filteredUsers, filteredCommunities]);
-
-  // 🧩 Infinite Scroll
-  const observer = useRef();
-  const lastItemRef = useCallback(
-    (node) => {
-      if (isLoading) return;
-      if (observer.current) observer.current.disconnect();
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) setPage((p) => p + 1);
-      });
-      if (node) observer.current.observe(node);
-    },
-    [isLoading, hasMore]
-  );
-
-  return { combinedItems, lastItemRef, filteredPosts };
+    return combinedItems;
 };

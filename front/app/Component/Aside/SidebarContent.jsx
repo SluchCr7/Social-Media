@@ -18,7 +18,7 @@ const SidebarContent = memo(({ isCollapsed,setIsCollapsed, isMobile, setIsMobile
   return (
     <>
       {/* Logo + Collapse Button */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 px-2">
         {!isCollapsed && (
           <span className="text-lg font-bold text-lightMode-text dark:text-darkMode-text truncate">
             {process.env.NEXT_PUBLIC_WEBSITE_NAME || "Zocial"}

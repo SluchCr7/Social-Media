@@ -158,6 +158,7 @@ import React, { useMemo, useState } from 'react';
 import { IoIosSearch } from "react-icons/io";
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
+import { FiArrowRight } from 'react-icons/fi'; // أو FiSearch
 
 // ملاحظة: يُفضل استخدام مكون Next.js 'link' بدلاً من 'a' العادي للتنقل الآمن بين الصفحات.
 // لغرض هذا المثال، سنستخدم 'a' مع مسار تخيلي.
@@ -262,13 +263,20 @@ const DesignExplore = ({
                             t={t}
                             maxResults={2} // <--- عرض نتيجة أو اثنتين فقط
                         />
-                         {/* رابط/زر "مشاهدة المزيد" ينقلك إلى صفحة النتائج الكاملة */}
-                        <div className="text-center mt-4 pt-2 border-t border-lightMode-border dark:border-darkMode-border">
+                        <div className="text-center mt-4 pt-4 border-t border-lightMode-border/50 dark:border-darkMode-border/50">
                             <a 
                                 href={`/Pages/Search?q=${encodeURIComponent(search.trim())}`} 
-                                className="text-primary-color dark:text-primary-dark hover:underline font-medium text-sm transition"
+                                className="inline-flex items-center space-x-2 
+                                        text-primary-color dark:text-primary-dark 
+                                        font-semibold text-base py-2 px-4 rounded-full
+                                        hover:bg-indigo-100 dark:hover:bg-indigo-900/40 
+                                        transition-all duration-200"
                             >
-                                {t("See all results for '")}{search.trim()}{t("'")}
+                                <span>
+                                    {t("See all results for '")}{search.trim()}{t("'")}
+                                </span>
+                                <FiArrowRight size={18} className="rtl:rotate-180" /> 
+                                {/* rlt:rotate-180 لقلب السهم في وضع اللغة العربية */}
                             </a>
                         </div>
                     </div>

@@ -84,7 +84,7 @@ const ProfileMenu = ({
                 <>
                   {actions.handleReport && (
                     <MenuItem onClick={actions.handleReport} danger>
-                      🚩 {t("Report User")}
+                      {t("Report User")}
                     </MenuItem>
                   )}
 

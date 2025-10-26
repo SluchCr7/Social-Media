@@ -71,7 +71,7 @@ const Stories = () => {
           ))}
         </div>
       ) : (
-        <div className="w-full overflow-x-auto flex gap-4 pt-4 pb-2 rounded-lg snap-x snap-mandatory scroll-smooth -webkit-overflow-scrolling: touch">
+        <div className="w-full overflow-x-auto flex gap-4 pt-2 pb-2 rounded-lg snap-x snap-mandatory scroll-smooth -webkit-overflow-scrolling: touch">
           {groupedArray.map((group, index) => (
             <div
               key={index}
