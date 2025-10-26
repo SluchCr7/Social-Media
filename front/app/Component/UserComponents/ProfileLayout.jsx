@@ -46,26 +46,11 @@ const ProfileLayout = ({
   setOpenMenu,
   openMenu
 }) => {
-  const { highlights, fetchHighlights, setOpenModal } = useHighlights();
-  
-  // 1. حالة لتتبع الهايلايت المحدد للعرض
-  const [selectedHighlight, setSelectedHighlight] = useState(null);
-
-  // 2. جلب الهايلايتس عند تحميل المكون
+  const { highlights, fetchHighlights, setOpenModal,selectedHighlight, setSelectedHighlight } = useHighlights();
   useEffect(() => {
     fetchHighlights();
   }, [fetchHighlights]);
 
-  // 3. مُعالجات الهايلايتس
-  const handleOpenHighlight = (highlight) => {
-    // لفتح الـ Viewer
-    setSelectedHighlight(highlight);
-  };
-
-  const handleCloseHighlightViewer = () => {
-    // لإغلاق الـ Viewer
-    setSelectedHighlight(null);
-  };
 
   const handleAddHighlight = () => {
     // لفتح قائمة إضافة هايلايت
@@ -103,7 +88,6 @@ const ProfileLayout = ({
       {/* ⚡ Highlights Bar - تم إلغاء التعليق عنه */}
       <HighlightsBar
         highlights={highlights}
-        onClickHighlight={handleOpenHighlight} // لفتح الـ Viewer
         onAddHighlight={handleAddHighlight}   // لفتح قائمة الإضافة
         isOwner={isOwner}                     // لتحديد إمكانية عرض زر 'New'
       />
@@ -150,7 +134,7 @@ const ProfileLayout = ({
       {selectedHighlight && (
         <HighlightViewerModal
           highlight={selectedHighlight}
-          onClose={handleCloseHighlightViewer} // إغلاق الـ Viewer
+          onClose={()=> setSelectedHighlight(null)} // إغلاق الـ Viewer
         />
       )}
 

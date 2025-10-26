@@ -11,7 +11,8 @@ export const HighlightProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { user } = useAuth(); // تأكد أن فيه user.token
-    const [openModal , setOpenModal] = useState(false)
+  const [openModal, setOpenModal] = useState(false)
+  const [selectedHighlight, setSelectedHighlight] = useState(null);
   // 🟢 جلب الـ Highlights الخاصة بالمستخدم
   const fetchHighlights = useCallback(async () => {
     if (!user?.token) return;

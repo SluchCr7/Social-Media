@@ -23,7 +23,7 @@ const UserProfilePage = ({ params }) => {
     combinedPosts, postYears, loading, loaderRef, userData,
     filters, setFilters, activeTab, setActiveTab, userHasMore
   } = useProfilePosts(id)
-
+  const serializableUserData = userData ? JSON.parse(JSON.stringify(userData)) : null;
   const [showFollowModal, setShowFollowModal] = useState(false)
   const [followModalType, setFollowModalType] = useState("followers")
   const [userStories, setUserStories] = useState([])
@@ -51,7 +51,7 @@ const UserProfilePage = ({ params }) => {
   return (
     <div className="w-full min-h-screen bg-lightMode-bg dark:bg-darkMode-bg">
       <ProfileLayout
-        user={userData}
+        user={serializableUserData}
         isOwner={false}
         isFollowing={isFollowing}
         canSeePrivateContent

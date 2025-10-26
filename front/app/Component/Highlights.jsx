@@ -3,12 +3,13 @@ import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { FaPlus } from 'react-icons/fa';
+import { useHighlights } from '../Context/HighlightContext';
 export default function HighlightsBar({
   highlights = [],
-  onClickHighlight,
   onAddHighlight,
   isOwner = false
 }) {
+  const {setSelectedHighlight} = useHighlights()
   return (
     <div className="w-full flex flex-col items-center gap-3 py-4">
       <div className="flex w-full overflow-x-auto scrollbar-hide gap-4 px-3">
@@ -35,7 +36,7 @@ export default function HighlightsBar({
             key={highlight._id}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onClickHighlight?.(highlight)}
+            onClick={() => setSelectedHighlight(highlight)}
             className="flex-shrink-0 flex flex-col items-center cursor-pointer"
           >
             <div
