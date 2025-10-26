@@ -29,10 +29,10 @@ const PostFeedItem = ({ post, t, isPreview = false }) => {
                 </div>
                 <div className="flex flex-col min-w-0">
                     <span className="font-bold text-base text-lightMode-text dark:text-darkMode-text truncate">
-                        {post.owner?.username || t("Unknown User")}
+                        {post?.owner?.username || t("Unknown User")}
                     </span>
                     <span className="text-xs text-gray-500 dark:text-gray-400">
-                        @{post.owner?.profileName || "user"} • {new Date(post.createdAt).toLocaleDateString()}
+                        @{post?.owner?.profileName || "user"} • {new Date(post.createdAt).toLocaleDateString()}
                     </span>
                 </div>
             </Link>
@@ -40,14 +40,14 @@ const PostFeedItem = ({ post, t, isPreview = false }) => {
             {/* Post Content */}
             <Link href={linkPath} className="block group">
                 <p className={`text-sm sm:text-base text-lightMode-text dark:text-darkMode-text ${isPreview ? 'line-clamp-3' : ''} mb-3`}>
-                    {post.text || t("Untitled Post")}
+                    {post?.text || t("Untitled Post")}
                 </p>
 
                 {/* Media (Images/Videos) */}
-                {Array.isArray(post.Photos) && post.Photos.length > 0 && (
+                {Array.isArray(post?.Photos) && post?.Photos?.length > 0 && (
                     <div className="mt-3 rounded-lg overflow-hidden max-h-96 w-full relative">
                         <Image 
-                            src={post.Photos[0].url} 
+                            src={post?.Photos[0].url} 
                             alt="Post media" 
                             width={500}
                             height={300}

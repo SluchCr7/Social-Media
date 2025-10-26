@@ -33,7 +33,7 @@ const FullSearchTabs = ({ searchResults, searchQuery, user, t }) => {
     
     // فلترة المنشورات لتبويب "الوسائط" (Media)
     const mediaPosts = useMemo(() => 
-        posts.filter(p => p.mediaType === 'image' || (Array.isArray(p.Photos) && p.Photos.length > 0))
+        posts.filter(p => p.mediaType === 'image' || (Array.isArray(p?.Photos) && p?.Photos?.length > 0))
     , [posts]);
 
     const CurrentContent = () => {
@@ -120,9 +120,9 @@ const FullSearchTabs = ({ searchResults, searchQuery, user, t }) => {
                  // عرض المنشورات التي تحتوي على وسائط فقط
                  return (
                     <div className="space-y-6">
-                        {mediaPosts.length > 0 ? (
-                            mediaPosts.map((p) => (
-                                <PostFeedItem key={p._id} post={p} t={t} /> 
+                        {mediaPosts?.length > 0 ? (
+                            mediaPosts?.map((p) => (
+                                <PostFeedItem key={p?._id} post={p} t={t} /> 
                             ))
                         ) : (
                             <p className="text-center text-gray-500 p-10 border dark:border-darkMode-border rounded-xl">{t("No media posts found matching your query.")}</p>

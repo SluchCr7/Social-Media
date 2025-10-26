@@ -28,7 +28,7 @@ const UserCard = ({ user, t, isCompact = false }) => {
                 <div className={`${avatarSize} relative flex-shrink-0`}>
                     <Image
                         src={user.profilePhoto?.url || '/default-avatar.png'}
-                        alt={`${user.username} profile`}
+                        alt={`${user?.username} profile`}
                         width={64}
                         height={64}
                         className="rounded-full object-cover w-full h-full border-2 border-indigo-500"
@@ -40,17 +40,17 @@ const UserCard = ({ user, t, isCompact = false }) => {
                     <div className="flex items-center mb-1">
                         <h3 className={`font-bold truncate ${nameSize}`}>{user.username}</h3>
                         {/* أيقونة التوثيق */}
-                        {user.isVerified && <FiCheckCircle className="ml-1 text-blue-500" size={16} />}
+                        {user?.isVerified && <FiCheckCircle className="ml-1 text-blue-500" size={16} />}
                     </div>
                     
                     <p className={`text-sm text-gray-500 dark:text-gray-400 ${isCompact ? '' : 'mb-3'}`}>
-                        @{user.profileName || 'user'}
+                        @{user?.profileName || 'user'}
                     </p>
 
                     {/* 3. النبذة (تظهر في الوضع غير المدمج فقط) */}
                     {!isCompact && (
                         <p className="text-sm text-lightMode-text dark:text-darkMode-text line-clamp-2 mt-2">
-                            {user.description || t('No bio provided.')}
+                            {user?.description || t('No bio provided.')}
                         </p>
                     )}
                 </div>
@@ -65,10 +65,10 @@ const UserCard = ({ user, t, isCompact = false }) => {
                             <FiUsers size={14} className="mr-1 text-indigo-500" />
                             {followerCount > 1000 ? `${(followerCount / 1000).toFixed(1)}K` : followerCount} {t("Followers")}
                         </span>
-                        {user.location && (
+                        {user?.location && (
                              <span className="flex items-center">
                                 <FiMapPin size={14} className="mr-1 text-indigo-500" />
-                                {user.location}
+                                {user?.location}
                             </span>
                         )}
                     </div>
