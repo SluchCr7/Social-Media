@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
   FaPlay, FaPause, FaStepForward, FaStepBackward
 } from "react-icons/fa"
+// ... (بقية الـ Imports)
 import ProfileHeader from "./ProfileHeader"
 import InfoAboutUser from "./InfoAboutUser"
 import Tabs from "./Tabs"
@@ -11,6 +12,14 @@ import TabsContent from "./TabsContent"
 import FilterBar from "./FilterBar"
 import Image from "next/image"
 import PostSkeleton from "@/app/Skeletons/PostSkeleton"
+import HighlightsBar from "../Highlights" // تم جلب المكون
+import { useHighlights } from "@/app/Context/HighlightContext" // تم جلب الـ Context
+
+// Imports للمكونات الجديدة (يجب عليك إنشاء هذه الملفات أو التأكد من مساراتها)
+// أنا أُضيفها هنا لتبسيط التنظيم، افترض أنها موجودة في نفس المسار أو مسار مُعَرَّف
+import HighlightViewerModal from './HighlightView'; // جلب مُكون العرض
+import AddHighlightMenu from './AddHighlight'; // جلب مُكون الإضافة 
+
 
 const ProfileLayout = ({
   user,
@@ -37,6 +46,31 @@ const ProfileLayout = ({
   setOpenMenu,
   openMenu
 }) => {
+  const { highlights, fetchHighlights, setOpenModal } = useHighlights();
+  
+  // 1. حالة لتتبع الهايلايت المحدد للعرض
+  const [selectedHighlight, setSelectedHighlight] = useState(null);
+
+  // 2. جلب الهايلايتس عند تحميل المكون
+  useEffect(() => {
+    fetchHighlights();
+  }, [fetchHighlights]);
+
+  // 3. مُعالجات الهايلايتس
+  const handleOpenHighlight = (highlight) => {
+    // لفتح الـ Viewer
+    setSelectedHighlight(highlight);
+  };
+
+  const handleCloseHighlightViewer = () => {
+    // لإغلاق الـ Viewer
+    setSelectedHighlight(null);
+  };
+
+  const handleAddHighlight = () => {
+    // لفتح قائمة إضافة هايلايت
+    setOpenModal(true);
+  };
 
   return (
     <motion.div
@@ -44,7 +78,7 @@ const ProfileLayout = ({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
       className="w-full min-h-screen bg-lightMode-bg dark:bg-darkMode-bg 
-                 text-lightMode-text dark:text-darkMode-text px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6"
+                  text-lightMode-text dark:text-darkMode-text px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6"
     >
       {/* 👤 رأس البروفايل */}
       <ProfileHeader
@@ -65,7 +99,15 @@ const ProfileLayout = ({
         renderOwnerMenu={isOwner ? renderMenu : undefined}
         renderVisitorMenu={!isOwner ? renderMenu : undefined}
       />
-
+      
+      {/* ⚡ Highlights Bar - تم إلغاء التعليق عنه */}
+      <HighlightsBar
+        highlights={highlights}
+        onClickHighlight={handleOpenHighlight} // لفتح الـ Viewer
+        onAddHighlight={handleAddHighlight}   // لفتح قائمة الإضافة
+        isOwner={isOwner}                     // لتحديد إمكانية عرض زر 'New'
+      />
+      
       {/* 🧾 معلومات المستخدم */}
       <InfoAboutUser user={user} />
 
@@ -103,6 +145,19 @@ const ProfileLayout = ({
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* 👁️ عارض الـ Highlight (HighlightViewerModal) */}
+      {selectedHighlight && (
+        <HighlightViewerModal
+          highlight={selectedHighlight}
+          onClose={handleCloseHighlightViewer} // إغلاق الـ Viewer
+        />
+      )}
+
+      {/* ➕ قائمة إضافة Highlight (AddHighlightMenu) */}
+      {/* تُدار حالة الفتح/الإغلاق بواسطة 'openModal' في الـ Context */}
+      <AddHighlightMenu stories={user?.stories} /> 
+      
     </motion.div>
   )
 }

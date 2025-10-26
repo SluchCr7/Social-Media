@@ -28,6 +28,7 @@ import { UserAdminContextProvider } from "./Context/UserAdminContext";
 import { VerifyContextProvider } from "./Context/VerifyContext";
 import { AdminContextProvider } from "./Context/AdminContext";
 import I18nProvider from "./providers/I18nProvider.jsx";
+import { HighlightContextProvider } from "./Context/HighlightContext";
 
 
 // 🟢 استيراد الخط الإنجليزي
@@ -72,29 +73,31 @@ export default function RootLayout({ children }) {
                             <CommentContextProvider>
                               <CommunityContextProvider>
                                 <StoryContextProvider>
-                                  <NewsContextProvider>
-                                    <ReportContextProvider>
-                                      <ReelsProvider>
-                                        <EventProvider>
-                                          <MusicProvider>
-                                            <MusicPlayerProvider>
-                                              <ThemeContextProvider>
-                                                <TranslateContextProvider>
-                                                  <AsideContextProvider>
-                                                    <AdminContextProvider>
-                                                      <LayoutComponent>
-                                                        {children}
-                                                      </LayoutComponent>
-                                                    </AdminContextProvider>
-                                                  </AsideContextProvider>
-                                                </TranslateContextProvider>
-                                              </ThemeContextProvider>
-                                            </MusicPlayerProvider>
-                                          </MusicProvider>
-                                        </EventProvider>
-                                      </ReelsProvider>
-                                    </ReportContextProvider>
-                                  </NewsContextProvider>
+                                  <HighlightContextProvider>
+                                    <NewsContextProvider>
+                                      <ReportContextProvider>
+                                        <ReelsProvider>
+                                          <EventProvider>
+                                            <MusicProvider>
+                                              <MusicPlayerProvider>
+                                                <ThemeContextProvider>
+                                                  <TranslateContextProvider>
+                                                    <AsideContextProvider>
+                                                      <AdminContextProvider>
+                                                        <LayoutComponent>
+                                                          {children}
+                                                        </LayoutComponent>
+                                                      </AdminContextProvider>
+                                                    </AsideContextProvider>
+                                                  </TranslateContextProvider>
+                                                </ThemeContextProvider>
+                                              </MusicPlayerProvider>
+                                            </MusicProvider>
+                                          </EventProvider>
+                                        </ReelsProvider>
+                                      </ReportContextProvider>
+                                    </NewsContextProvider>
+                                  </HighlightContextProvider>
                                 </StoryContextProvider>
                               </CommunityContextProvider>
                             </CommentContextProvider>

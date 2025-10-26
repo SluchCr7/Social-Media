@@ -10,7 +10,7 @@ import { MdLanguage, MdOutlineOndemandVideo } from "react-icons/md"
 import { IoTrophyOutline } from "react-icons/io5"
 import { SlCalender } from "react-icons/sl"
 import { IoIosMusicalNotes } from "react-icons/io";
-import { FaHistory, FaLock, FaSun, FaUserCog,FaBookmark, FaBell } from "react-icons/fa"
+import { FaHistory, FaLock, FaSun, FaUserCog,FaBookmark, FaBell, FaUsers } from "react-icons/fa"
 import {
   FiMessageCircle,
   FiShield,
@@ -180,6 +180,7 @@ export const TABS = [
   { id: 'account', label: 'Account', icon: <FaUserCog /> },
   { id: 'profile', label: 'Profile', icon: <CgProfile />},
   { id: 'notifications', label: 'Notifications', icon: <FaBell />},
+  { id: 'communities', label: 'Communities', icon: <FaUsers />},
   { id: 'billing', label: 'Billing', icon: <MdOutlinePaid />,view : false}
 ]
 

@@ -61,7 +61,7 @@ const FullSearchTabs = ({ searchResults, searchQuery, user, t }) => {
                                 <div className="space-y-4">
                                     {topResults?.posts?.map((p) => (
                                         // عرض مصغر للمنشورات
-                                        <PostFeedItem key={p?._id} post={p} t={t} isPreview={true} /> 
+                                        <SluchitEntry key={p?._id} post={p} t={t} isPreview={true} /> 
                                     ))}
                                 </div>
                             </div>
@@ -108,7 +108,7 @@ const FullSearchTabs = ({ searchResults, searchQuery, user, t }) => {
                     <div className="space-y-6">
                         {posts?.length > 0 ? (
                             posts?.map((p) => (
-                                <PostFeedItem key={p?._id} post={p} t={t} /> 
+                                <SluchitEntry key={p?._id} post={p} t={t} /> 
                             ))
                         ) : (
                             <p className="text-center text-gray-500 p-10 border dark:border-darkMode-border rounded-xl">{t("No posts found matching your query.")}</p>
@@ -122,7 +122,7 @@ const FullSearchTabs = ({ searchResults, searchQuery, user, t }) => {
                     <div className="space-y-6">
                         {mediaPosts?.length > 0 ? (
                             mediaPosts?.map((p) => (
-                                <PostFeedItem key={p?._id} post={p} t={t} /> 
+                                <SluchitEntry key={p?._id} post={p} t={t} /> 
                             ))
                         ) : (
                             <p className="text-center text-gray-500 p-10 border dark:border-darkMode-border rounded-xl">{t("No media posts found matching your query.")}</p>

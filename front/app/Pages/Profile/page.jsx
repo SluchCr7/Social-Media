@@ -76,7 +76,6 @@ const ProfilePage = () => {
         type={menuType}
         list={menuType === "followers" ? userData?.followers : userData?.following}
       />
-      <UpdateProfile update={update} setUpdate={setUpdate} user={userData} />
       <AddStoryModel isStory={isStory} setIsStory={setIsStory} />
     </div>
   )

@@ -14,6 +14,7 @@ import LanguageTab from './Tabs/LanguageTab'
 import HistoryTab from './Tabs/HistoryTab'
 import UpdateProfile from '@/app/Component/AddandUpdateMenus/UpdateProfile'
 import NotificationTab from './Tabs/NotificationTab'
+import CommunityTab from './Tabs/CommunityTab'
 
 export default function SettingsView({
   user = {},
@@ -164,6 +165,11 @@ export default function SettingsView({
                   user={user} 
                   onToggleNotificationBlock={onToggleNotificationBlock}
                   // يمكنك تمرير حالة التحميل هنا إذا كانت موجودة في المكون الأب
+                />
+              )}
+              {activeTab === 'communities' && (
+                <CommunityTab
+                  user={user} 
                 />
               )}
               {activeTab === 'account' && (

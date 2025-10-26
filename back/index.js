@@ -37,6 +37,7 @@ app.use('/api/reel', require('./routes/ReelRoute'))
 app.use('/api/music', require('./routes/MusicRoute'))
 app.use('/api/translate', require('./routes/TranslateRoute'))
 app.use('/api/admin', require('./routes/AdminRoute'))
+app.use('/api/highlight', require('./routes/HighlightRoute'))
 app.use(errorhandler)
 
 
