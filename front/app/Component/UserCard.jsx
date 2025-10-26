@@ -50,7 +50,7 @@ const UserCard = ({ user, t, isCompact = false }) => {
                     {/* 3. النبذة (تظهر في الوضع غير المدمج فقط) */}
                     {!isCompact && (
                         <p className="text-sm text-lightMode-text dark:text-darkMode-text line-clamp-2 mt-2">
-                            {user.bio || t('No bio provided.')}
+                            {user.description || t('No bio provided.')}
                         </p>
                     )}
                 </div>
