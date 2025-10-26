@@ -17,8 +17,8 @@ import { useHighlights } from "@/app/Context/HighlightContext" // تم جلب ا
 
 // Imports للمكونات الجديدة (يجب عليك إنشاء هذه الملفات أو التأكد من مساراتها)
 // أنا أُضيفها هنا لتبسيط التنظيم، افترض أنها موجودة في نفس المسار أو مسار مُعَرَّف
-import HighlightViewerModal from './HighlightView'; // جلب مُكون العرض
-import AddHighlightMenu from './AddHighlight'; // جلب مُكون الإضافة 
+import HighlightViewerModal from '../HighlightView'; // جلب مُكون العرض
+import AddHighlightMenu from '../AddandUpdateMenus/AddHighlight'; // جلب مُكون الإضافة 
 
 
 const ProfileLayout = ({
