@@ -83,7 +83,7 @@ export default function SavedPage() {
     pause();
 
     // 🕒 ننتظر لحظة لتحديث src داخل MusicPlayerContext قبل التشغيل
-    const trackIndex = filteredMusic.findIndex(m => m.id === track.id);
+    const trackIndex = filteredMusic.findIndex(m => m?.id === track.id);
     setTrack(track, trackIndex, filteredMusic);
 
     // نفتح واجهة الموسيقى الموسعة

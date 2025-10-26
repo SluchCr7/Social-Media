@@ -64,6 +64,7 @@ const ProfilePage = () => {
             actions={{ updatePrivacy: togglePrivateAccount, setUpdate }}
             isPrivate={userData?.isPrivate}
             open={openMenu}
+            onAddStory={() => setIsStory(true)}
             setOpen={setOpenMenu}
           />
         )}

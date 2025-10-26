@@ -178,15 +178,17 @@ const {t} = useTranslation()
         {!hideActions && (
           <>
             {isOwner ? (
-              <div className="flex flex-wrap gap-2 sm:gap-3 mt-3 justify-center lg:justify-start">
-                <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  onClick={onAddStory}
-                  className="flex items-center gap-2 border px-4 sm:px-6 py-2 rounded-lg text-sm font-medium hover:bg-lightMode-hover dark:hover:bg-darkMode-hover hover:shadow transition"
-                >
-                  <IoAdd /> {t("Add Story")}
-                </motion.button>
-              </div>
+              // <div className="flex flex-wrap gap-2 sm:gap-3 mt-3 justify-center lg:justify-start">
+              //   <motion.button
+              //     whileTap={{ scale: 0.96 }}
+              //     onClick={onAddStory}
+              //     className="flex items-center gap-2 border px-4 sm:px-6 py-2 rounded-lg text-sm font-medium hover:bg-lightMode-hover dark:hover:bg-darkMode-hover hover:shadow transition"
+              //   >
+              //     <IoAdd /> {t("Add Story")}
+              //   </motion.button>
+              // </div>
+              <>
+              </>
             ) : (
               <div className="flex gap-2 sm:gap-3 mt-3 justify-center lg:justify-start">
                 <button

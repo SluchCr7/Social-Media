@@ -4,19 +4,8 @@ import { FiX } from 'react-icons/fi';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 
-// ============================================================================
-// مكون علامة تبويب الإشعارات
-// ============================================================================
-
-/**
- * يعرض قائمة المستخدمين الذين تم حظر إشعاراتهم ويوفر خيار إلغاء الحظر.
- * @param {object} user - بيانات المستخدم التي تحتوي على BlockedNotificationFromUsers.
- * @param {function} onToggleNotificationBlock - الدالة التي تعالج حذف المستخدم من قائمة الحظر.
- * @param {boolean} loading - حالة التحميل (اختياري).
- */
 const NotificationTab = ({ user, onToggleNotificationBlock, loading = false }) => {
   const { t } = useTranslation();
-  // نفترض أن blockedNotificationFromUsers يحتوي على مصفوفة من كائنات المستخدمين
   const blockedUsers = user?.BlockedNotificationFromUsers || [];
 
   const handleUnblock = (userId) => {

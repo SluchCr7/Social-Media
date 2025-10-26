@@ -3,7 +3,7 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaUserEdit } from 'react-icons/fa'
-import { IoEyeSharp } from 'react-icons/io5'
+import { IoAdd, IoEyeSharp } from 'react-icons/io5'
 import { HiLockClosed, HiLockOpen, HiLink } from 'react-icons/hi'
 import Link from 'next/link'
 import { useAuth } from '../../Context/AuthContext'
@@ -32,6 +32,7 @@ const ProfileMenu = ({
   profileUrl,
   userId,
   open,
+  onAddStory,
   setOpen
 }) => {
   const { user } = useAuth()
@@ -62,12 +63,10 @@ const ProfileMenu = ({
                   <Link href={`/Pages/User/${user?._id}`}>
                     <MenuItem icon={<IoEyeSharp />}>{t("View as Visitor")}</MenuItem>
                   </Link>
-
-                  {/* {actions.setUpdate && (
-                    <MenuItem icon={<FaUserEdit />} onClick={() => { setOpen(false); actions.setUpdate(true) }}>
-                      {t("Edit Profile")}
-                    </MenuItem>
-                  )} */}
+                  
+                  <MenuItem icon={<IoAdd />} onClick={onAddStory}>
+                    {t("Add Story")}
+                  </MenuItem>
 
                   {actions.updatePrivacy && (
                     <MenuItem 

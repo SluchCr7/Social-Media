@@ -179,7 +179,7 @@ export const TABS = [
   { id: 'history', label: 'Login History', icon: <FaHistory /> },
   { id: 'account', label: 'Account', icon: <FaUserCog /> },
   { id: 'profile', label: 'Profile', icon: <CgProfile />},
-  { id: 'notification', label: 'Notifications', icon: <FaBell />},
+  { id: 'notifications', label: 'Notifications', icon: <FaBell />},
   { id: 'billing', label: 'Billing', icon: <MdOutlinePaid />,view : false}
 ]
 
