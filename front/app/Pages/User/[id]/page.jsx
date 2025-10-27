@@ -65,8 +65,8 @@ const UserProfilePage = ({ params }) => {
         loaderRef={loaderRef}
         // ⬇️ مرر الدوال هنا
         onProfileClick={handleProfileClick}
-        onFollow={() => followUser(userData._id)}
-        onUnfollow={() => followUser(userData._id)} // أو دالة خاصة بالـ unfollow
+        onFollow={() => followUser(userData?._id)}
+        onUnfollow={() => followUser(userData?._id)} // أو دالة خاصة بالـ unfollow
         onShowFollowers={() => {
           setFollowModalType("followers")
           setShowFollowModal(true)
@@ -81,7 +81,7 @@ const UserProfilePage = ({ params }) => {
           <ProfileMenu
             context="visitor"
             actions={{ followUser, blockOrUnblockUser, handleReport }}
-            isBlockedByMe={user?.blockedUsers?.includes(userData._id)}
+            isBlockedByMe={user?.blockedUsers?.includes(userData?._id)}
             open={openMenu}
             setOpen={setOpenMenu}
           />
