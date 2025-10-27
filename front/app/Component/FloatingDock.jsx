@@ -3,7 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FaHome, FaMusic, FaPlus, FaArrowUp, FaUserAlt, FaChevronLeft, FaChevronRight
+  FaHome,
+  FaMusic,
+  FaPlus,
+  FaArrowUp,
+  FaUserAlt,
+  FaChevronLeft,
+  FaChevronRight,
 } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 
@@ -27,6 +33,14 @@ export default function FloatingDrawer({ onOpenMusicPlayer }) {
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
+  const menuItems = [
+    { icon: <FaHome />, color: 'from-blue-500 to-cyan-400', action: () => router.push('/') },
+    { icon: <FaPlus />, color: 'from-indigo-500 to-purple-500', action: () => router.push('/Pages/NewPost') },
+    { icon: <FaMusic />, color: 'from-pink-500 to-rose-400', action: onOpenMusicPlayer },
+    { icon: <FaUserAlt />, color: 'from-green-500 to-emerald-400', action: () => router.push('/Pages/Profile') },
+    { icon: <FaArrowUp />, color: 'from-yellow-500 to-orange-400', action: scrollToTop },
+  ];
+
   return (
     <>
       {/* 🔹 زر الفتح / الإغلاق */}
@@ -34,15 +48,16 @@ export default function FloatingDrawer({ onOpenMusicPlayer }) {
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: visible ? 1 : 0, x: visible ? 0 : 50 }}
         transition={{ duration: 0.3 }}
-        className="fixed top-1/2 -translate-y-1/2 right-2 z-[100] cursor-pointer"
+        className="fixed top-1/2 -translate-y-1/2 right-3 z-[100]"
       >
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setIsOpen(!isOpen)}
-          className="bg-white/80 dark:bg-black/70 backdrop-blur-md border border-white/20 shadow-md 
-                     p-2 rounded-full hover:shadow-lg text-gray-800 dark:text-gray-200 transition"
+          className="bg-gradient-to-br from-white/60 to-white/30 dark:from-gray-800/70 dark:to-gray-900/50 
+                     backdrop-blur-md border border-white/20 shadow-lg 
+                     p-3 rounded-full hover:shadow-xl transition text-gray-800 dark:text-gray-200"
         >
-          {isOpen ? <FaChevronRight size={16} /> : <FaChevronLeft size={16} />}
+          {isOpen ? <FaChevronRight size={18} /> : <FaChevronLeft size={18} />}
         </motion.button>
       </motion.div>
 
@@ -53,51 +68,26 @@ export default function FloatingDrawer({ onOpenMusicPlayer }) {
             initial={{ x: 150, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 150, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-            className="fixed top-1/2 -translate-y-1/2 right-4 z-[90]
-                       bg-white/90 dark:bg-black/70 backdrop-blur-2xl 
-                       border border-white/20 shadow-2xl 
-                       rounded-2xl flex flex-col items-center gap-6 p-4 w-16 sm:w-20"
+            transition={{ type: 'spring', stiffness: 180, damping: 18 }}
+            className="fixed top-1/2 -translate-y-1/2 right-6 z-[90]
+                       bg-gradient-to-br from-white/60 to-white/30 dark:from-gray-900/80 dark:to-gray-800/60
+                       backdrop-blur-2xl border border-white/20 shadow-2xl 
+                       rounded-3xl flex flex-col items-center justify-center gap-6 p-5 w-20"
           >
-            {/* 🏠 الرئيسية */}
-            <button
-              onClick={() => router.push('/')}
-              className="text-gray-700 dark:text-gray-200 hover:text-blue-500 transition"
-            >
-              <FaHome size={18} />
-            </button>
-
-            {/* ✍️ منشور جديد */}
-            <button
-              onClick={() => router.push('/Pages/NewPost')}
-              className="text-gray-700 dark:text-gray-200 hover:text-indigo-500 transition"
-            >
-              <FaPlus size={18} />
-            </button>
-
-            {/* 🎵 الموسيقى */}
-            <button
-              onClick={onOpenMusicPlayer}
-              className="text-gray-700 dark:text-gray-200 hover:text-pink-500 transition"
-            >
-              <FaMusic size={18} />
-            </button>
-
-            {/* 👤 البروفايل */}
-            <button
-              onClick={() => router.push('/Pages/Profile')}
-              className="text-gray-700 dark:text-gray-200 hover:text-green-500 transition"
-            >
-              <FaUserAlt size={18} />
-            </button>
-
-            {/* 🔼 لأعلى */}
-            <button
-              onClick={scrollToTop}
-              className="text-gray-700 dark:text-gray-200 hover:text-purple-500 transition"
-            >
-              <FaArrowUp size={18} />
-            </button>
+            {menuItems.map((item, i) => (
+              <motion.button
+                key={i}
+                onClick={item.action}
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
+                className={`w-11 h-11 flex items-center justify-center 
+                            rounded-2xl text-white shadow-md 
+                            bg-gradient-to-br ${item.color}
+                            transition-transform duration-200 hover:shadow-lg`}
+              >
+                {item.icon}
+              </motion.button>
+            ))}
           </motion.div>
         )}
       </AnimatePresence>

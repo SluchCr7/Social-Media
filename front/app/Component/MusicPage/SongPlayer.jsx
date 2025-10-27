@@ -3,7 +3,15 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { FaPlay, FaPause, FaHeart, FaExpand, FaShareAlt, FaStepForward, FaStepBackward } from 'react-icons/fa'
+import {
+  FaPlay,
+  FaPause,
+  FaHeart,
+  FaExpand,
+  FaShareAlt,
+  FaStepForward,
+  FaStepBackward
+} from 'react-icons/fa'
 import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
 import { useMusic } from '@/app/Context/MusicContext'
 import { useAuth } from '@/app/Context/AuthContext'
@@ -27,7 +35,6 @@ const SongPlayer = React.memo(() => {
   const { t } = useTranslation()
 
   const [bgColor, setBgColor] = useState('#111')
-  const [compact, setCompact] = useState(false)
 
   // 🎨 استخراج لون الغلاف لتنسيق الخلفية
   useEffect(() => {
@@ -52,19 +59,8 @@ const SongPlayer = React.memo(() => {
     }
   }, [current])
 
-  // 📱 تصغير تلقائي عند التمرير
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 150) setCompact(true)
-      else setCompact(false)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
   const progressPercent = useMemo(() => (progress / (duration || 1)) * 100, [progress, duration])
 
-  // ⏱️ تنسيق الوقت
   const formatTime = (s) => {
     if (!s) return '0:00'
     const m = Math.floor(s / 60)
@@ -72,19 +68,20 @@ const SongPlayer = React.memo(() => {
     return `${m}:${sec < 10 ? '0' : ''}${sec}`
   }
 
-  if (!current) return null // 💤 لا يوجد أغنية
+  if (!current) return null
 
   return (
     <motion.div
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ type: 'spring', stiffness: 80, damping: 14 }}
-      className={`fixed bottom-3 left-1/2 -translate-x-1/2 z-50 
-                  w-[95%] sm:w-[85%] md:w-[70%] lg:w-[60%] mx-auto
-                  backdrop-blur-xl border border-white/10 
-                  rounded-3xl overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.3)]`}
+      transition={{ type: 'spring', stiffness: 90, damping: 15 }}
+      className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50
+                  w-[92%] sm:w-[80%] md:w-[65%] lg:w-[50%]
+                  backdrop-blur-xl border border-white/10
+                  rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.35)]
+                  overflow-hidden`}
       style={{
-        background: `linear-gradient(120deg, ${bgColor}cc, #000000cc)`
+        background: `linear-gradient(120deg, ${bgColor}dd, #000000ee)`
       }}
     >
       <motion.div
@@ -93,10 +90,10 @@ const SongPlayer = React.memo(() => {
         onDragEnd={(e, info) => {
           if (info.offset.y < -40) setExpanded(true)
         }}
-        className="cursor-grab active:cursor-grabbing p-3 sm:p-4 flex flex-col sm:flex-row items-center gap-3 sm:gap-4"
+        className="cursor-grab active:cursor-grabbing p-4 flex flex-col sm:flex-row items-center gap-4"
       >
-        {/* 🎧 الغلاف + الموجات */}
-        <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden shadow-md flex-shrink-0">
+        {/* 🎧 صورة الغلاف */}
+        <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
           {current?.cover ? (
             <Image src={current.cover} alt={current.title} fill className="object-cover" />
           ) : (
@@ -122,24 +119,28 @@ const SongPlayer = React.memo(() => {
           )}
         </div>
 
-        {/* 🎶 معلومات الأغنية */}
+        {/* 🎵 معلومات الأغنية */}
         <div className="flex-1 min-w-0 text-white">
-          <h4 className="font-semibold text-sm sm:text-base truncate">{current?.title || 'Unknown'}</h4>
-          <p className="text-xs text-gray-300 truncate">{current?.artist || 'Unknown Artist'}</p>
+          <h4 className="font-semibold text-sm sm:text-base truncate">
+            {current?.title || 'Unknown'}
+          </h4>
+          <p className="text-xs text-gray-300 truncate">
+            {current?.artist || 'Unknown Artist'}
+          </p>
           <div className="flex justify-between items-center mt-1 text-[10px] text-gray-400">
             <span>{formatTime(progress)}</span>
             <span>{formatTime(duration)}</span>
           </div>
-          <div className="h-1 mt-1 bg-white/20 rounded-full overflow-hidden">
+          <div className="h-1 mt-1 bg-white/25 rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-white/80"
+              className="h-full bg-white/90"
               style={{ width: `${progressPercent}%` }}
               transition={{ ease: 'easeOut', duration: 0.3 }}
             />
           </div>
         </div>
 
-        {/* 🎛️ عناصر التحكم */}
+        {/* 🎛️ أزرار التحكم */}
         <div className="flex items-center gap-2 sm:gap-3">
           <motion.button
             onClick={prev}
@@ -152,8 +153,8 @@ const SongPlayer = React.memo(() => {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={togglePlay}
-            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white 
-                       flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white 
+                       flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
           >
             {playing ? <FaPause /> : <FaPlay />}
           </motion.button>
