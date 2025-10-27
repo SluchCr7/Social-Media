@@ -47,7 +47,7 @@ export default function HighlightsBar({
             >
               <div className="w-full h-full rounded-full overflow-hidden bg-lightMode-bg dark:bg-darkMode-bg">
                 <Image
-                  src={highlight.cover || '/placeholder.jpg'}
+                  src={highlight.coverImage || '/placeholder.jpg'}
                   alt={highlight.title}
                   width={80}
                   height={80}

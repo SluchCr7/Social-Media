@@ -92,7 +92,7 @@ export default function HighlightViewerModal({ highlight, onClose }) {
           >
             <div className="relative w-full h-full rounded-xl overflow-hidden">
               <Image
-                src={stories[currentIndex]?.Photo || '/placeholder.jpg'}
+                src={stories[currentIndex]?.Photo || stories[currentIndex]?.Photo[0] || '/placeholder.jpg'}
                 alt={`Story ${currentIndex + 1}`}
                 fill
                 className="object-cover select-none"

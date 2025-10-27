@@ -38,7 +38,6 @@ export const HighlightContextProvider = ({ children }) => {
     if (!user?.token) return;
     try {
       setLoading(true);
-
       const formData = new FormData();
       formData.append('title', title);
       storyIds.forEach((id) => formData.append('storyIds', id));
