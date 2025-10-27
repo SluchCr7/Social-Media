@@ -6,6 +6,7 @@ const { errorhandler } = require('./Middelwares/errorHandler')
 const cookieParser = require('cookie-parser');
 const { app, server } = require('./Config/socket')
 const path = require('path')
+const { processScheduledPosts } = require("./utils/schedulePosts");
 
 // Database connection
 connectDB()
@@ -42,7 +43,6 @@ app.use(errorhandler)
 
 
 // ================== Scheduled Posts System ==================
-const { processScheduledPosts } = require("./utils/schedulePosts");
 
 // فحص المنشورات المجدولة كل دقيقة
 setInterval(() => {

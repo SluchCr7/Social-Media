@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const highlightSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   title: { type: String, required: true },
@@ -5,7 +6,8 @@ const highlightSchema = new mongoose.Schema({
   stories: [
     { type: mongoose.Schema.Types.ObjectId, ref: "Story" }
   ],
-  createdAt: { type: Date, default: Date.now }
+}, {
+    timestamps: true
 });
 
 const Highlight = mongoose.model("Highlight", highlightSchema);

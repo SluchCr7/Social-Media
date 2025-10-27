@@ -24,7 +24,7 @@ const ProfilePage = () => {
   const [showMenu, setShowMenu] = useState(false)
   const [menuType, setMenuType] = useState("followers")
   const [openMenu, setOpenMenu] = useState(false)
-  const serializableUserData = userData ? JSON.parse(JSON.stringify(userData)) : null;
+  // const serializableUserData = userData ? JSON.parse(JSON.stringify(userData)) : null;
   if (loading) return <ProfileSkeleton />
 
   return (
@@ -34,7 +34,7 @@ const ProfilePage = () => {
       </Head>
 
       <ProfileLayout
-        user={serializableUserData}
+        user={userData}
         isOwner
         isFollowing={false}
         canSeePrivateContent

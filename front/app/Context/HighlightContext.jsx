@@ -92,7 +92,7 @@ export const HighlightProvider = ({ children }) => {
         error,
         fetchHighlights,
         createHighlight,
-        deleteHighlight,openModal , setOpenModal
+        deleteHighlight,openModal , setOpenModal,selectedHighlight, setSelectedHighlight
       }}
     >
       {children}

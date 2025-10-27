@@ -1,5 +1,5 @@
 const Highlight = require("../Modules/Highlight");
-const { cloudUpload } = require("../utils/cloudinary"); // تأكد من المسار الصحيح
+const { cloudUpload } = require("../Config/cloudUpload"); // تأكد من المسار الصحيح
 
 // POST /api/highlights
 const createHighlight = async (req, res) => {
