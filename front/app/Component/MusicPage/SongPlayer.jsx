@@ -80,7 +80,7 @@ const SongPlayer = React.memo(() => {
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 80, damping: 14 }}
       className={`fixed bottom-3 left-1/2 -translate-x-1/2 z-50 
-                  w-[95%] sm:w-[85%] md:w-[70%] lg:w-[60%] 
+                  w-[95%] sm:w-[85%] md:w-[70%] lg:w-[60%] mx-auto
                   backdrop-blur-xl border border-white/10 
                   rounded-3xl overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.3)]`}
       style={{
