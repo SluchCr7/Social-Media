@@ -82,7 +82,35 @@ export const HighlightContextProvider = ({ children }) => {
       setLoading(false);
     }
   }, [user]);
+  const addStoryToHighlight = async (highlightId, storyId) => {
+    try {
+      setLoading(true);
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/highlight/${highlightId}/add-story`,
+        { storyId },
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        }
+      );
 
+      // تحديث الهايلايت في الذاكرة المحلية
+      const updated = res.data?.highlight;
+      if (updated) {
+        setHighlights(prev =>
+          prev.map(h => (h._id === updated._id ? updated : h))
+        );
+      }
+
+      return updated;
+    } catch (err) {
+      console.error('Error adding story to highlight:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <HighlightContext.Provider
       value={{
@@ -91,7 +119,7 @@ export const HighlightContextProvider = ({ children }) => {
         error,
         fetchHighlights,
         createHighlight,
-        deleteHighlight,openModal , setOpenModal,selectedHighlight, setSelectedHighlight
+        deleteHighlight,openModal ,addStoryToHighlight, setOpenModal,selectedHighlight, setSelectedHighlight
       }}
     >
       {children}

@@ -1,5 +1,6 @@
 const Highlight = require("../Modules/Highlight");
 const { cloudUpload } = require("../Config/cloudUpload"); // تأكد من المسار الصحيح
+const Story = require("../Modules/Story");
 
 // POST /api/highlights
 const createHighlight = async (req, res) => {
@@ -56,8 +57,57 @@ const deleteHighlight = async (req, res) => {
   }
 };
 
+
+/**
+ * إضافة Story جديدة إلى Highlight موجودة
+ * @route POST /api/highlights/:highlightId/add-story
+ */
+export const addStoryToHighlight = async (req, res) => {
+  try {
+    const { highlightId } = req.params;
+    const { storyId } = req.body;
+    const userId = req.user?._id; // assuming you use auth middleware
+
+    if (!storyId)
+      return res.status(400).json({ message: "storyId is required" });
+
+    // التحقق من أن الهايلايت موجودة فعلاً وتخص المستخدم
+    const highlight = await Highlight.findOne({ _id: highlightId, user: userId });
+    if (!highlight)
+      return res.status(404).json({ message: "Highlight not found" });
+
+    // التحقق أن الستوري موجودة وتخص نفس المستخدم
+    const story = await Story.findOne({ _id: storyId, user: userId });
+    if (!story)
+      return res.status(404).json({ message: "Story not found or unauthorized" });
+
+    // تجنب التكرار
+    if (highlight.stories.includes(storyId)) {
+      return res.status(400).json({ message: "Story already in highlight" });
+    }
+
+    // إضافة الـ story إلى الـ highlight
+    highlight.stories.push(storyId);
+    await highlight.save();
+
+    // إعادة highlight كاملة بعد التحديث
+    const updatedHighlight = await Highlight.findById(highlightId)
+      .populate("stories");
+
+    return res.status(200).json({
+      message: "Story added successfully",
+      highlight: updatedHighlight
+    });
+
+  } catch (error) {
+    console.error("Add story to highlight error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
 module.exports = {
   createHighlight,
   getUserHighlights,
-  deleteHighlight,
+  deleteHighlight,addStoryToHighlight
 };

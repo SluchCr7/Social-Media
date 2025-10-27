@@ -137,6 +137,7 @@ const ProfileLayout = ({
         <HighlightViewerModal
           highlight={selectedHighlight}
           onClose={()=> setSelectedHighlight(null)} // إغلاق الـ Viewer
+          allStories={user?.stories}
         />
       )}
 

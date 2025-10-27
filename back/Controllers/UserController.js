@@ -643,53 +643,59 @@ const getSuggestedUsers = asyncHandler(async (req, res) => {
   const currentUserId = req.user._id;
 
   const currentUser = await User.findById(currentUserId)
-    .select('interests country following blockedUsers communities lastActiveAt')
-    .populate('communities', '_id')
+    .select('interests country following blockedUsers joinedCommunities lastActiveAt')
+    .populate('joinedCommunities', '_id')
     .lean();
 
   if (!currentUser) {
     return res.status(404).json({ message: 'User not found' });
   }
 
-  const followingIds = currentUser.following.map(id => id.toString());
-  const blockedIds = currentUser.blockedUsers.map(id => id.toString());
-  const communityIds = currentUser.communities.map(c => c._id.toString());
+  // ✅ معالجة following و blockedUsers لو كانوا populated أو مجرد IDs
+  const followingIds = (currentUser.following || []).map(f =>
+    typeof f === 'object' && f !== null ? f._id.toString() : f.toString()
+  );
 
-  // المرشحين الأساسيين
+  const blockedIds = (currentUser.blockedUsers || []).map(b =>
+    typeof b === 'object' && b !== null ? b._id.toString() : b.toString()
+  );
+
+  const communityIds = (currentUser.joinedCommunities || []).map(c => c._id.toString());
+
+  // ✅ المرشحين الأساسيين
   const candidates = await User.find({
-    _id: { $ne: currentUserId, $nin: [...followingIds, ...blockedIds] },
+    _id: { $nin: [currentUserId, ...followingIds, ...blockedIds] },
     accountStatus: 'active',
     isPrivate: false,
     acceptedTerms: true,
   })
-    .select('_id username profilePhoto interests country communities lastActiveAt')
-    .populate('communities', '_id')
+    .select('_id username profilePhoto interests country joinedCommunities lastActiveAt')
+    .populate('joinedCommunities', '_id')
     .lean();
 
   const now = new Date();
 
+  // ✅ حساب الدرجات
   const suggestions = candidates.map(user => {
     let score = 0;
 
-    // ✅ الاهتمامات المشتركة
-    const sharedInterests = user.interests?.filter(interest =>
-      currentUser.interests.includes(interest)
-    ) || [];
+    // الاهتمامات المشتركة
+    const sharedInterests = (user.interests || []).filter(interest =>
+      (currentUser.interests || []).includes(interest)
+    );
     score += sharedInterests.length * 10;
 
-    // ✅ نفس الدولة
+    // نفس الدولة
     if (user.country === currentUser.country && user.country !== 'Unknown') {
       score += 15;
     }
 
-    // ✅ المجتمعات المشتركة
-    const userCommunities = user.communities.map(c => c._id.toString());
-    const commonCommunities = userCommunities.filter(cid =>
-      communityIds.includes(cid)
-    );
+    // المجتمعات المشتركة
+    const userCommunities = (user.joinedCommunities || []).map(c => c._id.toString());
+    const commonCommunities = userCommunities.filter(cid => communityIds.includes(cid));
     score += commonCommunities.length * 8;
 
-    // ✅ النشاط الأخير (آخر 7 أيام)
+    // النشاط الأخير (آخر 7 أيام)
     if (
       user.lastActiveAt &&
       now - new Date(user.lastActiveAt) < 7 * 24 * 60 * 60 * 1000
@@ -700,13 +706,15 @@ const getSuggestedUsers = asyncHandler(async (req, res) => {
     return { user, score };
   });
 
+  // ✅ ترتيب النتائج
   const topSuggestions = suggestions
-    .filter(s => s.score > 0) // بس اللي عندهم صلة
-    .sort((a, b) => b.score - a.score) // ترتيب تنازلي
-    .slice(0, 10); // أفضل 10 فقط
+    .filter(s => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10);
 
   res.status(200).json(topSuggestions.map(s => s.user));
 });
+
 
 
 const MakeAccountPreimumVerify = asyncHandler(async (req, res) => {
