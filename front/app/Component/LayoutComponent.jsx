@@ -163,7 +163,7 @@ const LayoutComponent = ({ children }) => {
             )
           }
           {/* <CookieConsent/> */}
-          <FloatingDock onOpenMusicPlayer={()=> setViewMusicPlayer(true)}/>
+          <FloatingDock onOpenMusicPlayer={()=> setViewMusicPlayer(!viewMusicPlayer)}/>
           <ExpandedWindow/>
         </div>
       </div>

@@ -1,91 +1,106 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FaArrowUp, FaPlus, FaHome, FaMusic, FaUserAlt, FaBell
+  FaHome, FaMusic, FaPlus, FaArrowUp, FaUserAlt, FaChevronLeft, FaChevronRight
 } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 
-export default function FloatingDock({ onOpenMusicPlayer }) {
+export default function FloatingDrawer({ onOpenMusicPlayer }) {
   const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
   const [visible, setVisible] = useState(true);
 
-  // 📜 إظهار/إخفاء الشريط أثناء التمرير
+  // 📜 إخفاء السهم أثناء التمرير للأسفل
   useEffect(() => {
     let lastScroll = 0;
     const handleScroll = () => {
       const currentScroll = window.scrollY;
-      if (currentScroll > lastScroll && currentScroll > 100) {
-        setVisible(false); // يخفي عند النزول
-      } else {
-        setVisible(true); // يظهر عند الصعود
-      }
+      if (currentScroll > lastScroll && currentScroll > 100) setVisible(false);
+      else setVisible(true);
       lastScroll = currentScroll;
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 40 }}
-      transition={{ duration: 0.3 }}
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] 
-                 bg-white/80 dark:bg-black/60 backdrop-blur-xl 
-                 shadow-lg border border-white/10 
-                 flex items-center justify-around gap-3 sm:gap-6 
-                 px-4 sm:px-6 py-2.5 sm:py-3 rounded-3xl 
-                 w-[95%] sm:w-[80%] md:w-[60%] lg:w-[45%]"
-    >
-      {/* 🏠 الصفحة الرئيسية */}
-      <button
-        onClick={() => router.push('/')}
-        className="flex flex-col items-center text-gray-700 dark:text-gray-200 hover:text-blue-500 transition"
+    <>
+      {/* 🔹 زر الفتح / الإغلاق */}
+      <motion.div
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: visible ? 1 : 0, x: visible ? 0 : 50 }}
+        transition={{ duration: 0.3 }}
+        className="fixed top-1/2 -translate-y-1/2 right-2 z-[100] cursor-pointer"
       >
-        <FaHome size={18} />
-      </button>
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setIsOpen(!isOpen)}
+          className="bg-white/80 dark:bg-black/70 backdrop-blur-md border border-white/20 shadow-md 
+                     p-2 rounded-full hover:shadow-lg text-gray-800 dark:text-gray-200 transition"
+        >
+          {isOpen ? <FaChevronRight size={16} /> : <FaChevronLeft size={16} />}
+        </motion.button>
+      </motion.div>
 
-      {/* ➕ إنشاء منشور جديد */}
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        onClick={()=> router.push('/Pages/NewPost')}
-        className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white 
-                   w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center 
-                   shadow-lg hover:shadow-xl transition-all border-2 border-white/30"
-      >
-        <FaPlus size={20} />
-      </motion.button>
+      {/* 🌙 Drawer الجانبي */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ x: 150, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 150, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+            className="fixed top-1/2 -translate-y-1/2 right-4 z-[90]
+                       bg-white/90 dark:bg-black/70 backdrop-blur-2xl 
+                       border border-white/20 shadow-2xl 
+                       rounded-2xl flex flex-col items-center gap-6 p-4 w-16 sm:w-20"
+          >
+            {/* 🏠 الرئيسية */}
+            <button
+              onClick={() => router.push('/')}
+              className="text-gray-700 dark:text-gray-200 hover:text-blue-500 transition"
+            >
+              <FaHome size={18} />
+            </button>
 
-      {/* 🎵 مشغل الموسيقى */}
-      <button
-        onClick={onOpenMusicPlayer}
-        className="flex flex-col items-center text-gray-700 dark:text-gray-200 hover:text-pink-500 transition"
-      >
-        <FaMusic size={18} />
-      </button>
+            {/* ✍️ منشور جديد */}
+            <button
+              onClick={() => router.push('/Pages/NewPost')}
+              className="text-gray-700 dark:text-gray-200 hover:text-indigo-500 transition"
+            >
+              <FaPlus size={18} />
+            </button>
 
-      {/* 👤 الملف الشخصي */}
-      <button
-        onClick={() => router.push('/Pages/Profile')}
-        className="flex flex-col items-center text-gray-700 dark:text-gray-200 hover:text-green-500 transition"
-      >
-        <FaUserAlt size={18} />
-      </button>
+            {/* 🎵 الموسيقى */}
+            <button
+              onClick={onOpenMusicPlayer}
+              className="text-gray-700 dark:text-gray-200 hover:text-pink-500 transition"
+            >
+              <FaMusic size={18} />
+            </button>
 
-      {/* 🔼 الرجوع للأعلى */}
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        onClick={scrollToTop}
-        className="hidden sm:flex flex-col items-center text-gray-700 dark:text-gray-200 hover:text-purple-500 transition"
-      >
-        <FaArrowUp size={18} />
-      </motion.button>
-    </motion.div>
+            {/* 👤 البروفايل */}
+            <button
+              onClick={() => router.push('/Pages/Profile')}
+              className="text-gray-700 dark:text-gray-200 hover:text-green-500 transition"
+            >
+              <FaUserAlt size={18} />
+            </button>
+
+            {/* 🔼 لأعلى */}
+            <button
+              onClick={scrollToTop}
+              className="text-gray-700 dark:text-gray-200 hover:text-purple-500 transition"
+            >
+              <FaArrowUp size={18} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

@@ -192,7 +192,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaPlus } from 'react-icons/fa';
 import Image from 'next/image';
-import { useHighlight } from '@/app/Context/HighlightContext'; // ✅ استخدم الكونتكست
+import { useHighlights } from '@/app/Context/HighlightContext'; // ✅ استخدم الكونتكست
 
 export default function HighlightViewerModal({ highlight, onClose, allStories = [] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -202,7 +202,7 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
   const [showMenu, setShowMenu] = useState(false);
   const stories = highlight?.stories || [];
 
-  const { addStoryToHighlight } = useHighlight(); // ✅ دالة الإضافة
+  const { addStoryToHighlight } = useHighlights(); // ✅ دالة الإضافة
   const intervalRef = useRef(null);
 
   const getPhoto = useCallback((story) => {
