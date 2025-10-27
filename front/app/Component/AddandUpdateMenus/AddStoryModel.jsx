@@ -768,7 +768,7 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
 
 export default AddStoryModel;
 
-AddStoryModel.propTypes = {
-  isOpen: PropTypes.bool,
-  onClose: PropTypes.func,
-};
+// AddStoryModel.propTypes = {
+//   isOpen: PropTypes.bool,
+//   onClose: PropTypes.func,
+// };
