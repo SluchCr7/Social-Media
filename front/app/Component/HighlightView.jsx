@@ -7,33 +7,41 @@ import Image from 'next/image';
 export default function HighlightViewerModal({ highlight, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef(null);
 
   const stories = highlight?.stories || [];
 
+  // توحيد شكل الصورة
+  const getPhoto = (story) => {
+    if (!story) return '/placeholder.jpg';
+    return Array.isArray(story.Photo) ? story.Photo[0] : story.Photo;
+  };
+
   useEffect(() => {
     if (!stories.length) return;
 
-    // Reset progress when story changes
-    setProgress(0);
     clearInterval(intervalRef.current);
+    setProgress(0);
 
-    intervalRef.current = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          handleNext();
-          return 0;
-        }
-        return prev + 1.5;
-      });
-    }, 80); // سرعة الشريط
+    if (!isPaused) {
+      intervalRef.current = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            handleNext();
+            return 0;
+          }
+          return prev + 1;
+        });
+      }, 70); // سرعة الشريط (كل 70ms)
+    }
 
     return () => clearInterval(intervalRef.current);
-  }, [currentIndex]);
+  }, [currentIndex, isPaused]);
 
   const handleNext = () => {
     if (currentIndex < stories.length - 1) setCurrentIndex((i) => i + 1);
-    else onClose(); // اغلاق المودال بعد آخر قصة
+    else onClose();
   };
 
   const handlePrev = () => {
@@ -59,11 +67,20 @@ export default function HighlightViewerModal({ highlight, onClose }) {
         </button>
 
         {/* محتوى العرض */}
-        <div className="relative w-full max-w-sm h-[80vh] flex flex-col items-center justify-center">
+        <div
+          className="relative w-full max-w-sm h-[80vh] flex flex-col items-center justify-center"
+          onMouseDown={() => setIsPaused(true)}
+          onMouseUp={() => setIsPaused(false)}
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setIsPaused(false)}
+        >
           {/* Progress bars */}
-          <div className="absolute top-3 left-0 right-0 flex gap-1 px-4">
+          <div className="absolute top-3 left-0 right-0 flex gap-1 px-4 z-20">
             {stories.map((_, idx) => (
-              <div key={idx} className="flex-1 bg-gray-600 h-1 rounded-full overflow-hidden">
+              <div
+                key={idx}
+                className="flex-1 bg-white/30 h-1 rounded-full overflow-hidden"
+              >
                 <motion.div
                   className="h-full bg-white"
                   initial={{ width: 0 }}
@@ -75,55 +92,73 @@ export default function HighlightViewerModal({ highlight, onClose }) {
                         ? `${progress}%`
                         : '0%',
                   }}
-                  transition={{ ease: 'linear' }}
+                  transition={{ ease: 'linear', duration: 0.05 }}
                 />
               </div>
             ))}
           </div>
 
-          {/* الصورة */}
-          <motion.div
-            key={stories[currentIndex]?._id}
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.4 }}
-            className="w-full h-full flex items-center justify-center"
-          >
-            <div className="relative w-full h-full rounded-xl overflow-hidden">
+          {/* Header */}
+          <div className="absolute top-8 left-4 flex items-center gap-3 z-20">
+            <div className="w-9 h-9 rounded-full overflow-hidden border border-white/50">
               <Image
-                src={stories[currentIndex]?.Photo || stories[currentIndex]?.Photo[0] || '/placeholder.jpg'}
-                alt={`Story ${currentIndex + 1}`}
-                fill
-                className="object-cover select-none"
-                draggable={false}
+                src={highlight.coverImage || '/placeholder.jpg'}
+                alt="Highlight cover"
+                width={36}
+                height={36}
+                className="object-cover"
               />
             </div>
-          </motion.div>
-
-          {/* عنوان الـ highlight */}
-          <div className="absolute bottom-5 text-center w-full text-white">
-            <h3 className="text-lg font-semibold">{highlight.title}</h3>
-            <p className="text-sm opacity-80 mt-1">
-              {currentIndex + 1} / {stories.length}
-            </p>
+            <div className="text-white">
+              <h3 className="text-sm font-semibold leading-none">
+                {highlight.title}
+              </h3>
+              <p className="text-xs opacity-70">
+                {currentIndex + 1}/{stories.length}
+              </p>
+            </div>
           </div>
+
+          {/* الصورة */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentIndex}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.4 }}
+              className="w-full h-full flex items-center justify-center"
+            >
+              <div className="relative w-full h-full rounded-xl overflow-hidden">
+                <Image
+                  src={getPhoto(stories[currentIndex])}
+                  alt={`Story ${currentIndex + 1}`}
+                  fill
+                  className="object-cover select-none"
+                  draggable={false}
+                />
+              </div>
+            </motion.div>
+          </AnimatePresence>
 
           {/* أزرار التنقل */}
-          <div className="absolute inset-0 flex justify-between items-center px-4 text-white">
-            <button
+          <div className="absolute inset-0 flex justify-between items-center text-white px-2 z-30">
+            <div
               onClick={handlePrev}
-              className="w-1/3 h-full cursor-pointer flex items-center"
+              className="w-1/3 h-full flex items-center justify-start cursor-pointer"
             >
-              <FaChevronLeft className="opacity-70 hover:opacity-100" />
-            </button>
-            <button
+              <FaChevronLeft className="opacity-60 hover:opacity-100 transition" />
+            </div>
+            <div
               onClick={handleNext}
-              className="w-1/3 h-full cursor-pointer flex items-center justify-end"
+              className="w-1/3 h-full flex items-center justify-end cursor-pointer"
             >
-              <FaChevronRight className="opacity-70 hover:opacity-100" />
-            </button>
+              <FaChevronRight className="opacity-60 hover:opacity-100 transition" />
+            </div>
           </div>
+
+          {/* ظل جميل أسفل القصة */}
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
         </div>
       </motion.div>
     </AnimatePresence>
