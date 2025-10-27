@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaPlus, FaImage, FaCheckCircle } from 'react-icons/fa';
 import Image from 'next/image';
@@ -7,10 +7,27 @@ import { useHighlights } from '@/app/Context/HighlightContext';
 
 export default function AddHighlightMenu({ stories = [] }) {
   const [title, setTitle] = useState('');
-  const [cover, setCover] = useState(null);
+  const [coverFile, setCoverFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [selectedStories, setSelectedStories] = useState([]);
   const { createHighlight, loading, setOpenModal, openModal } = useHighlights();
+
+  const modalRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  // Normalize photo source (story.Photo might be array or string or undefined)
+  const getStoryPhoto = (story) => {
+    if (!story) return '/placeholder.jpg';
+    if (Array.isArray(story.Photo)) return story.Photo[0] || '/placeholder.jpg';
+    return story.Photo || '/placeholder.jpg';
+  };
+
+  useEffect(() => {
+    // free preview objectURL when coverFile changes or on unmount
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
 
   const handleSelectStory = (id) => {
     setSelectedStories((prev) =>
@@ -19,25 +36,45 @@ export default function AddHighlightMenu({ stories = [] }) {
   };
 
   const handleCoverChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setCover(file);
-      setPreview(URL.createObjectURL(file));
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // revoke old
+    if (preview) URL.revokeObjectURL(preview);
+    setCoverFile(file);
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+  };
+
+  const resetForm = () => {
+    setTitle('');
+    setCoverFile(null);
+    if (preview) {
+      URL.revokeObjectURL(preview);
+      setPreview(null);
     }
+    setSelectedStories([]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleCreate = async () => {
-    if (!title || selectedStories.length === 0)
-      return alert('Please enter a title and select at least one story.');
-
+    if (!title.trim() || selectedStories.length === 0) {
+      // better UX than alert; you can replace with toast
+      return window.alert('Please enter a title and select at least one story.');
+    }
     try {
-      await createHighlight({ title, cover, storyIds: selectedStories });
+      await createHighlight({ title: title.trim(), cover: coverFile, storyIds: selectedStories });
+      resetForm();
       setOpenModal(false);
-      setTitle('');
-      setCover(null);
-      setSelectedStories([]);
     } catch (err) {
       console.error('Highlight creation failed:', err);
+      window.alert('Failed to create highlight. Try again.');
+    }
+  };
+
+  // close when clicking backdrop
+  const handleBackdropClick = (e) => {
+    if (modalRef.current && !modalRef.current.contains(e.target)) {
+      setOpenModal(false);
     }
   };
 
@@ -45,169 +82,190 @@ export default function AddHighlightMenu({ stories = [] }) {
     <AnimatePresence>
       {openModal && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
+          role="dialog"
+          aria-modal="true"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onMouseDown={handleBackdropClick}
         >
           <motion.div
-            className="
-              relative w-[95%] max-w-lg rounded-3xl shadow-2xl 
-              bg-gradient-to-br from-white/80 to-white/30 
-              dark:from-gray-900/90 dark:to-gray-800/70 
-              border border-white/20 dark:border-gray-700/40 
-              p-6 backdrop-blur-2xl
-            "
-            initial={{ scale: 0.95, y: 30, opacity: 0 }}
-            animate={{ scale: 1, y: 0, opacity: 1 }}
-            exit={{ scale: 0.95, y: 30, opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            ref={modalRef}
+            initial={{ y: 20, scale: 0.98, opacity: 0 }}
+            animate={{ y: 0, scale: 1, opacity: 1 }}
+            exit={{ y: 20, scale: 0.98, opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            className="relative w-[95%] max-w-2xl rounded-3xl bg-white/80 dark:bg-gray-900/85 backdrop-blur-lg border border-white/10 dark:border-gray-700 p-6 shadow-2xl"
+            onMouseDown={(e) => e.stopPropagation()}
           >
             {/* Close */}
             <button
+              aria-label="Close"
               onClick={() => setOpenModal(false)}
-              className="absolute top-4 right-4 text-gray-700 dark:text-gray-300 hover:text-red-500 transition"
+              className="absolute top-4 right-4 rounded-full p-1 text-gray-700 dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 transition"
             >
               <FaTimes size={18} />
             </button>
 
-            <h2 className="text-2xl font-semibold mb-6 text-center bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
-              ✨ Create New Highlight
-            </h2>
-
-            {/* Title Input */}
-            <div className="mb-5">
-              <label className="block text-sm font-medium mb-2 text-gray-600 dark:text-gray-300">
-                Title
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. My Trips 🌍"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="
-                  w-full p-2.5 rounded-xl bg-white/40 dark:bg-gray-800/60 
-                  border border-gray-300 dark:border-gray-700
-                  focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                  outline-none transition
-                "
-              />
+            {/* Header */}
+            <div className="mb-4 text-center">
+              <h3 className="text-2xl font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
+                ✨ Create New Highlight
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Choose a cover and select stories to include
+              </p>
             </div>
 
-            {/* Cover Image */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-2 text-gray-600 dark:text-gray-300">
-                Cover Image
-              </label>
-              <div
-                onClick={() => document.getElementById('coverUpload').click()}
-                className="
-                  relative h-40 rounded-xl border-2 border-dashed border-gray-400 dark:border-gray-600 
-                  bg-white/40 dark:bg-gray-800/60 cursor-pointer 
-                  flex items-center justify-center overflow-hidden
-                  hover:border-indigo-500 hover:bg-white/50 dark:hover:bg-gray-700/70 transition
-                "
-              >
-                {preview ? (
-                  <>
-                    <Image
-                      src={preview}
-                      alt="Preview"
-                      fill
-                      className="object-cover"
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {/* Left Column: Inputs */}
+              <div className="md:col-span-1 space-y-4">
+                {/* Title */}
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                  Title
+                  <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g. My Trips 🌍"
+                    className="mt-2 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white/60 dark:bg-gray-800/60 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+                    aria-label="Highlight title"
+                  />
+                </label>
+
+                {/* Cover upload */}
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                  Cover Image
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => (e.key === 'Enter' ? fileInputRef.current?.click() : null)}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mt-2 relative h-40 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 cursor-pointer overflow-hidden flex items-center justify-center bg-gray-50 dark:bg-gray-800/50 hover:border-indigo-500 transition"
+                  >
+                    {preview ? (
+                      <>
+                        <Image src={preview} alt="cover preview" fill className="object-cover" />
+                        <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-md">
+                          Change
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
+                        <FaImage size={26} />
+                        <span className="text-sm">Upload cover image</span>
+                      </div>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      id="coverUpload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCoverChange}
+                      hidden
                     />
-                    <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-md">
-                      Change
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center text-gray-500 dark:text-gray-400">
-                    <FaImage size={26} />
-                    <span className="text-sm mt-1">Upload cover image</span>
                   </div>
-                )}
-                <input
-                  id="coverUpload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleCoverChange}
-                  hidden
-                />
-              </div>
-            </div>
+                </label>
 
-            {/* Stories Grid */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-2 text-gray-600 dark:text-gray-300">
-                Select Stories
-              </label>
-              <div className="grid grid-cols-3 gap-3 max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400/40 scrollbar-track-transparent">
-                {stories.length === 0 ? (
-                  <p className="col-span-3 text-center text-gray-500 text-sm">
-                    No stories available.
-                  </p>
-                ) : (
-                  stories.map((story) => {
-                    const selected = selectedStories.includes(story._id);
-                    return (
-                      <motion.div
-                        key={story._id}
-                        whileHover={{ scale: 1.05 }}
-                        onClick={() => handleSelectStory(story._id)}
-                        className={`
-                          relative rounded-xl overflow-hidden border 
-                          ${selected
-                            ? 'border-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.6)]'
-                            : 'border-transparent hover:border-gray-400/60'}
-                          transition cursor-pointer
-                        `}
-                      >
-                        <Image
-                          src={story.Photo[0] || story.Photo || '/placeholder.jpg'}
-                          alt="Story"
-                          fill
-                          className="object-cover"
-                        />
-                        {selected && (
-                          <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/50 to-purple-500/50 flex items-center justify-center">
-                            <FaCheckCircle className="text-white text-xl drop-shadow-lg" />
+                {/* Selected count & preview */}
+                <div className="mt-2 flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 dark:border-gray-700">
+                      <Image
+                        src={preview || '/placeholder.jpg'}
+                        alt="cover small"
+                        width={40}
+                        height={40}
+                        className="object-cover"
+                      />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                        {title || 'Untitled Highlight'}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {selectedStories.length} selected
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Create Button */}
+                <div className="mt-4">
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleCreate}
+                    disabled={loading}
+                    className={`w-full py-2.5 rounded-xl font-semibold text-white ${
+                      loading ? 'opacity-70 cursor-not-allowed' : 'bg-gradient-to-r from-indigo-600 to-purple-600'
+                    } shadow-lg`}
+                    aria-disabled={loading}
+                  >
+                    {loading ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span className="text-sm">Saving…</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2">
+                        <FaPlus /> <span>Create Highlight</span>
+                      </div>
+                    )}
+                  </motion.button>
+                </div>
+              </div>
+
+              {/* Right Column: Stories grid */}
+              <div className="md:col-span-2">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200">Select Stories</h4>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    Click items to select — {selectedStories.length}/{stories.length}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 md:grid-cols-4 gap-3 max-h-72 overflow-y-auto pr-2">
+                  {stories.length === 0 ? (
+                    <div className="col-span-full text-center py-6 text-gray-500">No stories available.</div>
+                  ) : (
+                    stories.map((story) => {
+                      const id = story._id;
+                      const selected = selectedStories.includes(id);
+                      const src = getStoryPhoto(story);
+                      return (
+                        <motion.div
+                          key={id}
+                          layout
+                          whileHover={{ scale: 1.03 }}
+                          onClick={() => handleSelectStory(id)}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => (e.key === 'Enter' ? handleSelectStory(id) : null)}
+                          className={`relative rounded-lg overflow-hidden cursor-pointer border ${
+                            selected ? 'border-indigo-500 shadow-[0_8px_30px_rgba(99,102,241,0.18)]' : 'border-transparent'
+                          }`}
+                        >
+                          <div className="aspect-[3/4] relative w-full">
+                            <Image src={src} alt={`story-${id}`} fill className="object-cover" />
+                            {/* overlay */}
+                            <div
+                              className={`absolute inset-0 transition-opacity ${
+                                selected ? 'bg-gradient-to-tr from-indigo-500/40 to-purple-500/30' : 'bg-black/0'
+                              }`}
+                            />
+                            {selected && (
+                              <div className="absolute top-2 left-2 bg-white/90 dark:bg-black/60 rounded-full p-1">
+                                <FaCheckCircle className="text-indigo-600" />
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </motion.div>
-                    );
-                  })
-                )}
+                        </motion.div>
+                      );
+                    })
+                  )}
+                </div>
               </div>
             </div>
-
-            {/* Button */}
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              onClick={handleCreate}
-              disabled={loading}
-              className={`
-                w-full py-2.5 rounded-xl font-semibold 
-                bg-gradient-to-r from-indigo-500 to-purple-500 
-                text-white shadow-lg hover:shadow-indigo-400/40 
-                transition-all duration-300
-                ${loading ? 'opacity-70 cursor-not-allowed' : ''}
-              `}
-            >
-              {loading ? (
-                <motion.div
-                  className="flex items-center justify-center gap-2"
-                  animate={{ opacity: [0.5, 1, 0.5] }}
-                  transition={{ repeat: Infinity, duration: 1.2 }}
-                >
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Saving your memories…</span>
-                </motion.div>
-              ) : (
-                <>
-                  <FaPlus /> Create Highlight
-                </>
-              )}
-            </motion.button>
           </motion.div>
         </motion.div>
       )}
