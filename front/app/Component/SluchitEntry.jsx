@@ -327,7 +327,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
         transition={{ type: 'spring', stiffness: 200, damping: 18 }}
         className="
           relative w-[95%] md:w-full mx-auto mb-6
-          rounded-2xl overflow-hidden shadow-[0_0_25px_-10px_rgba(0,0,0,0.3)]
+          rounded-2xl shadow-[0_0_25px_-10px_rgba(0,0,0,0.3)]
           bg-white/90 dark:bg-black/40 backdrop-blur-xl
           border border-gray-200/70 dark:border-gray-700/60
           transition-all duration-300
@@ -354,7 +354,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
           {/* ======= Shared Info ======= */}
           {isShared && <SharedTitle user={user} post={post} original={original} />}
 
-          <div className="flex flex-col sm:flex-row gap-5">
+          <div className="flex flex-col items-start sm:flex-row gap-5">
             {/* ======= Optional Image on Side ======= */}
             <PostImage
               post={post}

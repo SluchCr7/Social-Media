@@ -9,6 +9,7 @@ export const TranslateContextProvider = ({ children }) => {
   const {i18n} = useTranslation()
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState(i18n.language || 'en');
+  const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language)
   // ✅ تحديث اللغة في i18next عند تغيير المستخدم
   const handleLanguageChange = (langCode) => {
     i18n.changeLanguage(langCode);
@@ -57,7 +58,7 @@ export const TranslateContextProvider = ({ children }) => {
   };
 
   return (
-    <TranslateContext.Provider value={{ translate, loading , language, handleLanguageChange }}>
+    <TranslateContext.Provider value={{ translate,isRTL, loading , language, handleLanguageChange }}>
       {children}
     </TranslateContext.Provider>
   );

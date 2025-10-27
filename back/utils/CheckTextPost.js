@@ -36,7 +36,7 @@ const bannedWords = [
   "gook",
   "fag",
   "nazi",
-
+  "israel",
   // كلمات حساسة للبالغين
   "porn",
   "sex",

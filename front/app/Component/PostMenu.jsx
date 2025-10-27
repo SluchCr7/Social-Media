@@ -16,6 +16,7 @@ import { useGetData } from '../Custome/useGetData';
 import { useTranslation } from 'react-i18next';
 import { IoVolumeMute } from "react-icons/io5";
 import { GoUnmute } from "react-icons/go";
+import { useTranslate } from '../Context/TranslateContext';
 
 const MenuOption = ({ icon, text, action, className, loading }) => (
   <motion.button
@@ -46,11 +47,12 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
   const [confirmAction, setConfirmAction] = useState(null);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const { userData } = useGetData(user?._id)
-
+  
   // ✅ تحديد اتجاه اللغة
-  const currentLang = i18n.language || 'en';
-  const isRTL = ['ar', 'fa', 'he', 'ur'].includes(currentLang);
-
+  const {isRTL} = useTranslate()
+  useEffect(()=>{
+    console.log(`user Data : ${userData}`)
+  },[userData])
   // ✅ إغلاق القائمة عند الضغط خارجها
   useEffect(() => {
     const handleClickOutside = (e) => {

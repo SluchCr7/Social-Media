@@ -28,8 +28,7 @@ const StoryViewer = ({ stories = [], onClose = () => {} }) => {
   const timerRef = useRef(null)
   const durationRef = useRef(5000) // مدة عرض كل ستوري بالميلّي ثانية
   const { t } = useTranslation()
-  const { language } = useTranslate()
-  const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language)
+  const {isRTL} = useTranslate();
   const containerRef = useRef(null)
   const [isImageLoaded, setIsImageLoaded] = useState(false)
 

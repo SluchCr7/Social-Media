@@ -192,7 +192,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaPlus } from 'react-icons/fa';
 import Image from 'next/image';
-import { useHighlights } from '@/app/Context/HighlightContext'; // ✅ استخدم الكونتكست
+import { useHighlights } from '@/app/Context/HighlightContext';
+import { useTranslate } from '../Context/TranslateContext';
 
 export default function HighlightViewerModal({ highlight, onClose, allStories = [] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -201,8 +202,8 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
   const [touchStartX, setTouchStartX] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const stories = highlight?.stories || [];
-
-  const { addStoryToHighlight } = useHighlights(); // ✅ دالة الإضافة
+  const { isRTL } = useTranslate();
+  const { addStoryToHighlight } = useHighlights();
   const intervalRef = useRef(null);
 
   const getPhoto = useCallback((story) => {
@@ -210,12 +211,10 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
     return Array.isArray(story.Photo) ? story.Photo[0] : story.Photo;
   }, []);
 
-  // ✅ استبعاد الـ stories الموجودة بالفعل في الـ highlight
   const availableStories = allStories.filter(
     (s) => !stories.some((st) => st._id === s._id)
   );
 
-  // ⏱️ Auto Progress
   useEffect(() => {
     if (!stories.length) return;
     clearInterval(intervalRef.current);
@@ -245,15 +244,13 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
     if (currentIndex > 0) setCurrentIndex((i) => i - 1);
   };
 
-  // 📱 Swipe
   const handleTouchStart = (e) => setTouchStartX(e.touches[0].clientX);
   const handleTouchEnd = (e) => {
     const diff = e.changedTouches[0].clientX - touchStartX;
-    if (diff > 60) handlePrev();
-    if (diff < -60) handleNext();
+    if (diff > 60) (isRTL ? handleNext() : handlePrev());
+    if (diff < -60) (isRTL ? handlePrev() : handleNext());
   };
 
-  // ➕ دالة لإضافة story إلى الـ highlight
   const handleAddStory = async (storyId) => {
     await addStoryToHighlight(highlight._id, storyId);
     setShowMenu(false);
@@ -266,15 +263,20 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md"
+        className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md ${
+          isRTL ? 'direction-rtl' : 'direction-ltr'
+        }`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
+        dir={isRTL ? 'rtl' : 'ltr'}
       >
         {/* ❌ زر الإغلاق */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-white hover:opacity-80 z-[110]"
+          className={`absolute top-5 ${
+            isRTL ? 'left-5' : 'right-5'
+          } text-white hover:opacity-80 z-[110]`}
         >
           <FaTimes size={22} />
         </button>
@@ -282,7 +284,9 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
         {/* ➕ زر الإضافة */}
         <button
           onClick={() => setShowMenu((p) => !p)}
-          className="absolute top-5 left-5 text-white hover:text-green-400 transition z-[110]"
+          className={`absolute top-5 ${
+            isRTL ? 'right-5' : 'left-5'
+          } text-white hover:text-green-400 transition z-[110]`}
           title="إضافة Story"
         >
           <FaPlus size={22} />
@@ -296,7 +300,9 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="absolute top-16 left-5 bg-black/70 backdrop-blur-xl rounded-2xl p-4 z-[120] w-72 shadow-2xl border border-white/10"
+              className={`absolute top-16 ${
+                isRTL ? 'right-5' : 'left-5'
+              } bg-black/70 backdrop-blur-xl rounded-2xl p-4 z-[120] w-72 shadow-2xl border border-white/10`}
             >
               <h4 className="text-white text-sm font-semibold mb-3 flex items-center justify-between">
                 Choose Story
@@ -325,7 +331,11 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
                           className="object-cover"
                         />
                       </div>
-                      <div className="flex-1 text-left">
+                      <div
+                        className={`flex-1 ${
+                          isRTL ? 'text-right' : 'text-left'
+                        }`}
+                      >
                         <p className="text-sm font-medium truncate">
                           {story.text || 'Story'}
                         </p>
@@ -371,7 +381,11 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
           onTouchEnd={handleTouchEnd}
         >
           {/* ⏳ Progress Bar */}
-          <div className="absolute top-3 left-0 right-0 flex gap-1 px-4 z-30">
+          <div
+            className={`absolute top-3 left-0 right-0 flex gap-1 px-4 z-30 ${
+              isRTL ? 'flex-row-reverse' : ''
+            }`}
+          >
             {stories.map((_, idx) => (
               <div key={idx} className="flex-1 bg-white/25 h-1 rounded-full overflow-hidden">
                 <motion.div
@@ -391,7 +405,11 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
           </div>
 
           {/* 🧾 Header */}
-          <div className="absolute top-8 left-4 flex items-center gap-3 z-30">
+          <div
+            className={`absolute top-8 ${
+              isRTL ? 'right-4 flex-row-reverse' : 'left-4'
+            } flex items-center gap-3 z-30`}
+          >
             <div className="w-9 h-9 rounded-full overflow-hidden border border-white/40 shadow-md">
               <Image
                 src={highlight.coverImage || '/placeholder.jpg'}
@@ -402,7 +420,13 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
               />
             </div>
             <div className="text-white">
-              <h3 className="text-sm font-semibold leading-none">{highlight.title}</h3>
+              <h3
+                className={`text-sm font-semibold leading-none ${
+                  isRTL ? 'text-right' : 'text-left'
+                }`}
+              >
+                {highlight.title}
+              </h3>
               <p className="text-xs opacity-70 pt-1">
                 {currentIndex + 1}/{stories.length}
               </p>
@@ -434,7 +458,9 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, ease: 'easeOut', delay: 0.2 }}
-                    className="absolute bottom-8 left-0 right-0 px-5 text-center z-20"
+                    className={`absolute bottom-8 left-0 right-0 px-5 text-center z-20 ${
+                      isRTL ? 'text-right' : 'text-center'
+                    }`}
                   >
                     <p className="text-white text-lg font-medium drop-shadow-md leading-snug">
                       {currentStory.text}
@@ -449,7 +475,11 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
           </AnimatePresence>
 
           {/* 🖐️ مناطق التنقل */}
-          <div className="absolute inset-0 flex justify-between items-center z-40">
+          <div
+            className={`absolute inset-0 flex ${
+              isRTL ? 'flex-row-reverse' : ''
+            } justify-between items-center z-40`}
+          >
             <div onClick={handlePrev} className="w-1/3 h-full cursor-pointer" />
             <div onClick={handleNext} className="w-1/3 h-full cursor-pointer ml-auto" />
           </div>

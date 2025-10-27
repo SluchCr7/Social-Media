@@ -31,8 +31,7 @@ const ReelCard = forwardRef(({userData, reel, isActive, isMuted, toggleMute }, r
   const [videoLoaded,setVideoLoaded] = useState(false)
   const [showHeart, setShowHeart] = useState(false);
   const [viewed, setViewed] = useState(false);
-  const { language } = useTranslate();
-  const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language); // true لو RTL
+  const {isRTL} = useTranslate();
   // 🎬 Auto play/pause and view count
   useEffect(() => {
     const videoEl = videoRef.current;

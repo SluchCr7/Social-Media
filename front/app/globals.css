@@ -216,3 +216,12 @@ html[dir="ltr"] {
 html[lang="ar"] {
   font-family: 'Cairo', sans-serif;
 }
+
+/* إخفاء شريط التمرير بشكل احترافي */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE و Edge */
+  scrollbar-width: none;     /* Firefox */
+}
