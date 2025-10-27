@@ -260,6 +260,11 @@ UserSchema.virtual("audios", {
   localField: "_id",         
   foreignField: "owner",  
 });
+UserSchema.virtual("highlights", {
+  ref: "Highlight",      
+  localField: "_id",         
+  foreignField: "user",  
+});
 
 // 🔹 Update Level Rank
 UserSchema.methods.updateLevelRank = function () {

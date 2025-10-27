@@ -51,7 +51,9 @@ const ProfileLayout = ({
     fetchHighlights();
   }, [fetchHighlights]);
 
-
+  useEffect(() => {
+    console.log(user?.highlights)
+  },[user])
   const handleAddHighlight = () => {
     // لفتح قائمة إضافة هايلايت
     setOpenModal(true);
@@ -87,7 +89,7 @@ const ProfileLayout = ({
       
       {/* ⚡ Highlights Bar - تم إلغاء التعليق عنه */}
       <HighlightsBar
-        highlights={highlights}
+        highlights={user?.highlights}
         onAddHighlight={handleAddHighlight}   // لفتح قائمة الإضافة
         isOwner={isOwner}                     // لتحديد إمكانية عرض زر 'New'
       />

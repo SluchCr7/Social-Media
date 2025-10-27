@@ -203,6 +203,19 @@ const userOnePopulate = [
     },
   },
   {
+    path: "highlights",
+    populate: {
+      path: "user",
+      model: "User",
+      select: userSelect,
+    },
+    populate: {
+      path: "stories",
+      model: "Story",
+      select : "Photo text createdAt originalStory"
+    },
+  },
+  {
     path: "BlockedNotificationFromUsers",
     select: userSelect,
   },
