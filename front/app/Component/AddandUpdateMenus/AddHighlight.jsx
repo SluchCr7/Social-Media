@@ -10,7 +10,6 @@ export default function AddHighlightMenu({ stories = [] }) {
   const [cover, setCover] = useState(null);
   const [preview, setPreview] = useState(null);
   const [selectedStories, setSelectedStories] = useState([]);
-
   const { createHighlight, loading, setOpenModal, openModal } = useHighlights();
 
   const handleSelectStory = (id) => {
@@ -33,10 +32,10 @@ export default function AddHighlightMenu({ stories = [] }) {
 
     try {
       await createHighlight({ title, cover, storyIds: selectedStories });
-        setOpenModal(false);
-        setTitle("")
-        setCover(null)
-        setSelectedStories([])
+      setOpenModal(false);
+      setTitle('');
+      setCover(null);
+      setSelectedStories([]);
     } catch (err) {
       console.error('Highlight creation failed:', err);
     }
@@ -46,37 +45,39 @@ export default function AddHighlightMenu({ stories = [] }) {
     <AnimatePresence>
       {openModal && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <motion.div
             className="
-              bg-lightMode-menu dark:bg-darkMode-menu
-              text-lightMode-fg dark:text-darkMode-fg
-              rounded-2xl p-6 w-[90%] max-w-md shadow-2xl relative
+              relative w-[95%] max-w-lg rounded-3xl shadow-2xl 
+              bg-gradient-to-br from-white/80 to-white/30 
+              dark:from-gray-900/90 dark:to-gray-800/70 
+              border border-white/20 dark:border-gray-700/40 
+              p-6 backdrop-blur-2xl
             "
-            initial={{ y: 40, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 40, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
+            initial={{ scale: 0.95, y: 30, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            exit={{ scale: 0.95, y: 30, opacity: 0 }}
+            transition={{ duration: 0.3 }}
           >
-            {/* Close Button */}
+            {/* Close */}
             <button
               onClick={() => setOpenModal(false)}
-              className="absolute top-3 right-3 text-lightMode-text dark:text-darkMode-text hover:opacity-80"
+              className="absolute top-4 right-4 text-gray-700 dark:text-gray-300 hover:text-red-500 transition"
             >
               <FaTimes size={18} />
             </button>
 
-            <h2 className="text-xl font-semibold mb-5 text-center text-lightMode-text dark:text-darkMode-text">
+            <h2 className="text-2xl font-semibold mb-6 text-center bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
               ✨ Create New Highlight
             </h2>
 
             {/* Title Input */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1 text-lightMode-text2 dark:text-darkMode-text2">
+            <div className="mb-5">
+              <label className="block text-sm font-medium mb-2 text-gray-600 dark:text-gray-300">
                 Title
               </label>
               <input
@@ -85,48 +86,44 @@ export default function AddHighlightMenu({ stories = [] }) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="
-                  w-full rounded-lg p-2.5 
-                  bg-lightMode-bg dark:bg-darkMode-bg 
-                  border border-gray-200 dark:border-gray-700
-                  focus:outline-none focus:ring-2 
-                  focus:ring-lightMode-text dark:focus:ring-darkMode-text
+                  w-full p-2.5 rounded-xl bg-white/40 dark:bg-gray-800/60 
+                  border border-gray-300 dark:border-gray-700
+                  focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+                  outline-none transition
                 "
               />
             </div>
 
-            {/* Cover Upload */}
-            <div className="mb-5">
-              <label className="block text-sm font-medium mb-2 text-lightMode-text2 dark:text-darkMode-text2">
+            {/* Cover Image */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-2 text-gray-600 dark:text-gray-300">
                 Cover Image
               </label>
               <div
                 onClick={() => document.getElementById('coverUpload').click()}
                 className="
-                  relative flex items-center justify-center rounded-lg 
-                  bg-lightMode-bg dark:bg-darkMode-bg border-2 
-                  border-dashed border-gray-300 dark:border-gray-700 
-                  h-36 cursor-pointer overflow-hidden
-                  hover:bg-lightMode-menu dark:hover:bg-darkMode-bg transition
+                  relative h-40 rounded-xl border-2 border-dashed border-gray-400 dark:border-gray-600 
+                  bg-white/40 dark:bg-gray-800/60 cursor-pointer 
+                  flex items-center justify-center overflow-hidden
+                  hover:border-indigo-500 hover:bg-white/50 dark:hover:bg-gray-700/70 transition
                 "
               >
                 {preview ? (
                   <>
                     <Image
                       src={preview}
-                      alt="Cover Preview"
+                      alt="Preview"
                       fill
                       className="object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/30 flex items-end justify-end p-2">
-                      <button className="bg-white/90 dark:bg-black/60 text-xs px-2 py-1 rounded-md">
-                        Change
-                      </button>
+                    <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-md">
+                      Change
                     </div>
                   </>
                 ) : (
-                  <div className="flex flex-col items-center gap-2 text-lightMode-text2 dark:text-darkMode-text2">
-                    <FaImage size={24} />
-                    <span>Click to upload image</span>
+                  <div className="flex flex-col items-center text-gray-500 dark:text-gray-400">
+                    <FaImage size={26} />
+                    <span className="text-sm mt-1">Upload cover image</span>
                   </div>
                 )}
                 <input
@@ -139,73 +136,75 @@ export default function AddHighlightMenu({ stories = [] }) {
               </div>
             </div>
 
-            {/* Story Selection */}
+            {/* Stories Grid */}
             <div className="mb-6">
-              <label className="block text-sm font-medium mb-2 text-lightMode-text2 dark:text-darkMode-text2">
+              <label className="block text-sm font-medium mb-2 text-gray-600 dark:text-gray-300">
                 Select Stories
               </label>
-              <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
-                {stories.length === 0 && (
-                  <p className="text-gray-500 text-sm">No stories available.</p>
+              <div className="grid grid-cols-3 gap-3 max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400/40 scrollbar-track-transparent">
+                {stories.length === 0 ? (
+                  <p className="col-span-3 text-center text-gray-500 text-sm">
+                    No stories available.
+                  </p>
+                ) : (
+                  stories.map((story) => {
+                    const selected = selectedStories.includes(story._id);
+                    return (
+                      <motion.div
+                        key={story._id}
+                        whileHover={{ scale: 1.05 }}
+                        onClick={() => handleSelectStory(story._id)}
+                        className={`
+                          relative rounded-xl overflow-hidden border 
+                          ${selected
+                            ? 'border-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.6)]'
+                            : 'border-transparent hover:border-gray-400/60'}
+                          transition cursor-pointer
+                        `}
+                      >
+                        <Image
+                          src={story.Photo[0] || story.Photo || '/placeholder.jpg'}
+                          alt="Story"
+                          fill
+                          className="object-cover"
+                        />
+                        {selected && (
+                          <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/50 to-purple-500/50 flex items-center justify-center">
+                            <FaCheckCircle className="text-white text-xl drop-shadow-lg" />
+                          </div>
+                        )}
+                      </motion.div>
+                    );
+                  })
                 )}
-                {stories.map((story) => (
-                  <motion.div
-                    key={story._id}
-                    onClick={() => handleSelectStory(story._id)}
-                    whileHover={{ scale: 1.05 }}
-                    className={`
-                      relative w-20 h-28 rounded-xl overflow-hidden cursor-pointer 
-                      transition-all border-2
-                      ${
-                        selectedStories.includes(story._id)
-                          ? 'border-lightMode-text dark:border-darkMode-text shadow-md shadow-lightMode-text/30 dark:shadow-darkMode-text/20'
-                          : 'border-transparent'
-                      }
-                    `}
-                  >
-                    <Image
-                      src={story.Photo || story.Photo[0] || '/placeholder.jpg'}
-                      alt="Story"
-                      fill
-                      className="object-cover"
-                    />
-                    {selectedStories.includes(story._id) && (
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <FaCheckCircle className="text-lightMode-text dark:text-darkMode-text text-xl" />
-                      </div>
-                    )}
-                  </motion.div>
-                ))}
               </div>
             </div>
 
-            {/* Create Button */}
+            {/* Button */}
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={handleCreate}
               disabled={loading}
               className={`
-                w-full py-2.5 rounded-lg 
-                bg-gradient-to-r from-lightMode-text to-purple-500 
-                dark:from-darkMode-text dark:to-purple-600
-                text-white font-semibold flex items-center justify-center gap-2
-                shadow-md hover:shadow-lg transition-all
-                ${loading ? 'opacity-75 cursor-not-allowed' : ''}
+                w-full py-2.5 rounded-xl font-semibold 
+                bg-gradient-to-r from-indigo-500 to-purple-500 
+                text-white shadow-lg hover:shadow-indigo-400/40 
+                transition-all duration-300
+                ${loading ? 'opacity-70 cursor-not-allowed' : ''}
               `}
             >
               {loading ? (
                 <motion.div
-                  className="flex items-center gap-2"
-                  initial={{ opacity: 0.5 }}
+                  className="flex items-center justify-center gap-2"
                   animate={{ opacity: [0.5, 1, 0.5] }}
                   transition={{ repeat: Infinity, duration: 1.2 }}
                 >
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span className="text-sm">Saving your memories…</span>
+                  <span>Saving your memories…</span>
                 </motion.div>
               ) : (
                 <>
-                  <FaPlus /> <span>Create Highlight</span>
+                  <FaPlus /> Create Highlight
                 </>
               )}
             </motion.button>

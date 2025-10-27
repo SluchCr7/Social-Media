@@ -56,7 +56,7 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
             {filteredPosts?.length > 0
               ? filteredPosts.map((post) => <SluchitEntry key={post?._id} post={post} />)
               : Array.from({ length: 4 }).map((_, i) => (
-                  <PostSkeleton key={i} className="animate-pulse" />
+                  <PostSkeleton key={i} className="animate-pulse w-full" />
                 ))
             }
             {userIsLoading && <PostSkeleton className="animate-pulse" />}
