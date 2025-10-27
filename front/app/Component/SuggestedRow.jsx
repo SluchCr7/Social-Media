@@ -244,7 +244,7 @@ const SuggestionCard = ({ item, type, delay }) => {
                                 }`}
                         >
                             {isFollowingOrMember ? (
-                                <><FiUserCheck size={16} className="text-green-500" /> {t("Following")}</>
+                                <><FiUserCheck size={16} className="text-green-500" /> {t("Unfollow")}</>
                             ) : (
                                 <><FiUserPlus size={16} /> {t("Follow")}</>
                             )}
@@ -260,7 +260,7 @@ const SuggestionCard = ({ item, type, delay }) => {
                                 }`}
                         >
                             {isFollowingOrMember ? (
-                                <>{t("Joined")}</>
+                                <>{t("Left")}</>
                             ) : (
                                 <><Users size={16} /> {t("Join")}</>
                             )}

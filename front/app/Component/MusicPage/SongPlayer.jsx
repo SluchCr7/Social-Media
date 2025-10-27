@@ -31,8 +31,13 @@ const SongPlayer = React.memo(() => {
 
   // 🎨 استخراج لون الغلاف لتنسيق الخلفية
   useEffect(() => {
-    if (current?.cover) {
-      const img = new Image()
+    if (!current?.cover) {
+      setBgColor('#222')
+      return
+    }
+
+    if (typeof window !== 'undefined') {
+      const img = new window.Image()
       img.crossOrigin = 'Anonymous'
       img.src = current.cover
       img.onload = () => {
@@ -44,8 +49,6 @@ const SongPlayer = React.memo(() => {
           setBgColor('#222')
         }
       }
-    } else {
-      setBgColor('#222')
     }
   }, [current])
 
