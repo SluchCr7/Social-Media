@@ -3,7 +3,6 @@
 import React, { forwardRef, useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useReels } from '../Context/ReelsContext';
-import { useAuth } from '../Context/AuthContext';
 import {
   FaHeart,
   FaRegCommentDots,
@@ -20,21 +19,20 @@ import CommentsPopup from './CommentReelPopup';
 import { useTranslation } from 'react-i18next';
 import { useTranslate } from '../Context/TranslateContext';
 import { useUser } from '../Context/UserContext';
-import { useGetData } from '../Custome/useGetData';
+import ReelSkeleton from '../Skeletons/ReelSkeleton';
 
-const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
+const ReelCard = forwardRef(({userData, reel, isActive, isMuted, toggleMute }, ref) => {
   const videoRef = useRef(null);
-  const { user } = useAuth();
   const {toggleSaveReel} = useUser()
   const { deleteReel, likeReel, viewReel, shareReel, setShowModelAddReel } = useReels();
   const {t} = useTranslation()
   const [showComments, setShowComments] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [videoLoaded,setVideoLoaded] = useState(false)
   const [showHeart, setShowHeart] = useState(false);
   const [viewed, setViewed] = useState(false);
   const { language } = useTranslate();
   const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language); // true لو RTL
-  const {userData} = useGetData(user?._id)
   // 🎬 Auto play/pause and view count
   useEffect(() => {
     const videoEl = videoRef.current;
@@ -42,14 +40,14 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
 
     if (isActive) {
       videoEl.play().catch(() => {});
-      if (!viewed && user) {
+      if (!viewed && userData) {
         viewReel(reel?._id);
         setViewed(true);
       }
     } else {
       videoEl.pause();
     }
-  }, [isActive, reel?._id, viewed, user, viewReel]);
+  }, [isActive, reel?._id, viewed, userData, viewReel]);
 
   // ⏳ Progress bar
   useEffect(() => {
@@ -66,7 +64,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
 
   // ❤️ Double click like
   const handleDoubleClick = () => {
-    if (!reel?.likes?.includes(user?._id)) handleLike();
+    if (!reel?.likes?.includes(userData?._id)) handleLike();
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 800);
   };
@@ -92,6 +90,11 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
       className="relative w-full h-screen flex flex-col justify-end bg-black overflow-hidden"
       onDoubleClick={handleDoubleClick}
     >
+      {!videoLoaded && (
+        <div className="absolute w-full h-full inset-0 bg-gray-800 animate-pulse flex items-center justify-center">
+          <ReelSkeleton/>
+        </div>
+      )}
       {/* 🎥 Video */}
       <video
         ref={videoRef}
@@ -100,7 +103,8 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
         loop
         muted={isMuted}
         playsInline
-        preload="auto"
+        preload="metadata" // ✅ بدل "auto"
+        onLoadedData={() => setVideoLoaded(true)}
       />
 
       {/* 💖 Heart Animation */}
@@ -179,7 +183,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
         <button
           onClick={handleLike}
           className={`flex flex-col items-center transition-transform ${
-            reel?.likes?.includes(user?._id)
+            reel?.likes?.includes(userData?._id)
               ? "scale-125 text-red-500"
               : "hover:scale-110"
           }`}
@@ -225,7 +229,7 @@ const ReelCard = forwardRef(({ reel, isActive, isMuted, toggleMute }, ref) => {
         </button>
 
         {/* 🗑 Delete */}
-        {reel?.owner._id === user?._id && (
+        {reel?.owner._id === userData?._id && (
           <button
             className="flex flex-col items-center text-red-500 hover:scale-110 transition-transform"
             onClick={() => deleteReel(reel?._id)}

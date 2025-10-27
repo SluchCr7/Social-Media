@@ -19,6 +19,7 @@ import { useHighlights } from "@/app/Context/HighlightContext" // تم جلب ا
 // أنا أُضيفها هنا لتبسيط التنظيم، افترض أنها موجودة في نفس المسار أو مسار مُعَرَّف
 import HighlightViewerModal from '../HighlightView'; // جلب مُكون العرض
 import AddHighlightMenu from '../AddandUpdateMenus/AddHighlight'; // جلب مُكون الإضافة 
+import StickyProfileBar from "./StickyProfileBar"
 
 
 const ProfileLayout = ({
@@ -67,25 +68,35 @@ const ProfileLayout = ({
       className="w-full min-h-screen bg-lightMode-bg dark:bg-darkMode-bg 
                   text-lightMode-text dark:text-darkMode-text px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6"
     >
-      {/* 👤 رأس البروفايل */}
-      <ProfileHeader
+      {/* ✅ الشريط الثابت */}
+      <StickyProfileBar
         user={user}
         isOwner={isOwner}
         isFollowing={isFollowing}
-        canSeePrivateContent={canSeePrivateContent}
-        onImageChange={onImageChange}
-        onEdit={onEdit}
-        onAddStory={onAddStory}
         onFollow={onFollow}
         onUnfollow={onUnfollow}
-        onShowFollowers={onShowFollowers}
-        onShowFollowing={onShowFollowing}
-        onProfileClick={onProfileClick}
-        setOpenMenu={setOpenMenu}
-        openMenu={openMenu}
-        renderOwnerMenu={isOwner ? renderMenu : undefined}
-        renderVisitorMenu={!isOwner ? renderMenu : undefined}
       />
+      {/* 👤 رأس البروفايل */}
+      <div id="profile-header">
+        <ProfileHeader
+          user={user}
+          isOwner={isOwner}
+          isFollowing={isFollowing}
+          canSeePrivateContent={canSeePrivateContent}
+          onImageChange={onImageChange}
+          onEdit={onEdit}
+          onAddStory={onAddStory}
+          onFollow={onFollow}
+          onUnfollow={onUnfollow}
+          onShowFollowers={onShowFollowers}
+          onShowFollowing={onShowFollowing}
+          onProfileClick={onProfileClick}
+          setOpenMenu={setOpenMenu}
+          openMenu={openMenu}
+          renderOwnerMenu={isOwner ? renderMenu : undefined}
+          renderVisitorMenu={!isOwner ? renderMenu : undefined}
+        />
+      </div>
       
       {/* ⚡ Highlights Bar - تم إلغاء التعليق عنه */}
       <HighlightsBar

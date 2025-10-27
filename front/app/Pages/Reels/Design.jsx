@@ -3,10 +3,14 @@ import React from 'react'
 import ReelCard from '../../Component/ReelCard';
 import ReelSkeleton from '../../Skeletons/ReelSkeleton';
 import { useTranslation } from 'react-i18next';
+import { useGetData } from '@/app/Custome/useGetData';
+import { useAuth } from '@/app/Context/AuthContext';
 const DesignReels = ({
     containerRef , reels , currentIndex , reelRefs , isLoading , lastReelRef , isMuted , setIsMuted
 }) => {
   const { t } = useTranslation()
+  const { user } = useAuth();
+  const { userData } = useGetData(user?._id);
   return (
     <div
       ref={containerRef}
@@ -24,6 +28,8 @@ const DesignReels = ({
             className="snap-start w-full h-screen"
           >
             <ReelCard
+              key={reel._id}
+              userData={userData}
               reel={reel}
               isActive={index === currentIndex}
               isMuted={isMuted}

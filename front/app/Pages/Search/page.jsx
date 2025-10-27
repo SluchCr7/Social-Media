@@ -5,14 +5,13 @@ import { usePost } from '@/app/Context/PostContext';
 import { useSearchLogic } from '../../Custome/useSearchLogic';
 import { useTranslation } from 'react-i18next';
 import { IoIosSearch } from 'react-icons/io';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 // استيراد المكونات
 import ExploreSearchBar from '../../Component/Explore/ExploreSearchBar';
 import FullSearchTabs from '../../Component/FullSearchTabs';
 
 const FullSearchResults = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const { users, user } = useAuth();
@@ -25,13 +24,11 @@ const FullSearchResults = () => {
   // منطق البحث
   const { search, setSearch, searchResults } = useSearchLogic(initialSearchQuery, users, posts);
 
-  // تحديث URL عند تغيير البحث
+  // تحديث URL عند تغيير البحث دون أي إعادة تحميل أو rerender
   useEffect(() => {
     const currentQ = searchParams.get('q') || '';
     if (search.trim() && search !== currentQ) {
-      // تعديل الـ URL بدون إعادة تحميل الصفحة
-      const newUrl = `/Search/results?q=${encodeURIComponent(search)}`;
-      router.replace(newUrl);
+      window.history.replaceState(null, '', `/Pages/Search?q=${encodeURIComponent(search)}`);
     }
   }, [search]);
 
@@ -76,6 +73,7 @@ const FullSearchResults = () => {
 };
 
 export default FullSearchResults;
+
 
 // 'use client';
 // import React from 'react';

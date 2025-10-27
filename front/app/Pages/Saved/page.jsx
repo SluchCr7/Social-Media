@@ -51,11 +51,19 @@ export default function SavedPage() {
   const filteredPosts = useMemo(() => posts.filter(p => (p.text + p.username).toLowerCase().includes(query.toLowerCase())), [query, posts])
   
   // استخدام قائمة التشغيل الحقيقية، والرجوع إلى البيانات الثابتة في حال عدم وجودها
-  const filteredMusic = useMemo(() => 
-    (userData?.myMusicPlaylist?.length > 0 ? userData?.myMusicPlaylist : savedMusic)
-      .filter(m => (m.title + m.artist).toLowerCase().includes(query.toLowerCase())), 
-    [query, userData?.myMusicPlaylist]
-  )
+  const filteredMusic = useMemo(() => {
+    const playlist = userData?.myMusicPlaylist?.length > 0
+      ? userData?.myMusicPlaylist
+      : savedMusic;
+
+    return playlist
+      .map(m => ({
+        ...m,
+        _id: m._id || m.id, // 🩹 توحيد المفتاح مع MusicPlayerContext
+        id: m._id || m.id,
+      }))
+      .filter(m => (m.title + m.artist).toLowerCase().includes(query.toLowerCase()));
+  }, [query, userData?.myMusicPlaylist]);
   const filteredReels = useMemo(() => 
     (userData?.savedReels?.length > 0 ? userData?.savedReels : savedReels)
       .filter(m => m.caption.toLowerCase().includes(query.toLowerCase())), 
@@ -68,7 +76,7 @@ export default function SavedPage() {
 // 3. دالة موحدة لتشغيل/إيقاف الموسيقى باستخدام المشغل العالمي
   const handleMusicAction = async (track) => {
     // إذا كانت الأغنية الحالية هي نفسها
-    if (current && current.id === track.id) {
+    if (current && (current._id === track._id || current.id === track.id)){
       if (playing) {
         pause();
         setExpanded(false);

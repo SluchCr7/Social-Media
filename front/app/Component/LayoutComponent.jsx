@@ -22,6 +22,7 @@ import { useTranslate } from '../Context/TranslateContext';
 import CookieConsent from './CookieConsent';
 import NProgress from 'nprogress'
 import '@/styles/nprogress.css'
+import FloatingDock from './FloatingDock';
 const LayoutComponent = ({ children }) => {
   const [loading, setLoading] = useState(true); // للتحكم في الـ Loader
 
@@ -156,12 +157,13 @@ const LayoutComponent = ({ children }) => {
           )}
           <MenuAllSuggestedFriends />
           <ReelUploadModal />
-          {/* {
+          {
             viewMusicPlayer && (
               <SongPlayer/>
             )
-          } */}
+          }
           {/* <CookieConsent/> */}
+          <FloatingDock onOpenMusicPlayer={()=> setViewMusicPlayer(true)}/>
           <ExpandedWindow/>
         </div>
       </div>
