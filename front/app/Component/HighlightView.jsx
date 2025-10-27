@@ -4,10 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import Image from 'next/image';
 
-/**
- * @param {Object} highlight - highlight object containing { title, stories: [{_id, Photo, createdAt}] }
- * @param {Function} onClose - callback when modal closes
- */
 export default function HighlightViewerModal({ highlight, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);

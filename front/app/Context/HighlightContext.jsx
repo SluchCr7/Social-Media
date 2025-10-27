@@ -6,7 +6,7 @@ import { useAuth } from './AuthContext';
 const HighlightContext = createContext();
 export const useHighlights = () => useContext(HighlightContext);
 
-export const HighlightProvider = ({ children }) => {
+export const HighlightContextProvider = ({ children }) => {
   const [highlights, setHighlights] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
