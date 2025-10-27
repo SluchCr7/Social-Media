@@ -157,11 +157,11 @@ const LayoutComponent = ({ children }) => {
           )}
           <MenuAllSuggestedFriends />
           <ReelUploadModal />
-          {
+          {/* {
             viewMusicPlayer && (
               <SongPlayer/>
             )
-          }
+          } */}
           {/* <CookieConsent/> */}
           <FloatingDock onOpenMusicPlayer={()=> setViewMusicPlayer(!viewMusicPlayer)}/>
           <ExpandedWindow/>
