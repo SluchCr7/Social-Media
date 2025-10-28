@@ -1,6 +1,6 @@
 const Highlight = require("../Modules/Highlight");
 const { cloudUpload } = require("../Config/cloudUpload"); // تأكد من المسار الصحيح
-const Story = require("../Modules/Story");
+const { Story } = require("../Modules/Story");
 
 // POST /api/highlights
 const createHighlight = async (req, res) => {
@@ -68,7 +68,7 @@ const deleteHighlight = async (req, res) => {
  * إضافة Story جديدة إلى Highlight موجودة
  * @route POST /api/highlights/:highlightId/add-story
  */
-export const addStoryToHighlight = async (req, res) => {
+const addStoryToHighlight = async (req, res) => {
   try {
     const { highlightId } = req.params;
     const { storyId } = req.body;
