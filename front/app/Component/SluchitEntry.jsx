@@ -330,7 +330,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
           rounded-2xl shadow-[0_0_25px_-10px_rgba(0,0,0,0.3)]
           bg-white/90 dark:bg-black/40 backdrop-blur-xl
           border border-gray-200/70 dark:border-gray-700/60
-          transition-all duration-300
+          transition-all duration-300 z-[1000]
         "
       >
         {/* ======= Share Modal ======= */}

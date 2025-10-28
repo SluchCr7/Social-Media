@@ -6,7 +6,7 @@ import { TABS } from '@/app/utils/Data'
 
 export default function MobileBottomNav({ activeTab, setActiveTab }) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 dark:bg-gray-900/70 border-t border-gray-200 dark:border-gray-800 shadow-lg">
+    <div className="fixed flex md:hidden bottom-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 dark:bg-gray-900/70 border-t border-gray-200 dark:border-gray-800 shadow-lg">
       <div className="flex items-center justify-start overflow-x-auto no-scrollbar px-2 py-3 space-x-4 snap-x snap-mandatory">
         {TABS.map((tab) => (
           <button
