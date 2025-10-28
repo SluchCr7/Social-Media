@@ -330,7 +330,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
           rounded-2xl shadow-[0_0_25px_-10px_rgba(0,0,0,0.3)]
           bg-white/90 dark:bg-black/40 backdrop-blur-xl
           border border-gray-200/70 dark:border-gray-700/60
-          transition-all duration-300 z-[1000]
+          transition-all duration-300 z-50
         "
       >
         {/* ======= Share Modal ======= */}
@@ -354,7 +354,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
           {/* ======= Shared Info ======= */}
           {isShared && <SharedTitle user={user} post={post} original={original} />}
 
-          <div className="flex flex-col items-start sm:flex-row gap-5">
+          <div className="flex flex-col items-start sm:flex-row gap-5 w-full">
             {/* ======= Optional Image on Side ======= */}
             <PostImage
               post={post}
@@ -363,7 +363,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
             />
 
             {/* ======= Main Content ======= */}
-            <div className="flex flex-col flex-1 gap-3">
+            <div className="flex flex-col flex-1 gap-3 w-full">
               <PostHeader
                 post={post}
                 user={user}
