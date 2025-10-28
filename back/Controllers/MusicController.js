@@ -149,27 +149,27 @@ const toggleLike = asyncHandler(async (req, res) => {
   const music = await Music.findById(req.params.id);
   if (!music) return res.status(404).json({ message: "Music not found" });
 
-  const userId = req.user._id;
-  const alreadyLiked = music.likes.includes(userId);
-
-  if (alreadyLiked) {
-    // إزالة اللايك
-    music.likes.pull(userId);
+  if (music.likes.includes(req.user._id)) {
+    await Music.findByIdAndUpdate(
+      req.params.id,
+      { $pull: { likes: req.user._id } }
+    );
   } else {
-    // إضافة اللايك
-    music.likes.push(userId);
-
-    // إرسال إشعار للمالك إذا كان المستخدم ليس هو المالك
-    if (!music.owner._id.equals(userId)) {
+    // إضافة لايك
+    await Music.findByIdAndUpdate(
+      req.params.id,
+      { $push: { likes: req.user._id } }
+    );
+    if (!music.owner._id.equals(req.user._id)) {
 
       // ✅ التأكد أن المالك لم يحظر هذا المستخدم من الإشعارات
       const isBlocked = music.owner.BlockedNotificationFromUsers?.some(
-        (blockedId) => blockedId.equals(userId)
+        (blockedId) => blockedId.equals(req.user._id)
       );
 
       if (!isBlocked) {
         await sendNotificationHelper({
-          sender: userId,
+          sender: req.user._id,
           receiver: music.owner._id,
           content: "liked your music 🎵",
           type: "like",
@@ -237,3 +237,4 @@ module.exports = {
   addView,
   addListen
 };
+

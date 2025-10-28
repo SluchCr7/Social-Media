@@ -99,7 +99,7 @@ export const MusicProvider = ({ children }) => {
       console.error(err);
       showAlert("Failed to like Music.");
     }
-  }, [user, showAlert]);
+  }, [user]);
 
   // 👁️ زيادة المشاهدات
   const viewMusic = useCallback(async (id) => {

@@ -117,7 +117,9 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
         : 'text-red-400 hover:bg-red-100',
     },
     {
-      icon: user?.following?.includes(post?.owner?._id)
+      icon: userData?.following?.includes(post?.owner?._id) ||
+        user?.following?.includes(post?.owner?._id) ||
+        userData?.following?.some((f) => f._id === post?.owner?._id)
         ? <RiUserUnfollowLine className="text-lg" />
         : <RiUserFollowLine className="text-lg" />,
       text: user?.following?.includes(post?.owner?._id)

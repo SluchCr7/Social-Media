@@ -42,6 +42,7 @@ const DasignCommunitySelect = ({
   showRules,
   setShowRules,
   isJoined,
+  showEdit ,
   hasPendingRequest,
   handleJoinToggle,
   handleMakeAdmin,
