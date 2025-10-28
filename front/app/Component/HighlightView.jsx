@@ -254,14 +254,15 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.01 }}
                 transition={{ duration: 0.45 }}
-                className="w-full max-w-2xl mx-auto h-full p-6 flex items-center justify-center"
+                className="w-full max-w-5xl mx-auto flex items-center justify-center"
+                style={{ height: 'calc(100vh - 160px)' }} // يضبط الطول تقريباً بطول الشاشة مع مراعاة التوب بار
               >
-                <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-[0_10px_60px_rgba(0,0,0,0.6)] bg-black">
+                <div className="relative w-full h-full flex items-center justify-center bg-black rounded-2xl overflow-hidden shadow-[0_10px_60px_rgba(0,0,0,0.6)]">
                   <Image
                     src={currentPhoto}
                     alt={currentStory?.text || `Story ${currentIndex + 1}`}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     draggable={false}
                     priority={true}
                   />
@@ -281,7 +282,7 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
                   {/* bottom gradient for contrast */}
                   <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
 
-                  {/* left / right invisible click zones (bigger tap targets) */}
+                  {/* left / right invisible click zones */}
                   <button
                     onClick={prev}
                     aria-label="Previous story"
@@ -295,6 +296,7 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
                 </div>
               </motion.div>
             </AnimatePresence>
+
 
             {/* Small floating controls: pause, index */}
             <div className="absolute top-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3">
