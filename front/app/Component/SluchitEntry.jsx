@@ -266,7 +266,7 @@ import { iso6391Map } from '../utils/Data'
 import { useTranslation } from 'react-i18next'
 import { getHighlightedComment } from '../utils/getHighlitedComment'
 import { usePathname } from 'next/navigation'
-
+import {motion , AnimatePresence} from 'framer-motion'
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost()
   const { user, isLogin } = useAuth()
