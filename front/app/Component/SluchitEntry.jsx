@@ -351,7 +351,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
             className="
               absolute inset-0 z-[60] 
               flex flex-col items-center justify-center text-center
-              overflow-hidden rounded-2xl
+              overflow-hidden rounded-2xl py-2
             "
           >
             {/* خلفية ناعمة وشفافة */}
@@ -361,7 +361,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 backdrop-blur-[15px] 
                 bg-gradient-to-br from-black/60 via-gray-900/50 to-black/40 
                 rounded-2xl
-                border border-white/10 shadow-inner
+                border border-white/10 shadow-inner py-2
               "
             />
 
