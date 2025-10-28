@@ -29,7 +29,7 @@ const StickyProfileBar = ({ user, isOwner, isFollowing, onFollow, onUnfollow }) 
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: -80, opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="fixed top-0 left-0 w-full z-50 
+      className="fixed top-0 left-0 w-full z-[1000]
                  bg-lightMode-bg/90 dark:bg-darkMode-bg/90 
                  backdrop-blur-xl border-b border-white/10 
                  shadow-md flex items-center justify-between px-4 sm:px-8 py-2"

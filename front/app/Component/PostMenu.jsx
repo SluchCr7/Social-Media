@@ -49,9 +49,6 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
   const { userData } = useGetData(user?._id)
   // ✅ تحديد اتجاه اللغة
   const {isRTL} = useTranslate()
-  useEffect(()=>{
-    console.log(userData)
-  },[userData])
   // ✅ إغلاق القائمة عند الضغط خارجها
   useEffect(() => {
     const handleClickOutside = (e) => {
