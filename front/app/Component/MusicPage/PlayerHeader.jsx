@@ -15,14 +15,14 @@ const PlayerHeader = ({ current, likeMusic, saveMusicInPlayList, userData, myPla
       </div>
       <div className="flex items-center gap-3">
         <button
-          onClick={() => current?._id && likeMusic(current._id)}
+          onClick={() => current?._id && likeMusic(current?._id)}
           className={`p-3 rounded-lg transition ${current?.likes?.includes(userData?._id) ? 'bg-red-500 text-white' : 'bg-white/30 dark:bg-gray-800/40 hover:bg-red-500/70 hover:text-white'}`}
         >
           <FaHeart />
         </button>
         <button
-          onClick={() => current?._id && saveMusicInPlayList(current._id)}
-          className={`p-3 rounded-lg transition ${myPlaylist?.some(s => s._id === current._id) ? 'bg-yellow-500 text-white' : 'bg-white/30 dark:bg-gray-800/40 hover:bg-yellow-400/60 hover:text-white'}`}
+          onClick={() => current?._id && saveMusicInPlayList(current?._id)}
+          className={`p-3 rounded-lg transition ${myPlaylist?.some(s => s?._id === current?._id) ? 'bg-yellow-500 text-white' : 'bg-white/30 dark:bg-gray-800/40 hover:bg-yellow-400/60 hover:text-white'}`}
         >
           <CiBookmark />
         </button>

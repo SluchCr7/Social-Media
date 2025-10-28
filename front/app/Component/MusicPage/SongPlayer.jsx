@@ -71,131 +71,133 @@ const SongPlayer = React.memo(() => {
   if (!current) return null
 
   return (
-    <motion.div
-      initial={{ y: 100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ type: 'spring', stiffness: 90, damping: 15 }}
-      className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50
-                  w-[92%] sm:w-[80%] md:w-[65%] lg:w-[50%]
-                  backdrop-blur-xl border border-white/10
-                  rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.35)]
-                  overflow-hidden`}
-      style={{
-        background: `linear-gradient(120deg, ${bgColor}dd, #000000ee)`
-      }}
-    >
+    <div className='w-full md:max-w-7xl mx-auto'>
       <motion.div
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 100 }}
-        onDragEnd={(e, info) => {
-          if (info.offset.y < -40) setExpanded(true)
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 90, damping: 15 }}
+        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50
+                    w-[92%] md:w-full mx-auto
+                    backdrop-blur-xl border border-white/10
+                    rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.35)]
+                    `}
+        style={{
+          background: `linear-gradient(120deg, ${bgColor}dd, #000000ee)`
         }}
-        className="cursor-grab active:cursor-grabbing p-4 flex flex-col sm:flex-row items-center gap-4"
       >
-        {/* 🎧 صورة الغلاف */}
-        <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
-          {current?.cover ? (
-            <Image src={current.cover} alt={current.title} fill className="object-cover" />
-          ) : (
-            <div className="w-full h-full bg-gray-700 flex items-center justify-center text-xs text-gray-400">
-              {t('No Cover')}
-            </div>
-          )}
-          {playing && (
-            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="w-1 bg-white/90 rounded-full"
-                  animate={{ height: ['25%', '90%', '40%'] }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 0.6 + i * 0.1,
-                    ease: 'easeInOut'
-                  }}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* 🎵 معلومات الأغنية */}
-        <div className="flex-1 min-w-0 text-white">
-          <h4 className="font-semibold text-sm sm:text-base truncate">
-            {current?.title || 'Unknown'}
-          </h4>
-          <p className="text-xs text-gray-300 truncate">
-            {current?.artist || 'Unknown Artist'}
-          </p>
-          <div className="flex justify-between items-center mt-1 text-[10px] text-gray-400">
-            <span>{formatTime(progress)}</span>
-            <span>{formatTime(duration)}</span>
+        <motion.div
+          drag="y"
+          dragConstraints={{ top: 0, bottom: 100 }}
+          onDragEnd={(e, info) => {
+            if (info.offset.y < -40) setExpanded(true)
+          }}
+          className="cursor-grab active:cursor-grabbing p-4 flex flex-col sm:flex-row items-center gap-4 w-full"
+        >
+          {/* 🎧 صورة الغلاف */}
+          <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
+            {current?.cover ? (
+              <Image src={current.cover} alt={current.title} fill className="object-cover" />
+            ) : (
+              <div className="w-full h-full bg-gray-700 flex items-center justify-center text-xs text-gray-400">
+                {t('No Cover')}
+              </div>
+            )}
+            {playing && (
+              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="w-1 bg-white/90 rounded-full"
+                    animate={{ height: ['25%', '90%', '40%'] }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 0.6 + i * 0.1,
+                      ease: 'easeInOut'
+                    }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-          <div className="h-1 mt-1 bg-white/25 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-white/90"
-              style={{ width: `${progressPercent}%` }}
-              transition={{ ease: 'easeOut', duration: 0.3 }}
-            />
+
+          {/* 🎵 معلومات الأغنية */}
+          <div className="flex-1 min-w-0 text-white">
+            <h4 className="font-semibold text-sm sm:text-base truncate">
+              {current?.title || 'Unknown'}
+            </h4>
+            <p className="text-xs text-gray-300 truncate">
+              {current?.artist || 'Unknown Artist'}
+            </p>
+            <div className="flex justify-between items-center mt-1 text-[10px] text-gray-400">
+              <span>{formatTime(progress)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
+            <div className="h-1 mt-1 bg-white/25 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-white/90"
+                style={{ width: `${progressPercent}%` }}
+                transition={{ ease: 'easeOut', duration: 0.3 }}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* 🎛️ أزرار التحكم */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          <motion.button
-            onClick={prev}
-            whileTap={{ scale: 0.9 }}
-            className="text-white/80 hover:text-white transition"
-          >
-            <FaStepBackward />
-          </motion.button>
+          {/* 🎛️ أزرار التحكم */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <motion.button
+              onClick={prev}
+              whileTap={{ scale: 0.9 }}
+              className="text-white/80 hover:text-white transition"
+            >
+              <FaStepBackward />
+            </motion.button>
 
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={togglePlay}
-            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white 
-                       flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
-          >
-            {playing ? <FaPause /> : <FaPlay />}
-          </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={togglePlay}
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white 
+                        flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+            >
+              {playing ? <FaPause /> : <FaPlay />}
+            </motion.button>
 
-          <motion.button
-            onClick={next}
-            whileTap={{ scale: 0.9 }}
-            className="text-white/80 hover:text-white transition"
-          >
-            <FaStepForward />
-          </motion.button>
+            <motion.button
+              onClick={next}
+              whileTap={{ scale: 0.9 }}
+              className="text-white/80 hover:text-white transition"
+            >
+              <FaStepForward />
+            </motion.button>
 
-          <motion.button
-            onClick={() => setExpanded(true)}
-            whileTap={{ scale: 0.9 }}
-            className="hidden sm:flex text-white/70 hover:text-white transition"
-          >
-            <FaExpand />
-          </motion.button>
+            <motion.button
+              onClick={() => setExpanded(true)}
+              whileTap={{ scale: 0.9 }}
+              className="hidden sm:flex text-white/70 hover:text-white transition"
+            >
+              <FaExpand />
+            </motion.button>
 
-          <motion.button
-            onClick={() => current?._id && likeMusic(current._id)}
-            whileTap={{ scale: 0.9 }}
-            className={`hidden sm:flex p-2 rounded-lg transition-all ${
-              current?.likes?.includes(user?._id)
-                ? 'bg-red-500 text-white'
-                : 'bg-white/20 text-white/80 hover:bg-white/30'
-            }`}
-          >
-            <FaHeart />
-          </motion.button>
+            <motion.button
+              onClick={() => current?._id && likeMusic(current._id)}
+              whileTap={{ scale: 0.9 }}
+              className={`hidden sm:flex p-2 rounded-lg transition-all ${
+                current?.likes?.includes(user?._id)
+                  ? 'bg-red-500 text-white'
+                  : 'bg-white/20 text-white/80 hover:bg-white/30'
+              }`}
+            >
+              <FaHeart />
+            </motion.button>
 
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            className="hidden sm:flex p-2 text-white/70 hover:text-white transition"
-          >
-            <FaShareAlt />
-          </motion.button>
-        </div>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              className="hidden sm:flex p-2 text-white/70 hover:text-white transition"
+            >
+              <FaShareAlt />
+            </motion.button>
+          </div>
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   )
 })
 

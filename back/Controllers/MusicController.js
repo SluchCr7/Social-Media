@@ -184,9 +184,10 @@ const toggleLike = asyncHandler(async (req, res) => {
   await music.updatePopularity({ threshold: 50 }); // يمكن تعديل threshold حسب الحاجة
 
   // تعبئة بيانات المالك للعرض
-  await music.populate("owner", "username profilePhoto");
+  const updatedMusic = await Music.findById(req.params.id)
+    .populate("owner", "username profilePhoto")
 
-  res.status(200).json(music);
+  res.status(200).json(updatedMusic);
 });
 
 
