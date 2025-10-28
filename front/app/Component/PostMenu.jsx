@@ -294,7 +294,8 @@ const MenuOption = ({ icon, text, action, className, loading }) => (
     {icon}
     <span>{loading ? 'Processing...' : text}</span>
   </motion.button>
-);
+ );
+
 
 const PostMenu = ({ showMenu, setShowMenu, post,triggerRef  }) => {
   const { followUser, pinPost, toggleBlockNotification } = useUser();

@@ -6,6 +6,7 @@ import { BsThreeDots } from 'react-icons/bs'
 import { HiBadgeCheck } from 'react-icons/hi'
 import PostMenu from '@/app/Component/PostMenu'
 import UserHoverCard from '../UserHoverCard'
+import {useRef} from 'react' 
 import { formatRelativeTime } from '@/app/utils/FormatDataCreatedAt'
 const PostHeader = ({ post, user, isLogin, showMenu, setShowMenu,isCommunityPost }) => {
   const triggerRef = useRef(null) 
