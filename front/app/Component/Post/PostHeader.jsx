@@ -8,6 +8,7 @@ import PostMenu from '@/app/Component/PostMenu'
 import UserHoverCard from '../UserHoverCard'
 import { formatRelativeTime } from '@/app/utils/FormatDataCreatedAt'
 const PostHeader = ({ post, user, isLogin, showMenu, setShowMenu,isCommunityPost }) => {
+  const triggerRef = useRef(null) 
   return (
     <div className="flex flex-row justify-between items-center gap-2">
       <div className="flex items-center gap-3">
@@ -37,13 +38,14 @@ const PostHeader = ({ post, user, isLogin, showMenu, setShowMenu,isCommunityPost
       {isLogin && (
         <div className="relative self-end sm:self-auto z-50">
           <button
+            ref={triggerRef}
             onClick={() => setShowMenu(!showMenu)}
             className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 
               text-xl text-gray-500 hover:text-gray-700 transition"
           >
             <BsThreeDots />
           </button>
-          <PostMenu post={post} showMenu={showMenu} setShowMenu={setShowMenu} />
+          <PostMenu post={post} showMenu={showMenu} setShowMenu={setShowMenu} triggerRef={triggerRef} />
         </div>
       )}
     </div>

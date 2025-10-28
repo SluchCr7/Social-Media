@@ -296,7 +296,7 @@ const MenuOption = ({ icon, text, action, className, loading }) => (
   </motion.button>
 );
 
-const PostMenu = ({ showMenu, setShowMenu, post }) => {
+const PostMenu = ({ showMenu, setShowMenu, post,triggerRef  }) => {
   const { followUser, pinPost, toggleBlockNotification } = useUser();
   const { blockOrUnblockUser } = useAdmin();
   const { t } = useTranslation();
@@ -308,7 +308,6 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
   const { isRTL } = useTranslate();
 
   const menuRef = useRef();
-  const triggerRef = useRef();
   const [confirmAction, setConfirmAction] = useState(null);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
