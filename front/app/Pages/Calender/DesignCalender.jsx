@@ -434,12 +434,11 @@ export default function EnhancedCalendar({
           <button onClick={() => setSelectedDate(dayjs())} className="text-sm text-blue-600">Today</button>
         </div>
         {/* MiniCalendar component optional - if not present, keep a simple month grid */}
-        <div className="mb-4">
-          {/* if you have a separate MiniCalendar component, use it here. Otherwise this area can show a compact month */}
+        {/*<div className="mb-4">
           {typeof MiniCalendar !== 'undefined' ? <MiniCalendar currentDate={currentDate} onChange={setCurrentDate} /> : (
             <div className="text-sm text-gray-500">Mini calendar placeholder</div>
           )}
-        </div>
+        </div>*/}
 
         <div className="mb-4">
           <h4 className="text-sm font-medium mb-2">Upcoming</h4>
