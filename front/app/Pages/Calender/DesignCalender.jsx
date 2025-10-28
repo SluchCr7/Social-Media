@@ -244,14 +244,9 @@ import {
 import AddEventModal from '@/app/Component/AddandUpdateMenus/AddEventModal';
 import EventDetailsModal from '@/app/Component/AddandUpdateMenus/EventDetailsModal';
 import ShowAllEvents from '@/app/Component/AddandUpdateMenus/ShowAllEvents';
-import MiniCalendar from './MiniCalendar'; // optional: if you keep a separate mini calendar file
+// import MiniCalendar from './MiniCalendar'; // optional: if you keep a separate mini calendar file
 // import "./EnhancedCalendar.css"; // optional additional styles
 
-// EnhancedCalendar.jsx
-// - Single-file React component (default export)
-// - Tailwind-friendly classes used throughout (assumes Tailwind is configured)
-// - Props: events (array), loading (bool), handlers: addEvent, updateEvent, deleteEvent
-// - No notifications (per user request)
 
 export default function EnhancedCalendar({
   events = [],
