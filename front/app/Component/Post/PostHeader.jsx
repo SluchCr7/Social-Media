@@ -38,7 +38,7 @@ const PostHeader = ({ post, user, isLogin, showMenu, setShowMenu,isCommunityPost
       {isLogin && (
         <div className="relative self-end sm:self-auto z-50">
           <button
-            ref={triggerRef}
+            // ref={triggerRef}
             onClick={() => setShowMenu(!showMenu)}
             className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 
               text-xl text-gray-500 hover:text-gray-700 transition"
