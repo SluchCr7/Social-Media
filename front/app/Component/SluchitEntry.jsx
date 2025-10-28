@@ -374,7 +374,6 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 className="
                   relative z-10 flex flex-col items-center justify-center 
                   gap-6 px-8 py-10 sm:px-10 sm:py-12 
-                  bg-white/20 dark:bg-black/20 
                   backdrop-blur-lg 
                   rounded-2xl
                   max-w-md text-center
