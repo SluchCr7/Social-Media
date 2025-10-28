@@ -245,7 +245,7 @@ import AddEventModal from '@/app/Component/AddandUpdateMenus/AddEventModal';
 import EventDetailsModal from '@/app/Component/AddandUpdateMenus/EventDetailsModal';
 import ShowAllEvents from '@/app/Component/AddandUpdateMenus/ShowAllEvents';
 import MiniCalendar from './MiniCalendar'; // optional: if you keep a separate mini calendar file
-import "./EnhancedCalendar.css"; // optional additional styles
+// import "./EnhancedCalendar.css"; // optional additional styles
 
 // EnhancedCalendar.jsx
 // - Single-file React component (default export)
