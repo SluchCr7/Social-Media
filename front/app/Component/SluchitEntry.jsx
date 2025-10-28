@@ -351,7 +351,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
             className="
               absolute inset-0 z-[60] 
               flex flex-col items-center justify-center text-center
-              overflow-hidden rounded-2xl py-2
+              overflow-hidden rounded-2xl
             "
           >
             {/* خلفية ناعمة وشفافة */}
@@ -361,7 +361,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 backdrop-blur-[15px] 
                 bg-gradient-to-br from-black/60 via-gray-900/50 to-black/40 
                 rounded-2xl
-                border border-white/10 shadow-inner py-2
+                border border-white/10 shadow-inner
               "
             />
 
@@ -370,7 +370,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.3 }}
-              className="relative z-10 flex flex-col items-center gap-4 p-6 text-white"
+              className="relative z-10 flex flex-col items-center gap-4 p-6 text-white my-3"
             >
               <div className="p-3 rounded-full bg-white/10 border border-white/20 shadow-lg">
                 <span className="text-4xl">⚠️</span>

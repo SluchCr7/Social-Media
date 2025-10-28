@@ -220,7 +220,6 @@ const useTrendingPosts = (trendingPosts, timeFilter) => {
 
 const useFollowingPhotos = (user) => {
     return useMemo(() => {
-        // يتم إزالة (.filter(m => m.type === 'image'))
         return user?.following?.flatMap(f =>
             f.posts?.flatMap(p => p?.Photos || []) || []
         ) || [];
