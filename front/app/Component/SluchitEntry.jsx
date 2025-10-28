@@ -374,10 +374,9 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 className="
                   relative z-10 flex flex-col items-center justify-center 
                   gap-6 px-8 py-10 sm:px-10 sm:py-12 
-                  bg-white/10 dark:bg-black/20 
+                  bg-white/20 dark:bg-black/20 
                   backdrop-blur-lg 
-                  rounded-2xl border border-white/20 dark:border-gray-700/50 
-                  shadow-[0_8px_40px_-10px_rgba(0,0,0,0.4)]
+                  rounded-2xl
                   max-w-md text-center
                 "
               >
@@ -391,16 +390,12 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                   {t('Sensitive Content')}
                 </h2>
 
-                {/* النص التحذيري */}
-                <p className="text-sm sm:text-base text-gray-200/90 leading-relaxed max-w-xs sm:max-w-sm">
-                  {t('This post may contain offensive, violent, or adult content.')}
-                </p>
 
                 {/* زر العرض */}
                 <button
                   onClick={()=> setShowSensitive(false)}
                   className="
-                    mt-2 sm:mt-3 px-8 py-3 sm:px-10 sm:py-3.5 
+                    px-8 py-3 sm:px-10 sm:py-3.5 
                     rounded-full font-semibold text-gray-900 
                     bg-gradient-to-r from-white via-gray-50 to-white 
                     hover:from-gray-100 hover:to-white
