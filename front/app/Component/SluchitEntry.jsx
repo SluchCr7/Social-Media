@@ -245,7 +245,6 @@
 
 import React, { forwardRef, useEffect, useState } from 'react'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
 import { usePost } from '../Context/PostContext'
 import { useAuth } from '../Context/AuthContext'
 import { ShareModal } from './AddandUpdateMenus/SharePost'
