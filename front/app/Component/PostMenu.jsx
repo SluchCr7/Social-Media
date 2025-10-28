@@ -37,7 +37,7 @@ const MenuOption = ({ icon, text, action, className, loading }) => (
 const PostMenu = ({ showMenu, setShowMenu, post }) => {
   const { followUser, pinPost, toggleBlockNotification } = useUser()
   const { blockOrUnblockUser } = useAdmin()
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { user } = useAuth();
   const { deletePost, setPostIsEdit, setShowPostModelEdit, displayOrHideComments, copyPostLink } = usePost();
   const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport();

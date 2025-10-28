@@ -971,16 +971,18 @@ const toggleBlockNotification = async (req, res) => {
     const currentUserId = req.user._id; // المستخدم الحالي (من التوكن)
 
     if (userId === String(currentUserId)) {
-      return res.status(400).json({ message: "لا يمكنك حظر نفسك من الإشعارات." });
+      return res.status(400).json({ message: "You cannot block or unblock yourself" });
     }
 
     const currentUser = await User.findById(currentUserId);
 
     if (!currentUser) {
-      return res.status(404).json({ message: "المستخدم الحالي غير موجود." });
+      return res.status(404).json({ message: "Current user not found" });
     }
 
-    const isBlocked = currentUser.BlockedNotificationFromUsers.includes(userId);
+    const isBlocked = currentUser.BlockedNotificationFromUsers.includes(userId) ||
+      currentUser.BlockedNotificationFromUsers.some(
+        (id) => id.toString() === userId);
 
     let message;
 
@@ -989,11 +991,11 @@ const toggleBlockNotification = async (req, res) => {
       currentUser.BlockedNotificationFromUsers = currentUser.BlockedNotificationFromUsers.filter(
         (id) => id.toString() !== userId
       );
-      message = "تم إلغاء حظر الإشعارات من هذا المستخدم.";
+      message = "Message notifications unblocked successfully.";
     } else {
       // 🚫 إضافة للحظر
       currentUser.BlockedNotificationFromUsers.push(userId);
-      message = "تم حظر الإشعارات من هذا المستخدم.";
+      message = "Message notifications blocked successfully.";
     }
 
     await currentUser.save();
@@ -1007,7 +1009,7 @@ const toggleBlockNotification = async (req, res) => {
     console.error("Error toggling block notifications:", error);
     res.status(500).json({
       success: false,
-      message: "حدث خطأ أثناء تحديث حالة الحظر.",
+      message: "Failed to toggle block notifications",
     });
   }
 };
