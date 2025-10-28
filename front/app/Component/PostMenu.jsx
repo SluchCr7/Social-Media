@@ -111,26 +111,26 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
       icon: user?.BlockedNotificationFromUsers?.includes(post?.owner?._id)
         ? <GoUnmute className="text-lg" />
         : <IoVolumeMute className="text-lg" />,
-      text: user?.BlockedNotificationFromUsers?.some(userBlock=> userBlock._id === post?.owner?._id)
+      text: user?.BlockedNotificationFromUsers?.includes(post?.owner?._id)
         ? t('Unmute Notifications From User')
         : t('Mute Notifications From User'),
       action: () => toggleBlockNotification(post?.owner?._id),
-      className: user?.BlockedNotificationFromUsers?.some(userBlock=> userBlock._id === post?.owner?._id)
+      className: user?.BlockedNotificationFromUsers?.includes(post?.owner?._id)
         ? 'text-blue-400 hover:bg-blue-100'
         : 'text-red-400 hover:bg-red-100',
     },
-    // {
-    //   icon: user?.following?.some(f => f._id === post?.owner?._id)
-    //     ? <RiUserUnfollowLine className="text-lg" />
-    //     : <RiUserFollowLine className="text-lg" />,
-    //   text: user?.following?.some(f => f._id === post?.owner?._id)
-    //     ? t('Unfollow User')
-    //     : t('Follow User'),
-    //   action: () => followUser(post?.owner?._id),
-    //   className: user?.following?.some(f => f._id === post?.owner?._id)
-    //     ? 'text-red-600 hover:bg-red-100'
-    //     : 'text-blue-600 hover:bg-blue-100',
-    // },
+    {
+      icon: user?.following?.includes(post?.owner?._id)
+        ? <RiUserUnfollowLine className="text-lg" />
+        : <RiUserFollowLine className="text-lg" />,
+      text: user?.following?.includes(post?.owner?._id)
+        ? t('Unfollow User')
+        : t('Follow User'),
+      action: () => followUser(post?.owner?._id),
+      className: user?.following?.includes(post?.owner?._id)
+        ? 'text-red-600 hover:bg-red-100'
+        : 'text-blue-600 hover:bg-blue-100',
+    },
     {
       icon: <MdOutlineReport size={18} />,
       text: t('Report Post'),
