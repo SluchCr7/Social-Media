@@ -130,7 +130,10 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
         ? t('Unfollow User')
         : t('Follow User'),
       action: () => followUser(post?.owner?._id),
-      className: user?.following?.includes(post?.owner?._id)
+      className: userData?.following?.includes(post?.owner?._id) ||
+        user?.following?.includes(post?.owner?._id) ||
+        userData?.following?.some(f => f._id === post?.owner?._id) ||
+        user?.following?.some(f => f._id === post?.owner?._id)
         ? 'text-red-600 hover:bg-red-100'
         : 'text-blue-600 hover:bg-blue-100',
     },

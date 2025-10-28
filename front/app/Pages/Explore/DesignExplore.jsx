@@ -210,10 +210,19 @@ const useTrendingPosts = (trendingPosts, timeFilter) => {
 }
 
 // دالة مساعدة لاستخراج صور المتابعين
+// const useFollowingPhotos = (user) => {
+//     return useMemo(() => {
+//         return user?.following?.flatMap(f =>
+//             f.posts?.flatMap(p => p?.Photos?.filter(m => m.type === 'image') || []) || []
+//         ) || [];
+//     }, [user]);
+// }
+
 const useFollowingPhotos = (user) => {
     return useMemo(() => {
+        // يتم إزالة (.filter(m => m.type === 'image'))
         return user?.following?.flatMap(f =>
-            f.posts?.flatMap(p => p?.Photos?.filter(m => m.type === 'image') || []) || []
+            f.posts?.flatMap(p => p?.Photos || []) || []
         ) || [];
     }, [user]);
 }
