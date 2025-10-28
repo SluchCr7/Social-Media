@@ -380,12 +380,12 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 "
               >
                 {/* أيقونة التحذير */}
-                <div className="p-4 rounded-full bg-yellow-500/20 border border-yellow-500/40 shadow-lg">
-                  <span className="text-4xl">⚠️</span>
+                <div className="p-2 rounded-full bg-yellow-500/20 border border-yellow-500/40 shadow-lg">
+                  <span className="text-2xl">⚠️</span>
                 </div>
 
                 {/* العنوان */}
-                <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-wide drop-shadow-md">
+                <h2 className="text-3xl sm:text-2xl font-bold text-white tracking-wide drop-shadow-md">
                   {t('Sensitive Content')}
                 </h2>
 
@@ -394,7 +394,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 <button
                   onClick={()=> setShowSensitive(false)}
                   className="
-                    px-8 py-3 sm:px-10 sm:py-3.5 
+                    px-8 py-2 sm:px-10 
                     rounded-full font-semibold text-gray-900 
                     bg-gradient-to-r from-white via-gray-50 to-white 
                     hover:from-gray-100 hover:to-white
