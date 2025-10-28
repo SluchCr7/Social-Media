@@ -83,7 +83,7 @@ export const addStoryToHighlight = async (req, res) => {
       return res.status(404).json({ message: "Highlight not found" });
 
     // التحقق أن الستوري موجودة وتخص نفس المستخدم
-    const story = await Story.findOne({ _id: storyId, user: userId });
+    const story = await Story.findOne({ _id: storyId, owner: userId });
     if (!story)
       return res.status(404).json({ message: "Story not found or unauthorized" });
 
