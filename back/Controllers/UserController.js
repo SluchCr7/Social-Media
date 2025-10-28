@@ -412,26 +412,24 @@ const makeFollow = asyncHandler(async (req, res) => {
 
     return res.status(200).json({
       message: "Unfollowed successfully",
-      user,
+      userId: user._id, // أضف هذا ليسهل التحديث في الواجهة
     });
   } else {
     // 🟢 متابعة (Follow)
     await User.findByIdAndUpdate(user._id, { $push: { followers: req.user._id } });
     await User.findByIdAndUpdate(currentUser._id, { $push: { following: user._id } });
 
-    // ✅ إرسال إشعار فقط إذا المالك لم يحظر هذا المستخدم
     if (!user._id.equals(currentUser._id)) {
       const isBlocked = user.BlockedNotificationFromUsers?.some((blockedId) =>
         blockedId.equals(currentUser._id)
       );
-
       if (!isBlocked) {
         await sendNotificationHelper({
           sender: currentUser._id,
           receiver: user._id,
           content: `${currentUser.username} started following you 👥`,
           type: "follow",
-          actionRef: currentUser._id, // مرجع المستخدم الذي قام بالمتابعة
+          actionRef: currentUser._id,
           actionModel: "User",
         });
       }
@@ -439,7 +437,7 @@ const makeFollow = asyncHandler(async (req, res) => {
 
     return res.status(200).json({
       message: "Followed successfully",
-      user,
+      userId: user._id,
     });
   }
 });

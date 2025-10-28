@@ -17,53 +17,57 @@ export const UserContextProvider = ({ children }) => {
     const { socket } = useSocket(); // ✅ نأخذ الـ socket من السياق
     const [onlineUsers, setOnlineUsers] = useState([]); // ✅ حالة للمستخدمين الأونلاين
 
-  const followUser = async (id) => {
-    setLoading(true);
-    try {
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/follow/${id}`,
-        {},
-        { headers: { Authorization: `Bearer ${user.token}` } }
-      );
+    const followUser = async (id) => {
+      setLoading(true);
+      try {
+        const res = await axios.put(
+          `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/follow/${id}`,
+          {},
+          { headers: { Authorization: `Bearer ${user.token}` } }
+        );
 
-      showAlert(res.data.message);
+        const message = res.data.message;
+        const userId = res.data.userId;
 
-      setUsers((prev) =>
-        prev.map((u) =>
-          u._id === id
+        showAlert(message);
+
+        // 🔄 تحديث المستخدم المستهدف في قائمة المستخدمين
+        setUsers((prev) =>
+          prev.map((u) =>
+            u._id === userId
+              ? {
+                  ...u,
+                  followers:
+                    message === "Followed successfully"
+                      ? [...u.followers, { _id: user._id }]
+                      : u.followers.filter((f) => f._id !== user._id),
+                }
+              : u
+          )
+        );
+
+        // 🔄 تحديث قائمة following الخاصة بالمستخدم الحالي
+        const updatedUser =
+          message === "Followed successfully"
             ? {
-                ...u,
-                followers:
-                  res.data.message === "Followed"
-                    ? [...u.followers, { _id: user._id }]
-                    : u.followers.filter((f) => f._id !== user._id),
+                ...user,
+                following: [...user.following, { _id: userId }],
               }
-            : u
-        )
-      );
+            : {
+                ...user,
+                following: user.following.filter((f) => f._id !== userId),
+              };
 
-      // تحديث قائمة following الخاصة بالمستخدم الحالي
-      let updatedUser;
-      if (res.data.message === "Followed") {
-        updatedUser = {
-          ...user,
-          following: [...user.following, { _id: id }],
-        };
-      } else if (res.data.message === "Unfollowed") {
-        updatedUser = {
-          ...user,
-          following: user.following.filter((f) => f._id !== id),
-        };
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      } catch (err) {
+        console.error(err);
+        showAlert("حدث خطأ أثناء العملية");
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const updatePhoto = async (photo) => {
     const formData = new FormData();

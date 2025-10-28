@@ -117,23 +117,14 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
         : 'text-red-400 hover:bg-red-100',
     },
     {
-      icon: userData?.following?.includes(post?.owner?._id) ||
-        user?.following?.includes(post?.owner?._id) ||
-        userData?.following?.some(f => f._id === post?.owner?._id) ||
-        user?.following?.some(f => f._id === post?.owner?._id)
+      icon: userData?.following?.some(member => member._id === post?.owner?._id)
         ? <RiUserUnfollowLine className="text-lg" />
         : <RiUserFollowLine className="text-lg" />,
-      text: userData?.following?.includes(post?.owner?._id) ||
-        user?.following?.includes(post?.owner?._id) ||
-        userData?.following?.some(f => f._id === post?.owner?._id) ||
-        user?.following?.some(f => f._id === post?.owner?._id)
+      text: userData?.following?.some(member => member._id === post?.owner?._id)
         ? t('Unfollow User')
         : t('Follow User'),
       action: () => followUser(post?.owner?._id),
-      className: userData?.following?.includes(post?.owner?._id) ||
-        user?.following?.includes(post?.owner?._id) ||
-        userData?.following?.some(f => f._id === post?.owner?._id) ||
-        user?.following?.some(f => f._id === post?.owner?._id)
+      className: userData?.following?.some(member => member._id === post?.owner?._id)
         ? 'text-red-600 hover:bg-red-100'
         : 'text-blue-600 hover:bg-blue-100',
     },
