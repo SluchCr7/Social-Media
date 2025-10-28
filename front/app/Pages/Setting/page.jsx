@@ -45,7 +45,7 @@ export default function SettingsContainer() {
     togglePrivateAccount(v)
   }
 
-  const handleToggleNotificationBlock = () => {
+  const handleToggleNotificationBlock = (user) => {
     toggleBlockNotification(user?._id)
   }
 

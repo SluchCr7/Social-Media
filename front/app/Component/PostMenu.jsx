@@ -107,7 +107,8 @@ const PostMenu = ({ showMenu, setShowMenu, post }) => {
   // ✅ خيارات الزائر
   const visitorOptions = useMemo(() => [
     {
-      icon: user?.BlockedNotificationFromUsers?.some(userBlock=> userBlock._id === post?.owner?._id)
+      // icon: user?.BlockedNotificationFromUsers?.some(userBlock=> userBlock._id === post?.owner?._id)
+      icon: user?.BlockedNotificationFromUsers?.includes(post?.owner?._id)
         ? <GoUnmute className="text-lg" />
         : <IoVolumeMute className="text-lg" />,
       text: user?.BlockedNotificationFromUsers?.some(userBlock=> userBlock._id === post?.owner?._id)
