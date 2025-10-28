@@ -76,8 +76,9 @@ const SongPlayer = React.memo(() => {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 90, damping: 15 }}
+        // ✨ التعديل 1: تحديد أقصى عرض على الشاشات الكبيرة (md:max-w-4xl lg:max-w-5xl)
         className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50
-                    w-[92%] md:w-full mx-auto
+                    w-[92%] md:max-w-4xl lg:max-w-5xl mx-auto
                     backdrop-blur-xl border border-white/10
                     rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.35)]
                     `}
@@ -132,7 +133,8 @@ const SongPlayer = React.memo(() => {
               <span>{formatTime(progress)}</span>
               <span>{formatTime(duration)}</span>
             </div>
-            <div className="h-1 mt-1 bg-white/25 rounded-full overflow-hidden">
+            {/* ✨ التعديل 2: زيادة ارتفاع شريط التقدم وإضافة ظل داخلي (h-1.5 shadow-inner) */}
+            <div className="h-1.5 mt-1 bg-white/25 rounded-full overflow-hidden shadow-inner">
               <motion.div
                 className="h-full bg-white/90"
                 style={{ width: `${progressPercent}%` }}
@@ -151,11 +153,12 @@ const SongPlayer = React.memo(() => {
               <FaStepBackward />
             </motion.button>
 
+            {/* ✨ التعديل 3: زيادة حجم زر التشغيل/الإيقاف (w-12 h-12 sm:w-14 sm:h-14) واستخدام ظل أقوى (shadow-2xl) */}
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={togglePlay}
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white 
-                        flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white 
+                        flex items-center justify-center shadow-2xl hover:scale-110 transition-transform"
             >
               {playing ? <FaPause /> : <FaPlay />}
             </motion.button>

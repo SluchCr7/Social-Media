@@ -6,10 +6,9 @@ import { BsThreeDots } from 'react-icons/bs'
 import { HiBadgeCheck } from 'react-icons/hi'
 import PostMenu from '@/app/Component/PostMenu'
 import UserHoverCard from '../UserHoverCard'
-import {useRef} from 'react' 
 import { formatRelativeTime } from '@/app/utils/FormatDataCreatedAt'
 const PostHeader = ({ post, user, isLogin, showMenu, setShowMenu,isCommunityPost }) => {
-  const triggerRef = useRef(null) 
+  // const triggerRef = useRef(null) 
   return (
     <div className="flex flex-row justify-between items-center gap-2">
       <div className="flex items-center gap-3">
@@ -46,7 +45,8 @@ const PostHeader = ({ post, user, isLogin, showMenu, setShowMenu,isCommunityPost
           >
             <BsThreeDots />
           </button>
-          <PostMenu post={post} showMenu={showMenu} setShowMenu={setShowMenu} triggerRef={triggerRef} />
+          <PostMenu post={post} showMenu={showMenu} setShowMenu={setShowMenu}  />
+          {/* triggerRef={triggerRef} */}
         </div>
       )}
     </div>

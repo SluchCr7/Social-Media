@@ -343,7 +343,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
       >
         {/* ======= Overlay Blur for Sensitive Content ======= */}
         {showSensitive && (
-          <div className="absolute inset-0 z-[60] backdrop-blur-3xl bg-black/40 flex flex-col items-center justify-center text-center p-6 transition-all">
+          <div className="absolute inset-0 z-[60] backdrop-blur-3xl bg-black/20 flex flex-col items-center justify-center text-center p-6 transition-all">
             <div className="flex flex-col items-center gap-3 text-white">
               <span className="text-3xl">⚠️</span>
               <h2 className="text-lg font-semibold">

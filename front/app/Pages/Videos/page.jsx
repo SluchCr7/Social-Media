@@ -8,7 +8,7 @@ const Page = () => {
   const { t } = useTranslation()
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-950 dark:to-black text-center px-6">
+    <div className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-950 dark:to-black text-center px-6 w-full">
       
       {/* خلفية زخرفية */}
       <motion.div
