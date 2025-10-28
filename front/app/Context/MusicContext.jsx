@@ -83,23 +83,35 @@ export const MusicProvider = ({ children }) => {
   }, [user, showAlert]);
 
   // ❤️ لايك / إلغاء لايك
-  const likeMusic = useCallback(async (id) => {
-    if (!user?.token) return;
+const likeMusic = useCallback(async (id) => {
+  if (!user?.token) return;
 
-    try {
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/music/like/${id}`,
-        {},
-        { headers: { Authorization: `Bearer ${user.token}` } }
-      );
-      const updated = res.data;
-      setMusic(prev => prev.map(r => (r?._id === id ? updated : r)));
-      showAlert("You liked this music.");
-    } catch (err) {
-      console.error(err);
-      showAlert("Failed to like Music.");
-    }
-  }, [user]);
+  try {
+    const res = await axios.put(
+      `${process.env.NEXT_PUBLIC_BACK_URL}/api/music/like/${id}`,
+      {},
+      { headers: { Authorization: `Bearer ${user.token}` } }
+    );
+
+    const { music, message } = res.data;
+
+    // ✅ تحديث مباشر للحالة بدون refresh
+    setMusic(prev =>
+      prev.map(item => (item._id === music._id ? music : item))
+    );
+
+    // ✅ في حال الموسيقى غير موجودة (مثل عرض مفصل)، نضيفها مؤقتًا
+    setMusic(prev => {
+      if (!prev.find(m => m._id === music._id)) return [...prev, music];
+      return prev;
+    });
+
+    showAlert(message || "Updated successfully");
+  } catch (err) {
+    console.error(err);
+    showAlert("Failed to like music.");
+  }
+}, [user]);
 
   // 👁️ زيادة المشاهدات
   const viewMusic = useCallback(async (id) => {

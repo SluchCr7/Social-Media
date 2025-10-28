@@ -144,25 +144,21 @@ const deleteMusic = asyncHandler(async (req, res) => {
   res.json({ message: "Music deleted successfully" });
 });
 
-// ✅ لايك/إلغاء لايك
 const toggleLike = asyncHandler(async (req, res) => {
-  const music = await Music.findById(req.params.id);
+  const music = await Music.findById(req.params.id)
+    .populate("owner", "username profilePhoto BlockedNotificationFromUsers");
+
   if (!music) return res.status(404).json({ message: "Music not found" });
 
-  if (music.likes.includes(req.user._id)) {
-    await Music.findByIdAndUpdate(
-      req.params.id,
-      { $pull: { likes: req.user._id } }
-    );
-  } else {
-    // إضافة لايك
-    await Music.findByIdAndUpdate(
-      req.params.id,
-      { $push: { likes: req.user._id } }
-    );
-    if (!music.owner._id.equals(req.user._id)) {
+  const hasLiked = music.likes.includes(req.user._id);
 
-      // ✅ التأكد أن المالك لم يحظر هذا المستخدم من الإشعارات
+  if (hasLiked) {
+    music.likes.pull(req.user._id);
+  } else {
+    music.likes.push(req.user._id);
+
+    // إرسال إشعار إذا لم يكن المستخدم نفسه
+    if (!music.owner._id.equals(req.user._id)) {
       const isBlocked = music.owner.BlockedNotificationFromUsers?.some(
         (blockedId) => blockedId.equals(req.user._id)
       );
@@ -180,14 +176,20 @@ const toggleLike = asyncHandler(async (req, res) => {
     }
   }
 
-  // تحديث الشعبية باستخدام الـmethod الجديدة
-  await music.updatePopularity({ threshold: 50 }); // يمكن تعديل threshold حسب الحاجة
+  await music.updatePopularity({ threshold: 50 });
+  await music.save();
 
-  // تعبئة بيانات المالك للعرض
+  // ✅ أعد البيانات كاملة (مع populate و virtuals)
   const updatedMusic = await Music.findById(req.params.id)
     .populate("owner", "username profilePhoto")
+    // .populate("likes", "username profilePhoto") // لو محتاج تعرض اللايكات مثل تويتر
+    .lean();
 
-  res.status(200).json(updatedMusic);
+  res.status(200).json({
+    success: true,
+    message: hasLiked ? "Like removed" : "Music liked",
+    music: updatedMusic,
+  });
 });
 
 

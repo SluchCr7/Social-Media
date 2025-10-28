@@ -74,7 +74,10 @@ const PostSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-
+  isContainWorst: {
+    type: Boolean,
+    default: false, 
+  },
 }, {
   timestamps: true,
   toJSON: { virtuals: true },

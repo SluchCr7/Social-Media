@@ -30,6 +30,10 @@ const StorySchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    isHighlighted: {
+        type: Boolean,
+        default: false,
+    },
 }, { timestamps: true })
 
 const Story = mongoose.model('Story', StorySchema)

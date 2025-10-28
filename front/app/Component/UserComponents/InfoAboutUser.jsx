@@ -92,7 +92,7 @@ const InfoAboutUser = ({ user }) => {
                 textColor="text-pink-600"
               />
             )}
-            {user?.preferedLanguage && <InfoItem icon={<GrLanguage />} label={t("Preferred Language")} value={user.preferedLanguage} bgColor="bg-blue-200" textColor="text-blue-700" />}
+            {/* {user?.preferedLanguage && <InfoItem icon={<GrLanguage />} label={t("Preferred Language")} value={user.preferedLanguage} bgColor="bg-blue-200" textColor="text-blue-700" />} */}
             {user?.dateOfBirth && (
               <InfoItem
                 icon={<FaBirthdayCake />}

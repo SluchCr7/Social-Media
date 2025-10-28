@@ -51,28 +51,164 @@ const uploadToCloudinary = (buffer) => {
 
 
 
+const addPost = async (req, res) => {
+  try {
+    let { text, Hashtags, community, mentions, scheduledAt, links, privacy } = req.body;
+    const userId = req.user._id;
+
+    // ✅ تنسيق الحقول لضمان أنها Arrays صحيحة
+    if (typeof Hashtags === "string") Hashtags = [Hashtags];
+    else if (!Array.isArray(Hashtags)) Hashtags = [];
+
+    if (typeof mentions === "string") {
+      try {
+        mentions = JSON.parse(mentions);
+      } catch {
+        mentions = [mentions];
+      }
+    } else if (!Array.isArray(mentions)) mentions = [];
+
+    if (typeof links === "string") {
+      try {
+        links = JSON.parse(links);
+      } catch {
+        links = [links];
+      }
+    } else if (!Array.isArray(links)) {
+      links = [];
+    }
+
+    // ✅ التحقق من صحة البيانات
+    const { error } = ValidatePost({ text, Hashtags, community, mentions });
+    if (error) return res.status(400).json({ message: error.details[0].message });
+
+    // ✅ فحص إذا كان التاريخ مستقبلي -> جدولة
+    let postStatus = "published";
+    let scheduleDate = null;
+
+    if (scheduledAt && new Date(scheduledAt) > new Date()) {
+      postStatus = "scheduled";
+      scheduleDate = new Date(scheduledAt);
+    }
+
+    // ✅ فحص المحتوى (Moderation)
+    const moderationResult = await moderatePost({ text });
+    const isContainWorst = moderationResult.isContainWorst || false;
+    const badWord = moderationResult.badWord || null;
+
+    // ❌ لم نعد نحظر النشر حتى لو فيه كلمة سيئة
+    // فقط نخزن المعلومة في البوست
+
+    // ✅ التحقق من المجتمع
+    let communityDoc = null;
+    if (community) {
+      communityDoc = await Community.findById(community);
+      if (!communityDoc) return res.status(404).json({ message: "Community not found." });
+      if (!communityDoc.members.includes(userId))
+        return res.status(403).json({ message: "Not a member of this community." });
+    }
+
+    // ✅ رفع الصور
+    let uploadedImages = [];
+    let imagesArr = [];
+
+    if (Array.isArray(req.files?.image)) imagesArr = req.files.image;
+    else if (req.files?.image) imagesArr = [req.files.image];
+
+    if (imagesArr.length > 0) {
+      uploadedImages = await Promise.all(
+        imagesArr.map(async (img) => {
+          const result = await uploadToCloudinary(img.buffer);
+          return { url: result.secure_url, publicId: result.public_id };
+        })
+      );
+    }
+
+    // ✅ إنشاء البوست
+    const post = new Post({
+      text,
+      Photos: uploadedImages,
+      Hashtags,
+      mentions,
+      owner: userId,
+      community: communityDoc ? communityDoc._id : null,
+      scheduledAt: scheduleDate,
+      status: postStatus,
+      links,
+      privacy,
+      // ✨ الإضافات الجديدة
+      isContainWorst,
+      badWord,
+    });
+
+    // ✅ إشعارات Mentions (فقط إذا تم النشر فورًا)
+    if (postStatus === "published" && mentions.length > 0) {
+      for (const mentionedUserId of mentions) {
+        if (mentionedUserId.toString() !== userId.toString()) {
+          await sendNotificationHelper({
+            sender: userId,
+            receiver: mentionedUserId,
+            content: "mentioned you in a post",
+            type: "mention",
+            actionRef: post._id,
+            actionModel: "Post",
+          });
+        }
+      }
+    }
+
+    // ✅ تحديث مستوى المستخدم
+    const user = await User.findById(userId);
+    user.userLevelPoints += 7;
+    user.updateLevelRank();
+    await user.save();
+
+    // ✅ حفظ البوست
+    await post.save();
+    await post.populate(postPopulate);
+
+    // ✅ إرجاع النتيجة
+    return res.status(201).json(post);
+  } catch (err) {
+    return res.status(500).json({ message: err.message || "Internal Server Error" });
+  }
+};
+
 // const addPost = async (req, res) => {
 //   try {
-//     let { text, Hashtags, community, mentions } = req.body;
+//     let { text, Hashtags, community, mentions, scheduledAt, links,privacy} = req.body;
 //     const userId = req.user._id;
 
 //     if (typeof Hashtags === "string") Hashtags = [Hashtags];
 //     else if (!Array.isArray(Hashtags)) Hashtags = [];
 
 //     if (typeof mentions === "string") {
+//       try { mentions = JSON.parse(mentions); }
+//       catch { mentions = [mentions]; }
+//     } else if (!Array.isArray(mentions)) mentions = [];
+    
+//     if (typeof links === "string") {
 //       try {
-//         mentions = JSON.parse(mentions);
+//         links = JSON.parse(links);
 //       } catch {
-//         mentions = [mentions];
+//         links = [links];
 //       }
-//     } else if (!Array.isArray(mentions)) {
-//       mentions = [];
+//     } else if (!Array.isArray(links)) {
+//       links = [];
 //     }
 
 //     const { error } = ValidatePost({ text, Hashtags, community, mentions });
 //     if (error) return res.status(400).json({ message: error.details[0].message });
 
-//     // ✅ 1. فحص المحتوى
+//     // ✅ فحص إذا كان التاريخ مستقبلي
+//     let postStatus = "published";
+//     let scheduleDate = null;
+
+//     if (scheduledAt && new Date(scheduledAt) > new Date()) {
+//       postStatus = "scheduled";
+//       scheduleDate = new Date(scheduledAt);
+//     }
+
 //     const moderationResult = await moderatePost({ text });
 //     if (moderationResult.status === "blocked") {
 //       return res.status(400).json({ message: moderationResult.reason });
@@ -108,10 +244,14 @@ const uploadToCloudinary = (buffer) => {
 //       mentions,
 //       owner: userId,
 //       community: communityDoc ? communityDoc._id : null,
+//       scheduledAt: scheduleDate,
+//       status: postStatus,
+//       links, // ✅ تم الإضافة هنا
+//       privacy // ✅ تم الإضافة هنا
 //     });
 
-//     // إشعارات الـ mentions
-//     if (mentions.length > 0) {
+//     // إشعارات mentions فقط إذا تم النشر فورًا
+//     if (postStatus === "published" && mentions.length > 0) {
 //       for (const mentionedUserId of mentions) {
 //         if (mentionedUserId.toString() !== userId.toString()) {
 //           await sendNotificationHelper({
@@ -132,122 +272,13 @@ const uploadToCloudinary = (buffer) => {
 //     await user.save();
 
 //     await post.save();
-//     await post.populate([
-//       { path: "owner", select: "username profileName profilePhoto" },
-//       { path: "community", select: "Name Picture members" },
-//       { path: "mentions", select: "username profileName profilePhoto" },
-//     ]);
+//     await post.populate(postPopulate);
 
 //     return res.status(201).json(post);
 //   } catch (err) {
 //     return res.status(500).json({ message: err.message || "Internal Server Error" });
 //   }
 // };
-const addPost = async (req, res) => {
-  try {
-    let { text, Hashtags, community, mentions, scheduledAt, links,privacy} = req.body;
-    const userId = req.user._id;
-
-    if (typeof Hashtags === "string") Hashtags = [Hashtags];
-    else if (!Array.isArray(Hashtags)) Hashtags = [];
-
-    if (typeof mentions === "string") {
-      try { mentions = JSON.parse(mentions); }
-      catch { mentions = [mentions]; }
-    } else if (!Array.isArray(mentions)) mentions = [];
-    
-    if (typeof links === "string") {
-      try {
-        links = JSON.parse(links);
-      } catch {
-        links = [links];
-      }
-    } else if (!Array.isArray(links)) {
-      links = [];
-    }
-
-    const { error } = ValidatePost({ text, Hashtags, community, mentions });
-    if (error) return res.status(400).json({ message: error.details[0].message });
-
-    // ✅ فحص إذا كان التاريخ مستقبلي
-    let postStatus = "published";
-    let scheduleDate = null;
-
-    if (scheduledAt && new Date(scheduledAt) > new Date()) {
-      postStatus = "scheduled";
-      scheduleDate = new Date(scheduledAt);
-    }
-
-    const moderationResult = await moderatePost({ text });
-    if (moderationResult.status === "blocked") {
-      return res.status(400).json({ message: moderationResult.reason });
-    }
-
-    let communityDoc = null;
-    if (community) {
-      communityDoc = await Community.findById(community);
-      if (!communityDoc) return res.status(404).json({ message: "Community not found." });
-      if (!communityDoc.members.includes(userId))
-        return res.status(403).json({ message: "Not a member of this community." });
-    }
-
-    let uploadedImages = [];
-    let imagesArr = [];
-
-    if (Array.isArray(req.files?.image)) imagesArr = req.files.image;
-    else if (req.files?.image) imagesArr = [req.files.image];
-
-    if (imagesArr.length > 0) {
-      uploadedImages = await Promise.all(
-        imagesArr.map(async (img) => {
-          const result = await uploadToCloudinary(img.buffer);
-          return { url: result.secure_url, publicId: result.public_id };
-        })
-      );
-    }
-
-    const post = new Post({
-      text,
-      Photos: uploadedImages,
-      Hashtags,
-      mentions,
-      owner: userId,
-      community: communityDoc ? communityDoc._id : null,
-      scheduledAt: scheduleDate,
-      status: postStatus,
-      links, // ✅ تم الإضافة هنا
-      privacy // ✅ تم الإضافة هنا
-    });
-
-    // إشعارات mentions فقط إذا تم النشر فورًا
-    if (postStatus === "published" && mentions.length > 0) {
-      for (const mentionedUserId of mentions) {
-        if (mentionedUserId.toString() !== userId.toString()) {
-          await sendNotificationHelper({
-            sender: userId,
-            receiver: mentionedUserId,
-            content: "mentioned you in a post",
-            type: "mention",
-            actionRef: post._id,
-            actionModel: "Post",
-          });
-        }
-      }
-    }
-
-    const user = await User.findById(userId);
-    user.userLevelPoints += 7;
-    user.updateLevelRank();
-    await user.save();
-
-    await post.save();
-    await post.populate(postPopulate);
-
-    return res.status(201).json(post);
-  } catch (err) {
-    return res.status(500).json({ message: err.message || "Internal Server Error" });
-  }
-};
 
 
 

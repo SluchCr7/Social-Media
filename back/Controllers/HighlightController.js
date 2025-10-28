@@ -24,6 +24,12 @@ const createHighlight = async (req, res) => {
       stories: storyIds,
     });
 
+    // ✅ تحديث القصص لجعلها "مُظللة" لمنع حذفها التلقائي
+    await Story.updateMany(
+      { _id: { $in: storyIds } },
+      { $set: { isHighlighted: true } }
+    );
+
     res.status(201).json(highlight);
   } catch (err) {
     console.error("Create Highlight Error:", err);
@@ -86,10 +92,11 @@ export const addStoryToHighlight = async (req, res) => {
       return res.status(400).json({ message: "Story already in highlight" });
     }
 
-    // إضافة الـ story إلى الـ highlight
     highlight.stories.push(storyId);
     await highlight.save();
 
+    // ✅ تحديث القصة لجعلها "مُظللة" لمنع حذفها التلقائي
+    await Story.findByIdAndUpdate(storyId, { $set: { isHighlighted: true } });
     // إعادة highlight كاملة بعد التحديث
     const updatedHighlight = await Highlight.findById(highlightId)
       .populate("stories");

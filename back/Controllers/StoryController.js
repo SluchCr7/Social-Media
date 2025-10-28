@@ -56,11 +56,17 @@ const addNewStory = asyncHandler(async (req, res) => {
  * @access Private
  */
 
+// const getAllStories = asyncHandler(async (req, res) => {
+//   const stories = await Story.find().populate(storyPopulate);
+//   res.status(200).json(stories);
+// });
+
 const getAllStories = asyncHandler(async (req, res) => {
-  const stories = await Story.find().populate(storyPopulate);
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  // تعديل الفلترة لتشمل القصص التي أُنشئت خلال الـ 24 ساعة الماضية فقط
+  const stories = await Story.find({ createdAt: { $gte: yesterday } }).populate(storyPopulate);
   res.status(200).json(stories);
 });
-
 /**
  * @desc Delete a story
  * @route DELETE /api/stories/:id

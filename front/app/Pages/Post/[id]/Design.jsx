@@ -76,7 +76,7 @@ const DesignPostSelect = ({
         {isShared && <SharedTitle user={user} post={post} original={original} />}
 
         {/* Post Card */}
-        <div className="flex flex-col sm:flex-row items-start gap-4 bg-white/30 dark:bg-black/30 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg p-4 sm:p-6 transition-transform hover:scale-[1.01]">
+        <div className="flex flex-col w-full sm:flex-row items-start gap-4 bg-white/30 dark:bg-black/30 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg p-4 sm:p-6 transition-transform hover:scale-[1.01]">
 
           {/* Profile / Post Image */}
           <PostImage
@@ -86,7 +86,7 @@ const DesignPostSelect = ({
           />
 
           {/* Main Content */}
-          <div className="flex-1 flex flex-col gap-3">
+          <div className="flex-1 flex w-full flex-col gap-3">
             <PostHeader
               post={post}
               user={post?.owner}

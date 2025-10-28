@@ -36,7 +36,7 @@ export default function FloatingDrawer({ onOpenMusicPlayer }) {
   const menuItems = [
     { icon: <FaHome />, color: 'from-blue-500 to-cyan-400', action: () => router.push('/') },
     { icon: <FaPlus />, color: 'from-indigo-500 to-purple-500', action: () => router.push('/Pages/NewPost') },
-    // { icon: <FaMusic />, color: 'from-pink-500 to-rose-400', action: onOpenMusicPlayer },
+    { icon: <FaMusic />, color: 'from-pink-500 to-rose-400', action: onOpenMusicPlayer },
     { icon: <FaUserAlt />, color: 'from-green-500 to-emerald-400', action: () => router.push('/Pages/Profile') },
     { icon: <FaArrowUp />, color: 'from-yellow-500 to-orange-400', action: scrollToTop },
   ];

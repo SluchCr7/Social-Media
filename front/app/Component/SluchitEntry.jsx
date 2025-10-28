@@ -278,6 +278,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
   const [translated, setTranslated] = useState(null)
   const [showTranslateButton, setShowTranslateButton] = useState(false)
   const [showOriginal, setShowOriginal] = useState(false)
+  const [showSensitive, setShowSensitive] = useState(false)
 
   const isShared = post?.isShared && post?.originalPost
   const original = post?.originalPost
@@ -297,7 +298,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
     setShowTranslateButton(textLang !== language)
   }, [post?.text, language])
 
-  // ======= دالة الترجمة =======
+  // ======= ترجمة =======
   const handleTranslate = async () => {
     if (!post?.text || !language) return
     const result = await translate(post.text, language)
@@ -312,14 +313,21 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
     setShowTranslateButton(true)
   }
 
+  // ======= فحص المحتوى الحساس =======
+  useEffect(() => {
+    if (post?.isContainWorst) setShowSensitive(true)
+  }, [post?.isContainWorst])
+
   return (
     <div className="relative w-full">
+      {/* Share Modal */}
       <ShareModal
         post={post}
         isOpen={openModel}
         onClose={() => setOpenModel(false)}
         onShare={(id, customText) => sharePost(id, post?.owner?._id, customText)}
       />
+
       <motion.div
         ref={ref}
         id={post?._id}
@@ -330,14 +338,33 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
           rounded-2xl shadow-[0_0_25px_-10px_rgba(0,0,0,0.3)]
           bg-white/90 dark:bg-black/40 backdrop-blur-xl
           border border-gray-200/70 dark:border-gray-700/60
-          transition-all duration-300 z-50
+          transition-all duration-300 overflow-hidden
         "
       >
-        {/* ======= Share Modal ======= */}
+        {/* ======= Overlay Blur for Sensitive Content ======= */}
+        {showSensitive && (
+          <div className="absolute inset-0 z-[60] backdrop-blur-3xl bg-black/40 flex flex-col items-center justify-center text-center p-6 transition-all">
+            <div className="flex flex-col items-center gap-3 text-white">
+              <span className="text-3xl">⚠️</span>
+              <h2 className="text-lg font-semibold">
+                {t('Sensitive content')}
+              </h2>
+              <p className="text-sm text-gray-200 max-w-sm">
+                {t('This post may contain offensive or inappropriate content.')}
+              </p>
+              <button
+                onClick={() => setShowSensitive(false)}
+                className="mt-3 px-5 py-2 rounded-full bg-white/20 hover:bg-white/40 transition text-sm font-semibold backdrop-blur-md border border-white/40"
+              >
+                {t('View Anyway')}
+              </button>
+            </div>
+          </div>
+        )}
 
-        {/* ======= Post Content ======= */}
-        <div className="p-4 sm:p-6 flex flex-col gap-5">
-          {/* ======= Pinned or Shared Badges ======= */}
+        {/* ======= محتوى البوست ======= */}
+        <div className={`p-4 sm:p-6 flex flex-col gap-5 transition-all ${showSensitive ? 'blur-md pointer-events-none select-none' : ''}`}>
+          {/* ======= Pinned or Shared ======= */}
           <div className="flex flex-wrap items-center gap-2">
             {post?.isPinned && (
               <span className="px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 shadow-md">
@@ -355,14 +382,12 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
           {isShared && <SharedTitle user={user} post={post} original={original} />}
 
           <div className="flex flex-col items-start sm:flex-row gap-5 w-full">
-            {/* ======= Optional Image on Side ======= */}
             <PostImage
               post={post}
               isCommunityPost={!!post?.community}
               className="w-full sm:w-[160px] h-auto rounded-xl"
             />
 
-            {/* ======= Main Content ======= */}
             <div className="flex flex-col flex-1 gap-3 w-full">
               <PostHeader
                 post={post}
@@ -373,7 +398,6 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 isCommunityPost={!!post?.community}
               />
 
-              {/* ======= Post Text ======= */}
               <RenderPostText
                 text={post?.text}
                 mentions={post?.mentions}
@@ -381,7 +405,6 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 italic={post?.isShared}
               />
 
-              {/* ======= Links ======= */}
               {post?.links && <PostLinks links={post?.links} />}
 
               {/* ======= Translation Section ======= */}
@@ -390,13 +413,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                   <button
                     onClick={handleTranslate}
                     disabled={loading}
-                    className="
-                      flex items-center gap-2 text-sm font-semibold px-4 py-1.5 w-fit
-                      text-blue-600 dark:text-blue-400
-                      border border-blue-500/40 rounded-full
-                      hover:bg-blue-500/10 dark:hover:bg-blue-500/20
-                      transition-all duration-300
-                    "
+                    className="flex items-center gap-2 text-sm font-semibold px-4 py-1.5 w-fit text-blue-600 dark:text-blue-400 border border-blue-500/40 rounded-full hover:bg-blue-500/10 dark:hover:bg-blue-500/20 transition-all"
                   >
                     {loading ? `${t('Translating')}...` : t('Translate')}
                     {loading && (
@@ -406,10 +423,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 )}
 
                 {translated && showOriginal && (
-                  <div className="
-                    bg-blue-50 dark:bg-blue-950/30 p-4 rounded-xl 
-                    border border-blue-200 dark:border-blue-900/60 shadow-inner
-                  ">
+                  <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-xl border border-blue-200 dark:border-blue-900/60 shadow-inner">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
                         {t('Translation')}
@@ -432,7 +446,6 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 )}
               </div>
 
-              {/* ======= Shared or Normal Post ======= */}
               {isShared && original && (
                 <SharedPost
                   original={original}
@@ -450,10 +463,8 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 />
               )}
 
-              {/* ======= Hashtags ======= */}
               {post?.Hashtags?.length > 0 && <PostHashtags post={post} />}
 
-              {/* ======= Actions ======= */}
               {isLogin && (
                 <PostActions
                   post={post}
@@ -466,7 +477,6 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                 />
               )}
 
-              {/* ======= Comments + Highlighted ======= */}
               {!isView && (
                 <>
                   {post?.comments?.length > 0 && (
