@@ -3,18 +3,12 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaPlus } from 'react-icons/fa';
-import { FaX } from 'react-icons/fa6';
+import { FaTrash } from 'react-icons/fa';
 import Image from 'next/image';
 import clsx from 'clsx';
 import { useHighlights } from '@/app/Context/HighlightContext';
 import { useTranslate } from '../Context/TranslateContext';
 
-// Professional, accessible and responsive redesign while preserving all functionality.
-// - improved layout: centered viewer with soft chrome, larger tap targets, visible controls
-// - keyboard and gesture navigation, pause on hover/touch, accessibility attributes
-// - preloads images, uses requestAnimationFrame for smooth progress
-// - add/choose story menu improved with search and grouped list
-// - confirmation for delete
 
 export default function HighlightViewerModal({ highlight, onClose, allStories = [] }) {
   const { isRTL } = useTranslate();
@@ -45,15 +39,18 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
   // preloaded images for smoother transitions
   const imageCache = useRef(new Map());
   useEffect(() => {
+    if (typeof window === 'undefined') return; // تأكد أننا في المتصفح فقط
+
     stories.forEach((s) => {
       const src = getPhoto(s);
       if (!imageCache.current.has(src)) {
-        const img = new Image();
+        const img = new window.Image(); // ← استخدم window.Image بدل Image
         img.src = src;
         imageCache.current.set(src, img);
       }
     });
   }, [stories, getPhoto]);
+
 
   const availableStories = useMemo(() => {
     const excluded = new Set(stories.map((s) => s._id));
@@ -216,7 +213,7 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
                 className="px-3 py-2 rounded-xl bg-transparent border border-red-500/30 text-red-400 text-sm hover:bg-red-500/5"
                 title="Delete highlight"
               >
-                Delete
+                <FaTrash/>
               </button>
 
               <button
