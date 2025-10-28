@@ -65,6 +65,26 @@ const Calendar = () => {
     days.push(date);
     date = date.add(1, "day");
   }
+   // توليد الأحداث السنوية المتكررة لعدة سنوات قادمة
+  const expandedEvents = events.flatMap((ev) => {
+    if (!ev.repeatYearly) return [ev]; // إذا لم يكن متكرر سنوياً نرجعه كما هو
+
+    const originalDate = dayjs(ev.date);
+    const startYear = dayjs().year(); // السنة الحالية
+    const yearsToGenerate = 10; // عدد السنوات القادمة التي نريد عرضها
+
+    // نولد نسخاً للأعوام القادمة
+    const repeatedInstances = Array.from({ length: yearsToGenerate }, (_, i) => {
+      const year = startYear + i;
+      return {
+        ...ev,
+        date: originalDate.year(year).format("YYYY-MM-DD"),
+        _id: `${ev._id}_repeat_${year}`, // مفتاح فريد
+      };
+    });
+
+    return [ev, ...repeatedInstances];
+  });
 
   const isToday = (d) => dayjs().isSame(d, "day");
   if (loading) return (
@@ -79,7 +99,7 @@ const Calendar = () => {
         setSelectedEvent={setSelectedEvent} selectedEvent={selectedEvent}
         currentDate={currentDate} days={days} isToday={isToday} setSelectedDate={setSelectedDate}
         typeIcons={typeIcons} setCurrentDate={setCurrentDate} showDayEvents={showDayEvents} setShowDayEvents={setShowDayEvents}
-        loading={loading} events={events} typeColors={typeColors} handleAddEvent={handleAddEvent} handleUpdateEvent={handleUpdateEvent}
+        loading={loading} events={expandedEvents} typeColors={typeColors} handleAddEvent={handleAddEvent} handleUpdateEvent={handleUpdateEvent}
         handleDeleteEvent={handleDeleteEvent} selectedDate={selectedDate}
         setIsCreating={setIsCreating} isCreating={isCreating}
       />

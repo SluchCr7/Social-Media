@@ -6,10 +6,12 @@ import { FiUserPlus } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { useUser } from '@/app/Context/UserContext';
 import { useTranslation } from 'react-i18next';
+import { useGetData } from '@/app/Custome/useGetData';
 
 const MenuFriends = () => {
   const {  user } = useAuth();
   const {suggestedUsers, followUser,setShowAllSuggestedUsers} = useUser()
+  const {userData : userProfile} = useGetData(user?._id)
   const hasSuggestions = Array.isArray(suggestedUsers) && suggestedUsers.length > 0;
   const {t} = useTranslation()
   return (
@@ -38,7 +40,7 @@ const MenuFriends = () => {
                 createdAt &&
                 (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24) < 7;
 
-              const myFollowing = Array.isArray(user?.following) ? user.following : [];
+              const myFollowing = Array.isArray(userProfile?.following) ? userProfile.following : [];
               const hisFollowing = Array.isArray(userData.following) ? userData.following : [];
               const mutualFriends = myFollowing.filter((id) => hisFollowing.includes(id));
 

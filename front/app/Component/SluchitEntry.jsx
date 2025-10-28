@@ -343,24 +343,65 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
       >
         {/* ======= Overlay Blur for Sensitive Content ======= */}
         {showSensitive && (
-          <div className="absolute inset-0 z-[60] backdrop-blur-3xl bg-black/20 flex flex-col items-center justify-center text-center p-6 transition-all">
-            <div className="flex flex-col items-center gap-3 text-white">
-              <span className="text-3xl">⚠️</span>
-              <h2 className="text-lg font-semibold">
-                {t('Sensitive content')}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="
+              absolute inset-0 z-[60] 
+              flex flex-col items-center justify-center text-center
+              overflow-hidden rounded-2xl
+            "
+          >
+            {/* خلفية ناعمة وشفافة */}
+            <div
+              className="
+                absolute inset-0 
+                backdrop-blur-[15px] 
+                bg-gradient-to-br from-black/60 via-gray-900/50 to-black/40 
+                rounded-2xl
+                border border-white/10 shadow-inner
+              "
+            />
+
+            {/* محتوى التحذير */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1, duration: 0.3 }}
+              className="relative z-10 flex flex-col items-center gap-4 p-6 text-white"
+            >
+              <div className="p-3 rounded-full bg-white/10 border border-white/20 shadow-lg">
+                <span className="text-4xl">⚠️</span>
+              </div>
+
+              <h2 className="text-lg sm:text-xl font-semibold drop-shadow-md">
+                {t('Sensitive Content')}
               </h2>
-              <p className="text-sm text-gray-200 max-w-sm">
-                {t('This post may contain offensive or inappropriate content.')}
+
+              <p className="text-sm sm:text-base text-gray-200/90 max-w-sm leading-relaxed">
+                {t('This post may contain offensive, violent, or adult content.')}
               </p>
+
               <button
                 onClick={() => setShowSensitive(false)}
-                className="mt-3 px-5 py-2 rounded-full bg-white/20 hover:bg-white/40 transition text-sm font-semibold backdrop-blur-md border border-white/40"
+                className="
+                  mt-4 px-6 py-2.5 rounded-full 
+                  text-sm font-semibold 
+                  bg-gradient-to-r from-white/80 to-white/60
+                  text-gray-800
+                  hover:from-white hover:to-white/80
+                  shadow-[0_0_20px_-5px_rgba(255,255,255,0.5)]
+                  backdrop-blur-md transition-all duration-200
+                "
               >
                 {t('View Anyway')}
               </button>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
+
 
         {/* ======= محتوى البوست ======= */}
         <div className={`p-4 sm:p-6 flex flex-col gap-5 transition-all ${showSensitive ? 'blur-md pointer-events-none select-none' : ''}`}>

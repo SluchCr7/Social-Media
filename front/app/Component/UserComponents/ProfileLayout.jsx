@@ -51,10 +51,6 @@ const ProfileLayout = ({
   useEffect(() => {
     fetchHighlights();
   }, [fetchHighlights]);
-
-  useEffect(() => {
-    console.log(user?.highlights)
-  },[user])
   const handleAddHighlight = () => {
     // لفتح قائمة إضافة هايلايت
     setOpenModal(true);
