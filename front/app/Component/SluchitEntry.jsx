@@ -398,7 +398,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
 
                 {/* زر العرض */}
                 <button
-                  onClick={handleViewAnyway}
+                  onClick={()=> setShowSensitive(false)}
                   className="
                     mt-2 sm:mt-3 px-8 py-3 sm:px-10 sm:py-3.5 
                     rounded-full font-semibold text-gray-900 
