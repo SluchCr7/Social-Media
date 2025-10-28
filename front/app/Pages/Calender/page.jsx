@@ -50,7 +50,12 @@ const Calendar = () => {
   };
 
   const handleDeleteEvent = async () => {
-    await deleteEvent(selectedEvent._id);
+    if (!selectedEvent) return;
+
+    // استخرج الـ id الأصلي حتى لو الحدث نسخة مكررة
+    const originalId = selectedEvent._id?.split('_repeat_')[0] || selectedEvent._id;
+
+    await deleteEvent(originalId);
     setSelectedEvent(null);
   };
 
