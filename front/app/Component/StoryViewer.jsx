@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { useSwipeable } from 'react-swipeable'
 import { motion, AnimatePresence } from 'framer-motion'
 import TimeAgo from 'react-timeago'
-
+import { FaEye } from "react-icons/fa";
 // Context hooks (kept as-is so behavior remains unchanged)
 import { useStory } from '../Context/StoryContext'
 import { useAuth } from '../Context/AuthContext'
