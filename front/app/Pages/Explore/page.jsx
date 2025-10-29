@@ -168,8 +168,10 @@ const Search = () => {
       setActiveTab={setActiveTab}
       finalTabs={finalTabs}
       topHashtags={topHashtags}
+      trendingPosts={posts}
       // تمرير Suggested Users إذا كنت تخطط لعرضهم في Explore
       suggestedUsersArr={suggestedUsersArr} 
+      posts={posts}
     />
   );
 };
