@@ -251,16 +251,18 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
               >
                 <div className="relative w-full h-full flex items-center justify-center bg-black">
                   {/* ✅ Full-fit image with shadow */}
-                  <div className="relative max-h-full max-w-full flex items-center justify-center">
-                    <Image
-                      src={currentPhoto}
-                      alt={currentStory?.text || `Story ${currentIndex + 1}`}
-                      fill
-                      className="object-contain select-none transition-all duration-500 ease-in-out"
-                      priority={true}
-                    />
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={currentPhoto || '/placeholder.jpg'}
+                        alt={currentStory?.text || `Story ${currentIndex + 1}`}
+                        fill
+                        unoptimized   // لتفادي مشاكل الدومين أو البروسيسنج
+                        className="object-contain select-none transition-all duration-500 ease-in-out"
+                        priority
+                      />
+                    </div>
                   </div>
-
                   {/* ✅ Text Overlay */}
                   {currentStory?.text && (
                     <motion.div
