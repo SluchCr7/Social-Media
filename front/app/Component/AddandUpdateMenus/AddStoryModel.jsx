@@ -15,7 +15,7 @@ import { useStory } from '../../Context/StoryContext';
 import { useAuth } from '../../Context/AuthContext';
 import { useGetData } from '@/app/Custome/useGetData';
 import { useTranslation } from 'react-i18next';
-
+import Image from 'next/image';
 // 🎨 ألوان الثيم الجديدة: Depth & Clarity
 const newColors = {
   lightMode: {
