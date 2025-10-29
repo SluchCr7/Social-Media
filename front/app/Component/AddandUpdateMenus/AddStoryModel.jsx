@@ -409,6 +409,28 @@ import { useAuth } from '../../Context/AuthContext';
 import { useGetData } from '@/app/Custome/useGetData';
 import { useTranslation } from 'react-i18next';
 
+// 🎨 ألوان الثيم الجديدة: Depth & Clarity
+const newColors = {
+  lightMode: {
+    bg: '#f4f7f9', // خلفية عامة
+    fg: '#ffffff', // خلفية البطاقة (Modal)
+    primary: '#1e40af', // ازرق عميق (Primary Button)
+    accent: '#f97316', // برتقالي (Accent)
+    text: '#1f2937', // نص داكن
+    textSoft: '#6b7280', // نص خفيف
+    border: '#e5e7eb',
+  },
+  darkMode: {
+    bg: '#0b0f14',
+    fg: '#141a21',
+    primary: '#4c6fff', // ازرق كهربائي
+    accent: '#ff9900', // ذهبي نيون
+    text: '#e2e8f0', // نص فاتح
+    textSoft: '#9ca3af',
+    border: '#2e3a47',
+  },
+};
+
 const AddStoryModel = ({ setIsStory, isStory }) => {
   const [storyText, setStoryText] = useState('');
   const [storyImage, setStoryImage] = useState(null);
