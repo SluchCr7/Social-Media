@@ -191,7 +191,7 @@ const likeMusic = useCallback(async (id) => {
       )
       // ✅ تحديث الـ state فورًا
       setPosts(prev => [data.post, ...prev])
-      showAlert(message || "Shared successfully");
+      showAlert("Shared successfully");
       return data.post
     } catch (error) {
       console.error('Error sharing music:', error)
