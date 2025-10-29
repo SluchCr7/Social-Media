@@ -1,61 +1,56 @@
-// ملف: Explore/TrendingTabContent.jsx
-
+'use client';
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { FaHeart, FaComment, FaStar } from 'react-icons/fa';
 
 const TrendingPostCard = ({ post, idx, t }) => {
-    const media = post.media || (post.Photos ? post.Photos[0] : null);
+    // فقط الصور
+    const photo = post.Photos?.[0] || null;
     const likes = Array.isArray(post.likes) ? post.likes.length : (post.likes || 0);
     const comments = Array.isArray(post.comments) ? post.comments.length : (post.comments || 0);
+    const score = Math.round(post.score || 0);
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.03 }}
-            className="bg-lightMode-menu dark:bg-darkMode-menu rounded-xl overflow-hidden shadow-sm hover:shadow-md transition"
+            transition={{ delay: idx * 0.05, type: 'spring', stiffness: 120 }}
+            className="bg-lightMode-card dark:bg-darkMode-card rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden transition-all duration-300 cursor-pointer group"
         >
-            <Link href={`/Pages/Post/${post._id}`}>
-                <div className="w-full h-44 md:h-48 overflow-hidden bg-gray-100 dark:bg-gray-800">
-                    {/* منطق عرض الوسائط: فيديو أو صورة أو لا يوجد عرض مسبق */}
-                    {media ? (
-                        media.type === 'video' ? (
-                            <video
-                                src={media.url}
-                                poster={media.poster || ''}
-                                controls={false}
-                                className="w-full h-full object-cover"
-                                muted
-                                playsInline
-                            />
-                        ) : (
-                            <Image
-                                src={media.url}
-                                alt={post.title || 'media'}
-                                width={800}
-                                height={600}
-                                className="w-full h-full object-cover"
-                            />
-                        )
+            <Link href={`/Pages/Post/${post._id}`} className="block">
+                {/* Photo preview */}
+                <div className="relative w-full h-56 md:h-64 lg:h-72 overflow-hidden rounded-t-2xl bg-gray-100 dark:bg-gray-800">
+                    {photo ? (
+                        <Image
+                            src={photo.url}
+                            alt={post.title || 'photo'}
+                            fill
+                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                        />
                     ) : (
                         <div className="flex items-center justify-center w-full h-full text-sm text-lightMode-text2 dark:text-darkMode-text2">
-                            {t("No preview")}
+                            {t("No photo available")}
                         </div>
                     )}
+
+                    {/* Score Badge */}
+                    <div className="absolute top-3 right-3 bg-indigo-600 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-md flex items-center gap-1">
+                        <FaStar size={12} /> {score}
+                    </div>
                 </div>
 
-                {/* تفاصيل المنشور */}
-                <div className="p-3">
-                    <div className="flex items-center gap-3 mb-2">
-                        {/* صورة الملف الشخصي */}
-                        <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+                {/* Post details */}
+                <div className="p-4 flex flex-col gap-2">
+                    {/* Author info */}
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0">
                             <Image
                                 src={post.owner?.profilePhoto?.url || '/default-avatar.png'}
                                 alt={post.owner?.username || 'author'}
-                                width={32}
-                                height={32}
+                                width={40}
+                                height={40}
                                 className="object-cover w-full h-full"
                             />
                         </div>
@@ -66,17 +61,25 @@ const TrendingPostCard = ({ post, idx, t }) => {
                             </p>
                         </div>
                     </div>
-                    <p className="text-sm text-lightMode-text2 dark:text-darkMode-text2 line-clamp-2 mb-3">
+
+                    {/* Post text */}
+                    <p className="text-sm text-lightMode-text dark:text-darkMode-text line-clamp-3">
                         {post.text || ''}
                     </p>
-                    <div className="flex items-center justify-between text-xs text-lightMode-text2 dark:text-darkMode-text2">
-                        <div className="flex items-center gap-3">
-                            <span>❤️ {likes}</span>
-                            <span>💬 {comments}</span>
+
+                    {/* Interaction buttons */}
+                    <div className="flex items-center justify-between mt-2 text-sm text-lightMode-text2 dark:text-darkMode-text2">
+                        <div className="flex items-center gap-4">
+                            <span className="flex items-center gap-1 hover:text-red-500 transition-colors">
+                                <FaHeart /> {likes}
+                            </span>
+                            <span className="flex items-center gap-1 hover:text-blue-500 transition-colors">
+                                <FaComment /> {comments}
+                            </span>
                         </div>
-                        <div className="text-xs">
-                            {t("Score")} {Math.round(post.score || 0)}
-                        </div>
+                        <span className="text-xs text-lightMode-text3 dark:text-darkMode-text3">
+                            {photo ? t("Photo") : t("No photo")}
+                        </span>
                     </div>
                 </div>
             </Link>
@@ -84,44 +87,40 @@ const TrendingPostCard = ({ post, idx, t }) => {
     );
 };
 
-
 const TrendingTabContent = ({ trendingToShow, timeFilter, setTimeFilter, t }) => {
     return (
-        <>
-            {/* Time filter controls */}
-            <div className="flex items-center gap-3 justify-end">
-                <div className="inline-flex rounded-xl bg-lightMode-menu dark:bg-darkMode-menu p-1">
+        <div className="flex flex-col gap-6">
+            {/* Time Filter */}
+            <div className="flex items-center justify-end gap-3">
+                {['today', 'week', 'month'].map((tf) => (
                     <button
-                        onClick={() => setTimeFilter('today')}
-                        className={`px-3 py-1 rounded-lg font-medium text-sm transition ${
-                            timeFilter === 'today' ? 'bg-indigo-600 text-white shadow' : 'text-lightMode-text2 dark:text-darkMode-text2'
+                        key={tf}
+                        onClick={() => setTimeFilter(tf)}
+                        className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+                            timeFilter === tf
+                                ? 'bg-indigo-600 text-white shadow-md'
+                                : 'bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text2 dark:text-darkMode-text2 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
                         }`}
                     >
-                        {t("Today")}
+                        {tf === 'today' ? t("Today") : tf === 'week' ? t("This Week") : t("This Month")}
                     </button>
-                    <button
-                        onClick={() => setTimeFilter('week')}
-                        className={`px-3 py-1 rounded-lg font-medium text-sm transition ${
-                            timeFilter === 'week' ? 'bg-indigo-600 text-white shadow' : 'text-lightMode-text2 dark:text-darkMode-text2'
-                        }`}
-                    >
-                        {t("This Week")}
-                    </button>
-                </div>
+                ))}
             </div>
 
-            {/* Mixed content grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {trendingToShow.length > 0 ? trendingToShow.map((post, idx) => (
-                    <TrendingPostCard key={post._id || idx} post={post} idx={idx} t={t} />
-                )) : (
-                    <p className="text-center text-lightMode-text2 dark:text-darkMode-text2 py-8 col-span-full">
-                        {t("No trending content for the selected timeframe.")}
-                    </p>
-                )}
-            </div>
-        </>
+            {/* Grid content */}
+            {trendingToShow.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {trendingToShow.map((post, idx) => (
+                        <TrendingPostCard key={post._id || idx} post={post} idx={idx} t={t} />
+                    ))}
+                </div>
+            ) : (
+                <p className="text-center text-lightMode-text2 dark:text-darkMode-text2 py-12">
+                    {t("No trending content for the selected timeframe.")}
+                </p>
+            )}
+        </div>
     );
-}
+};
 
 export default TrendingTabContent;

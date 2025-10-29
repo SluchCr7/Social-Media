@@ -32,8 +32,10 @@ const useTrendingPosts = (trendingPosts, timeFilter) => {
 
         if (timeFilter === 'today') {
             return diff <= 1000 * 60 * 60 * 24; // 24 ساعة
-        } else {
+        } else if (timeFilter === 'week') {
             return diff <= 1000 * 60 * 60 * 24 * 7; // 7 أيام
+        }else if (timeFilter === 'month') {
+            return diff <= 1000 * 60 * 60 * 24 * 30; // 30 يوم
         }
     };
 
