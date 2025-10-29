@@ -42,11 +42,8 @@ const PostActions = ({ post, user, likePost, hahaPost, sharePost, savePost, setO
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className="
-        grid grid-cols-4 sm:flex sm:flex-nowrap justify-around sm:justify-between
+        grid grid-cols-6 sm:flex sm:flex-nowrap justify-around sm:justify-between
         items-center gap-3 mt-3 p-3
-        bg-white/30 dark:bg-gray-800/30 
-        backdrop-blur-lg rounded-2xl border border-white/10
-        shadow-md sm:shadow-none
       "
     >
 

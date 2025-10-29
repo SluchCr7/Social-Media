@@ -35,7 +35,9 @@ const HashtagsMenu = () => {
             {t("No trending hashtags yet.")}
           </div>
         ) : (
-          topHashtags.map(([tag, count], index) => {
+            topHashtags
+              .slice(0, 3)
+              .map(([tag, count], index) => {
             const isTrendingUp = index % 2 === 0; // simple trend simulation
 
             return (
