@@ -19,6 +19,7 @@ import Comment from "@/app/Component/Comment";
 // })
 import CommentSkeleton from "@/app/Skeletons/CommentSkeleton";
 import { useTranslation } from "react-i18next";
+import PostMusicPlayer from "@/app/Component/Post/PostMusic";
 
 const DesignPostSelect = ({
   post,
@@ -107,7 +108,7 @@ const DesignPostSelect = ({
 
             {/* Links */}
             <PostLinks links={post?.links} />
-
+            {post?.music && <PostMusicPlayer music={post.music} />}
             {/* Shared Original */}
             {isShared && original && (
               <SharedPost

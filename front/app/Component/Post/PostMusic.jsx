@@ -20,7 +20,7 @@ const PostMusicPlayer = ({ music }) => {
   }
 
   return (
-    <div className="flex items-center gap-4 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
+    <div className="flex items-center gap-4 p-3 rounded-xl bg-white/5 dark:bg-black/5 hover:bg-white/10 dark:hover:bg-black/10 transition-all">
       <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
         <Image
           src={music?.cover || '/default-music.jpg'}
@@ -31,7 +31,7 @@ const PostMusicPlayer = ({ music }) => {
       </div>
 
       <div className="flex flex-col flex-1">
-        <span className="font-semibold text-white text-sm truncate">
+        <span className="font-semibold text-lightMode-text2 dark:text-darkMode-text2 text-sm truncate">
           {music?.title}
         </span>
         <span className="text-gray-400 text-xs truncate">
@@ -41,7 +41,7 @@ const PostMusicPlayer = ({ music }) => {
 
       <button
         onClick={handleToggle}
-        className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center hover:bg-blue-700 transition"
+        className="w-10 h-10 rounded-full bg-lightMode-text dark:bg-darkMode-text flex items-center justify-center transition"
       >
         {isCurrent && playing ? (
           <FaPause className="text-white text-sm" />
