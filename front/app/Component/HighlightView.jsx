@@ -153,14 +153,14 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
     setConfirmDeleteOpen(false);
     onClose();
   };
-
-  if (!highlight) return null;
-
+  
   const currentStory = stories[currentIndex];
   const currentPhoto = getPhoto(currentStory);
   useEffect(()=>{
     console.log(currentPhoto)
   },[currentPhoto])
+
+  if (!highlight) return null;
   return (
     <AnimatePresence>
       <motion.div
