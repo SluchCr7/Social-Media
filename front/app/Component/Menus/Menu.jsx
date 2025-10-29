@@ -30,7 +30,7 @@ const Menu = () => {
           <MenuAllNews showAllNews={showAllNews} setShowAllNews={setShowAllNews} />
           <div className="mt-auto border-t pt-4 w-full border-gray-300 dark:border-gray-700">
             <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
-              {t("Sluchit v1.0.0 — © 2025 All rights reserved.")}<br />
+              {t("Zocial v1.0.0 — © 2025 All rights reserved.")}<br />
               {t("Built with passion for communities & real connections.")}
             </p>
             <div className="mt-3 flex flex-col items-center justify-center gap-4 text-xs text-gray-400 dark:text-gray-500">
