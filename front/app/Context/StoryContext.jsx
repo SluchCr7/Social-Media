@@ -14,7 +14,7 @@ export const StoryContextProvider = ({ children }) => {
   const [stories, setStories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const {addNotify} = useNotify()
-
+  const [isStory, setIsStory] = useState(false)
   // const addNewStory = async (storyData) => {
   //   const formData = new FormData();
 
@@ -231,7 +231,7 @@ export const StoryContextProvider = ({ children }) => {
         addNewStory,
         stories,
         isLoading,
-        viewStory,toggleLove, getUserStories,shareStory
+        viewStory,toggleLove, getUserStories,shareStory,isStory, setIsStory
       }}
     >
       {children}

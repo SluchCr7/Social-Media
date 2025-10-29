@@ -23,6 +23,8 @@ import CookieConsent from './CookieConsent';
 import NProgress from 'nprogress'
 import '@/styles/nprogress.css'
 import FloatingDock from './FloatingDock';
+import AddStoryModel from './AddandUpdateMenus/AddStoryModel';
+import { useStory } from '../Context/StoryContext';
 const LayoutComponent = ({ children }) => {
   const [loading, setLoading] = useState(true); // للتحكم في الـ Loader
 
@@ -40,7 +42,8 @@ const LayoutComponent = ({ children }) => {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false)
   const { viewMusicPlayer, setViewMusicPlayer } = useMusicPlayer()
-    const { language } = useTranslate();
+  const { language } = useTranslate();
+  const {isStory, setIsStory} = useStory()
     const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language); // true لو RTL
   // الصفحات التي لا يظهر فيها Aside أو Menu
   const hideLayout = [
@@ -164,6 +167,7 @@ const LayoutComponent = ({ children }) => {
               <SongPlayer/>
             )
           }
+          <AddStoryModel isStory={isStory} setIsStory={setIsStory} />
           {/* <CookieConsent/> */}
           <FloatingDock onOpenMusicPlayer={()=> setViewMusicPlayer(!viewMusicPlayer)}/>
           <ExpandedWindow/>

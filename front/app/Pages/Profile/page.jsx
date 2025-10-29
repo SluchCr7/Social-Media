@@ -10,6 +10,7 @@ import { useProfilePosts } from "@/app/Custome/useProfilePosts"
 import ProfileSkeleton from "@/app/Skeletons/ProfileSkeleton"
 import { useState } from "react"
 import { useUser } from "@/app/Context/UserContext"
+import { useStory } from "@/app/Context/StoryContext"
 
 const ProfilePage = () => {
   const { user } = useAuth() 
@@ -20,7 +21,7 @@ const ProfilePage = () => {
   } = useProfilePosts(user?._id)
 
   const [update, setUpdate] = useState(false)
-  const [isStory, setIsStory] = useState(false)
+  const {isStory, setIsStory} = useStory()
   const [showMenu, setShowMenu] = useState(false)
   const [menuType, setMenuType] = useState("followers")
   const [openMenu, setOpenMenu] = useState(false)
@@ -76,7 +77,7 @@ const ProfilePage = () => {
         type={menuType}
         list={menuType === "followers" ? userData?.followers : userData?.following}
       />
-      <AddStoryModel isStory={isStory} setIsStory={setIsStory} />
+      
     </div>
   )
 }

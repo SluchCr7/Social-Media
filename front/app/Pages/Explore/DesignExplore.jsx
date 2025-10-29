@@ -150,6 +150,7 @@
 //     );
 // }
 
+
 // export default DesignExplore;
 
 // DesignExplore.jsx (المُعدّل)
@@ -209,14 +210,6 @@ const useTrendingPosts = (trendingPosts, timeFilter) => {
     return trendingToShow;
 }
 
-// دالة مساعدة لاستخراج صور المتابعين
-// const useFollowingPhotos = (user) => {
-//     return useMemo(() => {
-//         return user?.following?.flatMap(f =>
-//             f.posts?.flatMap(p => p?.Photos?.filter(m => m.type === 'image') || []) || []
-//         ) || [];
-//     }, [user]);
-// }
 
 const useFollowingPhotos = (user) => {
     return useMemo(() => {
