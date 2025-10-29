@@ -5,7 +5,7 @@ import Image from 'next/image'
 
 const NowPlaying = ({
   current, playing, togglePlay, next, prev,
-  shuffle, setShuffle, repeatMode, setRepeatMode,
+  shuffle, setShuffle, repeatMode, setRepeatMode,shareMusicAsPost,
   progress, setProgress, duration, volume, setVolume, muted, setMuted,
   expanded, setExpanded, likeMusic, saveMusicInPlayList,
   userData, myPlaylist, accentStyle, setTrack, songs, currentIndex,isReady
@@ -23,6 +23,7 @@ const NowPlaying = ({
           userData={userData}
           myPlaylist={myPlaylist}
           setExpanded={setExpanded}
+          shareMusicAsPost={shareMusicAsPost}
         />
         <PlayerControls
           togglePlay={togglePlay}

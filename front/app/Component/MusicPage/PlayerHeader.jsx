@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { CiBookmark } from 'react-icons/ci'
 import { FaExpand, FaHeart, FaShareAlt } from 'react-icons/fa'
 
-const PlayerHeader = ({ current, likeMusic, saveMusicInPlayList, userData, myPlaylist, setExpanded }) => {
+const PlayerHeader = ({ current, likeMusic,shareMusicAsPost, saveMusicInPlayList, userData, myPlaylist, setExpanded }) => {
   const {t} = useTranslation()
   return (
     <div className="flex items-center gap-4 justify-between flex-wrap mt-4 md:mt-0">
@@ -26,7 +26,7 @@ const PlayerHeader = ({ current, likeMusic, saveMusicInPlayList, userData, myPla
         >
           <CiBookmark />
         </button>
-        <button className="p-3 rounded-lg bg-white/30 dark:bg-gray-800/40 hover:bg-blue-500/70 hover:text-white transition"><FaShareAlt /></button>
+        <button onClick={()=> shareMusicAsPost(current?._id)} className="p-3 rounded-lg bg-white/30 dark:bg-gray-800/40 hover:bg-blue-500/70 hover:text-white transition"><FaShareAlt /></button>
         <button onClick={() => setExpanded(true)} className="p-3 rounded-lg bg-white/30 dark:bg-gray-800/40 hover:bg-indigo-500/70 hover:text-white transition"><FaExpand /></button>
       </div>
     </div>

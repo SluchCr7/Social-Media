@@ -9,7 +9,7 @@ import { useUser } from '@/app/Context/UserContext'
 import { useGetData } from '@/app/Custome/useGetData'
 
 export default function MusicPageContainer() {
-  const { music: songs, isLoading, likeMusic } = useMusic()
+  const { music: songs, isLoading, likeMusic,shareMusicAsPost } = useMusic()
   const { user } = useAuth()
   const { getUserById, saveMusicInPlayList} = useUser()
   const {
@@ -81,6 +81,7 @@ export default function MusicPageContainer() {
       openModel={openModel}
       setOpenModel={setOpenModel}
       likeMusic={likeMusic}
+      shareMusicAsPost={shareMusicAsPost}
       saveMusicInPlayList={saveMusicInPlayList}
       queue={queue}
       myPlaylist={myPlaylist}

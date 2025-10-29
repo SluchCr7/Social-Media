@@ -16,7 +16,7 @@ export default function MusicPagePresentation(props) {
     songs, filtered, current, playing, togglePlay, next, prev,isReady,
     shuffle, setShuffle, repeatMode, setRepeatMode,
     progress, setProgress, duration, volume, setVolume, muted, setMuted,
-    setTrack, currentIndex, expanded, setExpanded,
+    setTrack, currentIndex, expanded, setExpanded,shareMusicAsPost,
     userData, search, setSearch, loading, isLoading, openModel, setOpenModel,
     likeMusic, saveMusicInPlayList, queue, myPlaylist
   } = props
@@ -66,6 +66,7 @@ export default function MusicPagePresentation(props) {
                 expanded={expanded}
                 setExpanded={setExpanded}
                 likeMusic={likeMusic}
+                shareMusicAsPost={shareMusicAsPost}
                 saveMusicInPlayList={saveMusicInPlayList}
                 userData={userData}
                 myPlaylist={myPlaylist}

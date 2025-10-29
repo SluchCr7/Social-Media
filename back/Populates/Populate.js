@@ -89,6 +89,14 @@ const postPopulate = [
       select: userSelect,
     },
   },
+  {
+    path: "music",
+    select: "title cover url artist duration",
+    populate: {
+      path: "owner",
+      select: userSelect,
+    },
+  },
 ];
 
 

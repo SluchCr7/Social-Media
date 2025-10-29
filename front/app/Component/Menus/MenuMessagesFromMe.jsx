@@ -45,7 +45,7 @@ const MenuMessagesFromMe = () => {
               alt="avatar"
               width={40}
               height={40}
-              className="rounded-full object-cover"
+              className="rounded-full w-10 h-10 min-w-10 aspect-square object-cover "
             />
             <div className="flex flex-col w-full">
               <div className="flex justify-between items-center w-full">

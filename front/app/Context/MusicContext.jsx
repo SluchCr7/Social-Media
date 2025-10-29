@@ -5,6 +5,7 @@ import axios from "axios";
 import { useAuth } from "./AuthContext";
 import { useAlert } from "./AlertContext";
 import { useNotify } from "./NotifyContext";
+import { usePost } from "./PostContext";
 
 export const MusicContext = createContext();
 
@@ -18,7 +19,7 @@ export const MusicProvider = ({ children }) => {
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [showModelAddMusic, setShowModelAddMusic] = useState(false);
-
+  const { setPosts } = usePost();
   // ✅ جلب الموسيقى مع pagination
   const fetchMusic = useCallback(async (pageNum = 1) => {
     if (!hasMore && pageNum !== 1) return;
@@ -175,6 +176,28 @@ const likeMusic = useCallback(async (id) => {
       console.error('Error adding listen:', error);
     }
   };
+  const shareMusicAsPost = useCallback(async (musicId, customText = '') => {
+    if (!user?.token) return showAlert('You must be logged in to share music as a post.');
+
+    try {
+      const { data } = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/music/share/${musicId}`,
+        { customText },
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      )
+      // ✅ تحديث الـ state فورًا
+      setPosts(prev => [data.post, ...prev])
+      showAlert(message || "Shared successfully");
+      return data.post
+    } catch (error) {
+      console.error('Error sharing music:', error)
+      throw error
+    }
+  }, [user?.token])
   return (
     <MusicContext.Provider
       value={{
@@ -192,7 +215,7 @@ const likeMusic = useCallback(async (id) => {
         setShowModelAddMusic,
         currentMusic,
         setCurrentMusic,
-        addListen
+        addListen,shareMusicAsPost
       }}
     >
       {children}

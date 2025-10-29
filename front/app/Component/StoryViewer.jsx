@@ -232,41 +232,82 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
         <aside className={`hidden md:flex flex-col items-center justify-between py-6 px-3 w-20 bg-black/20 z-30 backdrop-blur-sm ${isRTL ? 'order-2' : 'order-1'}`}>
           {/* Top: avatar & info */}
           <div className="flex flex-col items-center gap-3">
-            <Link href={`/Pages/User/${story?.owner?._id || story?.originalStory?.owner?._id}`} className="relative block">
-              <Image
-                src={story?.originalStory ? story.originalStory.owner?.profilePhoto?.url : story?.owner?.profilePhoto?.url || '/default-profile.png'}
-                alt="owner"
-                width={56}
-                height={56}
-                className="w-14 h-14 rounded-full object-cover border-2 border-white/10 shadow-sm"
-              />
-            </Link>
+            <div className="relative">
+              {/* صورة صاحب القصة أو الذي أعاد النشر */}
+              <Link
+                href={`/Pages/User/${story?.owner?._id || story?.originalStory?.owner?._id}`}
+                className="relative block"
+              >
+                <Image
+                  src={
+                    story?.owner?.profilePhoto?.url ||
+                    story?.originalStory?.owner?.profilePhoto?.url ||
+                    '/default-profile.png'
+                  }
+                  alt="owner"
+                  width={56}
+                  height={56}
+                  className="w-14 h-14 rounded-full object-cover border-2 border-white/10 shadow-sm"
+                />
+              </Link>
+
+              {/* صورة صاحب القصة الأصلية (مصغّرة) */}
+              {story?.originalStory && story?.originalStory?.owner && (
+                <Link
+                  href={`/Pages/User/${story.originalStory.owner._id}`}
+                  className="absolute -bottom-1 -right-1"
+                >
+                  <Image
+                    src={story.originalStory.owner?.profilePhoto?.url || '/default-profile.png'}
+                    alt="original owner"
+                    width={22}
+                    height={22}
+                    className="w-5 h-5 rounded-full border-2 border-gray-900 shadow-md"
+                  />
+                </Link>
+              )}
+            </div>
+
             <div className="text-white text-xs text-center">
-              <div className="font-semibold">{story?.originalStory ? story.originalStory.owner?.username : story?.owner?.username || t('Unknown')}</div>
-              <div className="text-gray-300 text-xxs">{formatRelativeTime(story?.createdAt)}</div>
+              {/* اسم صاحب القصة الحالية */}
+              <div className="font-semibold">
+                {story?.owner?.username || t('Unknown')}
+              </div>
+
+              {/* إذا كانت قصة معاد نشرها، أظهر صاحب القصة الأصلية تحته */}
+              {story?.originalStory && story.originalStory.owner?.username && (
+                <div className="text-gray-400 text-[10px] mt-0.5">
+                  {t('From')} @{story.originalStory.owner.username}
+                </div>
+              )}
+
+              {/* وقت النشر */}
+              <div className="text-gray-300 text-xxs">
+                {formatRelativeTime(story?.createdAt)}
+              </div>
             </div>
           </div>
 
-          {/* Middle: main actions */}
-          <div className="flex flex-col items-center gap-3">
-            <button onClick={(e) => { e.stopPropagation(); setShowActionsMenu(prev => !prev) }} aria-label={t('Open Actions')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md">
-              <FaEllipsisV className="text-white text-lg" />
-            </button>
-
-            <div aria-label={t('Like Story')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md flex flex-col items-center gap-1">
-              <FaHeart className={`text-lg text-red-500`} />
-              <span>{story?.likes?.length}</span>
-            </div>
-            <div aria-label={t('View Story')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md flex flex-col items-center gap-1">
-              <FaEye className={`text-lg text-green-500`} />
-              <span>{story?.views?.length}</span>
-            </div>
-
-            <button onClick={(e) => { e.stopPropagation(); setIsPaused(prev => !prev) }} aria-label={t('Pause/Play')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md">
-              {isPaused ? <FaPlay className="text-white text-lg" /> : <FaPause className="text-white text-lg" />}
-            </button>
-          </div>
-
+          {
+            user?._id === story?.owner?._id && (
+              <div className="flex flex-col items-center gap-3">
+                <button onClick={(e) => { e.stopPropagation(); setShowActionsMenu(prev => !prev) }} aria-label={t('Open Actions')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md">
+                  <FaEllipsisV className="text-white text-lg" />
+                </button>
+                <div aria-label={t('Like Story')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md flex flex-col items-center gap-1">
+                  <FaHeart className={`text-lg text-red-500`} />
+                  <span className="text-white text-sm">{story?.loves?.length}</span>
+                </div>
+                <div aria-label={t('View Story')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md flex flex-col items-center gap-1">
+                  <FaEye className={`text-lg text-green-500`} />
+                  <span className="text-white text-sm">{story?.views?.length}</span>
+                </div>
+              </div>
+            )
+          }
+          <button onClick={(e) => { e.stopPropagation(); setIsPaused(prev => !prev) }} aria-label={t('Pause/Play')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md">
+            {isPaused ? <FaPlay className="text-white text-lg" /> : <FaPause className="text-white text-lg" />}
+          </button>
           {/* Bottom: owner stats or delete */}
           <div className="flex flex-col items-center gap-3">
             {user?._id === story?.owner?._id ? (

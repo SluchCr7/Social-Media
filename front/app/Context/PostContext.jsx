@@ -107,7 +107,7 @@ export const PostContextProvider = ({ children }) => {
         copyPostLink,
         imageView , setImageView, viewPost,fetchPosts,hasMore, setPage
         ,hahaPost, userPosts, fetchUserPosts, userPages,setUserPages , userHasMore,userIsLoading
-        ,isLoadingPostCreated
+        ,isLoadingPostCreated,setPosts
       }}
     >
       {children}

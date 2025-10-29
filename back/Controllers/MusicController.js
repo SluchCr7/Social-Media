@@ -5,6 +5,8 @@ const { User } = require("../Modules/User");
 const { cloudUpload } = require("../Config/cloudUpload");
 const { cloudUploadMusic } = require("../Config/cloudUploadMusic");
 const {sendNotificationHelper} = require("../utils/SendNotification");
+const { Post } = require("../Modules/Post");
+const { postPopulate } = require("../Populates/Populate");
 const createMusic = asyncHandler(async (req, res) => {
   try {
     const audioFile = req.files?.audio?.[0];
@@ -229,6 +231,33 @@ const addListen = asyncHandler(async (req, res) => {
   res.status(200).json(updatedMusic);
 });
 
+const shareMusicAsPost = asyncHandler(async (req, res) => {
+  const { id: musicId } = req.params;
+  const { customText } = req.body;
+
+  // ✅ التحقق من وجود الموسيقى
+  const music = await Music.findById(musicId);
+  if (!music) {
+    return res.status(404).json({ message: "Music not found" });
+  }
+
+  // ✅ إنشاء بوست جديد مرتبط بالموسيقى
+  const sharedPost = await Post.create({
+    text: customText?.trim() || "",
+    owner: req.user._id,
+    isShared: true,
+    music: music._id,
+  });
+
+  // ✅ populate للبيانات المرتبطة
+  const populatedPost = await Post.findById(sharedPost._id)
+    .populate(postPopulate);
+
+  return res.status(201).json({
+    message: "Music shared successfully as a post",
+    post: populatedPost,
+  });
+});
 
 module.exports = {
   createMusic,
@@ -238,6 +267,7 @@ module.exports = {
   deleteMusic,
   toggleLike,
   addView,
-  addListen
+  addListen,
+  shareMusicAsPost
 };
 

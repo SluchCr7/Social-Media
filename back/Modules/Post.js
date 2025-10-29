@@ -78,6 +78,11 @@ const PostSchema = new mongoose.Schema({
     type: Boolean,
     default: false, 
   },
+  music: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Music',
+    default: null
+  }
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
