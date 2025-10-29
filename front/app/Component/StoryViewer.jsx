@@ -17,15 +17,6 @@ import { useTranslation } from 'react-i18next'
 import { useTranslate } from '../Context/TranslateContext'
 import { formatRelativeTime } from '../utils/FormatDataCreatedAt'
 
-/**
- * Redesigned StoryViewer
- * - Keeps all existing logic (viewStory, toggleLove, shareStory, AddNewMessage, etc.)
- * - New layout: image/content area takes full available space; actions live in a separate action rail so they never overlap media/text
- * - Action rail adapts to RTL
- * - Owner-only controls (Delete) shown clearly in action menu
- * - Two display modes for image: 'cover' (fullscreen crop like big platforms) and 'contain' (shows whole image with tasteful gradient fill). Default = 'cover'
- * - Improved accessibility, keyboard controls, and clear separation of interactive areas
- */
 
 const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' /* 'cover' | 'contain' */ }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -262,13 +253,14 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
               <FaEllipsisV className="text-white text-lg" />
             </button>
 
-            <button onClick={(e) => { e.stopPropagation(); handleLove(e) }} aria-label={t('Like Story')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md">
-              <FaHeart className={`text-lg ${story?.loves?.some(u => u?._id === user?._id) ? 'text-red-400' : 'text-white'}`} />
-            </button>
-
-            <button onClick={(e) => { e.stopPropagation(); handleShare(e) }} aria-label={t('Share Story')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md">
-              <FaShare className="text-lg text-white" />
-            </button>
+            <div aria-label={t('Like Story')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md flex flex-col items-center gap-1">
+              <FaHeart className={`text-lg text-red-500`} />
+              <span>{story?.likes?.length}</span>
+            </div>
+            <div aria-label={t('View Story')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md flex flex-col items-center gap-1">
+              <FaEye className={`text-lg text-green-500`} />
+              <span>{story?.views?.length}</span>
+            </div>
 
             <button onClick={(e) => { e.stopPropagation(); setIsPaused(prev => !prev) }} aria-label={t('Pause/Play')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md">
               {isPaused ? <FaPlay className="text-white text-lg" /> : <FaPause className="text-white text-lg" />}
@@ -345,7 +337,7 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
 
                 {/* Optional text overlay kept separate and never overlapped by actions rail */}
                 {story?.text && (
-                  <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-11/12 text-center z-30 pointer-events-auto">
+                  <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-11/12 text-center z-30 pointer-events-auto">
                     <p className="text-lg sm:text-xl font-semibold text-white px-5 py-3 bg-black/45 rounded-2xl shadow-xl backdrop-blur-md">
                       {story.text}
                     </p>
@@ -362,7 +354,7 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
           </div>
 
           {/* Bottom action area (message input) — positioned inside main column but above end so actions rail never overlaps */}
-          {story && story?.owner?._id !== user?._id && (
+          {story?.owner?._id !== user?._id && (
             <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-3xl z-50 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <form onSubmit={handleCommentSubmit} className={`flex items-center gap-3 w-full bg-black/30 backdrop-blur-md px-3 py-2 rounded-full border border-white/6`}>
                 <textarea
