@@ -24,6 +24,7 @@ import { getHighlightedComment } from '../utils/getHighlitedComment'
 import { usePathname } from 'next/navigation'
 import {motion , AnimatePresence} from 'framer-motion'
 import ShowSensitiveContent from './Post/ShowSensitiveContent'
+import PostMusicPlayer from './Post/PostMusic'
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost()
   const { user, isLogin } = useAuth()
@@ -148,6 +149,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
               />
 
               {post?.links && <PostLinks links={post?.links} />}
+              {post?.music && <PostMusicPlayer music={post.music} />}
 
               {/* ======= Translation Section ======= */}
               <div className="mt-2 space-y-3">
