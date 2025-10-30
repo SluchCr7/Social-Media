@@ -469,12 +469,7 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
     </div>
   )
 }
-
-/**
- * MenuActions component separated and memoized to avoid re-renders.
- * Kept behavior identical to your original `menuActions` function.
- */
-const MenuActions = React.memo(({
+function MenuActionsComponent({
   user,
   story,
   setShowActionsMenu,
@@ -485,19 +480,67 @@ const MenuActions = React.memo(({
   setFitMode,
   t,
   isRTL
-}) => {
+}) {
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} transition={{ duration: 0.16 }} className={`absolute bottom-6 ${isRTL ? 'left-6' : 'right-6'} z-50 md:hidden`}>
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 12 }}
+      transition={{ duration: 0.16 }}
+      className={`absolute bottom-6 ${isRTL ? 'left-6' : 'right-6'} z-50 md:hidden`}
+    >
       <div className="bg-black/70 backdrop-blur-md rounded-xl p-3 flex flex-col gap-2 shadow-lg">
-        <button onClick={(e) => { e.stopPropagation(); handleLove(e); setShowActionsMenu(false) }} className="px-3 py-2 rounded-md text-white text-sm">{t('Like')}</button>
-        <button onClick={(e) => { e.stopPropagation(); handleShare(e); setShowActionsMenu(false) }} className="px-3 py-2 rounded-md text-white text-sm">{t('Share')}</button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            handleLove(e)
+            setShowActionsMenu(false)
+          }}
+          className="px-3 py-2 rounded-md text-white text-sm"
+        >
+          {t('Like')}
+        </button>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            handleShare(e)
+            setShowActionsMenu(false)
+          }}
+          className="px-3 py-2 rounded-md text-white text-sm"
+        >
+          {t('Share')}
+        </button>
+
         {user?._id === story?.owner?._id && (
-          <button onClick={(e) => { e.stopPropagation(); handleDelete(e); setShowActionsMenu(false) }} className="px-3 py-2 rounded-md text-red-400 text-sm">{t('Delete')}</button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              handleDelete(e)
+              setShowActionsMenu(false)
+            }}
+            className="px-3 py-2 rounded-md text-red-400 text-sm"
+          >
+            {t('Delete')}
+          </button>
         )}
-        <button onClick={() => { setFitMode(prev => prev === 'cover' ? 'contain' : 'cover'); setShowActionsMenu(false) }} className="px-3 py-2 rounded-md text-white text-sm">{fitMode === 'cover' ? t('Show full image') : t('Fill screen')}</button>
+
+        <button
+          onClick={() => {
+            setFitMode((prev) => (prev === 'cover' ? 'contain' : 'cover'))
+            setShowActionsMenu(false)
+          }}
+          className="px-3 py-2 rounded-md text-white text-sm"
+        >
+          {fitMode === 'cover' ? t('Show full image') : t('Fill screen')}
+        </button>
       </div>
     </motion.div>
   )
-})
+}
+
+MenuActionsComponent.displayName = 'MenuActions'
+
+const MenuActions = React.memo(MenuActionsComponent)
 
 export default StoryViewer
