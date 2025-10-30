@@ -21,7 +21,7 @@ const AddEventModal = ({
         exit={{ scale: 0.9, opacity: 0 }}
         transition={{ duration: 0.3 }}
         className="bg-lightMode-bg dark:bg-darkMode-bg border border-lightMode-menu/20 dark:border-darkMode-menu/20
-                   rounded-2xl p-6 w-full max-w-md shadow-2xl transition-colors duration-300"
+                  rounded-2xl p-6 w-full max-w-md shadow-2xl transition-colors duration-300"
       >
         <h3 className="text-xl font-semibold mb-5 text-center text-lightMode-text dark:text-darkMode-text">
           {t("Add Event on")} {selectedDate.format("DD MMM YYYY")}

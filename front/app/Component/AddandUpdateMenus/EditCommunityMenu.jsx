@@ -94,7 +94,10 @@ const EditCommunityMenu = ({ community, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
       <div className="w-full max-w-2xl relative bg-lightMode-bg dark:bg-darkMode-bg rounded-2xl p-6 shadow-2xl border border-lightMode-menu/30 dark:border-darkMode-menu/40 overflow-y-auto max-h-[95vh] transition-all">
         {/* Close Button */}
         <button

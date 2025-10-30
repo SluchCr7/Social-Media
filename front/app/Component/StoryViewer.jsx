@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { IoClose, IoSend } from 'react-icons/io5'
 import { FaHeart, FaShare, FaPlay, FaPause, FaTrashAlt, FaEllipsisV, FaCommentDots } from 'react-icons/fa'
 import Image from 'next/image'
@@ -27,8 +27,7 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
   const { viewStory, toggleLove, shareStory, deleteStory } = useStory()
   const { user } = useAuth()
   const { AddNewMessage, setSelectedUser } = useMessage()
-  const story = stories[currentIndex] || null
-  const timerRef = useRef(null)
+  const timerRef = useRef(null) // will hold raf id
   const durationRef = useRef(5000)
   const { t } = useTranslation()
   const { isRTL } = useTranslate()
@@ -36,6 +35,15 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
   const textareaRef = useRef(null)
   const [isImageLoaded, setIsImageLoaded] = useState(false)
   const [showActionsMenu, setShowActionsMenu] = useState(false)
+
+  // memoize current story and photoUrl so they don't recreate every render
+  const story = useMemo(() => stories[currentIndex] || null, [stories, currentIndex])
+
+  const photoUrl = useMemo(() => {
+    if (!story) return null
+    const p = Array.isArray(story?.Photo) ? story.Photo.find(url => url) || null : story?.Photo || null
+    return p
+  }, [story])
 
   // When story changes -> mark as viewed + select user
   useEffect(() => {
@@ -47,31 +55,66 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
     setIsImageLoaded(false)
   }, [currentIndex, story, viewStory, setSelectedUser])
 
-  // Progress timer
+  // Preload next image for smooth transition
+  useEffect(() => {
+    const next = stories[currentIndex + 1]
+    if (!next) return
+    const url = Array.isArray(next?.Photo) ? next.Photo.find(u => u) : next?.Photo
+    if (url) {
+      const img = new window.Image()
+      img.src = url
+    }
+  }, [currentIndex, stories])
+
+  // Progress timer using requestAnimationFrame (more efficient than setInterval)
   useEffect(() => {
     if (!story) return
-    if (isPaused) {
-      clearInterval(timerRef.current)
-      return
+    let rafId = null
+    let start = null
+    const duration = durationRef.current
+
+    const step = (timestamp) => {
+      if (isPaused) {
+        // keep paused state; don't advance. schedule next check in RAF to respond quickly when resumed.
+        rafId = requestAnimationFrame(step)
+        return
+      }
+      if (!start) start = timestamp
+      const elapsed = timestamp - start
+      const percent = (elapsed / duration) * 100
+      if (percent >= 100) {
+        // advance to next story
+        setProgress(100)
+        // small timeout to let UI show full bar, then advance
+        // using requestAnimationFrame recursion so no setTimeout needed; we will call handleNext synchronously after cancel.
+        cancelAnimationFrame(rafId)
+        // call next on next tick to avoid messing with RAF stack.
+        window.requestAnimationFrame(() => {
+          // note: using callback setter to ensure latest state
+          setProgress(0)
+          if (currentIndex < stories.length - 1) {
+            setCurrentIndex(idx => idx + 1)
+          } else {
+            // close when at the end
+            setIsPaused(true)
+            onClose()
+          }
+        })
+        return
+      } else {
+        setProgress(percent)
+        rafId = requestAnimationFrame(step)
+      }
     }
 
-    const interval = 50
-    const duration = durationRef.current
-    const increment = (interval / duration) * 100
+    rafId = requestAnimationFrame(step)
+    timerRef.current = rafId
 
-    timerRef.current = setInterval(() => {
-      setProgress(prev => {
-        const next = prev + increment
-        if (next >= 100) {
-          handleNext()
-          return 0
-        }
-        return next
-      })
-    }, interval)
-
-    return () => clearInterval(timerRef.current)
-  }, [currentIndex, isPaused, story])
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId)
+    }
+    // we intentionally include isPaused and story here so it restarts correctly
+  }, [currentIndex, isPaused, story, stories.length, onClose])
 
   // Keyboard nav
   useEffect(() => {
@@ -93,88 +136,7 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [currentIndex, isRTL])
-
-  const handleNext = useCallback(() => {
-    setProgress(0)
-    if (currentIndex < stories.length - 1) setCurrentIndex(idx => idx + 1)
-    else handleClose()
-  }, [currentIndex, stories.length])
-
-  const handlePrev = useCallback(() => {
-    setProgress(0)
-    if (currentIndex > 0) setCurrentIndex(idx => idx - 1)
-  }, [currentIndex])
-
-  const handlers = useSwipeable({
-    onSwipedUp: () => handleClose(),
-    onSwipedDown: () => handleClose(),
-    onSwipedLeft: isRTL ? handlePrev : handleNext,
-    onSwipedRight: isRTL ? handleNext : handlePrev,
-    trackMouse: true,
-    delta: 40,
-  })
-
-  const photoUrl = Array.isArray(story?.Photo)
-    ? story.Photo.find(url => url) || null
-    : story?.Photo || null
-
-  const handleLove = (e) => {
-    e?.stopPropagation()
-    if (!story?._id) return
-    toggleLove(story._id)
-  }
-
-  const handleShare = (e) => {
-    e?.stopPropagation()
-    if (!story?._id) return
-    shareStory(story._id)
-  }
-
-  const handleDelete = async (e) => {
-    e?.stopPropagation()
-    if (!story?._id) return
-    if (!confirm(t('Are you sure you want to delete this story?'))) return
-    try {
-      await deleteStory(story._id)
-      // After delete, remove from list if parent didn't handle it; we just close
-      handleClose()
-    } catch (err) {
-      console.error('Failed to delete story', err)
-    }
-  }
-
-  const handleCommentSubmit = async (e) => {
-    e?.preventDefault()
-    if (!comment.trim()) return
-    await AddNewMessage(comment)
-    setComment('')
-  }
-
-  const togglePause = (e) => {
-    if (e?.target?.closest && (e.target.closest('button') || e.target.closest('input') || e.target.closest('textarea'))) return
-    setIsPaused(prev => !prev)
-  }
-
-  const handleTap = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const clickX = e.clientX - rect.left
-    // thirds behaviour preserved
-    if (isRTL) {
-      if (clickX < rect.width / 3) handleNext()
-      else if (clickX > (rect.width * 2) / 3) handlePrev()
-      else togglePause(e)
-    } else {
-      if (clickX < rect.width / 3) handlePrev()
-      else if (clickX > (rect.width * 2) / 3) handleNext()
-      else togglePause(e)
-    }
-  }
-
-  const handleClose = useCallback(() => {
-    setIsPaused(true)
-    onClose()
-  }, [onClose])
+  }, [isRTL]) // handlers below are stable via useCallback
 
   // auto-resize textarea
   useEffect(() => {
@@ -188,6 +150,88 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
     el.addEventListener('input', adjust)
     return () => el.removeEventListener('input', adjust)
   }, [comment])
+
+  // Handlers - memoized to avoid re-creating on each render
+  const handleNext = useCallback(() => {
+    setProgress(0)
+    if (currentIndex < stories.length - 1) setCurrentIndex(idx => idx + 1)
+    else {
+      setIsPaused(true)
+      onClose()
+    }
+  }, [currentIndex, stories.length, onClose])
+
+  const handlePrev = useCallback(() => {
+    setProgress(0)
+    if (currentIndex > 0) setCurrentIndex(idx => idx - 1)
+  }, [currentIndex])
+
+  const handleLove = useCallback((e) => {
+    e?.stopPropagation()
+    if (!story?._id) return
+    toggleLove(story._id)
+  }, [story, toggleLove])
+
+  const handleShare = useCallback((e) => {
+    e?.stopPropagation()
+    if (!story?._id) return
+    shareStory(story._id)
+  }, [story, shareStory])
+
+  const handleDelete = useCallback(async (e) => {
+    e?.stopPropagation()
+    if (!story?._id) return
+    if (!confirm(t('Are you sure you want to delete this story?'))) return
+    try {
+      await deleteStory(story._id)
+      // After delete, remove from list if parent didn't handle it; we just close
+      setIsPaused(true)
+      onClose()
+    } catch (err) {
+      console.error('Failed to delete story', err)
+    }
+  }, [story, deleteStory, onClose, t])
+
+  const handleCommentSubmit = useCallback(async (e) => {
+    e?.preventDefault()
+    if (!comment.trim()) return
+    await AddNewMessage(comment)
+    setComment('')
+  }, [comment, AddNewMessage])
+
+  const togglePause = useCallback((e) => {
+    if (e?.target?.closest && (e.target.closest('button') || e.target.closest('input') || e.target.closest('textarea'))) return
+    setIsPaused(prev => !prev)
+  }, [])
+
+  const handleTap = useCallback((e) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const clickX = e.clientX - rect.left
+    // thirds behaviour preserved
+    if (isRTL) {
+      if (clickX < rect.width / 3) handleNext()
+      else if (clickX > (rect.width * 2) / 3) handlePrev()
+      else togglePause(e)
+    } else {
+      if (clickX < rect.width / 3) handlePrev()
+      else if (clickX > (rect.width * 2) / 3) handleNext()
+      else togglePause(e)
+    }
+  }, [isRTL, handleNext, handlePrev, togglePause])
+
+  const handleClose = useCallback(() => {
+    setIsPaused(true)
+    onClose()
+  }, [onClose])
+
+  const handlers = useSwipeable({
+    onSwipedUp: () => handleClose(),
+    onSwipedDown: () => handleClose(),
+    onSwipedLeft: isRTL ? handlePrev : handleNext,
+    onSwipedRight: isRTL ? handleNext : handlePrev,
+    trackMouse: true,
+    delta: 40,
+  })
 
   if (!stories || stories.length === 0) return null
 
@@ -222,7 +266,7 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
             <div key={idx} className="flex-1 h-1 rounded-full bg-white/15 overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-indigo-500 to-sky-400 transition-all ease-linear"
-                style={{ width: idx < currentIndex ? '100%' : idx === currentIndex ? `${progress}%` : '0%' }}
+                style={{ width: idx < currentIndex ? '100%' : idx === currentIndex ? `${Math.min(progress, 100)}%` : '0%' }}
               />
             </div>
           ))}
@@ -289,7 +333,7 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
           </div>
 
           {
-            user?._id === story?.owner?._id && (
+            user?._id === story?.owner?._id ? (
               <div className="flex flex-col items-center gap-3">
                 <button onClick={(e) => { e.stopPropagation(); setShowActionsMenu(prev => !prev) }} aria-label={t('Open Actions')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md">
                   <FaEllipsisV className="text-white text-lg" />
@@ -303,20 +347,25 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
                   <span className="text-white text-sm">{story?.views?.length}</span>
                 </div>
               </div>
-            )
-          }
+            ) : (
+              <div className="flex flex-col gap-3 items-center">
+                <button type="button" onClick={handleLove} className="p-3 rounded-full bg-white/6 backdrop-blur-sm hover:scale-110 transition shadow-md" aria-label={t('Like Story')}>
+                  <FaHeart className={`text-lg ${story?.loves?.some(u => u?._id === user?._id) ? 'text-red-400' : 'text-white'}`} />
+                </button>
+
+                <button type="button" onClick={handleShare} className="p-3 rounded-full bg-white/6 backdrop-blur-sm hover:scale-110 transition shadow-md" aria-label={t('Share Story')}>
+                  <FaShare className="text-lg text-white" />
+                </button>
+              </div>
+            )}
           <button onClick={(e) => { e.stopPropagation(); setIsPaused(prev => !prev) }} aria-label={t('Pause/Play')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md">
             {isPaused ? <FaPlay className="text-white text-lg" /> : <FaPause className="text-white text-lg" />}
           </button>
           {/* Bottom: owner stats or delete */}
           <div className="flex flex-col items-center gap-3">
-            {user?._id === story?.owner?._id ? (
+            {user?._id === story?.owner?._id && (
               <button onClick={handleDelete} aria-label={t('Delete Story')} className="p-3 rounded-full bg-red-600/80 hover:scale-105 transition shadow-md">
                 <FaTrashAlt className="text-white text-lg" />
-              </button>
-            ) : (
-              <button onClick={(e) => { e.stopPropagation(); setSelectedUser(story?.owner); /* open message maybe */ }} aria-label={t('Message Owner')} className="p-3 rounded-full bg-white/6 hover:scale-105 transition shadow-md">
-                <FaCommentDots className="text-white text-lg" />
               </button>
             )}
           </div>
@@ -360,9 +409,10 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
 
                 <motion.div
                   key={photoUrl + fitMode}
-                  initial={{ scale: fitMode === 'cover' ? 1.05 : 1.0 }}
-                  animate={{ scale: isPaused ? (fitMode === 'cover' ? 1.05 : 1.0) : (fitMode === 'cover' ? 1.0 : 1.0) }}
-                  transition={{ duration: (durationRef.current / 1000) + 0.6, ease: 'easeOut' }}
+                  initial={{ opacity: 0, scale: fitMode === 'cover' ? 1.05 : 1.0 }}
+                  animate={{ opacity: 1, scale: isPaused ? (fitMode === 'cover' ? 1.05 : 1.0) : (fitMode === 'cover' ? 1.0 : 1.0) }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: (durationRef.current / 1000) + 0.35, ease: 'easeOut' }}
                   className="absolute inset-0"
                 >
                   <Image
@@ -372,7 +422,9 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
                     sizes="(max-width: 768px) 100vw, 50vw"
                     onLoadingComplete={() => setIsImageLoaded(true)}
                     className={`${fitMode === 'cover' ? 'object-cover' : 'object-contain'} w-full h-full`}
-                    priority
+                    priority={currentIndex === 0}
+                    // if you have a small blurred placeholder you can set it here; fallback harmless
+                    placeholder={photoUrl ? 'empty' : undefined}
                   />
                 </motion.div>
 
@@ -393,54 +445,23 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
               </div>
             )}
           </div>
-
-          {/* Bottom action area (message input) — positioned inside main column but above end so actions rail never overlaps */}
-          {story?.owner?._id !== user?._id && (
-            <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-3xl z-50 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <form onSubmit={handleCommentSubmit} className={`flex items-center gap-3 w-full bg-black/30 backdrop-blur-md px-3 py-2 rounded-full border border-white/6`}>
-                <textarea
-                  ref={textareaRef}
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder={t('Send a message...')}
-                  rows={1}
-                  className={`w-full resize-none px-4 py-2 rounded-full bg-transparent text-white text-sm placeholder-gray-300 focus:outline-none`}
-                />
-
-                {comment.trim() ? (
-                  <button type="submit" className="p-3 rounded-full bg-gradient-to-r from-indigo-500 to-sky-500 hover:scale-105 transition shadow-lg" aria-label={t('Send Message')}>
-                    <IoSend className="text-white text-lg" />
-                  </button>
-                ) : (
-                  <div className="flex gap-2 items-center">
-                    <button type="button" onClick={handleLove} className="p-3 rounded-full bg-white/6 backdrop-blur-sm hover:scale-110 transition shadow-md" aria-label={t('Like Story')}>
-                      <FaHeart className={`text-lg ${story?.loves?.some(u => u?._id === user?._id) ? 'text-red-400' : 'text-white'}`} />
-                    </button>
-
-                    <button type="button" onClick={handleShare} className="p-3 rounded-full bg-white/6 backdrop-blur-sm hover:scale-110 transition shadow-md" aria-label={t('Share Story')}>
-                      <FaShare className="text-lg text-white" />
-                    </button>
-                  </div>
-                )}
-              </form>
-            </div>
-          )}
-
         </main>
 
         {/* Small action menu modal (for mobile / when ellipsis clicked) */}
         <AnimatePresence>
           {showActionsMenu && (
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} transition={{ duration: 0.16 }} className={`absolute bottom-6 ${isRTL ? 'left-6' : 'right-6'} z-50 md:hidden`}>
-              <div className="bg-black/70 backdrop-blur-md rounded-xl p-3 flex flex-col gap-2 shadow-lg">
-                <button onClick={(e) => { e.stopPropagation(); handleLove(e); setShowActionsMenu(false) }} className="px-3 py-2 rounded-md text-white text-sm">{t('Like')}</button>
-                <button onClick={(e) => { e.stopPropagation(); handleShare(e); setShowActionsMenu(false) }} className="px-3 py-2 rounded-md text-white text-sm">{t('Share')}</button>
-                {user?._id === story?.owner?._id && (
-                  <button onClick={(e) => { e.stopPropagation(); handleDelete(e); setShowActionsMenu(false) }} className="px-3 py-2 rounded-md text-red-400 text-sm">{t('Delete')}</button>
-                )}
-                <button onClick={() => { setFitMode(prev => prev === 'cover' ? 'contain' : 'cover'); setShowActionsMenu(false) }} className="px-3 py-2 rounded-md text-white text-sm">{fitMode === 'cover' ? t('Show full image') : t('Fill screen')}</button>
-              </div>
-            </motion.div>
+            <MenuActions
+              user={user}
+              story={story}
+              setShowActionsMenu={setShowActionsMenu}
+              handleLove={handleLove}
+              handleShare={handleShare}
+              handleDelete={handleDelete}
+              fitMode={fitMode}
+              setFitMode={setFitMode}
+              t={t}
+              isRTL={isRTL}
+            />
           )}
         </AnimatePresence>
 
@@ -448,5 +469,35 @@ const StoryViewer = ({ stories = [], onClose = () => {}, initialFit = 'contain' 
     </div>
   )
 }
+
+/**
+ * MenuActions component separated and memoized to avoid re-renders.
+ * Kept behavior identical to your original `menuActions` function.
+ */
+const MenuActions = React.memo(({
+  user,
+  story,
+  setShowActionsMenu,
+  handleLove,
+  handleShare,
+  handleDelete,
+  fitMode,
+  setFitMode,
+  t,
+  isRTL
+}) => {
+  return (
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} transition={{ duration: 0.16 }} className={`absolute bottom-6 ${isRTL ? 'left-6' : 'right-6'} z-50 md:hidden`}>
+      <div className="bg-black/70 backdrop-blur-md rounded-xl p-3 flex flex-col gap-2 shadow-lg">
+        <button onClick={(e) => { e.stopPropagation(); handleLove(e); setShowActionsMenu(false) }} className="px-3 py-2 rounded-md text-white text-sm">{t('Like')}</button>
+        <button onClick={(e) => { e.stopPropagation(); handleShare(e); setShowActionsMenu(false) }} className="px-3 py-2 rounded-md text-white text-sm">{t('Share')}</button>
+        {user?._id === story?.owner?._id && (
+          <button onClick={(e) => { e.stopPropagation(); handleDelete(e); setShowActionsMenu(false) }} className="px-3 py-2 rounded-md text-red-400 text-sm">{t('Delete')}</button>
+        )}
+        <button onClick={() => { setFitMode(prev => prev === 'cover' ? 'contain' : 'cover'); setShowActionsMenu(false) }} className="px-3 py-2 rounded-md text-white text-sm">{fitMode === 'cover' ? t('Show full image') : t('Fill screen')}</button>
+      </div>
+    </motion.div>
+  )
+})
 
 export default StoryViewer

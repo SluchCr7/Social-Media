@@ -84,7 +84,11 @@ const EditPostModal = ({ post, onClose }) => {
   if (!post) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4 backdrop-blur-sm bg-black/60">
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center px-4 backdrop-blur-sm bg-black/60"
+      onClick={onClose}
+    >
+      
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
         
         <AnimatePresence>

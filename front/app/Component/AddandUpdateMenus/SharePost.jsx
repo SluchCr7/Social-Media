@@ -34,6 +34,7 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          onClick={onClose}
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
