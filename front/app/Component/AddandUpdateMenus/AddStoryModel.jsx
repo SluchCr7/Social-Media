@@ -320,7 +320,6 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
                     </div>
                   )}
                   classNamePrefix="select"
-                  styles={customStyles}
                 />
               </div>
             )}
