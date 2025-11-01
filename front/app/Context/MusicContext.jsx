@@ -162,19 +162,18 @@ const likeMusic = useCallback(async (id) => {
   );
 
   const addListen = useCallback(async (musicId) => {
-      try {
-        const { data } = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/music/listen/${musicId}`,
-          {},
-          { headers: { Authorization: `Bearer ${user.token}` } }
-        );
-        // تحديث الموسيقى في الـ state
-        setMusic((prev) =>
-          prev.map((m) => (m._id === data._id ? data : m))
-        );
-        return data;
-      } catch (error) {
-        console.error('Error adding listen:', error);
-      }
+    try {
+      const { data } = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/music/listen/${musicId}`,
+        {},
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+      // تحديث الموسيقى في الـ state
+      setMusic((prev) =>
+        prev.map((m) => (m._id === data._id ? data : m))
+      );
+      return data;
+    } catch (error) {
+      console.error('Error adding listen:', error);
     }
   },[user])
   const shareMusicAsPost = useCallback(async (musicId, customText = '') => {
