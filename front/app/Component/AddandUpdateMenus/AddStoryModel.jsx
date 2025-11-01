@@ -17,6 +17,7 @@ import { useGetData } from '@/app/Custome/useGetData';
 import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
 
+// ✅ تحسينات كبيرة بدون حذف أي شيء
 const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
   const [storyText, setStoryText] = useState('');
   const [storyImage, setStoryImage] = useState(null);
@@ -56,8 +57,7 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
     [userData?.following]
   );
 
-
-  // 📷 Handlers — useCallback لتثبيتها
+  // 📷 Handlers
   const handleImageChange = useCallback(
     (e) => {
       const file = e.target.files?.[0];
@@ -158,7 +158,7 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ duration: 0.35 }}
-            className="relative w-[95%] max-w-lg rounded-3xl p-6 shadow-2xl transition-all 
+            className="relative w-[95%] max-w-lg max-h-[90vh] rounded-3xl p-6 shadow-2xl overflow-y-auto scroll-smooth scrollbar-thin scrollbar-thumb-lightMode-primary/60 dark:scrollbar-thumb-darkMode-primary/50 scrollbar-track-transparent
                        bg-lightMode-fg dark:bg-darkMode-fg border border-lightMode-fg dark:border-darkMode-fg
                        dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8),0_0_120px_-20px_rgba(76,111,255,0.1)] 
                        flex flex-col"
@@ -194,7 +194,7 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
             </AnimatePresence>
 
             {/* Header */}
-            <div className="flex justify-between items-center pb-4 border-b border-lightMode-border dark:border-darkMode-border/50">
+            <div className="sticky top-0 z-40 flex justify-between items-center pb-4 bg-lightMode-fg dark:bg-darkMode-fg border-b border-lightMode-border dark:border-darkMode-border/50">
               <h2 className="text-2xl font-extrabold text-lightMode-text dark:text-darkMode-text">
                 {t('Create Your Story')} 💬
               </h2>
