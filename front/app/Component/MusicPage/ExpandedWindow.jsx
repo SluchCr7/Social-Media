@@ -1,7 +1,7 @@
 'use client'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { 
   FaPlay, FaPause, FaStepForward, FaStepBackward, FaRandom, FaRedo, FaTimes, FaHeart, FaShareAlt 
 } from 'react-icons/fa'
