@@ -140,5 +140,5 @@ const CommentCard = memo(({ comment }) => {
     </motion.div>
   )
 })
-
+CommentCard.displayName = 'CommentCard'
 export default CommentCard

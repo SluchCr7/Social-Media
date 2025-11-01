@@ -96,5 +96,5 @@ const LoadingOverlay = memo(function LoadingOverlay({ isLoading, progress = null
     </AnimatePresence>
   );
 });
-
+LoadingOverlay.displayName = 'LoadingOverlay'
 export default LoadingOverlay;

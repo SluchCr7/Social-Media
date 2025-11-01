@@ -32,5 +32,5 @@ const PlayerHeader = memo(({ current, likeMusic,shareMusicAsPost, saveMusicInPla
     </div>
   )
 })
-
+PlayerHeader.displayName = 'PlayerHeader'
 export default PlayerHeader

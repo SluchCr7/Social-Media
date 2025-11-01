@@ -24,6 +24,7 @@ const LoadingOverlay = React.memo(() => (
     <p className="text-white text-sm font-medium tracking-wide">Sharing post...</p>
   </motion.div>
 ));
+LoadingOverlay.displayName = 'LoadingOverlay'
 
 const PostPreview = React.memo(({ post }) => {
   if (!post) return null;
@@ -237,3 +238,4 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
     </AnimatePresence>
   );
 }
+ShareModal.displayName = 'ShareModal'

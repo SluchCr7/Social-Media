@@ -77,6 +77,7 @@ const DashboardTab = React.memo(({
         </motion.div>
   )
 })
+DashboardTab.displayName = 'DashboardTab'
 
 const StatCard = React.memo(({ icon, title, value, color }) => {
   const { t } = useTranslation();
@@ -88,5 +89,6 @@ const StatCard = React.memo(({ icon, title, value, color }) => {
     </div>
   );
 });
+StatCard.displayName = 'StatCard'
 
 export default DashboardTab

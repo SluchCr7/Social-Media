@@ -88,5 +88,6 @@ const DesignReports = React.memo(({
     </div>
   )
 })
+DesignReports.displayName = 'DesignReports'
 
 export default DesignReports

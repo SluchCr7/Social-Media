@@ -52,33 +52,28 @@ const MenuFriends = memo(() => {
                 createdAt,
               } = userData;
 
-              const isFriend = useMemo(
-                () => following.includes(user?._id) && followers.includes(user?._id),
-                [following, followers, user?._id]
-              );
+              const isFriend = following.includes(user?._id) && followers.includes(user?._id);
 
-              const isNew = useMemo(() => {
+              const isNew = (() => {
                 if (!createdAt) return false;
                 const days = (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24);
                 return days < 7;
-              }, [createdAt]);
+              })();
 
               const myFollowing = Array.isArray(userProfile?.following)
                 ? userProfile.following
                 : [];
-              const mutualFriends = useMemo(
-                () => myFollowing.filter((id) => following.includes(id)),
-                [myFollowing, following]
-              );
+              const mutualFriends = myFollowing.filter((id) => following.includes(id));
 
-              const statusMessage = useMemo(() => {
+              const statusMessage = (() => {
                 if (isFriend) return t('You are friends');
                 if (isNew) return t('New here – welcome!');
                 if (mutualFriends.length > 0)
                   return `${mutualFriends.length} ${t('mutual friends')}`;
                 if (posts.length > 50) return t('Active member');
                 return t('Suggested for you');
-              }, [isFriend, isNew, mutualFriends, posts, t]);
+              })();
+
 
               return (
                 <motion.div
@@ -140,5 +135,6 @@ const MenuFriends = memo(() => {
     </motion.div>
   );
 });
+MenuFriends.displayName = 'MenuFriends'
 
 export default MenuFriends;

@@ -65,5 +65,6 @@ const HashtagsMenu = React.memo(() => {
     </div>
   );
 });
+HashtagsMenu.displayName = 'HashtagsMenu'
 
 export default HashtagsMenu;

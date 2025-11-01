@@ -59,5 +59,5 @@ const HighlightedComment = memo(({
         </div>
     )
 })
-
+HighlightedComment.displayName = 'HighlightedComment'
 export default HighlightedComment

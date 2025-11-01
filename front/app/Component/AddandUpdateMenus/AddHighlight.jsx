@@ -624,6 +624,6 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
     </AnimatePresence>
   );
 });
-
+AddHighlightMenu.displayName = 'AddHighlightMenu'
 export default AddHighlightMenu;
 

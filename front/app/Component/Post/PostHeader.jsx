@@ -87,5 +87,5 @@ const PostHeader = memo(({ post, user, isLogin, showMenu, setShowMenu, isCommuni
     </div>
   )
 })
-
+PostHeader.displayName = 'PostHeader'
 export default PostHeader

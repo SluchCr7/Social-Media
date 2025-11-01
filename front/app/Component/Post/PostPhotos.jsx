@@ -26,5 +26,5 @@ const PostPhotos = memo(({ photos = [], setImageView, postId }) => {
     </div>
   )
 })
-
+PostPhotos.displayName = 'PostPhotos'
 export default PostPhotos

@@ -163,5 +163,6 @@ const SearchResults = memo(({ searchResults, searchQuery, user, t, maxResults })
     </AnimatePresence>
   );
 });
+SearchResults.displayName = 'SearchResults'
 
 export default SearchResults;

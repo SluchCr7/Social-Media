@@ -425,3 +425,5 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
     </AnimatePresence>
   );
 })
+
+export default HighlightViewerModal

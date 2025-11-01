@@ -52,5 +52,5 @@ const PostMusicPlayer =memo(({ music }) => {
     </div>
   )
 })
-
+PostMusicPlayer.displayName = 'PostMusicPlayer'
 export default PostMusicPlayer

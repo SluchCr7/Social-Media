@@ -86,5 +86,5 @@ const LoginHistoryTimeline = memo(function LoginHistoryTimeline({ items = [] }) 
     </div>
   );
 });
-
+LoginHistoryTimeline.displayName = 'LoginHistoryTimeline'
 export default LoginHistoryTimeline;

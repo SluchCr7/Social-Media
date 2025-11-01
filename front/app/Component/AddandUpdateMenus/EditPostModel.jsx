@@ -287,5 +287,6 @@ const EditPostModal = memo(({ post, onClose }) => {
     </div>
   );
 });
+EditPostModal.displayName = 'EditPostModal'
 
 export default EditPostModal;

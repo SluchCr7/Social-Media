@@ -116,5 +116,6 @@ const EventDetailsModal = React.memo(({
     </div>
   )
 })
+EventDetailsModal.displayName = 'EventDetailsModal'
 
 export default EventDetailsModal

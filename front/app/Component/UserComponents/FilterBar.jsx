@@ -96,7 +96,7 @@ const FilterBar = memo(({ filters, setFilters, years }) => {
     </div>
   )
 })
-
+FilterBar.displayName = 'FilterBar'
 // 🧩 مكون فرعي ميمو أيضًا لتقليل إعادة التصيير
 const FilterSelect = memo(({ icon, value, onChange, options }) => (
   <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -118,5 +118,5 @@ const FilterSelect = memo(({ icon, value, onChange, options }) => (
     </select>
   </div>
 ))
-
+FilterSelect.displayName = 'FilterSelect'
 export default FilterBar

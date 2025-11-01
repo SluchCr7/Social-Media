@@ -323,5 +323,5 @@ const EditCommunityMenu = memo(({ community, onClose }) => {
     </div>
   );
 });
-
+EditCommunityMenu.displayName = 'EditCommunityMenu'
 export default EditCommunityMenu;

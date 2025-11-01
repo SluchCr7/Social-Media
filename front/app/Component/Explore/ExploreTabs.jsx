@@ -20,5 +20,6 @@ const ExploreTabs = React.memo(({ allTabs, activeTab, setActiveTab }) => {
         </div>
     );
 })
+ExploreTabs.displayName = 'ExploreTabs'
 
 export default ExploreTabs;

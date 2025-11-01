@@ -24,7 +24,5 @@ const SidebarNowPlaying = memo(({ current }) => {
   )
 })
 
-
-
-
+SidebarNowPlaying.displayName = 'SidebarNowPlaying'
 export default SidebarNowPlaying

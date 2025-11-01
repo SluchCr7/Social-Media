@@ -122,4 +122,5 @@ const AddEventModal = React.memo(({
   )
 })
 
+AddEventModal.displayName = 'AddEventModal'
 export default AddEventModal

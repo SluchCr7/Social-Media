@@ -140,6 +140,5 @@ const MenuUpComingEvents = () => {
     </LazyMotion>
   )
 }
-
 // 🧠 يمنع إعادة التصيير إلا إذا تغيرت الأحداث فعلاً
 export default memo(MenuUpComingEvents)

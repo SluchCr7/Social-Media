@@ -203,5 +203,6 @@ const CreateCommunityModal = React.memo(({ show, onClose, form, setForm, handleC
     </AnimatePresence>
   )
 })
+CreateCommunityModal.displayName = 'CreateCommunityModal'
 
 export default CreateCommunityModal

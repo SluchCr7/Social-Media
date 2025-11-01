@@ -55,5 +55,6 @@ const PhotosTabContent = ({ followingPhotos = [], t }) => {
     </div>
   );
 };
+PhotosTabContent.displayName = 'PhotosTabContent'
 
 export default memo(PhotosTabContent);

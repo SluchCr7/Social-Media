@@ -87,5 +87,5 @@ const PostLinks = memo(({ links }) => {
     </div>
   );
 });
-
+PostLinks.displayName = 'PostLinks'
 export default PostLinks;

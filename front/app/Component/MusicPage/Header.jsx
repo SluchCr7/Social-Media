@@ -25,5 +25,5 @@ const HeaderMusic = memo(({ search, setSearch, setOpenModel, userData }) => (
     </div>
   </header>
 ))
-
+HeaderMusic.displayName = 'HeaderMusic'
 export default HeaderMusic

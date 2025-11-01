@@ -31,5 +31,6 @@ const MobileSidebar = React.memo(({ isOpen, onClose , activeTab, setActiveTab })
     </div>
   );
 });
+MobileSidebar.displayName = 'MobileSidebar'
 
 export default MobileSidebar;

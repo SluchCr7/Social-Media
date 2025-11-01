@@ -58,6 +58,7 @@ const HashtagsTabContent = ({ topHashtags = [], t }) => {
 
   return <>{hashtagsList}</>;
 };
+HashtagsTabContent.displayName = 'HashtagsTabContent'
 
 // ✅ memo يمنع إعادة الرندر إلا إذا تغيّرت props فعلاً
 export default memo(HashtagsTabContent);

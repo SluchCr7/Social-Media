@@ -33,5 +33,5 @@ const RenderPostText = memo(({ text, mentions = [], hashtags = [], italic = fals
     </p>
   );
 });
-
+RenderPostText.displayName = 'RenderPostText'
 export default RenderPostText;

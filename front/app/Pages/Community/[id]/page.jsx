@@ -7,12 +7,12 @@ import Loading from '@/app/Component/Loading';
 import DasignCommunitySelect from './Dasign';
 
 // ✅ مكون الهيكل العظمي منفصل ومذكّر (memo)
-const SkeletonCover = React.memo(() => (
+const SkeletonCover = () => (
   <div className="animate-pulse">
     <div className="w-full h-48 bg-gray-200 rounded-b-xl" />
     <div className="-mt-12 ml-6 w-24 h-24 rounded-full bg-gray-200 border-4 border-white shadow-md" />
   </div>
-));
+);
 
 const Page = ({ params }) => {
   const id = params?.id;

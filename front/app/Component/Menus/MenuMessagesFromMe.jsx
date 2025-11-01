@@ -84,5 +84,5 @@ const MenuMessagesFromMe = memo(() => {
     </div>
   );
 });
-
+MenuMessagesFromMe.displayName = 'MenuMessagesFromMe'
 export default MenuMessagesFromMe;

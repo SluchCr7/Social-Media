@@ -164,6 +164,8 @@ const ReportRow = memo(({ report, type, openModal, callbacks, t }) => {
     </tr>
   );
 }, (prev, next) => prev.report === next.report && prev.type === next.type);
+ReportRow.displayName = 'ReportRow'
+
 
 const ReportsTable = ({ reports, type, openModal }) => {
   const { t } = useTranslation();

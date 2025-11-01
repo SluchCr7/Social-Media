@@ -234,5 +234,5 @@ const PostActions = React.memo(({ post, user, likePost, hahaPost, sharePost, sav
     </motion.div>
   );
 });
-
+PostActions.displayName = 'PostActions'
 export default PostActions;

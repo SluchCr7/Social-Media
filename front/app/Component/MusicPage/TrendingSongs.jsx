@@ -22,5 +22,5 @@ const TrendingSongs = memo(({ songs }) => {
     </div>
   )
 })
-
+TrendingSongs.displayName = 'TrendingSongs'
 export default TrendingSongs

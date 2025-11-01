@@ -18,5 +18,5 @@ const PostHashtags = memo(({
         </div>
   )
 })
-
+PostHashtags.displayName = 'PostHashtags'
 export default PostHashtags

@@ -48,5 +48,5 @@ const ConfirmModal = memo(({ open, onClose, onConfirm, title, message }) => {
   )
 })
 
-
+ConfirmModal.displayName = 'ConfirmModal'
 export default ConfirmModal

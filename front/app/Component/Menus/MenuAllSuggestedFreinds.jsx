@@ -145,5 +145,6 @@ const MenuAllSuggestedFriends = memo(() => {
     </AnimatePresence>
   );
 });
+MenuAllSuggestedFriends.displayName = 'MenuAllSuggestedFriends'
 
 export default MenuAllSuggestedFriends;

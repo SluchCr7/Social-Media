@@ -22,5 +22,5 @@ const PostImage = memo(({
           </div>
   )
 })
-
+PostImage.displayName = 'PostImage'
 export default PostImage

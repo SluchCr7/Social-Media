@@ -23,5 +23,5 @@ const SharedTitle = memo(({user, post, original}) => {
       </div>
   )
 })
-
+SharedTitle.displayName = 'SharedTitle'
 export default SharedTitle

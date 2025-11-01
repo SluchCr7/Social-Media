@@ -150,5 +150,5 @@ const AddNewReport = React.memo(function AddNewReport({
     </div>
   );
 });
-
+AddNewReport.displayName = 'AddNewReport'
 export default AddNewReport;

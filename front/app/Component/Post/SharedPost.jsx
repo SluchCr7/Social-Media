@@ -65,5 +65,5 @@ const SharedPost = memo(({
     </Link>
   )
 })
-
+SharedPost.displayName = 'SharedPost'
 export default SharedPost

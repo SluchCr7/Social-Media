@@ -29,6 +29,6 @@ const SidebarQueue = memo(({ queue, setTrack }) => {
   )
 })
 
-
+SidebarQueue.displayName = 'SidebarQueue'
 
 export default SidebarQueue

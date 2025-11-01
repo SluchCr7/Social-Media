@@ -78,5 +78,5 @@ const PostPrivacySelector = memo(({ onChange, defaultValue = 'public' }) => {
     </div>
   );
 });
-
+PostPrivacySelector.displayName = 'PostPrivacySelector'
 export default PostPrivacySelector;

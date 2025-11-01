@@ -120,5 +120,5 @@ const PlayerControls = memo(({
     </div>
   )
 })
-
+PlayerControls.displayName = 'PlayerControls'
 export default PlayerControls

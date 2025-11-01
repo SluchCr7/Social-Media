@@ -41,5 +41,6 @@ const AdminSidebar = React.memo(({ activeTab, setActiveTab }) => {
     </nav>
   );
 });
+AdminSidebar.displayName = 'AdminSidebar'
 
 export default AdminSidebar;

@@ -386,4 +386,5 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
   );
 });
 
+AddStoryModel.displayName = 'AddStoryModel'
 export default AddStoryModel;

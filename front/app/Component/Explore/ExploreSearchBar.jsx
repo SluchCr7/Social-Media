@@ -41,5 +41,6 @@ const ExploreSearchBar = React.memo(({ search, setSearch, placeholder = "Search.
         </motion.div>
     );
 })
+ExploreSearchBar.displayName = 'ExploreSearchBar'
 
 export default ExploreSearchBar;

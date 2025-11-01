@@ -28,7 +28,7 @@ const AnimatedCounter = memo(({ value = 0, duration = 0.8, className = '' }) => 
 
   return <div className={className}>{display}</div>
 })
-
+AnimatedCounter.displayName = 'AnimatedCounter'
 const StatBlock = memo(({ label, value = 0, onClick }) => (
   <div
     className="text-center cursor-pointer select-none"
@@ -38,5 +38,5 @@ const StatBlock = memo(({ label, value = 0, onClick }) => (
     <div className="text-sm text-gray-400">{label}</div>
   </div>
 ))
-
+StatBlock.displayName = 'StatBlock'
 export default StatBlock

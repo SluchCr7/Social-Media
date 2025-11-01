@@ -175,5 +175,6 @@ const UserManagePresintation = React.memo(({
     </div>
   );
 });
+UserManagePresintation.displayName = 'UserManagePresintation'
 
 export default UserManagePresintation;

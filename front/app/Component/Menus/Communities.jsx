@@ -103,5 +103,6 @@ const Communities = memo(() => {
     </div>
   );
 });
+Communities.displayName = 'Communities'
 
 export default Communities;

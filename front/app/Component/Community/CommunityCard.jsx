@@ -65,5 +65,6 @@ const CommunityCard = React.memo(({ comm }) => {
   )
 })
 
+CommunityCard.displayName = 'CommunityCard'
 
 export default CommunityCard

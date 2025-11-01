@@ -47,6 +47,6 @@ const NowPlaying = memo(({
     </div>
   </div>
 ))
-
+NowPlaying.displayName = 'NowPlaying'
 
 export default NowPlaying

@@ -32,7 +32,7 @@ const InfoItem = memo(({ icon, label, value, bgColor, textColor }) => (
     </div>
   </motion.div>
 ))
-
+InfoItem.displayName = 'InfoItem'
 const SocialIcon = memo(({ href, icon, bg, label }) => (
   <a
     href={href}
@@ -45,6 +45,7 @@ const SocialIcon = memo(({ href, icon, bg, label }) => (
     {icon}
   </a>
 ))
+SocialIcon.displayName = 'SocialIcon'
 
 // ===== Main Component =====
 const InfoAboutUser = memo(({ user }) => {
@@ -164,5 +165,5 @@ const InfoAboutUser = memo(({ user }) => {
     </motion.div>
   )
 })
-
+InfoAboutUser.displayName = 'InfoAboutUser'
 export default InfoAboutUser

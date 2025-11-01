@@ -130,5 +130,5 @@ const TrendingTabContent = memo(({ trendingToShow, timeFilter, setTimeFilter, t 
     </div>
   );
 });
-
+TrendingTabContent.displayName = 'TrendingTabContent'
 export default TrendingTabContent;

@@ -32,5 +32,5 @@ const SidebarPlaylist = memo(({ myPlaylist, setTrack }) => {
   )
 })
 
-
+SidebarPlaylist.displayName = 'SidebarPlaylist'
 export default SidebarPlaylist
