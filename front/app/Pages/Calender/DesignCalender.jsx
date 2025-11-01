@@ -19,7 +19,7 @@ import ShowAllEvents from '@/app/Component/AddandUpdateMenus/ShowAllEvents';
 import { useTranslation } from 'react-i18next';
 
 
-const DesignCalender = ({
+const DesignCalender = React.memo(({
     setNewEvent,newEvent,
     currentDate, days,isToday,  setSelectedDate, typeIcons,setCurrentDate, showDayEvents,selectedEvent, setSelectedEvent,
     setShowDayEvents,loading,events,typeColors,handleAddEvent,handleUpdateEvent,handleDeleteEvent,selectedDate
@@ -222,7 +222,7 @@ const DesignCalender = ({
       )}
     </div>
   )
-}
+})
 
 export default DesignCalender
 

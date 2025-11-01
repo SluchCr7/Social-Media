@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaHome,
@@ -17,6 +17,7 @@ export default function FloatingDrawer({ onOpenMusicPlayer }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [visible, setVisible] = useState(true);
+  const drawerRef = useRef(null); // ✅ المرجع للمكون
 
   // 📜 إخفاء الزر أثناء التمرير للأسفل
   useEffect(() => {
@@ -41,8 +42,26 @@ export default function FloatingDrawer({ onOpenMusicPlayer }) {
     { icon: <FaArrowUp />, color: 'from-yellow-500 to-orange-400', action: scrollToTop },
   ];
 
+  // 🧠 إغلاق القائمة عند الضغط خارجها
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (drawerRef.current && !drawerRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
   return (
     <div
+      ref={drawerRef} // ✅ أضف المرجع هنا
       className="fixed top-1/2 right-3 -translate-y-1/2 z-[100] 
                  flex items-center gap-3"
     >

@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 
 const Sluchits = ({ activeTab }) => {
   const { posts, isLoading, fetchPosts, hasMore, setPage, page, isLoadingPostCreated } = usePost();
-  const { user } = useAuth();
+  const { user , users } = useAuth();
   const { suggestedUsers } = useUser();
   const { communities } = useCommunity();
   const { userData, loading } = useGetData(user?._id);
@@ -94,15 +94,15 @@ const Sluchits = ({ activeTab }) => {
 
   // 🔹 فلترة المستخدمين المقترحين (تحسين منطق الفلترة)
   const filteredUsers = useMemo(() => {
-    if (!Array.isArray(suggestedUsers) || !userId) return [];
+    if (!Array.isArray(users) || !userId) return [];
     
-    return suggestedUsers.filter(u => {
+    return users.filter(u => {
       // 1. لا تظهر المستخدم إذا كان هو المستخدم الحالي
       if (u?._id?.toString() === userId) return false;
       // 2. لا تظهر المستخدم إذا كنت تتابعه بالفعل
       return !followingIds.has(u?._id?.toString());
     });
-  }, [suggestedUsers, followingIds, userId]); // تم تحديث التبعية
+  }, [users, followingIds, userId]); // تم تحديث التبعية
 
   // 🔹 فلترة المجتمعات المقترحة (تحسين منطق الفلترة)
   const filteredCommunities = useMemo(() => {
@@ -128,9 +128,8 @@ const Sluchits = ({ activeTab }) => {
     let userSuggestions = [...filteredUsers];
     let communitySuggestions = [...filteredCommunities];
     
-    // تحديد فترات زمنية لظهور الاقتراحات
-    const USER_INTERVAL = 8; // اقتراح مستخدم كل 8 منشورات
-    const COMMUNITY_INTERVAL = 15; // اقتراح مجتمع كل 15 منشور
+    const USER_INTERVAL = 10; 
+    const COMMUNITY_INTERVAL = 18; 
 
     filteredPosts.forEach((post, index) => {
       // إضافة المنشور

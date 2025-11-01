@@ -728,6 +728,11 @@
     "10. Contact Us": "10. التواصل معنا",
     "You can also contact us by mail at:": "يمكنك أيضاً الاتصال بنا عبر البريد على العنوان التالي:"
     ,"Translating" : "يتم الترجمه",
-    "Translate" : "ترجمه"
+    "Translate" : "ترجمه",
+    "My Communities" : "مجتمعاتي",
+    "Search stories..." : "ابحث عن الستوريز",
+    "No stories available" : "لا توجد ستوريز متوفرة",
+    "This will permanently delete the highlight and cannot be undone." : "هذه ستحذف الهايلايت ولن يمكنك اعادتها",
+    "Delete highlight?" : "حذف الهايلايت؟"
 }
 

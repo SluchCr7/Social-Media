@@ -1,16 +1,11 @@
 const mongoose = require('mongoose');
 const joi = require('joi');
+const User = require('./User'); // تأكد من المسار الصحيح لموديل المستخدم
 
 const PostSchema = new mongoose.Schema({
-  text: {
-    type: String,
-  },
-  Photos: {
-    type: Array,
-  },
-  Videos: {
-    type: Array,
-  },
+  text: String,
+  Photos: Array,
+  Videos: Array,
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -22,74 +17,30 @@ const PostSchema = new mongoose.Schema({
   saved: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   shares: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   views: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  
-  // ✅ مشاركة
-  originalPost: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Post',
-    default: null,
-  },
-  isShared: {
-    type: Boolean,
-    default: false,
-  },
-  
-  privacy: {
+  originalPost: { type: mongoose.Schema.Types.ObjectId, ref: 'Post', default: null },
+  isShared: { type: Boolean, default: false },
+  privacy: { type: String, enum: ['public', 'friends'], default: 'public' },
+  Hashtags: [String],
+  links: [{
     type: String,
-    enum: ['public', 'friends'],
-    default: 'public'
-  },
-
-  Hashtags: [
-    {
-      type: String,
-    },
-  ],
-
-  // ✅ روابط
-  links: [
-    {
-      type: String,
-      validate: {
-        validator: function (v) {
-          // يتحقق أن الرابط يبدأ بـ http أو https
-          return /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(v);
-        },
-        message: props => `${props.value} is not a valid URL`
-      }
+    validate: {
+      validator: v => /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(v),
+      message: props => `${props.value} is not a valid URL`
     }
-  ],
-
-  status: {
-    type: String,
-    enum: ["scheduled", "pending", "published", "failed"],
-    default: "published",
-  },
-
+  }],
+  status: { type: String, enum: ["scheduled", "pending", "published", "failed"], default: "published" },
   mentions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-
   community: { type: mongoose.Schema.Types.ObjectId, ref: 'Community', default: null },
-
-  isCommentOff: {
-    type: Boolean,
-    default: false
-  },
-  isContainWorst: {
-    type: Boolean,
-    default: false, 
-  },
-  music: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Music',
-    default: null
-  }
+  isCommentOff: { type: Boolean, default: false },
+  isContainWorst: { type: Boolean, default: false },
+  music: { type: mongoose.Schema.Types.ObjectId, ref: 'Music', default: null }
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
 });
 
-// Virtuals
+// ✅ Virtuals
 PostSchema.virtual("comments", {
   ref: "Comment",
   localField: "_id",
@@ -102,7 +53,35 @@ PostSchema.virtual("reports", {
   foreignField: "postId"
 });
 
-const Post = mongoose.model('Post', PostSchema);
+// ✅ بعد الحفظ (create أو save)
+PostSchema.post('save', async function (doc, next) {
+  try {
+    if (doc.isContainWorst && doc.owner) {
+      await User.findByIdAndUpdate(doc.owner, { $set: { isContainAdultContent: true } });
+    }
+    next();
+  } catch (err) {
+    console.error("Error updating user adult content flag after save:", err);
+    next(err);
+  }
+});
+
+// ✅ بعد التعديل (findOneAndUpdate)
+PostSchema.post('findOneAndUpdate', async function (doc, next) {
+  try {
+    if (!doc) return next();
+
+    // إذا تم تعيين isContainWorst إلى true
+    if (doc.isContainWorst && doc.owner) {
+      await User.findByIdAndUpdate(doc.owner, { $set: { isContainAdultContent: true } });
+    }
+
+    next();
+  } catch (err) {
+    console.error("Error updating user adult content flag after update:", err);
+    next(err);
+  }
+});
 
 // ✅ Joi Validation
 const ValidatePost = (post) => {
@@ -112,7 +91,6 @@ const ValidatePost = (post) => {
     community: joi.string().optional(),
     image: joi.any().optional(),
     mentions: joi.array().items(joi.string()).optional(),
-    // ✅ تحقق من الروابط
     links: joi.array().items(
       joi.string().uri().message("Invalid link format")
     ).optional()
@@ -120,4 +98,5 @@ const ValidatePost = (post) => {
   return schema.validate(post);
 };
 
+const Post = mongoose.model('Post', PostSchema);
 module.exports = { Post, ValidatePost };

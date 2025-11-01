@@ -1,5 +1,5 @@
 'use client';
-import React from "react";
+import React, { useMemo } from "react";
 import Image from "next/image";
 import { FiUserPlus, FiUserCheck } from "react-icons/fi";
 import { Users } from "lucide-react";
@@ -30,9 +30,9 @@ const SuggestionCard = ({ item, type, delay }) => {
     isUserType ? item.followers : item.members,
     userData?._id
   );
-  const isOwner = !isUserType && item?.owner?._id === userData?._id;
+  const isOwner =  useMemo(() => !isUserType && item?.owner?._id === userData?._id , [item, userData]);
 
-  const hrefPath = isUserType ? `/Pages/User/${item?._id}` : `/Pages/Community/${item?._id}`;
+  const hrefPath =  useMemo(() => isUserType ? `/Pages/User/${item?._id}` : `/Pages/Community/${item?._id}` , [item, isUserType]);
 
   return (
     <motion.div

@@ -1,10 +1,10 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import React from 'react';
+import React , {memo} from 'react';
 import { useTranslation } from 'react-i18next';
 
-const PostLinks = ({ links }) => {
+const PostLinks = memo(({ links }) => {
   const {t} = useTranslation()
   if (!links?.length) return null;
   return (
@@ -86,6 +86,6 @@ const PostLinks = ({ links }) => {
       })}
     </div>
   );
-};
+});
 
 export default PostLinks;

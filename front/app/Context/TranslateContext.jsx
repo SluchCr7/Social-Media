@@ -1,67 +1,78 @@
-'use client'
-import { createContext, useContext, useEffect, useState } from "react";
-import axios from "axios";
-import { useTranslation } from "react-i18next";
+'use client';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const TranslateContext = createContext();
+export const useTranslate = () => useContext(TranslateContext);
 
 export const TranslateContextProvider = ({ children }) => {
-  const {i18n} = useTranslation()
+  const { i18n } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState(i18n.language || 'en');
-  const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language)
-  // ✅ تحديث اللغة في i18next عند تغيير المستخدم
-  const handleLanguageChange = (langCode) => {
-    i18n.changeLanguage(langCode);
-    setLanguage(langCode);
-    localStorage.setItem('language', langCode);
 
-    // ✅ ضبط الاتجاه تلقائيًا حسب اللغة
-    if (['ar', 'fa', 'he', 'ur'].includes(langCode)) {
-      document.documentElement.dir = 'rtl';
-      document.documentElement.lang = langCode;
-    } else {
-      document.documentElement.dir = 'ltr';
-      document.documentElement.lang = langCode;
-    }
-  };
+  // ✅ هل اللغة الحالية تكتب من اليمين إلى اليسار؟
+  const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language);
 
-  // ✅ تحميل اللغة المخزنة مسبقًا (لو المستخدم اختارها قبل كده)
+  // ✅ دالة مساعدة لضبط الاتجاه في <html>
+  const applyDirection = useCallback((langCode) => {
+    const isRightToLeft = ['ar', 'fa', 'he', 'ur'].includes(langCode);
+    document.documentElement.dir = isRightToLeft ? 'rtl' : 'ltr';
+    document.documentElement.lang = langCode;
+  }, []);
+
+  // ✅ عند تغيير اللغة يدويًا
+  const handleLanguageChange = useCallback(
+    (langCode) => {
+      if (!langCode) return;
+      i18n.changeLanguage(langCode);
+      setLanguage(langCode);
+      localStorage.setItem('language', langCode);
+      applyDirection(langCode);
+    },
+    [i18n, applyDirection]
+  );
+
+  // ✅ تحميل اللغة المخزّنة مسبقًا مرة واحدة فقط
   useEffect(() => {
     const savedLang = localStorage.getItem('language') || i18n.language || 'en';
     i18n.changeLanguage(savedLang);
     setLanguage(savedLang);
+    applyDirection(savedLang);
+  }, [i18n, applyDirection]);
 
-    if (['ar', 'fa', 'he', 'ur'].includes(savedLang)) {
-      document.documentElement.dir = 'rtl';
-      document.documentElement.lang = savedLang;
-    } else {
-      document.documentElement.dir = 'ltr';
-      document.documentElement.lang = savedLang;
-    }
-  }, []);
-  const translate = async (text, targetLang = "ar") => {
-    if (!text) return "";
-    setLoading(true);
-    try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/translate`, {
-        text,
-        targetLang,
-      });
-      return res.data.translatedText;
-    } catch (err) {
-      console.error(err);
-      return text;
-    } finally {
-      setLoading(false);
-    }
-  };
+  // ✅ دالة الترجمة
+  const translate = useCallback(
+    async (text, targetLang = language || 'ar') => {
+      if (!text) return '';
+      setLoading(true);
+      try {
+        const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/translate`, {
+          text,
+          targetLang,
+        });
+        return res.data.translatedText;
+      } catch (err) {
+        console.error('Translation error:', err);
+        return text; // fallback
+      } finally {
+        setLoading(false);
+      }
+    },
+    [language]
+  );
 
   return (
-    <TranslateContext.Provider value={{ translate,isRTL, loading , language, handleLanguageChange }}>
+    <TranslateContext.Provider
+      value={{
+        translate,
+        isRTL,
+        loading,
+        language,
+        handleLanguageChange,
+      }}
+    >
       {children}
     </TranslateContext.Provider>
   );
 };
-
-export const useTranslate = () => useContext(TranslateContext);

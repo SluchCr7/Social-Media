@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, Menu, ChevronRight } from 'lucide-react';
 
-export default function PrivacyPolicyPresentation({
+function PrivacyPolicyPresentation({
   t, sectionsData, openIds, toggleSection, goTo,
   mobileTocOpen, setMobileTocOpen, sectionRefs, activeId, scaleX,
 }) {
@@ -147,3 +147,5 @@ export default function PrivacyPolicyPresentation({
     </div>
   );
 }
+
+export default memo(PrivacyPolicyPresentation)

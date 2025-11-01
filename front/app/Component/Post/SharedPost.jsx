@@ -1,4 +1,5 @@
-import React from 'react'
+'use client'
+import React, { memo } from 'react'
 import { HiBadgeCheck } from 'react-icons/hi'
 import UserHoverCard from '../UserHoverCard'
 import RenderPostText from './RenderText'
@@ -8,7 +9,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { formatRelativeTime } from '@/app/utils/FormatDataCreatedAt'
 
-const SharedPost = ({
+const SharedPost = memo(({
     original,
     user,
     setImageView
@@ -63,6 +64,6 @@ const SharedPost = ({
         <PostLinks links={original?.links}/>
     </Link>
   )
-}
+})
 
 export default SharedPost

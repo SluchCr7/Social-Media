@@ -1,10 +1,8 @@
-// ملف: Explore/ExploreSearchBar.jsx
-
 import React from 'react';
 import { FiSearch, FiX } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
-const ExploreSearchBar = ({ search, setSearch, placeholder = "Search..." }) => {
+const ExploreSearchBar = React.memo(({ search, setSearch, placeholder = "Search..." }) => {
     return (
         <motion.div 
             initial={{ opacity: 0, y: -5 }}
@@ -42,6 +40,6 @@ const ExploreSearchBar = ({ search, setSearch, placeholder = "Search..." }) => {
             )}
         </motion.div>
     );
-}
+})
 
 export default ExploreSearchBar;

@@ -1,5 +1,5 @@
 'use client';
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IoClose, IoImage, IoMusicalNotes } from "react-icons/io5";
 import Image from "next/image";
@@ -20,21 +20,28 @@ const AddMusicModal = ({ isOpen, onClose }) => {
   const [tags, setTags] = useState("");
   const [loading, setLoading] = useState(false);
   const { uploadMusic } = useMusic();
-  const {t} = useTranslation()
-  const handleCoverChange = (e) => {
-    const file = e.target.files[0];
+  const { t } = useTranslation();
+
+  // ✅ تحسين الأداء: تثبيت دوال المعالجة
+  const handleCoverChange = useCallback((e) => {
+    const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
     }
-  };
+  }, []);
 
-  const handleAudioChange = (e) => {
-    const file = e.target.files[0];
+  const handleAudioChange = useCallback((e) => {
+    const file = e.target.files?.[0];
     if (file) setAudioFile(file);
-  };
+  }, []);
 
-  const handleSubmit = async (e) => {
+  const handleClearCover = useCallback(() => {
+    setImageFile(null);
+    setImagePreview(null);
+  }, []);
+
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     if (!title || !artist || !audioFile) return;
 
@@ -47,6 +54,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
     formData.append("audio", audioFile);
     if (imageFile) formData.append("image", imageFile);
     formData.append("language", language);
+
     if (tags.trim()) {
       const tagsArray = tags.split(",").map(t => t.trim()).filter(Boolean);
       tagsArray.forEach(tag => formData.append("tags[]", tag));
@@ -55,7 +63,14 @@ const AddMusicModal = ({ isOpen, onClose }) => {
     await uploadMusic(formData);
     setLoading(false);
     onClose();
-  };
+  }, [title, artist, album, genre, audioFile, imageFile, language, tags, uploadMusic, onClose]);
+
+  // ✅ useMemo لتثبيت بيانات الحقول لتقليل إعادة التصيير
+  const formFields = useMemo(() => ([
+    { label: "Title", value: title, set: setTitle, placeholder: "Enter song title" },
+    { label: "Artist", value: artist, set: setArtist, placeholder: "Enter artist name" },
+    { label: "Album (Optional)", value: album, set: setAlbum, placeholder: "Enter album name" },
+  ]), [title, artist, album]);
 
   return (
     <AnimatePresence>
@@ -74,6 +89,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
             className="relative w-full max-w-2xl mx-4 my-10 rounded-3xl bg-gradient-to-br from-gray-900/60 to-black/80 border border-white/10 p-8 shadow-[0_0_40px_rgba(59,130,246,0.25)] 
                        max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent"
           >
+            {/* Close Button */}
             <button
               onClick={onClose}
               className="absolute top-4 right-4 text-white/70 hover:text-red-400 transition"
@@ -81,10 +97,12 @@ const AddMusicModal = ({ isOpen, onClose }) => {
               <IoClose size={26} />
             </button>
 
+            {/* Title */}
             <h2 className="text-center text-2xl sm:text-3xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
               🎵 {t("Add New Music")}
             </h2>
 
+            {/* Form */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
               {/* Cover Upload */}
               <div className="flex flex-col items-center text-center">
@@ -110,10 +128,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
                         </label>
                         <button
                           type="button"
-                          onClick={() => {
-                            setImageFile(null);
-                            setImagePreview(null);
-                          }}
+                          onClick={handleClearCover}
                           className="px-3 py-1.5 bg-red-500 text-white text-sm rounded-lg font-medium hover:bg-red-600 transition"
                         >
                           {t("Clear")}
@@ -136,11 +151,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
               </div>
 
               {/* Inputs */}
-              {[
-                { label: "Title", value: title, set: setTitle, placeholder: "Enter song title" },
-                { label: "Artist", value: artist, set: setArtist, placeholder: "Enter artist name" },
-                { label: "Album (Optional)", value: album, set: setAlbum, placeholder: "Enter album name" },
-              ].map((f, i) => (
+              {formFields.map((f, i) => (
                 <div key={i}>
                   <label className="block text-sm font-medium text-gray-300 mb-1">{t(f.label)}</label>
                   <input
@@ -217,7 +228,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
                 )}
               </div>
 
-              {/* Submit */}
+              {/* Submit Button */}
               <motion.button
                 type="submit"
                 whileHover={{ scale: 1.05 }}

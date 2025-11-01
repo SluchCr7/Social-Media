@@ -14,12 +14,13 @@ import Image from "next/image"
 import PostSkeleton from "@/app/Skeletons/PostSkeleton"
 import HighlightsBar from "../Highlights" // تم جلب المكون
 import { useHighlights } from "@/app/Context/HighlightContext" // تم جلب الـ Context
-
+import { memo } from "react"
 // Imports للمكونات الجديدة (يجب عليك إنشاء هذه الملفات أو التأكد من مساراتها)
 // أنا أُضيفها هنا لتبسيط التنظيم، افترض أنها موجودة في نفس المسار أو مسار مُعَرَّف
 import HighlightViewerModal from '../HighlightView'; // جلب مُكون العرض
 import AddHighlightMenu from '../AddandUpdateMenus/AddHighlight'; // جلب مُكون الإضافة 
 import StickyProfileBar from "./StickyProfileBar"
+import AdultContentWarning from "../AdultAlert"
 
 
 const ProfileLayout = ({
@@ -93,7 +94,11 @@ const ProfileLayout = ({
           renderVisitorMenu={!isOwner ? renderMenu : undefined}
         />
       </div>
-      
+      {
+        !isOwner && user?.isContainAdultContent && (
+          <AdultContentWarning />
+        )
+      }
       {/* ⚡ Highlights Bar - تم إلغاء التعليق عنه */}
       <HighlightsBar
         highlights={user?.highlights}
@@ -156,4 +161,4 @@ const ProfileLayout = ({
   )
 }
 
-export default ProfileLayout
+export default memo(ProfileLayout)

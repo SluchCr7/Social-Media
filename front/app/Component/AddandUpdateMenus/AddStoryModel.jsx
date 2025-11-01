@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import {
   IoClose,
   IoImage,
@@ -7,7 +7,7 @@ import {
   IoCamera,
   IoCheckmarkCircleOutline,
   IoCloudUploadOutline,
-  IoShareSocialOutline, // أيقونة جديدة للـ Publish
+  IoShareSocialOutline,
 } from 'react-icons/io5';
 import { motion, AnimatePresence } from 'framer-motion';
 import Select from 'react-select';
@@ -16,29 +16,8 @@ import { useAuth } from '../../Context/AuthContext';
 import { useGetData } from '@/app/Custome/useGetData';
 import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
-// 🎨 ألوان الثيم الجديدة: Depth & Clarity
-const newColors = {
-  lightMode: {
-    bg: '#f4f7f9', // خلفية عامة
-    fg: '#ffffff', // خلفية البطاقة (Modal)
-    primary: '#1e40af', // ازرق عميق (Primary Button)
-    accent: '#f97316', // برتقالي (Accent)
-    text: '#1f2937', // نص داكن
-    textSoft: '#6b7280', // نص خفيف
-    border: '#e5e7eb',
-  },
-  darkMode: {
-    bg: '#0b0f14',
-    fg: '#141a21',
-    primary: '#4c6fff', // ازرق كهربائي
-    accent: '#ff9900', // ذهبي نيون
-    text: '#e2e8f0', // نص فاتح
-    textSoft: '#9ca3af',
-    border: '#2e3a47',
-  },
-};
 
-const AddStoryModel = ({ setIsStory, isStory }) => {
+const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
   const [storyText, setStoryText] = useState('');
   const [storyImage, setStoryImage] = useState(null);
   const [error, setError] = useState('');
@@ -48,23 +27,25 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
   const [success, setSuccess] = useState(false);
   const [collaborators, setCollaborators] = useState([]);
 
-  // السياقات Hooks
   const { addNewStory } = useStory();
   const { user } = useAuth();
   const { userData } = useGetData(user?._id);
   const { t } = useTranslation();
 
-  // تحميل وحفظ المسودة
+  // 🧠 حفظ المسودة بذكاء (Throttle الكتابة)
   useEffect(() => {
     const saved = localStorage.getItem('storyDraft');
     if (saved) setStoryText(saved);
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('storyDraft', storyText);
+    const timeout = setTimeout(() => {
+      localStorage.setItem('storyDraft', storyText);
+    }, 400);
+    return () => clearTimeout(timeout);
   }, [storyText]);
 
-  // خيارات المتعاونين (Collaborators)
+  // 🧩 Memoized Collaborator Options
   const collaboratorOptions = useMemo(
     () =>
       (userData?.following || []).map((f) => ({
@@ -75,24 +56,35 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
     [userData?.following]
   );
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+
+  // 📷 Handlers — useCallback لتثبيتها
+  const handleImageChange = useCallback(
+    (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
         setError(t('Image size should not exceed 5MB.'));
         return;
       }
       setStoryImage(file);
       setError('');
-    }
-  };
+    },
+    [t]
+  );
 
-  const handleTextChange = (e) => {
+  const handleTextChange = useCallback((e) => {
     setStoryText(e.target.value);
     setError('');
-  };
+  }, []);
 
-  const simulateUploadProgress = async () => {
+  const clearInput = useCallback(() => {
+    setStoryImage(null);
+    setStoryText('');
+    setError('');
+    setCollaborators([]);
+  }, []);
+
+  const simulateUploadProgress = useCallback(() => {
     setIsUploading(true);
     setUploadProgress(0);
     return new Promise((resolve) => {
@@ -111,9 +103,9 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
         }
       }, 300);
     });
-  };
+  }, []);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!storyText.trim() && !storyImage) {
       setError(t('Please add text or an image to share your story'));
       return;
@@ -125,102 +117,29 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
 
     if (storyImage) await simulateUploadProgress();
 
-    const storyData = {
-      text: storyText.trim() || '',
-      file: storyImage || null,
-      collaborators: collaborators.length ? collaborators.map((c) => c.value) : [],
-    };
-
-    // افتراض نجاح الإرسال لغرض العرض
     try {
-        await addNewStory(storyData); // استدعاء API الفعلي
-        setSuccess(true);
-        clearInput();
-        localStorage.removeItem('storyDraft');
-        setTimeout(() => setIsStory(false), 2000);
-    } catch (apiError) {
-        setError(t('Failed to publish story. Please try again.'));
-        setIsLoading(false);
+      await addNewStory({
+        text: storyText.trim(),
+        file: storyImage || null,
+        collaborators: collaborators.map((c) => c.value),
+      });
+      setSuccess(true);
+      clearInput();
+      localStorage.removeItem('storyDraft');
+      setTimeout(() => setIsStory(false), 2000);
+    } catch {
+      setError(t('Failed to publish story. Please try again.'));
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
-  };
+  }, [storyText, storyImage, collaborators, simulateUploadProgress, addNewStory, clearInput, t, setIsStory]);
 
-  const clearInput = () => {
-    setStoryImage(null);
-    setStoryText('');
-    setError('');
-    setCollaborators([]);
-  };
-
-  // تصميم الـ Select component (React-Select) ليتناسب مع Dark/Light Mode
-  const customStyles = {
-    control: (base) => ({
-      ...base,
-      backgroundColor: newColors.darkMode.fg,
-      borderColor: newColors.darkMode.border,
-      borderRadius: '1rem',
-      color: newColors.darkMode.text,
-      padding: '4px',
-      boxShadow: 'none',
-      '&:hover': {
-        borderColor: newColors.darkMode.primary,
-      },
-      // Light mode adjustments for control
-      '@media (prefers-color-scheme: light)': {
-        backgroundColor: newColors.lightMode.bg,
-        borderColor: newColors.lightMode.border,
-        color: newColors.lightMode.text,
-        '&:hover': {
-          borderColor: newColors.lightMode.primary,
-        },
-      },
-    }),
-    menu: (base) => ({
-      ...base,
-      backgroundColor: newColors.darkMode.fg,
-      borderRadius: '1rem',
-      boxShadow: '0 4px 10px rgba(0,0,0,0.5)',
-      // Light mode adjustments for menu
-      '@media (prefers-color-scheme: light)': {
-        backgroundColor: newColors.lightMode.fg,
-        boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-      },
-    }),
-    option: (base, state) => ({
-      ...base,
-      backgroundColor: state.isSelected
-        ? newColors.darkMode.primary
-        : state.isFocused
-        ? newColors.darkMode.border
-        : newColors.darkMode.fg,
-      color: newColors.darkMode.text,
-      // Light mode adjustments for option
-      '@media (prefers-color-scheme: light)': {
-        backgroundColor: state.isSelected
-          ? newColors.lightMode.primary
-          : state.isFocused
-          ? newColors.lightMode.border
-          : newColors.lightMode.fg,
-        color: state.isSelected ? '#ffffff' : newColors.lightMode.text,
-      },
-      cursor: 'pointer',
-    }),
-    multiValue: (base) => ({
-        ...base,
-        backgroundColor: newColors.darkMode.primary,
-        color: '#ffffff',
-        // Light mode adjustments for multiValue
-        '@media (prefers-color-scheme: light)': {
-            backgroundColor: newColors.lightMode.primary,
-        },
-    }),
-    multiValueLabel: (base) => ({
-        ...base,
-        color: '#ffffff',
-    }),
-  };
-
+  // 🧹 تنظيف URL.createObjectURL لمنع التسرب
+  useEffect(() => {
+    if (!storyImage) return;
+    const imgURL = URL.createObjectURL(storyImage);
+    return () => URL.revokeObjectURL(imgURL);
+  }, [storyImage]);
 
   return (
     <AnimatePresence>
@@ -230,7 +149,6 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          // خلفية معتمة وبلور أقوى
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xl"
           onClick={(e) => e.target === e.currentTarget && setIsStory(false)}
         >
@@ -240,11 +158,10 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ duration: 0.35 }}
-            // تصميم البطاقة الجديد: Depth & Clarity
-            className={`relative w-[95%] max-w-lg rounded-3xl p-6 shadow-2xl transition-all 
-                        bg-lightMode-fg dark:bg-darkMode-fg border border-lightMode-fg dark:border-darkMode-fg
-                        dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8),0_0_120px_-20px_rgba(76,111,255,0.1)] 
-                        flex flex-col`}
+            className="relative w-[95%] max-w-lg rounded-3xl p-6 shadow-2xl transition-all 
+                       bg-lightMode-fg dark:bg-darkMode-fg border border-lightMode-fg dark:border-darkMode-fg
+                       dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8),0_0_120px_-20px_rgba(76,111,255,0.1)] 
+                       flex flex-col"
           >
             {/* Upload overlay */}
             <AnimatePresence>
@@ -258,15 +175,14 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
                   <motion.div
                     animate={{ scale: [1, 1.1, 1] }}
                     transition={{ repeat: Infinity, duration: 1.2 }}
-                    className="text-darkMode-primary dark:text-darkMode-primary text-5xl mb-4"
+                    className="text-lightMode-text dark:text-darkMode-text text-5xl mb-4"
                   >
                     <IoCloudUploadOutline />
                   </motion.div>
-
                   <p className="text-gray-200 font-medium mb-2">{t('Uploading Story')}</p>
                   <div className="w-3/4 h-1.5 bg-darkMode-border rounded-full overflow-hidden mt-2">
                     <motion.div
-                      className="h-full bg-darkMode-primary rounded-full"
+                      className="h-full bg-lightMode-bg dark:bg-darkMode-bg rounded-full"
                       initial={{ width: '0%' }}
                       animate={{ width: `${uploadProgress}%` }}
                       transition={{ ease: 'easeInOut', duration: 0.3 }}
@@ -292,7 +208,7 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
               </motion.button>
             </div>
 
-            {/* Story Image Preview */}
+            {/* Image Preview */}
             {storyImage && (
               <motion.div
                 key="imagePreview"
@@ -303,7 +219,7 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
                 <motion.img
                   src={URL.createObjectURL(storyImage)}
                   alt="Story preview"
-                  className="w-full h-72 object-cover" // ارتفاع أكبر
+                  className="w-full h-72 object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                 <motion.button
@@ -320,51 +236,63 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
               </motion.div>
             )}
 
-            {/* 🌟 New Image Drop Zone - يظهر فقط إذا لم تكن هناك صورة */}
+            {/* Image Drop Zone */}
             {!storyImage && (
-                <label className={`w-full h-40 flex flex-col items-center justify-center border-2 border-dashed rounded-2xl cursor-pointer transition-colors mt-4
-                                  ${error ? 'border-red-500' : 'border-lightMode-primary/50 dark:border-darkMode-primary/50 hover:border-lightMode-accent dark:hover:border-darkMode-accent'} 
-                                  bg-lightMode-bg dark:bg-darkMode-bg/50`}>
-                    <IoImage className="text-4xl text-lightMode-textSoft dark:text-darkMode-textSoft mb-2" />
-                    <p className="font-semibold text-lightMode-text dark:text-darkMode-text">{t('Drag and drop an image or click to upload')}</p>
-                    <p className="text-sm text-lightMode-textSoft dark:text-darkMode-textSoft mt-1">JPEG, PNG up to 5MB</p>
-                    <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-                </label>
+              <label
+                className={`w-full h-40 flex flex-col items-center justify-center border-2 border-dashed rounded-2xl cursor-pointer transition-colors mt-4
+                ${error ? 'border-red-500' : 'border-lightMode-primary/50 dark:border-darkMode-primary/50 hover:border-lightMode-accent dark:hover:border-darkMode-accent'} 
+                bg-lightMode-bg dark:bg-darkMode-bg/50`}
+              >
+                <IoImage className="text-4xl text-lightMode-textSoft dark:text-darkMode-textSoft mb-2" />
+                <p className="font-semibold text-lightMode-text dark:text-darkMode-text">
+                  {t('Drag and drop an image or click to upload')}
+                </p>
+                <p className="text-sm text-lightMode-textSoft dark:text-darkMode-textSoft mt-1">
+                  JPEG, PNG up to 5MB
+                </p>
+                <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+              </label>
             )}
 
-            {/* Text Input & Collaborators */}
+            {/* Text Input */}
             <div className="relative flex flex-col mt-4">
-                <motion.textarea
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    value={storyText}
-                    onChange={handleTextChange}
-                    placeholder={t('What is the story about? (300 characters max)...')} 
-                    rows={storyImage ? 2 : 4} // تقليل الارتفاع عند وجود صورة
-                    maxLength={300}
-                    // تصميم الـ Textarea الجديد
-                    className="w-full p-4 rounded-xl bg-lightMode-bg dark:bg-darkMode-bg/50 text-lightMode-text dark:text-darkMode-text placeholder-lightMode-textSoft dark:placeholder-darkMode-textSoft italic border border-lightMode-border dark:border-darkMode-border focus:outline-none focus:ring-2 focus:ring-lightMode-primary dark:focus:ring-darkMode-primary shadow-inner transition resize-none"
-                />
-                
-                {/* Character Counter & Mini-Toolbar */}
-                <div className='flex justify-between items-center pt-2'>
-                    <span className="text-xs text-lightMode-textSoft dark:text-darkMode-textSoft">
-                        {storyText.length}/300
-                    </span>
-                    
-                    {/* Mini-Toolbar below Text Area - لإضافة الكاميرا والصورة بشكل ثانوي */}
-                    <div className="flex gap-2">
-                        <label title={t('Take Photo')} className="p-2 bg-lightMode-accent/10 dark:bg-darkMode-accent/20 text-lightMode-accent dark:text-darkMode-accent rounded-full cursor-pointer hover:opacity-80 transition">
-                            <IoCamera className="text-xl" />
-                            <input type="file" accept="image/*" capture="camera" onChange={handleImageChange} className="hidden" />
-                        </label>
-                        <label title={t('Upload from Gallery')} className="p-2 bg-lightMode-primary/10 dark:bg-darkMode-primary/20 text-lightMode-primary dark:text-darkMode-primary rounded-full cursor-pointer hover:opacity-80 transition">
-                            <IoImage className="text-xl" />
-                            <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-                        </label>
-                    </div>
+              <motion.textarea
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                value={storyText}
+                onChange={handleTextChange}
+                placeholder={t('What is the story about? (300 characters max)...')}
+                rows={storyImage ? 2 : 4}
+                maxLength={300}
+                className="w-full p-4 rounded-xl bg-lightMode-bg dark:bg-darkMode-bg/50 text-lightMode-text dark:text-darkMode-text placeholder-lightMode-textSoft dark:placeholder-darkMode-textSoft italic border border-lightMode-border dark:border-darkMode-border focus:outline-none focus:ring-2 focus:ring-lightMode-primary dark:focus:ring-darkMode-primary shadow-inner transition resize-none"
+              />
+              <div className="flex justify-between items-center pt-2">
+                <span className="text-xs text-lightMode-textSoft dark:text-darkMode-textSoft">
+                  {storyText.length}/300
+                </span>
+                <div className="flex gap-2">
+                  <label
+                    title={t('Take Photo')}
+                    className="p-2 bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text2 dark:text-darkMode-text2 rounded-full cursor-pointer hover:opacity-80 transition"
+                  >
+                    <IoCamera className="text-xl" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="camera"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </label>
+                  <label
+                    title={t('Upload from Gallery')}
+                    className="p-2 bg-lightMode-bg/10 dark:bg-darkMode-bg/20 text-lightMode-fg dark:text-darkMode-fg rounded-full cursor-pointer hover:opacity-80 transition"
+                  >
+                    <IoImage className="text-xl" />
+                    <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                  </label>
                 </div>
-
+              </div>
             </div>
 
             {/* Collaborators */}
@@ -381,80 +309,81 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
                   placeholder={t('Select followers to collaborate with...')}
                   formatOptionLabel={(option) => (
                     <div className="flex items-center gap-2">
-                      <Image width={500} height={500} src={option.avatar} alt="" className="w-6 h-6 rounded-full object-cover" />
+                      <Image
+                        width={500}
+                        height={500}
+                        src={option.avatar}
+                        alt=""
+                        className="w-6 h-6 rounded-full object-cover"
+                      />
                       <span>{option.label}</span>
                     </div>
                   )}
                   classNamePrefix="select"
-                  styles={customStyles} // استخدام الستايلات المخصصة
+                  styles={customStyles}
                 />
               </div>
             )}
-            
-            {/* Error Message */}
+
+            {/* Error */}
             {error && (
-                <motion.p 
-                    initial={{ opacity: 0, y: -10 }} 
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-red-500 text-sm mt-3 font-medium text-center"
-                >
-                    {error}
-                </motion.p>
+              <motion.p
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-red-500 text-sm mt-3 font-medium text-center"
+              >
+                {error}
+              </motion.p>
             )}
 
-            {/* Submit Button */}
+            {/* Submit */}
             <div className="pt-6">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSubmit}
                 disabled={isLoading || isUploading || (!storyText.trim() && !storyImage)}
-                // تصميم الزر الجديد يركز على لون Primary
                 className={`w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl font-extrabold text-lightMode-fg dark:text-darkMode-fg text-lg transition-all duration-300
-                          bg-lightMode-bg hover:bg-lightMode-bg/90 dark:bg-darkMode-bg dark:hover:bg-darkMode-bg/90 
-                          shadow-xl ${
-                            (isLoading || isUploading || (!storyText.trim() && !storyImage)) ? 'opacity-50 cursor-not-allowed shadow-none' : ''
-                          }`}
+                bg-lightMode-bg hover:bg-lightMode-bg/90 dark:bg-darkMode-bg dark:hover:bg-darkMode-bg/90 
+                  shadow-xl ${
+                  isLoading || isUploading || (!storyText.trim() && !storyImage)
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'hover:shadow-2xl cursor-pointer'
+                }`}
               >
-                {isLoading || isUploading ? (
+                {isLoading ? (
+                  <motion.span
+                    className="w-6 h-6 border-3 border-t-transparent border-lightMode-primary dark:border-darkMode-primary rounded-full animate-spin"
+                  ></motion.span>
+                ) : success ? (
                   <>
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-                      className="border-t-2 border-white w-5 h-5 rounded-full"
-                    />
-                    <span>{t('Posting your story')}...</span>
+                    <IoCheckmarkCircleOutline className="text-2xl text-green-500" />
+                    {t('Story Published!')}
                   </>
                 ) : (
                   <>
-                    <IoShareSocialOutline className="text-xl" /> {t('Publish Story')}
+                    <IoShareSocialOutline className="text-2xl text-lightMode-primary dark:text-darkMode-primary" />
+                    {t('Share Story')}
                   </>
                 )}
               </motion.button>
             </div>
 
-            {/* Success Animation */}
-            <AnimatePresence>
-              {success && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute inset-0 bg-lightMode-fg dark:bg-darkMode-fg/95 flex flex-col items-center justify-center text-green-500 rounded-3xl"
-                >
-                  <IoCheckmarkCircleOutline className="text-7xl mb-4" />
-                  <p className="font-bold text-xl text-lightMode-text dark:text-darkMode-text">{t('Story shared successfully!')}</p>
-                  <p className="text-sm text-lightMode-textSoft dark:text-darkMode-textSoft mt-1">{t('Redirecting to feed...')}</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* Clear Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={clearInput}
+              disabled={isLoading || isUploading}
+              className="mt-3 w-full py-2 text-sm text-lightMode-textSoft dark:text-darkMode-textSoft hover:text-lightMode-text dark:hover:text-darkMode-text transition font-medium"
+            >
+              {t('Clear All')}
+            </motion.button>
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
   );
-};
+});
 
 export default AddStoryModel;
-
-

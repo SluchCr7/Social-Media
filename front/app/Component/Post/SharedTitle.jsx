@@ -1,9 +1,9 @@
 'use client';
 import Link from 'next/link'
-import React from 'react'
+import React, { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-const SharedTitle = ({user, post, original}) => {
+const SharedTitle = memo(({user, post, original}) => {
   const {t} = useTranslation()
   return (
         <div className="text-sm text-gray-800 dark:text-gray-200 italic">
@@ -22,6 +22,6 @@ const SharedTitle = ({user, post, original}) => {
           </Link>
       </div>
   )
-}
+})
 
 export default SharedTitle

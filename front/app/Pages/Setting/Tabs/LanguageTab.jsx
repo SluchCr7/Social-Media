@@ -1,12 +1,12 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import { MdLanguage } from 'react-icons/md';
 import { availableLanguages } from '@/app/utils/Data';
 import LanguageCard from '@/app/Component/Setting/LanguageCard';
 import { useTranslation } from 'react-i18next';
 
-const LanguageTab = ({
+const LanguageTab = memo(({
     language, handleLanguageChange
 }) => {
   const {t} = useTranslation()
@@ -45,6 +45,6 @@ const LanguageTab = ({
       </div>
     </motion.section>
   );
-};
+});
 
 export default LanguageTab;

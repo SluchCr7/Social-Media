@@ -1,5 +1,6 @@
 'use client';
-import { useState } from "react";
+import React from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri";
 import { FaSpinner, FaCamera } from "react-icons/fa";
@@ -13,7 +14,6 @@ import { useAuth } from "@/app/Context/AuthContext";
 import { useUser } from "@/app/Context/UserContext";
 import { useTranslation } from "react-i18next";
 import { MdInfo } from "react-icons/md";
-
 const ProfileHeader = ({
   user: profileUser,
   isOwner = false,
@@ -35,17 +35,34 @@ const ProfileHeader = ({
 }) => {
   const { user: authUser } = useAuth();
   const { loading } = useUser();
-const {t} = useTranslation()
-  const handleClick = async () => {
+  const { t } = useTranslation();
+
+  // ✅ Object URL preview
+  const [preview, setPreview] = useState(null);
+  useEffect(() => {
+    if (!image) return;
+    const objectUrl = URL.createObjectURL(image);
+    setPreview(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [image]);
+
+  const handleClick = useCallback(async () => {
     try {
       if (isFollowing) await onUnfollow?.();
       else await onFollow?.();
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [isFollowing, onFollow, onUnfollow]);
 
-  const hideActions = !isOwner && authUser?._id === profileUser?._id;
+  const hideActions = useMemo(() => !isOwner && authUser?._id === profileUser?._id, [isOwner, authUser, profileUser]);
+
+  // ✅ Progress percentage memoized
+  const levelPercent = useMemo(() => {
+    const points = profileUser?.userLevelPoints || 0;
+    const next = profileUser?.nextLevelPoints || 500;
+    return Math.min((points / next) * 100, 100);
+  }, [profileUser]);
 
   return (
     <div className="flex flex-col lg:flex-row items-center lg:items-start gap-5 sm:gap-8 w-full max-w-5xl mx-auto px-3 sm:px-4 md:px-8">
@@ -61,11 +78,7 @@ const {t} = useTranslation()
       >
         <div className="w-full h-full rounded-full overflow-hidden relative group">
           <Image
-            src={
-              image
-                ? URL.createObjectURL(image)
-                : profileUser?.profilePhoto?.url || "/default-profile.png"
-            }
+            src={preview || profileUser?.profilePhoto?.url || "/default-profile.png"}
             alt="Profile photo"
             fill
             className="object-cover rounded-full"
@@ -146,26 +159,14 @@ const {t} = useTranslation()
           <div className="w-full h-3 bg-gray-300 dark:bg-gray-700 rounded-full mt-2 overflow-hidden shadow-inner">
             <motion.div
               initial={{ width: 0 }}
-              animate={{
-                width: `${Math.min(
-                  ((profileUser?.userLevelPoints || 0) /
-                    (profileUser?.nextLevelPoints || 500)) *
-                    100,
-                  100
-                )}%`,
-              }}
+              animate={{ width: `${levelPercent}%` }}
               transition={{ duration: 1.2 }}
               className="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 rounded-full"
             />
           </div>
           <span className="block text-xs text-gray-500 mt-1 text-right">
             {t("Next level in")}{" "}
-            {Math.max(
-              (profileUser?.nextLevelPoints || 500) -
-                (profileUser?.userLevelPoints || 0),
-              0
-            )}{" "}
-            XP
+            {Math.max((profileUser?.nextLevelPoints || 500) - (profileUser?.userLevelPoints || 0), 0)} XP
           </span>
         </div>
 
@@ -178,30 +179,18 @@ const {t} = useTranslation()
         {!hideActions && (
           <>
             {isOwner ? (
-              // <div className="flex flex-wrap gap-2 sm:gap-3 mt-3 justify-center lg:justify-start">
-              //   <motion.button
-              //     whileTap={{ scale: 0.96 }}
-              //     onClick={onAddStory}
-              //     className="flex items-center gap-2 border px-4 sm:px-6 py-2 rounded-lg text-sm font-medium hover:bg-lightMode-hover dark:hover:bg-darkMode-hover hover:shadow transition"
-              //   >
-              //     <IoAdd /> {t("Add Story")}
-              //   </motion.button>
-              // </div>
-              <>
-              </>
+              <></>
             ) : (
               <div className="flex gap-2 sm:gap-3 mt-3 justify-center lg:justify-start">
                 <button
                   onClick={handleClick}
                   disabled={loading}
                   className={`flex items-center gap-2 px-4 sm:px-6 py-2 rounded-lg border text-sm sm:text-base font-medium transition-all duration-300
-                    ${
-                      isFollowing
-                        ? "text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
-                        : "text-green-600 border-green-600 hover:bg-green-600 hover:text-white"
+                    ${isFollowing
+                      ? "text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
+                      : "text-green-600 border-green-600 hover:bg-green-600 hover:text-white"
                     }
-                    ${loading ? "opacity-70 cursor-not-allowed" : ""}
-                  `}
+                    ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
                 >
                   {loading ? (
                     <>
@@ -241,4 +230,4 @@ const {t} = useTranslation()
   );
 };
 
-export default ProfileHeader;
+export default React.memo(ProfileHeader);

@@ -1,4 +1,6 @@
+'use client';
 import axios from 'axios';
+import { useCallback } from 'react';
 export const useCommunityRequests = ({
     user,
     communities,
@@ -6,7 +8,7 @@ export const useCommunityRequests = ({
     config,
     showAlert
 }) => {
-      const sendJoinRequest = async (id) => {
+  const sendJoinRequest = useCallback(async (id) => {
     try {
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/join-request/${id}`,
@@ -23,11 +25,9 @@ export const useCommunityRequests = ({
       console.error(err);
       showAlert('Failed to send join request.');
     }
-  };
+  }, [user, communities, setCommunities, config, showAlert]);
 
-  // 📌 الموافقة على طلب انضمام
-// 📌 الموافقة على طلب انضمام
-  const approveJoinRequest = async (communityId, userId) => {
+  const approveJoinRequest = useCallback(async (communityId, userId) => {
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/join-request/approve/${communityId}/${userId}`,
@@ -49,10 +49,10 @@ export const useCommunityRequests = ({
       console.error(err);
       showAlert('Failed to approve join request.');
     }
-  };
+  }, [user, communities, setCommunities, config, showAlert]);
 
 // 📌 رفض طلب انضمام
-  const rejectJoinRequest = async (communityId, userId) => {
+  const rejectJoinRequest = useCallback( async (communityId, userId) => {
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/join-request/reject/${communityId}/${userId}`,
@@ -65,11 +65,11 @@ export const useCommunityRequests = ({
       console.error(err);
       showAlert('Failed to reject join request.');
     }
-  };
+  }, [user, communities, setCommunities, config, showAlert]);
 
 
   // 📌 الانضمام أو المغادرة
-  const joinToCommunity = async (id) => {
+  const joinToCommunity = useCallback(async (id) => {
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/join/${id}`,
@@ -95,7 +95,7 @@ export const useCommunityRequests = ({
       console.error(err);
       showAlert('Error joining community.');
     }
-  };
+  }, [user, communities, setCommunities, config, showAlert]);
     return {
         sendJoinRequest,
         approveJoinRequest,

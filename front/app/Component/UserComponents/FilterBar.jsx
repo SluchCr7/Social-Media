@@ -5,11 +5,35 @@ import { MdOutlineDateRange } from "react-icons/md"
 import { IoMdRefresh } from "react-icons/io"
 import { months } from "@/app/utils/Data"
 import { useTranslation } from "react-i18next"
-const FilterBar = ({ filters, setFilters, years }) => {
-  const resetFilters = () => {
+import { memo, useCallback, useMemo } from "react"
+
+const FilterBar = memo(({ filters, setFilters, years }) => {
+  const { t } = useTranslation()
+
+  // ✅ استخدم useCallback لتثبيت الدوال (ما تتغير إلا عند الحاجة)
+  const handleChange = useCallback((key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }))
+  }, [setFilters])
+
+  const resetFilters = useCallback(() => {
     setFilters({ year: "all", month: "all", sort: "latest" })
-  }
-  const {t} = useTranslation()
+  }, [setFilters])
+
+  // ✅ استخدم useMemo لتجنب إعادة بناء عناصر القوائم كل مرة
+  const yearOptions = useMemo(
+    () => years.map(y => (
+      <option key={y} value={y}>{y}</option>
+    )),
+    [years]
+  )
+
+  const monthOptions = useMemo(
+    () => months.map(({ name, value }, i) => (
+      <option key={i + 1} value={value}>{name}</option>
+    )),
+    []
+  )
+
   return (
     <div
       className="
@@ -20,72 +44,38 @@ const FilterBar = ({ filters, setFilters, years }) => {
       "
     >
       {/* اختيار السنة */}
-      <div className="flex items-center gap-2 w-full sm:w-auto">
-        <MdOutlineDateRange className="text-lightMode-text2 dark:text-gray-400 shrink-0 text-lg" />
-        <select
-          value={filters.year}
-          onChange={(e) => setFilters(prev => ({ ...prev, year: e.target.value }))}
-          className="
-            flex-1 sm:flex-none w-full sm:w-auto px-4 py-2 rounded-xl border
-            text-xs sm:text-sm font-medium
-            bg-lightMode-bg dark:bg-darkMode-bg
-            border-lightMode-text/10 dark:border-darkMode-text/20
-            text-lightMode-text2 dark:text-gray-200
-            focus:ring-2 focus:ring-lightMode-text dark:focus:ring-darkMode-text
-            transition
-          "
-        >
-          <option value="all">{t("All Years")}</option>
-          {years.map((y) => (
-            <option key={y} value={y}>{y}</option>
-          ))}
-        </select>
-      </div>
+      <FilterSelect
+        icon={<MdOutlineDateRange />}
+        value={filters.year}
+        onChange={e => handleChange("year", e.target.value)}
+        options={[
+          <option key="all" value="all">{t("All Years")}</option>,
+          ...yearOptions
+        ]}
+      />
 
       {/* اختيار الشهر */}
-      <div className="flex items-center gap-2 w-full sm:w-auto">
-        <MdOutlineDateRange className="text-lightMode-text2 dark:text-gray-400 shrink-0 text-lg" />
-        <select
-          value={filters.month}
-          onChange={(e) => setFilters(prev => ({ ...prev, month: e.target.value }))}
-          className="
-            flex-1 sm:flex-none w-full sm:w-auto px-4 py-2 rounded-xl border
-            text-xs sm:text-sm font-medium
-            bg-lightMode-bg dark:bg-darkMode-bg
-            border-lightMode-text/10 dark:border-darkMode-text/20
-            text-lightMode-text2 dark:text-gray-200
-            focus:ring-2 focus:ring-lightMode-text dark:focus:ring-darkMode-text
-            transition
-          "
-        >
-          <option value="all">{t("All Months")}</option>
-          {months.map(({name , value}, i) => (
-            <option key={i + 1} value={value}>{name}</option>
-          ))}
-        </select>
-      </div>
+      <FilterSelect
+        icon={<MdOutlineDateRange />}
+        value={filters.month}
+        onChange={e => handleChange("month", e.target.value)}
+        options={[
+          <option key="all" value="all">{t("All Months")}</option>,
+          ...monthOptions
+        ]}
+      />
 
       {/* الترتيب */}
-      <div className="flex items-center gap-2 w-full sm:w-auto">
-        <FaSortAmountDown className="text-lightMode-text2 dark:text-gray-400 shrink-0 text-lg" />
-        <select
-          value={filters.sort}
-          onChange={(e) => setFilters(prev => ({ ...prev, sort: e.target.value }))}
-          className="
-            flex-1 sm:flex-none w-full sm:w-auto px-4 py-2 rounded-xl border
-            text-xs sm:text-sm font-medium
-            bg-lightMode-bg dark:bg-darkMode-bg
-            border-lightMode-text/10 dark:border-darkMode-text/20
-            text-lightMode-text2 dark:text-gray-200
-            focus:ring-2 focus:ring-lightMode-text dark:focus:ring-darkMode-text
-            transition
-          "
-        >
-          <option value="latest">🆕 {t("Latest")}</option>
-          <option value="mostLiked">❤️ {t("Most Liked")}</option>
-          <option value="mostCommented">💬 {t("Most Commented")}</option>
-        </select>
-      </div>
+      <FilterSelect
+        icon={<FaSortAmountDown />}
+        value={filters.sort}
+        onChange={e => handleChange("sort", e.target.value)}
+        options={[
+          <option key="latest" value="latest">🆕 {t("Latest")}</option>,
+          <option key="mostLiked" value="mostLiked">❤️ {t("Most Liked")}</option>,
+          <option key="mostCommented" value="mostCommented">💬 {t("Most Commented")}</option>
+        ]}
+      />
 
       {/* زر Reset */}
       <button
@@ -105,6 +95,28 @@ const FilterBar = ({ filters, setFilters, years }) => {
       </button>
     </div>
   )
-}
+})
+
+// 🧩 مكون فرعي ميمو أيضًا لتقليل إعادة التصيير
+const FilterSelect = memo(({ icon, value, onChange, options }) => (
+  <div className="flex items-center gap-2 w-full sm:w-auto">
+    <span className="text-lightMode-text2 dark:text-gray-400 shrink-0 text-lg">{icon}</span>
+    <select
+      value={value}
+      onChange={onChange}
+      className="
+        flex-1 sm:flex-none w-full sm:w-auto px-4 py-2 rounded-xl border
+        text-xs sm:text-sm font-medium
+        bg-lightMode-bg dark:bg-darkMode-bg
+        border-lightMode-text/10 dark:border-darkMode-text/20
+        text-lightMode-text2 dark:text-gray-200
+        focus:ring-2 focus:ring-lightMode-text dark:focus:ring-darkMode-text
+        transition
+      "
+    >
+      {options}
+    </select>
+  </div>
+))
 
 export default FilterBar

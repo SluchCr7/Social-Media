@@ -13,14 +13,14 @@ const { verifyToken, verifyAdmin } = require('../Middelwares/verifyToken');
 route.post('/add', verifyToken, addNewReport);
 
 // 📋 Get all reports (Admin only)
-route.get('/', verifyToken, getReports);
+route.get('/', verifyAdmin, getReports);
 
 // 🗑 Delete report (Admin only)
-route.delete('/delete/:id', verifyToken,  deleteReport);
+route.delete('/delete/:id', verifyAdmin,  deleteReport);
 
 // 🔄 Update report status (Admin only)
-route.patch('/status/:id', verifyToken, updateReportStatus);
+route.patch('/status/:id', verifyAdmin, updateReportStatus);
 
 // 🗑 Clear all reports (Admin only)
-route.delete('/clear', verifyToken, verifyAdmin, clearAllReports);
+route.delete('/clear', verifyAdmin, verifyAdmin, clearAllReports);
 module.exports = route;

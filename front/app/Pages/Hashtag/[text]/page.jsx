@@ -1,7 +1,7 @@
 'use client'
 import SluchitEntry from '@/app/Component/SluchitEntry'
 import { usePost } from '@/app/Context/PostContext'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FaHashtag } from 'react-icons/fa'
 
@@ -10,10 +10,17 @@ const Page = ({ params }) => {
   const { posts } = usePost()
   const text = params.text
   const {t} = useTranslation()
+  const filteredPosts = useMemo(() => {
+    if (!Array.isArray(posts)) return []
+    return posts.filter((post) => 
+      Array.isArray(post?.Hashtags) && post.Hashtags.includes(text)
+    )
+  }, [posts, text])
+
+  // ✅ تحديث الحالة فقط عند التغيير الحقيقي (لتقليل rerenders)
   useEffect(() => {
-    const filteredPosts = posts.filter((post) => post.Hashtags.includes(text))
     setPostsRelated(filteredPosts)
-  }, [text, posts])
+  }, [filteredPosts])
 
   return (
     <div className="w-full px-4 md:px-8 py-8 min-h-screen bg-lightMode-bg dark:bg-darkMode-bg transition-colors duration-300">
@@ -74,4 +81,4 @@ const Page = ({ params }) => {
   )
 }
 
-export default Page
+export default React.memo(Page)

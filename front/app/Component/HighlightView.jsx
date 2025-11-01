@@ -1,18 +1,30 @@
 'use client';
-
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+  memo,
+} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaPlus, FaTrash } from 'react-icons/fa';
 import Image from 'next/image';
 import clsx from 'clsx';
 import { useHighlights } from '@/app/Context/HighlightContext';
 import { useTranslate } from '../Context/TranslateContext';
+import { useTranslation } from 'react-i18next';
 
-export default function HighlightViewerModal({ highlight, onClose, allStories = [] }) {
+// ✅ مكون رئيسي مع تحسين الأداء
+const HighlightViewerModal = memo(function HighlightViewerModal({
+  highlight,
+  onClose,
+  allStories = [],
+}) {
   const { isRTL } = useTranslate();
   const { addStoryToHighlight, deleteHighlight } = useHighlights();
-
-  const stories = highlight?.stories || [];
+  const {t} = useTranslation()
+  const stories = useMemo(() => highlight?.stories || [], [highlight]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -22,44 +34,51 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
 
   const rafRef = useRef(null);
   const lastTimeRef = useRef(null);
-  const viewerRef = useRef(null);
   const touchStartX = useRef(null);
 
   const STORY_DURATION_MS = 7000;
 
-  // ✅ Helper: get photo url
+  // ✅ صورة القصة
   const getPhoto = useCallback((story) => {
     if (!story) return '/placeholder.jpg';
     return Array.isArray(story.Photo) ? story.Photo[0] : story.Photo;
   }, []);
 
-  // ✅ Preload images
+  // ✅ Preload الصور مرة واحدة فقط
   const imageCache = useRef(new Map());
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    stories.forEach((s) => {
+    if (!stories.length || typeof window === 'undefined') return;
+    for (const s of stories) {
       const src = getPhoto(s);
       if (!imageCache.current.has(src)) {
-        const img = new window.Image();
+        const img = new Image();
         img.src = src;
         imageCache.current.set(src, img);
       }
-    });
+    }
   }, [stories, getPhoto]);
 
-  // ✅ Filter available stories
-  const availableStories = useMemo(() => {
+  // ✅ حساب القصص المتاحة مرة واحدة فقط
+  const filteredAvailable = useMemo(() => {
     const excluded = new Set(stories.map((s) => s._id));
-    return allStories.filter((s) => !excluded.has(s._id));
-  }, [allStories, stories]);
+    return allStories
+      .filter((s) => !excluded.has(s._id))
+      .filter((s) => {
+        if (!search) return true;
+        return (s.text || '').toLowerCase().includes(search.toLowerCase());
+      });
+  }, [allStories, stories, search]);
 
-  const filteredAvailable = availableStories.filter((s) => {
-    if (!search) return true;
-    const text = (s.text || '').toLowerCase();
-    return text.includes(search.toLowerCase());
-  });
+  // ✅ الانتقال بين القصص
+  const next = useCallback(() => {
+    setCurrentIndex((i) => (i < stories.length - 1 ? i + 1 : (onClose(), i)));
+  }, [stories.length, onClose]);
 
-  // ✅ Progress loop
+  const prev = useCallback(() => {
+    setCurrentIndex((i) => (i > 0 ? i - 1 : 0));
+  }, []);
+
+  // ✅ تقدم القصة (progress)
   useEffect(() => {
     if (!stories.length) return;
 
@@ -69,39 +88,31 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
         rafRef.current = requestAnimationFrame(tick);
         return;
       }
-
       if (lastTimeRef.current == null) lastTimeRef.current = now;
       const elapsed = now - lastTimeRef.current;
       const percent = Math.min(100, (elapsed / STORY_DURATION_MS) * 100 + (progress || 0));
 
       setProgress(percent);
-
       if (percent >= 100) {
-        if (currentIndex < stories.length - 1) {
-          setCurrentIndex((i) => i + 1);
-          setProgress(0);
-          lastTimeRef.current = now;
-        } else {
+        setCurrentIndex((i) => {
+          if (i < stories.length - 1) return i + 1;
           onClose();
-        }
+          return i;
+        });
+        setProgress(0);
+        lastTimeRef.current = now;
       }
-
       rafRef.current = requestAnimationFrame(tick);
     };
 
     lastTimeRef.current = null;
     rafRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-      lastTimeRef.current = null;
-    };
-  }, [currentIndex, isPaused, stories.length]);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [currentIndex, isPaused, stories.length, onClose]);
 
   useEffect(() => setProgress(0), [currentIndex, stories.length]);
 
-  // ✅ Keyboard navigation
+  // ✅ تنقل عبر الكيبورد
   useEffect(() => {
     const handler = (e) => {
       if (e.key === 'ArrowRight') return isRTL ? prev() : next();
@@ -114,51 +125,47 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [isRTL, currentIndex, stories.length]);
+  }, [isRTL, next, prev, onClose]);
 
-  const next = useCallback(() => {
-    if (currentIndex < stories.length - 1) setCurrentIndex((i) => i + 1);
-    else onClose();
-  }, [currentIndex, stories.length, onClose]);
-
-  const prev = useCallback(() => {
-    if (currentIndex > 0) setCurrentIndex((i) => i - 1);
-  }, [currentIndex]);
-
-  // ✅ Gestures
-  const handleTouchStart = (e) => {
+  // ✅ الإيماءات
+  const handleTouchStart = useCallback((e) => {
     touchStartX.current = e.touches?.[0]?.clientX ?? null;
     setIsPaused(true);
-  };
-  const handleTouchEnd = (e) => {
-    const endX = e.changedTouches?.[0]?.clientX ?? null;
-    if (touchStartX.current == null || endX == null) return setIsPaused(false);
-    const diff = endX - touchStartX.current;
-    if (diff > 60) (isRTL ? next() : prev());
-    if (diff < -60) (isRTL ? prev() : next());
-    touchStartX.current = null;
-    setIsPaused(false);
-  };
+  }, []);
 
-  const handleMouseDown = () => setIsPaused(true);
-  const handleMouseUp = () => setIsPaused(false);
+  const handleTouchEnd = useCallback(
+    (e) => {
+      const endX = e.changedTouches?.[0]?.clientX ?? null;
+      if (touchStartX.current == null || endX == null) return setIsPaused(false);
+      const diff = endX - touchStartX.current;
+      if (diff > 60) (isRTL ? next() : prev());
+      if (diff < -60) (isRTL ? prev() : next());
+      touchStartX.current = null;
+      setIsPaused(false);
+    },
+    [isRTL, next, prev]
+  );
 
-  const handleAddStory = async (storyId) => {
-    await addStoryToHighlight(highlight._id, storyId);
-    setShowMenu(false);
-  };
+  const handleMouseDown = useCallback(() => setIsPaused(true), []);
+  const handleMouseUp = useCallback(() => setIsPaused(false), []);
 
-  const handleDeleteHighlight = async () => {
+  // ✅ عمليات التفاعل
+  const handleAddStory = useCallback(
+    async (storyId) => {
+      await addStoryToHighlight(highlight._id, storyId);
+      setShowMenu(false);
+    },
+    [addStoryToHighlight, highlight?._id]
+  );
+
+  const handleDeleteHighlight = useCallback(async () => {
     await deleteHighlight(highlight._id);
     setConfirmDeleteOpen(false);
     onClose();
-  };
-  
+  }, [deleteHighlight, highlight?._id, onClose]);
+
   const currentStory = stories[currentIndex];
   const currentPhoto = getPhoto(currentStory);
-  useEffect(()=>{
-    console.log(currentPhoto)
-  },[currentPhoto])
 
   if (!highlight) return null;
   return (
@@ -198,7 +205,7 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
                 aria-expanded={showMenu}
                 className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm transition"
               >
-                <FaPlus /> <span className="hidden sm:inline">Add story</span>
+                <FaPlus /> <span className="hidden sm:inline">{t("Add story")}</span>
               </button>
 
               <button
@@ -363,7 +370,7 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search stories..."
+                  placeholder={t("Search stories...")}
                   className="flex-1 bg-white/5 placeholder:text-white/40 rounded-xl px-3 py-2 text-white text-sm outline-none focus:ring-1 focus:ring-white/30"
                 />
                 <button onClick={() => setShowMenu(false)} className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm">Close</button>
@@ -386,7 +393,7 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
                     </div>
                   ))
                 ) : (
-                  <p className="text-xs text-white/60 text-center py-6">No stories available</p>
+                  <p className="text-xs text-white/60 text-center py-6">{t("No stories available")}</p>
                 )}
               </div>
             </motion.aside>
@@ -403,8 +410,8 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
                 exit={{ scale: 0.95, opacity: 0 }}
                 className="w-full max-w-md p-6 rounded-2xl bg-black/90 border border-white/10 shadow-2xl backdrop-blur-md"
               >
-                <h4 className="text-white text-lg font-semibold mb-2">Delete highlight?</h4>
-                <p className="text-sm text-white/80 mb-4">This will permanently delete the highlight and cannot be undone.</p>
+                <h4 className="text-white text-lg font-semibold mb-2">{t("Delete highlight?")}</h4>
+                <p className="text-sm text-white/80 mb-4">{t("This will permanently delete the highlight and cannot be undone.")}</p>
                 <div className="flex gap-3 justify-end">
                   <button onClick={() => setConfirmDeleteOpen(false)} className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm transition">Cancel</button>
                   <button onClick={handleDeleteHighlight} className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm transition">Delete</button>
@@ -417,4 +424,4 @@ export default function HighlightViewerModal({ highlight, onClose, allStories = 
       </motion.div>
     </AnimatePresence>
   );
-}
+})

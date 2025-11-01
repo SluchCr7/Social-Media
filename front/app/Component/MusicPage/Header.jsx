@@ -1,8 +1,9 @@
 import Link from 'next/link'
-import React from 'react'
+import React, { memo } from 'react'
 import { FaSearch } from 'react-icons/fa'
 
-const HeaderMusic = ({ search, setSearch, setOpenModel, userData }) => (
+
+const HeaderMusic = memo(({ search, setSearch, setOpenModel, userData }) => (
   <header className="sticky top-0 z-40 backdrop-blur-md bg-white/70 dark:bg-black/40 border-b border-gray-200 dark:border-gray-800">
     <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
       <div className="flex items-center gap-3">
@@ -23,6 +24,6 @@ const HeaderMusic = ({ search, setSearch, setOpenModel, userData }) => (
       </div>
     </div>
   </header>
-)
+))
 
 export default HeaderMusic

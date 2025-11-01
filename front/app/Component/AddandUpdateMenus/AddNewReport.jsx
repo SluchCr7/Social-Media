@@ -1,56 +1,79 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useReport } from '../../Context/ReportContext';
 import { IoClose } from 'react-icons/io5';
 import { reasons } from '@/app/utils/Data';
 import { useTranslation } from 'react-i18next';
-const AddNewReport = ({
+
+const AddNewReport = React.memo(function AddNewReport({
   targetId,
   reportedOnType = "post", // "post", "comment", "user"
   onClose,
   title = "Report Item"
-}) => {
+}) {
   const { addReport } = useReport();
   const [reason, setReason] = useState('');
   const [details, setDetails] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const {t} = useTranslation()
+  const { t } = useTranslation();
 
+  const tSelectReason = useMemo(() => t("Select a reason..."), [t]);
+  const tSubmitReport = useMemo(() => t("Submit Report"), [t]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const reasonOptions = useMemo(
+    () =>
+      reasons.map((r, idx) => (
+        <option key={idx} value={r.value}>
+          {r.label}
+        </option>
+      )),
+    []
+  );
 
-    if (!reason) {
-      setErrorMsg('⚠️ Please select a reason for the report.');
-      return;
-    }
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
 
-    setLoading(true);
-    setErrorMsg('');
+      if (!reason) {
+        setErrorMsg('⚠️ Please select a reason for the report.');
+        return;
+      }
 
-    try {
-      await addReport({
-        reportedOnType,
-        targetId,
-        text: details || reason,
-        reason
-      });
+      setLoading(true);
+      setErrorMsg('');
 
-      setReason('');
-      setDetails('');
-      onClose?.();
-    } catch (err) {
-      setErrorMsg(err?.response?.data?.message || '❌ Failed to send report.');
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        await addReport({
+          reportedOnType,
+          targetId,
+          text: details || reason,
+          reason,
+        });
+
+        setReason('');
+        setDetails('');
+        onClose?.();
+      } catch (err) {
+        setErrorMsg(err?.response?.data?.message || '❌ Failed to send report.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [reason, details, addReport, reportedOnType, targetId, onClose]
+  );
+
+  const handleBackdropClick = useCallback(
+    (e) => {
+      if (e.target === e.currentTarget) onClose?.();
+    },
+    [onClose]
+  );
 
   return (
     <div
       className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center"
-      onClick={(e) => e.target === e.currentTarget && onClose?.()}
+      onClick={handleBackdropClick}
     >
       <div
         className="bg-lightMode-bg dark:bg-darkMode-bg
@@ -85,12 +108,8 @@ const AddNewReport = ({
             value={reason}
             onChange={(e) => setReason(e.target.value)}
           >
-            <option value="">{t("Select a reason...")}</option>
-            {reasons.map((r, idx) => (
-              <option key={idx} value={r.value}>
-                {r.label}
-              </option>
-            ))}
+            <option value="">{tSelectReason}</option>
+            {reasonOptions}
           </select>
 
           {/* Details */}
@@ -123,13 +142,13 @@ const AddNewReport = ({
             {loading ? (
               <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
             ) : (
-              t("Submit Report")
+              tSubmitReport
             )}
           </button>
         </form>
       </div>
     </div>
   );
-};
+});
 
 export default AddNewReport;

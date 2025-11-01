@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import React from 'react'
+import React, { memo } from 'react'
 
-const PostHashtags = ({
+const PostHashtags = memo(({
     post
 }) => {
   return (
@@ -17,6 +17,6 @@ const PostHashtags = ({
             ))}
         </div>
   )
-}
+})
 
 export default PostHashtags

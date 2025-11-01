@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 
-const DesignReports = ({
+const DesignReports = React.memo(({
     reports,         
     postsReports,   
     commentsReports, 
@@ -87,6 +87,6 @@ const DesignReports = ({
       />
     </div>
   )
-}
+})
 
 export default DesignReports

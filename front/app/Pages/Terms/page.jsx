@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { IoArrowUp } from 'react-icons/io5';
@@ -9,12 +9,13 @@ const TermsOfServicePage = () => {
   const [activeSection, setActiveSection] = useState('');
   const sectionsRef = useRef({});
 
-  const currentDate = new Date().toLocaleDateString('en-US', {
+  // ✅ استخدم useMemo لتجنب إعادة إنشاء التواريخ في كل render
+  const currentDate = useMemo(() => new Date().toLocaleDateString('en-US', {
     month: 'long', day: 'numeric', year: 'numeric'
-  });
+  }), []);
 
-  // قائمة الأقسام
-  const sections = [
+  // ✅ استخدم useMemo لتجنب إعادة إنشاء المصفوفة في كل render
+  const sections = useMemo(() => [
     { id: 'summary', title: t('Quick Summary') },
     { id: 'eligibility', title: t('1. Eligibility and Accounts') },
     { id: 'conduct', title: t('2. User Conduct and Restrictions') },
@@ -26,33 +27,40 @@ const TermsOfServicePage = () => {
     { id: 'governing-law', title: t('8. Governing Law and Disputes') },
     { id: 'changes', title: t('9. Changes to Terms') },
     { id: 'contact', title: t('10. Contact Us') },
-  ];
+  ], [t]);
 
-  // Smooth scroll and active section detection
+  // ✅ اجعل observer ثابت ولا يتغير عبر useEffect مع cleanup واضح
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) setActiveSection(entry.target.id);
-        });
+      entries => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+            break; // ✅ نوقف بعد أول تقاطع لتقليل العمليات
+          }
+        }
       },
-      { rootMargin: '-50% 0px -50% 0px' }
+      { rootMargin: '-50% 0px -50% 0px', threshold: 0.1 }
     );
 
-    Object.values(sectionsRef.current).forEach(sec => observer.observe(sec));
+    const refs = Object.values(sectionsRef.current);
+    refs.forEach(el => el && observer.observe(el));
+
     return () => observer.disconnect();
   }, []);
 
-  // Scroll to section
-  const scrollToSection = (id) => {
+  // ✅ استخدم useCallback لتثبيت الدوال وعدم إعادة إنشائها
+  const scrollToSection = useCallback((id) => {
     const element = sectionsRef.current[id];
     if (element) element.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, []);
 
-  // Scroll to top
-  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
-  const Section = ({ id, title, children }) => (
+  // ✅ فصل المكون الفرعي memoized لتقليل إعادة التصيير
+  const Section = React.memo(({ id, title, children }) => (
     <motion.section
       id={id}
       ref={el => (sectionsRef.current[id] = el)}
@@ -68,7 +76,7 @@ const TermsOfServicePage = () => {
       </h2>
       <div className="prose prose-base dark:prose-invert max-w-none">{children}</div>
     </motion.section>
-  );
+  ));
 
   return (
     <div className="min-h-screen w-full bg-lightMode-bg dark:bg-darkMode-bg px-4 md:px-12 py-12 text-lightMode-text dark:text-darkMode-text transition-colors duration-300">
@@ -93,7 +101,10 @@ const TermsOfServicePage = () => {
                 <button
                   onClick={() => scrollToSection(sec.id)}
                   className={`w-full text-left px-2 py-1 rounded-lg transition-colors duration-200
-                    ${activeSection === sec.id ? 'bg-blue-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.4)]' : 'text-lightMode-text dark:text-darkMode-text hover:text-blue-600 dark:hover:text-blue-400'}`}
+                    ${activeSection === sec.id
+                      ? 'bg-blue-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.4)]'
+                      : 'text-lightMode-text dark:text-darkMode-text hover:text-blue-600 dark:hover:text-blue-400'
+                    }`}
                 >
                   {sec.title}
                 </button>
@@ -106,7 +117,9 @@ const TermsOfServicePage = () => {
         <div className="bg-white/40 dark:bg-darkMode-card/40 backdrop-blur-lg p-8 md:p-12 rounded-2xl shadow-xl border border-white/20 dark:border-gray-700
                         transition-all duration-300">
           
-          <p className="mb-8">{t("Welcome to our Social Media App. By accessing or using our platform, you agree to be bound by the following comprehensive terms and conditions (the 'Terms'). If you do not agree, do not use the service.")}</p>
+          <p className="mb-8">
+            {t("Welcome to our Social Media App. By accessing or using our platform, you agree to be bound by the following comprehensive terms and conditions (the 'Terms'). If you do not agree, do not use the service.")}
+          </p>
 
           <Section id="summary" title={t("Quick Summary")}>
             <p className="mb-4 font-semibold">{t("Here are the essential points you must know:")}</p>
@@ -135,23 +148,22 @@ const TermsOfServicePage = () => {
             </ul>
           </Section>
 
-          {/* باقي الأقسام مماثلة مع Section component لتسهيل التوسع والتعديل */}
-
         </div>
 
         {/* Back to Top Button */}
-        <button
+        <motion.button
           onClick={scrollTop}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
           className="fixed bottom-8 right-8 p-3 rounded-full bg-blue-600 text-white shadow-lg
                      hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(79,70,229,0.4)] transition-all"
           title="Back to Top"
         >
           <IoArrowUp className="text-xl"/>
-        </button>
-
+        </motion.button>
       </div>
     </div>
   );
 };
 
-export default TermsOfServicePage;
+export default React.memo(TermsOfServicePage);

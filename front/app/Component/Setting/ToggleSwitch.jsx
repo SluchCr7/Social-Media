@@ -1,4 +1,5 @@
-import React from 'react'
+'use client'
+import React, { memo } from 'react'
 import clsx from 'clsx'
 
 function ToggleSwitch({ checked, onChange, onColor = 'bg-blue-500' }) {
@@ -23,4 +24,4 @@ function ToggleSwitch({ checked, onChange, onColor = 'bg-blue-500' }) {
 }
 
 
-export default ToggleSwitch
+export default memo(ToggleSwitch)

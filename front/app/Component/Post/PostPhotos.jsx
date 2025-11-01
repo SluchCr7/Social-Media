@@ -1,9 +1,9 @@
 'use client'
-import React from 'react'
+import React, {memo} from 'react'
 import Image from 'next/image'
 
 
-const PostPhotos = ({ photos = [], setImageView, postId }) => {
+const PostPhotos = memo(({ photos = [], setImageView, postId }) => {
   if (!photos || photos.length === 0) return null;
 
   return (
@@ -25,6 +25,6 @@ const PostPhotos = ({ photos = [], setImageView, postId }) => {
       ))}
     </div>
   )
-}
+})
 
 export default PostPhotos

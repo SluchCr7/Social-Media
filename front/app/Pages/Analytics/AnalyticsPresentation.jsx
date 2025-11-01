@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next'
 const COLORS = ['#5558f1', '#6b7bff', '#fbbf24', '#facc15', '#fb7185']
 const formatNumber = (v) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v)
 
-export default function AnalyticsPresentation({
+function AnalyticsPresentation({
   userData, user, followers, userPosts,
   totalLikes, totalComments, engagementRate,
   timeSeries, topPosts, peakHours, engagement,
@@ -206,3 +206,5 @@ export default function AnalyticsPresentation({
     </div>
   )
 }
+
+export default React.memo(AnalyticsPresentation)

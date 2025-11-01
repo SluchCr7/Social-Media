@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { filterHashtags } from '../../utils/filterHashtags';
 import { useTranslation } from 'react-i18next';
 
-const HashtagsMenu = () => {
+const HashtagsMenu = React.memo(() => {
   const { posts } = usePost();
   const {t} = useTranslation()
   // Collect all hashtags from all posts
@@ -64,6 +64,6 @@ const HashtagsMenu = () => {
       </div>
     </div>
   );
-};
+});
 
 export default HashtagsMenu;

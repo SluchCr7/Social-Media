@@ -1,6 +1,6 @@
 'use client';
 
-import React, { forwardRef, useRef, useEffect, useState } from 'react';
+import React, { forwardRef, useRef, useEffect, useState , useCallback } from 'react';
 import Link from 'next/link';
 import { useReels } from '../Context/ReelsContext';
 import {
@@ -62,25 +62,25 @@ const ReelCard = forwardRef(({userData, reel, isActive, isMuted, toggleMute }, r
   }, [reel?._id]);
 
   // ❤️ Double click like
-  const handleDoubleClick = () => {
+  const handleDoubleClick = useCallback(() => {
     if (!reel?.likes?.includes(userData?._id)) handleLike();
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 800);
-  };
+  }, [reel?.likes, userData?._id, handleLike]);
 
-  const handleLike = async () => {
+  const handleLike = useCallback(async () => {
     try {
       await likeReel(reel?._id);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [likeReel, reel?._id]);
 
-  const handleCopyLink = () => {
+  const handleCopyLink = useCallback(() => {
     const link = `${window.location.origin}/Pages/Reel/${reel?._id}`;
     navigator.clipboard.writeText(link);
     alert("✅ Link copied!");
-  };
+  }, [reel?._id]);
 
   return (
     <div

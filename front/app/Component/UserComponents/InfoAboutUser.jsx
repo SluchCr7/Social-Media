@@ -1,5 +1,6 @@
 'use client'
-import React from 'react'
+
+import React, { memo, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import dayjs from 'dayjs'
@@ -11,7 +12,8 @@ import {
 import { BsCalendar2Date } from "react-icons/bs"
 import { useTranslation } from 'react-i18next'
 
-const InfoItem = ({ icon, label, value, bgColor, textColor }) => (
+// ===== Memoized subcomponents =====
+const InfoItem = memo(({ icon, label, value, bgColor, textColor }) => (
   <motion.div
     variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
     className="flex items-start sm:items-center gap-3 p-4 rounded-2xl
@@ -29,9 +31,9 @@ const InfoItem = ({ icon, label, value, bgColor, textColor }) => (
       </p>
     </div>
   </motion.div>
-)
+))
 
-const SocialIcon = ({ href, icon, bg, label }) => (
+const SocialIcon = memo(({ href, icon, bg, label }) => (
   <a
     href={href}
     target="_blank"
@@ -42,18 +44,24 @@ const SocialIcon = ({ href, icon, bg, label }) => (
   >
     {icon}
   </a>
-)
+))
 
-const InfoAboutUser = ({ user }) => {
+// ===== Main Component =====
+const InfoAboutUser = memo(({ user }) => {
   const { t } = useTranslation()
 
-  const socialIcons = {
+  // ===== Memoized social icons config =====
+  const socialIcons = useMemo(() => ({
     github: { icon: <FaGithub size={18} />, bg: "from-gray-700 to-gray-900", label: "GitHub" },
     linkedin: { icon: <FaLinkedin size={18} />, bg: "from-blue-600 to-blue-800", label: "LinkedIn" },
     twitter: { icon: <FaTwitter size={18} />, bg: "from-blue-400 to-blue-600", label: "Twitter" },
     facebook: { icon: <FaFacebook size={18} />, bg: "from-blue-700 to-blue-900", label: "Facebook" },
     website: { icon: <FaGlobe size={18} />, bg: "from-purple-500 to-purple-700", label: "Website" },
-  }
+  }), [])
+
+  // ===== Memoized formatted dates =====
+  const dateOfBirth = useMemo(() => user?.dateOfBirth ? dayjs(user.dateOfBirth).format("MMMM D, YYYY") : null, [user?.dateOfBirth])
+  const createdAt = useMemo(() => user?.createdAt ? dayjs(user.createdAt).format("MMMM D, YYYY") : null, [user?.createdAt])
 
   return (
     <motion.div
@@ -66,14 +74,14 @@ const InfoAboutUser = ({ user }) => {
       className="mt-8 w-full rounded-3xl bg-lightMode-menu dark:bg-darkMode-menu
                  shadow-lg p-6 sm:p-10 space-y-10 transition-all duration-300"
     >
-      {/* عنوان القسم */}
+      {/* Section title */}
       <h2 className="text-3xl font-bold tracking-tight mb-2 text-lightMode-text2 dark:text-darkMode-text2">
         {t("About")}
       </h2>
       <div className="h-[3px] w-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mb-6"></div>
 
       <div className="space-y-10">
-        {/* 🧍‍♂️ القسم الأول: المعلومات الشخصية */}
+        {/* Personal Info Section */}
         <section>
           <h3 className="text-xl font-semibold mb-5 text-lightMode-text2 dark:text-darkMode-text2">
             {t("Personal Info")}
@@ -83,37 +91,12 @@ const InfoAboutUser = ({ user }) => {
             {user?.phone && <InfoItem icon={<FaPhone />} label={t("Phone")} value={user.phone} bgColor="bg-blue-100" textColor="text-blue-600" />}
             {user?.country && <InfoItem icon={<FaMapMarkerAlt />} label={t("Country")} value={user.country} bgColor="bg-green-100" textColor="text-green-600" />}
             {user?.city && <InfoItem icon={<FaMapMarkerAlt />} label={t("City")} value={user.city} bgColor="bg-teal-100" textColor="text-teal-600" />}
-            {user?.gender && (
-              <InfoItem
-                icon={user.gender.toLowerCase() === 'male' ? <FaMars /> : <FaVenus />}
-                label={t("Gender")}
-                value={user.gender}
-                bgColor="bg-pink-100"
-                textColor="text-pink-600"
-              />
-            )}
-            {/* {user?.preferedLanguage && <InfoItem icon={<GrLanguage />} label={t("Preferred Language")} value={user.preferedLanguage} bgColor="bg-blue-200" textColor="text-blue-700" />} */}
-            {user?.dateOfBirth && (
-              <InfoItem
-                icon={<FaBirthdayCake />}
-                label={t("Date of Birth")}
-                value={dayjs(user.dateOfBirth).format("MMMM D, YYYY")}
-                bgColor="bg-yellow-100"
-                textColor="text-yellow-600"
-              />
-            )}
-            {user?.createdAt && (
-              <InfoItem
-                icon={<BsCalendar2Date />}
-                label={t("Date Joined")}
-                value={dayjs(user.createdAt).format("MMMM D, YYYY")}
-                bgColor="bg-indigo-100"
-                textColor="text-indigo-600"
-              />
-            )}
+            {user?.gender && <InfoItem icon={user.gender.toLowerCase() === 'male' ? <FaMars /> : <FaVenus />} label={t("Gender")} value={user.gender} bgColor="bg-pink-100" textColor="text-pink-600" />}
+            {dateOfBirth && <InfoItem icon={<FaBirthdayCake />} label={t("Date of Birth")} value={dateOfBirth} bgColor="bg-yellow-100" textColor="text-yellow-600" />}
+            {createdAt && <InfoItem icon={<BsCalendar2Date />} label={t("Date Joined")} value={createdAt} bgColor="bg-indigo-100" textColor="text-indigo-600" />}
           </div>
 
-          {/* ❤️ الحالة العاطفية */}
+          {/* Relationship Status */}
           {user?.relationshipStatus && (
             <motion.div
               variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
@@ -129,19 +112,12 @@ const InfoAboutUser = ({ user }) => {
                 {user.relationshipStatus === "single" && t("Single")}
                 {(user.relationshipStatus === "In a Relationship" || user.relationshipStatus === "Married") && (
                   <>
-                    {user.relationshipStatus === "In a Relationship"
-                      ? t("In a relationship with")
-                      : t("Married to")}{" "}
+                    {user.relationshipStatus === "In a Relationship" ? t("In a relationship with") : t("Married to")}{" "}
                     {user.partner ? (
-                      <Link
-                        href={`/Pages/User/${user.partner._id}`}
-                        className="text-blue-500 hover:underline"
-                      >
+                      <Link href={`/Pages/User/${user.partner._id}`} className="text-blue-500 hover:underline">
                         {user.partner.username}
                       </Link>
-                    ) : (
-                      t("Unknown")
-                    )}
+                    ) : t("Unknown")}
                   </>
                 )}
               </p>
@@ -149,16 +125,13 @@ const InfoAboutUser = ({ user }) => {
           )}
         </section>
 
-        {/* 🎯 الاهتمامات */}
+        {/* Interests */}
         {user?.interests?.length > 0 && (
           <section>
             <h3 className="text-xl font-semibold mb-5 text-lightMode-text2 dark:text-darkMode-text2">
               {t("Interests")}
             </h3>
-            <motion.div
-              className="flex flex-wrap gap-3"
-              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}
-            >
+            <motion.div className="flex flex-wrap gap-3" variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}>
               {user.interests.map((interest, index) => (
                 <motion.span
                   key={index}
@@ -174,7 +147,7 @@ const InfoAboutUser = ({ user }) => {
           </section>
         )}
 
-        {/* 🌐 الروابط الاجتماعية */}
+        {/* Social Links */}
         {(user?.socialLinks && Object.values(user.socialLinks).some(link => link?.trim())) && (
           <section>
             <h3 className="text-xl font-semibold mb-5 text-lightMode-text2 dark:text-darkMode-text2">
@@ -182,9 +155,7 @@ const InfoAboutUser = ({ user }) => {
             </h3>
             <div className="flex flex-wrap items-center gap-4 sm:gap-6">
               {Object.entries(user.socialLinks).map(([key, link]) =>
-                link && socialIcons[key] ? (
-                  <SocialIcon key={key} href={link} {...socialIcons[key]} />
-                ) : null
+                link && socialIcons[key] ? <SocialIcon key={key} href={link} {...socialIcons[key]} /> : null
               )}
             </div>
           </section>
@@ -192,6 +163,6 @@ const InfoAboutUser = ({ user }) => {
       </div>
     </motion.div>
   )
-}
+})
 
 export default InfoAboutUser

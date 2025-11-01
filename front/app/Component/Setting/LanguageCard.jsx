@@ -21,4 +21,4 @@ function LanguageCard({ lang, active, onClick }) {
   )
 }
 
-export default LanguageCard
+export default React.memo(LanguageCard)

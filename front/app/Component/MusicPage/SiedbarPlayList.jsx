@@ -1,10 +1,11 @@
 'use client';
 import Image from 'next/image'
-import React from 'react'
+import React , { memo } from 'react'
 import { formatTime } from '@/app/utils/formatTime'
 import { useTranslation } from 'react-i18next'
 
-const SidebarPlaylist = ({ myPlaylist, setTrack }) => {
+
+const SidebarPlaylist = memo(({ myPlaylist, setTrack }) => {
   const {t} = useTranslation()
   return (    
     <div className="rounded-2xl p-4 bg-white/50 dark:bg-gray-900/50 border dark:border-gray-800">
@@ -29,7 +30,7 @@ const SidebarPlaylist = ({ myPlaylist, setTrack }) => {
       )}
     </div>
   )
-}
+})
 
 
 export default SidebarPlaylist

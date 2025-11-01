@@ -5,7 +5,7 @@ import { FiUserCheck, FiUserX, FiTrash2 } from "react-icons/fi";
 import { HiBadgeCheck } from "react-icons/hi";
 import { useTranslation } from "react-i18next";
 
-const UserManagePresintation = ({
+const UserManagePresintation = React.memo(({
   search, setSearch, statusFilter, setStatusFilter, setCurrentPage,
   currentPage, currentUsers, makeUserAdmin, updateAccountStatus,
   deleteUser, totalPages
@@ -174,6 +174,6 @@ const UserManagePresintation = ({
       </div>
     </div>
   );
-};
+});
 
 export default UserManagePresintation;

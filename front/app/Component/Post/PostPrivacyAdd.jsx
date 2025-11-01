@@ -1,28 +1,31 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState , memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaGlobe, FaUserFriends, FaCheck } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 
-const PostPrivacySelector = ({ onChange, defaultValue = 'public' }) => {
+const PostPrivacySelector = memo(({ onChange, defaultValue = 'public' }) => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(defaultValue);
   const {t} = useTranslation()
   
-  const options = [
+  const options = useMemo(() => [
     { value: 'public', label: t('Public'), icon: <FaGlobe /> },
     { value: 'friends', label: t('Friends'), icon: <FaUserFriends /> },
-    // يمكن إضافة خيارات أخرى مثل 'only_me' هنا
-  ];
+  ], [t]);
 
-  const handleSelect = (option) => {
+  const selectedOption = useMemo(
+    () => options.find(opt => opt.value === selected),
+    [options, selected]
+  );
+
+  const handleSelect = useCallback((option) => {
     setSelected(option.value);
     onChange(option.value);
     setOpen(false);
-  };
+  }, [onChange]);
 
-  const selectedOption = options.find(opt => opt.value === selected);
 
   return (
     <div className="relative w-full min-w-[120px] max-w-[180px]">
@@ -74,6 +77,6 @@ const PostPrivacySelector = ({ onChange, defaultValue = 'public' }) => {
       </AnimatePresence>
     </div>
   );
-};
+});
 
 export default PostPrivacySelector;

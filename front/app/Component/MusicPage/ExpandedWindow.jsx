@@ -20,7 +20,21 @@ const ExpandedWindow = () => {
 
   const { likeMusic } = useMusic()
   const { user } = useAuth()
-  const progressPercent = (progress / (duration || 1)) * 100
+  const progressPercent = useMemo(()=>(progress / (duration || 1)) * 100, [progress, duration])
+  
+  const handleClose = useCallback(() => setExpanded(false), [setExpanded])
+  const handleTogglePlay = useCallback(() => {
+    if (!isReady) return
+    togglePlay()
+  }, [isReady, togglePlay])
+
+  const handleLike = useCallback(() => {
+    if (current?._id) likeMusic(current._id)
+  }, [current?._id, likeMusic])
+
+  const handleRepeat = useCallback(() => {
+    setRepeatMode(repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off')
+  }, [repeatMode, setRepeatMode])
 
   if (!current) return null
 
@@ -47,7 +61,7 @@ const ExpandedWindow = () => {
           >
             {/* Close Button */}
             <button
-              onClick={() => setExpanded(false)}
+              onClick={handleClose}
               className="absolute top-4 right-4 p-2 sm:p-3 bg-white/20 hover:bg-white/30 
                          text-white rounded-full transition-all z-20"
             >
@@ -119,10 +133,7 @@ const ExpandedWindow = () => {
               </button>
 
               <button
-                onClick={() => {
-                  if (!isReady) return; // لا تشغل قبل تحميل الملف
-                  togglePlay();
-                }}
+                onClick={handleTogglePlay}
                 className="p-4 sm:p-5 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 
                           text-white shadow-lg hover:scale-110 transition-transform"
               >
@@ -135,9 +146,7 @@ const ExpandedWindow = () => {
               </button>
 
               <button
-                onClick={() => 
-                  setRepeatMode(repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off')
-                }
+                onClick={handleRepeat}
                 className={`p-2.5 sm:p-3 rounded-full ${
                   repeatMode !== 'off' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
                 }`}
@@ -146,10 +155,9 @@ const ExpandedWindow = () => {
                 <FaRedo size={18} />
               </button>
 
-              {/* Like & Share */}
               <div className="flex items-center gap-3 sm:gap-4 mt-2 sm:mt-0">
                 <button
-                  onClick={() => current?._id && likeMusic(current._id)}
+                  onClick={handleLike}
                   className={`p-2.5 sm:p-3 rounded-full transition-all ${
                     current?.likes?.includes(user?._id)
                       ? 'bg-red-500 text-white'
@@ -158,13 +166,6 @@ const ExpandedWindow = () => {
                   title="Like"
                 >
                   <FaHeart />
-                </button>
-
-                <button
-                  className="p-2.5 sm:p-3 rounded-full bg-white/20 text-gray-300 hover:bg-white/30 transition-all"
-                  title="Share"
-                >
-                  <FaShareAlt />
                 </button>
               </div>
             </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState , useCallback } from 'react'
 import { useAuth } from '@/app/Context/AuthContext'
 import { usePost } from '@/app/Context/PostContext'
 import AnalyticsPresentation from './AnalyticsPresentation'
@@ -24,12 +24,12 @@ export default function AnalyticsContainer() {
   }, [userData?._id])
 
   // Derived metrics
-  const totalLikes = useMemo(() => userPosts.reduce((s, p) => s + (p?.likes?.length || 0), 0), [userPosts])
-  const totalComments = useMemo(() => userPosts.reduce((s, p) => s + (p?.comments?.length || 0), 0), [userPosts])
-  const engagementRate = useMemo(() => {
-    const followersCount = followers.length || 1
-    return (((totalLikes + totalComments) / followersCount) * 100).toFixed(2)
-  }, [totalLikes, totalComments, followers])
+  const stats = useMemo(() => {
+    const totalLikes = userPosts.reduce((s, p) => s + (p?.likes?.length || 0), 0)
+    const totalComments = userPosts.reduce((s, p) => s + (p?.comments?.length || 0), 0)
+    const engagementRate = (((totalLikes + totalComments) / (followers.length || 1)) * 100).toFixed(2)
+    return { totalLikes, totalComments, engagementRate }
+  }, [userPosts, followers])
 
   // Time series
   const timeSeries = useMemo(() => {
@@ -63,14 +63,14 @@ export default function AnalyticsContainer() {
     return hours
   }, [userPosts])
 
-  const engagement = [
+  const engagement = useMemo(() => ([
     { name: 'Likes', value: totalLikes },
     { name: 'Comments', value: totalComments },
     { name: 'Followers', value: followers.length },
-  ]
+  ]), [totalLikes, totalComments, followers.length])
 
   // CSV export
-  const exportCSV = () => {
+  const exportCSV = useCallback(() => {
     setExporting(true)
     try {
       const rows = [['Metric', 'Value']]
@@ -93,8 +93,9 @@ export default function AnalyticsContainer() {
     } finally {
       setExporting(false)
     }
-  }
+  }, [userData, user, followers, following, userPosts, totalLikes, totalComments])
 
+  const { totalLikes, totalComments, engagementRate } = stats
   if (loading) return <div className="p-6 max-w-6xl mx-auto"><AnalyticsSkeleton /></div>
 
   return (

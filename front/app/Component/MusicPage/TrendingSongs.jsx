@@ -1,9 +1,9 @@
 'use client';
 import Image from 'next/image'
-import React from 'react'
+import React , { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-const TrendingSongs = ({ songs }) => {
+const TrendingSongs = memo(({ songs }) => {
   const {t} = useTranslation()
   return (
     <div className="mt-8">
@@ -21,6 +21,6 @@ const TrendingSongs = ({ songs }) => {
       </div>
     </div>
   )
-}
+})
 
 export default TrendingSongs

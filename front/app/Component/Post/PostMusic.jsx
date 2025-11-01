@@ -1,23 +1,23 @@
 'use client'
 
-import React from 'react'
+import React ,{memo, useCallback} from 'react'
 import Image from 'next/image'
 import { FaPlay, FaPause } from 'react-icons/fa'
 import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
 
-const PostMusicPlayer = ({ music }) => {
+const PostMusicPlayer =memo(({ music }) => {
   const { current, playing, togglePlay, setTrack } = useMusicPlayer()
 
   const isCurrent = current?._id === music?._id
 
-  const handleToggle = () => {
+  const handleToggle = useCallback(() => {
     if (isCurrent) {
       togglePlay()
     } else {
       setTrack(music)
       setTimeout(() => togglePlay(), 100) // لتشغيلها بعد تعيينها مباشرة
     }
-  }
+  },[isCurrent])
 
   return (
     <div className="flex items-center gap-4 p-3 rounded-xl bg-white/5 dark:bg-black/5 hover:bg-white/10 dark:hover:bg-black/10 transition-all">
@@ -51,6 +51,6 @@ const PostMusicPlayer = ({ music }) => {
       </button>
     </div>
   )
-}
+})
 
 export default PostMusicPlayer

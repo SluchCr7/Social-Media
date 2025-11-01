@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { useScroll, useSpring } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import {
@@ -11,8 +11,11 @@ import PrivacyPolicyPresentation from './PrivactPresentation';
 
 export default function PrivacyPolicyPage() {
   const { t } = useTranslation();
+  const sectionRefs = useRef({});
+  const observerRef = useRef(null);
 
-  const sectionsData = [
+  // ✅ تثبيت البيانات بـ useMemo لتقليل re-renders
+  const sectionsData = useMemo(() => [
     {
       id: 'info',
       title: t('1. Information We Collect'),
@@ -62,40 +65,47 @@ export default function PrivacyPolicyPage() {
         </>
       ),
     },
-  ];
+  ], [t]);
 
-  const [openIds, setOpenIds] = useState(sectionsData.map((s) => s.id));
+  const [openIds, setOpenIds] = useState(() => sectionsData.map((s) => s.id));
   const [mobileTocOpen, setMobileTocOpen] = useState(false);
-  const sectionRefs = useRef({});
   const [activeId, setActiveId] = useState(sectionsData[0].id);
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 200, damping: 30 });
 
+  // ✅ ملاحظة: نستخدم useEffect مرة واحدة لإنشاء observer
   useEffect(() => {
-    const observer = new IntersectionObserver(
+    observerRef.current = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) setActiveId(entry.target.id);
-        });
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id);
+            break;
+          }
+        }
       },
       { rootMargin: '-35% 0px -45% 0px' }
     );
 
-    Object.values(sectionRefs.current).forEach((el) => el && observer.observe(el));
-    return () => observer.disconnect();
+    Object.values(sectionRefs.current).forEach((el) => el && observerRef.current.observe(el));
+    return () => observerRef.current?.disconnect();
   }, []);
 
-  const toggleSection = (id) =>
-    setOpenIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  // ✅ تثبيت الدوال لتجنب إعادة إنشائها في كل render
+  const toggleSection = useCallback((id) => {
+    setOpenIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }, []);
 
-  const goTo = (id) => {
+  const goTo = useCallback((id) => {
     const el = sectionRefs.current[id];
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setMobileTocOpen(false);
     }
-  };
+  }, []);
 
   return (
     <PrivacyPolicyPresentation

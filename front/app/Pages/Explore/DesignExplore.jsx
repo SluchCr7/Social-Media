@@ -1,6 +1,6 @@
 
 'use client';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState , memo } from 'react';
 import { IoIosSearch } from "react-icons/io";
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
@@ -19,25 +19,26 @@ import TrendingTabContent from '../../Component/Explore/TrendingTabContent';
 import HashtagsTabContent from '../../Component/Explore/HashtagsTabContent';
 import PhotosTabContent from '../../Component/Explore/PhotosTabContent';
 import DefaultTabContent from '../../Component/Explore/DefaultTabContent'; // للتبويبات الافتراضية
+import Link from 'next/link';
 
 // --- دوال المساعدة / Hooks (تبقى كما هي) ---
 
 // نقل دالة الفلترة الزمنية والفرز إلى خارج المكون لتبسيطه
 const useTrendingPosts = (trendingPosts, timeFilter) => {
-    const withinTimeFilter = (post) => {
+    const withinTimeFilter = useCallback((post) => {
         if (!post?.createdAt) return false;
         const created = new Date(post.createdAt);
         const now = new Date();
         const diff = now - created;
 
-        if (timeFilter === 'today') {
-            return diff <= 1000 * 60 * 60 * 24; // 24 ساعة
-        } else if (timeFilter === 'week') {
-            return diff <= 1000 * 60 * 60 * 24 * 7; // 7 أيام
-        }else if (timeFilter === 'month') {
-            return diff <= 1000 * 60 * 60 * 24 * 30; // 30 يوم
+        switch (timeFilter) {
+            case 'today': return diff <= 86_400_000; // 24h
+            case 'week':  return diff <= 604_800_000; // 7d
+            case 'month': return diff <= 2_592_000_000; // 30d
+            default: return true;
         }
-    };
+    }, [timeFilter]);
+
 
     const trendingToShow = useMemo(() => {
         return (trendingPosts || [])
@@ -58,23 +59,18 @@ const useTrendingPosts = (trendingPosts, timeFilter) => {
 }
 
 
-const useFollowingPhotos = (user, posts) => {
-  return useMemo(() => {
-    // إذا كان المستخدم لا يحتوي على بيانات following مع posts، نأخذ كل الصور من posts العامة
-    if (!user?.following?.length) {
-      return posts.flatMap(p => p.Photos || []);
-    }
-    // وإلا نأخذ صور المتابَعين
-    return user.following.flatMap(f =>
-      f.posts?.flatMap(p => p.Photos || []) || []
-    );
-  }, [user, posts]);
-};
-
+const useFollowingPhotos = (user, posts) => useMemo(() => {
+  const followingIds = new Set(user?.following?.map(f => f._id));
+  return posts.flatMap(p => 
+    (!followingIds.size || followingIds.has(p.user?._id)) 
+      ? (p.Photos || []) 
+      : []
+  );
+}, [user?.following, posts]);
 
 // --- المكون الرئيسي (مع التعديلات) ---
 
-const DesignExplore = ({
+const DesignExplore = memo(({
     search, setSearch, searchResults, activeTab, setActiveTab,
     finalTabs, topHashtags, user, trendingPosts = [],posts
 }) => {
@@ -84,13 +80,10 @@ const DesignExplore = ({
     const trendingToShow = useTrendingPosts(trendingPosts, timeFilter);
     const followingPhotos = useFollowingPhotos(user, posts);
     const hasSearchQuery = search.trim().length > 0;
-    useEffect(() => {
-        console.log(`followingPhotos: ${followingPhotos}`);
-    }, [followingPhotos]);
-    // جميع التبويبات المتاحة
-    const allTabs = useMemo(() => 
-        finalTabs.concat([{ name: 'Trending' }, { name: 'Hashtags' }, { name: 'Photos' }])
-    , [finalTabs]);
+    const allTabs = useMemo(
+    () => [...finalTabs, { name: 'Trending' }, { name: 'Hashtags' }, { name: 'Photos' }],
+    [finalTabs]
+    );
 
 
     return (
@@ -120,7 +113,7 @@ const DesignExplore = ({
                             maxResults={2} // <--- عرض نتيجة أو اثنتين فقط
                         />
                         <div className="text-center mt-4 pt-4 border-t border-lightMode-border/50 dark:border-darkMode-border/50">
-                            <a 
+                            <Link 
                                 href={`/Pages/Search?q=${encodeURIComponent(search.trim())}`} 
                                 className="inline-flex items-center space-x-2 
                                         text-primary-color dark:text-primary-dark 
@@ -133,7 +126,7 @@ const DesignExplore = ({
                                 </span>
                                 <FiArrowRight size={18} className="rtl:rotate-180" /> 
                                 {/* rlt:rotate-180 لقلب السهم في وضع اللغة العربية */}
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 )}
@@ -189,6 +182,6 @@ const DesignExplore = ({
             </AnimatePresence>
         </div>
     );
-}
+})
 
 export default DesignExplore;

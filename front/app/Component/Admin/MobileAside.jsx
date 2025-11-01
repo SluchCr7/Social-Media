@@ -4,8 +4,8 @@
 
 import { FiX } from 'react-icons/fi';
 import AdminSidebar from './AdminAside';
-
-const MobileSidebar = ({ isOpen, onClose , activeTab, setActiveTab }) => {
+import React from 'react'
+const MobileSidebar = React.memo(({ isOpen, onClose , activeTab, setActiveTab }) => {
   return (
     <div
       className={`fixed inset-0 z-50 transition-transform duration-300 ${
@@ -30,6 +30,6 @@ const MobileSidebar = ({ isOpen, onClose , activeTab, setActiveTab }) => {
       </div>
     </div>
   );
-};
+});
 
 export default MobileSidebar;

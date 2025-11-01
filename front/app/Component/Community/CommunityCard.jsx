@@ -7,7 +7,7 @@ import { FaLock, FaUsers, FaGlobe } from 'react-icons/fa'
 import Badge from './Badge'
 import { useTranslation } from 'react-i18next'
 
-const CommunityCard = ({ comm }) => {
+const CommunityCard = React.memo(({ comm }) => {
   const {t} = useTranslation()
   return (    
     <motion.article
@@ -63,7 +63,7 @@ const CommunityCard = ({ comm }) => {
       </div>
     </motion.article>
   )
-}
+})
 
 
 export default CommunityCard

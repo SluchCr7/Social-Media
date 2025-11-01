@@ -1,8 +1,8 @@
 'use client'
-import React from 'react'
+import React, { memo } from 'react'
 import Image from 'next/image'
 import { useTranslation } from 'react-i18next'
-const HighlightedComment = ({
+const HighlightedComment = memo(({
     highlightedComment
 }) => {
     const { t } = useTranslation()
@@ -58,6 +58,6 @@ const HighlightedComment = ({
         </div>
         </div>
     )
-}
+})
 
 export default HighlightedComment

@@ -1,9 +1,9 @@
 'use client';
-import React from 'react'
+import React, { memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
-const ConfirmModal = ({ open, onClose, onConfirm, title, message }) => {
+const ConfirmModal = memo(({ open, onClose, onConfirm, title, message }) => {
   const {t} = useTranslation()
   return (    
     <AnimatePresence>
@@ -46,7 +46,7 @@ const ConfirmModal = ({ open, onClose, onConfirm, title, message }) => {
       )}
     </AnimatePresence>
   )
-}
+})
 
 
 export default ConfirmModal

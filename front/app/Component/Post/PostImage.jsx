@@ -1,7 +1,6 @@
 import Image from 'next/image';
-import React from 'react'
-
-const PostImage = ({
+import React , {memo} from 'react'
+const PostImage = memo(({
     post,
     isCommunityPost,
 }) => {
@@ -22,6 +21,6 @@ const PostImage = ({
             <div className="hidden sm:block border border-gray-600 h-[70px] w-[1px] mt-2"></div>
           </div>
   )
-}
+})
 
 export default PostImage

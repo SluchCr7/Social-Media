@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import React, { useState } from 'react';
+import React, { useState , useCallback } from 'react';
 import { CiHeart } from 'react-icons/ci';
 import { FaRegCommentDots, FaRegEdit } from 'react-icons/fa';
 import { IoIosHeart, IoIosSend } from 'react-icons/io';
@@ -25,7 +25,7 @@ const Comment = ({ comment }) => {
   const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport();
   const { user } = useAuth();
 
-  const handleSendReply = async () => {
+  const handleSendReply = useCallback(async () => {
     if (!replyText.trim()) return;
     setLoadingReply(true);
     try {
@@ -35,9 +35,9 @@ const Comment = ({ comment }) => {
     } finally {
       setLoadingReply(false);
     }
-  };
+  },[replyText, comment.postId, comment.owner._id, comment._id]);
 
-  const handleUpdateComment = async () => {
+  const handleUpdateComment = useCallback(async () => {
     if (!editText.trim()) return;
     setLoadingEdit(true);
     try {
@@ -46,7 +46,7 @@ const Comment = ({ comment }) => {
     } finally {
       setLoadingEdit(false);
     }
-  };
+  },[editText, comment._id]);
 
   return (
     <div className="flex flex-col w-full max-w-full break-words">

@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import getData from '../utils/getData';
 import { useAuth } from './AuthContext';
@@ -56,7 +56,42 @@ export const CommunityContextProvider = ({ children }) => {
   }, [user?.token]);
 
 
-  const addCommunity = async ({ Name, Category, description, tags = [], rules = [], isPrivate = false, isForAdults = false }) => {
+//   const addCommunity = async ({ Name, Category, description, tags = [], rules = [], isPrivate = false, isForAdults = false }) => {
+//   try {
+//     const res = await axios.post(
+//       `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/add`,
+//       { Name, Category, description, tags, rules, isPrivate, isForAdults },
+//       config
+//     );
+
+//     const communityId = res.data._id;
+
+//     if (communityId) {
+//       const communityRes = await axios.get(
+//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/${communityId}`,
+//         config
+//       );
+
+//       const newCommunity = communityRes.data;
+//       setCommunities((prev) => [...prev, newCommunity]);
+
+//       showAlert('Community created successfully');
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     showAlert('Error creating community.');
+//   }
+// };
+
+const addCommunity =useCallback( async ({
+  Name,
+  Category,
+  description,
+  tags = [],
+  rules = [],
+  isPrivate = false,
+  isForAdults = false,
+}) => {
   try {
     const res = await axios.post(
       `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/add`,
@@ -64,24 +99,18 @@ export const CommunityContextProvider = ({ children }) => {
       config
     );
 
-    const communityId = res.data._id;
+    // 👇 نأخذ المجتمع مباشرة من الرد
+    const newCommunity = res.data.community;
 
-    if (communityId) {
-      const communityRes = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/${communityId}`,
-        config
-      );
+    setCommunities((prev) => [...prev, newCommunity]);
 
-      const newCommunity = communityRes.data;
-      setCommunities((prev) => [...prev, newCommunity]);
-
-      showAlert('Community created successfully');
-    }
+    showAlert(res.data.message || 'Community created successfully');
   } catch (err) {
     console.error(err);
-    showAlert('Error creating community.');
+    showAlert(err?.response?.data?.message || 'Error creating community.');
   }
-};
+},[setCommunities , showAlert , config]);
+
 
   return (
     <CommunityContext.Provider

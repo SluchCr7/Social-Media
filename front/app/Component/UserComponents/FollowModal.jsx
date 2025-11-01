@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 
-const FollowModal = ({ visible, onClose, type, list }) => {
+const FollowModal = memo(({ visible, onClose, type, list }) => {
   const {t} = useTranslation()
   if (!visible) return null
   return (
@@ -83,6 +83,6 @@ const FollowModal = ({ visible, onClose, type, list }) => {
       </AnimatePresence>
     </div>
   )
-}
+})
 
 export default FollowModal

@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-const ExploreTabs = ({ allTabs, activeTab, setActiveTab }) => {
+const ExploreTabs = React.memo(({ allTabs, activeTab, setActiveTab }) => {
     return (
         <div className="max-w-3xl mx-auto flex justify-center flex-wrap gap-3 mb-6 relative">
             {allTabs?.map((tab) => (
@@ -19,6 +19,6 @@ const ExploreTabs = ({ allTabs, activeTab, setActiveTab }) => {
             ))}
         </div>
     );
-}
+})
 
 export default ExploreTabs;

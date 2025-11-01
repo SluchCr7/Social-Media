@@ -1,10 +1,10 @@
 'use client'
 import LoginHistoryTimeline from '@/app/Component/Setting/LoginHistoryTimeline'
-import React from 'react'
+import React, { memo } from 'react'
 import { motion } from 'framer-motion'
 import { FaHistory } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
-const HistoryTab = ({ loginHistory }) => {
+const HistoryTab = memo(({ loginHistory }) => {
   const {t} = useTranslation()
   return (
     <motion.section
@@ -26,6 +26,6 @@ const HistoryTab = ({ loginHistory }) => {
         <LoginHistoryTimeline items={loginHistory} />
     </motion.section>
   )
-}
+})
 
 export default HistoryTab

@@ -3,7 +3,7 @@
 import axios from 'axios';
 import swal from 'sweetalert';
 import getData from '../utils/getData';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState,useCallback } from 'react';
 import { useAlert } from './AlertContext';
 
 export const AuthContext = createContext();
@@ -17,7 +17,7 @@ export const AuthContextProvider = ({ children }) => {
   const { showAlert } = useAlert();
   // ------------------- AUTH ACTIONS -------------------
 
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     try {
       const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/login`, {
         email,
@@ -42,9 +42,9 @@ export const AuthContextProvider = ({ children }) => {
         showAlert(message);
       }
     }
-  };
+  },[showAlert]);
 
-  const Logout = () => {
+  const Logout = useCallback(() => {
     swal({
       title: "Are you sure you want to logout?",
       text: "You will be logged out from your account and need to login again to access your data.",
@@ -77,10 +77,10 @@ export const AuthContextProvider = ({ children }) => {
         window.location.href = "/Pages/Login";
       }
     });
-  };
+  }, []);
 
 
-  const registerNewUser = async (username, email, password) => {
+  const registerNewUser = useCallback(async (username, email, password) => {
     try {
       const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/register`, { username, email, password });
       showAlert(res.data.message);
@@ -88,7 +88,7 @@ export const AuthContextProvider = ({ children }) => {
     } catch (err) {
       swal('Oops!', err.response?.data?.message || 'Registration failed', 'error');
     }
-  };
+  }, [showAlert]);
   // ------------------- INIT -------------------
   useEffect(() => {
     const storedUser = localStorage.getItem('user');

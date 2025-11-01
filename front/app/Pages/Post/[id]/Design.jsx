@@ -1,6 +1,7 @@
 'use client';
-import React from "react";
+import React, { memo } from "react";
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import { IoIosSend } from 'react-icons/io';
 import { ShareModal } from "@/app/Component/AddandUpdateMenus/SharePost";
@@ -13,15 +14,15 @@ import PostPhotos from "@/app/Component/Post/PostPhotos";
 import PostHashtags from "@/app/Component/Post/PostHashtags";
 import PostActions from "@/app/Component/Post/PostActions";
 import SharedTitle from "@/app/Component/Post/SharedTitle";
-import Comment from "@/app/Component/Comment";
-// const Comment = dynamic(() => import("@/app/Component/Comment"), {
-//   loading: () => <p>Loading comment...</p>,
-// })
+// import Comment from "@/app/Component/Comment";
+const Comment = dynamic(() => import("@/app/Component/Comment"), {
+  loading: () => <p>Loading comment...</p>,
+})
 import CommentSkeleton from "@/app/Skeletons/CommentSkeleton";
 import { useTranslation } from "react-i18next";
 import PostMusicPlayer from "@/app/Component/Post/PostMusic";
 
-const DesignPostSelect = ({
+const DesignPostSelect = memo(({
   post,
   isShared,
   original,
@@ -209,6 +210,6 @@ const DesignPostSelect = ({
       </motion.div>
     </div>
   );
-};
+});
 
 export default DesignPostSelect;

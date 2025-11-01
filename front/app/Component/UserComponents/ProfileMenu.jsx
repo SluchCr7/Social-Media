@@ -43,6 +43,7 @@ const ProfileMenu = ({
   const { t } = useTranslation()
   const { isRTL } = useTranslate()
 
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(profileUrl)
     alert('✅ ' + t('Profile link copied!'))

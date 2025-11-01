@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { FaPause, FaPlay, FaRandom, FaRedo, FaStepBackward, FaStepForward, FaVolumeUp } from 'react-icons/fa';
 import { ImSpinner2 } from 'react-icons/im'; // ✅ أيقونة التحميل
 import ProgressBar from './ProgressBar';
 import { formatTime } from '@/app/utils/formatTime'
 
-const PlayerControls = ({
+const PlayerControls = memo(({
   togglePlay, playing, prev, next, shuffle, setShuffle,
   repeatMode, setRepeatMode, progress, setProgress,
   duration, volume, setVolume, muted, setMuted,
@@ -119,6 +119,6 @@ const PlayerControls = ({
       </div>
     </div>
   )
-}
+})
 
 export default PlayerControls

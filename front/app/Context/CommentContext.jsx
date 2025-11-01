@@ -21,7 +21,8 @@ export const CommentContextProvider = ({ children }) => {
     fetchCommentsByPostId,
     AddComment,
     deleteComment,
-    updateComment
+    updateComment,
+    updateCommentInTree
   } = useCommentModify({
     user,
     showAlert,
@@ -30,8 +31,8 @@ export const CommentContextProvider = ({ children }) => {
   });
 
   // 📌 لايك على كومنت
-  const likeComment = async (id) => {
-    if (!checkUserStatus("like comments" ,showAlert,user)) return;
+  const likeComment = useCallback(async (id) => {
+    if (!checkUserStatus("like comments", showAlert, user)) return;
 
     try {
       const res = await axios.put(
@@ -49,8 +50,7 @@ export const CommentContextProvider = ({ children }) => {
       console.error(err);
       showAlert(err?.response?.data?.message || "Failed to like comment.");
     }
-  };
-
+  },[user,showAlert,setComments]);
   return (
     <CommentContext.Provider
       value={{

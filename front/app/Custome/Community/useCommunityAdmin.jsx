@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useCallback } from "react";
 
 export const useCommunityAdmin = ({
   user,
@@ -13,7 +14,7 @@ export const useCommunityAdmin = ({
   };
 
   // 📌 تعديل بيانات المجتمع
-  const editCommunity = async (id, updatedData) => {
+  const editCommunity = useCallback(async (id, updatedData) => {
     try {
       if (!updatedData || Object.keys(updatedData).length === 0) {
         showAlert("No changes to update.");
@@ -38,7 +39,7 @@ export const useCommunityAdmin = ({
       showAlert(msg);
       return null;
     }
-  };
+  }, [user, communities, setCommunities, headers, showAlert]);
 
   // 📸 تحديث صورة المجتمع
   const updateCommunityPicture = async (id, file) => {
@@ -106,7 +107,7 @@ export const useCommunityAdmin = ({
   };
 
   // 👥 إزالة عضو من المجتمع
-  const removeMember = async (communityId, userId) => {
+  const removeMember = useCallback( async (communityId, userId) => {
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/remove/${communityId}/${userId}`,
@@ -128,10 +129,10 @@ export const useCommunityAdmin = ({
       console.error("❌ removeMember error:", err);
       showAlert(err.response?.data?.message || "Failed to remove member.");
     }
-  };
+  }, [user, communities, setCommunities, headers, showAlert]);
 
   // 👑 جعل/إزالة أدمن
-  const makeAdmin = async (communityId, userIdToMakeAdmin) => {
+  const makeAdmin = useCallback( async (communityId, userIdToMakeAdmin) => {
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/admin/${communityId}`,
@@ -159,26 +160,27 @@ export const useCommunityAdmin = ({
       const msg = err.response?.data?.message || "Failed to update admin role.";
       showAlert(msg);
     }
-    };
+  }, [user, communities, setCommunities, headers, showAlert]);
     
-      const updateCommunityRules = async (id, rules) => {
-        try {
-          const res = await axios.put(
-            `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/rules/${id}`,
-            { rules },
-            { headers }
-          );
-          showAlert(res.data.message);
-    
-          // تحديث الـ state
-          setCommunities((prev) =>
-            prev.map((c) => (c._id === id ? { ...c, rules } : c))
-          );
-        } catch (err) {
-          console.error(err);
-          showAlert('Failed to update community rules.');
-        }
-      };
+
+  const updateCommunityRules = useCallback(async (id, rules) => {
+    try {
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/community/rules/${id}`,
+        { rules },
+        { headers }
+      );
+      showAlert(res.data.message);
+
+      // تحديث الـ state
+      setCommunities((prev) =>
+        prev.map((c) => (c._id === id ? { ...c, rules } : c))
+      );
+    } catch (err) {
+      console.error(err);
+      showAlert('Failed to update community rules.');
+    }
+  }, [user, communities, setCommunities, headers, showAlert]);
 
   return {
     editCommunity,

@@ -4,7 +4,7 @@ import { FaPlus, FaSpinner } from 'react-icons/fa'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 
-const AddEventModal = ({
+const AddEventModal = React.memo(({
   newEvent,
   setNewEvent,
   setSelectedDate,
@@ -120,6 +120,6 @@ const AddEventModal = ({
       </motion.div>
     </div>
   )
-}
+})
 
 export default AddEventModal

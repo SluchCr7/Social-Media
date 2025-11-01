@@ -11,7 +11,7 @@ import AllSongsFeed from '@/app/Component/MusicPage/AllSongsFeed'
 import SidebarQueue from '@/app/Component/MusicPage/SidebarQueue'
 import SidebarNowPlaying from '@/app/Component/MusicPage/SidebarNowPlaying'
 
-export default function MusicPagePresentation(props) {
+function MusicPagePresentation(props) {
   const {
     songs, filtered, current, playing, togglePlay, next, prev,isReady,
     shuffle, setShuffle, repeatMode, setRepeatMode,
@@ -101,5 +101,4 @@ export default function MusicPagePresentation(props) {
   )
 }
 
-
-
+export default React.memo(MusicPagePresentation)

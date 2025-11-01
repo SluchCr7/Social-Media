@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { memo } from 'react'
 import PlayerHeader from './PlayerHeader'
 import PlayerControls from './PlayerControls'
 import Image from 'next/image'
 
-const NowPlaying = ({
+const NowPlaying = memo(({
   current, playing, togglePlay, next, prev,
   shuffle, setShuffle, repeatMode, setRepeatMode,shareMusicAsPost,
   progress, setProgress, duration, volume, setVolume, muted, setMuted,
@@ -46,7 +46,7 @@ const NowPlaying = ({
       </div>
     </div>
   </div>
-)
+))
 
 
 export default NowPlaying

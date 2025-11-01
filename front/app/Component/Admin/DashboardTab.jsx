@@ -13,7 +13,7 @@ import {
 } from 'react-icons/fi';
 import { chartData } from '@/app/utils/Data';
 import { useTranslation } from 'react-i18next';
-const DashboardTab = ({
+const DashboardTab = React.memo(({
     stats,
     loading,
     getAdminStats
@@ -76,9 +76,9 @@ const DashboardTab = ({
           </motion.div>
         </motion.div>
   )
-}
+})
 
-const StatCard = ({ icon, title, value, color }) => {
+const StatCard = React.memo(({ icon, title, value, color }) => {
   const { t } = useTranslation();
   return (
     <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl shadow hover:shadow-lg transition flex flex-col items-center justify-center text-center w-full h-full">
@@ -87,6 +87,6 @@ const StatCard = ({ icon, title, value, color }) => {
       <p className="text-gray-500">{t(title)}</p>
     </div>
   );
-};
+});
 
 export default DashboardTab

@@ -137,5 +137,6 @@ export const useCommentModify = ({
     AddComment,
     deleteComment,
     updateComment,
+    updateCommentInTree
   };
 };

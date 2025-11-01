@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState , useCallback , useMemo } from "react";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
 import {
@@ -21,43 +21,41 @@ const Calendar = () => {
 
   const { events, loading, addEvent, updateEvent, deleteEvent,setIsCreating , isCreating } = useEvent();
 
-  const typeIcons = {
+  const typeIcons = useMemo(() => ({
     birthday: <FaBirthdayCake />,
     meeting: <FaUsers />,
     public: <FaCalendarAlt />,
     custom: <FaRegStar />,
-  };
+  }), []);
 
-  const typeColors = {
+  const typeColors = useMemo(() => ({
     birthday: "bg-pink-200 text-pink-800",
     meeting: "bg-green-200 text-green-800",
     public: "bg-blue-200 text-blue-800",
     custom: "bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text",
-  };
+  }), []);
 
-  const handleAddEvent = async () => {
+  const handleAddEvent = useCallback(async () => {
     if (!newEvent.title) return;
-    const event = { ...newEvent, date: selectedDate.format("YYYY-MM-DD")};
+    const event = { ...newEvent, date: selectedDate.format("YYYY-MM-DD") };
     await addEvent(event);
     setNewEvent({ title: "", description: "", type: "custom", repeatYearly: false });
     setSelectedDate(null);
-  };
+  }, [newEvent, selectedDate, addEvent]);
 
-  const handleUpdateEvent = async () => {
+  const handleUpdateEvent = useCallback(async () => {
     if (!selectedEvent.title) return;
     await updateEvent(selectedEvent);
     setSelectedEvent(null);
-  };
+  }, [selectedEvent, updateEvent]);
 
-  const handleDeleteEvent = async () => {
+  const handleDeleteEvent = useCallback(async () => {
     if (!selectedEvent) return;
-
-    // استخرج الـ id الأصلي حتى لو الحدث نسخة مكررة
-    const originalId = selectedEvent._id?.split('_repeat_')[0] || selectedEvent._id;
-
+    const originalId = selectedEvent._id?.split("_repeat_")[0] || selectedEvent._id;
     await deleteEvent(originalId);
     setSelectedEvent(null);
-  };
+  }, [selectedEvent, deleteEvent]);
+
 
   const startOfMonth = currentDate.startOf("month");
   const endOfMonth = currentDate.endOf("month");
@@ -71,25 +69,26 @@ const Calendar = () => {
     date = date.add(1, "day");
   }
    // توليد الأحداث السنوية المتكررة لعدة سنوات قادمة
-  const expandedEvents = events.flatMap((ev) => {
-    if (!ev.repeatYearly) return [ev]; // إذا لم يكن متكرر سنوياً نرجعه كما هو
+  const expandedEvents = useMemo(() => {
+    return events.flatMap((ev) => {
+      if (!ev.repeatYearly) return [ev];
 
-    const originalDate = dayjs(ev.date);
-    const startYear = dayjs().year(); // السنة الحالية
-    const yearsToGenerate = 10; // عدد السنوات القادمة التي نريد عرضها
+      const originalDate = dayjs(ev.date);
+      const startYear = dayjs().year();
+      const yearsToGenerate = 10;
 
-    // نولد نسخاً للأعوام القادمة
-    const repeatedInstances = Array.from({ length: yearsToGenerate }, (_, i) => {
-      const year = startYear + i;
-      return {
-        ...ev,
-        date: originalDate.year(year).format("YYYY-MM-DD"),
-        _id: `${ev._id}_repeat_${year}`, // مفتاح فريد
-      };
+      const repeatedInstances = Array.from({ length: yearsToGenerate }, (_, i) => {
+        const year = startYear + i;
+        return {
+          ...ev,
+          date: originalDate.year(year).format("YYYY-MM-DD"),
+          _id: `${ev._id}_repeat_${year}`,
+        };
+      });
+
+      return [ev, ...repeatedInstances];
     });
-
-    return [ev, ...repeatedInstances];
-  });
+  }, [events]);
 
   const isToday = (d) => dayjs().isSame(d, "day");
   if (loading) return (

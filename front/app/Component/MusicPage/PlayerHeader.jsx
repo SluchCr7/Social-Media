@@ -1,10 +1,10 @@
 'use client'
-import React from 'react'
+import React, { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CiBookmark } from 'react-icons/ci'
 import { FaExpand, FaHeart, FaShareAlt } from 'react-icons/fa'
 
-const PlayerHeader = ({ current, likeMusic,shareMusicAsPost, saveMusicInPlayList, userData, myPlaylist, setExpanded }) => {
+const PlayerHeader = memo(({ current, likeMusic,shareMusicAsPost, saveMusicInPlayList, userData, myPlaylist, setExpanded }) => {
   const {t} = useTranslation()
   return (
     <div className="flex items-center gap-4 justify-between flex-wrap mt-4 md:mt-0">
@@ -31,6 +31,6 @@ const PlayerHeader = ({ current, likeMusic,shareMusicAsPost, saveMusicInPlayList
       </div>
     </div>
   )
-}
+})
 
 export default PlayerHeader

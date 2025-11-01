@@ -1,22 +1,25 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import { useCommunity } from '@/app/Context/CommunityContext'
 import { useAuth } from '@/app/Context/AuthContext'
 import MaidDesign from './MaidDesign'
 import { useGetData } from '@/app/Custome/useGetData'
 
-// ================= Main CommunityPage =================
-export default function CommunityPage() {
+const CommunityPage = () => {
   const { communities, addCommunity } = useCommunity()
   const { user } = useAuth()
+  const { userData } = useGetData(user?._id)
 
+  // ✅ استخدم useState فقط للحالات التفاعلية
   const [activeCategory, setActiveCategory] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [sortBy, setSortBy] = useState('Newest')
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const {userData} = useGetData(user?._id)
+  const [isCreating, setIsCreating] = useState(false)
+  const [visibleCount, setVisibleCount] = useState(6)
+
   const [form, setForm] = useState({
     Name: '',
     description: '',
@@ -29,70 +32,77 @@ export default function CommunityPage() {
     newRule: '',
   })
 
-  const [isCreating, setIsCreating] = useState(false)
-  const [visibleCount, setVisibleCount] = useState(6)
+  // ✅ دالة ثابتة لزيادة العناصر المعروضة
+  const loadMore = useCallback(() => setVisibleCount(v => v + 6), [])
 
-  const loadMore = () => setVisibleCount((v) => v + 6)
-
-  // Debounce Search
+  // ✅ Debounce Search - يقلل re-render الناتج عن الكتابة
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 300)
     return () => clearTimeout(t)
   }, [searchTerm])
 
-  // Categories from communities
+  // ✅ استخدم useMemo لتوليد الفئات بدون إعادة حساب غير ضروري
   const categories = useMemo(() => {
-    const cats = new Set(communities.map((c) => c.Category || c.category || 'Other'))
+    if (!communities?.length) return ['All']
+    const cats = new Set(communities.map(c => c.Category || c.category || 'Other'))
     return ['All', ...Array.from(cats).slice(0, 12)]
   }, [communities])
 
-  // Filter + Sort
+  // ✅ فلترة وفرز البيانات - مكلفة => استخدم useMemo
   const filtered = useMemo(() => {
+    if (!communities?.length) return []
+
     const s = debouncedSearch.toLowerCase()
+
     const results = communities
-      .filter((c) =>
-        activeCategory === 'All' ? true : (c.Category || c.category) === activeCategory
-      )
-      .filter((c) => {
+      .filter(c => activeCategory === 'All' || (c.Category || c.category) === activeCategory)
+      .filter(c => {
         if (!s) return true
         const name = (c.Name || c.name || '').toLowerCase()
         const desc = (c.description || '').toLowerCase()
         const cat = ((c.Category || c.category) || '').toLowerCase()
         return name.includes(s) || desc.includes(s) || cat.includes(s)
       })
-      .map((c) => ({ ...c, _membersCount: (c.members || []).length }))
+      .map(c => ({ ...c, _membersCount: (c.members || []).length }))
 
-    if (sortBy === 'Most Members') {
-      results.sort((a, b) => b._membersCount - a._membersCount)
-    } else if (sortBy === 'A-Z') {
-      results.sort((a, b) =>
-        (a.Name || a.name || '').localeCompare(b.Name || b.name || '')
-      )
-    } else {
-      results.sort(
-        (a, b) =>
-          new Date(b.createdAt || b.CreatedAt) - new Date(a.createdAt || a.CreatedAt)
-      )
+    // ✅ استخدم switch بدل ifs
+    switch (sortBy) {
+      case 'Most Members':
+        results.sort((a, b) => b._membersCount - a._membersCount)
+        break
+      case 'A-Z':
+        results.sort((a, b) =>
+          (a.Name || a.name || '').localeCompare(b.Name || b.name || '')
+        )
+        break
+      default:
+        results.sort(
+          (a, b) =>
+            new Date(b.createdAt || b.CreatedAt) - new Date(a.createdAt || a.CreatedAt)
+        )
+        break
     }
 
     return results
   }, [communities, activeCategory, debouncedSearch, sortBy])
 
-  // Auto load more on scroll
+  // ✅ Scroll handler محسن ومُزال بعد التفكيك
   useEffect(() => {
     const handleScroll = () => {
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
         loadMore()
       }
     }
+
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [loadMore])
 
-  // Create new community
-  const handleCreate = async (e) => {
+  // ✅ تثبيت دالة الإنشاء عبر useCallback
+  const handleCreate = useCallback(async (e) => {
     e.preventDefault()
     if (!form.Name.trim() || !form.description.trim()) return
+
     try {
       setIsCreating(true)
       await addCommunity?.({
@@ -119,7 +129,7 @@ export default function CommunityPage() {
     } finally {
       setIsCreating(false)
     }
-  }
+  }, [form, addCommunity])
 
   return (
     <MaidDesign
@@ -142,3 +152,5 @@ export default function CommunityPage() {
     />
   )
 }
+
+export default React.memo(CommunityPage)
