@@ -132,29 +132,31 @@ import { LuLaugh } from 'react-icons/lu';
 import { BiRepost } from 'react-icons/bi';
 import { BsEye } from 'react-icons/bs';
 
+const ActionButton = React.memo(({ onClick, icon, label, active, color }) => (
+  <motion.button
+    whileHover={{ scale: 1.1 }}
+    whileTap={{ scale: 0.9 }}
+    onClick={onClick}
+    className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 py-2 rounded-xl
+               transition-all duration-200 ease-in-out hover:bg-gradient-to-tr hover:from-white/20 hover:to-transparent
+               active:scale-95 select-none"
+  >
+    <span className={`${active ? color : 'text-gray-500 dark:text-gray-400'} text-[22px] sm:text-[24px]`}>
+      {icon}
+    </span>
+    {label !== undefined && (
+      <span className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium">
+        {label}
+      </span>
+    )}
+  </motion.button>
+));
+
+ActionButton.displayName = 'ActionButton'
+
+
 const PostActions = React.memo(({ post, user, likePost, hahaPost, sharePost, savePost, setOpenModel }) => {
   const isInPostPage = useMemo(() => typeof window !== 'undefined' && window.location.pathname.startsWith('/Pages/Post/'), []);
-
-  const ActionButton = React.memo(({ onClick, icon, label, active, color }) => (
-    <motion.button
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      onClick={onClick}
-      className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 py-2 rounded-xl
-                 transition-all duration-200 ease-in-out hover:bg-gradient-to-tr hover:from-white/20 hover:to-transparent
-                 active:scale-95 select-none"
-    >
-      <span className={`${active ? color : 'text-gray-500 dark:text-gray-400'} text-[22px] sm:text-[24px]`}>
-        {icon}
-      </span>
-      {label !== undefined && (
-        <span className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium">
-          {label}
-        </span>
-      )}
-    </motion.button>
-  ));
-
   return (
     <motion.div
       layout

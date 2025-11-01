@@ -88,7 +88,7 @@ const TrendingPostCard = memo(({ post, idx, t }) => {
     </motion.article>
   );
 });
-
+TrendingPostCard.displayName = 'TrendingPostCard'
 const TrendingTabContent = memo(({ trendingToShow, timeFilter, setTimeFilter, t }) => {
   const filters = useMemo(() => [
     { key: 'today', label: t("Today") },

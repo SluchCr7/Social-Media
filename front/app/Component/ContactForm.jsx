@@ -110,5 +110,5 @@ const ContactModal = memo(({ show, setShow, sent, setSent }) => {
     </AnimatePresence>
   );
 });
-
+ContactModal.displayName = 'ContactModal'
 export default ContactModal;

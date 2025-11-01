@@ -81,7 +81,7 @@ const PostPreview = React.memo(({ post }) => {
     </div>
   );
 });
-
+PostPreview.displayName = 'PostPreview'
 export function ShareModal({ post, isOpen, onClose, onShare }) {
   const [customText, setCustomText] = useState("");
   const { user } = useAuth();
