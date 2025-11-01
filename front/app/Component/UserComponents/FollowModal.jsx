@@ -84,5 +84,5 @@ const FollowModal = memo(({ visible, onClose, type, list }) => {
     </div>
   )
 })
-
+FollowModal.displayName = 'FollowModal'
 export default FollowModal
