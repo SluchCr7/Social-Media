@@ -4,7 +4,7 @@ import { FiX } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
-
+import { memo } from 'react'
 const FollowModal = memo(({ visible, onClose, type, list }) => {
   const {t} = useTranslation()
   if (!visible) return null
