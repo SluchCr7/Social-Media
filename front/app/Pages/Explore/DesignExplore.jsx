@@ -1,6 +1,6 @@
 
 'use client';
-import React, { useEffect, useMemo, useState , memo } from 'react';
+import React, { useEffect, useMemo, useState , memo , useCallback } from 'react';
 import { IoIosSearch } from "react-icons/io";
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
