@@ -61,6 +61,13 @@ const ReelCard = forwardRef(({userData, reel, isActive, isMuted, toggleMute }, r
     videoEl.addEventListener("timeupdate", updateProgress);
     return () => videoEl.removeEventListener("timeupdate", updateProgress);
   }, [reel?._id]);
+  const handleLike = useCallback(async () => {
+    try {
+      await likeReel(reel?._id);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [likeReel, reel?._id]);
 
   // ❤️ Double click like
   const handleDoubleClick = useCallback(() => {
@@ -69,13 +76,6 @@ const ReelCard = forwardRef(({userData, reel, isActive, isMuted, toggleMute }, r
     setTimeout(() => setShowHeart(false), 800);
   }, [reel?.likes, userData?._id, handleLike]);
 
-  const handleLike = useCallback(async () => {
-    try {
-      await likeReel(reel?._id);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [likeReel, reel?._id]);
 
   const handleCopyLink = useCallback(() => {
     const link = `${window.location.origin}/Pages/Reel/${reel?._id}`;
