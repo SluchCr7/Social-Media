@@ -30,7 +30,7 @@ const FullSearchResults = () => {
     if (search.trim() && search !== currentQ) {
       window.history.replaceState(null, '', `/Pages/Search?q=${encodeURIComponent(search)}`);
     }
-  }, [search]);
+  }, [search , searchParams]);
 
   return (
     <div

@@ -77,7 +77,7 @@ const TermsOfServicePage = () => {
       <div className="prose prose-base dark:prose-invert max-w-none">{children}</div>
     </motion.section>
   ));
-
+  Section.displayName = 'Section'
   return (
     <div className="min-h-screen w-full bg-lightMode-bg dark:bg-darkMode-bg px-4 md:px-12 py-12 text-lightMode-text dark:text-darkMode-text transition-colors duration-300">
       <div className="max-w-6xl mx-auto">

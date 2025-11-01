@@ -4,6 +4,7 @@ import { useAuth } from '@/app/Context/AuthContext'
 import { FiEye, FiEyeOff, FiMail, FiUser, FiLock } from 'react-icons/fi'
 import { FcGoogle } from 'react-icons/fc'
 import { useTranslation } from 'react-i18next'
+import Image from 'next/image'
 
 const Register = () => {
   const { t } = useTranslation()
@@ -46,7 +47,9 @@ const Register = () => {
       <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl overflow-hidden grid md:grid-cols-2">
         {/* Left Side (Illustration / Image) */}
         <div className="hidden md:flex items-center justify-center bg-blue-50">
-          <img
+          <Image
+            width={500}
+            height={500}
             src="/register2.svg"
             alt={t('Register Illustration')}
             className="w-3/4 h-auto"

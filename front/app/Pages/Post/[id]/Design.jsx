@@ -211,5 +211,5 @@ const DesignPostSelect = memo(({
     </div>
   );
 });
-
+DesignPostSelect.displayName = 'DesignPostSelect'
 export default DesignPostSelect;

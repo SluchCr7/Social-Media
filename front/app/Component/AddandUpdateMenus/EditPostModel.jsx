@@ -211,7 +211,7 @@ const EditPostModal = memo(({ post, onClose }) => {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
               {newPhotosPreview.map(({ preview }, idx) => (
                 <div key={idx} className="relative rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
-                  <img src={preview} alt="new" className="w-full h-32 md:h-36 object-cover rounded-lg" />
+                  <Image width={500} height={500} src={preview} alt="new" className="w-full h-32 md:h-36 object-cover rounded-lg" />
                 </div>
               ))}
             </div>

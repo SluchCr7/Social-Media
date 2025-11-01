@@ -266,10 +266,12 @@ const NewPostPresenter = (props) => {
                       exit={{ scale: 0.95, opacity: 0 }}
                       className="relative group rounded-xl overflow-hidden shadow-lg"
                     >
-                      <img
+                      <Image
+                        width={500}
+                        height={500}
                         src={img.url}
                         alt={`preview-${idx}`}
-                        className="w-full aspect-square object-cover rounded-xl transform group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full aspect-square object-cover rounded-xl transform group-hover:scale-105 transition-transform duration-300"
                       />
                       <button
                         onClick={() => removeImage(idx)}

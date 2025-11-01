@@ -78,8 +78,6 @@ const MemberRow = memo(
     isOwner,
   }) => {
     const { t } = useTranslation();
-    if (!member) return null;
-
     const currentIsAdmin = isAdmin(member?._id);
     const currentIsOwner = isOwner(member?._id);
     const canManage = isOwner(currentUserId) || isAdmin(currentUserId);
@@ -94,7 +92,7 @@ const MemberRow = memo(
       () => handleRemoveMember(CommunitySelected._id, member?._id),
       [CommunitySelected._id, member?._id, handleRemoveMember]
     );
-
+    if (!member) return null;
     return (
       <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition">
         <Link
@@ -564,5 +562,6 @@ const DasignCommunitySelect = memo(
     </div>
   );
 });
+DasignCommunitySelect.displayName = 'DasignCommunitySelect';
 
 export default DasignCommunitySelect;

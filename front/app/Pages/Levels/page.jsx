@@ -368,7 +368,7 @@ const LevelCard = React.memo(({ lvl, idx, isCurrent, completed, progressToNext, 
     </motion.div>
   )
 })
-
+LevelCard.displayName = 'LevelCard'
 // 💎 Earn Method Card (Memoized)
 const EarnMethodCard = React.memo(({ m, i, t }) => {
   const Icon = m.icon
@@ -395,7 +395,7 @@ const EarnMethodCard = React.memo(({ m, i, t }) => {
     </motion.div>
   )
 })
-
+EarnMethodCard.displayName = "EarnMethodCard"
 /* ---------------- MAIN COMPONENT ---------------- */
 export default function LevelsPage() {
   const { t } = useTranslation()

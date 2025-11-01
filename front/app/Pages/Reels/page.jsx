@@ -30,7 +30,7 @@ const ReelsPage = () => {
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [currentIndex, reels.length, scrolling]);
+  }, [currentIndex, reels.length, scrolling , goToReel]);
 
   // 🖱️ التحكم بعجلة الماوس
   useEffect(() => {
@@ -42,7 +42,7 @@ const ReelsPage = () => {
     const container = containerRef.current;
     container.addEventListener('wheel', handleWheel, { passive: false });
     return () => container.removeEventListener('wheel', handleWheel);
-  }, [currentIndex, scrolling, reels.length]);
+  }, [currentIndex, scrolling, reels.length , goToReel]);
 
   // 📱 التحكم بالسحب (Swipe) على الموبايل
   useEffect(() => {
@@ -84,7 +84,7 @@ const ReelsPage = () => {
         container.removeEventListener('touchend', handleTouchEnd);
       }
     };
-  }, [currentIndex, scrolling, reels.length]);
+  }, [currentIndex, scrolling, reels.length,goToReel]);
 
   return (
     <DesignReels

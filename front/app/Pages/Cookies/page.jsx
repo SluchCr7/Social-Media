@@ -40,6 +40,7 @@ const Section = memo(({ title, icon, children, id }) => {
     </motion.section>
   );
 });
+Section.displayName = 'Section';
 
 const CookiesPolicyPage = () => {
   const { t } = useTranslation();

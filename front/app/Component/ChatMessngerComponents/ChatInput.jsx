@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import { IoIosSend } from 'react-icons/io';
 import { IoImage, IoClose, IoMic, IoHappyOutline } from 'react-icons/io5';
 import { useMessage } from '../../Context/MessageContext';
+import Image from 'next/image';
 
 const ChatInput = () => {
   const { AddNewMessage, replyingTo, setReplyingTo } = useMessage();
@@ -67,7 +68,9 @@ const ChatInput = () => {
                 {replyingTo.text}
               </p>
             ) : replyingTo.Photos?.length > 0 ? (
-              <img
+              <Image
+                width={300}
+                height={300}
                 src={replyingTo.Photos[0].url}
                 alt="reply_img"
                 className="w-16 h-16 rounded-md object-cover mt-1"
@@ -93,7 +96,9 @@ const ChatInput = () => {
               className="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 
                          rounded-lg overflow-hidden shadow border border-gray-200 dark:border-gray-600"
             >
-              <img
+              <Image
+                width={500}
+                height={500}
                 src={img.url}
                 alt={`upload-${idx}`}
                 className="w-full h-full object-cover hover:scale-105 transition"

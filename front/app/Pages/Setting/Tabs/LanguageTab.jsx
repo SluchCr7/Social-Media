@@ -46,5 +46,5 @@ const LanguageTab = memo(({
     </motion.section>
   );
 });
-
+LanguageTab.displayName = 'LanguageTab'
 export default LanguageTab;

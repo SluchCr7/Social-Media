@@ -12,7 +12,7 @@ const Page = ({ params }) => {
 
   useEffect(() => {
     if (!verifyStatus) verifyAccount(id, token);
-  }, [id, token, verifyStatus]);
+  }, [id, token, verifyStatus , verifyAccount]);
 
   const isVerify = verifyStatus;
 

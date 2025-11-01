@@ -224,6 +224,7 @@ const DesignCalender = React.memo(({
   )
 })
 
+DesignCalender.displayName = 'DesignCalender';
 export default DesignCalender
 
 // "use client"

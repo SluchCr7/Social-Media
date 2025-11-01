@@ -183,5 +183,5 @@ const DesignExplore = memo(({
         </div>
     );
 })
-
+DesignExplore.displayName = "DesignExplore"
 export default DesignExplore;

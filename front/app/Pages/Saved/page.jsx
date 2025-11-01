@@ -390,7 +390,7 @@ const EmptyState = React.memo(function EmptyState() {
     </div>
   )
 })
-
+EmptyState.displayName = 'EmptyState'
 export default function SavedPage() {
   const { t } = useTranslation()
   const tabs = useMemo(() => ['posts', 'music', 'reels'], [])
@@ -585,7 +585,7 @@ const Header = React.memo(({ t, active, setActive, tabs, query, setQuery }) => (
     </div>
   </div>
 ))
-
+Header.displayName = 'Header'
 // ✅ Music Tab مع memo
 const MusicTab = React.memo(({ filteredMusic, current, playing, handleMusicAction, setExpanded }) => {
   if (!filteredMusic?.length) return <EmptyState />
@@ -662,7 +662,7 @@ const MusicTab = React.memo(({ filteredMusic, current, playing, handleMusicActio
     </motion.div>
   )
 })
-
+MusicTab.displayName = 'MusicTab'
 // ✅ Reels Tab
 const ReelsTab = React.memo(({ filteredReels, setOpenReel }) => (
   <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -678,7 +678,7 @@ const ReelsTab = React.memo(({ filteredReels, setOpenReel }) => (
           onClick={() => setOpenReel(r)}
         >
           <div className="relative w-full h-48 md:h-60 overflow-hidden">
-            <img src={r.thumbnailUrl} alt={r.caption} className="w-full h-full object-cover transition duration-500 group-hover:scale-110" />
+            <Image width={500} height={500} src={r.thumbnailUrl} alt={r.caption} className="w-full h-full object-cover transition duration-500 group-hover:scale-110" />
             <div className="absolute inset-0 bg-black/40 transition duration-300 group-hover:bg-black/10 flex items-center justify-center">
               <motion.button
                 whileTap={{ scale: 0.9 }}
@@ -700,7 +700,7 @@ const ReelsTab = React.memo(({ filteredReels, setOpenReel }) => (
     )}
   </motion.div>
 ))
-
+ReelsTab.displayName = 'ReelsTab'
 // ✅ Reel Modal مع memo
 const ReelModal = React.memo(({ openReel, setOpenReel, t }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -727,3 +727,4 @@ const ReelModal = React.memo(({ openReel, setOpenReel, t }) => (
     </motion.div>
   </div>
 ))
+ReelModal.displayName = 'ReelModal'

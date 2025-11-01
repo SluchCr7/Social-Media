@@ -27,5 +27,5 @@ const HistoryTab = memo(({ loginHistory }) => {
     </motion.section>
   )
 })
-
+HistoryTab.displayName = 'HistoryTab'
 export default HistoryTab

@@ -164,5 +164,6 @@ const MaidDesign = memo(({
     </div>
   )
 })
+MaidDesign.displayName = 'MaidDesign';
 
 export default MaidDesign

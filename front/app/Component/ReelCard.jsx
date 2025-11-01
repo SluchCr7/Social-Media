@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { useTranslate } from '../Context/TranslateContext';
 import { useUser } from '../Context/UserContext';
 import ReelSkeleton from '../Skeletons/ReelSkeleton';
+import Image from 'next/image';
 
 const ReelCard = forwardRef(({userData, reel, isActive, isMuted, toggleMute }, ref) => {
   const videoRef = useRef(null);
@@ -122,7 +123,9 @@ const ReelCard = forwardRef(({userData, reel, isActive, isMuted, toggleMute }, r
         <div className="relative flex items-center gap-3 sm:gap-4">
           <div className="relative">
             {/* صورة المالك الأصلي */}
-            <img
+            <Image
+              width={100}
+              height={100}
               src={reel?.originalPost?.owner?.profilePhoto?.url || reel?.owner?.profilePhoto?.url}
               alt={reel?.originalPost?.owner?.username || reel?.owner?.username}
               className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white object-cover shadow-md"
@@ -130,7 +133,9 @@ const ReelCard = forwardRef(({userData, reel, isActive, isMuted, toggleMute }, r
 
             {/* إذا كان الريل مُعاد نشره */}
             {reel?.originalPost && reel?.originalPost?.owner && (
-              <img
+              <Image
+                width={100}
+                height={100}
                 src={reel?.owner?.profilePhoto?.url}
                 alt={reel?.owner?.username}
                 className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-white object-cover absolute -bottom-1 -right-2 bg-gray-800 shadow-md"

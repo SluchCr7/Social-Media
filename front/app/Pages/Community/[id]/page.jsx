@@ -182,4 +182,6 @@ const Page = ({ params }) => {
   );
 };
 
+Page.displayName = 'Page';
+
 export default React.memo(Page);

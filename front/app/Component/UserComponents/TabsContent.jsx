@@ -180,6 +180,7 @@ import { usePost } from '@/app/Context/PostContext'
 import PostSkeleton from '@/app/Skeletons/PostSkeleton'
 import MusicCard from './MusicCard'
 import { useTranslation } from 'react-i18next'
+import Image from 'next/image'
 
 const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
   const { setImageView , userIsLoading } = usePost()
@@ -292,7 +293,9 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
                     className="relative group overflow-hidden rounded-lg shadow hover:shadow-lg transition duration-300"
                     onClick={() => handleImageClick(img?.url, p?._id)}
                   >
-                    <img
+                    <Image
+                      width={500}
+                      height={500}
                       src={img?.url || img}
                       alt="post photo"
                       className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"

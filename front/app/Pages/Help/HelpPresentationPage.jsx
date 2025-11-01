@@ -192,5 +192,5 @@ const HelpPresentationPage = memo(({
     </div>
   );
 });
-
+HelpPresentationPage.displayName = "HelpPresentationPage"
 export default HelpPresentationPage;

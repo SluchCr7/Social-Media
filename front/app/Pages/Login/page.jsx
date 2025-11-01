@@ -5,6 +5,7 @@ import { useAuth } from '@/app/Context/AuthContext';
 import { FiEye, FiEyeOff, FiMail, FiLock } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -36,7 +37,7 @@ const Login = () => {
       <div className="grid md:grid-cols-2 bg-white rounded-3xl shadow-xl overflow-hidden w-full max-w-5xl">
         {/* Illustration Section */}
         <div className="hidden md:flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 p-8">
-          <img src="/login.svg" alt="login" className="w-3/4" />
+          <Image width={500} height={500} src="/login.svg" alt="login" className="w-3/4 h-auto" />
         </div>
 
         {/* Form Section */}

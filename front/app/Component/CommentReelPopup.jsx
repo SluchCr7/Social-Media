@@ -7,6 +7,7 @@ import { useAuth } from '../Context/AuthContext';
 import { useAlert } from '../Context/AlertContext';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import Image from 'next/image';
 
 const CommentsPopup = ({ reelId, isOpen, onClose }) => {
   const { user } = useAuth();
@@ -46,7 +47,9 @@ const CommentsPopup = ({ reelId, isOpen, onClose }) => {
               {comments.length > 0 ? (
                 comments.map((c) => (
                   <div key={c._id} className="flex gap-3 items-start border-b pb-2">
-                    <img
+                    <Image
+                      width={100}
+                      height={100}
                       src={c.owner?.profilePhoto?.url || '/default-avatar.png'}
                       alt="avatar"
                       className="w-9 h-9 rounded-full object-cover"
