@@ -7,23 +7,20 @@ import { useAuth } from '../../Context/AuthContext';
 import { useUser } from '@/app/Context/UserContext';
 import { useTranslation } from 'react-i18next';
 import { useGetData } from '@/app/Custome/useGetData';
-
+import { useRouter } from 'next/navigation';
 const MenuFriends = memo(() => {
-  const { user } = useAuth();
-  const { suggestedUsers, followUser, setShowAllSuggestedUsers } = useUser();
+  const { user , users } = useAuth();
+  const { suggestedUsers, followUser} = useUser();
   const { userData: userProfile } = useGetData(user?._id);
   const { t } = useTranslation();
-
-  const hasSuggestions = Array.isArray(suggestedUsers) && suggestedUsers.length > 0;
+  const router = useRouter();
+  const hasSuggestions = Array.isArray(users) && users.length > 0;
 
   const handleFollow = useCallback(
     (id) => followUser(id),
     [followUser]
   );
 
-  const handleShowAll = useCallback(() => {
-    setShowAllSuggestedUsers(true);
-  }, [setShowAllSuggestedUsers]);
 
   return (
     <motion.div
@@ -41,7 +38,7 @@ const MenuFriends = memo(() => {
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-thumb-rounded-full">
         {hasSuggestions ? (
           <>
-            {suggestedUsers.slice(0, 3).map((userData, index) => {
+            {users.slice(0, 3).map((userData, index) => {
               const {
                 _id,
                 username,
@@ -115,11 +112,11 @@ const MenuFriends = memo(() => {
               );
             })}
 
-            {suggestedUsers.length > 3 && (
+            {users.length > 3 && (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={handleShowAll}
+                onClick={router.push('/Pages/Friends')}
                 className="w-[90%] mx-auto my-3 py-2 font-semibold text-blue-600 dark:text-blue-400 border border-blue-600 dark:border-blue-400 rounded-lg transition-all duration-300 hover:bg-blue-600 hover:text-white"
               >
                 {t('Show All Users')}
