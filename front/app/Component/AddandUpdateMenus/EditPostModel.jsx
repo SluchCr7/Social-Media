@@ -128,7 +128,7 @@ const EditPostModal = memo(({ post, onClose }) => {
         {/* المحتوى القابل للتمرير */}
         <div
           className="flex flex-col h-full overflow-y-auto px-6 py-4 
-                     scrollbar-thin scrollbar-thumb-blue-400/70 scrollbar-track-transparent 
+                     scrollbar-thin scrollbar-thumb-blue-400/70 scrollbar-track-blue 
                      dark:scrollbar-thumb-blue-600/70 hover:scrollbar-thumb-blue-500 
                      transition-colors duration-300"
         >

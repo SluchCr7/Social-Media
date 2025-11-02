@@ -56,17 +56,37 @@ const addNewStory = asyncHandler(async (req, res) => {
  * @access Private
  */
 
+
 // const getAllStories = asyncHandler(async (req, res) => {
-//   const stories = await Story.find().populate(storyPopulate);
+//   const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+//   // تعديل الفلترة لتشمل القصص التي أُنشئت خلال الـ 24 ساعة الماضية فقط
+//   const stories = await Story.find({ createdAt: { $gte: yesterday } }).populate(storyPopulate);
 //   res.status(200).json(stories);
 // });
 
 const getAllStories = asyncHandler(async (req, res) => {
-  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  // تعديل الفلترة لتشمل القصص التي أُنشئت خلال الـ 24 ساعة الماضية فقط
-  const stories = await Story.find({ createdAt: { $gte: yesterday } }).populate(storyPopulate);
-  res.status(200).json(stories);
+  try {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    // ✅ جلب القصص الحديثة فقط (آخر 24 ساعة)
+    // ✅ واستثناء القصص الـ Highlighted لأنها دائمة
+    const stories = await Story.find({
+      createdAt: { $gte: twentyFourHoursAgo },
+      $or: [
+        { isHighlighted: { $exists: false } },
+        { isHighlighted: false }
+      ]
+    })
+      .populate(storyPopulate)
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(stories);
+  } catch (error) {
+    console.error("❌ Error fetching stories:", error);
+    res.status(500).json({ message: "حدث خطأ أثناء جلب القصص" });
+  }
 });
+
 /**
  * @desc Delete a story
  * @route DELETE /api/stories/:id

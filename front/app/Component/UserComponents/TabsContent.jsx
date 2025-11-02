@@ -181,6 +181,7 @@ import PostSkeleton from '@/app/Skeletons/PostSkeleton'
 import MusicCard from './MusicCard'
 import { useTranslation } from 'react-i18next'
 import Image from 'next/image'
+import { MdEventAvailable } from 'react-icons/md'
 
 const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
   const { setImageView , userIsLoading } = usePost()
@@ -236,9 +237,20 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
           <motion.div key="posts" {...motionSettings} className="flex flex-col gap-4 w-full">
             {filteredPosts?.length > 0
               ? filteredPosts.map((post) => <SluchitEntry key={post?._id} post={post} />)
-              : Array.from({ length: 4 }).map((_, i) => <PostSkeleton key={i} className="animate-pulse w-full" />)
+              :
+              (
+                <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                  <MdEventAvailable size={40} className="mb-3 text-gray-500" />
+                  <span>{t("You haven’t posted anything yet.")}</span>
+                </div>
+              )
             }
-            {userIsLoading && <PostSkeleton className="animate-pulse" />}
+            {userIsLoading && (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <PostSkeleton key={i} className="animate-pulse w-full" />
+                ))
+              )
+            }
           </motion.div>
         )}
 

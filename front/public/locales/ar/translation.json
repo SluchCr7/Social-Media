@@ -733,6 +733,7 @@
     "Search stories..." : "ابحث عن الستوريز",
     "No stories available" : "لا توجد ستوريز متوفرة",
     "This will permanently delete the highlight and cannot be undone." : "هذه ستحذف الهايلايت ولن يمكنك اعادتها",
-    "Delete highlight?" : "حذف الهايلايت؟"
+    "Delete highlight?" : "حذف الهايلايت؟",
+    "You haven’t posted anything yet." : "لم تنشر شيء بعد"
 }
 
