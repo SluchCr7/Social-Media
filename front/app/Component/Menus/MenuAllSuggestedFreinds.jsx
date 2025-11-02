@@ -51,14 +51,14 @@ const MenuAllSuggestedFriends = memo(() => {
                 <AnimatePresence>
                   {computedSuggestedUsers.map((userData) => {
                     const isFriend =
-                      userData.following?.includes(user?._id) &&
-                      userData.followers?.includes(user?._id);
+                      userData?.following?.includes(user?._id) &&
+                      userData?.followers?.includes(user?._id);
 
-                    const myFollowing = Array.isArray(user?.following) ? user.following : [];
-                    const hisFollowing = Array.isArray(userData.following) ? userData.following : [];
+                    const myFollowing = Array.isArray(user?.following) ? user?.following : [];
+                    const hisFollowing = Array.isArray(userData?.following) ? userData?.following : [];
                     const mutualFriends = myFollowing.filter((id) => hisFollowing.includes(id));
 
-                    const createdAt = userData.createdAt ? new Date(userData.createdAt) : null;
+                    const createdAt = userData?.createdAt ? new Date(userData?.createdAt) : null;
                     const isNew =
                       createdAt &&
                       (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24) < 7;
@@ -88,8 +88,8 @@ const MenuAllSuggestedFriends = memo(() => {
                         <div className="flex items-center gap-3">
                           <div className="relative">
                             <Image
-                              src={userData.profilePhoto?.url || '/default-avatar.png'}
-                              alt={userData.username}
+                              src={userData?.profilePhoto?.url || '/default-avatar.png'}
+                              alt={userData?.username}
                               width={48}
                               height={48}
                               loading="lazy"
@@ -101,7 +101,7 @@ const MenuAllSuggestedFriends = memo(() => {
                           </div>
                           <div className="flex flex-col">
                             <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
-                              {userData.username}
+                              {userData?.username}
                             </span>
                             <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                               {statusMessage}
@@ -112,7 +112,7 @@ const MenuAllSuggestedFriends = memo(() => {
                         {/* Follow Button */}
                         <motion.button
                           whileTap={{ scale: 0.95 }}
-                          onClick={() => followUser(userData._id)}
+                          onClick={() => followUser(userData?._id)}
                           className={`flex items-center gap-1 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all shadow-sm ${
                             isFriend
                               ? 'bg-green-600 hover:bg-green-700 text-white'

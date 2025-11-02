@@ -98,6 +98,7 @@ import { useMusicPlayer } from '../../Context/MusicPlayerContext'
 import { useAuth } from '@/app/Context/AuthContext'
 import { useUser } from '@/app/Context/UserContext'
 import { useGetData } from '@/app/Custome/useGetData'
+import Loading from '@/app/Component/Loading'
 
 // ✅ Lazy loading للمكون الضخم (تحسين أولي للتحميل)
 const MusicPagePresentation = React.lazy(() => import('./MusicPagePresentation'))
@@ -152,9 +153,7 @@ export default function MusicPageContainer() {
   /* ---------------- 🧠 استخدام Suspense للتحميل الذكي ---------------- */
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-[70vh]">
-        <div className="animate-pulse text-gray-400">🎵 Loading Music Player...</div>
-      </div>
+      <Loading/>
     }>
       <MusicPagePresentation
         songs={songs}

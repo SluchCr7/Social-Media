@@ -8,6 +8,7 @@ import DesignExplore from './DesignExplore';
 import { useUser } from '@/app/Context/UserContext';
 import { useGetData } from '@/app/Custome/useGetData';
 import { useSearchLogic } from '../../Custome/useSearchLogic'; // Hook البحث
+import Loading from '@/app/Component/Loading';
 
 // ==============================
 // 🔹 المكون الرئيسي
@@ -75,9 +76,7 @@ const Search = () => {
   // -------------------------------
   if (!userData) {
     return (
-      <div className="w-full min-h-screen flex flex-col items-center justify-center text-lg text-gray-500 dark:text-gray-300">
-        <div className="animate-pulse">Loading Explore...</div>
-      </div>
+      <Loading/>
     );
   }
 

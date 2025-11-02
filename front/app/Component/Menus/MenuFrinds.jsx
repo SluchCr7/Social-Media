@@ -106,7 +106,7 @@ const MenuFriends = memo(() => {
   const { t } = useTranslation();
   const router = useRouter();
   const {userData} = useGetData(user?._id);
-  const hasSuggestions = Array.isArray(users) && users.length > 0;
+  const hasSuggestions = Array.isArray(users) && users?.length > 0;
   const handleFollow = useCallback((id) => followUser(id), [followUser]);
 
   // ✅ Skeleton loader
@@ -160,7 +160,7 @@ const MenuFriends = memo(() => {
             ))}
 
             {/* Enhanced "Show All" Button */}
-            {users.filter((friend) => !userData.following.includes(friend._id) || !userData.following.some((f) => f._id === friend._id)).length > 3 && (
+            {users.filter((friend) => !userData?.following?.includes(friend?._id) || !userData?.following?.some((f) => f?._id === friend?._id)).length > 3 && (
               <motion.div
                 className="px-5 mt-2 mb-4 flex justify-center"
                 initial={{ opacity: 0 }}

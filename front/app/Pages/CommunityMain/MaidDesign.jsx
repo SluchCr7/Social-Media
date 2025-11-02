@@ -231,7 +231,7 @@ const MaidDesign = memo(({
     <div className="w-full max-w-8xl mx-auto px-4 sm:px-6 md:px-8 py-12 space-y-8 bg-gradient-to-b from-lightMode-bg to-lightMode-menu dark:from-darkMode-bg dark:to-darkMode-menu text-lightMode-text dark:text-darkMode-text">
 
       {/* Hero + Controls */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 w-full gap-6 items-start">
         <motion.div initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:0.5}} className="lg:col-span-2 bg-white/5 dark:bg-black/30 p-6 rounded-3xl shadow-md border border-white/6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
