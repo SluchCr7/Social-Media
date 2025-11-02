@@ -228,7 +228,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
 
           {/* ✅ Main Content */}
           <div
-            ref={viewerRef}
+            // ref={viewerRef}
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             onTouchStart={handleTouchStart}

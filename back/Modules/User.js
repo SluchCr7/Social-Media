@@ -270,7 +270,8 @@ UserSchema.virtual("highlights", {
 UserSchema.methods.updateLevelRank = function () {
   if (this.userLevelPoints >= 15000) {
     this.userLevelRank = "Legend";
-    this.nextLevelPoints = 15000; // أعلى ليفل
+    this.nextLevelPoints = 15000; 
+    this.isAccountWithPremiumVerify = true
   } else if (this.userLevelPoints >= 10000) {
     this.userLevelRank = "Master";
     this.nextLevelPoints = 15000;
