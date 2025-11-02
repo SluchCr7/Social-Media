@@ -1,7 +1,7 @@
 'use client';
 import React, { memo, useMemo, useCallback } from 'react';
 import Image from 'next/image';
-import { FiUserPlus } from 'react-icons/fi';
+import { FiUserPlus , FiUserCheck } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../Context/AuthContext';
 import { useUser } from '@/app/Context/UserContext';
