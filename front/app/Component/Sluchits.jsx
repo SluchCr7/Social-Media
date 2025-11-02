@@ -52,7 +52,7 @@ const Sluchits = ({ activeTab }) => {
     }
 
     // 🟣 For You feed (المنطق لم يتغير)
-    if (activeTab === 'foryou') {
+    if (activeTab === 'forYou') {
       if (!userData?.interests || userData.interests.length === 0) {
         return posts
           .slice()

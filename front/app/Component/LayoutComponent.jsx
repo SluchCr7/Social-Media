@@ -55,6 +55,7 @@ const LayoutComponent = ({ children }) => {
     '/Pages/Messanger',
     '/Pages/Saved',
     '/Pages/Calender',
+    '/Pages/CommunityMain',
     '/Pages/Terms',
     '/Pages/Forgot',
     '/Pages/Setting',

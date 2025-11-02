@@ -84,10 +84,14 @@ const FriendCard = memo(({ userData, index, user, userProfile, handleFollow, t }
         whileTap={{ scale: 0.9 }}
         whileHover={{ scale: 1.05 }}
         onClick={() => handleFollow(_id)}
-        className="p-2 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 text-white shadow-md transition-all"
-        aria-label="Follow"
+        className={`p-2 rounded-full transition-all duration-300 shadow-md 
+          ${user.following.includes(userData._id) || !user.following.some((f) => f._id === userData._id)
+            ? "bg-gradient-to-r from-red-500 to-pink-600 hover:from-pink-600 hover:to-red-500 text-white"
+            : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 text-white"
+          }`}
+        aria-label={user.following.includes(userData._id) || !user.following.some((f) => f._id === userData._id) ? "Unfollow" : "Follow"}
       >
-        <FiUserPlus size={18} />
+        {user.following.includes(userData._id) || !user.following.some((f) => f._id === userData._id) ? <FiUserCheck size={18} /> : <FiUserPlus size={18} />}
       </motion.button>
     </motion.div>
   );
@@ -101,7 +105,7 @@ const MenuFriends = memo(() => {
   const { userData: userProfile, loading } = useGetData(user?._id);
   const { t } = useTranslation();
   const router = useRouter();
-
+  const {userData} = useGetData(user?._id);
   const hasSuggestions = Array.isArray(users) && users.length > 0;
   const handleFollow = useCallback((id) => followUser(id), [followUser]);
 
@@ -140,12 +144,15 @@ const MenuFriends = memo(() => {
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-thumb-rounded-full p-1">
         {hasSuggestions ? (
           <>
-            {users.slice(0, 3).map((userData, index) => (
+            {users
+              .filter((friend) => !userData.following.includes(friend._id) || !userData.following.some((f) => f._id === friend._id))
+              .slice(0, 3)
+              .map((userFriend, index) => (
               <FriendCard
-                key={userData._id}
-                userData={userData}
+                key={userFriend._id}
+                userData={userFriend}
                 index={index}
-                user={user}
+                user={userData}
                 userProfile={userProfile}
                 handleFollow={handleFollow}
                 t={t}
@@ -153,7 +160,7 @@ const MenuFriends = memo(() => {
             ))}
 
             {/* Enhanced "Show All" Button */}
-            {users.length > 3 && (
+            {users.filter((friend) => !userData.following.includes(friend._id) || !userData.following.some((f) => f._id === friend._id)).length > 3 && (
               <motion.div
                 className="px-5 mt-2 mb-4 flex justify-center"
                 initial={{ opacity: 0 }}

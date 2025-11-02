@@ -15,9 +15,10 @@ const PostMusicPlayer =memo(({ music }) => {
       togglePlay()
     } else {
       setTrack(music)
-      setTimeout(() => togglePlay(), 100) // لتشغيلها بعد تعيينها مباشرة
+      // استخدم promise أو event جاهزية الصوت إن وجد
+      setTimeout(() => togglePlay(), 300) 
     }
-  },[isCurrent])
+  }, [isCurrent, music, setTrack, togglePlay])
 
   return (
     <div className="flex items-center gap-4 p-3 rounded-xl bg-white/5 dark:bg-black/5 hover:bg-white/10 dark:hover:bg-black/10 transition-all">

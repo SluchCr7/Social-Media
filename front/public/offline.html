@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Internet Connected</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            background: #f9fafb;
+            color: #333;
+        }
+
+        img {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <img src="/logo.png" alt="Logo" />
+    <h1>You are not Connected To the Internet</h1>
+    <p>Please Connect to The Internet and try again</p>
+    <button type="button" onclick="location.reload()">Try Again 🔁</button>
+</body>
+
+</html>
