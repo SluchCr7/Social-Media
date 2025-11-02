@@ -20,7 +20,7 @@ const FriendCard = memo(({ userData, index, user, userProfile, handleFollow, t }
     createdAt,
   } = userData;
 
-  const isFriend = following.includes(user?._id) && followers.includes(user?._id);
+  const isFriend = following?.includes(user?._id) && followers?.includes(user?._id);
 
   const isNew = useMemo(() => {
     if (!createdAt) return false;
@@ -85,13 +85,13 @@ const FriendCard = memo(({ userData, index, user, userProfile, handleFollow, t }
         whileHover={{ scale: 1.05 }}
         onClick={() => handleFollow(_id)}
         className={`p-2 rounded-full transition-all duration-300 shadow-md 
-          ${user.following.includes(userData._id) || !user.following.some((f) => f._id === userData._id)
+          ${user?.following?.includes(userData?._id) || !user?.following?.some((f) => f?._id === userData?._id)
             ? "bg-gradient-to-r from-red-500 to-pink-600 hover:from-pink-600 hover:to-red-500 text-white"
             : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 text-white"
           }`}
-        aria-label={user.following.includes(userData._id) || !user.following.some((f) => f._id === userData._id) ? "Unfollow" : "Follow"}
+        aria-label={user?.following?.includes(userData?._id) || !user?.following?.some((f) => f?._id === userData?._id) ? "Unfollow" : "Follow"}
       >
-        {user.following.includes(userData._id) || !user.following.some((f) => f._id === userData._id) ? <FiUserCheck size={18} /> : <FiUserPlus size={18} />}
+        {user?.following?.includes(userData?._id) || !user?.following?.some((f) => f?._id === userData?._id) ? <FiUserCheck size={18} /> : <FiUserPlus size={18} />}
       </motion.button>
     </motion.div>
   );
@@ -145,11 +145,11 @@ const MenuFriends = memo(() => {
         {hasSuggestions ? (
           <>
             {users
-              .filter((friend) => !userData.following.includes(friend._id) || !userData.following.some((f) => f._id === friend._id))
+              .filter((friend) => !userData?.following?.includes(friend?._id) || !userData?.following?.some((f) => f?._id === friend?._id))
               .slice(0, 3)
               .map((userFriend, index) => (
               <FriendCard
-                key={userFriend._id}
+                key={userFriend?._id}
                 userData={userFriend}
                 index={index}
                 user={userData}
