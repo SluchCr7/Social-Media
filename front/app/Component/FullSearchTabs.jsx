@@ -13,7 +13,6 @@ const TABS = (t) => [
     { name: t("Top"), key: 'top' }, 
     { name: t("Users"), key: 'users' },
     { name: t("Posts"), key: 'posts' },
-    { name: t("Media"), key: 'media' },
     { name: t("Hashtags"), key: 'hashtags' },
 ];
 

@@ -207,7 +207,7 @@ const NewPostPresenter = (props) => {
             </div>
 
             {/* Mention Box */}
-            <AnimatePresence>
+            {/* <AnimatePresence>
               {showMentionBox && filteredUsers.length > 0 && (
                 <motion.ul
                   initial={{ opacity: 0, y: 6 }}
@@ -244,7 +244,56 @@ const NewPostPresenter = (props) => {
                   ))}
                 </motion.ul>
               )}
+            </AnimatePresence> */}
+            {/* Mention Box */}
+            <AnimatePresence>
+              {showMentionBox && filteredUsers.length > 0 && (
+                <motion.ul
+                  initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                  transition={{ duration: 0.2 }}
+                  style={{
+                    top: mentionBoxPos.top + 30, // نضعها أسفل السطر الحالي
+                    left: Math.min(mentionBoxPos.left, window.innerWidth - 280), // نتأكد ألا تخرج عن يمين الشاشة
+                  }}
+                  className="absolute z-[9999] bg-lightMode-menu dark:bg-darkMode-menu 
+                            border border-gray-200 dark:border-gray-700 
+                            shadow-2xl rounded-2xl overflow-hidden 
+                            w-[260px] max-h-[260px] overflow-y-auto
+                            backdrop-blur-lg"
+                >
+                  {filteredUsers.map((mention) => (
+                    <li
+                      key={mention._id}
+                      onClick={() => handleSelectMention(mention)}
+                      className="flex items-center gap-3 px-3 py-2 
+                                hover:bg-blue-100 dark:hover:bg-blue-900 
+                                cursor-pointer transition-all duration-200"
+                    >
+                      <Image
+                        src={mention.profilePhoto?.url || '/default.png'}
+                        alt=""
+                        width={32}
+                        height={32}
+                        className="rounded-full shadow-md"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">
+                          {mention.username}
+                        </p>
+                        {mention.profileName && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            {mention.profileName}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </motion.ul>
+              )}
             </AnimatePresence>
+
           </div>
 
           {/* Images Grid */}

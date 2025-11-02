@@ -227,13 +227,11 @@
 // DesignCalender.displayName = 'DesignCalender';
 // export default DesignCalender
 'use client'
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react'
 import {
   FaChevronLeft,
   FaChevronRight,
   FaPlus,
-  FaTrash,
-  FaEdit,
   FaBirthdayCake,
   FaUsers,
   FaCalendarAlt,
@@ -245,156 +243,203 @@ import {
 } from 'react-icons/fa'
 import { motion, AnimatePresence } from 'framer-motion'
 import dayjs from 'dayjs'
-import AddEventModal from '@/app/Component/AddandUpdateMenus/AddEventModal'
-import EventDetailsModal from '@/app/Component/AddandUpdateMenus/EventDetailsModal'
-import ShowAllEvents from '@/app/Component/AddandUpdateMenus/ShowAllEvents'
 import { useTranslation } from 'react-i18next'
 
-// NOTE: this file preserves all incoming props and behavior from the original component.
-// It layers UI/UX improvements, a small sidebar, view toggles and a mini navigator.
+// Lazy load modals to reduce initial bundle (preserve original components and props)
+const AddEventModal = React.lazy(() => import('@/app/Component/AddandUpdateMenus/AddEventModal'))
+const EventDetailsModal = React.lazy(() => import('@/app/Component/AddandUpdateMenus/EventDetailsModal'))
+const ShowAllEvents = React.lazy(() => import('@/app/Component/AddandUpdateMenus/ShowAllEvents'))
 
+// NOTE: component keeps ALL incoming props and behavior (non-destructive)
 const DesignCalender = React.memo(({
-  setNewEvent,newEvent,
-  currentDate, days,isToday,  setSelectedDate, typeIcons,setCurrentDate, showDayEvents,selectedEvent, setSelectedEvent,
-  setShowDayEvents,loading,events,typeColors,handleAddEvent,handleUpdateEvent,handleDeleteEvent,selectedDate
-  ,setIsCreating , isCreating
+  setNewEvent, newEvent,
+  currentDate, days, isToday, setSelectedDate, typeIcons, setCurrentDate, showDayEvents, selectedEvent, setSelectedEvent,
+  setShowDayEvents, loading, events, typeColors, handleAddEvent, handleUpdateEvent, handleDeleteEvent, selectedDate,
+  setIsCreating, isCreating
 }) => {
   const { t } = useTranslation()
 
-  // local UI state (non-destructive to props)
+  // local UI state
   const [viewMode, setViewMode] = useState('month') // month | week | list
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [filterTypes, setFilterTypes] = useState({ birthday: true, meeting: true, public: true, custom: true })
 
-  // helper to format day key (kept as original)
-  const dayKey = (d) => d.format('YYYY-MM-DD')
+  // helpers
+  const dayKey = useCallback((d) => d.format('YYYY-MM-DD'), [])
 
-  // filtered events according to local filters
-  const visibleEvents = useMemo(() => events.filter(ev => filterTypes[ev.type] ?? true), [events, filterTypes])
+  // filtered events according to local filters (memoized)
+  const visibleEvents = useMemo(() => {
+    if (!Array.isArray(events)) return []
+    return events.filter(ev => (filterTypes[ev.type] ?? true))
+  }, [events, filterTypes])
 
-  // small analytics for sidebar
+  // stats
   const stats = useMemo(() => {
     const counts = { birthday: 0, meeting: 0, public: 0, custom: 0 }
-    visibleEvents.forEach(ev => { if(counts[ev.type] !== undefined) counts[ev.type]++ })
+    visibleEvents.forEach(ev => { if (counts[ev.type] !== undefined) counts[ev.type]++ })
     return counts
   }, [visibleEvents])
 
-  // mini navigator: quick jump to previous/next month (preserve setCurrentDate usage)
-  const jumpMonth = (dir) => setCurrentDate(currentDate.add(dir, 'month'))
+  // navigation
+  const jumpMonth = useCallback((dir) => {
+    // dir is +/-1
+    if (!currentDate || !currentDate.add) return
+    setCurrentDate(currentDate.add(dir, 'month'))
+  }, [currentDate, setCurrentDate])
 
-  // export (client only dummy JSON export)
-  const handleExportJSON = () => {
-    const blob = new Blob([JSON.stringify(events, null, 2)], { type: 'application/json' })
-    const href = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = href
-    a.download = `events-${currentDate.format('YYYY-MM')}.json`
-    a.click()
-    URL.revokeObjectURL(href)
-  }
+  // export JSON
+  const handleExportJSON = useCallback(() => {
+    try {
+      const blob = new Blob([JSON.stringify(events || [], null, 2)], { type: 'application/json' })
+      const href = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = href
+      a.download = `events-${currentDate ? currentDate.format('YYYY-MM') : 'export'}.json`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(href)
+    } catch (err) {
+      // silently fail but you can add notification
+      console.error('Export failed', err)
+    }
+  }, [events, currentDate])
 
-  // small helper to toggle filter
-  const toggleFilter = (type) => setFilterTypes(prev => ({ ...prev, [type]: !prev[type] }))
+  // toggle filter
+  const toggleFilter = useCallback((type) => {
+    setFilterTypes(prev => ({ ...prev, [type]: !prev[type] }))
+  }, [])
+
+  // keyboard shortcut: n for new event, ArrowLeft/Right for months
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'n') {
+        // open create on today
+        setSelectedDate(dayjs())
+      } else if (e.key === 'ArrowLeft') {
+        jumpMonth(-1)
+      } else if (e.key === 'ArrowRight') {
+        jumpMonth(1)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [jumpMonth, setSelectedDate])
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto
       bg-gradient-to-b from-white/2 dark:from-black/40 to-transparent
       text-lightMode-text dark:text-darkMode-text rounded-2xl shadow-lg border border-white/6 backdrop-blur-sm">
 
-      {/* Top bar + sidebar toggle */}
-      <div className="flex items-start gap-4 mb-4">
-        <div className="flex-1">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2">
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <button
-                onClick={() => jumpMonth(-1)}
-                className="p-2 rounded-full hover:bg-gray-100/60 dark:hover:bg-white/5 transition"
-                title="Previous month"
-              >
-                <FaChevronLeft />
-              </button>
-
-              <div className="flex flex-col text-left">
-                <motion.h2
-                  key={currentDate.format('MMMM YYYY')}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35 }}
-                  className="text-lg sm:text-2xl font-bold tracking-tight"
-                >
-                  {currentDate.format('MMMM YYYY')}
-                </motion.h2>
-
-                <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-3">
-                  <button
-                    onClick={() => setCurrentDate(dayjs())}
-                    className="text-sm text-blue-500 hover:underline"
-                  >
-                    {t('Today')}
-                  </button>
-                  <span>·</span>
-                  <span>{days.length} {t('days')}</span>
-                </div>
-              </div>
-
-              <button
-                onClick={() => jumpMonth(1)}
-                className="p-2 rounded-full hover:bg-gray-100/60 dark:hover:bg-white/5 transition ml-2 sm:ml-4"
-                title="Next month"
-              >
-                <FaChevronRight />
-              </button>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
+      {/* Top bar - sticky for better UX */}
+      <div className="sticky top-4 z-30 bg-transparent pb-4 mb-4">
+        <div className="flex items-start gap-4">
+          <div className="flex-1">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2">
+              <div className="flex items-center gap-3 w-full sm:w-auto">
                 <button
-                  onClick={() => setSelectedDate(dayjs())}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg shadow"
-                  title="Add event"
+                  onClick={() => jumpMonth(-1)}
+                  className="p-2 rounded-full hover:bg-gray-100/60 dark:hover:bg-white/5 transition"
+                  aria-label="Previous month"
+                  title={t('Previous month')}
                 >
-                  <FaPlus /> <span className="text-sm hidden sm:inline">{t('Add Event')}</span>
+                  <FaChevronLeft />
                 </button>
 
-                <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                  <span className="flex items-center gap-1"><FaBirthdayCake /> {t('Birthday')}</span>
-                  <span className="flex items-center gap-1"><FaUsers /> {t('Meeting')}</span>
-                  <span className="flex items-center gap-1"><FaCalendarAlt /> {t('Public')}</span>
+                <div className="flex flex-col text-left">
+                  <motion.h2
+                    key={currentDate?.format?.('MMMM YYYY') ?? 'calendar'}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.28 }}
+                    className="text-lg sm:text-2xl font-semibold tracking-tight"
+                  >
+                    {currentDate?.format?.('MMMM YYYY')}
+                  </motion.h2>
+
+                  <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-3">
+                    <button
+                      onClick={() => setCurrentDate(dayjs())}
+                      className="text-sm text-blue-500 hover:underline"
+                      aria-label={t('Today')}
+                    >
+                      {t('Today')}
+                    </button>
+                    <span>·</span>
+                    <span>{days?.length ?? 0} {t('days')}</span>
+                  </div>
                 </div>
+
+                <button
+                  onClick={() => jumpMonth(1)}
+                  className="p-2 rounded-full hover:bg-gray-100/60 dark:hover:bg-white/5 transition ml-2 sm:ml-4"
+                  aria-label="Next month"
+                  title={t('Next month')}
+                >
+                  <FaChevronRight />
+                </button>
               </div>
 
-              {/* view toggles */}
-              <div className="flex items-center gap-2 bg-white/4 dark:bg-black/20 rounded-md p-1">
-                <button
-                  onClick={() => setViewMode('month')}
-                  className={`p-2 rounded-md ${viewMode === 'month' ? 'bg-blue-600 text-white' : 'text-gray-500'}`}
-                  title="Month view"
-                ><FaTh /></button>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setSelectedDate(dayjs())}
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg shadow"
+                    title={t('Add Event')}
+                    aria-label={t('Add Event')}
+                  >
+                    <FaPlus /> <span className="text-sm hidden sm:inline">{t('Add Event')}</span>
+                  </button>
 
-                <button
-                  onClick={() => setViewMode('week')}
-                  className={`p-2 rounded-md ${viewMode === 'week' ? 'bg-blue-600 text-white' : 'text-gray-500'}`}
-                  title="Week view"
-                ><FaBars /></button>
+                  <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="flex items-center gap-1"><FaBirthdayCake /> {t('Birthday')}</span>
+                    <span className="flex items-center gap-1"><FaUsers /> {t('Meeting')}</span>
+                    <span className="flex items-center gap-1"><FaCalendarAlt /> {t('Public')}</span>
+                  </div>
+                </div>
 
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'text-gray-500'}`}
-                  title="List view"
-                ><FaList /></button>
+                {/* view toggles */}
+                <div className="flex items-center gap-2 bg-white/4 dark:bg-black/20 rounded-md p-1">
+                  <button
+                    onClick={() => setViewMode('month')}
+                    className={`p-2 rounded-md ${viewMode === 'month' ? 'bg-blue-600 text-white' : 'text-gray-500'}`}
+                    aria-pressed={viewMode === 'month'}
+                    title="Month view"
+                  ><FaTh /></button>
+
+                  <button
+                    onClick={() => setViewMode('week')}
+                    className={`p-2 rounded-md ${viewMode === 'week' ? 'bg-blue-600 text-white' : 'text-gray-500'}`}
+                    aria-pressed={viewMode === 'week'}
+                    title="Week view"
+                  ><FaBars /></button>
+
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'text-gray-500'}`}
+                    aria-pressed={viewMode === 'list'}
+                    title="List view"
+                  ><FaList /></button>
+                </div>
+
+                {/* export + sidebar toggle */}
+                <button onClick={handleExportJSON} className="p-2 rounded-md hover:bg-gray-100/50 dark:hover:bg-white/5" title={t('Export JSON')} aria-label={t('Export JSON')}>
+                  <FaDownload />
+                </button>
+
+                <button onClick={() => setSidebarOpen(s => !s)} className="p-2 rounded-md hover:bg-gray-100/50 dark:hover:bg-white/5 ml-1" title={t('Toggle sidebar')} aria-label={t('Toggle sidebar')}>
+                  <FaUsers />
+                </button>
               </div>
-
-              {/* export + sidebar toggle */}
-              <button onClick={handleExportJSON} className="p-2 rounded-md hover:bg-gray-100/50 dark:hover:bg-white/5" title="Export JSON">
-                <FaDownload />
-              </button>
-
-              <button onClick={() => setSidebarOpen(s => !s)} className="p-2 rounded-md hover:bg-gray-100/50 dark:hover:bg-white/5 ml-1" title="Toggle sidebar">
-                <FaUsers />
-              </button>
             </div>
           </div>
+        </div>
+      </div>
 
+      {/* Main area: calendar grid + sidebar */}
+      <div className="flex gap-6 items-start">
+        {/* Calendar content */}
+        <div className="flex-1 min-w-0">
           {/* Days header for desktop */}
           <div className="hidden sm:grid grid-cols-7 text-center font-semibold text-xs sm:text-sm
             text-lightMode-text2 dark:text-darkMode-text2 mb-2 uppercase tracking-wider">
@@ -407,21 +452,20 @@ const DesignCalender = React.memo(({
           <div className="overflow-x-auto">
             <AnimatePresence mode="wait">
               <motion.div
-                key={`${currentDate.format('MM-YYYY')}-${viewMode}`}
-                initial={{ opacity: 0, y: 10 }}
+                key={`${currentDate?.format?.('MM-YYYY') ?? 'cal'}-${viewMode}`}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.35 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.28 }}
                 className={`grid grid-cols-7 gap-2 min-w-[640px] sm:min-w-full ${viewMode === 'list' ? 'opacity-90' : ''}`}
               >
-                {days.map((day, idx) => {
+                {days?.map((day, idx) => {
                   const dayStr = dayKey(day)
                   const dayEvents = visibleEvents.filter(
                     (ev) => dayjs(ev.date).format('YYYY-MM-DD') === dayStr
                   )
 
                   const isCurrent = isToday(day)
-
                   const preview = dayEvents.slice(0, 3)
                   const moreCount = Math.max(0, dayEvents.length - 3)
 
@@ -429,11 +473,16 @@ const DesignCalender = React.memo(({
                     <motion.div
                       key={idx}
                       whileHover={{ scale: 1.02 }}
+                      layout
+                      transition={{ type: 'spring', stiffness: 260, damping: 22 }}
                       className={`min-h-[100px] sm:h-28 border rounded-2xl p-2 relative
                         transition-all duration-200 cursor-pointer
-                        ${isCurrent ? 'bg-gradient-to-br from-blue-50/60 to-white/30 border-blue-400 shadow-md' : 'bg-white/3 dark:bg-transparent'}
-                        `}
+                        ${isCurrent ? 'bg-gradient-to-br from-blue-50/60 to-white/30 border-blue-400 shadow-md' : 'bg-white/3 dark:bg-transparent'}`}
                       onClick={() => setSelectedDate(day)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === 'Enter') setSelectedDate(day) }}
+                      aria-label={`${t('Open day')} ${day.format('YYYY-MM-DD')}`}
                     >
                       {/* Date badge */}
                       <div className={`absolute top-2 left-2 text-[12px] font-semibold px-2 py-1 rounded-full
@@ -444,10 +493,10 @@ const DesignCalender = React.memo(({
                       {/* small indicators */}
                       <div className="absolute top-2 right-2 flex items-center gap-1">
                         {dayEvents.some(ev => dayjs(ev.date).isSame(dayjs(), 'day')) && (
-                          <span className="w-2 h-2 rounded-full bg-red-500" title="Happening today" />
+                          <span className="w-2 h-2 rounded-full bg-red-500" title={t('Happening today')} />
                         )}
                         {dayEvents.some(ev => dayjs(ev.date).isSame(dayjs().add(1, 'day'), 'day')) && (
-                          <span className="w-2 h-2 rounded-full bg-yellow-400" title="Tomorrow" />
+                          <span className="w-2 h-2 rounded-full bg-yellow-400" title={t('Tomorrow')} />
                         )}
                       </div>
 
@@ -463,6 +512,9 @@ const DesignCalender = React.memo(({
                               setSelectedEvent(ev)
                             }}
                             title={`${ev.title} - ${ev.description || ''}`}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); setSelectedEvent(ev) } }}
                           >
                             <span className="text-sm">{typeIcons?.[ev.type] || '•'}</span>
                             <span className="text-xs truncate">{ev.title}</span>
@@ -497,13 +549,19 @@ const DesignCalender = React.memo(({
           </div>
         </div>
 
-        {/* Sidebar */}
-        <div className={`w-72 transition-all duration-300 ${sidebarOpen ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-4'} hidden md:block`}>
+        {/* Sidebar (collapsible, animated) */}
+        <motion.aside
+          initial={{ opacity: 0, x: 8 }}
+          animate={{ opacity: sidebarOpen ? 1 : 0.6, x: 0 }}
+          transition={{ type: 'spring', stiffness: 220, damping: 28 }}
+          className={`w-72 transition-all duration-300 ${sidebarOpen ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-4'} hidden md:block`}
+          aria-hidden={!sidebarOpen}
+        >
           <div className="p-4 rounded-xl bg-white/6 dark:bg-black/30 border border-white/5 h-full sticky top-6">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold">{t('Overview')}</h3>
               <div className="flex items-center gap-2">
-                <button onClick={() => setSidebarOpen(false)} className="p-1 rounded-md hover:bg-white/5">×</button>
+                <button onClick={() => setSidebarOpen(false)} className="p-1 rounded-md hover:bg-white/5" aria-label="Close sidebar">×</button>
               </div>
             </div>
 
@@ -556,34 +614,52 @@ const DesignCalender = React.memo(({
             </div>
 
           </div>
-        </div>
+        </motion.aside>
       </div>
 
-      {/* Add Event Modal (preserve original conditionals) */}
-      {selectedDate && !selectedEvent && (
-        <AddEventModal selectedDate={selectedDate}
-          newEvent={newEvent} setNewEvent={setNewEvent}
-          setSelectedDate={setSelectedDate}
-          handleAddEvent={handleAddEvent} isCreating={isCreating}
-        />
-      )}
+      {/* Add Event Modal (preserve original conditionals) -- lazy loaded */}
+      <AnimatePresence>
+        {selectedDate && !selectedEvent && (
+          <Suspense fallback={null}>
+            <AddEventModal
+              selectedDate={selectedDate}
+              newEvent={newEvent} setNewEvent={setNewEvent}
+              setSelectedDate={setSelectedDate}
+              handleAddEvent={handleAddEvent} isCreating={isCreating}
+              setIsCreating={setIsCreating}
+            />
+          </Suspense>
+        )}
+      </AnimatePresence>
 
       {/* Event Details Modal */}
-      {selectedEvent && (
-        <EventDetailsModal 
-          handleUpdateEvent={handleUpdateEvent} 
-          handleDeleteEvent={handleDeleteEvent} 
-          selectedEvent={selectedEvent}      
-          setSelectedEvent={setSelectedEvent}  
-        />
-      )}
+      <AnimatePresence>
+        {selectedEvent && (
+          <Suspense fallback={null}>
+            <EventDetailsModal
+              handleUpdateEvent={handleUpdateEvent}
+              handleDeleteEvent={handleDeleteEvent}
+              selectedEvent={selectedEvent}
+              setSelectedEvent={setSelectedEvent}
+            />
+          </Suspense>
+        )}
+      </AnimatePresence>
 
       {/* Show All Events in a Day */}
-      {showDayEvents && (
-        <ShowAllEvents 
-          setSelectedEvent={setSelectedEvent} showDayEvents={showDayEvents} setShowDayEvents={setShowDayEvents} typeColors={typeColors} typeIcons={typeIcons}
-        />
-      )}
+      <AnimatePresence>
+        {showDayEvents && (
+          <Suspense fallback={null}>
+            <ShowAllEvents
+              setSelectedEvent={setSelectedEvent}
+              showDayEvents={showDayEvents}
+              setShowDayEvents={setShowDayEvents}
+              typeColors={typeColors}
+              typeIcons={typeIcons}
+            />
+          </Suspense>
+        )}
+      </AnimatePresence>
     </div>
   )
 })
