@@ -315,7 +315,7 @@ const MaidDesign = memo(({
 
         {/* Right column: Stats & quick filters */}
         <motion.aside initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{duration:0.45}} className="hidden lg:block w-full">
-          <div className="p-4 rounded-2xl bg-white/5 dark:bg-black/30 border border-white/6 sticky top-24 w-72">
+          <div className="p-4 rounded-2xl bg-white/5 dark:bg-black/30 border border-white/6 sticky top-24 w-96">
             <div className="flex items-center justify-between">
               <h4 className="font-semibold">{t('Overview')}</h4>
               <span className="text-sm text-gray-400">{filtered.length}</span>
