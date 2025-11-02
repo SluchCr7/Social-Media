@@ -137,7 +137,7 @@ const MenuFriends = memo(() => {
                   ?.filter((friend) => 
                     friend?._id !== userData?._id &&
                     !userData?.following?.some((f) => f?._id === friend?._id)
-                  )
+                )
                   .slice(0, 3)
                   .map((userFriend, index) => (
                     <FriendCard
