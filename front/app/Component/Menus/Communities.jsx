@@ -8,6 +8,7 @@ import { FaCheck, FaUsers } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { useGetData } from '@/app/Custome/useGetData';
 import { motion, AnimatePresence } from 'framer-motion';
+import MenuSkeleton from '../../Skeletons/MenuSkeleton';
 
 const Communities = memo(() => {
   const { communities } = useCommunity();
@@ -30,17 +31,7 @@ const Communities = memo(() => {
       {/* Body */}
       <div className="flex flex-col w-full px-4 py-3 space-y-3 overflow-y-auto">
         {!userData ? (
-          <div className="animate-pulse flex flex-col space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <MenuSkeleton/>
         ) : joinedCommunities.length === 0 ? (
           <p className="text-center text-gray-500 dark:text-gray-400 py-6">{t("No communities to join.")}</p>
         ) : (

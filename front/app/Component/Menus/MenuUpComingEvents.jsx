@@ -43,6 +43,12 @@ const MenuUpComingEvents = () => {
 
   return (
     <LazyMotion features={loadFeatures}>
+      {/* Header */}
+      <div className="flex justify-between items-center px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-500 to-indigo-500">
+        <h2 className="flex items-center gap-2 text-white font-semibold text-lg">
+          <FaRegCalendarAlt className="text-white" /> {t("Upcoming Events")}
+        </h2>
+      </div>
       {events.length === 0 ? (
         <m.div
           {...fadeInUp}
@@ -64,12 +70,6 @@ const MenuUpComingEvents = () => {
           {...fadeInUp}
           className="w-full max-w-sm bg-white dark:bg-[#16181c] rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 flex flex-col max-h-[500px] overflow-hidden"
         >
-          {/* Header */}
-          <div className="flex justify-between items-center px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-500 to-indigo-500">
-            <h2 className="flex items-center gap-2 text-white font-semibold text-lg">
-              <FaRegCalendarAlt className="text-white" /> {t("Upcoming Events")}
-            </h2>
-          </div>
 
           {/* Event List */}
           <div className="flex-1 overflow-y-auto">
