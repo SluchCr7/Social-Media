@@ -1,5 +1,5 @@
 'use client'
-import React, { memo, useCallback } from 'react'
+import React, { memo, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { BsThreeDots } from 'react-icons/bs'
@@ -10,6 +10,7 @@ import { formatRelativeTime } from '@/app/utils/FormatDataCreatedAt'
 
 const PostHeader = memo(({ post, user, isLogin, showMenu, setShowMenu, isCommunityPost }) => {
   const owner = post?.owner
+  const triggerRef = useRef(null)
 
   // ✅ useCallback لتجنب إعادة إنشاء الدالة في كل رندر
   const handleToggleMenu = useCallback(() => {
@@ -53,8 +54,9 @@ const PostHeader = memo(({ post, user, isLogin, showMenu, setShowMenu, isCommuni
 
       {/* 📋 قائمة الخيارات */}
       {isLogin && (
-        <div className="relative z-50">
+        <div className="relative">
           <button
+            ref={triggerRef}
             onClick={handleToggleMenu}
             className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 
               text-xl text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
@@ -68,6 +70,7 @@ const PostHeader = memo(({ post, user, isLogin, showMenu, setShowMenu, isCommuni
             post={post}
             showMenu={showMenu}
             setShowMenu={setShowMenu}
+            triggerRef={triggerRef}
           />
         </div>
       )}
