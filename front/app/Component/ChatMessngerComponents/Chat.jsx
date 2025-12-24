@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useEffect, useRef } from 'react';
 import ChatInput from './ChatInput';
 import ChatHeader from './ChatHeader';
@@ -9,12 +10,14 @@ import ReceiverMessage from './ReceiverMessage';
 import { isToday, isYesterday, format } from 'date-fns';
 import MessageSkeleton from '@/app/Skeletons/MessageSkeleton';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
+
 const Chat = ({ onBack }) => {
   const { user } = useAuth();
-  const { selectedUser, messages,isMessagesLoading } = useMessage();
+  const { selectedUser, messages, isMessagesLoading } = useMessage();
   const ContainerMessageRef = useRef(null);
+  const { t } = useTranslation();
 
-  // --- Group messages by date ---
   const groupMessagesByDate = (messages) => {
     return messages.reduce((groups, message) => {
       if (!message?.createdAt) return groups;
@@ -26,7 +29,6 @@ const Chat = ({ onBack }) => {
     }, {});
   };
 
-  // --- Friendly date labels ---
   const getDisplayDate = (dateString) => {
     const date = new Date(dateString);
     if (isToday(date)) return 'Today';
@@ -39,73 +41,84 @@ const Chat = ({ onBack }) => {
     (a, b) => new Date(a).getTime() - new Date(b).getTime()
   );
 
-  // --- Auto-scroll to bottom ---
   useEffect(() => {
     if (ContainerMessageRef.current && messages?.length > 0) {
       ContainerMessageRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
-  const {t} = useTranslation()
-  return (
-    <div className="flex flex-col w-full h-full bg-lightMode-bg dark:bg-darkMode-bg rounded-lg overflow-hidden shadow-md">
 
-      {/* ✅ Responsive Chat Header - visible on all screens */}
-      <div className="sticky top-0 z-20 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-darkMode-menu shadow-sm">
+  return (
+    <div className="flex flex-col w-full h-full bg-[#050505] relative overflow-hidden">
+      {/* Decorative Ambient Backgrounds */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full -mr-64 -mt-64 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 blur-[120px] rounded-full -ml-64 -mb-64 pointer-events-none" />
+
+      {/* High-End Header */}
+      <div className="sticky top-0 z-[50] border-b border-white/5 bg-[#050505cc] backdrop-blur-2xl">
         <ChatHeader onBack={onBack} />
       </div>
 
-      {/* 💬 Messages Area */}
+      {/* Immersive Message Feed */}
       <div
-        className="flex-1 overflow-y-auto overflow-x-hidden px-2 sm:px-3 md:px-4 py-2 sm:py-3 space-y-5
-        bg-lightMode-bg dark:bg-darkMode-bg 
-        scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 
-        scrollbar-track-transparent"
+        className="flex-1 overflow-y-auto px-6 py-8 space-y-12 scrollbar-hide relative z-10"
       >
-        {/* 🌀 حالة التحميل */}
         {isMessagesLoading ? (
-          <div className="flex flex-col gap-4 mt-4">
+          <div className="flex flex-col gap-8">
             {Array.from({ length: 5 }).map((_, i) => (
               <MessageSkeleton key={i} />
             ))}
           </div>
         ) : messages?.length === 0 ? (
-          // 📭 في حال لا توجد رسائل
-          <div className="flex justify-center items-center h-full text-gray-500 dark:text-gray-400 text-sm">
-            {t("No messages yet")}
+          <div className="flex flex-col items-center justify-center h-full opacity-20 text-center">
+            <div className="w-20 h-20 rounded-[2rem] bg-indigo-500/20 flex items-center justify-center mb-6">
+              <span className="text-3xl font-black italic">Z</span>
+            </div>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em]">{t("Establish Link with")} {selectedUser?.username}</p>
           </div>
         ) : (
-          // ✅ بعد تحميل الرسائل بنجاح
           sortedDates.map((dateKey) => (
-            <div key={dateKey}>
-              {/* 📅 فاصل التاريخ */}
-              <div className="flex justify-center my-2 sm:my-3 md:my-4">
-                <div className="text-[10px] sm:text-xs md:text-sm text-gray-600 dark:text-gray-400 
-                                bg-gray-200 dark:bg-gray-700 
-                                px-3 py-1 rounded-full shadow-sm">
+            <div key={dateKey} className="space-y-8">
+              {/* Pro Date Separator */}
+              <div className="flex items-center gap-6">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/5 to-white/5" />
+                <div className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20 whitespace-nowrap">
                   {getDisplayDate(dateKey)}
                 </div>
+                <div className="flex-1 h-px bg-gradient-to-l from-transparent via-white/5 to-white/5" />
               </div>
 
-              {/* 💌 الرسائل لهذا التاريخ */}
-              {groupedMessages[dateKey].map((msg, index) => {
-                const senderId = msg.sender?._id || msg.sender;
-                const isMine = senderId === user?._id;
-                return isMine ? (
-                  <SenderMessage key={msg._id || index} message={msg} user={user} />
-                ) : (
-                  <ReceiverMessage key={msg._id || index} message={msg} user={selectedUser} />
-                );
-              })}
+              <div className="flex flex-col gap-6">
+                {groupedMessages[dateKey].map((msg, index) => {
+                  const senderId = msg.sender?._id || msg.sender;
+                  const isMine = senderId === user?._id;
+                  return (
+                    <motion.div
+                      key={msg._id || index}
+                      initial={{ opacity: 0, x: isMine ? 20 : -20, y: 10 }}
+                      animate={{ opacity: 1, x: 0, y: 0 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                    >
+                      {isMine ? (
+                        <SenderMessage message={msg} user={user} />
+                      ) : (
+                        <ReceiverMessage message={msg} user={selectedUser} />
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </div>
             </div>
           ))
         )}
-        <div ref={ContainerMessageRef}></div>
+        <div ref={ContainerMessageRef} />
       </div>
 
-
-      {/* 📝 Chat Input */}
-      <div className="border-t border-gray-200 dark:border-gray-700 p-2 sm:p-3 md:p-4 bg-white dark:bg-darkMode-menu shadow-sm">
-        <ChatInput />
+      {/* Floating Chat Input Bar */}
+      <div className="relative px-6 pb-6 pt-2 z-20">
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0A0A0A] to-transparent pointer-events-none" />
+        <div className="relative">
+          <ChatInput />
+        </div>
       </div>
     </div>
   );

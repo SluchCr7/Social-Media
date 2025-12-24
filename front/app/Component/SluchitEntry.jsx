@@ -1,84 +1,77 @@
-'use client'
+'use client';
 
-import React, { forwardRef, useEffect, useState } from 'react'
-import Image from 'next/image'
-import { usePost } from '../Context/PostContext'
-import { useAuth } from '../Context/AuthContext'
-import { ShareModal } from './AddandUpdateMenus/SharePost'
-import PostMenu from './PostMenu'
-import PostHeader from './Post/PostHeader'
-import PostPhotos from './Post/PostPhotos'
-import PostLinks from './Post/PostLinks'
-import PostHashtags from './Post/PostHashtags'
-import RenderPostText from './Post/RenderText'
-import PostActions from './Post/PostActions'
-import SharedPost from './Post/SharedPost'
-import SharedTitle from './Post/SharedTitle'
-import PostImage from './Post/PostImage'
-import HighlightedComment from './Post/highlightedComment'
-import { useTranslate } from '../Context/TranslateContext'
-import { franc } from 'franc'
-import { iso6391Map } from '../utils/Data'
-import { useTranslation } from 'react-i18next'
-import { getHighlightedComment } from '../utils/getHighlitedComment'
-import { usePathname } from 'next/navigation'
-import {motion , AnimatePresence} from 'framer-motion'
-import ShowSensitiveContent from './Post/ShowSensitiveContent'
-import PostMusicPlayer from './Post/PostMusic'
+import React, { forwardRef, useEffect, useState } from 'react';
+import { usePost } from '../Context/PostContext';
+import { useAuth } from '../Context/AuthContext';
+import { ShareModal } from './AddandUpdateMenus/SharePost';
+import PostHeader from './Post/PostHeader';
+import PostPhotos from './Post/PostPhotos';
+import PostLinks from './Post/PostLinks';
+import PostHashtags from './Post/PostHashtags';
+import RenderPostText from './Post/RenderText';
+import PostActions from './Post/PostActions';
+import SharedPost from './Post/SharedPost';
+import SharedTitle from './Post/SharedTitle';
+import PostImage from './Post/PostImage';
+import HighlightedComment from './Post/highlightedComment';
+import { useTranslate } from '../Context/TranslateContext';
+import { franc } from 'franc';
+import { iso6391Map } from '../utils/Data';
+import { useTranslation } from 'react-i18next';
+import { getHighlightedComment } from '../utils/getHighlitedComment';
+import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import ShowSensitiveContent from './Post/ShowSensitiveContent';
+import PostMusicPlayer from './Post/PostMusic';
+import Image from 'next/image';
+
 const SluchitEntry = forwardRef(({ post }, ref) => {
-  const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost()
-  const { user, isLogin } = useAuth()
-  const { t } = useTranslation()
-  const { translate, loading, language } = useTranslate()
+  const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost();
+  const { user, isLogin } = useAuth();
+  const { t } = useTranslation();
+  const { translate, loading, language } = useTranslate();
 
-  const [showMenu, setShowMenu] = useState(false)
-  const [openModel, setOpenModel] = useState(false)
-  const [translated, setTranslated] = useState(null)
-  const [showTranslateButton, setShowTranslateButton] = useState(false)
-  const [showOriginal, setShowOriginal] = useState(false)
-  const [showSensitive, setShowSensitive] = useState(false)
+  const [openModel, setOpenModel] = useState(false);
+  const [translated, setTranslated] = useState(null);
+  const [showTranslateButton, setShowTranslateButton] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const [showSensitive, setShowSensitive] = useState(false);
 
-  const isShared = post?.isShared && post?.originalPost
-  const original = post?.originalPost
-  const highlightedComment = getHighlightedComment(post)
-  const pathname = usePathname()
-  const isView = pathname?.includes('/Pages/Saved')
+  const isShared = post?.isShared && post?.originalPost;
+  const original = post?.originalPost;
+  const highlightedComment = getHighlightedComment(post);
+  const pathname = usePathname();
+  const isView = pathname?.includes('/Pages/Saved');
 
-  // ======= فحص اللغة =======
   useEffect(() => {
-    if (!post?.text || !language) return
-    if (post.text.length < 3) return setShowTranslateButton(false)
+    if (!post?.text || !language) return;
+    if (post.text.length < 3) return setShowTranslateButton(false);
+    const langCode3 = franc(post.text, { minLength: 3 });
+    if (langCode3 === 'und') return setShowTranslateButton(false);
+    const textLang = iso6391Map[langCode3] || 'en';
+    setShowTranslateButton(textLang !== language);
+  }, [post?.text, language]);
 
-    const langCode3 = franc(post.text, { minLength: 3 })
-    if (langCode3 === 'und') return setShowTranslateButton(false)
-
-    const textLang = iso6391Map[langCode3] || 'en'
-    setShowTranslateButton(textLang !== language)
-  }, [post?.text, language])
-
-  // ======= ترجمة =======
   const handleTranslate = async () => {
-    if (!post?.text || !language) return
-    const result = await translate(post.text, language)
-    setTranslated(result)
-    setShowOriginal(true)
-    setShowTranslateButton(false)
-  }
+    if (!post?.text || !language) return;
+    const result = await translate(post.text, language);
+    setTranslated(result);
+    setShowOriginal(true);
+    setShowTranslateButton(false);
+  };
 
   const handleShowOriginal = () => {
-    setShowOriginal(false)
-    setTranslated(null)
-    setShowTranslateButton(true)
-  }
+    setShowOriginal(false);
+    setTranslated(null);
+    setShowTranslateButton(true);
+  };
 
-  // ======= فحص المحتوى الحساس =======
   useEffect(() => {
-    if (post?.isContainWorst) setShowSensitive(true)
-  }, [post?.isContainWorst])
+    if (post?.isContainWorst) setShowSensitive(true);
+  }, [post?.isContainWorst]);
 
   return (
-    <div className="relative w-full">
-      {/* Share Modal */}
+    <div className="relative w-full max-w-2xl mx-auto mb-12">
       <ShareModal
         post={post}
         isOpen={openModel}
@@ -89,127 +82,114 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
       <motion.div
         ref={ref}
         id={post?._id}
-        whileHover={{ y: -2 }}
-        transition={{ type: 'spring', stiffness: 200, damping: 18 }}
-        className="
-          relative w-[95%] md:w-full mx-auto mb-6
-          rounded-2xl shadow-[0_0_25px_-10px_rgba(0,0,0,0.3)]
-          bg-white/90 dark:bg-black/40 backdrop-blur-xl
-          border border-gray-200/70 dark:border-gray-700/60
-          transition-all duration-300
-        "
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        className="group relative overflow-hidden rounded-[2.5rem] bg-[#0A0A0A] border border-white/5 shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-all hover:border-white/10"
       >
-      <AnimatePresence>
-        {showSensitive && (
-          <ShowSensitiveContent setShowSensitive={setShowSensitive} t={t} />
-        )}
-      </AnimatePresence>
+        {/* Decorative Ambient Logic */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-        {/* ======= محتوى البوست ======= */}
-        <div className={`p-4 sm:p-6 flex flex-col gap-5 transition-all ${showSensitive ? 'blur-md pointer-events-none select-none' : ''}`}>
-          {/* ======= Pinned or Shared ======= */}
-          <div className="flex flex-wrap items-center gap-2">
-            {post?.isPinned && (
-              <span className="px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 shadow-md">
-                📌 {t('Pinned')}
-              </span>
-            )}
-            {isShared && (
-              <span className="px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r from-cyan-500 to-blue-600 shadow-md">
-                🔁 {t('Shared')}
-              </span>
-            )}
+        <AnimatePresence>
+          {showSensitive && (
+            <ShowSensitiveContent setShowSensitive={setShowSensitive} t={t} />
+          )}
+        </AnimatePresence>
+
+        <div className={`p-6 md:p-8 flex flex-col gap-6 transition-all ${showSensitive ? 'blur-2xl pointer-events-none' : ''}`}>
+
+          {/* Top Metadata Row */}
+          <div className="flex items-center justify-between">
+            <div className="flex gap-2">
+              {post?.isPinned && (
+                <div className="px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-[10px] font-black uppercase tracking-widest text-yellow-500">
+                  Pinned
+                </div>
+              )}
+              {isShared && (
+                <div className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-black uppercase tracking-widest text-indigo-500">
+                  Shared Vision
+                </div>
+              )}
+            </div>
+            {isShared && <SharedTitle user={user} post={post} original={original} />}
           </div>
 
-          {/* ======= Shared Info ======= */}
-          {isShared && <SharedTitle user={user} post={post} original={original} />}
-
-          <div className="flex flex-col items-start sm:flex-row gap-5 w-full">
-            <PostImage
+          <div className="flex flex-col gap-6">
+            {/* Header with User Info */}
+            <PostHeader
               post={post}
+              user={user}
+              isLogin={isLogin}
               isCommunityPost={!!post?.community}
-              className="w-full sm:w-[160px] h-auto rounded-xl"
             />
 
-            <div className="flex flex-col flex-1 gap-3 w-full">
-              <PostHeader
-                post={post}
-                user={user}
-                isLogin={isLogin}
-                showMenu={showMenu}
-                setShowMenu={setShowMenu}
-                isCommunityPost={!!post?.community}
-              />
+            {/* Content Area */}
+            <div className="flex flex-col gap-5">
+              <div className="text-lg md:text-xl font-medium leading-relaxed dark:text-white/90">
+                <RenderPostText
+                  text={post?.text}
+                  mentions={post?.mentions}
+                  hashtags={post?.Hashtags}
+                  italic={post?.isShared}
+                />
+              </div>
 
-              <RenderPostText
-                text={post?.text}
-                mentions={post?.mentions}
-                hashtags={post?.Hashtags}
-                italic={post?.isShared}
-              />
-
-              {post?.links && <PostLinks links={post?.links} />}
               {post?.music && <PostMusicPlayer music={post.music} />}
 
-              {/* ======= Translation Section ======= */}
-              <div className="mt-2 space-y-3">
-                {showTranslateButton && !showOriginal && (
-                  <button
-                    onClick={handleTranslate}
-                    disabled={loading}
-                    className="flex items-center gap-2 text-sm font-semibold px-4 py-1.5 w-fit text-blue-600 dark:text-blue-400 border border-blue-500/40 rounded-full hover:bg-blue-500/10 dark:hover:bg-blue-500/20 transition-all"
-                  >
-                    {loading ? `${t('Translating')}...` : t('Translate')}
-                    {loading && (
-                      <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full opacity-60" />
-                    )}
-                  </button>
+              {/* Media Section */}
+              <div className="rounded-[1.5rem] overflow-hidden border border-white/5 bg-white/[0.02]">
+                {!isShared && post?.Photos?.length > 0 && (
+                  <PostPhotos
+                    photos={post.Photos}
+                    setImageView={setImageView}
+                    postId={post._id}
+                    className="aspect-video"
+                  />
                 )}
-
-                {translated && showOriginal && (
-                  <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-xl border border-blue-200 dark:border-blue-900/60 shadow-inner">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
-                        {t('Translation')}
-                      </span>
-                      <button
-                        onClick={handleShowOriginal}
-                        className="text-xs font-medium text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-300 underline"
-                      >
-                        {t('Show Original')}
-                      </button>
-                    </div>
-
-                    <RenderPostText
-                      text={translated}
-                      mentions={post?.mentions}
-                      hashtags={post?.Hashtags}
-                      italic={post?.isShared}
-                    />
-                  </div>
+                {isShared && original && (
+                  <SharedPost
+                    original={original}
+                    user={user}
+                    setImageView={setImageView}
+                  />
                 )}
               </div>
 
-              {isShared && original && (
-                <SharedPost
-                  original={original}
-                  user={user}
-                  setImageView={setImageView}
-                />
-              )}
-
-              {!isShared && post?.Photos?.length > 0 && (
-                <PostPhotos
-                  photos={post.Photos}
-                  setImageView={setImageView}
-                  postId={post._id}
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl overflow-hidden"
-                />
-              )}
-
+              {post?.links && <PostLinks links={post?.links} />}
               {post?.Hashtags?.length > 0 && <PostHashtags post={post} />}
+            </div>
 
-              {isLogin && (
+            {/* Translation Widget */}
+            <AnimatePresence>
+              {showTranslateButton && !showOriginal && (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  onClick={handleTranslate}
+                  className="text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 w-fit"
+                >
+                  {loading ? "Decrypting..." : "Translate Logic"}
+                </motion.button>
+              )}
+              {translated && showOriginal && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
+                  className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2"
+                >
+                  <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-[0.2em] text-white/30">
+                    <span>Translated Output</span>
+                    <button onClick={handleShowOriginal} className="hover:text-white transition-colors">Original Version</button>
+                  </div>
+                  <div className="text-base text-white/70">
+                    <RenderPostText text={translated} />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Action Bar - Premium Dock */}
+            {isLogin && (
+              <div className="mt-4 pt-6 border-t border-white/5">
                 <PostActions
                   post={post}
                   user={user}
@@ -219,42 +199,42 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                   savePost={savePost}
                   setOpenModel={setOpenModel}
                 />
-              )}
+              </div>
+            )}
 
-              {!isView && (
-                <>
-                  {post?.comments?.length > 0 && (
-                    <div className="flex items-center gap-2 pt-3">
-                      <div className="flex -space-x-2">
-                        {post.comments.slice(0, 3).map((comment, i) => (
-                          <Image
-                            key={i}
-                            src={comment?.owner?.profilePhoto?.url}
-                            alt="comment-avatar"
-                            width={24}
-                            height={24}
-                            className="rounded-full border-2 border-white dark:border-black w-6 h-6 object-cover"
-                          />
-                        ))}
-                      </div>
-                      <span className="text-gray-500 text-xs">
-                        {post.comments.length} {t('comments')}
-                      </span>
+            {/* Discussion Footer */}
+            {!isView && (post?.comments?.length > 0 || highlightedComment) && (
+              <div className="space-y-4 pt-4">
+                {post?.comments?.length > 0 && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex -space-x-2">
+                      {post.comments.slice(0, 3).map((c, i) => (
+                        <div key={i} className="w-6 h-6 rounded-full border-2 border-black overflow-hidden bg-gray-800">
+                          <img src={c?.owner?.profilePhoto?.url} alt="av" className="w-full h-full object-cover" />
+                        </div>
+                      ))}
                     </div>
-                  )}
-
-                  {highlightedComment && (
-                    <HighlightedComment highlightedComment={highlightedComment} />
-                  )}
-                </>
-              )}
-            </div>
+                    <Link href={`/Pages/Post/${post?._id}`} className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-indigo-400 transition-colors">
+                      View Discourse ({post.comments.length})
+                    </Link>
+                  </div>
+                )}
+                {highlightedComment && (
+                  <div className="relative">
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500/20 rounded-full" />
+                    <div className="pl-6">
+                      <HighlightedComment highlightedComment={highlightedComment} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </motion.div>
     </div>
-  )
-})
+  );
+});
 
-SluchitEntry.displayName = 'SluchitEntry'
-export default SluchitEntry
+SluchitEntry.displayName = 'SluchitEntry';
+export default SluchitEntry;

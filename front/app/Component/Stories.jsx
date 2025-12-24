@@ -1,151 +1,142 @@
-'use client'
+'use client';
 
-import React, { useState, useMemo } from 'react'
-import Image from 'next/image'
-import { useStory } from '../Context/StoryContext'
-import StoryViewer from './StoryViewer'
-import StorySkeleton from '../Skeletons/StoriesSkeleton'
-import { useAuth } from '../Context/AuthContext'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FiPlus } from 'react-icons/fi'
+import React, { useState, useMemo } from 'react';
+import Image from 'next/image';
+import { useStory } from '../Context/StoryContext';
+import StoryViewer from './StoryViewer';
+import StorySkeleton from '../Skeletons/StoriesSkeleton';
+import { useAuth } from '../Context/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiPlus } from 'react-icons/fi';
 
 const Stories = () => {
-  const { user } = useAuth()
-  const { stories, isLoading, viewStory,isStory, setIsStory } = useStory()
-  const [viewerStories, setViewerStories] = useState(null)
+  const { user } = useAuth();
+  const { stories, isLoading, viewStory, setIsStory } = useStory();
+  const [viewerStories, setViewerStories] = useState(null);
+
   const groupedArray = useMemo(() => {
-    if (!stories?.length) return []
+    if (!stories?.length) return [];
     const filteredStories = stories.filter(
-      story =>
-        story?.owner?._id === user?._id ||
-        user?.following?.includes(story?.owner?._id)
-    )
+      story => story?.owner?._id === user?._id || user?.following?.includes(story?.owner?._id)
+    );
     const groupedStories = filteredStories.reduce((acc, story) => {
-      const userId = story?.owner?._id
-      if (!acc[userId]) acc[userId] = { user: story?.owner, stories: [] }
-      acc[userId].stories.push(story)
-      return acc
-    }, {})
-    return Object.values(groupedStories)
-  }, [stories, user?.following])
+      const userId = story?.owner?._id;
+      if (!acc[userId]) acc[userId] = { user: story?.owner, stories: [] };
+      acc[userId].stories.push(story);
+      return acc;
+    }, {});
+    return Object.values(groupedStories);
+  }, [stories, user?._id, user?.following]);
 
   const handleOpenViewer = (userStories) => {
-    setViewerStories(userStories)
-    userStories.forEach(story => viewStory(story._id))
-  }
+    setViewerStories(userStories);
+    userStories.forEach(story => viewStory(story._id));
+  };
 
-  // 🟢 conic-gradient border generator
   const getBorderStyle = (stories, userId) => {
-    const total = stories.length
+    const total = stories.length;
     if (total === 1) {
-      const unseen = !stories[0]?.views?.some(v => v?._id === userId)
-      return unseen
-        ? "conic-gradient(#ff006a 0deg 360deg, transparent 0deg)"
-        : "conic-gradient(#a1a1a1 0deg 360deg, transparent 0deg)"
+      const unseen = !stories[0]?.views?.some(v => v?._id === userId);
+      return unseen ? "conic-gradient(#6366f1, #a855f7, #ec4899)" : "conic-gradient(#333, #333)";
     }
-
-    const step = 360 / total
-    let gradients = []
-
+    const step = 360 / total;
+    let gradients = [];
     stories.forEach((story, i) => {
-      const start = i * step
-      const end = (i + 1) * step
-      const unseen = !story?.views?.some(v => v?._id === userId)
-      gradients.push(
-        `${unseen ? "#ff006a" : "#a1a1a1"} ${start}deg ${end}deg`
-      )
-    })
-
-    return `conic-gradient(${gradients.join(", ")})`
-  }
+      const start = i * step + 2;
+      const end = (i + 1) * step - 2;
+      const unseen = !story?.views?.some(v => v?._id === userId);
+      gradients.push(`${unseen ? "#6366f1" : "#333"} ${start}deg ${end}deg`);
+      gradients.push(`transparent ${end}deg ${(i + 1) * step}deg`);
+    });
+    return `conic-gradient(${gradients.join(", ")})`;
+  };
 
   return (
-    <div className="w-[90%] mx-auto md:w-full">
-      {isLoading ? (
-        <div className="w-full overflow-x-auto flex gap-4 py-4 rounded-lg">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <StorySkeleton key={i} circle />
-          ))}
-        </div>
-      ) : (
-        <div className="w-full overflow-x-auto flex items-center gap-4 pt-3 pb-3 rounded-lg snap-x snap-mandatory scroll-smooth scrollbar-hide">
-          
-          {/* 🟢 Create Story Button */}
-          <div
-            className="relative cursor-pointer group flex flex-col items-center snap-start"
-            title="Create Story"
-            onClick={() => setIsStory(true)}
-          >
-            <div className="relative w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-indigo-500 to-purple-500">
-              <div className="w-full h-full rounded-full bg-black/90 flex items-center justify-center border border-white/10 shadow-md transition-transform group-hover:scale-105 duration-300">
-                <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-full p-2 shadow-lg">
-                  <FiPlus className="text-white text-xl" />
+    <div className="w-full py-6">
+      <div className="flex items-center gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x">
+
+        {/* Create Your Story */}
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsStory(true)}
+          className="flex flex-col items-center gap-3 cursor-pointer shrink-0 snap-start"
+        >
+          <div className="relative w-20 h-20 rounded-[2rem] p-[3px] bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 shadow-xl shadow-indigo-500/10">
+            <div className="w-full h-full rounded-[1.8rem] bg-[#0A0A0A] flex items-center justify-center border border-white/10 group overflow-hidden">
+              {user?.profilePhoto?.url ? (
+                <div className="relative w-full h-full opacity-40 group-hover:opacity-60 transition-opacity">
+                  <Image src={user.profilePhoto.url} fill alt="user" className="object-cover blur-[2px]" />
+                </div>
+              ) : null}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-2xl bg-white text-black flex items-center justify-center shadow-2xl">
+                  <FiPlus size={24} />
                 </div>
               </div>
             </div>
-            <p className="text-xs mt-2 text-gray-700 dark:text-gray-200 text-center truncate w-16">
-              Create
-            </p>
           </div>
+          <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Launch</span>
+        </motion.div>
 
-          {/* 🟣 Other User Stories */}
-          {groupedArray.map((group, index) => (
-            <div
-              key={index}
-              className="relative cursor-pointer group flex flex-col items-center snap-start"
+        {/* User Stories */}
+        {isLoading ? (
+          Array.from({ length: 5 }).map((_, i) => <StorySkeleton key={i} />)
+        ) : (
+          groupedArray.map((group, index) => (
+            <motion.div
+              key={group.user?._id || index}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
               onClick={() => handleOpenViewer(group.stories)}
-              title={group?.user?.username}
+              className="flex flex-col items-center gap-3 cursor-pointer shrink-0 snap-start group"
             >
-              {/* Profile Image with dynamic conic border */}
               <div
-                className="relative w-16 h-16 rounded-full p-[2px]"
-                style={{
-                  background: getBorderStyle(group.stories, user?._id)
-                }}
+                className="relative w-20 h-20 rounded-[2rem] p-[3px] shadow-2xl transition-all group-hover:shadow-indigo-500/20"
+                style={{ background: getBorderStyle(group.stories, user?._id) }}
               >
-                <div className="w-full h-full rounded-full bg-black p-[2px] overflow-hidden">
-                  <Image
-                    src={group?.user?.profilePhoto?.url || '/default-profile.png'}
-                    alt={group?.user?.username}
-                    fill
-                    loading={index < 3 ? 'eager' : 'lazy'}
-                    className="object-cover rounded-full group-hover:scale-110 transition-transform duration-300 ease-in-out"
-                  />
+                <div className="w-full h-full rounded-[1.8rem] bg-black p-1">
+                  <div className="relative w-full h-full rounded-[1.5rem] overflow-hidden border border-white/5">
+                    <Image
+                      src={group?.user?.profilePhoto?.url || '/default-profile.png'}
+                      alt={group?.user?.username}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  </div>
                 </div>
+                {group.stories.length > 1 && (
+                  <div className="absolute -top-1 -right-1 w-6 h-6 rounded-lg bg-white text-black text-[10px] font-black flex items-center justify-center border-2 border-black shadow-lg">
+                    {group.stories.length}
+                  </div>
+                )}
               </div>
-
-              <p className="text-xs mt-2 text-gray-700 dark:text-gray-200 text-center truncate w-16">
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/60 truncate w-20 text-center">
                 {group?.user?.username}
-              </p>
+              </span>
+            </motion.div>
+          ))
+        )}
+      </div>
 
-              {group.stories.length > 1 && (
-                <span className="absolute top-0 right-0 bg-black/60 text-white text-[10px] font-semibold w-5 h-5 rounded-full flex items-center justify-center shadow-md">
-                  {group.stories.length}
-                </span>
-              )}
-            </div>
-          ))}
-
-          {/* 🟠 Story Viewer Modal */}
-          <AnimatePresence>
-            {viewerStories && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="fixed inset-0 z-[999]"
-              >
-                <StoryViewer
-                  stories={viewerStories}
-                  onClose={() => setViewerStories(null)}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      )}
+      <AnimatePresence>
+        {viewerStories && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[1000]"
+          >
+            <StoryViewer
+              stories={viewerStories}
+              onClose={() => setViewerStories(null)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
-  )
-}
+  );
+};
 
-export default Stories
+export default Stories;
