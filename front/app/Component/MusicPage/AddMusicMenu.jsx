@@ -1,12 +1,13 @@
 'use client';
-import { useState, useCallback, useMemo } from "react";
+
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { IoClose, IoImage, IoMusicalNotes } from "react-icons/io5";
+import { IoClose, IoImage, IoMusicalNotes, IoCloudUploadOutline, IoInformationCircleOutline, IoRocketOutline } from "react-icons/io5";
 import Image from "next/image";
 import { useMusic } from "../../Context/MusicContext";
 import { useTranslation } from "react-i18next";
 
-const genres = ["Pop", "Rock", "HipHop", "Jazz", "Classical", "Other"];
+const genres = ["Pop", "Rock", "HipHop", "Jazz", "Classical", "Lo-Fi", "Electronic", "Other"];
 
 const AddMusicModal = ({ isOpen, onClose }) => {
   const [title, setTitle] = useState("");
@@ -22,14 +23,14 @@ const AddMusicModal = ({ isOpen, onClose }) => {
   const { uploadMusic } = useMusic();
   const { t } = useTranslation();
 
-  // ✅ تحسين الأداء: تثبيت دوال المعالجة
   const handleCoverChange = useCallback((e) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
     }
-  }, []);
+  }, [imagePreview]);
 
   const handleAudioChange = useCallback((e) => {
     const file = e.target.files?.[0];
@@ -38,8 +39,15 @@ const AddMusicModal = ({ isOpen, onClose }) => {
 
   const handleClearCover = useCallback(() => {
     setImageFile(null);
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
     setImagePreview(null);
-  }, []);
+  }, [imagePreview]);
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
@@ -60,198 +68,186 @@ const AddMusicModal = ({ isOpen, onClose }) => {
       tagsArray.forEach(tag => formData.append("tags[]", tag));
     }
 
-    await uploadMusic(formData);
-    setLoading(false);
-    onClose();
+    try {
+      await uploadMusic(formData);
+      onClose();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, [title, artist, album, genre, audioFile, imageFile, language, tags, uploadMusic, onClose]);
-
-  // ✅ useMemo لتثبيت بيانات الحقول لتقليل إعادة التصيير
-  const formFields = useMemo(() => ([
-    { label: "Title", value: title, set: setTitle, placeholder: "Enter song title" },
-    { label: "Artist", value: artist, set: setArtist, placeholder: "Enter artist name" },
-    { label: "Album (Optional)", value: album, set: setAlbum, placeholder: "Enter album name" },
-  ]), [title, artist, album]);
 
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 bg-gradient-to-br from-black/80 via-gray-900/70 to-black/80 backdrop-blur-xl z-[1000] flex justify-center items-center overflow-y-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/90 backdrop-blur-2xl z-[1000] flex justify-center items-center p-4"
+          onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: -20 }}
+            initial={{ scale: 0.95, opacity: 0, y: 30 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            transition={{ duration: 0.25 }}
-            className="relative w-full max-w-2xl mx-4 my-10 rounded-3xl bg-gradient-to-br from-gray-900/60 to-black/80 border border-white/10 p-8 shadow-[0_0_40px_rgba(59,130,246,0.25)] 
-                       max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent"
+            exit={{ scale: 0.95, opacity: 0, y: 30 }}
+            className="relative w-full max-w-5xl bg-[#0F0F0F] rounded-[3rem] border border-white/5 shadow-[0_0_100px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col md:flex-row h-full max-h-[850px]"
           >
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 text-white/70 hover:text-red-400 transition"
-            >
-              <IoClose size={26} />
-            </button>
-
-            {/* Title */}
-            <h2 className="text-center text-2xl sm:text-3xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-              🎵 {t("Add New Music")}
-            </h2>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-              {/* Cover Upload */}
-              <div className="flex flex-col items-center text-center">
-                <div className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-2xl overflow-hidden border border-gray-600/40 shadow-md group cursor-pointer hover:scale-[1.03] transition">
-                  {imagePreview ? (
-                    <>
-                      <Image
-                        src={imagePreview}
-                        alt="cover preview"
-                        width={160}
-                        height={160}
-                        className="object-cover w-full h-full"
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-3 transition">
-                        <label className="px-3 py-1.5 bg-white/90 dark:bg-gray-800 text-sm rounded-lg font-medium cursor-pointer hover:bg-white dark:hover:bg-gray-700 transition">
-                          {t("Change")}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleCoverChange}
-                            className="hidden"
-                          />
-                        </label>
-                        <button
-                          type="button"
-                          onClick={handleClearCover}
-                          className="px-3 py-1.5 bg-red-500 text-white text-sm rounded-lg font-medium hover:bg-red-600 transition"
-                        >
-                          {t("Clear")}
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <label className="flex flex-col items-center justify-center gap-2 text-gray-400 cursor-pointer h-full w-full">
-                      <IoImage size={28} />
-                      <span className="text-sm font-medium">Upload Cover</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleCoverChange}
-                        className="hidden"
-                      />
-                    </label>
-                  )}
+            {/* Sidebar / Preview Section */}
+            <div className="w-full md:w-80 bg-[#151515] p-8 border-r border-white/5 flex flex-col gap-8 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                  <IoMusicalNotes className="text-white" size={20} />
                 </div>
+                <h2 className="text-xl font-black text-white tracking-tight">Music Studio</h2>
               </div>
 
-              {/* Inputs */}
-              {formFields.map((f, i) => (
-                <div key={i}>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">{t(f.label)}</label>
-                  <input
-                    type="text"
-                    value={f.value}
-                    onChange={(e) => f.set(e.target.value)}
-                    placeholder={f.placeholder}
-                    className="w-full px-4 py-2 border border-gray-700 rounded-xl bg-gray-900/50 text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition"
-                  />
-                </div>
-              ))}
-
-              {/* Genre */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">{t("Genre")}</label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {genres.map((g) => (
-                    <label
-                      key={g}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium cursor-pointer border transition-all ${
-                        genre === g
-                          ? "border-blue-500 bg-blue-500 text-white"
-                          : "border-gray-700 bg-transparent text-gray-300 hover:border-blue-400"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        value={g}
-                        checked={genre === g}
-                        onChange={() => setGenre(g)}
-                        className="hidden"
-                      />
-                      {g}
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Language */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">{t("Language")}</label>
-                <input
-                  type="text"
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  placeholder="Enter language (default: Unknown)"
-                  className="w-full px-4 py-2 border border-gray-700 rounded-xl bg-gray-900/50 text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition"
-                />
-              </div>
-
-              {/* Tags */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">{t("Tags")} (comma separated)</label>
-                <input
-                  type="text"
-                  value={tags}
-                  onChange={(e) => setTags(e.target.value)}
-                  placeholder="e.g., summer, chill, 2025"
-                  className="w-full px-4 py-2 border border-gray-700 rounded-xl bg-gray-900/50 text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition"
-                />
-              </div>
-
-              {/* Audio Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">{t("Upload Music File")}</label>
-                <input
-                  type="file"
-                  accept="audio/*"
-                  onChange={handleAudioChange}
-                  className="w-full px-4 py-2 border border-gray-700 rounded-xl cursor-pointer bg-gray-900/50 text-gray-100"
-                />
-                {audioFile && (
-                  <audio controls src={URL.createObjectURL(audioFile)} className="w-full mt-2 rounded-lg" />
-                )}
-              </div>
-
-              {/* Submit Button */}
-              <motion.button
-                type="submit"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                disabled={loading}
-                className={`w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow-lg transition-all ${
-                  loading ? "opacity-70 cursor-not-allowed" : ""
-                }`}
-              >
-                {loading ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                    className="w-5 h-5 border-t-2 border-white rounded-full mx-auto"
-                  />
-                ) : (
+              {/* Cover Preview Card */}
+              <div className="relative aspect-square w-full rounded-3xl overflow-hidden bg-black shadow-2xl border border-white/5 group border-dashed flex flex-col items-center justify-center text-center p-4">
+                {imagePreview ? (
                   <>
-                    <IoMusicalNotes className="inline-block text-xl mr-2" />
-                    {t("Save Music")}
+                    <Image src={imagePreview} alt="preview" fill className="object-cover" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                      <button type="button" onClick={handleClearCover} className="p-3 bg-red-500 text-white rounded-full">
+                        <IoClose size={20} />
+                      </button>
+                    </div>
                   </>
+                ) : (
+                  <label className="cursor-pointer flex flex-col items-center gap-2">
+                    <IoImage size={48} className="text-white/10 group-hover:text-indigo-500 transition-colors" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-white/20 group-hover:text-white transition-colors">Select Artwork</p>
+                    <input type="file" accept="image/*" onChange={handleCoverChange} className="hidden" />
+                  </label>
                 )}
-              </motion.button>
-            </form>
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                  <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                    <IoInformationCircleOutline /> Track Info
+                  </div>
+                  <p className="text-sm font-bold text-white truncate">{title || "Untitled Rhythm"}</p>
+                  <p className="text-xs text-indigo-400 font-bold truncate">{artist || "Unknown Visionary"}</p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                  <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-2">Asset Type</div>
+                  <div className="flex items-center gap-2 text-white/60">
+                    <IoMusicalNotes />
+                    <span className="text-xs font-bold">{audioFile ? audioFile.name : "None Selected"}</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={onClose}
+                className="mt-auto py-4 text-xs font-black uppercase tracking-widest text-white/20 hover:text-white transition-colors"
+              >
+                Abort Upload
+              </button>
+            </div>
+
+            {/* Main Content Form */}
+            <div className="flex-1 flex flex-col h-full">
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-10 space-y-10">
+                <section>
+                  <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                    <span className="w-8 h-px bg-white/10" /> Primary Metadata
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-white/40 uppercase ml-2">Track Title *</label>
+                      <input
+                        value={title} onChange={e => setTitle(e.target.value)}
+                        placeholder="e.g. Midnight Waves"
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-5 py-4 text-white placeholder:text-white/10 focus:border-indigo-500/50 outline-none transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-white/40 uppercase ml-2">Artist Identity *</label>
+                      <input
+                        value={artist} onChange={e => setArtist(e.target.value)}
+                        placeholder="e.g. Studio X"
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-5 py-4 text-white placeholder:text-white/10 focus:border-indigo-500/50 outline-none transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-white/40 uppercase ml-2">Collection / Album</label>
+                      <input
+                        value={album} onChange={e => setAlbum(e.target.value)}
+                        placeholder="e.g. Neon Horizon"
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-5 py-4 text-white placeholder:text-white/10 focus:border-indigo-500/50 outline-none transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-white/40 uppercase ml-2">Recording Language</label>
+                      <input
+                        value={language} onChange={e => setLanguage(e.target.value)}
+                        placeholder="e.g. English"
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-5 py-4 text-white placeholder:text-white/10 focus:border-indigo-500/50 outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+                </section>
+
+                <section>
+                  <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                    <span className="w-8 h-px bg-white/10" /> Genre Selection
+                  </h3>
+                  <div className="flex flex-wrap gap-3">
+                    {genres.map(g => (
+                      <button
+                        key={g}
+                        onClick={() => setGenre(g)}
+                        className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${genre === g ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/20' : 'bg-white/[0.02] border-white/5 text-white/40 hover:border-white/20'}`}
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <section>
+                  <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                    <span className="w-8 h-px bg-white/10" /> Master Audio Asset
+                  </h3>
+                  <label className={`block group relative w-full h-32 border-2 border-dashed rounded-3xl cursor-pointer transition-all flex flex-col items-center justify-center bg-white/[0.01] ${audioFile ? 'border-green-500/30' : 'border-white/5 hover:border-indigo-500/50 group-hover:bg-white/[0.03]'}`}>
+                    <IoCloudUploadOutline size={32} className={`mb-2 transition-colors ${audioFile ? 'text-green-500' : 'text-white/10 group-hover:text-indigo-500'}`} />
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${audioFile ? 'text-green-500' : 'text-white/20'}`}>
+                      {audioFile ? `Verified: ${audioFile.name}` : "Upload Master .wav / .mp3"}
+                    </span>
+                    <input type="file" accept="audio/*" onChange={handleAudioChange} className="hidden" />
+                  </label>
+                </section>
+              </div>
+
+              {/* Launch Footer */}
+              <div className="p-8 bg-[#0D0D0D] border-t border-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                  <span className="text-[10px] font-black text-white/20 uppercase tracking-widest underline decoration-indigo-500 decoration-2 underline-offset-4 cursor-help">Digital Rights Verified</span>
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleSubmit}
+                  disabled={loading || !title || !artist || !audioFile}
+                  className={`flex items-center gap-4 px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all duration-500 ${loading || !title || !artist || !audioFile ? 'bg-white/5 text-white/10' : 'bg-white text-black hover:bg-indigo-600 hover:text-white shadow-2xl shadow-indigo-600/20'}`}
+                >
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <IoRocketOutline size={20} />
+                      Launch Distribution
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            </div>
           </motion.div>
         </motion.div>
       )}

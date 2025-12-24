@@ -8,21 +8,21 @@ import {
   FaPause,
   FaHeart,
   FaExpand,
-  FaShareAlt,
   FaStepForward,
   FaStepBackward,
   FaVolumeUp,
   FaVolumeMute,
   FaRandom,
-  FaRedo
+  FaRedo,
+  FaListUl
 } from 'react-icons/fa'
 import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
 import { useMusic } from '@/app/Context/MusicContext'
 import { useAuth } from '@/app/Context/AuthContext'
 import { useTranslation } from 'react-i18next'
 import ColorThief from 'colorthief'
-import Slider from 'rc-slider' // لتوفير شريط تحكم بالصوت احترافي
-import 'rc-slider/assets/index.css' // ملف الـ CSS الخاص بالـ Slider
+import Slider from 'rc-slider'
+import 'rc-slider/assets/index.css'
 
 const SongPlayer = React.memo(() => {
   const {
@@ -49,13 +49,12 @@ const SongPlayer = React.memo(() => {
   const { user } = useAuth()
   const { t } = useTranslation()
 
-  const [bgColor, setBgColor] = useState('#111')
+  const [bgColor, setBgColor] = useState('#4f46e5')
   const [showVolumeSlider, setShowVolumeSlider] = useState(false)
 
-  // 🎨 استخراج لون الغلاف لتنسيق الخلفية
   useEffect(() => {
     if (!current?.cover) {
-      setBgColor('#222')
+      setBgColor('#4f46e5')
       return
     }
 
@@ -69,7 +68,7 @@ const SongPlayer = React.memo(() => {
           const color = colorThief.getColor(img)
           setBgColor(`rgb(${color.join(',')})`)
         } catch {
-          setBgColor('#222')
+          setBgColor('#4f46e5')
         }
       }
     }
@@ -91,179 +90,156 @@ const SongPlayer = React.memo(() => {
   if (!current) return null
 
   return (
-    // هذا الـ div سيضمن أن الـ SongPlayer يظهر في منتصف الجزء السفلي بالظبط
-    // Fixed, Centered, Responsive, and on top of everything.
     <AnimatePresence>
       <motion.div
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 90, damping: 15 }}
-        className={`fixed bottom-0 left-0 w-full z-50 p-4 pb-8 flex justify-center items-center
-                    bg-gradient-to-t from-gray-950/90 via-gray-950/70 to-transparent`} // خلفية متدرجة شفافة
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-5xl z-[100] px-4"
       >
         <div
-          className={`w-[96%] max-w-5xl bg-white/5 backdrop-blur-xl border border-white/10
-                      rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.5)]
-                      flex flex-col md:flex-row items-center p-3 sm:p-4 gap-3 sm:gap-6`}
-          style={{
-            background: `linear-gradient(90deg, ${bgColor}33, #00000066)` // خلفية متدرجة تعتمد على لون الغلاف
-          }}
+          className="relative overflow-hidden rounded-[2.5rem] bg-black/40 dark:bg-black/60 backdrop-blur-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-4 flex flex-col md:flex-row items-center gap-6"
         >
-          {/* 🎧 معلومات الأغنية (يسار) */}
-          <div className="flex items-center gap-3 flex-shrink-0 w-full md:w-auto">
-            <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden shadow-md flex-shrink-0">
-              {current?.cover ? (
-                <Image src={current.cover} alt={current.title} fill className="object-cover" />
-              ) : (
-                <div className="w-full h-full bg-gray-700 flex items-center justify-center text-xs text-gray-400">
-                  {t('No Cover')}
-                </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0 text-white">
-              <h4 className="font-semibold text-sm sm:text-base truncate">
-                {current?.title || 'Unknown'}
+          {/* Ambient Background Glow */}
+          <div
+            className="absolute inset-0 opacity-20 blur-[100px] pointer-events-none"
+            style={{ backgroundColor: bgColor }}
+          />
+
+          {/* Album Art & Info */}
+          <div className="flex items-center gap-4 flex-shrink-0 z-10">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-2xl ring-2 ring-white/10"
+            >
+              <Image src={current.cover || '/song-placeholder.png'} alt={current.title} fill className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-black/40 to-transparent" />
+            </motion.div>
+            <div className="flex flex-col">
+              <h4 className="text-white font-bold text-sm sm:text-base leading-tight truncate max-w-[150px]">
+                {current.title}
               </h4>
-              <p className="text-xs text-gray-300 truncate">
-                {current?.artist || 'Unknown Artist'}
+              <p className="text-indigo-400 text-xs font-semibold">
+                {current.artist}
               </p>
             </div>
           </div>
 
-          {/* 🎛️ أزرار التحكم الرئيسية وشريط التقدم (المنتصف) */}
-          <div className="flex-1 flex flex-col items-center w-full md:w-auto">
-            {/* أزرار التحكم */}
-            <div className="flex items-center gap-4 sm:gap-6 mb-2">
-              <motion.button
+          {/* Controls & Progress */}
+          <div className="flex-1 flex flex-col items-center gap-2 z-10 w-full">
+            <div className="flex items-center gap-8">
+              <button
                 onClick={toggleShuffle}
-                whileTap={{ scale: 0.9 }}
-                className={`text-white/70 hover:text-white transition ${shuffle ? 'text-green-400' : ''}`}
-                aria-label={t('Shuffle')}
+                className={`transition-colors ${shuffle ? 'text-indigo-500' : 'text-gray-400 hover:text-white'}`}
               >
-                <FaRandom size={16} />
-              </motion.button>
+                <FaRandom size={14} />
+              </button>
+
+              <button onClick={prev} className="text-white hover:scale-110 transition-transform">
+                <FaStepBackward size={18} />
+              </button>
+
               <motion.button
-                onClick={prev}
+                whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className="text-white hover:text-white/80 transition"
-                aria-label={t('Previous')}
-              >
-                <FaStepBackward size={20} />
-              </motion.button>
-              <motion.button
-                whileTap={{ scale: 0.8 }}
                 onClick={togglePlay}
-                className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white
-                          flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
-                aria-label={playing ? t('Pause') : t('Play')}
+                className="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all"
               >
-                {playing ? <FaPause size={20} /> : <FaPlay size={20} />}
+                {playing ? <FaPause size={20} /> : <FaPlay size={20} className="ml-1" />}
               </motion.button>
-              <motion.button
-                onClick={next}
-                whileTap={{ scale: 0.9 }}
-                className="text-white hover:text-white/80 transition"
-                aria-label={t('Next')}
-              >
-                <FaStepForward size={20} />
-              </motion.button>
-              <motion.button
+
+              <button onClick={next} className="text-white hover:scale-110 transition-transform">
+                <FaStepForward size={18} />
+              </button>
+
+              <button
                 onClick={toggleLoop}
-                whileTap={{ scale: 0.9 }}
-                className={`text-white/70 hover:text-white transition ${loop ? 'text-green-400' : ''}`}
-                aria-label={t('Loop')}
+                className={`transition-colors ${loop ? 'text-indigo-500' : 'text-gray-400 hover:text-white'}`}
               >
-                <FaRedo size={16} />
-              </motion.button>
+                <FaRedo size={14} />
+              </button>
             </div>
 
-            {/* شريط التقدم */}
-            <div className="flex items-center gap-3 w-full text-xs text-gray-300">
-              <span>{formatTime(progress)}</span>
-              <Slider
-                min={0}
-                max={100}
-                value={progressPercent}
-                onChange={handleSeek}
-                className="flex-1"
-                trackStyle={{ backgroundColor: '#4F46E5' }} // لون شريط التقدم
-                handleStyle={{
-                  borderColor: '#4F46E5',
-                  backgroundColor: '#6366F1',
-                  opacity: 1,
-                  boxShadow: 'none',
-                  marginTop: -4 // لضبط موقع المقبض
-                }}
-                railStyle={{ backgroundColor: '#ffffff33' }} // لون شريط التقدم الخلفي
-              />
-              <span>{formatTime(duration)}</span>
+            <div className="w-full flex items-center gap-3">
+              <span className="text-[10px] font-bold text-gray-400 w-10 text-right">{formatTime(progress)}</span>
+              <div className="flex-1">
+                <Slider
+                  min={0}
+                  max={100}
+                  value={progressPercent}
+                  onChange={handleSeek}
+                  trackStyle={{ background: 'linear-gradient(90deg, #4f46e5, #9333ea)', height: 4 }}
+                  railStyle={{ backgroundColor: 'rgba(255,255,255,0.1)', height: 4 }}
+                  handleStyle={{
+                    borderColor: '#ffffff',
+                    backgroundColor: '#ffffff',
+                    opacity: 1,
+                    boxShadow: '0 0 10px rgba(255,255,255,0.5)',
+                    width: 12,
+                    height: 12,
+                    marginTop: -4
+                  }}
+                />
+              </div>
+              <span className="text-[10px] font-bold text-gray-400 w-10">{formatTime(duration)}</span>
             </div>
           </div>
 
-          {/* 🔊 عناصر إضافية (يمين) */}
-          <div className="flex items-center gap-3 flex-shrink-0 mt-2 md:mt-0">
-            {/* زر الصوت والمتحكم */}
-            <div className="relative flex items-center gap-2">
-              <motion.button
-                onClick={() => setShowVolumeSlider(prev => !prev)}
-                whileTap={{ scale: 0.9 }}
-                className="text-white/70 hover:text-white transition"
-                aria-label={isMuted ? t('Unmute') : t('Mute')}
+          {/* Extra Controls */}
+          <div className="flex items-center gap-5 z-10 flex-shrink-0">
+            <div className="relative">
+              <button
+                onMouseEnter={() => setShowVolumeSlider(true)}
+                className="text-gray-400 hover:text-white transition-colors"
+                onClick={toggleMute}
               >
                 {isMuted || volume === 0 ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
-              </motion.button>
+              </button>
+
               <AnimatePresence>
                 {showVolumeSlider && (
                   <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    className="absolute bottom-full mb-2 w-24 p-2 bg-gray-800/80 backdrop-blur-md rounded-lg shadow-xl"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    onMouseLeave={() => setShowVolumeSlider(false)}
+                    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 p-3 bg-black/80 backdrop-blur-xl rounded-2xl border border-white/10"
                   >
-                    <Slider
-                      min={0}
-                      max={100}
-                      value={isMuted ? 0 : volume * 100}
-                      onChange={(val) => setVolume(val / 100)}
-                      vertical // لجعل المتحكم عمودي
-                      className="h-20"
-                      trackStyle={{ backgroundColor: '#6366F1' }}
-                      handleStyle={{
-                        borderColor: '#4F46E5',
-                        backgroundColor: '#6366F1',
-                        opacity: 1,
-                        boxShadow: 'none',
-                        marginLeft: -2 // لضبط موقع المقبض العمودي
-                      }}
-                      railStyle={{ backgroundColor: '#ffffff33' }}
-                    />
+                    <div className="h-24">
+                      <Slider
+                        vertical
+                        min={0}
+                        max={100}
+                        value={isMuted ? 0 : volume * 100}
+                        onChange={(val) => setVolume(val / 100)}
+                        trackStyle={{ backgroundColor: '#4f46e5' }}
+                        railStyle={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                      />
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            <motion.button
+            <button
               onClick={() => current?._id && likeMusic(current._id)}
-              whileTap={{ scale: 0.9 }}
-              className={`p-2 rounded-full transition-all text-sm
-                        ${current?.likes?.includes(user?._id)
-                          ? 'bg-red-500 text-white'
-                          : 'bg-white/10 text-white/70 hover:bg-white/20'
-                        }`}
-              aria-label={t('Like')}
+              className={`transition-colors ${current?.likes?.includes(user?._id) ? 'text-red-500' : 'text-gray-400 hover:text-white'}`}
             >
-              <FaHeart />
-            </motion.button>
+              <FaHeart size={18} />
+            </button>
 
-            <motion.button
+            <button
               onClick={() => setExpanded(true)}
-              whileTap={{ scale: 0.9 }}
-              className="p-2 rounded-full bg-white/10 text-white/70 hover:bg-white/20 transition text-sm"
-              aria-label={t('Expand')}
+              className="text-gray-400 hover:text-white transition-colors"
             >
-              <FaExpand />
-            </motion.button>
+              <FaExpand size={16} />
+            </button>
+
+            <div className="h-8 w-px bg-white/10 mx-2 hidden md:block" />
+
+            <button className="text-gray-400 hover:text-indigo-400 transition-colors">
+              <FaListUl size={18} />
+            </button>
           </div>
         </div>
       </motion.div>
