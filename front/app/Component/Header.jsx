@@ -22,14 +22,14 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
       <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-16 flex items-center justify-between gap-8">
 
         {/* Brand/Logo */}
-        <Link href="/" className="flex items-center gap-2 group shrink-0">
+        {/* <Link href="/" className="flex items-center gap-2 group shrink-0">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
             <span className="text-white font-black text-xl italic">Z</span>
           </div>
           <span className="hidden sm:block text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 tracking-tight">
             Zocial
           </span>
-        </Link>
+        </Link> */}
 
         {/* Tab Navigation - Professional Pill Design */}
         <nav className="flex items-center bg-white/5 p-1 rounded-2xl border border-white/5 hidden md:flex">

@@ -71,7 +71,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
   }, [post?.isContainWorst]);
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto mb-12">
+    <div className="relative w-full mb-12">
       <ShareModal
         post={post}
         isOpen={openModel}

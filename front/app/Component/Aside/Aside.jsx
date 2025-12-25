@@ -1,9 +1,7 @@
 'use client'
-import React, { useState, useEffect, memo } from 'react'
-
-import { Tooltip } from 'react-tooltip'
-import { motion } from 'framer-motion'
-import { FiChevronLeft, FiX } from "react-icons/fi"
+import React, { useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { FiX } from "react-icons/fi"
 import 'react-tooltip/dist/react-tooltip.css'
 import { useAuth } from '../../Context/AuthContext'
 import { useAside } from '../../Context/AsideContext'
@@ -11,17 +9,13 @@ import SidebarContent from './SidebarContent'
 import { useUser } from '@/app/Context/UserContext'
 import { useTranslate } from '@/app/Context/TranslateContext'
 
-
-
-
-const Aside = ({isCollapsed, setIsCollapsed}) => {
+const Aside = ({ isCollapsed, setIsCollapsed }) => {
   const { user, Logout } = useAuth()
-  const {onlineUsers} = useUser()
+  const { onlineUsers } = useUser()
   const { isMobile, setIsMobile, isMobileMenuOpen, setIsMobileMenuOpen } = useAside()
-  // const [isCollapsed, setIsCollapsed] = useState(false)
   const { language } = useTranslate();
-  const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language); // true لو RTL
-  // Detect mobile safely (SSR safe)
+  const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language);
+
   useEffect(() => {
     if (typeof window === "undefined") return
     const handleResize = () => setIsMobile(window.innerWidth < 1024)
@@ -30,7 +24,6 @@ const Aside = ({isCollapsed, setIsCollapsed}) => {
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  // Adjust collapsed on mobile
   useEffect(() => {
     setIsCollapsed(isMobile)
     if (!isMobile) setIsMobileMenuOpen(false)
@@ -40,11 +33,20 @@ const Aside = ({isCollapsed, setIsCollapsed}) => {
     <>
       {/* ===== Desktop Sidebar ===== */}
       <motion.aside
-        animate={{ width: isCollapsed ? 80 : 260 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className={`hidden md:flex fixed top-0 ${isRTL ? 'right-0' : 'left-0'} flex-col h-screen bg-lightMode-menu dark:bg-darkMode-menu border-r p-3 hover-expanded`}
+        animate={{
+          width: isCollapsed ? 88 : 280,
+          opacity: 1
+        }}
+        initial={{ opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+        className={`
+          hidden md:flex fixed top-0 ${isRTL ? 'right-0 border-l' : 'left-0 border-r'} 
+          flex-col h-screen 
+          bg-white/80 dark:bg-[#0B0F1A]/80 backdrop-blur-xl
+          border-gray-100 dark:border-white/5 
+          p-4 z-50 transition-colors duration-500
+        `}
       >
-
         <SidebarContent
           isCollapsed={isCollapsed}
           isMobile={false}
@@ -56,43 +58,49 @@ const Aside = ({isCollapsed, setIsCollapsed}) => {
       </motion.aside>
 
       {/* ===== Mobile Drawer ===== */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-[1000] flex">
-          <div
-            className="fixed inset-0 bg-black/40"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-          {/* <motion.aside
-            initial={{ x: -300 }}
-            animate={{ x: 0 }}
-            exit={{ x: -300 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 25 }}
-            className="relative w-72 bg-lightMode-menu dark:bg-darkMode-menu p-4 flex flex-col"
-          > */}
-          <motion.aside
-            initial={{ x: isRTL ? 300 : -300 }}
-            animate={{ x: 0 }}
-            exit={{ x: isRTL ? 300 : -300 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 25 }}
-            className={`relative w-72 bg-lightMode-menu dark:bg-darkMode-menu p-4 flex flex-col ${isRTL ? 'right-0' : 'left-0'}`}
-          >
-
-            <button
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-[1000] flex">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="absolute top-4 right-4 text-2xl text-lightMode-text dark:text-darkMode-text"
-            >
-              <FiX />
-            </button>
-            <SidebarContent
-              isCollapsed={false} // always expanded in mobile drawer
-              isMobile={true}
-              setIsMobileMenuOpen={setIsMobileMenuOpen}
-              user={{ ...user, Logout }}
-              onlineUsers={onlineUsers}
             />
-          </motion.aside>
-        </div>
-      )}
+
+            <motion.aside
+              initial={{ x: isRTL ? '100%' : '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: isRTL ? '100%' : '-100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className={`
+                relative w-[280px] h-full
+                bg-white dark:bg-[#0B0F1A]
+                p-6 flex flex-col shadow-2xl
+                ${isRTL ? 'mr-auto' : 'ml-0'}
+              `}
+            >
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400"
+              >
+                <FiX className="text-xl" />
+              </motion.button>
+
+              <SidebarContent
+                isCollapsed={false}
+                isMobile={true}
+                setIsMobileMenuOpen={setIsMobileMenuOpen}
+                user={{ ...user, Logout }}
+                onlineUsers={onlineUsers}
+              />
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

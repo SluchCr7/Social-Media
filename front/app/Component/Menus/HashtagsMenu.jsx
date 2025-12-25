@@ -1,70 +1,87 @@
 'use client';
+
 import React from 'react';
 import { usePost } from '../../Context/PostContext';
-import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { HiTrendingUp, HiTrendingDown } from 'react-icons/hi2';
 import Link from 'next/link';
 import { filterHashtags } from '../../utils/filterHashtags';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 
 const HashtagsMenu = React.memo(() => {
   const { posts } = usePost();
-  const {t} = useTranslation()
-  // Collect all hashtags from all posts
+  const { t } = useTranslation()
+
   const hashtagCount = {};
   filterHashtags(posts, hashtagCount);
 
-  // Convert to array and sort by popularity
   const topHashtags = Object.entries(hashtagCount)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 5); // top 5 hashtags
+    .slice(0, 5);
 
   return (
-    <div className="w-full max-h-[500px] overflow-y-auto bg-white dark:bg-[#16181c] rounded-xl shadow-md border border-gray-200 dark:border-gray-700 flex flex-col">
-      
-      {/* Header */}
-      <div className="flex justify-between items-center px-5 py-3 border-b border-gray-300 dark:border-gray-600 bg-gradient-to-r from-purple-500 to-indigo-500">
-        <h2 className="text-white text-lg font-semibold">
-          {t("Trending Hashtags")}
+    <div className="w-full bg-white/50 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-2xl overflow-hidden flex flex-col">
+
+      {/* ⚡ Header */}
+      <div className="px-7 pt-7 pb-4">
+        <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
+          <span className="w-2 h-6 bg-indigo-600 dark:bg-indigo-500 rounded-full" />
+          {t("Trending Now")}
         </h2>
       </div>
 
-      {/* Body */}
-      <div className="flex flex-col w-full px-4 py-3 space-y-2">
+      {/* 🚀 Body */}
+      <div className="flex flex-col w-full px-4 pb-6 space-y-1">
         {topHashtags.length === 0 ? (
-          <div className="flex items-center justify-center py-10 text-gray-500 dark:text-gray-400 text-sm">
-            {t("No trending hashtags yet.")}
+          <div className="flex items-center justify-center py-10 text-gray-400 dark:text-gray-500 text-sm font-medium">
+            {t("No trends found yet.")}
           </div>
         ) : (
-            topHashtags
-              .slice(0, 3)
-              .map(([tag, count], index) => {
-            const isTrendingUp = index % 2 === 0; // simple trend simulation
+          topHashtags
+            .slice(0, 4)
+            .map(([tag, count], index) => {
+              const isTrendingUp = index % 2 === 0;
 
-            return (
-              <Link
-                key={tag}
-                href={`/Pages/Hashtag/${encodeURIComponent(tag)}`}
-                className="flex justify-between items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
-              >
-                <div className="flex flex-col">
-                  <span className="text-gray-900 dark:text-gray-100 font-medium">#{tag}</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{count} {t("posts")}</span>
-                </div>
-                <div className={`flex items-center justify-center w-6 h-6 rounded-full ${isTrendingUp ? 'bg-green-100 dark:bg-green-800' : 'bg-red-100 dark:bg-red-800'}`}>
-                  {isTrendingUp ? (
-                    <FaArrowUp className="text-green-600 dark:text-green-400 text-sm" />
-                  ) : (
-                    <FaArrowDown className="text-red-600 dark:text-red-400 text-sm" />
-                  )}
-                </div>
-              </Link>
-            );
-          })
+              return (
+                <Link
+                  key={tag}
+                  href={`/Pages/Hashtag/${encodeURIComponent(tag)}`}
+                  className="group flex justify-between items-center p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-300"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-gray-900 dark:text-gray-100 font-bold group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      #{tag}
+                    </span>
+                    <span className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-0.5">
+                      {count} {t("posts")}
+                    </span>
+                  </div>
+
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    className={`flex items-center justify-center w-9 h-9 rounded-xl ${isTrendingUp ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'}`}
+                  >
+                    {isTrendingUp ? (
+                      <HiTrendingUp size={18} />
+                    ) : (
+                      <HiTrendingDown size={18} />
+                    )}
+                  </motion.div>
+                </Link>
+              );
+            })
         )}
+      </div>
+
+      {/* Footer Link */}
+      <div className="px-7 py-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
+        <button className="text-[12px] font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors tracking-wide uppercase">
+          Explore all trends
+        </button>
       </div>
     </div>
   );
 });
-HashtagsMenu.displayName = 'HashtagsMenu'
 
+HashtagsMenu.displayName = 'HashtagsMenu'
 export default HashtagsMenu;
