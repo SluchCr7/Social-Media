@@ -1,623 +1,300 @@
-// 'use client'
-// import React from 'react'
-// import {
-//   FaChevronLeft,
-//   FaChevronRight,
-//   FaPlus,
-//   FaTrash,
-//   FaEdit,
-//   FaBirthdayCake,
-//   FaUsers,
-//   FaCalendarAlt,
-//   FaRegStar,
-// } from "react-icons/fa";
-// import { motion, AnimatePresence } from "framer-motion";
-// import dayjs from "dayjs";
-// import AddEventModal from '@/app/Component/AddandUpdateMenus/AddEventModal';
-// import EventDetailsModal from '@/app/Component/AddandUpdateMenus/EventDetailsModal';
-// import ShowAllEvents from '@/app/Component/AddandUpdateMenus/ShowAllEvents';
-// import { useTranslation } from 'react-i18next';
+'use client';
 
-
-// const DesignCalender = React.memo(({
-//     setNewEvent,newEvent,
-//     currentDate, days,isToday,  setSelectedDate, typeIcons,setCurrentDate, showDayEvents,selectedEvent, setSelectedEvent,
-//     setShowDayEvents,loading,events,typeColors,handleAddEvent,handleUpdateEvent,handleDeleteEvent,selectedDate
-//     ,setIsCreating , isCreating
-// }) => {
-
-//   // helper to format day key
-//   const dayKey = (d) => d.format('YYYY-MM-DD')
-//   const {t} = useTranslation()
-//   return (
-//     <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto
-//       bg-gradient-to-b from-white/2 dark:from-black/40 to-transparent
-//       text-lightMode-text dark:text-darkMode-text rounded-2xl">
-
-//       {/* Header */}
-//       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
-//         <div className="flex items-center gap-3 w-full sm:w-auto">
-//           <button
-//             onClick={() => setCurrentDate(currentDate.subtract(1, "month"))}
-//             className="p-2 rounded-full hover:bg-gray-100/60 dark:hover:bg-white/5 transition"
-//             title="Previous month"
-//           >
-//             <FaChevronLeft />
-//           </button>
-
-//           <div className="flex flex-col text-left">
-//             <h2 className="text-lg sm:text-2xl font-bold">{currentDate.format("MMMM YYYY")}</h2>
-//             <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-3">
-//               <button
-//                 onClick={() => setCurrentDate(dayjs())}
-//                 className="text-sm text-blue-500 hover:underline"
-//               >
-//                 {t("Today")}
-//               </button>
-//               <span>·</span>
-//               <span>{days.length} {t("days")}</span>
-//             </div>
-//           </div>
-
-//           <button
-//             onClick={() => setCurrentDate(currentDate.add(1, "month"))}
-//             className="p-2 rounded-full hover:bg-gray-100/60 dark:hover:bg-white/5 transition ml-2 sm:ml-4"
-//             title="Next month"
-//           >
-//             <FaChevronRight />
-//           </button>
-//         </div>
-
-//         <div className="flex items-center gap-3">
-//           <button
-//             onClick={() => {
-//               // open add event modal by selecting today
-//               setSelectedDate(dayjs())
-//             }}
-//             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg shadow"
-//             title="Add event"
-//           >
-//             <FaPlus /> <span className="text-sm hidden sm:inline">{t("Add Event")}</span>
-//           </button>
-
-//           <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-//             <span className="flex items-center gap-1"><FaBirthdayCake /> {t("Birthday")}</span>
-//             <span className="flex items-center gap-1"><FaUsers /> {t("Meeting")}</span>
-//             <span className="flex items-center gap-1"><FaCalendarAlt /> {t("Public")}</span>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Days Header */}
-//       <div className="hidden sm:grid grid-cols-7 text-center font-semibold text-xs sm:text-sm
-//         text-lightMode-text2 dark:text-darkMode-text2 mb-2 uppercase tracking-wider">
-//         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-//           <div key={day} className="py-2">{t(day)}</div>
-//         ))}
-//       </div>
-
-//       {/* Days Grid wrapper: on small screens use horizontal scroll */}
-//       <div className="overflow-x-auto">
-//         <AnimatePresence mode="wait">
-//           <motion.div
-//             key={currentDate.format("MM-YYYY")}
-//             initial={{ opacity: 0, y: 10 }}
-//             animate={{ opacity: 1, y: 0 }}
-//             exit={{ opacity: 0, y: -10 }}
-//             transition={{ duration: 0.35 }}
-//             className="grid grid-cols-7 gap-2 min-w-[640px] sm:min-w-full"
-//           >
-//             {days.map((day, idx) => {
-//               const dayStr = dayKey(day)
-//               const dayEvents = events.filter(
-//                 (ev) => dayjs(ev.date).format("YYYY-MM-DD") === dayStr
-//               );
-
-//               const isCurrent = isToday(day)
-
-//               // max 3 previewed events
-//               const preview = dayEvents.slice(0, 3)
-//               const moreCount = Math.max(0, dayEvents.length - 3)
-
-//               return (
-//                 <motion.div
-//                   key={idx}
-//                   whileHover={{ scale: 1.02 }}
-//                   className={`min-h-[100px] sm:h-28 border rounded-xl p-2 relative
-//                     transition-all duration-200 cursor-pointer
-//                     ${isCurrent ? "bg-blue-50/40 border-blue-400" : "bg-white/3 dark:bg-transparent"}
-//                     `}
-//                   onClick={() => setSelectedDate(day)}
-//                 >
-//                   {/* Date badge */}
-//                   <div className={`absolute top-2 left-2 text-[12px] font-semibold px-2 py-1 rounded-full
-//                     ${isCurrent ? "bg-blue-600 text-white" : "bg-black/5 dark:bg-white/5 text-gray-800 dark:text-gray-100"}`}>
-//                     {day.date()}
-//                   </div>
-
-//                   {/* small indicators */}
-//                   <div className="absolute top-2 right-2 flex items-center gap-1">
-//                     {/* red dot: event today */}
-//                     {dayEvents.some(ev => dayjs(ev.date).isSame(dayjs(), "day")) && (
-//                       <span className="w-2 h-2 rounded-full bg-red-500" title="Happening today" />
-//                     )}
-//                     {/* yellow dot: tomorrow */}
-//                     {dayEvents.some(ev => dayjs(ev.date).isSame(dayjs().add(1, 'day'), "day")) && (
-//                       <span className="w-2 h-2 rounded-full bg-yellow-400" title="Tomorrow" />
-//                     )}
-//                   </div>
-
-//                   {/* Events preview */}
-//                   <div className="mt-6 space-y-1">
-//                     {preview.map((ev) => (
-//                       <div
-//                         key={ev._id}
-//                         className={`flex items-center gap-2 px-2 py-1 rounded-md font-medium truncate shadow-sm
-//                           ${typeColors?.[ev.type] || "bg-gray-800/40"} `}
-//                         onClick={(e) => {
-//                           e.stopPropagation()
-//                           setSelectedEvent(ev)
-//                         }}
-//                         title={ev.title}
-//                       >
-//                         <span className="text-sm">{typeIcons?.[ev.type] || '•'}</span>
-//                         <span className="text-xs truncate">{ev.title}</span>
-//                         {/* repeat indicator */}
-//                         {ev.repeatYearly && (
-//                           <span className="ml-auto text-[10px] px-1 rounded bg-yellow-400/20 text-yellow-600">yr</span>
-//                         )}
-//                       </div>
-//                     ))}
-
-//                     {/* more button */}
-//                     {moreCount > 0 && (
-//                       <button
-//                         className="text-[11px] text-blue-600 underline ml-1"
-//                         onClick={(e) => {
-//                           e.stopPropagation()
-//                           setShowDayEvents(dayEvents)
-//                         }}
-//                       >
-//                         +{moreCount} {t("more")}
-//                       </button>
-//                     )}
-
-//                     {/* empty hint */}
-//                     {dayEvents.length === 0 && (
-//                       <div className="text-[12px] text-gray-500 mt-1">{t("No events")}</div>
-//                     )}
-//                   </div>
-//                 </motion.div>
-//               )
-//             })}
-//           </motion.div>
-//         </AnimatePresence>
-//       </div>
-
-//       {/* Add Event Modal */}
-//       {selectedDate && !selectedEvent && (
-//         <AddEventModal selectedDate={selectedDate}
-//           newEvent={newEvent} setNewEvent={setNewEvent}
-//           setSelectedDate={setSelectedDate}
-//           handleAddEvent={handleAddEvent} isCreating={isCreating}
-//         />
-//       )}
-
-//       {/* Event Details Modal */}
-//       {selectedEvent && (
-//         <EventDetailsModal 
-//           handleUpdateEvent={handleUpdateEvent} 
-//           handleDeleteEvent={handleDeleteEvent} 
-//           selectedEvent={selectedEvent}      
-//           setSelectedEvent={setSelectedEvent}  
-//         />
-//       )}
-
-
-//       {/* Show All Events in a Day */}
-//       {showDayEvents && (
-//         <ShowAllEvents 
-//           setSelectedEvent={setSelectedEvent} showDayEvents={showDayEvents} setShowDayEvents={setShowDayEvents} typeColors={typeColors} typeIcons={typeIcons}
-//         />
-//       )}
-//     </div>
-//   )
-// })
-
-// DesignCalender.displayName = 'DesignCalender';
-// export default DesignCalender
-'use client'
-import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import {
-  FaChevronLeft,
-  FaChevronRight,
-  FaPlus,
-  FaBirthdayCake,
-  FaUsers,
-  FaCalendarAlt,
-  FaRegStar,
-  FaList,
-  FaTh,
-  FaBars,
-  FaDownload,
-} from 'react-icons/fa'
-import { motion, AnimatePresence } from 'framer-motion'
-import dayjs from 'dayjs'
-import { useTranslation } from 'react-i18next'
+  HiChevronLeft,
+  HiChevronRight,
+  HiPlus,
+  HiCake,
+  HiUsers,
+  HiCalendarDays,
+  HiStar,
+  HiListBullet,
+  HiSquares2X2,
+  HiBars3,
+  HiArrowDownTray,
+} from 'react-icons/hi2';
+import { motion, AnimatePresence } from 'framer-motion';
+import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 
-// Lazy load modals to reduce initial bundle (preserve original components and props)
-const AddEventModal = React.lazy(() => import('@/app/Component/AddandUpdateMenus/AddEventModal'))
-const EventDetailsModal = React.lazy(() => import('@/app/Component/AddandUpdateMenus/EventDetailsModal'))
-const ShowAllEvents = React.lazy(() => import('@/app/Component/AddandUpdateMenus/ShowAllEvents'))
+// Lazy load modals for performance
+const AddEventModal = React.lazy(() => import('@/app/Component/AddandUpdateMenus/AddEventModal'));
+const EventDetailsModal = React.lazy(() => import('@/app/Component/AddandUpdateMenus/EventDetailsModal'));
+const ShowAllEvents = React.lazy(() => import('@/app/Component/AddandUpdateMenus/ShowAllEvents'));
 
-// NOTE: component keeps ALL incoming props and behavior (non-destructive)
 const DesignCalender = React.memo(({
   setNewEvent, newEvent,
   currentDate, days, isToday, setSelectedDate, typeIcons, setCurrentDate, showDayEvents, selectedEvent, setSelectedEvent,
   setShowDayEvents, loading, events, typeColors, handleAddEvent, handleUpdateEvent, handleDeleteEvent, selectedDate,
   setIsCreating, isCreating
 }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   // local UI state
-  const [viewMode, setViewMode] = useState('month') // month | week | list
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [filterTypes, setFilterTypes] = useState({ birthday: true, meeting: true, public: true, custom: true })
+  const [viewMode, setViewMode] = useState('month'); // month | week | list
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [filterTypes, setFilterTypes] = useState({ birthday: true, meeting: true, public: true, custom: true });
 
-  // helpers
-  const dayKey = useCallback((d) => d.format('YYYY-MM-DD'), [])
+  const dayKey = useCallback((d) => d.format('YYYY-MM-DD'), []);
 
-  // filtered events according to local filters (memoized)
   const visibleEvents = useMemo(() => {
-    if (!Array.isArray(events)) return []
-    return events.filter(ev => (filterTypes[ev.type] ?? true))
-  }, [events, filterTypes])
+    if (!Array.isArray(events)) return [];
+    return events.filter(ev => (filterTypes[ev.type] ?? true));
+  }, [events, filterTypes]);
 
-  // stats
   const stats = useMemo(() => {
-    const counts = { birthday: 0, meeting: 0, public: 0, custom: 0 }
-    visibleEvents.forEach(ev => { if (counts[ev.type] !== undefined) counts[ev.type]++ })
-    return counts
-  }, [visibleEvents])
+    const counts = { birthday: 0, meeting: 0, public: 0, custom: 0 };
+    visibleEvents.forEach(ev => { if (counts[ev.type] !== undefined) counts[ev.type]++; });
+    return counts;
+  }, [visibleEvents]);
 
-  // navigation
   const jumpMonth = useCallback((dir) => {
-    // dir is +/-1
-    if (!currentDate || !currentDate.add) return
-    setCurrentDate(currentDate.add(dir, 'month'))
-  }, [currentDate, setCurrentDate])
+    if (!currentDate || !currentDate.add) return;
+    setCurrentDate(currentDate.add(dir, 'month'));
+  }, [currentDate, setCurrentDate]);
 
-  // export JSON
   const handleExportJSON = useCallback(() => {
     try {
-      const blob = new Blob([JSON.stringify(events || [], null, 2)], { type: 'application/json' })
-      const href = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = href
-      a.download = `events-${currentDate ? currentDate.format('YYYY-MM') : 'export'}.json`
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      URL.revokeObjectURL(href)
+      const blob = new Blob([JSON.stringify(events || [], null, 2)], { type: 'application/json' });
+      const href = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = href;
+      a.download = `events-${currentDate ? currentDate.format('YYYY-MM') : 'export'}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(href);
     } catch (err) {
-      // silently fail but you can add notification
-      console.error('Export failed', err)
+      console.error('Export failed', err);
     }
-  }, [events, currentDate])
+  }, [events, currentDate]);
 
-  // toggle filter
   const toggleFilter = useCallback((type) => {
-    setFilterTypes(prev => ({ ...prev, [type]: !prev[type] }))
-  }, [])
+    setFilterTypes(prev => ({ ...prev, [type]: !prev[type] }));
+  }, []);
 
-  // keyboard shortcut: n for new event, ArrowLeft/Right for months
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === 'n') {
-        // open create on today
-        setSelectedDate(dayjs())
-      } else if (e.key === 'ArrowLeft') {
-        jumpMonth(-1)
-      } else if (e.key === 'ArrowRight') {
-        jumpMonth(1)
+      if (e.key === 'n' && !e.ctrlKey && !e.metaKey) {
+        setSelectedDate(dayjs());
+      } else if (e.key === 'ArrowLeft' && e.altKey) {
+        jumpMonth(-1);
+      } else if (e.key === 'ArrowRight' && e.altKey) {
+        jumpMonth(1);
       }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [jumpMonth, setSelectedDate])
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [jumpMonth, setSelectedDate]);
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto
-      bg-gradient-to-b from-white/2 dark:from-black/40 to-transparent
-      text-lightMode-text dark:text-darkMode-text rounded-2xl shadow-lg border border-white/6 backdrop-blur-sm">
-
-      {/* Top bar - sticky for better UX */}
-      <div className="sticky top-4 z-30 bg-transparent pb-4 mb-4">
-        <div className="flex items-start gap-4">
-          <div className="flex-1">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-2">
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <button
-                  onClick={() => jumpMonth(-1)}
-                  className="p-2 rounded-full hover:bg-gray-100/60 dark:hover:bg-white/5 transition"
-                  aria-label="Previous month"
-                  title={t('Previous month')}
-                >
-                  <FaChevronLeft />
-                </button>
-
-                <div className="flex flex-col text-left">
-                  <motion.h2
-                    key={currentDate?.format?.('MMMM YYYY') ?? 'calendar'}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.28 }}
-                    className="text-lg sm:text-2xl font-semibold tracking-tight"
-                  >
-                    {currentDate?.format?.('MMMM YYYY')}
-                  </motion.h2>
-
-                  <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-3">
-                    <button
-                      onClick={() => setCurrentDate(dayjs())}
-                      className="text-sm text-blue-500 hover:underline"
-                      aria-label={t('Today')}
-                    >
-                      {t('Today')}
-                    </button>
-                    <span>·</span>
-                    <span>{days?.length ?? 0} {t('days')}</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => jumpMonth(1)}
-                  className="p-2 rounded-full hover:bg-gray-100/60 dark:hover:bg-white/5 transition ml-2 sm:ml-4"
-                  aria-label="Next month"
-                  title={t('Next month')}
-                >
-                  <FaChevronRight />
-                </button>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setSelectedDate(dayjs())}
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg shadow"
-                    title={t('Add Event')}
-                    aria-label={t('Add Event')}
-                  >
-                    <FaPlus /> <span className="text-sm hidden sm:inline">{t('Add Event')}</span>
-                  </button>
-
-                  <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                    <span className="flex items-center gap-1"><FaBirthdayCake /> {t('Birthday')}</span>
-                    <span className="flex items-center gap-1"><FaUsers /> {t('Meeting')}</span>
-                    <span className="flex items-center gap-1"><FaCalendarAlt /> {t('Public')}</span>
-                  </div>
-                </div>
-
-                {/* view toggles */}
-                <div className="flex items-center gap-2 bg-white/4 dark:bg-black/20 rounded-md p-1">
-                  <button
-                    onClick={() => setViewMode('month')}
-                    className={`p-2 rounded-md ${viewMode === 'month' ? 'bg-blue-600 text-white' : 'text-gray-500'}`}
-                    aria-pressed={viewMode === 'month'}
-                    title="Month view"
-                  ><FaTh /></button>
-
-                  <button
-                    onClick={() => setViewMode('week')}
-                    className={`p-2 rounded-md ${viewMode === 'week' ? 'bg-blue-600 text-white' : 'text-gray-500'}`}
-                    aria-pressed={viewMode === 'week'}
-                    title="Week view"
-                  ><FaBars /></button>
-
-                  <button
-                    onClick={() => setViewMode('list')}
-                    className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'text-gray-500'}`}
-                    aria-pressed={viewMode === 'list'}
-                    title="List view"
-                  ><FaList /></button>
-                </div>
-
-                {/* export + sidebar toggle */}
-                <button onClick={handleExportJSON} className="p-2 rounded-md hover:bg-gray-100/50 dark:hover:bg-white/5" title={t('Export JSON')} aria-label={t('Export JSON')}>
-                  <FaDownload />
-                </button>
-
-                <button onClick={() => setSidebarOpen(s => !s)} className="p-2 rounded-md hover:bg-gray-100/50 dark:hover:bg-white/5 ml-1" title={t('Toggle sidebar')} aria-label={t('Toggle sidebar')}>
-                  <FaUsers />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="relative min-h-screen p-4 sm:p-8 lg:p-12 overflow-hidden">
+      {/* 🎭 Animated Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            x: [0, 50, 0],
+            y: [0, 30, 0],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-indigo-500/10 blur-[120px] rounded-full"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.3, 1],
+            x: [0, -40, 0],
+            y: [0, -50, 0],
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute -bottom-[20%] -right-[10%] w-[50%] h-[50%] bg-purple-500/10 blur-[120px] rounded-full"
+        />
       </div>
 
-      {/* Main area: calendar grid + sidebar */}
-      <div className="flex gap-6 items-start">
-        {/* Calendar content */}
-        <div className="flex-1 min-w-0">
-          {/* Days header for desktop */}
-          <div className="hidden sm:grid grid-cols-7 text-center font-semibold text-xs sm:text-sm
-            text-lightMode-text2 dark:text-darkMode-text2 mb-2 uppercase tracking-wider">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-              <div key={day} className="py-2">{t(day)}</div>
-            ))}
-          </div>
-
-          {/* Calendar grid wrapper */}
-          <div className="overflow-x-auto">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`${currentDate?.format?.('MM-YYYY') ?? 'cal'}-${viewMode}`}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.28 }}
-                className={`grid grid-cols-7 gap-2 min-w-[640px] sm:min-w-full ${viewMode === 'list' ? 'opacity-90' : ''}`}
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* 🚀 Header Section */}
+        <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-8 bg-indigo-500 rounded-full" />
+              <motion.h1
+                key={currentDate?.format?.('MMMM YYYY')}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="text-4xl font-black tracking-tighter text-gray-900 dark:text-white"
               >
-                {days?.map((day, idx) => {
-                  const dayStr = dayKey(day)
-                  const dayEvents = visibleEvents.filter(
-                    (ev) => dayjs(ev.date).format('YYYY-MM-DD') === dayStr
-                  )
-
-                  const isCurrent = isToday(day)
-                  const preview = dayEvents.slice(0, 3)
-                  const moreCount = Math.max(0, dayEvents.length - 3)
-
-                  return (
-                    <motion.div
-                      key={idx}
-                      whileHover={{ scale: 1.02 }}
-                      layout
-                      transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-                      className={`min-h-[100px] sm:h-28 border rounded-2xl p-2 relative
-                        transition-all duration-200 cursor-pointer
-                        ${isCurrent ? 'bg-gradient-to-br from-blue-50/60 to-white/30 border-blue-400 shadow-md' : 'bg-white/3 dark:bg-transparent'}`}
-                      onClick={() => setSelectedDate(day)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => { if (e.key === 'Enter') setSelectedDate(day) }}
-                      aria-label={`${t('Open day')} ${day.format('YYYY-MM-DD')}`}
-                    >
-                      {/* Date badge */}
-                      <div className={`absolute top-2 left-2 text-[12px] font-semibold px-2 py-1 rounded-full
-                        ${isCurrent ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(59,130,246,0.18)]' : 'bg-black/5 dark:bg-white/5 text-gray-800 dark:text-gray-100'}`}>
-                        {day.date()}
-                      </div>
-
-                      {/* small indicators */}
-                      <div className="absolute top-2 right-2 flex items-center gap-1">
-                        {dayEvents.some(ev => dayjs(ev.date).isSame(dayjs(), 'day')) && (
-                          <span className="w-2 h-2 rounded-full bg-red-500" title={t('Happening today')} />
-                        )}
-                        {dayEvents.some(ev => dayjs(ev.date).isSame(dayjs().add(1, 'day'), 'day')) && (
-                          <span className="w-2 h-2 rounded-full bg-yellow-400" title={t('Tomorrow')} />
-                        )}
-                      </div>
-
-                      {/* Events preview */}
-                      <div className="mt-6 space-y-1">
-                        {preview.map((ev) => (
-                          <div
-                            key={ev._id}
-                            className={`flex items-center gap-2 px-2 py-1 rounded-md font-medium truncate shadow-sm ring-1 ring-white/6
-                              ${typeColors?.[ev.type] || 'bg-gray-800/40'} `}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setSelectedEvent(ev)
-                            }}
-                            title={`${ev.title} - ${ev.description || ''}`}
-                            role="button"
-                            tabIndex={0}
-                            onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); setSelectedEvent(ev) } }}
-                          >
-                            <span className="text-sm">{typeIcons?.[ev.type] || '•'}</span>
-                            <span className="text-xs truncate">{ev.title}</span>
-
-                            {ev.repeatYearly && (
-                              <span className="ml-auto text-[10px] px-1 rounded bg-yellow-400/20 text-yellow-600">yr</span>
-                            )}
-                          </div>
-                        ))}
-
-                        {moreCount > 0 && (
-                          <button
-                            className="text-[11px] text-blue-600 underline ml-1"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setShowDayEvents(dayEvents)
-                            }}
-                          >
-                            +{moreCount} {t('more')}
-                          </button>
-                        )}
-
-                        {dayEvents.length === 0 && (
-                          <div className="text-[12px] text-gray-500 mt-1 flex items-center gap-2">{t('No events')}</div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )
-                })}
-              </motion.div>
-            </AnimatePresence>
+                {currentDate?.format?.('MMMM YYYY')}
+              </motion.h1>
+            </div>
+            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 pl-4">
+              <button onClick={() => setCurrentDate(dayjs())} className="hover:text-indigo-500 transition-colors">
+                {t('Jump to Today')}
+              </button>
+              <span>•</span>
+              <span className="text-indigo-500/60">{days?.length ?? 0} {t('Temporal Units')}</span>
+            </div>
           </div>
-        </div>
 
-        {/* Sidebar (collapsible, animated) */}
-        <motion.aside
-          initial={{ opacity: 0, x: 8 }}
-          animate={{ opacity: sidebarOpen ? 1 : 0.6, x: 0 }}
-          transition={{ type: 'spring', stiffness: 220, damping: 28 }}
-          className={`w-72 transition-all duration-300 ${sidebarOpen ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-4'} hidden md:block`}
-          aria-hidden={!sidebarOpen}
-        >
-          <div className="p-4 rounded-xl bg-white/6 dark:bg-black/30 border border-white/5 h-full sticky top-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold">{t('Overview')}</h3>
-              <div className="flex items-center gap-2">
-                <button onClick={() => setSidebarOpen(false)} className="p-1 rounded-md hover:bg-white/5" aria-label="Close sidebar">×</button>
-              </div>
-            </div>
+          <div className="flex items-center gap-3 bg-white/50 dark:bg-white/[0.02] backdrop-blur-xl p-2 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-xl">
+            <button
+              onClick={() => jumpMonth(-1)}
+              className="p-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all active:scale-95"
+            >
+              <HiChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => jumpMonth(1)}
+              className="p-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all active:scale-95"
+            >
+              <HiChevronRight className="w-5 h-5" />
+            </button>
+            <div className="w-px h-6 bg-gray-200 dark:bg-white/10 mx-2" />
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setSelectedDate(dayjs())}
+              className="flex items-center gap-2 bg-indigo-600 px-6 py-3 rounded-2xl text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-500/20 active:bg-indigo-700"
+            >
+              <HiPlus className="w-4 h-4" />
+              {t('New Event')}
+            </motion.button>
+          </div>
+        </header>
 
-            <div className="mb-3">
-              <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-                <span>{t('This month')}</span>
-                <span className="font-medium">{visibleEvents.length}</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center gap-2 p-2 rounded-md bg-white/3 dark:bg-black/20">
-                  <FaBirthdayCake /> <span className="truncate">{t('Birthdays')}</span>
-                  <span className="ml-auto font-semibold">{stats.birthday}</span>
-                </div>
-                <div className="flex items-center gap-2 p-2 rounded-md bg-white/3 dark:bg-black/20">
-                  <FaUsers /> <span className="truncate">{t('Meetings')}</span>
-                  <span className="ml-auto font-semibold">{stats.meeting}</span>
-                </div>
-
-                <div className="flex items-center gap-2 p-2 rounded-md bg-white/3 dark:bg-black/20">
-                  <FaCalendarAlt /> <span className="truncate">{t('Public')}</span>
-                  <span className="ml-auto font-semibold">{stats.public}</span>
-                </div>
-
-                <div className="flex items-center gap-2 p-2 rounded-md bg-white/3 dark:bg-black/20">
-                  <FaRegStar /> <span className="truncate">{t('Custom')}</span>
-                  <span className="ml-auto font-semibold">{stats.custom}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-3">
-              <h4 className="text-xs font-semibold mb-2">{t('Filters')}</h4>
-              <div className="flex flex-col gap-2">
-                {Object.keys(filterTypes).map((k) => (
-                  <label key={k} className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" checked={filterTypes[k]} onChange={() => toggleFilter(k)} />
-                    <span className="capitalize">{k}</span>
-                  </label>
+        {/* 📅 Main View Container */}
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Calendar Deck */}
+          <div className="flex-1 order-2 lg:order-1">
+            <div className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[3rem] border border-gray-100 dark:border-white/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] overflow-hidden">
+              {/* Day Headers */}
+              <div className="grid grid-cols-7 border-b border-gray-100 dark:border-white/5">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                  <div key={day} className="py-6 text-center text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                    {t(day)}
+                  </div>
                 ))}
               </div>
-            </div>
 
-            <div className="mt-4">
-              <h4 className="text-xs font-semibold mb-2">{t('Quick jump')}</h4>
-              <div className="flex items-center gap-2">
-                <button onClick={() => setCurrentDate(dayjs())} className="px-2 py-1 rounded-md bg-white/5">{t('Today')}</button>
-                <button onClick={() => setCurrentDate(currentDate.subtract(1, 'month'))} className="px-2 py-1 rounded-md bg-white/5">◀</button>
-                <button onClick={() => setCurrentDate(currentDate.add(1, 'month'))} className="px-2 py-1 rounded-md bg-white/5">▶</button>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`${currentDate?.format?.('MM-YYYY')}-${viewMode}`}
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.02 }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  className="grid grid-cols-7 gap-px bg-gray-100 dark:bg-white/5"
+                >
+                  {days?.map((day, idx) => {
+                    const dayStr = dayKey(day);
+                    const dayEvents = visibleEvents.filter(ev => dayjs(ev.date).format('YYYY-MM-DD') === dayStr);
+                    const isTodayFlag = isToday(day);
+                    const preview = dayEvents.slice(0, 3);
+                    const moreCount = Math.max(0, dayEvents.length - preview.length);
+
+                    return (
+                      <motion.div
+                        key={idx}
+                        onClick={() => setSelectedDate(day)}
+                        className={`group relative min-h-[140px] p-4 bg-white dark:bg-[#0B0F1A] transition-all hover:z-10 hover:shadow-2xl hover:scale-[1.02] cursor-pointer
+                          ${!day.isSame(currentDate, 'month') ? 'opacity-30 grayscale' : ''}
+                          ${isTodayFlag ? 'bg-indigo-50/30 dark:bg-indigo-500/5' : ''}`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <span className={`text-lg font-black tracking-tighter ${isTodayFlag ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
+                            {day.date()}
+                          </span>
+                          {dayEvents.length > 0 && (
+                            <div className="flex -space-x-1">
+                              {dayEvents.slice(0, 2).map((_, i) => (
+                                <div key={i} className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="mt-4 space-y-1.5">
+                          {preview.map((ev) => (
+                            <motion.div
+                              key={ev._id}
+                              whileHover={{ x: 3 }}
+                              onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); }}
+                              className={`px-2 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest truncate border border-transparent hover:border-white/10 shadow-sm
+                                ${typeColors?.[ev.type] || 'bg-gray-800/40 text-white'}`}
+                            >
+                              {ev.title}
+                            </motion.div>
+                          ))}
+                          {moreCount > 0 && (
+                            <div className="text-[8px] font-black uppercase tracking-widest text-indigo-500/60 pl-1">
+                              + {moreCount} {t('Others')}
+                            </div>
+                          )}
+                        </div>
+
+                        {isTodayFlag && (
+                          <div className="absolute inset-x-4 top-0 h-1 bg-indigo-500 rounded-full" />
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* 📊 Sidebar Metrics */}
+          <aside className="w-full lg:w-80 order-1 lg:order-2 space-y-6">
+            <div className="p-8 bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-6">{t('Data Synopsis')}</h3>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-indigo-500/5 rounded-2xl border border-indigo-500/10">
+                  <HiCake className="w-5 h-5 text-indigo-500 mb-2" />
+                  <div className="text-2xl font-black">{stats.birthday}</div>
+                  <div className="text-[9px] font-bold text-gray-400 uppercase">{t('Birthdays')}</div>
+                </div>
+                <div className="p-4 bg-purple-500/5 rounded-2xl border border-purple-500/10">
+                  <HiUsers className="w-5 h-5 text-purple-500 mb-2" />
+                  <div className="text-2xl font-black">{stats.meeting}</div>
+                  <div className="text-[9px] font-bold text-gray-400 uppercase">{t('Meetings')}</div>
+                </div>
+              </div>
+
+              <div className="mt-8 space-y-4">
+                <h4 className="text-[9px] font-black uppercase tracking-widest text-gray-400">{t('Transmission Filters')}</h4>
+                {Object.keys(filterTypes).map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => toggleFilter(type)}
+                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${filterTypes[type] ? 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]' : 'bg-gray-300'}`} />
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${filterTypes[type] ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}>
+                        {t(type)}
+                      </span>
+                    </div>
+                    {filterTypes[type] && <div className="text-[8px] font-black text-indigo-500">ACTIVE</div>}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-8 pt-8 border-t border-gray-100 dark:border-white/5">
+                <button
+                  onClick={handleExportJSON}
+                  className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 transition-all text-xs font-black uppercase tracking-widest"
+                >
+                  <HiArrowDownTray className="w-4 h-4" />
+                  {t('Export Data')}
+                </button>
               </div>
             </div>
-
-          </div>
-        </motion.aside>
+          </aside>
+        </div>
       </div>
 
-      {/* Add Event Modal (preserve original conditionals) -- lazy loaded */}
+      {/* 🎭 Modals (Lazy Loaded) */}
       <AnimatePresence>
         {selectedDate && !selectedEvent && (
           <Suspense fallback={null}>
@@ -632,7 +309,6 @@ const DesignCalender = React.memo(({
         )}
       </AnimatePresence>
 
-      {/* Event Details Modal */}
       <AnimatePresence>
         {selectedEvent && (
           <Suspense fallback={null}>
@@ -646,7 +322,6 @@ const DesignCalender = React.memo(({
         )}
       </AnimatePresence>
 
-      {/* Show All Events in a Day */}
       <AnimatePresence>
         {showDayEvents && (
           <Suspense fallback={null}>
@@ -660,9 +335,20 @@ const DesignCalender = React.memo(({
           </Suspense>
         )}
       </AnimatePresence>
+
+      {/* 🔮 Floating Decorative Tip */}
+      <div className="fixed bottom-8 right-8 flex items-center gap-4 bg-white/70 dark:bg-black/40 backdrop-blur-xl px-6 py-3 rounded-full border border-white/10 shadow-2xl z-50">
+        <div className="flex gap-1">
+          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse delay-75" />
+        </div>
+        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">
+          Sync Operational • Zocial Pulse
+        </span>
+      </div>
     </div>
-  )
-})
+  );
+});
 
 DesignCalender.displayName = 'DesignCalender';
-export default DesignCalender
+export default DesignCalender;

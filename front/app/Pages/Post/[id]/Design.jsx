@@ -1,9 +1,10 @@
 'use client';
-import React, { memo } from "react";
+
+import React, { memo, useState } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import { motion } from 'framer-motion';
-import { IoIosSend } from 'react-icons/io';
+import { motion, AnimatePresence } from 'framer-motion';
+import { HiPaperAirplane, HiCheckBadge, HiChatBubbleLeftRight, HiSignal } from 'react-icons/hi2';
 import { ShareModal } from "@/app/Component/AddandUpdateMenus/SharePost";
 import PostImage from "@/app/Component/Post/PostImage";
 import PostHeader from "@/app/Component/Post/PostHeader";
@@ -14,13 +15,13 @@ import PostPhotos from "@/app/Component/Post/PostPhotos";
 import PostHashtags from "@/app/Component/Post/PostHashtags";
 import PostActions from "@/app/Component/Post/PostActions";
 import SharedTitle from "@/app/Component/Post/SharedTitle";
-// import Comment from "@/app/Component/Comment";
-const Comment = dynamic(() => import("@/app/Component/Comment"), {
-  loading: () => <p>Loading comment...</p>,
-})
-import CommentSkeleton from "@/app/Skeletons/CommentSkeleton";
 import { useTranslation } from "react-i18next";
 import PostMusicPlayer from "@/app/Component/Post/PostMusic";
+
+const Comment = dynamic(() => import("@/app/Component/Comment"), {
+  loading: () => <div className="h-20 bg-gray-100 dark:bg-white/5 rounded-2xl animate-pulse" />,
+});
+import CommentSkeleton from "@/app/Skeletons/CommentSkeleton";
 
 const DesignPostSelect = memo(({
   post,
@@ -47,48 +48,57 @@ const DesignPostSelect = memo(({
   const { t } = useTranslation();
 
   return (
-    <div className="relative w-[95%] md:w-full mx-auto">
-      {/* Share Modal */}
+    <div className="relative min-h-screen py-10 px-4 sm:px-8">
+      {/* 🎭 Animated Background */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        <div className="absolute top-[10%] left-[10%] w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[10%] right-[10%] w-[400px] h-[400px] bg-purple-500/5 blur-[120px] rounded-full" />
+      </div>
+
       <ShareModal
         post={post}
         isOpen={openModel}
         onClose={() => setOpenModel(false)}
         onShare={(id, customText) => sharePost(id, post?.owner?._id, customText)}
       />
-      <motion.div
-        className="w-full p-3 sm:p-6 flex flex-col gap-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2">
-          {post.isPinned && (
-            <span className="px-3 py-1 text-xs font-bold text-white bg-gradient-to-r from-yellow-400 via-red-400 to-pink-500 rounded-full shadow-md">
-              📌 {t("Pinned")}
-            </span>
-          )}
-          {isShared && (
-            <span className="px-3 py-1 text-xs font-bold text-white bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full shadow-md">
-              🔁 {t("Shared")}
-            </span>
-          )}
+
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* 🚀 Breadcrumb / Top Bar */}
+        <div className="flex items-center justify-between pb-6 border-b border-gray-100 dark:border-white/5">
+          <div className="flex items-center gap-4">
+            <div className="w-1.5 h-8 bg-indigo-500 rounded-full" />
+            <h1 className="text-2xl font-black tracking-tighter text-gray-900 dark:text-white uppercase">
+              {t('Focus Entry')}
+            </h1>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-500/10 px-4 py-1.5 rounded-full">
+            <HiSignal className="w-3 h-3 animate-pulse" />
+            Live Sync
+          </div>
         </div>
 
-        {/* Shared Info */}
-        {isShared && <SharedTitle user={user} post={post} original={original} />}
+        {/* 💎 Main Post Card (The Prism) */}
+        <motion.article
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[3rem] border border-gray-100 dark:border-white/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] overflow-hidden"
+        >
+          {/* Decorative Header */}
+          <div className="p-8 pb-4 flex flex-wrap gap-2">
+            {post.isPinned && (
+              <span className="px-4 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-[9px] font-black uppercase tracking-widest">
+                Pinned Terminal
+              </span>
+            )}
+            {isShared && (
+              <span className="px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 text-[9px] font-black uppercase tracking-widest">
+                Shared Resonance
+              </span>
+            )}
+          </div>
 
-        {/* Post Card */}
-        <div className="flex flex-col w-full sm:flex-row items-start gap-4 bg-white/30 dark:bg-black/30 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg p-4 sm:p-6 transition-transform hover:scale-[1.01]">
-
-          {/* Profile / Post Image */}
-          <PostImage
-            post={post}
-            isCommunityPost={isCommunityPost}
-            className="w-full sm:w-[150px] rounded-xl"
-          />
-
-          {/* Main Content */}
-          <div className="flex-1 flex w-full flex-col gap-3">
+          <div className="px-8 pb-8 space-y-8">
+            {/* User Info Header */}
             <PostHeader
               post={post}
               user={user}
@@ -98,44 +108,56 @@ const DesignPostSelect = memo(({
               isCommunityPost={isCommunityPost}
             />
 
-            {/* Text */}
-            {post.text && (
-              <RenderPostText
-                text={post.text}
-                mentions={post.mentions}
-                hashtags={post.Hashtags}
-              />
-            )}
+            {/* Content Body */}
+            <div className="space-y-6">
+              {post.text && (
+                <div className="text-2xl md:text-3xl font-medium leading-tight dark:text-white/90 tracking-tight">
+                  <RenderPostText
+                    text={post.text}
+                    mentions={post.mentions}
+                    hashtags={post.Hashtags}
+                  />
+                </div>
+              )}
 
-            {/* Links */}
-            <PostLinks links={post?.links} />
-            {post?.music && <PostMusicPlayer music={post.music} />}
-            {/* Shared Original */}
-            {isShared && original && (
-              <SharedPost
-                original={original}
-                user={user}
-                setImageView={setImageView}
-              />
-            )}
+              {/* Media Blocks */}
+              <div className="space-y-4">
+                {post?.music && <PostMusicPlayer music={post.music} />}
 
-            {/* Photos */}
-            {!isShared && post.Photos?.length > 0 && (
-              <PostPhotos
-                photos={post.Photos}
-                setImageView={setImageView}
-                postId={post._id}
-              />
-            )}
+                {!isShared && post.Photos?.length > 0 && (
+                  <div className="rounded-[2.5rem] overflow-hidden border border-gray-100 dark:border-white/5 shadow-2xl">
+                    <PostPhotos
+                      photos={post.Photos}
+                      setImageView={setImageView}
+                      postId={post._id}
+                    />
+                  </div>
+                )}
 
-            {/* Hashtags */}
-            {post?.Hashtags?.length > 0 && (
-              <PostHashtags post={post} />
-            )}
+                {isShared && original && (
+                  <div className="rounded-[2.5rem] overflow-hidden border border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 p-6">
+                    <SharedTitle user={user} post={post} original={original} />
+                    <SharedPost
+                      original={original}
+                      user={user}
+                      setImageView={setImageView}
+                    />
+                  </div>
+                )}
 
-            {/* Actions */}
+                <PostLinks links={post?.links} />
+              </div>
+
+              {post?.Hashtags?.length > 0 && (
+                <div className="pt-4">
+                  <PostHashtags post={post} />
+                </div>
+              )}
+            </div>
+
+            {/* Premium Action Footer */}
             {isLogin && (
-              <div className="flex flex-wrap items-center justify-between sm:justify-start gap-3 sm:gap-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="pt-8 border-t border-gray-100 dark:border-white/5">
                 <PostActions
                   post={post}
                   user={user}
@@ -147,68 +169,101 @@ const DesignPostSelect = memo(({
                 />
               </div>
             )}
+          </div>
+        </motion.article>
 
-            {/* Comment Input */}
-            {!post.isCommentOff && isLogin && (
-              canComment() ? (
-                <div className="flex items-start sm:items-center gap-3 mt-4 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 rounded-2xl focus-within:ring-2 focus-within:ring-blue-400 transition-all">
+        {/* 💬 Discourse Section */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-3 pl-4">
+            <HiChatBubbleLeftRight className="w-5 h-5 text-indigo-500" />
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
+              {t('Active Discourse')} ({comments?.length || 0})
+            </h2>
+          </div>
+
+          {/* Comment Input Box */}
+          {!post.isCommentOff && isLogin && (
+            canComment() ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl p-4 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl flex items-center gap-4"
+              >
+                <div className="relative shrink-0">
                   <Image
                     src={user?.profilePhoto?.url || '/default-profile.png'}
-                    alt="User Profile"
-                    width={40}
-                    height={40}
-                    className="w-10 h-10 rounded-full object-cover"
+                    alt="User"
+                    width={48}
+                    height={48}
+                    className="w-12 h-12 rounded-2xl object-cover ring-2 ring-indigo-500/20"
                   />
-                  <div className="flex-1 relative">
-                    <input
-                      type="text"
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      placeholder={`${t("Write a comment")}...`}
-                      className="w-full bg-transparent text-[12px] resize-none outline-none placeholder-gray-400 dark:placeholder-gray-500 px-2 py-1 leading-snug text-gray-800 dark:text-gray-100 overflow-y-auto"
-                    />
-                  </div>
-                  <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    onClick={handleAddComment}
-                    disabled={!commentText.trim()}
-                    className={`p-2.5 rounded-full transition-all ${commentText.trim()
-                      ? 'bg-blue-500 hover:bg-blue-400'
-                      : 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'
-                      }`}
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-[#0B0F1A] rounded-full" />
+                </div>
+
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder={`${t('Contribute to discourse')}...`}
+                    className="w-full bg-transparent text-lg font-medium outline-none placeholder-gray-400 dark:placeholder-gray-600 px-2"
+                  />
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleAddComment}
+                  disabled={!commentText.trim()}
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${commentText.trim()
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                      : 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed'
+                    }`}
+                >
+                  <HiPaperAirplane className="w-5 h-5 -rotate-45" />
+                </motion.button>
+              </motion.div>
+            ) : (
+              <div className="p-6 rounded-[2rem] bg-amber-500/5 border border-amber-500/10 text-amber-600 flex items-center gap-3">
+                <HiCheckBadge className="w-6 h-6" />
+                <span className="text-[10px] font-black uppercase tracking-widest leading-relaxed">
+                  {t("Privileged Access Required")} • @{post.owner?.username} {t("discourse limit active")}
+                </span>
+              </div>
+            )
+          )}
+
+          {/* Feed of Comments */}
+          <div className="space-y-4">
+            {post.isCommentOff ? (
+              <div className="py-20 text-center text-gray-400 font-black uppercase text-[10px] tracking-widest bg-white/[0.02] rounded-[3rem] border border-white/5 border-dashed">
+                Discourse Disabled for this Entity
+              </div>
+            ) : isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => <CommentSkeleton key={i} />)
+            ) : comments?.length > 0 ? (
+              <div className="space-y-4">
+                {comments.map((comment) => (
+                  <motion.div
+                    key={comment._id}
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
                   >
-                    <IoIosSend className="text-white text-lg" />
-                  </motion.button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 mt-4 px-3 py-2 bg-yellow-100 dark:bg-yellow-900 rounded-xl text-sm text-yellow-800 dark:text-yellow-300">
-                  {t("You must follow or be followed by")} @{post.owner?.username} {t("to comment on this post")}.
-                </div>
-              )
+                    <Comment comment={comment} />
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-20 text-center text-gray-400 font-black uppercase text-[10px] tracking-widest">
+                No Signals Detected Yet
+              </div>
             )}
-
-            {/* Comments List */}
-            <div className="flex flex-col gap-4 border-t border-gray-700 pt-6">
-              {post.isCommentOff ? (
-                <div className="flex flex-col items-center justify-center py-6 text-black dark:text-white">
-                  <p>{t("Comments are turned off")}</p>
-                </div>
-              ) : isLoading ? (
-                Array.from({ length: 3 }).map((_, i) => <CommentSkeleton key={i} />)
-              ) : comments?.length > 0 ? (
-                comments.map((comment) => <Comment key={comment._id} comment={comment} />)
-              ) : (
-                <div className="flex flex-col items-center justify-center py-6 text-black dark:text-white">
-                  <p>{t("No comments yet")}</p>
-                </div>
-              )}
-            </div>
-
           </div>
-        </div>
-      </motion.div>
+        </section>
+      </div>
     </div>
   );
 });
-DesignPostSelect.displayName = 'DesignPostSelect'
+
+DesignPostSelect.displayName = 'DesignPostSelect';
 export default DesignPostSelect;

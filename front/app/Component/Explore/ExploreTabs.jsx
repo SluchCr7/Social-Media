@@ -1,25 +1,49 @@
-// ملف: Explore/ExploreTabs.jsx
+'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
+import { HiFire, HiHashtag, HiPhoto, HiSignal } from 'react-icons/hi2';
 
-const ExploreTabs = React.memo(({ allTabs, activeTab, setActiveTab }) => {
+const ExploreTabs = ({ allTabs, activeTab, setActiveTab }) => {
+    const getIcon = (name) => {
+        switch (name) {
+            case 'Trending': return <HiFire className="w-4 h-4" />;
+            case 'Hashtags': return <HiHashtag className="w-4 h-4" />;
+            case 'Photos': return <HiPhoto className="w-4 h-4" />;
+            default: return <HiSignal className="w-4 h-4" />;
+        }
+    };
+
     return (
-        <div className="max-w-3xl mx-auto flex justify-center flex-wrap gap-3 mb-6 relative">
-            {allTabs?.map((tab) => (
-                <button
-                    key={tab?.name}
-                    onClick={() => setActiveTab(tab?.name)}
-                    className={`px-4 py-2 rounded-full font-semibold transition
-                        ${activeTab === tab?.name
-                            ? 'bg-indigo-600 text-white shadow-lg'
-                            : 'bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text2 dark:text-darkMode-text2 hover:opacity-80'}`}
-                >
-                    {tab?.name}
-                </button>
-            ))}
+        <div className="flex items-center justify-center gap-2 mb-12 overflow-x-auto no-scrollbar pb-4">
+            {allTabs.map((tab) => {
+                const isActive = activeTab === tab.name;
+                return (
+                    <motion.button
+                        key={tab.name}
+                        onClick={() => setActiveTab(tab.name)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`relative flex items-center gap-3 px-8 py-4 rounded-2xl transition-all ${isActive
+                                ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/30'
+                                : 'bg-white/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                    >
+                        {getIcon(tab.name)}
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap">
+                            {tab.name}
+                        </span>
+                        {isActive && (
+                            <motion.div
+                                layoutId="activeTabGlow"
+                                className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-2xl -z-10"
+                            />
+                        )}
+                    </motion.button>
+                );
+            })}
         </div>
     );
-})
-ExploreTabs.displayName = 'ExploreTabs'
+};
 
 export default ExploreTabs;

@@ -1,54 +1,48 @@
 'use client';
 
 import React from 'react';
-import { FiSearch, FiX } from 'react-icons/fi';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
-const ExploreSearchBar = React.memo(({ search, setSearch, placeholder = "Search for vibes..." }) => {
+const ExploreSearchBar = ({ search, setSearch, placeholder }) => {
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative max-w-3xl mx-auto mb-12 group"
-        >
-            {/* Glossy Background Accent */}
-            <div className="absolute inset-0 bg-indigo-500/5 blur-2xl rounded-[2.5rem] -z-10 group-focus-within:bg-indigo-500/10 transition-colors" />
+        <div className="max-w-4xl mx-auto mb-12">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative group lg:scale-110"
+            >
+                <div className="absolute inset-0 bg-indigo-500/10 blur-2xl rounded-[3rem] opacity-0 group-focus-within:opacity-100 transition-opacity" />
+                <div className="relative flex items-center bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-[0_20px_40px_-12px_rgba(0,0,0,0.1)] transition-all">
+                    <div className="pl-8 pr-4">
+                        <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+                    </div>
+                    <input
+                        type="text"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder={placeholder}
+                        className="w-full h-20 bg-transparent text-xl font-medium outline-none placeholder-gray-400 dark:placeholder-gray-600 pr-8"
+                    />
 
-            <div className="relative flex items-center bg-white/[0.03] border border-white/5 rounded-[2.5rem] p-1.5 focus-within:border-indigo-500/30 focus-within:bg-white/[0.05] transition-all duration-500 backdrop-blur-xl shadow-2xl">
-                <div className="pl-6 flex items-center justify-center text-white/20 group-focus-within:text-indigo-400 transition-colors">
-                    <FiSearch size={22} />
+                    <div className="pr-8 flex items-center gap-4">
+                        <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-gray-100 dark:bg-white/5 rounded-lg text-[9px] font-black uppercase text-gray-400 tracking-widest">
+                            <span>⌘</span>
+                            <span>K</span>
+                        </div>
+                        {search && (
+                            <button
+                                onClick={() => setSearch('')}
+                                className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-500 hover:text-rose-500 transition-colors"
+                                aria-label="Clear Search"
+                            >
+                                ×
+                            </button>
+                        )}
+                    </div>
                 </div>
-
-                <input
-                    type="text"
-                    placeholder={placeholder}
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="w-full bg-transparent border-none outline-none py-4 px-6 text-white font-medium placeholder:text-white/10 placeholder:font-black placeholder:uppercase placeholder:tracking-[0.2em] placeholder:text-[10px]"
-                />
-
-                <AnimatePresence>
-                    {search && (
-                        <motion.button
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0, opacity: 0 }}
-                            onClick={() => setSearch('')}
-                            className="mr-3 p-3 rounded-full bg-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all"
-                        >
-                            <FiX size={18} />
-                        </motion.button>
-                    )}
-                </AnimatePresence>
-
-                <div className="hidden md:flex items-center gap-2 pr-4 text-white/10 font-black text-[10px] uppercase tracking-widest pointer-events-none">
-                    <span className="px-2 py-1 rounded-lg border border-white/5 bg-white/5">Esc</span>
-                    <span>to clear</span>
-                </div>
-            </div>
-        </motion.div>
+            </motion.div>
+        </div>
     );
-})
+};
 
-ExploreSearchBar.displayName = 'ExploreSearchBar';
 export default ExploreSearchBar;
