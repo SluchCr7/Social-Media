@@ -89,7 +89,7 @@ const DesignCalender = React.memo(({
   }, [jumpMonth, setSelectedDate]);
 
   return (
-    <div className="relative min-h-screen p-4 sm:p-8 lg:p-12 overflow-hidden">
+    <div className="relative w-full min-h-screen p-4 sm:p-8 lg:p-12 overflow-hidden">
       {/* 🎭 Animated Ambient Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         <motion.div

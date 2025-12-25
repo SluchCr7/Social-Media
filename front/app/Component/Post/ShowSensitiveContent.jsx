@@ -37,7 +37,6 @@ const ShowSensitiveContent = ({
         transition={{ type: 'spring', stiffness: 260, damping: 20 }}
         className="
           relative z-10 flex flex-col items-center 
-          bg-white/10 dark:bg-white/[0.03]
           backdrop-blur-md
           rounded-3xl p-8 sm:p-12
           max-w-sm w-full text-center
@@ -67,8 +66,8 @@ const ShowSensitiveContent = ({
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
           {t('Sensitive Content')}
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
-          {t('This content may contain sensitive material. Would you like to view it?')}
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+          {t('This content may contain sensitive material')}
         </p>
 
         {/* Action Button */}

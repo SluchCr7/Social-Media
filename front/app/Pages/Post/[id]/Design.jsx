@@ -48,7 +48,7 @@ const DesignPostSelect = memo(({
   const { t } = useTranslation();
 
   return (
-    <div className="relative min-h-screen py-10 px-4 sm:px-8">
+    <div className="relative w-full min-h-screen py-10 px-4 sm:px-8">
       {/* 🎭 Animated Background */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <div className="absolute top-[10%] left-[10%] w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full" />

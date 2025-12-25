@@ -31,7 +31,7 @@ const FullSearchResults = () => {
   }, [search, searchParams]);
 
   return (
-    <div className="relative min-h-screen px-4 sm:px-8 py-12 lg:px-16 overflow-hidden">
+    <div className="relative w-full min-h-screen px-4 sm:px-8 py-12 lg:px-16 overflow-hidden">
       {/* 🔮 Background Elements */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full translate-x-1/4 -translate-y-1/4" />

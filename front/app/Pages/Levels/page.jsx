@@ -166,106 +166,199 @@ export default function LevelsPage() {
   )
 
   return (
-    <div className="min-h-screen relative bg-gradient-to-b from-lightMode-bg to-lightMode-bg dark:from-[#0b0b0f] dark:to-[#12121a] text-lightMode-fg dark:text-darkMode-fg antialiased">
-      {/* خلفية إضاءة ديناميكية */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(85,88,241,0.15),transparent_60%),radial-gradient(circle_at_80%_70%,rgba(251,191,36,0.1),transparent_60%)] pointer-events-none"></div>
+    <div className="min-h-screen relative bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 text-gray-900 dark:text-gray-100 antialiased">
+      {/* Decorative background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl" />
+      </div>
 
       <div className="relative z-10 w-full px-6 py-20 max-w-7xl mx-auto">
         {/* Header */}
-        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12">
+        <motion.header
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row md:items-center md:justify-between gap-8 mb-16"
+        >
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight flex items-center gap-3">
-              <span className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-[#5558f1] to-indigo-600 shadow-lg">
-                <FaStar className="text-white text-xl" />
-              </span>
-              {t('Level Up System')}
-            </h1>
-            <p className="mt-2 text-gray-500 dark:text-gray-400 max-w-2xl">
+            <div className="flex items-center gap-4 mb-4">
+              <motion.div
+                animate={{ y: [0, -5, 0], rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 via-yellow-500 to-amber-600 shadow-2xl shadow-amber-500/30"
+              >
+                <FaStar className="text-white text-3xl" />
+              </motion.div>
+              <h1 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 bg-clip-text text-transparent">
+                {t('Level Up System')}
+              </h1>
+            </div>
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl">
               {t('Earn XP for meaningful activity. Unlock advanced features and climb to Legend status.')}
             </p>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <div className="text-right">
-              <div className="text-sm text-gray-400">{t('Current Points')}</div>
-              <div className="text-2xl font-semibold text-[#fbbf24]">{formatPoints(currentPoints)} XP</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">
+                {t('Current Points')}
+              </div>
+              <div className="text-4xl font-extrabold bg-gradient-to-r from-amber-500 to-yellow-600 bg-clip-text text-transparent">
+                {formatPoints(currentPoints)} XP
+              </div>
             </div>
 
-            <button className="ml-2 inline-flex items-center gap-2 px-5 py-2 rounded-2xl bg-gradient-to-r from-[#5558f1] to-[#6b7bff] text-white font-semibold shadow-lg hover:scale-105 transition">
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              className="inline-flex items-center gap-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold shadow-2xl shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
+            >
               {t('Go to Dashboard')} <FaChevronRight />
-            </button>
+            </motion.button>
           </div>
-        </header>
+        </motion.header>
 
         {/* Main grid */}
         <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <section className="lg:col-span-2">
-            <div className="rounded-3xl p-6 shadow-xl backdrop-blur-xl border border-white/10 bg-white/10 dark:bg-[#1a1a1a]/60">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-[#5558f1]">{t('Your Level:')} {t(currentLevel.name)}</h2>
-                <div className="text-sm text-gray-500">{t('Progress:')} {progressToNext}%</div>
-              </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative rounded-3xl p-8 shadow-2xl backdrop-blur-xl border border-white/20 dark:border-gray-700/30 bg-white/60 dark:bg-gray-800/60 overflow-hidden"
+            >
+              {/* Background gradient */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5" />
 
-              <div className="w-full bg-gray-300/30 dark:bg-gray-700/40 rounded-full h-3 overflow-hidden mb-6">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progressToNext}%` }}
-                  transition={{ duration: 0.8 }}
-                  className="h-3 bg-gradient-to-r from-[#5558f1] to-[#6b7bff]"
-                />
-              </div>
-
-              {nextLevel && (
-                <div className="text-center text-sm text-gray-500 mb-6">
-                  {t('You need')} <strong className="text-[#5558f1]">{formatPoints(pointsRemaining)} XP</strong> {t('to reach')} <strong className="text-[#fbbf24]">{t(nextLevel.name)}</strong>
+              <div className="relative">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500 to-yellow-600">
+                      <FaTrophy className="text-white text-2xl" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        {t('Your Level:')} {t(currentLevel.name)}
+                      </h2>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {t('Progress:')} {progressToNext}%
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              )}
 
-              <div className="space-y-6">{renderedLevels}</div>
-            </div>
+                <div className="w-full bg-gray-200/50 dark:bg-gray-700/50 rounded-full h-4 overflow-hidden mb-8 shadow-inner">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progressToNext}%` }}
+                    transition={{ duration: 1, ease: 'easeOut' }}
+                    className="h-4 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 shadow-lg relative"
+                  >
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                      animate={{ x: ['-100%', '100%'] }}
+                      transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
+                    />
+                  </motion.div>
+                </div>
+
+                {nextLevel && (
+                  <div className="text-center text-base text-gray-700 dark:text-gray-300 mb-8 p-4 rounded-2xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20">
+                    {t('You need')} <strong className="text-blue-600 dark:text-blue-400">{formatPoints(pointsRemaining)} XP</strong> {t('to reach')} <strong className="text-amber-600 dark:text-amber-400">{t(nextLevel.name)}</strong>
+                  </div>
+                )}
+
+                <div className="space-y-5">{renderedLevels}</div>
+              </div>
+            </motion.div>
           </section>
 
           {/* Sidebar */}
           <aside>
             <div className="sticky top-24 space-y-6">
-              <div className="p-6 rounded-2xl shadow-xl bg-white/10 dark:bg-[#1a1a1a]/60 border border-white/20 backdrop-blur-xl">
-                <h3 className="font-bold text-lg mb-3 text-[#5558f1]">{t('How to Earn XP')}</h3>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="p-8 rounded-3xl shadow-2xl bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-white/20 dark:border-gray-700/30"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
+                    <FaStar className="text-white text-xl" />
+                  </div>
+                  <h3 className="font-bold text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    {t('How to Earn XP')}
+                  </h3>
+                </div>
                 <div className="grid grid-cols-1 gap-3">
                   {EARN_METHODS.map((m, i) => <EarnMethodCard key={i} m={m} i={i} t={t} />)}
                 </div>
-                <div className="mt-4 text-sm text-gray-500">{t('Pro tip: Stay active and log in daily to keep your XP streak growing!')}</div>
-              </div>
+                <div className="mt-6 text-sm text-gray-600 dark:text-gray-400 p-4 rounded-2xl bg-blue-500/5 border border-blue-500/10">
+                  💡 {t('Pro tip: Stay active and log in daily to keep your XP streak growing!')}
+                </div>
+              </motion.div>
 
-              <div className="bg-gradient-to-br from-[#5558f1] to-[#6b7bff] rounded-2xl p-6 shadow-xl text-white">
-                <h4 className="font-bold text-xl mb-2">{t('Ready to climb?')}</h4>
-                <p className="text-sm mb-4">{t('Complete actions, earn XP, and unlock exclusive perks at higher tiers.')}</p>
-                <button className="w-full py-3 rounded-xl font-semibold bg-white/10 hover:scale-105 transition">
-                  {t('Complete tasks')} • <strong className="ml-2">{t('Earn +50 XP')}</strong>
-                </button>
-              </div>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+                className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-3xl p-8 shadow-2xl text-white overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+                <div className="relative">
+                  <h4 className="font-bold text-2xl mb-3">{t('Ready to climb?')}</h4>
+                  <p className="text-sm mb-6 text-white/90">
+                    {t('Complete actions, earn XP, and unlock exclusive perks at higher tiers.')}
+                  </p>
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full py-4 rounded-2xl font-bold bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all shadow-lg"
+                  >
+                    {t('Complete tasks')} • <strong>{t('Earn +50 XP')}</strong>
+                  </motion.button>
+                </div>
+              </motion.div>
             </div>
           </aside>
         </main>
 
         {/* Footer CTA */}
-        <div className="mt-12">
-          <div className="rounded-3xl p-8 bg-white/10 dark:bg-[#1a1a1a]/60 border border-white/10 backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              <h3 className="text-2xl font-bold text-[#5558f1]">{t('Start gaining XP today')}</h3>
-              <p className="text-gray-500 mt-2">{t('Engage with the community and unlock exclusive profile features.')}</p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-16"
+        >
+          <div className="relative rounded-3xl p-10 bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5" />
+            <div className="relative">
+              <h3 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                {t('Start gaining XP today')}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                {t('Engage with the community and unlock exclusive profile features.')}
+              </p>
             </div>
 
-            <div className="flex items-center gap-4">
-              <button className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#5558f1] to-[#6b7bff] font-semibold text-white shadow hover:scale-105 transition">
+            <div className="relative flex items-center gap-4">
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 font-bold text-white shadow-2xl shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
+              >
                 {t('Do Tasks')}
-              </button>
-              <button className="px-6 py-3 rounded-2xl border border-gray-300/40 text-gray-200 hover:bg-gray-200/10 transition">
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 rounded-2xl border-2 border-gray-300/50 dark:border-gray-600/50 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-200/20 dark:hover:bg-gray-700/20 transition-all"
+              >
                 {t('View Leaderboard')}
-              </button>
+              </motion.button>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
-  )
+  );
 }
