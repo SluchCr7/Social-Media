@@ -48,7 +48,9 @@ const FullSearchResults = () => {
             </div>
             <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-gray-900 dark:text-white leading-[0.9] break-words">
               {t('Results for')} <br />
-              <span className="text-indigo-500">"{search || '...'}"</span>
+              <span className="text-indigo-500">
+                {search ? `"${search}"` : '...'}
+              </span>
             </h1>
           </div>
         </header>

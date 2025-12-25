@@ -125,7 +125,9 @@ const DesignExplore = memo(({
                                         href={`/Pages/Search?q=${encodeURIComponent(search.trim())}`}
                                         className="inline-flex items-center gap-4 bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-indigo-500/30 active:scale-95 transition-all"
                                     >
-                                        <span>{t("Expand Data View for")} "{search.trim()}"</span>
+                                        <span>
+                                            {`${t("Expand Data View for")} "${search?.trim() || ''}"`}
+                                        </span>
                                         <HiArrowRight className="w-5 h-5 rtl:rotate-180" />
                                     </Link>
                                 </div>

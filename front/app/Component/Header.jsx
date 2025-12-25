@@ -58,7 +58,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
         <div className="flex items-center gap-2 md:gap-4">
           {/* Quick Search Trigger */}
           <button className="p-2.5 rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white transition-all hover:bg-white/10">
-            <Search className="w-5 h-5" />
+            <Link href="/Pages/Search"><Search className="w-5 h-5" /></Link>
           </button>
 
           {isLogin ? (
