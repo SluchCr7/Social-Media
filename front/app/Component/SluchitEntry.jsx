@@ -24,7 +24,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ShowSensitiveContent from './Post/ShowSensitiveContent';
 import PostMusicPlayer from './Post/PostMusic';
 import Image from 'next/image';
-
+import Link from 'next/link'
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost();
   const { user, isLogin } = useAuth();
