@@ -174,8 +174,9 @@ const ProfileHeader = ({
         <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-12">
           <div className="lg:col-span-12 space-y-8">
             <p className="text-xl md:text-2xl font-medium text-white/60 leading-relaxed max-w-4xl italic">
-              {profileUser?.description || "A visionary user exploring the Zocial universe. No formal broadcast yet."}
+              {`"${profileUser?.description || "A visionary user exploring the Zocial universe. No formal broadcast yet."}"`}
             </p>
+
 
 
             {/* Advanced Level Dash */}
