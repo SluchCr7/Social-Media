@@ -92,24 +92,25 @@ const SongPlayer = React.memo(() => {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ y: 100, opacity: 0 }}
+        initial={{ y: 120, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 100, opacity: 0 }}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-4xl z-[100] px-4"
+        exit={{ y: 120, opacity: 0 }}
+        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+        className="fixed bottom-0 left-0 right-0 z-[999] pb-safe"
       >
-        <div className="group relative">
-          {/* ✨ Ethereal Aura Glow */}
+        <div className="relative mx-auto w-full max-w-7xl px-3 sm:px-6 pb-4 sm:pb-6">
+          {/* 🔮 Neural Aura Glow */}
           <motion.div
             animate={{
               backgroundColor: bgColor,
-              scale: playing ? [1, 1.05, 1] : 1,
-              opacity: playing ? 0.3 : 0.15
+              scale: playing ? [1, 1.08, 1] : 1,
+              opacity: playing ? 0.4 : 0.2
             }}
-            transition={{ repeat: Infinity, duration: 4 }}
-            className="absolute -inset-4 blur-[60px] rounded-full pointer-events-none transition-colors duration-1000"
+            transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+            className="absolute -inset-6 blur-[80px] rounded-full pointer-events-none"
           />
 
-          <div className="relative overflow-hidden rounded-[2.5rem] bg-white/70 dark:bg-[#0B0F1A]/80 backdrop-blur-3xl border border-white/20 dark:border-white/5 shadow-2xl p-3 flex flex-col md:flex-row items-center gap-4">
+          <div className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-white/80 dark:bg-[#0A0A0A]/95 backdrop-blur-3xl border border-gray-200 dark:border-white/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] p-2 sm:p-3 flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
 
             {/* 🎵 Album Metadata Section */}
             <div className="flex items-center gap-4 flex-shrink-0 w-full md:w-auto p-1">
@@ -137,85 +138,85 @@ const SongPlayer = React.memo(() => {
                 </p>
               </div>
 
-              <div className="flex md:hidden items-center gap-2">
-                <button onClick={prev} className="p-2 text-gray-500"><HiBackward size={20} /></button>
-                <button onClick={togglePlay} className="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                  {playing ? <HiPause size={20} /> : <HiPlay size={20} className="ml-0.5" />}
+              <div className="flex sm:hidden items-center gap-3 ml-auto">
+                <button onClick={prev} className="p-2.5 text-gray-600 dark:text-gray-400 hover:text-indigo-500 transition-colors"><HiBackward className="w-5 h-5" /></button>
+                <button onClick={togglePlay} className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/40 active:scale-95 transition-transform">
+                  {playing ? <HiPause className="w-5 h-5" /> : <HiPlay className="w-5 h-5 ml-0.5" />}
                 </button>
-                <button onClick={next} className="p-2 text-gray-500"><HiForward size={20} /></button>
+                <button onClick={next} className="p-2.5 text-gray-600 dark:text-gray-400 hover:text-indigo-500 transition-colors"><HiForward className="w-5 h-5" /></button>
               </div>
             </div>
 
             {/* 🕹️ Central Controls & Slider Section */}
-            <div className="hidden md:flex flex-1 flex-col items-center gap-1.5 px-2">
-              <div className="flex items-center gap-7">
+            <div className="hidden sm:flex flex-1 flex-col items-center gap-2 px-2">
+              <div className="flex items-center gap-6 md:gap-8">
                 <button
                   onClick={toggleShuffle}
-                  className={`transition-all duration-300 ${shuffle ? 'text-indigo-500 scale-110' : 'text-gray-400 hover:text-gray-600 dark:hover:text-white'}`}
+                  className={`transition-all duration-300 ${shuffle ? 'text-indigo-500 scale-110' : 'text-gray-400 hover:text-gray-700 dark:hover:text-white'}`}
                 >
-                  <HiArrowsRightLeft size={18} />
+                  <HiArrowsRightLeft className="w-[18px] h-[18px]" />
                 </button>
 
                 <button onClick={prev} className="text-gray-700 dark:text-white hover:text-indigo-500 dark:hover:text-indigo-400 transition-all hover:scale-110 active:scale-95">
-                  <HiBackward size={22} />
+                  <HiBackward className="w-6 h-6" />
                 </button>
 
                 <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.92 }}
                   onClick={togglePlay}
-                  className="w-12 h-12 rounded-full bg-indigo-600 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center shadow-xl shadow-indigo-500/20 dark:shadow-white/5 transition-all"
+                  className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-500 dark:from-white dark:to-gray-100 text-white dark:text-gray-900 flex items-center justify-center shadow-2xl shadow-indigo-500/30 dark:shadow-white/10 transition-all"
                 >
-                  {playing ? <HiPause size={24} /> : <HiPlay size={24} className="ml-1" />}
+                  {playing ? <HiPause className="w-6 h-6" /> : <HiPlay className="w-6 h-6 ml-1" />}
                 </motion.button>
 
                 <button onClick={next} className="text-gray-700 dark:text-white hover:text-indigo-500 dark:hover:text-indigo-400 transition-all hover:scale-110 active:scale-95">
-                  <HiForward size={22} />
+                  <HiForward className="w-6 h-6" />
                 </button>
 
                 <button
                   onClick={toggleLoop}
-                  className={`transition-all duration-300 ${loop ? 'text-indigo-500 scale-110' : 'text-gray-400 hover:text-gray-600 dark:hover:text-white'}`}
+                  className={`transition-all duration-300 ${loop ? 'text-indigo-500 scale-110' : 'text-gray-400 hover:text-gray-700 dark:hover:text-white'}`}
                 >
-                  <HiArrowPath size={18} />
+                  <HiArrowPath className="w-[18px] h-[18px]" />
                 </button>
               </div>
 
               <div className="w-full flex items-center gap-3">
-                <span className="text-[10px] font-bold text-gray-400 tabular-nums w-8">{formatTime(progress)}</span>
+                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 tabular-nums w-10 text-right">{formatTime(progress)}</span>
                 <div className="flex-1 px-1">
                   <Slider
                     min={0}
                     max={100}
                     value={progressPercent}
                     onChange={handleSeek}
-                    trackStyle={{ background: 'linear-gradient(90deg, #6366f1, #a855f7)', height: 5, borderRadius: 10 }}
-                    railStyle={{ backgroundColor: 'rgba(0,0,0,0.05)', height: 5, borderRadius: 10 }}
+                    trackStyle={{ background: 'linear-gradient(90deg, #6366f1, #a855f7)', height: 6, borderRadius: 10 }}
+                    railStyle={{ backgroundColor: 'rgba(156,163,175,0.2)', height: 6, borderRadius: 10 }}
                     handleStyle={{
                       borderColor: 'white',
                       backgroundColor: '#6366f1',
                       opacity: 1,
                       borderWidth: 3,
-                      boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-                      width: 14,
-                      height: 14,
-                      marginTop: -4.5
+                      boxShadow: '0 4px 12px rgba(99,102,241,0.4)',
+                      width: 16,
+                      height: 16,
+                      marginTop: -5
                     }}
                   />
                 </div>
-                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 tabular-nums w-8">{formatTime(duration)}</span>
+                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 tabular-nums w-10">{formatTime(duration)}</span>
               </div>
             </div>
 
             {/* 🛠️ Utility Actions Section */}
-            <div className="hidden md:flex items-center gap-3 px-2 border-l border-gray-100 dark:border-white/5 ml-2">
+            <div className="hidden sm:flex items-center gap-3 px-2 border-l border-gray-200 dark:border-white/5 ml-2">
               <div className="relative">
                 <button
                   onMouseEnter={() => setShowVolumeSlider(true)}
-                  className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
                   onClick={toggleMute}
                 >
-                  {isMuted || volume === 0 ? <HiSpeakerXMark size={20} /> : <HiSpeakerWave size={20} />}
+                  {isMuted || volume === 0 ? <HiSpeakerXMark className="w-5 h-5" /> : <HiSpeakerWave className="w-5 h-5" />}
                 </button>
 
                 <AnimatePresence>
@@ -225,7 +226,7 @@ const SongPlayer = React.memo(() => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       onMouseLeave={() => setShowVolumeSlider(false)}
-                      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 p-4 bg-white/90 dark:bg-[#1A1F2E]/90 backdrop-blur-2xl rounded-2xl border border-gray-100 dark:border-white/10 shadow-2xl"
+                      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 p-4 bg-white/95 dark:bg-[#1A1F2E]/95 backdrop-blur-2xl rounded-2xl border border-gray-200 dark:border-white/10 shadow-2xl"
                     >
                       <div className="h-32 flex flex-col items-center">
                         <Slider
@@ -235,7 +236,7 @@ const SongPlayer = React.memo(() => {
                           value={isMuted ? 0 : volume * 100}
                           onChange={(val) => setVolume(val / 100)}
                           trackStyle={{ background: '#6366f1', width: 6 }}
-                          railStyle={{ backgroundColor: 'rgba(0,0,0,0.05)', width: 6 }}
+                          railStyle={{ backgroundColor: 'rgba(156,163,175,0.2)', width: 6 }}
                           handleStyle={{ borderColor: 'white', backgroundColor: '#6366f1', width: 14, height: 14, marginLeft: -4 }}
                         />
                       </div>
@@ -248,19 +249,19 @@ const SongPlayer = React.memo(() => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => current?._id && likeMusic(current._id)}
-                className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all ${current?.likes?.includes(user?._id) ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-500' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50'}`}
+                className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${current?.likes?.includes(user?._id) ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-500' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}
               >
-                <HiHeart size={20} className={current?.likes?.includes(user?._id) ? 'fill-current' : ''} />
+                <HiHeart className={`w-5 h-5 ${current?.likes?.includes(user?._id) ? 'fill-current' : ''}`} />
               </motion.button>
 
-              <button className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                <HiQueueList size={20} />
+              <button className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                <HiQueueList className="w-5 h-5" />
               </button>
             </div>
 
             {/* Mobile Progress Bar (Strip at bottom) */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 md:hidden">
-              <div className="h-full bg-indigo-500" style={{ width: `${progressPercent}%` }} />
+            <div className="absolute bottom-0 left-0 right-0 h-1 sm:hidden bg-gray-200 dark:bg-white/5 rounded-b-[2rem]">
+              <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-b-[2rem] transition-all" style={{ width: `${progressPercent}%` }} />
             </div>
           </div>
         </div>

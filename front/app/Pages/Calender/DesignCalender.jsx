@@ -112,7 +112,7 @@ const DesignCalender = React.memo(({
         />
       </div>
 
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="w-full space-y-8">
         {/* 🚀 Header Section */}
         <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-1">

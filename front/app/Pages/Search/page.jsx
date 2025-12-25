@@ -38,7 +38,7 @@ const FullSearchResults = () => {
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-500/5 blur-[120px] rounded-full -translate-x-1/4 translate-y-1/4" />
       </div>
 
-      <div className="max-w-6xl mx-auto space-y-12">
+      <div className="w-full space-y-12">
         {/* 🚀 Dynamic Header */}
         <header className="flex flex-col md:flex-row items-end justify-between gap-6 border-b border-gray-100 dark:border-white/5 pb-12">
           <div className="space-y-4 max-w-2xl">
@@ -56,7 +56,7 @@ const FullSearchResults = () => {
         </header>
 
         {/* 🔍 Refined Search Bar */}
-        <div className="max-w-4xl mx-auto">
+        <div className="w-full">
           <ExploreSearchBar
             search={search}
             setSearch={setSearch}

@@ -62,7 +62,7 @@ const DesignPostSelect = memo(({
         onShare={(id, customText) => sharePost(id, post?.owner?._id, customText)}
       />
 
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="w-full space-y-8">
         {/* 🚀 Breadcrumb / Top Bar */}
         <div className="flex items-center justify-between pb-6 border-b border-gray-100 dark:border-white/5">
           <div className="flex items-center gap-4">

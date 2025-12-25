@@ -1,122 +1,132 @@
-'use client'
+'use client';
 
-import { FaSortAmountDown } from "react-icons/fa"
-import { MdOutlineDateRange } from "react-icons/md"
-import { IoMdRefresh } from "react-icons/io"
-import { months } from "@/app/utils/Data"
-import { useTranslation } from "react-i18next"
-import { memo, useCallback, useMemo } from "react"
+import { HiAdjustmentsHorizontal, HiCalendarDays, HiArrowPath, HiChevronDown } from "react-icons/hi2";
+import { months } from "@/app/utils/Data";
+import { useTranslation } from "react-i18next";
+import { memo, useCallback, useMemo } from "react";
+import { motion } from "framer-motion";
 
 const FilterBar = memo(({ filters, setFilters, years }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
-  // ✅ استخدم useCallback لتثبيت الدوال (ما تتغير إلا عند الحاجة)
   const handleChange = useCallback((key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }))
-  }, [setFilters])
+    setFilters(prev => ({ ...prev, [key]: value }));
+  }, [setFilters]);
 
   const resetFilters = useCallback(() => {
-    setFilters({ year: "all", month: "all", sort: "latest" })
-  }, [setFilters])
+    setFilters({ year: "all", month: "all", sort: "latest" });
+  }, [setFilters]);
 
-  // ✅ استخدم useMemo لتجنب إعادة بناء عناصر القوائم كل مرة
   const yearOptions = useMemo(
     () => years.map(y => (
-      <option key={y} value={y}>{y}</option>
+      <option key={y} value={y} className="bg-white dark:bg-[#0B0F1A]">{y}</option>
     )),
     [years]
-  )
+  );
 
   const monthOptions = useMemo(
     () => months.map(({ name, value }, i) => (
-      <option key={i + 1} value={value}>{name}</option>
+      <option key={i + 1} value={value} className="bg-white dark:bg-[#0B0F1A]">{name}</option>
     )),
     []
-  )
+  );
 
   return (
-    <div
-      className="
-        flex flex-wrap items-center justify-center gap-3 sm:gap-4
-        bg-lightMode-menu dark:bg-darkMode-menu
-        p-4 rounded-2xl shadow-lg border border-lightMode-text/10 dark:border-darkMode-text/20
-        w-[95%] sm:w-[90%] mx-auto transition-colors duration-300
-      "
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-6xl mx-auto mb-12"
     >
-      {/* اختيار السنة */}
-      <FilterSelect
-        icon={<MdOutlineDateRange />}
-        value={filters.year}
-        onChange={e => handleChange("year", e.target.value)}
-        options={[
-          <option key="all" value="all">{t("All Years")}</option>,
-          ...yearOptions
-        ]}
-      />
+      <div className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-[0_20px_40px_-12px_rgba(0,0,0,0.1)] flex flex-wrap items-center gap-6">
 
-      {/* اختيار الشهر */}
-      <FilterSelect
-        icon={<MdOutlineDateRange />}
-        value={filters.month}
-        onChange={e => handleChange("month", e.target.value)}
-        options={[
-          <option key="all" value="all">{t("All Months")}</option>,
-          ...monthOptions
-        ]}
-      />
+        {/* Signal Section */}
+        <div className="flex items-center gap-3 pr-6 border-r border-gray-100 dark:border-white/5 hidden lg:flex">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+            <HiAdjustmentsHorizontal className="w-5 h-5" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{t("Tuning")}</span>
+            <span className="text-xs font-bold text-gray-400 uppercase">{t("Parameters")}</span>
+          </div>
+        </div>
 
-      {/* الترتيب */}
-      <FilterSelect
-        icon={<FaSortAmountDown />}
-        value={filters.sort}
-        onChange={e => handleChange("sort", e.target.value)}
-        options={[
-          <option key="latest" value="latest">🆕 {t("Latest")}</option>,
-          <option key="mostLiked" value="mostLiked">❤️ {t("Most Liked")}</option>,
-          <option key="mostCommented" value="mostCommented">💬 {t("Most Commented")}</option>
-        ]}
-      />
+        {/* Dynamic Selectors */}
+        <div className="flex flex-1 flex-wrap items-center gap-4">
+          <FilterSelect
+            icon={<HiCalendarDays />}
+            label={t("Year")}
+            value={filters.year}
+            onChange={e => handleChange("year", e.target.value)}
+            options={[
+              <option key="all" value="all" className="bg-white dark:bg-[#0B0F1A]">{t("All Dimensions")}</option>,
+              ...yearOptions
+            ]}
+          />
 
-      {/* زر Reset */}
-      <button
-        onClick={resetFilters}
-        className="
-          w-full sm:w-auto ml-auto flex items-center justify-center gap-2
-          px-4 py-2 text-xs sm:text-sm font-medium
-          rounded-xl
-          bg-red-100 text-red-600 hover:bg-red-200
-          dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-800/70
-          border border-red-200/50 dark:border-red-800/50
-          transition duration-200
-        "
-      >
-        <IoMdRefresh className="text-base" />
-        {t("Reset")}
-      </button>
+          <FilterSelect
+            icon={<HiCalendarDays />}
+            label={t("Month")}
+            value={filters.month}
+            onChange={e => handleChange("month", e.target.value)}
+            options={[
+              <option key="all" value="all" className="bg-white dark:bg-[#0B0F1A]">{t("All Phases")}</option>,
+              ...monthOptions
+            ]}
+          />
+
+          <FilterSelect
+            icon={<HiAdjustmentsHorizontal />}
+            label={t("Sort")}
+            value={filters.sort}
+            onChange={e => handleChange("sort", e.target.value)}
+            options={[
+              <option key="latest" value="latest" className="bg-white dark:bg-[#0B0F1A]">🆕 {t("Chronological")}</option>,
+              <option key="mostLiked" value="mostLiked" className="bg-white dark:bg-[#0B0F1A]">❤️ {t("Resonant")}</option>,
+              <option key="mostCommented" value="mostCommented" className="bg-white dark:bg-[#0B0F1A]">💬 {t("Active Discourse")}</option>
+            ]}
+          />
+        </div>
+
+        {/* Reset Trigger */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={resetFilters}
+          className="group flex items-center gap-3 px-6 py-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-lg shadow-rose-500/10"
+        >
+          <HiArrowPath className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
+          <span className="text-[10px] font-black uppercase tracking-widest">{t("Reset Matrix")}</span>
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+});
+
+FilterBar.displayName = 'FilterBar';
+
+const FilterSelect = memo(({ icon, label, value, onChange, options }) => (
+  <div className="relative group/select flex-1 min-w-[140px]">
+    <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10">
+      <span className="text-indigo-500 opacity-60 group-focus-within/select:opacity-100 transition-opacity">
+        {icon}
+      </span>
+      <span className="hidden sm:inline text-[9px] font-black uppercase tracking-widest text-gray-400">
+        {label}:
+      </span>
     </div>
-  )
-})
-FilterBar.displayName = 'FilterBar'
-// 🧩 مكون فرعي ميمو أيضًا لتقليل إعادة التصيير
-const FilterSelect = memo(({ icon, value, onChange, options }) => (
-  <div className="flex items-center gap-2 w-full sm:w-auto">
-    <span className="text-lightMode-text2 dark:text-gray-400 shrink-0 text-lg">{icon}</span>
     <select
       value={value}
       onChange={onChange}
-      className="
-        flex-1 sm:flex-none w-full sm:w-auto px-4 py-2 rounded-xl border
-        text-xs sm:text-sm font-medium
-        bg-lightMode-bg dark:bg-darkMode-bg
-        border-lightMode-text/10 dark:border-darkMode-text/20
-        text-lightMode-text2 dark:text-gray-200
-        focus:ring-2 focus:ring-lightMode-text dark:focus:ring-darkMode-text
-        transition
-      "
+      className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-2xl pl-24 pr-10 py-4 text-xs font-black uppercase tracking-widest text-gray-700 dark:text-white outline-none focus:border-indigo-500/30 transition-all appearance-none cursor-pointer"
     >
       {options}
     </select>
+    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
+      <HiChevronDown className="w-3 h-3" />
+    </div>
   </div>
-))
-FilterSelect.displayName = 'FilterSelect'
-export default FilterBar
+));
+
+FilterSelect.displayName = 'FilterSelect';
+
+export default FilterBar;

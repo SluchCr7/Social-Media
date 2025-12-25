@@ -1,4 +1,5 @@
 'use client';
+
 import React, {
   useState,
   useEffect,
@@ -8,14 +9,22 @@ import React, {
   memo,
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaTimes, FaPlus, FaTrash } from 'react-icons/fa';
+import {
+  HiXMark,
+  HiPlus,
+  HiTrash,
+  HiChevronLeft,
+  HiChevronRight,
+  HiPause,
+  HiPlay,
+  HiSignal,
+  HiCalendarDays
+} from 'react-icons/hi2';
 import Image from 'next/image';
-import clsx from 'clsx';
 import { useHighlights } from '@/app/Context/HighlightContext';
 import { useTranslate } from '../Context/TranslateContext';
 import { useTranslation } from 'react-i18next';
 
-// ✅ مكون رئيسي مع تحسين الأداء
 const HighlightViewerModal = memo(function HighlightViewerModal({
   highlight,
   onClose,
@@ -23,65 +32,41 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
 }) {
   const { isRTL } = useTranslate();
   const { addStoryToHighlight, deleteHighlight } = useHighlights();
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const stories = useMemo(() => highlight?.stories || [], [highlight]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
+  const [showAddMenu, setShowAddMenu] = useState(false);
   const [search, setSearch] = useState('');
-  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const rafRef = useRef(null);
   const lastTimeRef = useRef(null);
-  const touchStartX = useRef(null);
+  const STORY_DURATION_MS = 6000;
 
-  const STORY_DURATION_MS = 7000;
-
-  // ✅ صورة القصة
   const getPhoto = useCallback((story) => {
     if (!story) return '/placeholder.jpg';
     return Array.isArray(story.Photo) ? story.Photo[0] : story.Photo;
   }, []);
 
-  // ✅ Preload الصور مرة واحدة فقط
-  const imageCache = useRef(new Map());
-  useEffect(() => {
-    if (!stories.length || typeof window === 'undefined') return;
-    for (const s of stories) {
-      const src = getPhoto(s);
-      if (!imageCache.current.has(src)) {
-        const img = new Image();
-        img.src = src;
-        imageCache.current.set(src, img);
-      }
-    }
-  }, [stories, getPhoto]);
-
-  // ✅ حساب القصص المتاحة مرة واحدة فقط
-  const filteredAvailable = useMemo(() => {
-    const excluded = new Set(stories.map((s) => s._id));
-    return allStories
-      .filter((s) => !excluded.has(s._id))
-      .filter((s) => {
-        if (!search) return true;
-        return (s.text || '').toLowerCase().includes(search.toLowerCase());
-      });
-  }, [allStories, stories, search]);
-
-  // ✅ الانتقال بين القصص
   const next = useCallback(() => {
-    setCurrentIndex((i) => (i < stories.length - 1 ? i + 1 : (onClose(), i)));
-  }, [stories.length, onClose]);
+    if (currentIndex < stories.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setProgress(0);
+    } else {
+      onClose();
+    }
+  }, [currentIndex, stories.length, onClose]);
 
   const prev = useCallback(() => {
-    setCurrentIndex((i) => (i > 0 ? i - 1 : 0));
-  }, []);
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setProgress(0);
+    }
+  }, [currentIndex]);
 
-  // ✅ تقدم القصة (progress)
   useEffect(() => {
-    if (!stories.length) return;
-
     const tick = (now) => {
       if (isPaused) {
         lastTimeRef.current = now;
@@ -90,340 +75,271 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
       }
       if (lastTimeRef.current == null) lastTimeRef.current = now;
       const elapsed = now - lastTimeRef.current;
-      const percent = Math.min(100, (elapsed / STORY_DURATION_MS) * 100 + (progress || 0));
+      const speed = isPaused ? 0 : (100 / STORY_DURATION_MS);
+      const delta = (elapsed * speed) / 1000; // This is a bit complex, let's simplify
 
-      setProgress(percent);
-      if (percent >= 100) {
-        setCurrentIndex((i) => {
-          if (i < stories.length - 1) return i + 1;
-          onClose();
-          return i;
-        });
-        setProgress(0);
-        lastTimeRef.current = now;
-      }
+      setProgress(prev => {
+        const nextVal = prev + (elapsed / STORY_DURATION_MS) * 100;
+        if (nextVal >= 100) {
+          // We'll handle sync in the parent effect to avoid double state updates
+          return 100;
+        }
+        return nextVal;
+      });
+
+      lastTimeRef.current = now;
       rafRef.current = requestAnimationFrame(tick);
     };
 
-    lastTimeRef.current = null;
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [currentIndex, isPaused, stories.length, onClose]);
+  }, [isPaused]);
 
-  useEffect(() => setProgress(0), [currentIndex, stories.length]);
+  useEffect(() => {
+    if (progress >= 100) {
+      next();
+    }
+  }, [progress, next]);
 
-  // ✅ تنقل عبر الكيبورد
+  // Keyboard controls
   useEffect(() => {
     const handler = (e) => {
-      if (e.key === 'ArrowRight') return isRTL ? prev() : next();
-      if (e.key === 'ArrowLeft') return isRTL ? next() : prev();
-      if (e.key === 'Escape') return onClose();
-      if (e.key === ' ' || e.key === 'Spacebar') {
-        e.preventDefault();
-        setIsPaused((p) => !p);
-      }
+      if (e.key === 'ArrowRight') isRTL ? prev() : next();
+      if (e.key === 'ArrowLeft') isRTL ? next() : prev();
+      if (e.key === 'Escape') onClose();
+      if (e.key === ' ') setIsPaused(p => !p);
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [isRTL, next, prev, onClose]);
 
-  // ✅ الإيماءات
-  const handleTouchStart = useCallback((e) => {
-    touchStartX.current = e.touches?.[0]?.clientX ?? null;
-    setIsPaused(true);
-  }, []);
-
-  const handleTouchEnd = useCallback(
-    (e) => {
-      const endX = e.changedTouches?.[0]?.clientX ?? null;
-      if (touchStartX.current == null || endX == null) return setIsPaused(false);
-      const diff = endX - touchStartX.current;
-      if (diff > 60) (isRTL ? next() : prev());
-      if (diff < -60) (isRTL ? prev() : next());
-      touchStartX.current = null;
-      setIsPaused(false);
-    },
-    [isRTL, next, prev]
-  );
-
-  const handleMouseDown = useCallback(() => setIsPaused(true), []);
-  const handleMouseUp = useCallback(() => setIsPaused(false), []);
-
-  // ✅ عمليات التفاعل
-  const handleAddStory = useCallback(
-    async (storyId) => {
-      await addStoryToHighlight(highlight._id, storyId);
-      setShowMenu(false);
-    },
-    [addStoryToHighlight, highlight?._id]
-  );
-
-  const handleDeleteHighlight = useCallback(async () => {
-    await deleteHighlight(highlight._id);
-    setConfirmDeleteOpen(false);
-    onClose();
-  }, [deleteHighlight, highlight?._id, onClose]);
-
   const currentStory = stories[currentIndex];
   const currentPhoto = getPhoto(currentStory);
 
   if (!highlight) return null;
+
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-xl p-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        aria-modal
-        role="dialog"
+        className="fixed inset-0 z-[1000] flex items-center justify-center bg-[#050505]/95 backdrop-blur-3xl overflow-hidden"
       >
-        {/* Shell */}
-        <div className="w-full max-w-4xl h-[90vh] rounded-3xl overflow-hidden shadow-[0_10px_70px_rgba(0,0,0,0.8)] bg-black/60 flex flex-col border border-white/10 backdrop-blur-xl">
+        {/* Cinematic Particles */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-indigo-500/5 blur-[120px] rounded-full" />
+        </div>
 
-          {/* ✅ Top Bar */}
-          <div className="flex items-center justify-between gap-3 px-5 py-3 bg-black/40 border-b border-white/10 backdrop-blur-md">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-full overflow-hidden border border-white/20">
-                <Image
-                  src={highlight.coverImage || '/placeholder.jpg'}
-                  width={44}
-                  height={44}
-                  alt="Highlight cover"
-                  className="object-cover"
+        {/* 🎬 Viewer Console */}
+        <div className="relative w-full h-full max-w-5xl md:h-[90vh] flex flex-col md:rounded-[3rem] bg-black shadow-2xl border border-white/10 overflow-hidden">
+
+          {/* Progress Indicators */}
+          <div className="absolute top-6 left-10 right-10 z-[100] flex gap-2">
+            {stories.map((_, idx) => (
+              <div key={idx} className="flex-1 h-1 rounded-full bg-white/20 overflow-hidden">
+                <motion.div
+                  className="h-full bg-white"
+                  style={{ width: idx < currentIndex ? '100%' : idx === currentIndex ? `${progress}%` : '0%' }}
+                  transition={{ ease: 'linear', duration: 0 }}
                 />
               </div>
+            ))}
+          </div>
+
+          {/* Top Control Rail */}
+          <div className="absolute top-12 left-10 right-10 z-[100] flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl overflow-hidden border border-white/20">
+                <Image src={highlight.coverImage || '/placeholder.jpg'} width={48} height={48} alt="Cover" className="object-cover h-full" />
+              </div>
               <div className="text-white">
-                <h3 className="text-sm font-semibold">{highlight.title}</h3>
-                <p className="text-xs opacity-70">{currentIndex + 1}/{stories.length}</p>
+                <h3 className="text-sm font-black uppercase tracking-widest">{highlight.title}</h3>
+                <div className="flex items-center gap-2 text-[10px] text-indigo-400 font-bold">
+                  <HiSignal className="animate-pulse" />
+                  SIGNAL {currentIndex + 1} / {stories.length}
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <button
-                onClick={() => setShowMenu((p) => !p)}
-                aria-expanded={showMenu}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm transition"
+                onClick={() => setIsPaused(!isPaused)}
+                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all"
               >
-                <FaPlus /> <span className="hidden sm:inline">{t("Add story")}</span>
+                {isPaused ? <HiPlay className="w-5 h-5" /> : <HiPause className="w-5 h-5" />}
               </button>
 
               <button
-                onClick={() => setConfirmDeleteOpen(true)}
-                className="px-3 py-2 rounded-xl bg-transparent border border-red-500/40 text-red-400 text-sm hover:bg-red-500/10 transition"
-                title="Delete highlight"
+                onClick={() => setShowAddMenu(true)}
+                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-indigo-600 text-white font-black text-[10px] uppercase tracking-widest transition-all"
               >
-                <FaTrash />
+                <HiPlus className="w-4 h-4" /> {t("Inject Data")}
+              </button>
+
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-rose-500 text-white flex items-center justify-center transition-all"
+              >
+                <HiTrash className="w-5 h-5" />
               </button>
 
               <button
                 onClick={onClose}
-                aria-label="Close viewer"
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white transition"
+                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all"
               >
-                <FaTimes />
+                <HiXMark className="w-6 h-6" />
               </button>
             </div>
           </div>
 
-          {/* ✅ Main Content */}
-          <div
-            // ref={viewerRef}
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-            className="relative flex-1 flex items-center justify-center bg-black"
-          >
-            {/* Background blurred */}
-            <div
-              aria-hidden
-              className="absolute inset-0 -z-10 blur-3xl opacity-30"
-              style={{
-                backgroundImage: `url(${currentPhoto})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }}
-            />
-
-            {/* ✅ Image Container */}
+          {/* Main Media Core */}
+          <div className="flex-1 relative bg-black group/viewer">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
-                initial={{ opacity: 0, scale: 0.98 }}
+                initial={{ opacity: 0, scale: 1.1 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.02 }}
-                transition={{ duration: 0.5, ease: 'easeInOut' }}
-                className="relative w-full h-full flex items-center justify-center overflow-hidden"
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.7, ease: "circOut" }}
+                className="absolute inset-0 flex items-center justify-center"
               >
-                <div className="relative w-full h-full flex items-center justify-center bg-black">
-                  {/* ✅ Full-fit image with shadow */}
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    <div className="relative w-full h-full">
-                      <Image
-                        src={currentPhoto || '/placeholder.jpg'}
-                        alt={currentStory?.text || `Story ${currentIndex + 1}`}
-                        fill
-                        unoptimized   // لتفادي مشاكل الدومين أو البروسيسنج
-                        className="object-contain select-none transition-all duration-500 ease-in-out"
-                        priority
-                      />
-                    </div>
-                  </div>
-                  {/* ✅ Text Overlay */}
-                  {currentStory?.text && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 0.1 }}
-                      className="absolute bottom-10 left-6 right-6 sm:left-10 sm:right-10 bg-gradient-to-t from-black/80 to-transparent rounded-xl p-5 text-white text-center sm:text-left shadow-[0_0_25px_rgba(0,0,0,0.6)]"
-                    >
-                      <p className="text-lg sm:text-xl font-semibold leading-snug break-words whitespace-pre-wrap">
-                        {currentStory.text}
-                      </p>
-                    </motion.div>
-                  )}
+                <Image
+                  src={currentPhoto}
+                  alt="Story"
+                  fill
+                  className="object-contain"
+                  priority
+                />
 
-                  {/* ✅ Bottom gradient */}
-                  <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/90 to-transparent pointer-events-none" />
+                {/* Visual Overlays */}
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-transparent to-transparent pointer-events-none" />
 
-                  {/* ✅ Click zones */}
-                  <button
-                    onClick={prev}
-                    aria-label="Previous story"
-                    className="absolute left-0 top-0 bottom-0 w-[40%] bg-transparent"
-                  />
-                  <button
-                    onClick={next}
-                    aria-label="Next story"
-                    className="absolute right-0 top-0 bottom-0 w-[40%] bg-transparent"
-                  />
-                </div>
+                {currentStory?.text && (
+                  <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    className="absolute bottom-20 left-10 right-10 text-center"
+                  >
+                    <p className="text-xl md:text-3xl font-black text-white uppercase tracking-tighter leading-tight drop-shadow-2xl">
+                      {currentStory.text}
+                    </p>
+                  </motion.div>
+                )}
               </motion.div>
             </AnimatePresence>
 
-            {/* ✅ Progress Bar */}
-            <div className="absolute top-5 left-6 right-6 z-50 flex gap-2">
-              {stories.map((_, idx) => (
-                <div key={idx} className="flex-1 h-1 rounded-md bg-white/20 overflow-hidden">
-                  <motion.div
-                    className="h-full bg-white"
-                    style={{ width: idx < currentIndex ? '100%' : idx === currentIndex ? `${progress}%` : '0%' }}
-                    transition={{ ease: 'linear', duration: 0.1 }}
-                  />
-                </div>
-              ))}
-            </div>
+            {/* Navigation Regions */}
+            <div className="absolute inset-y-0 left-0 w-1/4 z-10 cursor-pointer" onClick={prev} />
+            <div className="absolute inset-y-0 right-0 w-1/4 z-10 cursor-pointer" onClick={next} />
 
-            {/* ✅ Floating controls */}
-            <div className="absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-3">
-              <button
-                onClick={() => setIsPaused((p) => !p)}
-                className="px-4 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm transition"
-                aria-pressed={isPaused}
-              >
-                {isPaused ? '▶ Play' : '❚❚ Pause'}
+            {/* Desktop Nav Buttons */}
+            <div className="hidden md:flex absolute inset-y-0 left-6 items-center z-20 pointer-events-none">
+              <button onClick={prev} className="w-14 h-14 rounded-full bg-white/5 backdrop-blur-lg border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/viewer:opacity-100 transition-opacity pointer-events-auto hover:bg-white/10">
+                <HiChevronLeft className="w-8 h-8" />
               </button>
-              <div className="text-white text-xs opacity-70">{currentIndex + 1} / {stories.length}</div>
+            </div>
+            <div className="hidden md:flex absolute inset-y-0 right-6 items-center z-20 pointer-events-none">
+              <button onClick={next} className="w-14 h-14 rounded-full bg-white/5 backdrop-blur-lg border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/viewer:opacity-100 transition-opacity pointer-events-auto hover:bg-white/10">
+                <HiChevronRight className="w-8 h-8" />
+              </button>
             </div>
           </div>
 
-          {/* ✅ Bottom thumbnails */}
-          <div className="border-t border-white/10 p-3 bg-black/40 backdrop-blur-md">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 overflow-x-auto py-1">
-                {stories.map((s, i) => (
-                  <button
-                    key={s._id}
-                    onClick={() => setCurrentIndex(i)}
-                    className={clsx(
-                      'flex-none w-20 h-12 rounded-md overflow-hidden border transition',
-                      i === currentIndex ? 'border-white/90 shadow-md' : 'border-white/10 opacity-80 hover:opacity-100'
-                    )}
-                    aria-label={`Jump to story ${i + 1}`}
-                  >
-                    <Image src={getPhoto(s)} alt={s.text || `Story ${i + 1}`} width={160} height={90} className="object-cover" />
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <p className="text-xs text-white/70">{highlight.description || ''}</p>
-              </div>
+          {/* Data Meta Bar (Footer) */}
+          <div className="hidden md:flex items-center justify-between px-10 py-6 bg-white/[0.02] border-t border-white/10">
+            <div className="flex items-center gap-6 overflow-x-auto no-scrollbar py-2">
+              {stories.map((s, i) => (
+                <button
+                  key={s._id}
+                  onClick={() => { setCurrentIndex(i); setProgress(0); }}
+                  className={`relative w-24 h-14 rounded-xl overflow-hidden border-2 transition-all ${i === currentIndex ? 'border-indigo-500 scale-105 shadow-lg' : 'border-transparent opacity-40 hover:opacity-100'}`}
+                >
+                  <Image src={getPhoto(s)} fill className="object-cover" alt="Thumb" />
+                </button>
+              ))}
             </div>
+            {highlight.description && (
+              <div className="flex items-center gap-3 text-gray-400">
+                <HiCommandLine className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest">{highlight.description}</span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* ✅ Add story menu */}
+        {/* 🏺 Inject Data Menu (Side Panel) */}
         <AnimatePresence>
-          {showMenu && (
+          {showAddMenu && (
             <motion.aside
-              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              transition={{ duration: 0.25 }}
-              className="absolute top-24 left-6 z-60 w-80 rounded-2xl bg-black/85 border border-white/10 shadow-2xl p-4 backdrop-blur-md"
-              role="dialog"
-              aria-label="Add story to highlight"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              className="fixed top-0 right-0 w-full sm:w-96 h-full bg-[#0A0A0A] border-l border-white/10 z-[2000] p-10 space-y-8 shadow-2xl"
             >
-              <div className="flex items-center gap-2 mb-3">
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder={t("Search stories...")}
-                  className="flex-1 bg-white/5 placeholder:text-white/40 rounded-xl px-3 py-2 text-white text-sm outline-none focus:ring-1 focus:ring-white/30"
-                />
-                <button onClick={() => setShowMenu(false)} className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm">Close</button>
+              <div className="flex items-center justify-between mb-10">
+                <h3 className="text-xl font-black text-white uppercase tracking-widest">{t("Data Injection")}</h3>
+                <button onClick={() => setShowAddMenu(false)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white"><HiXMark /></button>
               </div>
 
-              <div className="max-h-60 overflow-y-auto space-y-2 custom-scroll">
-                {filteredAvailable.length ? (
-                  filteredAvailable.map((story) => (
-                    <div key={story._id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition">
-                      <div className="w-12 h-12 rounded-lg overflow-hidden">
-                        <Image src={getPhoto(story)} alt="" width={48} height={48} className="object-cover" />
-                      </div>
-                      <div className="flex-1 text-white text-sm">
-                        <div className="truncate font-medium">{story.text || 'Story'}</div>
-                        <div className="text-xs text-white/60">{story.createdAt ? new Date(story.createdAt).toLocaleDateString() : '—'}</div>
-                      </div>
-                      <div>
-                        <button onClick={() => handleAddStory(story._id)} className="px-3 py-1 rounded-lg bg-green-500/20 hover:bg-green-500/40 text-green-200 text-sm transition">Add</button>
-                      </div>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={t("Filter archive...")}
+                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-gray-600 outline-none focus:border-indigo-500"
+              />
+
+              <div className="space-y-4 overflow-y-auto h-[calc(100%-250px)] pr-2 custom-scrollbar">
+                {allStories.filter(s => !stories.some(ex => ex._id === s._id)).map(st => (
+                  <div key={st._id} className="group p-4 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center gap-4 hover:border-indigo-500/50 transition-all">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden relative">
+                      <Image src={getPhoto(st)} fill className="object-cover" alt="Story" />
                     </div>
-                  ))
-                ) : (
-                  <p className="text-xs text-white/60 text-center py-6">{t("No stories available")}</p>
-                )}
+                    <div className="flex-1">
+                      <div className="text-[10px] font-black text-white uppercase mb-1">{st.text || 'SIGNAL'}</div>
+                      <div className="text-[8px] text-gray-500 font-bold uppercase">{dayjs(st.createdAt).format('DD MMM')}</div>
+                    </div>
+                    <button
+                      onClick={() => { addStoryToHighlight(highlight._id, st._id); setShowAddMenu(false); }}
+                      className="w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center hover:bg-indigo-500 hover:text-white transition-all"
+                    >
+                      <HiPlus />
+                    </button>
+                  </div>
+                ))}
               </div>
             </motion.aside>
           )}
         </AnimatePresence>
 
-        {/* ✅ Confirm delete */}
+        {/* 🗑 Delete Protocol */}
         <AnimatePresence>
-          {confirmDeleteOpen && (
-            <motion.div className="absolute inset-0 z-70 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                className="w-full max-w-md p-6 rounded-2xl bg-black/90 border border-white/10 shadow-2xl backdrop-blur-md"
-              >
-                <h4 className="text-white text-lg font-semibold mb-2">{t("Delete highlight?")}</h4>
-                <p className="text-sm text-white/80 mb-4">{t("This will permanently delete the highlight and cannot be undone.")}</p>
-                <div className="flex gap-3 justify-end">
-                  <button onClick={() => setConfirmDeleteOpen(false)} className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm transition">Cancel</button>
-                  <button onClick={handleDeleteHighlight} className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm transition">Delete</button>
+          {confirmDelete && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="absolute inset-0 z-[3000] flex items-center justify-center bg-black/60 backdrop-blur-md"
+            >
+              <div className="bg-[#0A0A0A] border border-rose-500/30 rounded-[3rem] p-12 max-w-sm text-center space-y-8">
+                <div className="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center text-rose-500 mx-auto text-3xl">
+                  <HiTrash />
                 </div>
-              </motion.div>
+                <div className="space-y-2">
+                  <h4 className="text-xl font-black text-white uppercase tracking-tighter">{t("Purge Protocol")}</h4>
+                  <p className="text-gray-400 text-sm font-medium">{t("This will permanently decouple this highlight from the grid.")}</p>
+                </div>
+                <div className="flex gap-4">
+                  <button onClick={() => setConfirmDelete(false)} className="flex-1 py-4 rounded-2xl bg-white/5 text-gray-400 font-black text-[10px] uppercase tracking-widest">{t("Abort")}</button>
+                  <button onClick={() => { deleteHighlight(highlight._id); onClose(); }} className="flex-1 py-4 rounded-2xl bg-rose-600 text-white font-black text-[10px] uppercase tracking-widest">{t("Purge")}</button>
+                </div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
-
       </motion.div>
     </AnimatePresence>
   );
-})
+});
 
-export default HighlightViewerModal
+HighlightViewerModal.displayName = 'HighlightViewerModal';
+export default HighlightViewerModal;
