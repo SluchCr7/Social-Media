@@ -39,7 +39,6 @@ const ShowSensitiveContent = ({
           relative z-10 flex flex-col items-center 
           bg-white/10 dark:bg-white/[0.03]
           backdrop-blur-md
-          border border-white/20 dark:border-white/10
           rounded-3xl p-8 sm:p-12
           max-w-sm w-full text-center
           shadow-2xl shadow-black/5

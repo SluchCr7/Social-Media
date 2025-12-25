@@ -1,51 +1,44 @@
 'use client';
-import React from 'react';
-import { useState } from 'react';
-import { FiMenu } from 'react-icons/fi';
-import AdminSidebar from './AdminAside';
+
+import React, { useState } from 'react';
+import { HiBars3, HiXMark } from 'react-icons/hi2';
+import { motion, AnimatePresence } from 'framer-motion';
 import MobileSidebar from './MobileAside';
-import { useTranslation } from 'react-i18next';
 
 const AdminLayout = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('Dashboard'); // ✅ الحالة
-
-  const { t } = useTranslation();
-  // ✅ نغلف children بـ React.cloneElement لإضافة prop جديدة له
-  const childrenWithProps = children
-    ? React.cloneElement(children, { activeTab, setActiveTab })
-    : null;
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 w-full">
-      {/* ✅ Sidebar for desktop */}
-      <aside className="hidden md:block w-64 bg-white dark:bg-gray-800 p-6 shadow-lg">
-        <h2 className="text-2xl font-bold mb-6">{t("Admin Panel")}</h2>
-        <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      </aside>
-
-      {/* ✅ Mobile Topbar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 shadow z-40 p-4 flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-[#050505] dark:via-[#0A0A0A] dark:to-[#050505]">
+      {/* Mobile Header */}
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-white/90 dark:bg-[#0A0A0A]/95 backdrop-blur-3xl border-b border-gray-200 dark:border-white/10 shadow-xl z-40 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+            <span className="text-indigo-500 font-black text-sm">A</span>
+          </div>
+          <h1 className="text-lg font-black uppercase tracking-tighter">
+            Admin <span className="text-indigo-500">Console</span>
+          </h1>
+        </div>
         <button
           onClick={() => setMobileOpen(true)}
-          className="text-2xl text-gray-700 dark:text-gray-200"
+          className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-700 dark:text-gray-300"
         >
-          <FiMenu />
+          <HiBars3 className="w-6 h-6" />
         </button>
-        <h1 className="text-lg font-semibold">Admin</h1>
       </div>
 
-      {/* ✅ Mobile Drawer */}
+      {/* Mobile Drawer */}
       <MobileSidebar
         isOpen={mobileOpen}
         onClose={() => setMobileOpen(false)}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        activeTab={children?.props?.activeTab}
+        setActiveTab={children?.props?.setActiveTab}
       />
 
-      {/* ✅ Main content */}
-      <main className="flex-1 p-4 w-full">
-        {childrenWithProps}
+      {/* Main Content */}
+      <main className="w-full pt-20 md:pt-0">
+        {children}
       </main>
     </div>
   );

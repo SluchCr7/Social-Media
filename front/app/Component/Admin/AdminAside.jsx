@@ -1,46 +1,47 @@
 'use client';
+
 import React, { useMemo, useCallback } from 'react';
-import { FiHome, FiUsers, FiBarChart2 } from 'react-icons/fi';
+import { HiChartBar, HiUsers, HiDocumentText } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 
 const AdminSidebar = React.memo(({ activeTab, setActiveTab }) => {
   const { t } = useTranslation();
 
-  // ✅ نستخدم useMemo لتثبيت قائمة العناصر
   const navItems = useMemo(
     () => [
-      { label: 'Dashboard', tag: 'Dashboard', icon: FiHome },
-      { label: 'Users', tag: 'Users', icon: FiUsers },
-      { label: 'Reports', tag: 'Reports', icon: FiBarChart2 },
+      { label: 'Dashboard', tag: 'Dashboard', icon: HiChartBar },
+      { label: 'Users', tag: 'Users', icon: HiUsers },
+      { label: 'Reports', tag: 'Reports', icon: HiDocumentText },
     ],
     []
   );
 
-  // ✅ دالة ثابتة لتغيير التبويب
   const handleTabChange = useCallback(
     (tag) => setActiveTab(tag),
     [setActiveTab]
   );
 
   return (
-    <nav className="flex flex-col gap-2">
+    <nav className="flex flex-col gap-3">
       {navItems.map(({ label, tag, icon: Icon }) => (
-        <button
+        <motion.button
           key={tag}
           onClick={() => handleTabChange(tag)}
-          className={`flex items-center gap-3 px-4 py-2 rounded-lg transition text-sm font-medium ${
-            activeTab === tag
-              ? 'bg-indigo-600 text-white'
-              : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-          }`}
+          whileHover={{ scale: 1.02, x: 4 }}
+          whileTap={{ scale: 0.98 }}
+          className={`group flex items-center gap-4 px-6 py-4 rounded-2xl transition-all text-sm font-black uppercase tracking-widest ${activeTab === tag
+              ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/30'
+              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'
+            }`}
         >
-          <Icon className="text-lg" />
+          <Icon className={`w-5 h-5 ${activeTab === tag ? '' : 'group-hover:scale-110 transition-transform'}`} />
           <span>{t(label)}</span>
-        </button>
+        </motion.button>
       ))}
     </nav>
   );
 });
-AdminSidebar.displayName = 'AdminSidebar'
 
+AdminSidebar.displayName = 'AdminSidebar';
 export default AdminSidebar;
