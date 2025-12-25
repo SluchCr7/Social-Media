@@ -5,7 +5,7 @@ import { useAuth } from '../../Context/AuthContext';
 import Link from 'next/link';
 import { useUser } from '@/app/Context/UserContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HiOutlineUserGroup, HiChevronRight } from 'react-icons/hi2';
+import { HiUserGroup, HiChevronRight } from 'react-icons/hi2';
 
 const MenuFollowers = () => {
   const { user, users } = useAuth();
@@ -30,7 +30,7 @@ const MenuFollowers = () => {
           Followers
         </h2>
         <div className="p-2 rounded-xl bg-gray-50 dark:bg-white/5 text-gray-400">
-          <HiOutlineUserGroup size={20} />
+          <HiUserGroup size={20} />
         </div>
       </div>
 

@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import React from 'react';
 import Link from 'next/link';
-import { HiOutlineArrowTopRightOnSquare } from 'react-icons/hi2';
+import { HiArrowTopRightOnSquare } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import { useNews } from '../../Context/NewsContext';
 import MenuSkeleton from '@/app/Skeletons/MenuSkeleton';
@@ -98,7 +98,7 @@ const News = ({ showAllNews, setShowAllNews }) => {
                 className="group inline-flex items-center gap-2 text-[12px] font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-all uppercase tracking-wide"
               >
                 {t('Expand universe')}
-                <HiOutlineArrowTopRightOnSquare className="text-sm group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                <HiArrowTopRightOnSquare className="text-sm group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </button>
             </div>
           </motion.div>

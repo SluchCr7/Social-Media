@@ -3,10 +3,10 @@ import React, { memo, useMemo } from 'react'
 import { useEvent } from '../../Context/EventContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  HiOutlineCake,
-  HiOutlineCalendarDays,
-  HiOutlineClock,
-  HiOutlineVideoCamera,
+  HiCake,
+  HiCalendarDays,
+  HiClock,
+  HiVideoCamera,
   HiChevronRight
 } from 'react-icons/hi2'
 import Link from 'next/link'
@@ -15,10 +15,10 @@ import Image from 'next/image'
 import MenuSkeleton from '@/app/Skeletons/MenuSkeleton'
 
 const typeIcons = {
-  birthday: <HiOutlineCake className="text-pink-500" />,
-  meeting: <HiOutlineVideoCamera className="text-blue-500" />,
-  public: <HiOutlineCalendarDays className="text-emerald-500" />,
-  custom: <HiOutlineClock className="text-indigo-500" />
+  birthday: <HiCake className="text-pink-500" />,
+  meeting: <HiVideoCamera className="text-blue-500" />,
+  public: <HiCalendarDays className="text-emerald-500" />,
+  custom: <HiClock className="text-indigo-500" />
 }
 
 const MenuUpComingEvents = () => {
@@ -37,7 +37,7 @@ const MenuUpComingEvents = () => {
           {t('The Radar')}
         </h2>
         <Link href="/Pages/Calender" className="p-2 rounded-xl bg-gray-50 dark:bg-white/5 text-gray-400 hover:text-indigo-500 transition-colors">
-          <HiOutlineCalendarDays size={20} />
+          <HiCalendarDays size={20} />
         </Link>
       </div>
 
@@ -54,7 +54,7 @@ const MenuUpComingEvents = () => {
             className="flex flex-col items-center justify-center py-12 px-8 text-center"
           >
             <div className="w-16 h-16 rounded-[2rem] bg-gray-50 dark:bg-white/5 flex items-center justify-center mb-4 group hover:scale-110 transition-transform duration-500">
-              <HiOutlineCalendarDays className="text-3xl text-gray-300 dark:text-gray-600 group-hover:text-indigo-500 transition-colors" />
+              <HiCalendarDays className="text-3xl text-gray-300 dark:text-gray-600 group-hover:text-indigo-500 transition-colors" />
             </div>
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-relaxed mb-6">
               {t('No signals on the radar')}

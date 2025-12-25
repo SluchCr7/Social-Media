@@ -12,7 +12,7 @@ import {
   HiSpeakerWave,
   HiSpeakerXMark,
   HiArrowsRightLeft,
-  HiArrowPathRoundedSquare,
+  HiArrowPath,
   HiQueueList,
   HiHeart
 } from 'react-icons/hi2'
@@ -177,7 +177,7 @@ const SongPlayer = React.memo(() => {
                   onClick={toggleLoop}
                   className={`transition-all duration-300 ${loop ? 'text-indigo-500 scale-110' : 'text-gray-400 hover:text-gray-600 dark:hover:text-white'}`}
                 >
-                  <HiArrowPathRoundedSquare size={18} />
+                  <HiArrowPath size={18} />
                 </button>
               </div>
 
