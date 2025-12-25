@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { usePost } from '../../Context/PostContext';
-import { HiTrendingUp, HiTrendingDown } from 'react-icons/hi2';
+import { HiArrowTrendingUp, HiArrowTrendingDown } from 'react-icons/hi2';
 import Link from 'next/link';
 import { filterHashtags } from '../../utils/filterHashtags';
 import { useTranslation } from 'react-i18next';
@@ -62,9 +62,9 @@ const HashtagsMenu = React.memo(() => {
                     className={`flex items-center justify-center w-9 h-9 rounded-xl ${isTrendingUp ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'}`}
                   >
                     {isTrendingUp ? (
-                      <HiTrendingUp size={18} />
+                      <HiArrowTrendingUp size={18} />
                     ) : (
-                      <HiTrendingDown size={18} />
+                      <HiArrowTrendingDown size={18} />
                     )}
                   </motion.div>
                 </Link>
