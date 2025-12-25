@@ -1,34 +1,55 @@
-import React from 'react'
+import React from 'react';
 
-export default function MusicSkeleton() {
+const MusicSkeleton = () => {
   return (
-    <div className="animate-pulse space-y-6">
-      {/* Now Playing Skeleton */}
-      <div className="flex flex-col md:flex-row items-center gap-6">
-        <div className="w-48 h-48 md:w-40 md:h-40 bg-gray-300 dark:bg-gray-800 rounded-xl" />
-        <div className="flex-1 space-y-3">
-          <div className="h-5 w-40 bg-gray-300 dark:bg-gray-800 rounded" />
-          <div className="h-4 w-24 bg-gray-300 dark:bg-gray-800 rounded" />
-          <div className="flex gap-3 mt-4">
-            {Array(4).fill(0).map((_, i) => (
-              <div key={i} className="w-10 h-10 bg-gray-300 dark:bg-gray-800 rounded-full" />
-            ))}
-          </div>
+    <div className="relative p-6 rounded-3xl overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-white/40 dark:from-gray-800/60 dark:to-gray-900/40 backdrop-blur-xl border border-white/20 dark:border-gray-700/30" />
+
+      <div className="relative space-y-4">
+        {/* Album Art */}
+        <div className="relative w-full aspect-square rounded-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-300/50 to-gray-200/50 dark:from-gray-700/50 dark:to-gray-600/50 animate-pulse" />
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+        </div>
+
+        {/* Song Title */}
+        <div className="relative h-6 w-3/4 rounded-xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-300/50 to-gray-200/50 dark:from-gray-700/50 dark:to-gray-600/50 animate-pulse" />
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+        </div>
+
+        {/* Artist */}
+        <div className="relative h-4 w-1/2 rounded-full overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-200/50 to-gray-100/50 dark:from-gray-600/50 dark:to-gray-500/50 animate-pulse" />
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+        </div>
+
+        {/* Progress Bar */}
+        <div className="relative h-2 w-full rounded-full overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-200/50 to-gray-100/50 dark:from-gray-600/50 dark:to-gray-500/50 animate-pulse" />
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+        </div>
+
+        {/* Controls */}
+        <div className="flex justify-center gap-4 mt-4">
+          {[1, 2, 3].map((_, idx) => (
+            <div key={idx} className={`relative ${idx === 1 ? 'w-14 h-14' : 'w-10 h-10'} rounded-full overflow-hidden`}>
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-300/50 to-gray-200/50 dark:from-gray-700/50 dark:to-gray-600/50 animate-pulse" />
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Songs List Skeleton */}
-      <div className="space-y-3">
-        {Array(5).fill(0).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-gray-100 dark:bg-gray-900/50">
-            <div className="w-12 h-12 bg-gray-300 dark:bg-gray-800 rounded-md" />
-            <div className="flex-1 space-y-2">
-              <div className="h-4 w-2/3 bg-gray-300 dark:bg-gray-800 rounded" />
-              <div className="h-3 w-1/3 bg-gray-300 dark:bg-gray-800 rounded" />
-            </div>
-          </div>
-        ))}
-      </div>
+      <style jsx>{`
+        @keyframes shimmer {
+          100% {
+            transform: translateX(100%);
+          }
+        }
+      `}</style>
     </div>
-  )
-}
+  );
+};
+
+export default MusicSkeleton;

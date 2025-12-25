@@ -1,38 +1,61 @@
-'use client'
+import React from 'react';
 
-import React from 'react'
-import { motion } from 'framer-motion'
-
-const SkeletonPulse = "animate-pulse bg-gray-300 dark:bg-gray-700"
-
-// ===============================
-// Community Header Skeleton
-// ===============================
-export const CommunityHeaderSkeleton = () => {
+const CommunitySkeleton = () => {
   return (
-    <div className="w-full rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-gray-700 mb-6">
-      {/* Cover */}
-      <div className={`w-full h-48 ${SkeletonPulse}`}></div>
+    <div className="relative p-6 rounded-3xl overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-white/40 dark:from-gray-800/60 dark:to-gray-900/40 backdrop-blur-xl border border-white/20 dark:border-gray-700/30" />
 
-      {/* Info */}
-      <div className="relative px-6 pb-6">
+      <div className="relative space-y-4">
+        {/* Cover Image */}
+        <div className="relative h-32 w-full rounded-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-300/50 to-gray-200/50 dark:from-gray-700/50 dark:to-gray-600/50 animate-pulse" />
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+        </div>
+
         {/* Avatar */}
-        <div className="absolute -top-12 left-6">
-          <div className={`w-24 h-24 rounded-full border-4 border-white dark:border-gray-900 ${SkeletonPulse}`}></div>
+        <div className="relative -mt-12 ml-6 w-20 h-20 rounded-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-300/50 to-gray-200/50 dark:from-gray-700/50 dark:to-gray-600/50 animate-pulse border-4 border-white dark:border-gray-900" />
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
         </div>
 
-        {/* Text */}
-        <div className="mt-16 flex flex-col gap-2">
-          <div className={`w-1/3 h-5 rounded-md ${SkeletonPulse}`}></div>
-          <div className={`w-1/2 h-4 rounded-md ${SkeletonPulse}`}></div>
+        {/* Title */}
+        <div className="relative h-6 w-48 rounded-xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-300/50 to-gray-200/50 dark:from-gray-700/50 dark:to-gray-600/50 animate-pulse" />
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
         </div>
 
-        {/* Buttons */}
-        <div className="mt-4 flex gap-3">
-          <div className={`w-24 h-9 rounded-xl ${SkeletonPulse}`}></div>
-          <div className={`w-24 h-9 rounded-xl ${SkeletonPulse}`}></div>
+        {/* Description */}
+        <div className="space-y-2">
+          <div className="relative h-4 w-full rounded-full overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-200/50 to-gray-100/50 dark:from-gray-600/50 dark:to-gray-500/50 animate-pulse" />
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+          </div>
+          <div className="relative h-4 w-3/4 rounded-full overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-200/50 to-gray-100/50 dark:from-gray-600/50 dark:to-gray-500/50 animate-pulse" />
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="flex gap-4">
+          {[1, 2, 3].map((_, idx) => (
+            <div key={idx} className="relative h-5 w-16 rounded-full overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-300/50 to-gray-200/50 dark:from-gray-700/50 dark:to-gray-600/50 animate-pulse" />
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+            </div>
+          ))}
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes shimmer {
+          100% {
+            transform: translateX(100%);
+          }
+        }
+      `}</style>
     </div>
-  )
-}
+  );
+};
+
+export default CommunitySkeleton;

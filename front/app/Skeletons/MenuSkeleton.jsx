@@ -1,19 +1,31 @@
-import React from 'react'
+import React from 'react';
 
 const MenuSkeleton = () => {
   return (
-    <div className="w-full max-w-sm bg-white dark:bg-[#16181c] rounded-2xl shadow-lg p-6 space-y-4 animate-pulse">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="flex items-center gap-4">
-            <div className="w-11 h-11 bg-gray-300 dark:bg-gray-700 rounded-full" />
-            <div className="flex-1 space-y-2">
-              <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-2/3" />
-              <div className="h-2 bg-gray-200 dark:bg-gray-800 rounded w-1/2" />
-            </div>
+    <div className="space-y-3 p-4">
+      {[...Array(5)].map((_, idx) => (
+        <div key={idx} className="relative flex items-center gap-4 p-3 rounded-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-white/60 to-white/40 dark:from-gray-800/60 dark:to-gray-900/40 backdrop-blur-sm border border-white/20 dark:border-gray-700/30" />
+          <div className="relative w-10 h-10 rounded-xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-300/50 to-gray-200/50 dark:from-gray-700/50 dark:to-gray-600/50 animate-pulse" />
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
           </div>
-        ))}
-    </div>
-  )
-}
+          <div className="relative flex-1 h-5 rounded-full overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-300/50 to-gray-200/50 dark:from-gray-700/50 dark:to-gray-600/50 animate-pulse" />
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+          </div>
+        </div>
+      ))}
 
-export default MenuSkeleton
+      <style jsx>{`
+        @keyframes shimmer {
+          100% {
+            transform: translateX(100%);
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default MenuSkeleton;

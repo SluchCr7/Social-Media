@@ -2,12 +2,17 @@ import React from 'react';
 
 const ReelSkeleton = () => {
   return (
-    <div className="w-full h-screen bg-gray-800 animate-pulse relative">
-      <div className="absolute bottom-5 left-5 w-32 h-4 bg-gray-600 rounded"></div>
-      <div className="absolute bottom-12 right-5 flex flex-col gap-4">
-        <div className="w-10 h-10 bg-gray-600 rounded-full"></div>
-        <div className="w-10 h-10 bg-gray-600 rounded-full"></div>
-      </div>
+    <div className="relative w-full h-[600px] rounded-3xl overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-300/50 to-gray-200/50 dark:from-gray-800/50 dark:to-gray-700/50 animate-pulse" />
+      <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+
+      <style jsx>{`
+        @keyframes shimmer {
+          100% {
+            transform: translateX(100%);
+          }
+        }
+      `}</style>
     </div>
   );
 };

@@ -1,116 +1,98 @@
-
 import React from 'react';
-import { FaBookmark, FaRegImage, FaMusic, FaPlay } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
-/**
- * مكون الهيكل الأساسي (Skeleton)
- * @param {string} type - نوع الهيكل: 'text' (افتراضي), 'square', 'circle'
- * @param {number} width - عرض مخصص (مفيد للـ 'text' و 'square')
- * @param {number} height - ارتفاع مخصص (مفيد للـ 'text' و 'square')
- * @param {string} className - كلاسات Tailwind إضافية لتخصيص الأبعاد أو الألوان
- */
-const Skeleton = ({ type = 'text', width = 'full', height = '4', className = '' }) => {
-    // كلاسات الألوان والتحريك المركزية
-    const baseClasses = 'animate-pulse bg-gray-300 dark:bg-white/10';
+// Base Skeleton Component
+const Skeleton = ({ type = 'text', className = '' }) => {
+    const baseClasses = 'relative overflow-hidden';
 
-    // تحديد كلاسات الحجم والشكل بناءً على النوع
-    let shapeClasses = '';
-    if (type === 'circle') {
-        shapeClasses = `w-${width} h-${height} rounded-full`;
-    } else if (type === 'square') {
-        shapeClasses = `w-${width} h-${height} rounded-xl`;
-    } else { // 'text'
-        shapeClasses = `w-${width} h-${height} rounded-md`;
-    }
-
-    // الدمج النهائي
     return (
-        <div className={`${baseClasses} ${shapeClasses} ${className}`}></div>
+        <div className={`${baseClasses} ${className}`}>
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-300/50 to-gray-200/50 dark:from-gray-700/50 dark:to-gray-600/50 animate-pulse" />
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+        </div>
     );
 };
 
-// -----------------------------------------------------
-// 2. هياكل العناصر الفرعية (Item Skeletons)
-// -----------------------------------------------------
-
-// هيكل عنصر قائمة الموسيقى (Music Item)
+// Music Item Skeleton
 const MusicItemSkeleton = () => (
-    <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 transition-all">
-        {/* صورة الغلاف */}
-        <Skeleton type="square" width="16" height="16" className="min-w-16" />
-
-        <div className="flex-1 min-w-0 space-y-3">
-            {/* عنوان الأغنية - أطول */}
-            <Skeleton width="4/5" height="4" />
-            {/* اسم الفنان - أقصر وأقل ارتفاعًا */}
-            <Skeleton width="1/2" height="3" className="opacity-70" />
+    <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="relative flex items-center gap-4 p-5 rounded-2xl overflow-hidden"
+    >
+        <div className="absolute inset-0 bg-gradient-to-r from-white/60 to-white/40 dark:from-gray-800/60 dark:to-gray-900/40 backdrop-blur-sm border border-white/20 dark:border-gray-700/30" />
+        <div className="relative flex items-center gap-4 w-full">
+            <Skeleton className="w-16 h-16 rounded-xl flex-shrink-0" />
+            <div className="flex-1 space-y-3">
+                <Skeleton className="h-4 w-4/5 rounded-full" />
+                <Skeleton className="h-3 w-1/2 rounded-full" />
+            </div>
+            <Skeleton className="hidden sm:block w-10 h-3 rounded-full" />
+            <Skeleton className="w-10 h-10 rounded-full flex-shrink-0" />
         </div>
-
-        {/* المدة (يظهر على الشاشات الكبيرة) */}
-        <Skeleton width="10" height="3" className="hidden sm:block opacity-60" />
-
-        {/* زر التشغيل (دائري) */}
-        <Skeleton type="circle" width="10" height="10" />
-    </div>
+    </motion.div>
 );
 
-// هيكل عنصر البوست (Post Item)
+// Post Item Skeleton
 const PostItemSkeleton = () => (
-    <div className="border border-gray-200 dark:border-white/10 rounded-3xl p-5 bg-white dark:bg-white/5 shadow-lg dark:shadow-xl transition-all space-y-5">
-        {/* معلومات المستخدم */}
-        <div className="flex items-center gap-3">
-            <Skeleton type="circle" width="10" height="10" className="min-w-10" />
-            <div className="flex-1 space-y-2">
-                <Skeleton width="28" height="4" /> {/* اسم المستخدم */}
-                <Skeleton width="20" height="3" className="opacity-70" /> {/* التاريخ/الوصف */}
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative rounded-3xl p-6 overflow-hidden"
+    >
+        <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-white/40 dark:from-gray-800/60 dark:to-gray-900/40 backdrop-blur-xl border border-white/20 dark:border-gray-700/30" />
+        <div className="relative space-y-5">
+            {/* User Info */}
+            <div className="flex items-center gap-3">
+                <Skeleton className="w-10 h-10 rounded-full flex-shrink-0" />
+                <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-28 rounded-full" />
+                    <Skeleton className="h-3 w-20 rounded-full" />
+                </div>
+            </div>
+
+            {/* Text */}
+            <div className="space-y-3">
+                <Skeleton className="h-4 w-full rounded-full" />
+                <Skeleton className="h-4 w-11/12 rounded-full" />
+                <Skeleton className="h-4 w-2/3 rounded-full" />
+            </div>
+
+            {/* Image */}
+            <Skeleton className="w-full h-64 rounded-2xl" />
+
+            {/* Actions */}
+            <div className="flex items-center gap-6 pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
+                <Skeleton className="w-6 h-6 rounded-full" />
+                <Skeleton className="w-6 h-6 rounded-full" />
+                <Skeleton className="w-6 h-6 rounded-full" />
             </div>
         </div>
-
-        {/* النص */}
-        <div className="space-y-3">
-            <Skeleton width="full" height="4" />
-            <Skeleton width="11/12" height="4" />
-            <Skeleton width="2/3" height="4" />
-        </div>
-
-        {/* الصورة الرئيسية */}
-        <Skeleton type="square" width="full" height="64" />
-
-        {/* الإجراءات (مثل الإعجابات والتعليقات) */}
-        <div className="flex items-center gap-6 pt-2 border-t border-gray-200 dark:border-white/10">
-            <Skeleton type="circle" width="6" height="6" />
-            <Skeleton type="circle" width="6" height="6" />
-            <Skeleton type="circle" width="6" height="6" />
-        </div>
-    </div>
+    </motion.div>
 );
 
-// هيكل عنصر مقطع Reels
+// Reel Item Skeleton
 const ReelItemSkeleton = () => (
-    <div className="relative rounded-2xl overflow-hidden bg-gray-200 dark:bg-white/10 shadow-lg h-60 transition-all">
-        {/* الصورة المصغرة / الفيديو */}
-        <Skeleton type="square" width="full" height="full" className="rounded-none" />
-
-        {/* العنوان في الأسفل */}
-        <div className="p-3 absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent">
-            <Skeleton width="3/4" height="4" className="bg-white/20 dark:bg-white/30" />
+    <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative rounded-2xl overflow-hidden h-60"
+    >
+        <Skeleton className="w-full h-full" />
+        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/50 to-transparent">
+            <Skeleton className="h-4 w-3/4 rounded-full bg-white/20" />
         </div>
-    </div>
+    </motion.div>
 );
 
-// -----------------------------------------------------
-// 3. المكون الرئيسي (Main Component)
-// -----------------------------------------------------
-
+// Main Component
 export default function SavedPageSkeleton({ activeTab = 'posts' }) {
-
-    // تحديد المحتوى الهيكلي بناءً على التبويب النشط
     let contentSkeleton = null;
 
     switch (activeTab) {
         case 'music':
             contentSkeleton = (
-                <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-sm space-y-5">
+                <div className="space-y-4">
                     {[...Array(5)].map((_, i) => <MusicItemSkeleton key={i} />)}
                 </div>
             );
@@ -125,7 +107,7 @@ export default function SavedPageSkeleton({ activeTab = 'posts' }) {
         case 'posts':
         default:
             contentSkeleton = (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8"> {/* تحسين لـ 2 عمود على الشاشات الكبيرة */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {[...Array(4)].map((_, i) => <PostItemSkeleton key={i} />)}
                 </div>
             );
@@ -133,57 +115,46 @@ export default function SavedPageSkeleton({ activeTab = 'posts' }) {
     }
 
     return (
-        <div className="min-h-screen w-full py-12 px-4 sm:px-6 bg-gray-50 dark:bg-[#121212] transition-colors">
+        <div className="min-h-screen w-full py-12 px-4 sm:px-6 bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
             <div className="max-w-7xl w-full mx-auto">
-
-                {/* ========================================= */}
-                {/* هيكل الهيدر (العنوان والبحث والتبويبات) */}
-                {/* ========================================= */}
+                {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
-
-                    {/* هيكل العنوان */}
-                    <div className='flex items-center gap-4'>
-                        {/* أيقونة الصفحة */}
-                        <Skeleton type="square" width="14" height="14" className="min-w-14" />
+                    <div className="flex items-center gap-4">
+                        <Skeleton className="w-14 h-14 rounded-2xl flex-shrink-0" />
                         <div>
-                            {/* العنوان الرئيسي */}
-                            <Skeleton width="72" height="6" className="mb-2" />
-                            {/* الوصف / التفاصيل */}
-                            <Skeleton width="96" height="4" className="hidden sm:block opacity-80" />
+                            <Skeleton className="h-8 w-72 rounded-xl mb-2" />
+                            <Skeleton className="hidden sm:block h-4 w-96 rounded-full" />
                         </div>
                     </div>
 
-                    {/* هيكل شريط البحث والتبويبات */}
                     <div className="flex flex-col md:flex-row items-end gap-3 w-full md:w-auto">
-
-                        {/* حقل البحث */}
-                        <Skeleton type="square" width="full" height="11" className="md:w-64" />
-
-                        {/* التبويبات الكبيرة (Desktop Tabs) */}
-                        <div className="hidden md:flex items-center bg-gray-100 dark:bg-white/5 rounded-xl p-1 gap-1 shadow-inner w-60">
-                            <Skeleton type="text" height="8" width="1/3" className="rounded-lg" />
-                            <Skeleton type="text" height="8" width="1/3" className="rounded-lg" />
-                            <Skeleton type="text" height="8" width="1/3" className="rounded-lg" />
+                        <Skeleton className="w-full md:w-64 h-11 rounded-2xl" />
+                        <div className="hidden md:flex items-center gap-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-2xl p-1 border border-white/20 dark:border-gray-700/30">
+                            <Skeleton className="h-8 w-20 rounded-xl" />
+                            <Skeleton className="h-8 w-20 rounded-xl" />
+                            <Skeleton className="h-8 w-20 rounded-xl" />
                         </div>
                     </div>
                 </div>
 
-                {/* ========================================= */}
-                {/* هيكل التبويبات للجوال (Mobile Tabs) */}
-                {/* ========================================= */}
+                {/* Mobile Tabs */}
                 <div className="flex md:hidden gap-3 mb-8">
-                    <Skeleton type="text" height="10" className="flex-1 rounded-xl" />
-                    <Skeleton type="text" height="10" className="flex-1 rounded-xl" />
-                    <Skeleton type="text" height="10" className="flex-1 rounded-xl" />
+                    <Skeleton className="flex-1 h-10 rounded-xl" />
+                    <Skeleton className="flex-1 h-10 rounded-xl" />
+                    <Skeleton className="flex-1 h-10 rounded-xl" />
                 </div>
 
-                {/* ========================================= */}
-                {/* هيكل المحتوى النشط */}
-                {/* ========================================= */}
-                <div>
-                    {contentSkeleton}
-                </div>
+                {/* Content */}
+                <div>{contentSkeleton}</div>
             </div>
+
+            <style jsx>{`
+        @keyframes shimmer {
+          100% {
+            transform: translateX(100%);
+          }
+        }
+      `}</style>
         </div>
-    )
+    );
 }
