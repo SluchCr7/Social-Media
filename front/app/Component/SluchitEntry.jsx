@@ -25,6 +25,7 @@ import ShowSensitiveContent from './Post/ShowSensitiveContent';
 import PostMusicPlayer from './Post/PostMusic';
 import Image from 'next/image';
 import Link from 'next/link'
+
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost();
   const { user, isLogin } = useAuth();
@@ -36,6 +37,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
   const [showTranslateButton, setShowTranslateButton] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
   const [showSensitive, setShowSensitive] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   const isShared = post?.isShared && post?.originalPost;
   const original = post?.originalPost;
@@ -121,6 +123,8 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
               post={post}
               user={user}
               isLogin={isLogin}
+              showMenu={showMenu}
+              setShowMenu={setShowMenu}
               isCommunityPost={!!post?.community}
             />
 

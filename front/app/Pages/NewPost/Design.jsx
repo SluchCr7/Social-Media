@@ -2,9 +2,16 @@
 import React, { useMemo } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiX, FiClock } from 'react-icons/fi'
-import { IoImage, IoHappyOutline } from 'react-icons/io5'
-import { FaUsers } from 'react-icons/fa'
+import {
+  HiXMark,
+  HiOutlineCalendarDays,
+  HiPhoto,
+  HiFaceSmile,
+  HiUsers,
+  HiLink,
+  HiChevronRight,
+  HiCheckBadge
+} from 'react-icons/hi2'
 import EmojiPicker from 'emoji-picker-react'
 import PostPrivacySelector from '@/app/Component/Post/PostPrivacyAdd'
 import { useTranslation } from 'react-i18next'
@@ -22,471 +29,343 @@ const NewPostPresenter = (props) => {
 
   const { t } = useTranslation()
 
-  // derived
+  // Derived state
   const charCount = postText ? postText.length : 0
-  const rtl = useMemo(() => /[\u0600-\u06FF]/.test(postText || ''), [postText])
+  const isRTL = useMemo(() => /[\u0600-\u06FF]/.test(postText || ''), [postText])
+  const canPost = (postText?.trim() || images.length > 0) && !loading && !errorText
 
   return (
-    <main className="flex items-center justify-center w-full py-8 px-4 bg-lightMode-bg dark:bg-darkMode-bg transition-colors min-h-screen">
-      <div className="w-full max-w-3xl mx-auto relative">
-        {/* Card */}
+    <main className="min-h-screen bg-lightMode-bg dark:bg-[#050505] flex items-center justify-center py-12 px-4 sm:px-6 transition-colors duration-500">
+      {/* Decorative Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+
+      <div className="w-full max-w-4xl relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28 }}
-          className="bg-lightMode-menu dark:bg-darkMode-menu rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800 transition-all duration-500"
+          initial={{ opacity: 0, y: 20, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[3rem] border border-gray-100 dark:border-white/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] overflow-hidden"
         >
-          {/* Header */}
-          <div className="p-5 md:p-6 bg-gradient-to-br from-white/60 via-transparent to-white/30 dark:from-gray-900/60 dark:via-transparent dark:to-gray-800/30 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-              {/* Profile + title */}
-              <div className="flex items-center gap-4 min-w-0">
-                <div className="relative flex-shrink-0">
+          {/* Header Section */}
+          <div className="px-8 pt-8 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-5">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-[1.5rem] opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative w-16 h-16 rounded-[1.5rem] overflow-hidden ring-2 ring-white dark:ring-gray-900 shadow-lg">
                   <Image
-                    src={selectedUser?.profilePhoto?.url || '/default.png'}
+                    src={selectedUser?.profilePhoto?.url || '/default-avatar.png'}
                     alt="profile"
-                    width={64}
-                    height={64}
-                    className="rounded-full w-16 h-16 object-cover border-2 border-blue-400 shadow-md"
+                    fill
+                    className="object-cover"
                   />
                 </div>
-                <div className="min-w-0">
-                  <h2 className="text-lg md:text-xl font-semibold text-gray-800 dark:text-white truncate">
-                    {selectedUser?.username || 'Guest'}
-                  </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                    {selectedUser?.profileName || ''}
-                  </p>
-                </div>
               </div>
+              <div>
+                <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
+                  <span className="w-2 h-6 bg-indigo-600 rounded-full" />
+                  {t('New Broadcast')}
+                </h2>
+                <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mt-1">
+                  {selectedUser?.username || 'Zocial Navigator'}
+                </p>
+              </div>
+            </div>
 
-              {/* Controls: privacy + community (on wide screens inline) */}
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-2">
-                  <div className="min-w-[160px]">
-                    <PostPrivacySelector defaultValue={privacy} onChange={(v) => setPrivacy(v)} />
-                  </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="p-1 gap-1 flex bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+                <PostPrivacySelector defaultValue={privacy} onChange={(v) => setPrivacy(v)} />
 
-                  <div className="hidden md:block h-8 border-l dark:border-gray-600 mx-1" />
-
-                  <div className="relative min-w-[180px]">
-                    {communities?.length > 0 &&
-                    communities.some((c) => c?.members?.some((m) => m._id === selectedUser?._id)) ? (
+                {communities?.length > 0 &&
+                  communities.some((c) => c?.members?.some((m) => m._id === selectedUser?._id)) && (
+                    <div className="relative flex items-center">
+                      <HiUsers className="absolute left-3 text-gray-400 pointer-events-none" size={16} />
                       <select
                         value={selectedCommunity}
                         onChange={(e) => setSelectedCommunity(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-xl text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        className="pl-9 pr-8 py-2 bg-transparent text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider focus:outline-none appearance-none cursor-pointer"
                       >
-                        <option value="">{t("Select Community")}</option>
+                        <option value="" className="bg-white dark:bg-gray-900">{t("Global")}</option>
                         {communities
                           .filter((com) => com.members.some((m) => m._id === selectedUser?._id))
                           .map((com) => (
-                            <option key={com._id} value={com._id}>
+                            <option key={com._id} value={com._id} className="bg-white dark:bg-gray-900">
                               {com.Name}
                             </option>
                           ))}
                       </select>
-                    ) : (
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {t("No joined communities.")}
-                      </span>
-                    )}
-                    <FaUsers className="absolute left-2 top-2.5 text-gray-400" />
-                  </div>
-                </div>
-
-                {/* compact on small screens: move controls below using flex-wrap */}
-              </div>
-            </div>
-
-            {/* On small screens: put privacy + community as a second row for clarity */}
-            <div className="mt-3 md:hidden">
-              <div className="flex items-center gap-3">
-                <div className="flex-1">
-                  <PostPrivacySelector defaultValue={privacy} onChange={(v) => setPrivacy(v)} />
-                </div>
-                <div className="flex-1">
-                  {communities?.length > 0 &&
-                  communities.some((c) => c?.members?.some((m) => m._id === selectedUser?._id)) ? (
-                    <select
-                      value={selectedCommunity}
-                      onChange={(e) => setSelectedCommunity(e.target.value)}
-                      className="w-full pl-3 pr-3 py-2 bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-xl text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">{t("Select Community")}</option>
-                      {communities
-                        .filter((com) => com.members.some((m) => m._id === selectedUser?._id))
-                        .map((com) => (
-                          <option key={com._id} value={com._id}>
-                            {com.Name}
-                          </option>
-                        ))}
-                    </select>
-                  ) : (
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {t("No joined communities.")}
-                    </span>
+                    </div>
                   )}
-                </div>
               </div>
             </div>
           </div>
 
-          {/* Body */}
-          <div className="p-5 md:p-6 space-y-4 relative">
-            {/* Links pills */}
-            {links?.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {links.map((link, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full shadow-sm hover:shadow-md transition"
-                  >
-                    <a
-                      href={link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-600 truncate max-w-[180px]"
+          {/* Content Body */}
+          <div className="px-8 pb-8 space-y-6">
+            {/* Link Pills */}
+            <AnimatePresence>
+              {links?.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {links.map((link, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      className="flex items-center gap-3 bg-indigo-50 dark:bg-indigo-500/10 px-4 py-2 rounded-xl group"
                     >
-                      {link}
-                    </a>
-                    <button
-                      onClick={() => handleRemoveLink(idx)}
-                      className="p-1 rounded-full hover:bg-red-500 hover:text-white transition"
-                      aria-label={t("Remove link")}
-                    >
-                      <FiX size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+                      <HiLink className="text-indigo-500" size={14} />
+                      <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 truncate max-w-[200px]">
+                        {link}
+                      </span>
+                      <button onClick={() => handleRemoveLink(idx)} className="text-gray-400 hover:text-rose-500 transition-colors">
+                        <HiXMark size={16} />
+                      </button>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </AnimatePresence>
 
-            {/* Add Link */}
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="text"
-                placeholder={`${t("Add a link")}...`}
-                value={linkInput}
-                onChange={(e) => setLinkInput(e.target.value)}
-                className="flex-1 px-4 py-2 border dark:border-gray-600 rounded-lg text-sm bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                onClick={handleAddLink}
-                disabled={!linkInput?.trim()}
-                className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                  linkInput?.trim()
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                {t("Add")}
-              </button>
+            {/* Input Utilities */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative group">
+                <input
+                  type="text"
+                  placeholder={t("Inject URL context...")}
+                  value={linkInput}
+                  onChange={(e) => setLinkInput(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl text-sm font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 outline-none transition-all"
+                />
+                <HiLink className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
+                {linkInput?.trim() && (
+                  <button
+                    onClick={handleAddLink}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition"
+                  >
+                    <HiChevronRight size={16} />
+                  </button>
+                )}
+              </div>
+
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                  <HiOutlineCalendarDays className="text-gray-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
+                </div>
+                <input
+                  type="datetime-local"
+                  value={scheduleDate}
+                  onChange={(e) => {
+                    setScheduleDate(e.target.value)
+                    setScheduleEnabled(!!e.target.value)
+                  }}
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 outline-none transition-all appearance-none"
+                />
+              </div>
             </div>
 
-            {/* Textarea */}
+            {/* Main Content Area */}
             <div className="relative">
               <textarea
                 ref={textareaRef}
                 value={postText}
                 onChange={handleTextareaChange}
-                rows={5}
-                placeholder={t("What's on your mind? Add #hashtags, @mentions or 😊 emojis...")}
-                dir={rtl ? 'rtl' : 'ltr'}
-                className={`w-full p-5 text-base leading-relaxed rounded-2xl resize-none shadow-inner caret-blue-600 border transition-all focus:ring-2 outline-none ${
-                  errorText
-                    ? 'border-red-500 focus:ring-red-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-white'
-                    : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:ring-blue-500 text-gray-900 dark:text-white'
-                }`}
+                rows={6}
+                placeholder={t("Transcribe your vision... Use #hashtags and @mentions")}
+                dir={isRTL ? 'rtl' : 'ltr'}
+                className={`w-full p-8 text-xl md:text-2xl font-medium leading-relaxed bg-gray-50 dark:bg-white/5 border rounded-[2rem] resize-none focus:ring-4 transition-all duration-500 outline-none ${errorText
+                  ? 'border-rose-500/50 focus:ring-rose-500/10 text-rose-500'
+                  : 'border-gray-100 dark:border-white/5 focus:ring-indigo-500/10 dark:text-white/90'
+                  }`}
               />
-              {/* small helper row: char count + error */}
-              <div className="flex items-center justify-between mt-2 text-xs">
-                <div className="text-red-500">{errorText ? errorText : ''}</div>
-                <div className="text-gray-500 dark:text-gray-400">{charCount} {t("chars")}</div>
-              </div>
-            </div>
 
-            {/* Mention Box */}
-            {/* <AnimatePresence>
-              {showMentionBox && filteredUsers.length > 0 && (
-                <motion.ul
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 6 }}
-                  style={{
-                    top: mentionBoxPos.top,
-                    left: mentionBoxPos.left,
-                  }}
-                  className="absolute bg-white dark:bg-gray-800 shadow-xl rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 z-[9999] w-64 max-h-56 overflow-y-auto"
-                >
-                  {filteredUsers.map((mention) => (
-                    <li
-                      key={mention._id}
-                      onClick={() => handleSelectMention(mention)}
-                      className="flex items-center gap-2 px-3 py-2 hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer"
-                    >
-                      <Image
-                        src={mention.profilePhoto?.url || '/default.png'}
-                        alt=""
-                        width={28}
-                        height={28}
-                        className="rounded-full"
-                      />
-                      <div>
-                        <span className="text-sm font-semibold text-gray-700 dark:text-white">
-                          {mention.username}
-                        </span>
-                        <span className="text-xs text-gray-400 block">
-                          {mention.profileName || ''}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-                </motion.ul>
-              )}
-            </AnimatePresence> */}
-            {/* Mention Box */}
-            <AnimatePresence>
-              {showMentionBox && filteredUsers.length > 0 && (
-                <motion.ul
-                  initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                  transition={{ duration: 0.2 }}
-                  style={{
-                    top: mentionBoxPos.top + 30, // نضعها أسفل السطر الحالي
-                    left: Math.min(mentionBoxPos.left, window.innerWidth - 280), // نتأكد ألا تخرج عن يمين الشاشة
-                  }}
-                  className="absolute z-[9999] bg-lightMode-menu dark:bg-darkMode-menu 
-                            border border-gray-200 dark:border-gray-700 
-                            shadow-2xl rounded-2xl overflow-hidden 
-                            w-[260px] max-h-[260px] overflow-y-auto
-                            backdrop-blur-lg"
-                >
-                  {filteredUsers.map((mention) => (
-                    <li
-                      key={mention._id}
-                      onClick={() => handleSelectMention(mention)}
-                      className="flex items-center gap-3 px-3 py-2 
-                                hover:bg-blue-100 dark:hover:bg-blue-900 
-                                cursor-pointer transition-all duration-200"
-                    >
-                      <Image
-                        src={mention.profilePhoto?.url || '/default.png'}
-                        alt=""
-                        width={32}
-                        height={32}
-                        className="rounded-full shadow-md"
-                      />
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">
-                          {mention.username}
-                        </p>
-                        {mention.profileName && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                            {mention.profileName}
-                          </p>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </motion.ul>
-              )}
-            </AnimatePresence>
-
-          </div>
-
-          {/* Images Grid */}
-          <AnimatePresence>
-            {images.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="px-5 pb-4"
-              >
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-4">
-                  {images.map((img, idx) => (
-                    <motion.div
-                      key={idx}
-                      layout
-                      initial={{ scale: 0.98 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0.95, opacity: 0 }}
-                      className="relative group rounded-xl overflow-hidden shadow-lg"
-                    >
-                      <Image
-                        width={500}
-                        height={500}
-                        src={img.url}
-                        alt={`preview-${idx}`}
-                        className="w-full h-full aspect-square object-cover rounded-xl transform group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <button
-                        onClick={() => removeImage(idx)}
-                        className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full shadow hover:bg-red-600 transition"
-                        aria-label={t("Remove image")}
-                      >
-                        <FiX size={16} />
-                      </button>
-                    </motion.div>
-                  ))}
+              {/* Character Score */}
+              <div className="absolute bottom-6 right-8 flex items-center gap-4">
+                <div className={`text-[10px] font-black uppercase tracking-widest ${charCount > 450 ? 'text-rose-500' : 'text-gray-400'}`}>
+                  {charCount} / 500
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                {charCount > 0 && (
+                  <div className="w-8 h-8 rounded-full border-2 border-gray-100 dark:border-white/5 flex items-center justify-center relative">
+                    <svg className="w-full h-full -rotate-90">
+                      <circle
+                        cx="16" cy="16" r="14"
+                        fill="transparent"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className="text-gray-100 dark:text-white/5"
+                      />
+                      <circle
+                        cx="16" cy="16" r="14"
+                        fill="transparent"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeDasharray={88}
+                        strokeDashoffset={88 - (charCount / 500) * 88}
+                        className={charCount > 450 ? 'text-rose-500' : 'text-indigo-500'}
+                      />
+                    </svg>
+                  </div>
+                )}
+              </div>
 
-          {/* Footer */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60">
-            <div className="flex items-center gap-3 relative">
-              {/* Image Upload */}
-              <label className="cursor-pointer flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-blue-100 dark:hover:bg-blue-800 text-gray-700 dark:text-gray-300 transition shadow-md">
-                <IoImage size={22} />
-                <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
-              </label>
-
-              {/* Emoji Button */}
-              <button
-                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-yellow-100 dark:hover:bg-yellow-800 text-gray-600 dark:text-gray-300 transition shadow-md"
-                aria-label={t("Open emojis")}
-              >
-                <IoHappyOutline size={22} />
-              </button>
-
-              {/* Emoji Picker Popover */}
+              {/* Mention List UI */}
               <AnimatePresence>
-                {showEmojiPicker && (
+                {showMentionBox && filteredUsers.length > 0 && (
                   <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    className="absolute left-0 bottom-[130%] z-50 w-[320px] rounded-2xl shadow-2xl overflow-hidden"
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    style={{
+                      top: (mentionBoxPos.top || 0) + 40,
+                      left: (mentionBoxPos.left || 0)
+                    }}
+                    className="absolute z-[1000] w-72 bg-white/95 dark:bg-[#0B0F1A]/95 backdrop-blur-2xl rounded-[2rem] border border-gray-100 dark:border-white/10 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] overflow-hidden"
                   >
-                    <div className="flex justify-between items-center bg-gray-200 dark:bg-gray-700 px-3 py-2">
-                      <span className="text-gray-700 dark:text-gray-200 font-semibold">
-                        {t("Emojis")}
-                      </span>
-                      <button
-                        onClick={() => setShowEmojiPicker(false)}
-                        className="text-gray-600 dark:text-gray-300 hover:text-red-500 transition"
-                        aria-label={t("Close emojis")}
-                      >
-                        <FiX size={18} />
-                      </button>
+                    <div className="p-3 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5">
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">{t("Connection Radar")}</span>
                     </div>
-                    <div className="bg-white dark:bg-gray-900">
-                      <EmojiPicker onEmojiClick={handleEmojiClick} theme="dark" height={300} />
+                    <div className="max-h-64 overflow-y-auto custom-scrollbar">
+                      {filteredUsers.map((u, idx) => (
+                        <motion.button
+                          key={u._id}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.05 }}
+                          onClick={() => handleSelectMention(u)}
+                          className="w-full flex items-center gap-3 p-3 hover:bg-indigo-500 dark:hover:bg-indigo-600 group transition-all"
+                        >
+                          <div className="relative w-10 h-10 rounded-xl overflow-hidden ring-2 ring-white dark:ring-gray-800 shadow-sm transition-transform group-hover:scale-110">
+                            <Image src={u.profilePhoto?.url || '/default-avatar.png'} alt="user" fill className="object-cover" />
+                          </div>
+                          <div className="text-left min-w-0">
+                            <div className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-white truncate">
+                              {u.username}
+                            </div>
+                            <div className="text-[10px] text-gray-500 dark:text-gray-400 group-hover:text-indigo-100 truncate">
+                              @{u.profileName || u.username}
+                            </div>
+                          </div>
+                        </motion.button>
+                      ))}
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Post Button */}
-            <div className="w-full sm:w-auto flex items-center gap-3">
-              <button
-                onClick={handlePost}
-                disabled={loading || (!postText?.trim() && images.length === 0) || !!errorText}
-                className={`w-full sm:w-auto px-6 py-2 text-sm font-semibold rounded-full shadow-lg flex items-center justify-center gap-2 transition-all duration-300 ${
-                  loading
-                    ? 'bg-gray-400 text-white cursor-wait'
-                    : (!postText?.trim() && images.length === 0) || errorText
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white'
-                }`}
-                aria-label={t("Post")}
-              >
-                {loading ? (
-                  <>
-                    <motion.span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>{t("Posting")}...</span>
-                  </>
-                ) : (
-                  <span>{t("Post")}</span>
-                )}
-              </button>
-
-              {/* Schedule toggle quick */}
-              <button
-                onClick={() => setScheduleEnabled(!scheduleEnabled)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all duration-300 ${
-                  scheduleEnabled
-                    ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-blue-400'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-                aria-pressed={scheduleEnabled}
-                aria-label={t("Schedule Post")}
-              >
-                <FiClock size={16} />
-                <span className="hidden sm:inline">{t("Schedule")}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Schedule section */}
-          <div className="px-5 py-5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+            {/* Media Preview Container */}
             <AnimatePresence>
-              {scheduleEnabled && (
+              {images.length > 0 && (
                 <motion.div
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 6 }}
-                  className="flex items-center gap-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl p-3 shadow-inner w-full sm:w-auto"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="grid grid-cols-2 md:grid-cols-4 gap-4"
                 >
-                  <input
-                    type="datetime-local"
-                    value={scheduleDate}
-                    onChange={(e) => setScheduleDate(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border dark:border-gray-700 text-gray-800 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500"
-                  />
-                  {scheduleDate && (
-                    <button
-                      onClick={() => setScheduleDate('')}
-                      className="p-2 rounded-full hover:bg-red-500 hover:text-white transition"
-                      aria-label={t("Clear schedule")}
+                  {images.map((img, idx) => (
+                    <motion.div
+                      key={idx}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="relative aspect-square rounded-[1.5rem] overflow-hidden group shadow-lg"
                     >
-                      <FiX size={16} />
-                    </button>
-                  )}
+                      <Image src={img.url} alt="preview" fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-3">
+                        <button
+                          onClick={() => removeImage(idx)}
+                          className="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-xl hover:scale-110 transition-transform"
+                        >
+                          <HiXMark size={20} />
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
-        </motion.div>
 
-        {/* Floating mobile toolbar (sticky at bottom when composing on small screens) */}
-        <div className="fixed left-0 right-0 bottom-4 md:hidden flex items-center justify-center z-50">
-          <div className="mx-4 bg-white dark:bg-gray-900/80 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl flex items-center gap-2 px-3 py-2 w-full max-w-3xl">
-            <label className="cursor-pointer p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800">
-              <IoImage size={20} />
-              <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
-            </label>
-            <button
-              onClick={() => setShowEmojiPicker((s) => !s)}
-              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              <IoHappyOutline size={20} />
-            </button>
-            <div className="flex-1" />
+          {/* Action Footer */}
+          <div className="px-8 py-6 bg-gray-50/50 dark:bg-white/[0.02] border-t border-gray-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <label className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-white/10 shadow-sm border border-gray-100 dark:border-white/5 transition-all cursor-pointer group">
+                <HiPhoto size={22} className="group-hover:scale-110 transition-transform" />
+                <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
+              </label>
+
+              <button
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className={`flex items-center justify-center w-12 h-12 rounded-2xl shadow-sm border border-gray-100 dark:border-white/5 transition-all group ${showEmojiPicker ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:text-amber-500 hover:bg-white'}`}
+              >
+                <HiFaceSmile size={22} className="group-hover:scale-110 transition-transform" />
+              </button>
+
+              <AnimatePresence>
+                {showEmojiPicker && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute left-8 bottom-32 z-[100] shadow-2xl rounded-3xl overflow-hidden border border-white/10"
+                  >
+                    <EmojiPicker
+                      onEmojiClick={handleEmojiClick}
+                      theme="dark"
+                      width={320}
+                      height={400}
+                      lazyLoadEmojis={true}
+                      skinTonesDisabled
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             <button
               onClick={handlePost}
-              disabled={loading || (!postText?.trim() && images.length === 0) || !!errorText}
-              className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
-                loading
-                  ? 'bg-gray-400 text-white cursor-wait'
-                  : (!postText?.trim() && images.length === 0) || errorText
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-blue-600 to-purple-700 text-white'
-              }`}
+              disabled={!canPost}
+              className={`relative px-12 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.3em] transition-all overflow-hidden ${canPost
+                ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 hover:scale-[1.02] hover:bg-indigo-700 active:scale-[0.98]'
+                : 'bg-gray-200 dark:bg-white/5 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                }`}
             >
-              {loading ? t("Posting") : t("Post")}
+              {loading ? (
+                <div className="flex items-center gap-3">
+                  <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                    <HiChevronRight size={16} />
+                  </motion.div>
+                  {t('Broadcasting')}...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span>{t('Launch Broadcast')}</span>
+                  <HiCheckBadge size={16} className={canPost ? 'text-indigo-200' : ''} />
+                </div>
+              )}
             </button>
           </div>
-        </div>
+        </motion.div>
+
+        {/* Floating Tips / Stats */}
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+          className="mt-8 flex flex-col items-center gap-2"
+        >
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-[0.3em]">
+            {t("Secure Neural Transmission • Zocial Network")}
+          </p>
+          <div className="flex gap-4">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" style={{ animationDelay: '0.5s' }} />
+            <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" style={{ animationDelay: '1s' }} />
+          </div>
+        </motion.div>
       </div>
     </main>
   )
 }
 
 export default React.memo(NewPostPresenter)
+

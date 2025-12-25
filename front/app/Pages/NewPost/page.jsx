@@ -409,20 +409,10 @@ const NewPostContainer = () => {
         textarea,
         textarea.selectionStart
       )
-      const rect = textarea.getBoundingClientRect()
-      const boxWidth = 256
-      const boxHeight = 224
 
-      let finalTop = rect.top + window.scrollY + top + 25
-      let finalLeft = rect.left + window.scrollX + left
-
-      if (finalLeft + boxWidth > window.innerWidth)
-        finalLeft = window.innerWidth - boxWidth - 16
-
-      if (finalTop + boxHeight > window.scrollY + window.innerHeight)
-        finalTop = rect.top + window.scrollY + top - boxHeight - 10
-
-      setMentionBoxPos({ top: finalTop, left: finalLeft })
+      // We only need the offsets relative to the textarea's top-left
+      // the parent in Design.jsx is relative, so these offsets will work perfectly.
+      setMentionBoxPos({ top, left })
     }
   }, [showMentionBox, postText, cursorPosition, getCaretCoordinates])
 
@@ -550,7 +540,7 @@ const NewPostContainer = () => {
     <Suspense
       fallback={
         <div className="p-4 text-gray-400 animate-pulse text-center">
-          <Loading/>
+          <Loading />
         </div>
       }
     >

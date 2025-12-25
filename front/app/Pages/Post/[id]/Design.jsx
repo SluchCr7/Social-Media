@@ -91,7 +91,7 @@ const DesignPostSelect = memo(({
           <div className="flex-1 flex w-full flex-col gap-3">
             <PostHeader
               post={post}
-              user={post?.owner}
+              user={user}
               isLogin={isLogin}
               showMenu={showMenu}
               setShowMenu={setShowMenu}
@@ -172,11 +172,10 @@ const DesignPostSelect = memo(({
                     whileTap={{ scale: 0.9 }}
                     onClick={handleAddComment}
                     disabled={!commentText.trim()}
-                    className={`p-2.5 rounded-full transition-all ${
-                      commentText.trim()
-                        ? 'bg-blue-500 hover:bg-blue-400'
-                        : 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'
-                    }`}
+                    className={`p-2.5 rounded-full transition-all ${commentText.trim()
+                      ? 'bg-blue-500 hover:bg-blue-400'
+                      : 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'
+                      }`}
                   >
                     <IoIosSend className="text-white text-lg" />
                   </motion.button>

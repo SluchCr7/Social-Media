@@ -1,18 +1,18 @@
 'use client';
 
-import React, { useState , memo , useCallback, useMemo } from 'react';
+import React, { useState, memo, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaGlobe, FaUserFriends, FaCheck } from 'react-icons/fa';
+import { HiGlobeAlt, HiUsers, HiCheck } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 
 const PostPrivacySelector = memo(({ onChange, defaultValue = 'public' }) => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(defaultValue);
-  const {t} = useTranslation()
-  
+  const { t } = useTranslation();
+
   const options = useMemo(() => [
-    { value: 'public', label: t('Public'), icon: <FaGlobe /> },
-    { value: 'friends', label: t('Friends'), icon: <FaUserFriends /> },
+    { value: 'public', label: t('Public'), icon: <HiGlobeAlt /> },
+    { value: 'friends', label: t('Friends'), icon: <HiUsers /> },
   ], [t]);
 
   const selectedOption = useMemo(
@@ -26,50 +26,48 @@ const PostPrivacySelector = memo(({ onChange, defaultValue = 'public' }) => {
     setOpen(false);
   }, [onChange]);
 
-
   return (
-    <div className="relative w-full min-w-[120px] max-w-[180px]">
-      {/* Selector Button - مُحدث بالألوان المُخصصة */}
-      <button
+    <div className="relative">
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full px-4 py-2 bg-lightMode-menu dark:bg-gray-800 text-lightMode-text2 dark:text-darkMode-fg rounded-xl border border-gray-300 dark:border-gray-700 shadow-sm hover:border-lightMode-text dark:hover:border-darkMode-text transition-all focus:outline-none focus:ring-2 focus:ring-lightMode-text dark:focus:ring-darkMode-text"
+        className="flex items-center gap-3 px-4 py-2 bg-white dark:bg-white/10 text-gray-700 dark:text-gray-200 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm transition-all focus:outline-none"
       >
-        <div className="flex items-center gap-2 text-sm font-semibold">
-          {/* لون الأيقونة يتغير بالوضع الداكن والفاتح */}
-          <span className="text-lightMode-text dark:text-darkMode-text">{selectedOption.icon}</span>
+        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+          <span className="text-indigo-500">{selectedOption.icon}</span>
           <span className="truncate">{selectedOption.label}</span>
         </div>
-        {/* لون السهم يتغير بالوضع الداكن والفاتح */}
-        <span className={`text-xs ml-2 transform transition-transform ${open ? 'rotate-180' : 'rotate-0'}`}>
+        <motion.span
+          animate={{ rotate: open ? 180 : 0 }}
+          className="text-[8px] text-gray-400"
+        >
           ▼
-        </span>
-      </button>
+        </motion.span>
+      </motion.button>
 
-      {/* Dropdown - مُحدث بالألوان المُخصصة */}
       <AnimatePresence>
         {open && (
           <motion.ul
-            initial={{ opacity: 0, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            className="absolute left-0 mt-2 w-full bg-lightMode-menu dark:bg-gray-800 text-lightMode-text2 dark:text-darkMode-fg rounded-xl shadow-xl border border-gray-300 dark:border-gray-700 z-50 overflow-hidden"
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            className="absolute left-0 mt-3 w-48 bg-white/90 dark:bg-[#0B0F1A]/90 backdrop-blur-2xl rounded-2xl shadow-2xl border border-gray-100 dark:border-white/10 z-[100] overflow-hidden"
           >
             {options.map((option) => (
               <li
                 key={option.value}
                 onClick={() => handleSelect(option)}
-                className={`flex items-center gap-3 px-4 py-2 cursor-pointer transition-colors text-sm ${
-                  selected === option.value 
-                    ? 'bg-lightMode-text/10 dark:bg-darkMode-text/10 font-bold border-l-4 border-lightMode-text dark:border-darkMode-text' // تمييز العنصر المختار بلون الموقع
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all text-[10px] font-black uppercase tracking-widest ${selected === option.value
+                    ? 'bg-indigo-500 text-white'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-white/5'
+                  }`}
               >
-                {/* الأيقونة داخل القائمة */}
-                <span className="text-lightMode-text dark:text-darkMode-text">{option.icon}</span>
+                <span className={selected === option.value ? 'text-white' : 'text-indigo-500'}>
+                  {option.icon}
+                </span>
                 <span className="flex-1">{option.label}</span>
-                
-                {/* علامة التحقق */}
-                {selected === option.value && <FaCheck className="ml-auto text-lightMode-text dark:text-darkMode-text" />}
+                {selected === option.value && <HiCheck className="text-white" />}
               </li>
             ))}
           </motion.ul>
@@ -78,5 +76,6 @@ const PostPrivacySelector = memo(({ onChange, defaultValue = 'public' }) => {
     </div>
   );
 });
-PostPrivacySelector.displayName = 'PostPrivacySelector'
+
+PostPrivacySelector.displayName = 'PostPrivacySelector';
 export default PostPrivacySelector;
