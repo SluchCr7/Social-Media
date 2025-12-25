@@ -18,7 +18,8 @@ import {
   HiPause,
   HiPlay,
   HiSignal,
-  HiCalendarDays
+  HiCalendarDays,
+  HiCommandLine
 } from 'react-icons/hi2';
 import Image from 'next/image';
 import { useHighlights } from '@/app/Context/HighlightContext';
