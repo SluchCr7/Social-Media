@@ -4,12 +4,14 @@ import { IoIosSend } from 'react-icons/io';
 import { IoImage, IoClose, IoMic, IoHappyOutline } from 'react-icons/io5';
 import { useMessage } from '../../Context/MessageContext';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ChatInput = () => {
   const { AddNewMessage, replyingTo, setReplyingTo } = useMessage();
   const [message, setMessage] = useState('');
   const [images, setImages] = useState([]);
   const fileInputRef = useRef();
+  const [isFocused, setIsFocused] = useState(false);
 
   // 🖼️ تحميل الصور
   const handleImageChange = (e) => {
@@ -50,127 +52,141 @@ const ChatInput = () => {
   };
 
   return (
-    <div
-      className="w-full px-2 sm:px-3 py-2 sm:py-3 bg-white dark:bg-darkMode-bg 
-                 border-t border-gray-200 dark:border-gray-700 sticky bottom-0
-                 flex flex-col"
-    >
+    <div className={`
+      relative w-full
+      bg-white/[0.03] backdrop-blur-xl 
+      border border-white/5 
+      rounded-2xl transition-all duration-300
+      ${isFocused ? 'ring-1 ring-indigo-500/30 bg-black/40' : 'hover:bg-white/[0.05]'}
+    `}>
 
-      {/* 💬 شريط الرد (Reply Preview) */}
-      {replyingTo && (
-        <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/40 border-l-4 border-blue-500 px-3 py-2 mb-2 rounded-md relative">
-          <div className="flex flex-col text-sm max-w-[80%]">
-            <span className="font-semibold text-blue-700 dark:text-blue-300">
-              Replying to {replyingTo.sender?.username || 'user'}
-            </span>
-            {replyingTo.text ? (
-              <p className="text-gray-700 dark:text-gray-300 truncate">
-                {replyingTo.text}
-              </p>
-            ) : replyingTo.Photos?.length > 0 ? (
-              <Image
-                width={300}
-                height={300}
-                src={replyingTo.Photos[0].url}
-                alt="reply_img"
-                className="w-16 h-16 rounded-md object-cover mt-1"
-              />
-            ) : (
-              <p className="text-gray-400 italic">No content</p>
-            )}
-          </div>
-          <IoClose
-            onClick={() => setReplyingTo(null)}
-            className="text-gray-500 hover:text-red-500 text-lg cursor-pointer"
-            title="Cancel reply"
-          />
-        </div>
-      )}
-
-      {/* 🖼️ معاينة الصور */}
-      {images.length > 0 && (
-        <div className="flex overflow-x-auto gap-2 mb-2 sm:mb-3 pb-1">
-          {images.map((img, idx) => (
-            <div
-              key={idx}
-              className="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 
-                         rounded-lg overflow-hidden shadow border border-gray-200 dark:border-gray-600"
-            >
-              <Image
-                width={500}
-                height={500}
-                src={img.url}
-                alt={`upload-${idx}`}
-                className="w-full h-full object-cover hover:scale-105 transition"
-              />
-              <IoClose
-                onClick={() => removeImage(img.url)}
-                className="absolute top-1 right-1 bg-white dark:bg-black/70 
-                           text-red-600 text-lg sm:text-xl rounded-full cursor-pointer"
-              />
+      {/* 💬 شريط الرد (Reply Preview) - Floating on top */}
+      <AnimatePresence>
+        {replyingTo && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: 10, height: 0 }}
+            className="px-4 pt-4"
+          >
+            <div className="flex items-center justify-between bg-indigo-500/10 border-l-2 border-indigo-500 rounded p-2 mb-2">
+              <div className="flex flex-col text-xs max-w-[85%]">
+                <span className="font-bold text-indigo-400 mb-0.5">
+                  Reply to {replyingTo.sender?.username || 'user'}
+                </span>
+                {replyingTo.text ? (
+                  <p className="text-white/60 truncate">
+                    {replyingTo.text}
+                  </p>
+                ) : replyingTo.Photos?.length > 0 ? (
+                  <div className="flex items-center gap-1.5 text-white/50 italic">
+                    <IoImage size={10} />
+                    <span>Image attachment</span>
+                  </div>
+                ) : (
+                  <p className="text-white/30 italic">No content</p>
+                )}
+              </div>
+              <button
+                onClick={() => setReplyingTo(null)}
+                className="p-1 hover:bg-white/10 rounded-full transition-colors text-white/60 hover:text-white"
+              >
+                <IoClose size={16} />
+              </button>
             </div>
-          ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+
+      <div className="p-2 sm:p-3">
+        {/* 🖼️ معاينة الصور */}
+        {images.length > 0 && (
+          <div className="flex overflow-x-auto gap-3 py-2 px-1 mb-2">
+            {images.map((img, idx) => (
+              <div
+                key={idx}
+                className="relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-white/10 group"
+              >
+                <Image
+                  width={100}
+                  height={100}
+                  src={img.url}
+                  alt={`upload-${idx}`}
+                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                />
+                <button
+                  onClick={() => removeImage(img.url)}
+                  className="absolute top-1 right-1 bg-black/60 text-white p-0.5 rounded-full hover:bg-red-500 transition-colors"
+                >
+                  <IoClose size={12} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 📝 أدوات الإدخال */}
+        <div className="flex items-end gap-2 text-white/60">
+
+          {/* أدوات المرفقات */}
+          <div className="flex items-center gap-1 pb-1">
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleImageChange}
+              ref={fileInputRef}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current.click()}
+              className="p-2 rounded-xl hover:bg-white/10 text-white/40 hover:text-indigo-400 transition-colors"
+              title="Add Image"
+            >
+              <IoImage size={20} />
+            </button>
+            <button
+              className="hidden sm:block p-2 rounded-xl hover:bg-white/10 text-white/40 hover:text-amber-400 transition-colors"
+            >
+              <IoHappyOutline size={20} />
+            </button>
+            <button
+              className="hidden sm:block p-2 rounded-xl hover:bg-white/10 text-white/40 hover:text-emerald-400 transition-colors"
+            >
+              <IoMic size={20} />
+            </button>
+          </div>
+
+          {/* مربع النص */}
+          <div className="flex-1 min-h-[44px] bg-transparent flex items-center">
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              placeholder="Type a message..."
+              className="w-full bg-transparent border-none text-white placeholder:text-white/20 text-sm font-medium focus:ring-0 px-2 py-2"
+            />
+          </div>
+
+          {/* زر الإرسال */}
+          <button
+            onClick={handleSend}
+            disabled={!message.trim() && images.length === 0}
+            className={`
+              p-2.5 rounded-xl transition-all duration-300
+              ${(!message.trim() && images.length === 0)
+                ? 'bg-white/5 text-white/20 cursor-not-allowed'
+                : 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-500 active:scale-95'
+              }
+            `}
+          >
+            <IoIosSend size={18} className={message.trim() || images.length > 0 ? "ml-0.5" : ""} />
+          </button>
         </div>
-      )}
-
-      {/* 📝 إدخال النصوص والأزرار */}
-      <div className="flex items-center gap-1 sm:gap-2 w-full">
-        {/* 📁 رفع صورة */}
-        <button
-          onClick={() => fileInputRef.current.click()}
-          className="flex-shrink-0 p-2 sm:p-2.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition"
-          title="Upload Image"
-        >
-          <IoImage className="text-lg sm:text-xl text-blue-500" />
-        </button>
-
-        {/* 😀 إيموجي */}
-        <button
-          className="flex-shrink-0 p-2 sm:p-2.5 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900 transition"
-          title="Insert Emoji"
-        >
-          <IoHappyOutline className="text-lg sm:text-xl text-yellow-500" />
-        </button>
-
-        {/* 🎤 تسجيل صوتي */}
-        <button
-          className="hidden xs:flex sm:flex-shrink-0 p-2 sm:p-2.5 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900 transition"
-          title="Record Voice"
-        >
-          <IoMic className="text-lg sm:text-xl text-purple-500" />
-        </button>
-
-        <input
-          type="file"
-          multiple
-          accept="image/*"
-          onChange={handleImageChange}
-          ref={fileInputRef}
-          className="hidden"
-        />
-
-        {/* 🧾 مربع الإدخال */}
-        <div className="flex-1 flex items-center bg-gray-50 dark:bg-darkMode-menu rounded-full shadow-sm px-2 sm:px-3">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type your message..."
-            className="flex-1 bg-transparent py-2 text-sm sm:text-base 
-                       text-black dark:text-white focus:outline-none"
-          />
-        </div>
-
-        {/* 📤 إرسال */}
-        <button
-          onClick={handleSend}
-          className="flex-shrink-0 p-2 sm:p-3 bg-green-500 text-white 
-                     rounded-full hover:bg-green-600 active:scale-95 transition"
-          title="Send Message"
-        >
-          <IoIosSend className="text-lg sm:text-xl" />
-        </button>
       </div>
     </div>
   );

@@ -1,15 +1,15 @@
 'use client';
 import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiUserPlus, FiUserCheck } from 'react-icons/fi';
+import { FiUserPlus, FiUserCheck, FiSearch } from 'react-icons/fi';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/app/Context/AuthContext';
 import { useUser } from '@/app/Context/UserContext';
 import { useGetData } from '@/app/Custome/useGetData';
 import { useTranslation } from 'react-i18next';
-import { FaSearch } from 'react-icons/fa';
 import MenuSkeleton from '@/app/Skeletons/MenuSkeleton';
+import { Sparkles, Users, Globe } from 'lucide-react';
 
 const SuggestedFriendsPage = () => {
   const { user, users } = useAuth();
@@ -21,7 +21,6 @@ const SuggestedFriendsPage = () => {
 
   const handleFollow = useCallback((id) => followUser(id), [followUser]);
 
-  // 🔍 تصفية الأصدقاء حسب الاسم
   const suggestions = useMemo(() => {
     if (!Array.isArray(users)) return [];
     const base = users.filter(
@@ -36,138 +35,152 @@ const SuggestedFriendsPage = () => {
   }, [users, userData, searchTerm]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
-      className="min-h-screen w-full px-4 sm:px-6 md:px-12 py-10 
-                 bg-gradient-to-b from-lightMode-bg to-lightMode-menu 
-                 dark:from-darkMode-bg dark:to-darkMode-menu 
-                 text-lightMode-text dark:text-darkMode-text"
-    >
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-5">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
-            {t('Friends Recommendations')}
-          </h1>
-          <p className="text-sm opacity-80 mt-1">
-            {t('Discover amazing people to follow and expand your community.')}
-          </p>
+    <div className="min-h-screen w-full relative bg-[#050505] text-white overflow-hidden">
+      {/* Background Ambience */}
+      <div className="fixed top-0 inset-x-0 h-[400px] bg-gradient-to-b from-indigo-900/20 to-transparent pointer-events-none" />
+      <div className="fixed bottom-0 right-0 w-[600px] h-[600px] bg-purple-900/10 blur-[150px] pointer-events-none rounded-full" />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-12">
+
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-16">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-widest text-emerald-400">
+              <Globe size={10} />
+              Global Network
+            </div>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white">
+              Discover <span className="text-white/20">Connections</span>
+            </h1>
+            <p className="text-sm font-medium text-white/40 max-w-lg">
+              Expand your resonance. Connect with creators, innovators, and friends across the decentralized network.
+            </p>
+          </div>
+
+          {/* Search Bar Premium */}
+          <div className="relative w-full md:w-96 group">
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 blur-lg opacity-0 group-focus-within:opacity-100 transition duration-500 rounded-xl" />
+            <div className="relative flex items-center bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 backdrop-blur-md transition-all group-focus-within:bg-black/80 group-focus-within:border-emerald-500/50">
+              <FiSearch className="text-white/30 text-lg mr-3 group-focus-within:text-emerald-400 transition-colors" />
+              <input
+                type="text"
+                placeholder={t("Search username...")}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-transparent border-none outline-none text-white placeholder:text-white/20 font-medium"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* 🔍 Search */}
-        <div className="relative w-full max-w-md">
-          <input
-            type="text"
-            placeholder={t('Search for users...')}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-xl 
-                       bg-white/10 dark:bg-black/30 
-                       border border-white/10 
-                       focus:ring-2 focus:ring-blue-500 
-                       outline-none placeholder:text-sm transition"
-          />
-          <FaSearch className="absolute left-3 top-2.5 text-gray-400" />
-        </div>
+        {/* Grid Content */}
+        {loading ? (
+          <MenuSkeleton />
+        ) : (
+          <AnimatePresence mode="wait">
+            {suggestions.length > 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              >
+                {suggestions.map((userFriend, index) => (
+                  <UserCard
+                    key={userFriend._id}
+                    user={userFriend}
+                    index={index}
+                    handleFollow={handleFollow}
+                    isFollowing={userData?.following?.some((f) => f?._id === userFriend?._id)}
+                    t={t}
+                  />
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col items-center justify-center py-32 text-center"
+              >
+                <div className="w-24 h-24 rounded-full bg-white/5 border border-white/5 flex items-center justify-center mb-6">
+                  <Sparkles className="w-10 h-10 text-white/20" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">{t("No vibes found")}</h3>
+                <p className="text-white/40 text-sm max-w-xs">{t("We couldn't find anyone matching that search. Try broadening your horizon.")}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
       </div>
-
-      {/* CONTENT */}
-      {loading ? (
-        <MenuSkeleton />
-      ) : (
-        <AnimatePresence>
-          {suggestions.length > 0 ? (
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-            >
-              {suggestions.map((userFriend, index) => (
-                <motion.div
-                  key={userFriend._id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.04 }}
-                  whileHover={{
-                    y: -4,
-                    scale: 1.02,
-                    boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
-                  }}
-                  className="p-5 rounded-2xl 
-                             bg-white/60 dark:bg-[#1a1c21]/60 
-                             backdrop-blur-lg border border-white/10 
-                             hover:border-blue-400/40 transition-all 
-                             flex flex-col items-center text-center shadow-md"
-                >
-                  {/* Profile image */}
-                  <div className="relative mb-3">
-                    <Image
-                      src={userFriend?.profilePhoto?.url || '/default-avatar.png'}
-                      alt={userFriend.username}
-                      width={80}
-                      height={80}
-                      className="rounded-full w-20 h-20 object-cover 
-                                 border-2 border-white dark:border-gray-700 shadow"
-                    />
-                  </div>
-
-                  {/* Info */}
-                  <Link
-                    href={`/Pages/User/${userFriend._id}`}
-                    className="text-base font-semibold hover:text-blue-600 transition"
-                  >
-                    {userFriend.username}
-                  </Link>
-
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {t('Suggested for you')}
-                  </p>
-
-                  {/* Follow Button */}
-                  <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    whileHover={{ scale: 1.05 }}
-                    onClick={() => handleFollow(userFriend._id)}
-                    className={`mt-4 px-4 py-2 rounded-full text-sm font-medium text-white shadow transition-all duration-300 ${
-                      userData?.following?.some((f) => f?._id === userFriend?._id)
-                        ? 'bg-gradient-to-r from-red-500 to-pink-600 hover:from-pink-600 hover:to-red-500'
-                        : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600'
-                    }`}
-                  >
-                    {userData?.following?.some((f) => f?._id === userFriend?._id) ? (
-                      <span className="flex items-center gap-1">
-                        <FiUserCheck /> {t('Following')}
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1">
-                        <FiUserPlus /> {t('Follow')}
-                      </span>
-                    )}
-                  </motion.button>
-                </motion.div>
-              ))}
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center py-20 rounded-3xl 
-                         bg-white/5 dark:bg-black/20 backdrop-blur-lg text-center"
-            >
-              <div className="text-6xl mb-4">💬</div>
-              <h3 className="text-xl font-semibold">{t('No friend suggestions')}</h3>
-              <p className="text-gray-500 text-sm mt-2">
-                {t('You are all caught up for now!')}
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      )}
-    </motion.div>
+    </div>
   );
 };
+
+// ✅ Component: Premium User Card
+const UserCard = ({ user, index, handleFollow, isFollowing, t }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className="group relative p-1 rounded-3xl bg-transparent hover:bg-white/[0.02] transition-colors duration-500"
+    >
+      {/* Card Content */}
+      <div className="relative p-6 rounded-[20px] bg-[#0a0a0a] border border-white/10 overflow-hidden flex flex-col items-center text-center h-full group-hover:border-white/20 transition-colors duration-500">
+
+        {/* Hover Gradient Effect */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+        {/* Avatar with Glow */}
+        <div className="relative mb-6">
+          <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-white/5 group-hover:border-emerald-500/50 transition-colors duration-500 shadow-2xl">
+            <Image
+              src={user?.profilePhoto?.url || '/default-avatar.png'}
+              alt={user.username}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-110"
+            />
+          </div>
+        </div>
+
+        {/* Text Info */}
+        <div className="relative z-10 flex-1 flex flex-col items-center w-full">
+          <Link href={`/Pages/User/${user._id}`} className="block">
+            <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors duration-300">
+              {user.username}
+            </h3>
+          </Link>
+          <p className="text-xs font-medium text-white/30 uppercase tracking-widest mt-1 mb-6">
+            {t('Creator')}
+          </p>
+
+          {/* Action Button */}
+          <button
+            onClick={() => handleFollow(user._id)}
+            className={`
+                            mt-auto w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-300
+                            flex items-center justify-center gap-2
+                            ${isFollowing
+                ? 'bg-white/5 text-white/40 hover:bg-red-500/10 hover:text-red-500'
+                : 'bg-white text-black hover:bg-emerald-400 hover:text-black hover:scale-105 shadow-lg shadow-white/10'}
+                        `}
+          >
+            {isFollowing ? (
+              <>
+                <FiUserCheck size={14} />
+                {t('Following')}
+              </>
+            ) : (
+              <>
+                <FiUserPlus size={14} />
+                {t('Follow')}
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
 
 export default SuggestedFriendsPage;

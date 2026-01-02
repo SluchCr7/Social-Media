@@ -3,44 +3,55 @@ import ChatSlider from '@/app/Component/ChatMessngerComponents/ChatSlider'
 import NoChat from '@/app/Component/ChatMessngerComponents/NoChat'
 import React from 'react'
 import { FaBars } from 'react-icons/fa'
+import { motion } from 'framer-motion'
 
 const MessangerPresentation = ({
-    showSidebar , setShowSidebar,  selectedUser
+  showSidebar, setShowSidebar, selectedUser
 }) => {
   return (
-    <div className="w-full h-screen overflow-hidden bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text">
-      <div className="flex h-full w-full m-0 p-0">
-        {/* Sidebar */}
-        <aside
+    <div className="w-full h-screen overflow-hidden bg-[#050505]">
+      {/* Background Ambience */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/10 via-[#050505] to-[#050505] opacity-50 z-0 pointer-events-none" />
+
+      <div className="relative z-10 flex h-full w-full">
+        {/* Sidebar Panel */}
+        <motion.aside
+          initial={false}
+          animate={{
+            x: showSidebar ? 0 : '-100%',
+            opacity: showSidebar ? 1 : 0
+          }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
           className={`
             fixed inset-y-0 left-0 z-30 
-            w-[80%] max-w-[300px] 
-            bg-white dark:bg-darkMode-menu 
-            border-r border-gray-300 dark:border-gray-700 
-            transform transition-transform duration-300 ease-in-out
-            ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
-            md:static md:translate-x-0 md:w-[280px]
+            w-[85%] sm:w-[320px]
+            bg-black/40 backdrop-blur-xl border-r border-white/5
+            md:static md:translate-x-0 md:opacity-100 md:w-[320px] md:flex
           `}
         >
           <ChatSlider />
-        </aside>
+        </motion.aside>
 
-        {/* Overlay للموبايل */}
+        {/* Mobile Overlay */}
         {showSidebar && (
           <div
-            className="fixed inset-0 bg-black/40 z-20 md:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 md:hidden"
             onClick={() => setShowSidebar(false)}
           />
         )}
 
-        {/* Main Chat Area */}
-        <main className="flex-1 w-full h-full relative">
-          <button
-            onClick={() => setShowSidebar(true)}
-            className="absolute top-4 left-4 z-10 p-2 rounded-md bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text shadow md:hidden"
-          >
-            <FaBars size={20} />
-          </button>
+        {/* Main Chat Area Panel */}
+        <main className="flex-1 w-full h-full relative flex flex-col bg-[#050505]/50 backdrop-blur-3xl">
+          {/* Mobile Toggle Button */}
+          <div className="absolute top-4 left-4 z-20 md:hidden">
+            <button
+              onClick={() => setShowSidebar(true)}
+              className="p-2.5 rounded-xl bg-white/5 border border-white/5 text-white shadow-lg backdrop-blur-md active:scale-95 transition-all"
+            >
+              <FaBars size={18} />
+            </button>
+          </div>
+
 
           {selectedUser ? (
             <Chat onBack={() => setShowSidebar(true)} />
@@ -51,7 +62,7 @@ const MessangerPresentation = ({
           )}
         </main>
       </div>
-      </div>
+    </div>
   )
 }
 

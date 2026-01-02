@@ -1,63 +1,29 @@
 'use client';
-import Image from 'next/image';
-import Link from 'next/link';
-import React from 'react';
+import React from 'react'
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
 
 const NoChat = () => {
-  const {t} = useTranslation()
   return (
-    <div className="flex flex-col items-center justify-center flex-1 w-full px-4 bg-lightMode-bg dark:bg-darkMode-bg">
-      
-      {/* Logo */}
-      <Link href="/" className="mb-6">
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.4 }}
-        >
-          <Image
-            src="/Logo.png"
-            alt="Sluchit Logo"
-            width={140}
-            height={140}
-            className="transition hover:scale-105 duration-300"
-          />
-        </motion.div>
-      </Link>
-
-      {/* Title */}
-      <motion.h1
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.4 }}
-        className="text-2xl font-semibold text-gray-800 dark:text-gray-100"
+    <div className="flex flex-col items-center justify-center p-12 text-center pointer-events-none select-none">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1 }}
+        className="mb-8 relative"
       >
-        {t("Welcome to")} {process.env.WEBSITE_NAME || "Zocial"}!
-      </motion.h1>
+        {/* Abstract Graphic */}
+        <div className="w-40 h-40 bg-gradient-to-tr from-indigo-500/10 to-purple-500/10 rounded-full blur-[50px] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+        <div className="relative z-10 w-24 h-24 border border-white/10 rounded-[2rem] flex items-center justify-center bg-white/[0.01]">
+          <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
+        </div>
+      </motion.div>
 
-      {/* Subtitle */}
-      <motion.p
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.4 }}
-        className="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-sm text-center"
-      >
-        {t("Start a new conversation by selecting a chat from the sidebar or searching for a friend.")}
-      </motion.p>
-
-      {/* Hint */}
-      <motion.p
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.4, duration: 0.4 }}
-        className="mt-6 text-xs text-gray-400 dark:text-gray-500"
-      >
-        {t("Your messages will appear here once you start chatting.")}
-      </motion.p>
+      <h2 className="text-2xl font-black text-white/60 mb-2 tracking-tight">Decentralized Hub</h2>
+      <p className="text-sm text-white/30 max-w-xs leading-relaxed">
+        Select a neural node from the sidebar to establish a secure connection.
+      </p>
     </div>
-  );
-};
+  )
+}
 
-export default NoChat;
+export default NoChat

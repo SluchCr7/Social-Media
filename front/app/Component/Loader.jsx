@@ -6,98 +6,96 @@ import Image from "next/image";
 
 const Loader = () => {
   return (
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center overflow-hidden bg-[#050505]">
-      {/* 🔮 Neural Background Pulse */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.1, 0.2, 0.1],
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/20 blur-[120px] rounded-full"
-        />
-        <motion.div
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.05, 0.15, 0.05],
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/10 blur-[100px] rounded-full"
-        />
-      </div>
+    <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#050505] overflow-hidden">
 
-      <div className="relative flex flex-col items-center justify-center space-y-12">
-        {/* 💎 The Core Prism */}
-        <div className="relative group">
+      {/* Background Gradient Subtle */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-900/10 via-[#050505] to-[#050505]" />
+
+      <div className="relative flex flex-col items-center justify-center p-12">
+        {/* Main Logo Container */}
+        <div className="relative mb-8">
+          {/* Animated Glow Behind Logo */}
           <motion.div
             animate={{
-              rotate: 360,
-              borderRadius: ["40% 60% 70% 30% / 40% 50% 60% 50%", "30% 70% 50% 50% / 50% 30% 70% 40%", "40% 60% 70% 30% / 40% 50% 60% 50%"],
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.6, 0.3],
             }}
-            transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-            className="w-48 h-48 bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 backdrop-blur-3xl border border-white/10 shadow-[0_0_50px_rgba(99,102,241,0.2)]"
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute inset-0 bg-indigo-500/20 blur-[60px] rounded-full"
           />
 
+          {/* Logo with Breathing Effect */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="absolute inset-0 flex items-center justify-center"
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="relative w-32 h-32 md:w-40 md:h-40 z-10"
           >
-            <div className="relative w-24 h-24">
-              <Image
-                src="/Logo.png"
-                alt="Logo"
-                fill
-                className="object-contain filter drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
-                priority
-              />
-            </div>
+            <Image
+              src="/Logo.png"
+              alt="Loading..."
+              fill
+              className="object-contain drop-shadow-2xl"
+              priority
+            />
           </motion.div>
 
-          {/* Orbiting Particles */}
-          {[0, 1, 2].map((i) => (
-            <motion.div
-              key={i}
-              animate={{
-                rotate: 360,
-              }}
-              transition={{ duration: 3 + i, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-[-20px] pointer-events-none"
-            >
-              <div className={`w-2 h-2 rounded-full bg-indigo-500/50 blur-[2px] absolute top-0 left-1/2 -translate-x-1/2`} />
-            </motion.div>
-          ))}
+          {/* Spinning Ring (Minimalist) */}
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-[-20px] rounded-full border border-indigo-500/10 border-t-indigo-500/50 z-0"
+          />
+          <motion.div
+            animate={{ rotate: -360 }}
+            transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-[-10px] rounded-full border border-white/5 border-b-white/20 z-0"
+          />
         </div>
 
-        {/* 📡 Signal Status */}
-        <div className="flex flex-col items-center space-y-3">
-          <div className="flex items-center gap-2">
-            <motion.div
-              animate={{ opacity: [0.3, 1, 0.3] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-              className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)]"
-            />
-            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-500 flex items-center gap-2">
-              Initializing <span className="text-white mt-1">•••</span> Global Grid
-            </span>
-          </div>
+        {/* Text & Progress */}
+        <div className="flex flex-col items-center space-y-4 z-10 w-full max-w-[200px]">
 
-          <div className="w-48 h-[1px] bg-white/5 relative overflow-hidden">
+          {/* Elegant Text */}
+          <motion.h2
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="text-xs md:text-sm font-medium tracking-[0.3em] text-white/80 uppercase"
+          >
+            Loading
+          </motion.h2>
+
+          {/* Minimalist Progress Line */}
+          <div className="h-[2px] w-full bg-white/5 rounded-full overflow-hidden relative">
             <motion.div
-              animate={{ x: ["-100%", "100%"] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-500 to-transparent w-full"
+              initial={{ x: "-100%" }}
+              animate={{ x: "0%" }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                repeatDelay: 0.5
+              }}
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-500/80 to-transparent w-full"
             />
           </div>
         </div>
       </div>
 
-      {/* 🎭 Metadata Overlay */}
-      <div className="fixed bottom-12 left-1/2 -translate-x-1/2">
-        <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/20">
-          Zocial Pulse Engine • Operational
-        </span>
+      {/* Footer / Version / Quote (Optional for premium feel) */}
+      <div className="absolute bottom-8 left-0 right-0 text-center">
+        <motion.span
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1, duration: 1 }}
+          className="text-[10px] text-white/20 font-light tracking-widest"
+        >
+          EXPERIENCE THE FUTURE
+        </motion.span>
       </div>
     </div>
   );
