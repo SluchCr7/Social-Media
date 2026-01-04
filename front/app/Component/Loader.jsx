@@ -56,46 +56,6 @@ const Loader = () => {
             className="absolute inset-[-10px] rounded-full border border-white/5 border-b-white/20 z-0"
           />
         </div>
-
-        {/* Text & Progress */}
-        <div className="flex flex-col items-center space-y-4 z-10 w-full max-w-[200px]">
-
-          {/* Elegant Text */}
-          <motion.h2
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="text-xs md:text-sm font-medium tracking-[0.3em] text-white/80 uppercase"
-          >
-            Loading
-          </motion.h2>
-
-          {/* Minimalist Progress Line */}
-          <div className="h-[2px] w-full bg-white/5 rounded-full overflow-hidden relative">
-            <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: "0%" }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                repeatDelay: 0.5
-              }}
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-500/80 to-transparent w-full"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Footer / Version / Quote (Optional for premium feel) */}
-      <div className="absolute bottom-8 left-0 right-0 text-center">
-        <motion.span
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 1 }}
-          className="text-[10px] text-white/20 font-light tracking-widest"
-        >
-          EXPERIENCE THE FUTURE
-        </motion.span>
       </div>
     </div>
   );

@@ -15,6 +15,7 @@ import {
 import { HiSparkles } from 'react-icons/hi';
 import Image from 'next/image';
 import { useHighlights } from '@/app/Context/HighlightContext';
+import { useAlert } from '@/app/Context/AlertContext';
 
 const StoryCard = memo(({ story, isSelected, onToggle, getStoryPhoto }) => {
   const x = useMotionValue(0);
@@ -45,8 +46,8 @@ const StoryCard = memo(({ story, isSelected, onToggle, getStoryPhoto }) => {
       <motion.div
         style={{ rotateX, rotateY }}
         className={`w-full h-full rounded-2xl overflow-hidden border-2 transition-all duration-300 ${isSelected
-            ? 'border-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.4)]'
-            : 'border-transparent hover:border-white/30 shadow-xl'
+          ? 'border-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.4)]'
+          : 'border-transparent hover:border-white/30 shadow-xl'
           }`}
       >
         <Image
@@ -93,6 +94,7 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
   const [selectedStories, setSelectedStories] = useState([]);
 
   const { createHighlight, loading, setOpenModal, openModal } = useHighlights();
+  const { showAlert } = useAlert();
 
   const modalRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -137,7 +139,7 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
 
   const handleCreate = async () => {
     if (!title.trim() || selectedStories.length === 0) {
-      return window.alert('Please enter a title and select at least one story.');
+      return showAlert('⚠️ Please enter a title and select at least one story.');
     }
     try {
       await createHighlight({ title: title.trim(), cover: coverFile, storyIds: selectedStories });
@@ -145,7 +147,6 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
       setOpenModal(false);
     } catch (err) {
       console.error('Highlight creation failed:', err);
-      window.alert('Failed to create highlight. Try again.');
     }
   };
 
@@ -372,4 +373,3 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
 
 AddHighlightMenu.displayName = 'AddHighlightMenu'
 export default AddHighlightMenu;
-

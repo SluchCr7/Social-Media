@@ -19,8 +19,15 @@ const createHighlight = async (req, res) => {
 
     // ✅ إعداد القصص للأرشفة (فك الارتباط بانتهاء الصلاحة)
     let archivedStories = [];
-    if (storyIds && Array.isArray(storyIds) && storyIds.length > 0) {
-      const stories = await Story.find({ _id: { $in: storyIds }, owner: userId });
+
+    // Ensure storyIds is an array (handle single item case)
+    let idsToProcess = [];
+    if (storyIds) {
+      idsToProcess = Array.isArray(storyIds) ? storyIds : [storyIds];
+    }
+
+    if (idsToProcess.length > 0) {
+      const stories = await Story.find({ _id: { $in: idsToProcess }, owner: userId });
       archivedStories = stories.map(s => ({
         _id: s._id,
         text: s.text,

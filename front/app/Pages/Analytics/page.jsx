@@ -16,7 +16,7 @@ export default function AnalyticsContainer() {
   const [period, setPeriod] = useState('30')
   const [exporting, setExporting] = useState(false)
   const {userData,loading} = useGetData(user._id)
-
+  
   // Fetch posts
   useEffect(() => {
     if (!userData?._id) return
@@ -30,7 +30,7 @@ export default function AnalyticsContainer() {
     const engagementRate = (((totalLikes + totalComments) / (followers.length || 1)) * 100).toFixed(2)
     return { totalLikes, totalComments, engagementRate }
   }, [userPosts, followers])
-
+  const { totalLikes, totalComments, engagementRate } = stats
   // Time series
   const timeSeries = useMemo(() => {
     const days = period === '7' ? 7 : period === '30' ? 30 : 90
@@ -95,7 +95,7 @@ export default function AnalyticsContainer() {
     }
   }, [userData, user, followers, following, userPosts, totalLikes, totalComments])
 
-  const { totalLikes, totalComments, engagementRate } = stats
+  
   if (loading) return <div className="p-6 max-w-6xl mx-auto"><AnalyticsSkeleton /></div>
 
   return (

@@ -64,7 +64,8 @@ export const HighlightContextProvider = ({ children }) => {
         );
 
         const newHighlight = res.data;
-        // ✅ تحديث فوري دون Refresh
+        // The backend now returns { ...highlight, stories: [...] } (mapped from archivedStories)
+        // We can directly add this to our state.
         setHighlights((prev) => [newHighlight, ...prev]);
         showAlert('✅ Highlight created successfully!');
         return newHighlight;

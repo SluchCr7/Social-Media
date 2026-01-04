@@ -31,7 +31,7 @@ const MainApp = () => {
       />
 
       {/* محتوى الصفحة */}
-      <div className="w-full pt-10 md:pt-6 pb-5 pl-4">
+      <div className="w-full pt-10 md:pt-6 pb-5 pl-7">
         <div className='w-full pl-3'>
           {isLogin && <Stories />}
         </div>
