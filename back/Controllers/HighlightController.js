@@ -3,6 +3,7 @@ const { cloudUpload } = require("../Config/cloudUpload"); // تأكد من ال�
 const { Story } = require("../Modules/Story");
 
 // POST /api/highlights
+// POST /api/highlights
 const createHighlight = async (req, res) => {
   try {
     const { title, storyIds } = req.body;
@@ -16,21 +17,37 @@ const createHighlight = async (req, res) => {
       coverImageUrl = uploadResult.secure_url;
     }
 
-    // ✅ إنشاء الـ Highlight في قاعدة البيانات
+    // ✅ إعداد القصص للأرشفة (فك الارتباط بانتهاء الصلاحة)
+    let archivedStories = [];
+    if (storyIds && Array.isArray(storyIds) && storyIds.length > 0) {
+      const stories = await Story.find({ _id: { $in: storyIds }, owner: userId });
+      archivedStories = stories.map(s => ({
+        _id: s._id,
+        text: s.text,
+        Photo: s.Photo,
+        originalStory: s.originalStory,
+        createdAt: s.createdAt
+      }));
+    }
+
+    // ✅ إنشاء الـ Highlight مع البيانات المضمنة
     const highlight = await Highlight.create({
       user: userId,
       title,
       coverImage: coverImageUrl,
-      stories: storyIds,
+      stories: [], // نترك المصفوفة القديمة فارغة للجديد
+      archivedStories: archivedStories,
     });
 
-    // ✅ تحديث القصص لجعلها "مُظللة" لمنع حذفها التلقائي
-    await Story.updateMany(
-      { _id: { $in: storyIds } },
-      { $set: { isHighlighted: true } }
-    );
+    // ❌ لم نعد بحاجة لتحديث حالة isHighlighted في الستوري الأصلية
+    // لأننا احتفظنا بنسخة كاملة منها هنا
 
-    res.status(201).json(highlight);
+    // ✅ تنسيق الاستجابة لتناسب الواجهة (mapping)
+    const response = highlight.toObject();
+    response.stories = highlight.archivedStories;
+    delete response.archivedStories;
+
+    res.status(201).json(response);
   } catch (err) {
     console.error("Create Highlight Error:", err);
     res.status(500).json({ message: err.message });
@@ -39,15 +56,48 @@ const createHighlight = async (req, res) => {
 
 
 // GET /api/highlights/:userId
+// GET /api/highlights/:userId
 const getUserHighlights = async (req, res) => {
   try {
-    const highlights = await Highlight.find({ user: req.params.userId })
+    let highlights = await Highlight.find({ user: req.params.userId })
       .populate({
         path: "stories",
         select: "Photo text originalStory createdAt",
-      });
+      }); // نحتاج الـ populate من أجل عملية الترحيل (Migration) فقط
 
-    res.status(200).json(highlights);
+    const processedHighlights = await Promise.all(highlights.map(async (h) => {
+      // ✅ Lazy Migration: ترحيل البيانات القديمة عند الطلب
+      if ((!h.archivedStories || h.archivedStories.length === 0) && h.stories && h.stories.length > 0) {
+
+        // تصفية العناصر الفارغة (التي حذفت بالفعل)
+        const validStories = h.stories.filter(s => s && s._id);
+
+        if (validStories.length > 0) {
+          h.archivedStories = validStories.map(s => ({
+            _id: s._id,
+            text: s.text,
+            Photo: s.Photo,
+            originalStory: s.originalStory,
+            createdAt: s.createdAt
+          }));
+          // إفراغ المصفوفة القديمة لتجنب التكرار وتوفير المساحة
+          h.stories = [];
+          await h.save();
+        }
+      }
+
+      const obj = h.toObject();
+      // إذا وجدنا قصص مؤرشفة، نعيدها في الحقل stories الذي تتوقعه الواجهة الأمامية
+      if (h.archivedStories && h.archivedStories.length > 0) {
+        obj.stories = h.archivedStories;
+      }
+      // إخفاء الحقل الداخلي
+      delete obj.archivedStories;
+
+      return obj;
+    }));
+
+    res.status(200).json(processedHighlights);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -72,7 +122,7 @@ const addStoryToHighlight = async (req, res) => {
   try {
     const { highlightId } = req.params;
     const { storyId } = req.body;
-    const userId = req.user?._id; // assuming you use auth middleware
+    const userId = req.user?._id;
 
     if (!storyId)
       return res.status(400).json({ message: "storyId is required" });
@@ -82,24 +132,33 @@ const addStoryToHighlight = async (req, res) => {
     if (!highlight)
       return res.status(404).json({ message: "Highlight not found" });
 
-    // التحقق أن الستوري موجودة وتخص نفس المستخدم
+    // ✅ التحقق من التكرار في الأرشيف
+    const alreadyExists = highlight.archivedStories && highlight.archivedStories.some(s => s._id.equals(storyId));
+    if (alreadyExists) {
+      return res.status(400).json({ message: "Story already in highlight" });
+    }
+
+    // التحقق أن الستوري الأصلية موجودة
     const story = await Story.findOne({ _id: storyId, owner: userId });
     if (!story)
       return res.status(404).json({ message: "Story not found or unauthorized" });
 
-    // تجنب التكرار
-    if (highlight.stories.includes(storyId)) {
-      return res.status(400).json({ message: "Story already in highlight" });
-    }
+    // ✅ إضافة القصة إلى الأرشيف الدائم
+    highlight.archivedStories.push({
+      _id: story._id,
+      text: story.text,
+      Photo: story.Photo,
+      originalStory: story.originalStory,
+      createdAt: story.createdAt
+    });
 
-    highlight.stories.push(storyId);
     await highlight.save();
 
-    // ✅ تحديث القصة لجعلها "مُظللة" لمنع حذفها التلقائي
-    await Story.findByIdAndUpdate(storyId, { $set: { isHighlighted: true } });
-    // إعادة highlight كاملة بعد التحديث
-    const updatedHighlight = await Highlight.findById(highlightId)
-      .populate("stories");
+    // ❌ لا نحدث الستوري الأصلية (decoupled)
+
+    const updatedHighlight = highlight.toObject();
+    updatedHighlight.stories = highlight.archivedStories;
+    delete updatedHighlight.archivedStories;
 
     return res.status(200).json({
       message: "Story added successfully",
@@ -116,5 +175,5 @@ const addStoryToHighlight = async (req, res) => {
 module.exports = {
   createHighlight,
   getUserHighlights,
-  deleteHighlight,addStoryToHighlight
+  deleteHighlight, addStoryToHighlight
 };

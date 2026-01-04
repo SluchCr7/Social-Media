@@ -6,8 +6,17 @@ const highlightSchema = new mongoose.Schema({
   stories: [
     { type: mongoose.Schema.Types.ObjectId, ref: "Story" }
   ],
+  archivedStories: [
+    {
+      _id: { type: mongoose.Schema.Types.ObjectId }, // Original Story ID
+      text: { type: String },
+      Photo: { type: Array },
+      originalStory: { type: mongoose.Schema.Types.ObjectId, ref: "Story" },
+      createdAt: { type: Date }
+    }
+  ],
 }, {
-    timestamps: true
+  timestamps: true
 });
 
 const Highlight = mongoose.model("Highlight", highlightSchema);
