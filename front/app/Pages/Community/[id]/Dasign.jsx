@@ -79,6 +79,7 @@ const ActionButton = memo(({ children, onClick, variant = 'primary', className =
     </motion.button>
   );
 });
+ActionButton.displayName = 'ActionButton';
 
 const StatItem = ({ label, value, icon: Icon }) => (
   <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
@@ -156,6 +157,8 @@ const MemberRow = memo(({ member, currentUserId, handleMakeAdmin, handleRemoveMe
     </motion.div>
   );
 });
+MemberRow.displayName = 'MemberRow';
+
 
 // --- 🏗️ Main Layout ---
 
