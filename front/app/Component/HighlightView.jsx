@@ -26,6 +26,7 @@ import { useHighlights } from '@/app/Context/HighlightContext';
 import { useTranslate } from '../Context/TranslateContext';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
+import { useAuth } from '../Context/AuthContext';
 
 const HighlightViewerModal = memo(function HighlightViewerModal({
   highlight,
