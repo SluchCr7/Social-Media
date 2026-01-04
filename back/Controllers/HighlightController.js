@@ -179,8 +179,54 @@ const addStoryToHighlight = async (req, res) => {
 };
 
 
+/**
+ * تحديث عنوان أو غلاف الهايلايت
+ * @route PUT /api/highlights/:id
+ */
+const updateHighlight = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title } = req.body;
+    const userId = req.user._id;
+
+    let updateData = {};
+    if (title) updateData.title = title;
+
+    if (req.file) {
+      const uploadResult = await cloudUpload(req.file);
+      updateData.coverImage = uploadResult.secure_url;
+    }
+
+    // البحث والتحديث مع التأكد من الملكية
+    const highlight = await Highlight.findOneAndUpdate(
+      { _id: id, user: userId },
+      { $set: updateData },
+      { new: true }
+    );
+
+    if (!highlight) {
+      return res.status(404).json({ message: "Highlight not found or unauthorized" });
+    }
+
+    // تنسيق الاستجابة
+    const response = highlight.toObject();
+    if (highlight.archivedStories && highlight.archivedStories.length > 0) {
+      response.stories = highlight.archivedStories;
+    }
+    delete response.archivedStories;
+
+    res.status(200).json(response);
+  } catch (err) {
+    console.error("Update Highlight Error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
 module.exports = {
   createHighlight,
   getUserHighlights,
-  deleteHighlight, addStoryToHighlight
+  deleteHighlight,
+  addStoryToHighlight,
+  updateHighlight
 };

@@ -95,6 +95,7 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
 
   const { createHighlight, loading, setOpenModal, openModal } = useHighlights();
   const { showAlert } = useAlert();
+  const { t } = useTranslation();
 
   const modalRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -139,7 +140,7 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
 
   const handleCreate = async () => {
     if (!title.trim() || selectedStories.length === 0) {
-      return showAlert('⚠️ Please enter a title and select at least one story.');
+      return showAlert(t('Please enter a title and select at least one story.'));
     }
     try {
       await createHighlight({ title: title.trim(), cover: coverFile, storyIds: selectedStories });
@@ -179,10 +180,10 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold dark:text-white flex items-center gap-2">
-                    Highlight Studio
+                    {t("Highlight Studio")}
                     <span className="text-indigo-500"><HiSparkles /></span>
                   </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Curate your best moments into a cinematic collection</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{t("Curate your best moments into a cinematic collection")}</p>
                 </div>
               </div>
 
@@ -203,7 +204,7 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
               <div className="w-full md:w-80 p-8 border-r border-gray-100 dark:border-gray-800 flex flex-col gap-8 bg-gray-50/50 dark:bg-gray-900/50">
 
                 <div className="flex flex-col gap-6">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">Cover Identity</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">{t("Cover Identity")}</h3>
 
                   {/* Cover Upload Circle */}
                   <div
@@ -216,7 +217,7 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
                       ) : (
                         <div className="flex flex-col items-center justify-center h-full text-gray-400 group-hover:text-indigo-500 transition-colors">
                           <FaImage size={40} className="mb-2" />
-                          <span className="text-[10px] font-bold">SET COVER</span>
+                          <span className="text-[10px] font-bold">{t("SET COVER")}</span>
                         </div>
                       )}
 
@@ -232,7 +233,7 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
                       <input
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Name your Highlight..."
+                        placeholder={t("Name your Highlight...")}
                         className="w-full bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 rounded-2xl px-4 py-3 text-lg font-bold placeholder:text-gray-300 dark:placeholder:text-gray-600 focus:border-indigo-500 focus:outline-none transition-all"
                       />
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600">
@@ -242,7 +243,7 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
 
                     <div className="bg-white/50 dark:bg-gray-800/50 rounded-2xl p-4 border border-white/20 dark:border-gray-700">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold text-gray-500">Selected Clips</span>
+                        <span className="text-xs font-bold text-gray-500">{t("Selected Clips")}</span>
                         <span className="px-2 py-0.5 rounded-full bg-indigo-500 text-white text-[10px] font-bold">
                           {selectedStories.length}
                         </span>
@@ -265,7 +266,7 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
                           </div>
                         )}
                         {selectedStories.length === 0 && (
-                          <div className="text-[10px] text-gray-400 italic">No stories selected yet...</div>
+                          <div className="text-[10px] text-gray-400 italic">{t("No stories selected yet...")}</div>
                         )}
                       </div>
                     </div>
@@ -285,7 +286,7 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
                     ) : (
                       <>
                         <FaPlus />
-                        <span>CREATE HIGHLIGHT</span>
+                        <span>{t("CREATE HIGHLIGHT")}</span>
                       </>
                     )}
                   </motion.button>
@@ -294,7 +295,7 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
                     onClick={resetForm}
                     className="w-full py-3 rounded-[1.25rem] text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
                   >
-                    RESET STUDIO
+                    {t("RESET STUDIO")}
                   </button>
                 </div>
               </div>
@@ -304,7 +305,7 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <FaImages className="text-indigo-500" />
-                    <h3 className="text-lg font-bold dark:text-white">Your Storyboard</h3>
+                    <h3 className="text-lg font-bold dark:text-white">{t("Your Storyboard")}</h3>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -312,13 +313,13 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
                       onClick={() => setSelectedStories(stories.map(s => s._id))}
                       className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-colors"
                     >
-                      SELECT ALL
+                      {t("SELECT ALL")}
                     </button>
                     <button
                       onClick={() => setSelectedStories([])}
                       className="px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-gray-200 transition-colors"
                     >
-                      CLEAR
+                      {t("CLEAR")}
                     </button>
                   </div>
                 </div>
@@ -327,7 +328,7 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
                   {stories.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-4 opacity-50">
                       <FaFilm size={60} />
-                      <p className="font-bold">YOUR STORYBOARD IS EMPTY</p>
+                      <p className="font-bold">{t("YOUR STORYBOARD IS EMPTY")}</p>
                     </div>
                   ) : (
                     <motion.div

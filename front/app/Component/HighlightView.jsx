@@ -249,7 +249,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
 
                   <div className="flex flex-col items-center gap-4">
                     <label htmlFor="edit-cover-upload" className="cursor-pointer group relative w-32 h-32 rounded-full overflow-hidden border-2 border-dashed border-gray-600 hover:border-indigo-500 transition-colors">
-                      <Image src={editPreview || highlight.coverImage || '/placeholder.jpg'} fill className="object-cover opacity-50 group-hover:opacity-100 transition-opacity" alt="Cover" />
+                      <Image src={editPreview || highlight.coverImage || '/placeholder.jpg'} fill className="object-cover opacity-50 group-hover:opacity-100 transition-opacity" alt={t("Cover")} />
                       <div className="absolute inset-0 flex items-center justify-center">
                         <HiPlus className="text-white text-2xl drop-shadow-md" />
                       </div>
@@ -294,7 +294,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
                 >
                   <Image
                     src={currentPhoto}
-                    alt="Story"
+                    alt={t("Story")}
                     fill
                     className="object-contain"
                     priority
@@ -348,7 +348,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
                     onClick={() => { setCurrentIndex(i); setProgress(0); }}
                     className={`relative w-24 h-14 rounded-xl overflow-hidden border-2 transition-all ${i === currentIndex ? 'border-indigo-500 scale-105 shadow-lg' : 'border-transparent opacity-40 hover:opacity-100'}`}
                   >
-                    <Image src={getPhoto(s)} fill className="object-cover" alt="Thumb" />
+                    <Image src={getPhoto(s)} fill className="object-cover" alt={t("Thumbnail")} />
                   </button>
                 ))}
               </div>
@@ -387,10 +387,10 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
                 {allStories.filter(s => !stories.some(ex => ex._id === s._id)).map(st => (
                   <div key={st._id} className="group p-4 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center gap-4 hover:border-indigo-500/50 transition-all">
                     <div className="w-14 h-14 rounded-xl overflow-hidden relative">
-                      <Image src={getPhoto(st)} fill className="object-cover" alt="Story" />
+                      <Image src={getPhoto(st)} fill className="object-cover" alt={t("Story")} />
                     </div>
                     <div className="flex-1">
-                      <div className="text-[10px] font-black text-white uppercase mb-1">{st.text || 'SIGNAL'}</div>
+                      <div className="text-[10px] font-black text-white uppercase mb-1">{st.text || t('SIGNAL')}</div>
                       <div className="text-[8px] text-gray-500 font-bold uppercase">{dayjs(st.createdAt).format('DD MMM')}</div>
                     </div>
                     <button
