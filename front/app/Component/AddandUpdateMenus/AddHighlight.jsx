@@ -103,8 +103,28 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
 
   const getStoryPhoto = useCallback((story) => {
     if (!story) return '/placeholder.jpg';
-    if (Array.isArray(story.Photo)) return story.Photo[0] || '/placeholder.jpg';
-    return story.Photo || '/placeholder.jpg';
+
+    // Try Photo (capital P) first
+    if (story.Photo) {
+      if (Array.isArray(story.Photo) && story.Photo.length > 0) {
+        return story.Photo[0];
+      }
+      if (typeof story.Photo === 'string') {
+        return story.Photo;
+      }
+    }
+
+    // Fallback to photo (lowercase)
+    if (story.photo) {
+      if (Array.isArray(story.photo) && story.photo.length > 0) {
+        return story.photo[0];
+      }
+      if (typeof story.photo === 'string') {
+        return story.photo;
+      }
+    }
+
+    return '/placeholder.jpg';
   }, []);
 
   useEffect(() => {

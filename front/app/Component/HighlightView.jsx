@@ -67,7 +67,28 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
 
   const getPhoto = useCallback((story) => {
     if (!story) return '/placeholder.jpg';
-    return Array.isArray(story.Photo) ? story.Photo[0] : story.Photo;
+
+    // Try Photo (capital P) first
+    if (story.Photo) {
+      if (Array.isArray(story.Photo) && story.Photo.length > 0) {
+        return story.Photo[0];
+      }
+      if (typeof story.Photo === 'string') {
+        return story.Photo;
+      }
+    }
+
+    // Fallback to photo (lowercase)
+    if (story.photo) {
+      if (Array.isArray(story.photo) && story.photo.length > 0) {
+        return story.photo[0];
+      }
+      if (typeof story.photo === 'string') {
+        return story.photo;
+      }
+    }
+
+    return '/placeholder.jpg';
   }, []);
 
   const next = useCallback(() => {
@@ -141,6 +162,19 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
 
   const currentStory = stories[currentIndex];
   const currentPhoto = getPhoto(currentStory);
+
+  // Debug logging
+  useEffect(() => {
+    if (highlight && stories.length > 0) {
+      console.log('📸 Highlight Stories Debug:', {
+        highlightTitle: highlight.title,
+        totalStories: stories.length,
+        firstStory: stories[0],
+        currentStory: currentStory,
+        currentPhoto: currentPhoto
+      });
+    }
+  }, [highlight, stories, currentStory, currentPhoto]);
 
   if (!highlight) return null;
 
@@ -293,11 +327,15 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
                   className="absolute inset-0 flex items-center justify-center"
                 >
                   <Image
-                    src={currentPhoto}
+                    src={currentPhoto || '/placeholder.jpg'}
                     alt={t("Story")}
                     fill
                     className="object-contain"
                     priority
+                    onError={(e) => {
+                      console.error('Failed to load story image:', currentPhoto);
+                      e.target.src = '/placeholder.jpg';
+                    }}
                   />
 
                   {/* Visual Overlays */}
