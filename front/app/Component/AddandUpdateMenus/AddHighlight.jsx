@@ -16,6 +16,7 @@ import { HiSparkles } from 'react-icons/hi';
 import Image from 'next/image';
 import { useHighlights } from '@/app/Context/HighlightContext';
 import { useAlert } from '@/app/Context/AlertContext';
+import { useTranslation } from 'react-i18next';
 
 const StoryCard = memo(({ story, isSelected, onToggle, getStoryPhoto }) => {
   const x = useMotionValue(0);
