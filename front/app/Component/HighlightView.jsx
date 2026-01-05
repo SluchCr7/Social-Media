@@ -55,7 +55,10 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
   const rafRef = useRef(null);
   const lastTimeRef = useRef(null);
   const STORY_DURATION_MS = 6000;
-
+  useEffect(() => {
+    console.log(highlight)
+    console.log(`stories : ${highlight.stories}`)
+  }, [highlight])
   // Cleanup preview
   useEffect(() => {
     return () => {
