@@ -223,10 +223,54 @@ const updateHighlight = async (req, res) => {
 };
 
 
+/**
+ * حذف Story من Highlight موجودة
+ * @route DELETE /api/highlights/:highlightId/story/:storyId
+ */
+const removeStoryFromHighlight = async (req, res) => {
+  try {
+    const { highlightId, storyId } = req.params;
+    const userId = req.user?._id;
+
+    // التحقق من أن الهايلايت موجودة فعلاً وتخص المستخدم
+    const highlight = await Highlight.findOne({ _id: highlightId, user: userId });
+    if (!highlight) {
+      return res.status(404).json({ message: "Highlight not found or unauthorized" });
+    }
+
+    // التحقق من وجود القصة في الأرشيف
+    const storyExists = highlight.archivedStories && highlight.archivedStories.some(s => s._id.equals(storyId));
+    if (!storyExists) {
+      return res.status(404).json({ message: "Story not found in this highlight" });
+    }
+
+    // حذف القصة من الأرشيف
+    highlight.archivedStories = highlight.archivedStories.filter(s => !s._id.equals(storyId));
+
+    await highlight.save();
+
+    // تنسيق الاستجابة
+    const updatedHighlight = highlight.toObject();
+    updatedHighlight.stories = highlight.archivedStories;
+    delete updatedHighlight.archivedStories;
+
+    return res.status(200).json({
+      message: "Story removed successfully",
+      highlight: updatedHighlight
+    });
+
+  } catch (error) {
+    console.error("Remove story from highlight error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
 module.exports = {
   createHighlight,
   getUserHighlights,
   deleteHighlight,
   addStoryToHighlight,
-  updateHighlight
+  updateHighlight,
+  removeStoryFromHighlight
 };

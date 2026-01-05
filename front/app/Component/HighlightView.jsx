@@ -34,7 +34,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
   allStories = [],
 }) {
   const { isRTL } = useTranslate();
-  const { addStoryToHighlight, deleteHighlight, updateHighlight } = useHighlights(); // ✅ Added updateHighlight
+  const { addStoryToHighlight, deleteHighlight, updateHighlight, removeStoryFromHighlight } = useHighlights(); // ✅ Added removeStoryFromHighlight
   const { user } = useAuth(); // ✅ Need user to check ownership
   const { t } = useTranslation();
 
@@ -381,13 +381,37 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
             <div className="hidden md:flex items-center justify-between px-10 py-6 bg-white/[0.02] border-t border-white/10">
               <div className="flex items-center gap-6 overflow-x-auto no-scrollbar py-2">
                 {stories.map((s, i) => (
-                  <button
-                    key={s._id}
-                    onClick={() => { setCurrentIndex(i); setProgress(0); }}
-                    className={`relative w-24 h-14 rounded-xl overflow-hidden border-2 transition-all ${i === currentIndex ? 'border-indigo-500 scale-105 shadow-lg' : 'border-transparent opacity-40 hover:opacity-100'}`}
-                  >
-                    <Image src={getPhoto(s)} fill className="object-cover" alt={t("Thumbnail")} />
-                  </button>
+                  <div key={s._id} className="relative group/thumb">
+                    <button
+                      onClick={() => { setCurrentIndex(i); setProgress(0); }}
+                      className={`relative w-24 h-14 rounded-xl overflow-hidden border-2 transition-all ${i === currentIndex ? 'border-indigo-500 scale-105 shadow-lg' : 'border-transparent opacity-40 hover:opacity-100'}`}
+                    >
+                      <Image src={getPhoto(s)} fill className="object-cover" alt={t("Thumbnail")} />
+                    </button>
+                    {/* Delete Story Button - Only for owners */}
+                    {isOwner && stories.length > 1 && (
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (window.confirm(t("Remove this story from highlight?"))) {
+                            await removeStoryFromHighlight(highlight._id, s._id);
+                            // If we deleted the current story, move to previous or next
+                            if (i === currentIndex) {
+                              if (i > 0) {
+                                setCurrentIndex(i - 1);
+                              } else if (stories.length > 1) {
+                                setCurrentIndex(0);
+                              }
+                            }
+                          }
+                        }}
+                        className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 transition-opacity shadow-lg hover:bg-rose-600 z-10"
+                        title={t("Remove story")}
+                      >
+                        <HiTrash className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
                 ))}
               </div>
               {highlight.description && (

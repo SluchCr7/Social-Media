@@ -185,6 +185,45 @@ export const HighlightContextProvider = ({ children }) => {
     [user, showAlert]
   );
 
+  // 🗑️ حذف ستوري من Highlight
+  const removeStoryFromHighlight = useCallback(
+    async (highlightId, storyId) => {
+      if (!user?.token) return showAlert("You must be logged in.");
+
+      try {
+        const res = await axios.delete(
+          `${process.env.NEXT_PUBLIC_BACK_URL}/api/highlight/${highlightId}/story/${storyId}`,
+          {
+            headers: { Authorization: `Bearer ${user.token}` },
+          }
+        );
+
+        const updated = res.data?.highlight;
+        if (updated) {
+          // ✅ تحديث فوري في الواجهة
+          setHighlights((prev) =>
+            prev.map((h) => (h._id === updated._id ? updated : h))
+          );
+
+          // ✅ تحديث الهايلايت المفتوحة في Modal
+          setSelectedHighlight((prev) =>
+            prev && prev._id === updated._id ? updated : prev
+          );
+
+          showAlert('🗑️ Story removed from highlight.');
+        }
+        return updated;
+      } catch (err) {
+        console.error('Error removing story from highlight:', err);
+        const message = err.response?.data?.message || 'Failed to remove story.';
+        showAlert(`❌ ${message}`);
+        throw err;
+      }
+    },
+    [user, showAlert]
+  );
+
+
   return (
     <HighlightContext.Provider
       value={{
@@ -196,6 +235,7 @@ export const HighlightContextProvider = ({ children }) => {
         deleteHighlight,
         addStoryToHighlight,
         updateHighlight,
+        removeStoryFromHighlight,
         openModal,
         setOpenModal,
         selectedHighlight,
