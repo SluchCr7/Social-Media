@@ -1,5 +1,5 @@
 'use client';
-import '../i18n'; 
+import '../i18n';
 import React, { useEffect, useState } from 'react';
 import Aside from './Aside/Aside';
 import Menu from './Menus/Menu';
@@ -43,12 +43,47 @@ const LayoutComponent = ({ children }) => {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const { viewMusicPlayer, setViewMusicPlayer } = useMusicPlayer()
   const { language } = useTranslate();
-  const {isStory, setIsStory} = useStory()
-    const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language); // true لو RTL
+  const { isStory, setIsStory } = useStory()
+  const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language); // true لو RTL
+
   // الصفحات التي لا يظهر فيها Aside أو Menu
-  const hideLayout = [
-    "/"
-  ].includes(pathname);
+  // Static routes (exact match)
+  const staticHiddenRoutes = [
+    '/Admin',
+    '/Pages/Login',
+    '/Pages/Help',
+    '/Pages/Levels',
+    '/Pages/Register',
+    '/Pages/Messanger',
+    '/Pages/Saved',
+    '/Pages/Calender',
+    '/Pages/CommunityMain',
+    '/Pages/Terms',
+    '/Pages/Forgot',
+    '/Pages/Setting',
+    '/Pages/Privacy',
+    '/Pages/Explore',
+    '/Pages/ResetPassword',
+    '/Pages/Reels',
+    '/Pages/Music',
+    '/Pages/Cookies',
+    '/Pages/Analytics',
+    '/Pages/Profile',
+  ];
+
+  // Dynamic routes (starts with match)
+  const dynamicHiddenRoutes = [
+    '/Pages/Community/',
+    '/Pages/User/',
+    '/Pages/Post/',
+    '/Pages/ResetPassword/',
+    '/Pages/UserVerify/',
+  ];
+
+  // Check if current path should hide layout
+  const hideLayout =
+    staticHiddenRoutes.includes(pathname) ||
+    dynamicHiddenRoutes.some(route => pathname.startsWith(route));
 
   useEffect(() => {
     NProgress.start()
@@ -86,35 +121,33 @@ const LayoutComponent = ({ children }) => {
   return (
     <div>
       <div className={`flex items-start gap-3 w-full`}>
-        {hideLayout && isLogin && (
+        {!hideLayout && isLogin && (
           <Aside
             isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed}
           />
         )}
 
-          <div
-            className={`flex items-start transition-all duration-300 ${
-              hideLayout
-                ? `w-full`
-                : isLogin
-                ? `w-full ${
-                    isCollapsed
-                      ? isRTL
-                        ? 'md:mr-[85px]'   // RTL: margin-right
-                        : 'md:ml-[85px]'   // LTR: margin-left
-                      : isRTL
-                      ? 'md:mr-[280px]'
-                      : 'md:ml-[260px]'
-                  }`
+        <div
+          className={`flex items-start transition-all duration-300 ${hideLayout
+              ? `w-full`
+              : isLogin
+                ? `w-full ${isCollapsed
+                  ? isRTL
+                    ? 'md:mr-[85px]'   // RTL: margin-right
+                    : 'md:ml-[85px]'   // LTR: margin-left
+                  : isRTL
+                    ? 'md:mr-[280px]'
+                    : 'md:ml-[260px]'
+                }`
                 : 'w-[90%] md:w-[80%] mx-auto'
             }`}
-          >
+        >
 
           <Alert />
 
           {children}
 
-          {isLogin && hideLayout && (
+          {isLogin && !hideLayout && (
             <Menu
             />
           )}
@@ -145,13 +178,13 @@ const LayoutComponent = ({ children }) => {
           <ReelUploadModal />
           {
             viewMusicPlayer && (
-              <SongPlayer/>
+              <SongPlayer />
             )
           }
           <AddStoryModel isStory={isStory} setIsStory={setIsStory} />
           {/* <CookieConsent/> */}
-          <FloatingDock onOpenMusicPlayer={()=> setViewMusicPlayer(!viewMusicPlayer)}/>
-          <ExpandedWindow/>
+          <FloatingDock onOpenMusicPlayer={() => setViewMusicPlayer(!viewMusicPlayer)} />
+          <ExpandedWindow />
         </div>
       </div>
     </div>
