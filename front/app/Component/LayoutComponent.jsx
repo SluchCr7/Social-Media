@@ -47,32 +47,7 @@ const LayoutComponent = ({ children }) => {
     const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language); // true لو RTL
   // الصفحات التي لا يظهر فيها Aside أو Menu
   const hideLayout = [
-    '/Admin',
-    '/Pages/Login',
-    '/Pages/Help',
-    '/Pages/Levels',
-    '/Pages/Register',
-    '/Pages/Messanger',
-    '/Pages/Saved',
-    '/Pages/Calender',
-    '/Pages/CommunityMain',
-    '/Pages/Community/[id]',
-    '/Pages/Terms',
-    '/Pages/Forgot',
-    '/Pages/Setting',
-    '/Pages/Privacy',
-    '/Pages/Explore',
-    '/Pages/ResetPassword',
-    '/Pages/Reels',
-    '/Pages/Music',
-    '/Pages/Privacy',
-    '/Pages/Cookies',
-    '/Pages/Analytics',
-    '/Pages/ResetPassword/[id]/[token]',
-    '/Pages/User/[id]',
-    '/Pages/Profile',
-    '/Pages/Post/[id]',
-    '/Pages/UserVerify/[id]/verify/[token]',
+    "/"
   ].includes(pathname);
 
   useEffect(() => {
@@ -111,7 +86,7 @@ const LayoutComponent = ({ children }) => {
   return (
     <div>
       <div className={`flex items-start gap-3 w-full`}>
-        {!hideLayout && isLogin && (
+        {hideLayout && isLogin && (
           <Aside
             isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed}
           />
@@ -139,7 +114,7 @@ const LayoutComponent = ({ children }) => {
 
           {children}
 
-          {isLogin && !hideLayout && (
+          {isLogin && hideLayout && (
             <Menu
             />
           )}

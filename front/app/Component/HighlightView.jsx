@@ -38,7 +38,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
   const { user } = useAuth(); // ✅ Need user to check ownership
   const { t } = useTranslation();
 
-  const stories = useMemo(() => highlight?.stories || [], [highlight]);
+  const stories = useMemo(() => highlight?.archivedStories || [], [highlight]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
