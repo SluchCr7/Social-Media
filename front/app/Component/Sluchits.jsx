@@ -18,12 +18,12 @@ import { useTranslation } from 'react-i18next';
 
 const Sluchits = ({ activeTab }) => {
   const { posts, isLoading, fetchPosts, hasMore, setPage, page, isLoadingPostCreated } = usePost();
-  const { user , users } = useAuth();
+  const { user, users } = useAuth();
   const { suggestedUsers } = useUser();
   const { communities } = useCommunity();
   const { userData, loading } = useGetData(user?._id);
   const { t } = useTranslation();
-  
+
   // 📝 استخلاص قوائم المتابعة والعضوية
   // نحول الـ following إلى Set لسرعة البحث
   const followingIds = useMemo(() => {
@@ -51,7 +51,7 @@ const Sluchits = ({ activeTab }) => {
         });
     }
 
-    // 🟣 For You feed (المنطق لم يتغير)
+    // 🟣 For You feed
     if (activeTab === 'forYou') {
       if (!userData?.interests || userData.interests.length === 0) {
         return posts
@@ -59,7 +59,8 @@ const Sluchits = ({ activeTab }) => {
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       }
 
-      const matched = posts
+      // تحسين: بدلاً من إخفاء المنشورات التي لا تطابق الاهتمامات، نقوم بترتيبها بحيث تظهر المطابقة أولاً
+      return posts
         .map(post => {
           const text = `
             ${post?.text || ''}
@@ -69,21 +70,18 @@ const Sluchits = ({ activeTab }) => {
 
           let score = 0;
           userData.interests.forEach(interest => {
-            if (text.includes(interest.toLowerCase())) score += 1;
+            if (interest && text.includes(interest.toLowerCase())) score += 1;
           });
 
           return { post, score };
         })
-        .filter(item => item.score > 0)
         .sort((a, b) => {
+          // ترتيب حسب السكور (الأعلى أولاً)
           if (a.score !== b.score) return b.score - a.score;
+          // ثم حسب التاريخ (الأحدث أولاً)
           return new Date(b.post.createdAt) - new Date(a.post.createdAt);
         })
         .map(item => item.post);
-
-      return matched.length > 0
-        ? matched
-        : posts.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
 
     // 🟡 Default feed
@@ -95,7 +93,7 @@ const Sluchits = ({ activeTab }) => {
   // 🔹 فلترة المستخدمين المقترحين (تحسين منطق الفلترة)
   const filteredUsers = useMemo(() => {
     if (!Array.isArray(users) || !userId) return [];
-    
+
     return users.filter(u => {
       // 1. لا تظهر المستخدم إذا كان هو المستخدم الحالي
       if (u?._id?.toString() === userId) return false;
@@ -107,7 +105,7 @@ const Sluchits = ({ activeTab }) => {
   // 🔹 فلترة المجتمعات المقترحة (تحسين منطق الفلترة)
   const filteredCommunities = useMemo(() => {
     if (!Array.isArray(communities) || !userId) return [];
-    
+
     return communities.filter(c => {
       // 1. لا تظهر المجتمع إذا كنت مالكه
       if (c?.owner?._id?.toString() === userId) return false;
@@ -127,9 +125,9 @@ const Sluchits = ({ activeTab }) => {
     const items = [];
     let userSuggestions = [...filteredUsers];
     let communitySuggestions = [...filteredCommunities];
-    
-    const USER_INTERVAL = 10; 
-    const COMMUNITY_INTERVAL = 18; 
+
+    const USER_INTERVAL = 10;
+    const COMMUNITY_INTERVAL = 18;
 
     filteredPosts.forEach((post, index) => {
       // إضافة المنشور
