@@ -1,612 +1,261 @@
-// 'use client';
-// import { createContext, useContext, useEffect, useState } from 'react';
-// import axios from 'axios';
-// import { useAuth } from './AuthContext';
-// import { useAlert } from './AlertContext';
-// import { useSocket } from './SocketContext';
-
-// const UserContext = createContext();
-// export const useUser = () => useContext(UserContext);
-
-// export const UserContextProvider = ({ children }) => {
-//     const { user, setUser, setUsers } = useAuth();
-//     const [loading, setLoading] = useState(false);
-//     const {showAlert} = useAlert()
-//     const [suggestedUsers, setSuggestedUsers] = useState([]);
-//     const [updateProfileLoading , setUpdateProfileLoading] = useState(false)
-//     const { socket } = useSocket(); // ✅ نأخذ الـ socket من السياق
-//     const [onlineUsers, setOnlineUsers] = useState([]); // ✅ حالة للمستخدمين الأونلاين
-
-//     const followUser = async (id) => {
-//       setLoading(true);
-//       try {
-//         const res = await axios.put(
-//           `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/follow/${id}`,
-//           {},
-//           { headers: { Authorization: `Bearer ${user.token}` } }
-//         );
-
-//         const message = res.data.message;
-//         const userId = res.data.userId;
-
-//         showAlert(message);
-
-//         // 🔄 تحديث المستخدم المستهدف في قائمة المستخدمين
-//         setUsers((prev) =>
-//           prev.map((u) =>
-//             u._id === userId
-//               ? {
-//                   ...u,
-//                   followers:
-//                     message === "Followed successfully"
-//                       ? [...u.followers, { _id: user._id }]
-//                       : u.followers.filter((f) => f._id !== user._id),
-//                 }
-//               : u
-//           )
-//         );
-
-//         // 🔄 تحديث قائمة following الخاصة بالمستخدم الحالي
-//         const updatedUser =
-//           message === "Followed successfully"
-//             ? {
-//                 ...user,
-//                 following: [...user.following, { _id: userId }],
-//               }
-//             : {
-//                 ...user,
-//                 following: user.following.filter((f) => f._id !== userId),
-//               };
-
-//         setUser(updatedUser);
-//         localStorage.setItem("user", JSON.stringify(updatedUser));
-//       } catch (err) {
-//         console.error(err);
-//         showAlert("حدث خطأ أثناء العملية");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-
-//   const updatePhoto = async (photo) => {
-//     const formData = new FormData();
-//     formData.append('image', photo);
-
-//     try {
-//       const res = await axios.post(
-//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/photo`,
-//         formData,
-//         {
-//           headers: {
-//             authorization: `Bearer ${user?.token}`,
-//             'Content-Type': 'multipart/form-data',
-//           },
-//         }
-//       );
-
-//       showAlert('Photo Updated Successfully');
-
-//       const updatedUser = {
-//         ...user,
-//         profilePhoto: res.data?.profilePhoto || res.data,
-//       };
-
-//       localStorage.setItem('user', JSON.stringify(updatedUser));
-//       setUser(updatedUser);
-//     } catch (err) {
-//       console.error(err);
-
-//       const message =
-//         err?.response?.data?.message ||
-//         err?.message ||
-//         'Failed to update profile photo. Please try again.';
-
-//       showAlert(message);
-//     }
-//   };
-
-//   const updateProfile = async (fields) => {
-//     // ⚙️ تجهيز Payload نظيف يحتوي فقط على القيم التي تغيّرت فعلاً
-//     const payload = {};
-
-//     // قائمة الحقول النصية العادية
-//     const normalFields = [
-//       "username",
-//       "profileName",
-//       "description",
-//       "country",
-//       "city",
-//       "phone",
-//       "gender",
-//       "preferedLanguage",
-//       "relationshipStatus",
-//     ];
-
-//     for (const key of normalFields) {
-//       const newValue = fields[key]?.trim?.() || fields[key];
-//       if (newValue && newValue !== user[key]) {
-//         payload[key] = newValue;
-//       }
-//     }
-
-//     // 🎂 تاريخ الميلاد
-//     if (fields.dateOfBirth && fields.dateOfBirth !== user.dateOfBirth) {
-//       payload.dateOfBirth = fields.dateOfBirth;
-//     }
-
-//     // 💞 الشريك (partner)
-//     if (fields.partner !== undefined && fields.partner !== user.partner) {
-//       payload.partner = fields.partner || null;
-//     }
-
-//     // 🎯 الاهتمامات
-//     if (
-//       Array.isArray(fields.interests) &&
-//       JSON.stringify(fields.interests) !== JSON.stringify(user.interests)
-//     ) {
-//       payload.interests = fields.interests;
-//     }
-
-//     // 🌐 الروابط الاجتماعية
-//     if (fields.socialLinks) {
-//       const socialPayload = {};
-//       const socialKeys = ["github", "twitter", "linkedin", "facebook", "website"];
-
-//       for (const key of socialKeys) {
-//         const newVal = fields.socialLinks[key]?.trim?.() || "";
-//         const oldVal = user.socialLinks?.[key] || "";
-//         if (newVal && newVal !== oldVal) {
-//           socialPayload[key] = newVal;
-//         }
-//       }
-
-//       if (Object.keys(socialPayload).length > 0) {
-//         payload.socialLinks = socialPayload;
-//       }
-//     }
-
-//     // 🧾 لو مفيش أي تغييرات
-//     if (Object.keys(payload).length === 0) {
-//       showAlert("No changes detected to update.", "warning");
-//       return;
-//     }
-
-//     setUpdateProfileLoading(true);
-//     try {
-//       const res = await axios.put(
-//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update`,
-//         payload,
-//         { headers: { authorization: `Bearer ${user.token}` } }
-//       );
-
-//       const newUserData = res.data.user || res.data;
-//       const updatedUser = { ...user, ...newUserData, token: user.token };
-
-//       localStorage.setItem("user", JSON.stringify(updatedUser));
-//       setUser(updatedUser);
-
-//       showAlert("Profile updated successfully.", "success");
-
-//       // ✅ تحديث فوري بدون refresh ثقيل
-//       // يمكنك إلغاء reload لو مش ضروري
-//       setTimeout(() => {
-//         window.location.reload();
-//       }, 1500);
-//     } catch (err) {
-//       console.error("Update error:", err);
-//       showAlert("Failed to update profile.", "error");
-//     } finally {
-//       setUpdateProfileLoading(false);
-//     }
-//   };
-  
-//   const updatePassword = async (password) => {
-//     try {
-//       const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update/pass`, { password }, {
-//         headers: { authorization: `Bearer ${user.token}` }
-//       });
-//       showAlert(res.data.message);
-      
-//     } catch (err) {
-//       console.error(err);
-//     }
-//   };
-
-//   const pinPost = async (id) => {
-//     try {
-//       const res = await axios.put(
-//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/pin/${id}`,
-//         {},
-//         { headers: { Authorization: `Bearer ${user.token}` } }
-//       );
-
-//       showAlert(res.data.message);
-//     } catch (err) {
-//       console.error(err);
-//     }
-//   };  
-
-
-// const togglePrivateAccount = async () => {
-//   if (!user?.token) return showAlert('You must be logged in');
-
-//   try {
-//     const res = await axios.put(
-//       `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/account/private`,
-//       {},
-//       { headers: { Authorization: `Bearer ${user.token}` } }
-//     );
-
-//     // تحديث حالة الحساب المحليًا
-//     setUser((prev) => ({ ...prev, isPrivate: !prev.isPrivate }));
-
-//     showAlert(res.data.message);
-//   } catch (err) {
-//     console.error(err);
-//     showAlert(err.response?.data?.message || 'Failed to update privacy');
-//   }
-// };
-
-
-//   const getUserById = async (id) => {
-//     try {
-//       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/${id}`);
-//       return res.data; // بيرجع بيانات اليوزر
-//     } catch (err) {
-//       console.error("Error fetching user by ID:", err);
-//       return null;
-//     }
-//   };
-
-//   const saveMusicInPlayList = async (musicId) => {
-//     try {
-//       const res = await axios.put(
-//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/save/music/${musicId}`,
-//         {},
-//         {
-//           headers: { Authorization: `Bearer ${user?.token}` },
-//         }
-//       );
-//       showAlert(res.data.message || 'Music saved successfully');
-//       return res.data;
-//     } catch (err) {
-//       console.error("Error saving music in playlist:", err);
-//       return null;
-//     }
-//   };
-//   const toggleBlockNotification = async (targetUserId) => {
-//     if (!user?.token) return showAlert("You must be logged in");
-
-//     try {
-//       const res = await axios.post(
-//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/block/notify/${targetUserId}`,
-//         {},
-//         {
-//           headers: {
-//             Authorization: `Bearer ${user.token}`,
-//           },
-//         }
-//       );
-
-//       // ✅ تحديث بيانات المستخدم المحلي (blocked list)
-//       const updatedUser = {
-//         ...user,
-//         BlockedNotificationFromUsers: res.data.blockedUsers || [],
-//       };
-
-//       setUser(updatedUser);
-//       localStorage.setItem("user", JSON.stringify(updatedUser));
-
-//       showAlert(res.data.message || "Notification preference updated");
-//       return res.data;
-//     } catch (err) {
-//       console.error("Error toggling notification block:", err);
-//       showAlert(
-//         err?.response?.data?.message || "Failed to update notification block"
-//       );
-//     }
-//   };
-//   const toggleSaveReel = async (reelId) => {
-//     try {
-//       const res = await axios.put(
-//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/save/reel/${reelId}`,
-//         {},
-//         {
-//           headers: { Authorization: `Bearer ${user?.token}` },
-//         }
-//       );
-//       showAlert(res.data.message || 'Reel saved successfully');
-//       return res.data;
-//     } catch (err) {
-//       console.error("Error saving music in playlist:", err);
-//       return null;
-//     }
-//   };
-//   // =====================================
-
-//   useEffect(() => {
-//     const getSuggestedUsers = async () => {
-//       if (!user?.token) return;
-
-//       try {
-//         const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/suggested`, {
-//           headers: {
-//             Authorization: `Bearer ${user.token}`,
-//           },
-//         });
-//         setSuggestedUsers(res.data);
-//       } catch (err) {
-//         console.error("Error fetching suggested users:", err.response?.data || err.message);
-//       }
-//     };
-//     getSuggestedUsers();
-//   }, [user?.token]);
-
-
-//   useEffect(() => {
-//     if (!socket) return;
-
-//     socket.on("getOnlineUsers", (users) => {
-//       setOnlineUsers(users);
-//       console.log("👥 Online users updated:", users);
-//     });
-
-//     // تنظيف عند الخروج
-//     return () => socket.off("getOnlineUsers");
-//   }, [socket]);
-
-
-//   return (
-//     <UserContext.Provider
-//         value={{
-//             suggestedUsers,
-//             saveMusicInPlayList,
-//             togglePrivateAccount,
-//             updatePassword
-//             ,getUserById,followUser,
-//             updatePhoto,
-//             updateProfile,
-//             pinPost,toggleSaveReel,
-//             onlineUsers,updateProfileLoading,loading,toggleBlockNotification
-//         }}
-//     >
-//       {children}
-//     </UserContext.Provider>
-//   );
-// };
 'use client';
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+
 import axios from 'axios';
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
-import { useAlert } from './AlertContext';
+import { useFeedback } from './FeedbackContext';
 import { useSocket } from './SocketContext';
+import { MESSAGES } from '../utils/messages';
 
 const UserContext = createContext();
-export const useUser = () => useContext(UserContext);
+
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error('useUser must be used within a UserContextProvider');
+  }
+  return context;
+};
 
 export const UserContextProvider = ({ children }) => {
   const { user, setUser, setUsers } = useAuth();
-  const { showAlert } = useAlert();
+  const { showToast } = useFeedback();
   const { socket } = useSocket();
 
+  // --- State ---
   const [loading, setLoading] = useState(false);
   const [updateProfileLoading, setUpdateProfileLoading] = useState(false);
   const [suggestedUsers, setSuggestedUsers] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
 
-  // ✅ متابعة المستخدم
-  const followUser = useCallback(async (id) => {
+  // --- Helper for Authorized Requests ---
+  const getAuthHeader = useCallback(() => ({
+    headers: { Authorization: `Bearer ${user?.token}` }
+  }), [user?.token]);
+
+  // --- Actions ---
+
+  /**
+   * Toggle follow/unfollow for a user
+   */
+  const followUser = useCallback(async (targetId) => {
+    if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+
     setLoading(true);
     try {
       const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/follow/${id}`,
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/follow/${targetId}`,
         {},
-        { headers: { Authorization: `Bearer ${user.token}` } }
+        getAuthHeader()
       );
 
-      const message = res.data.message;
-      const userId = res.data.userId;
-      showAlert(message);
+      const { message, userId } = res.data;
+      const isFollowed = message === 'Followed successfully';
 
-      // تحديث قائمة المستخدمين
+      showToast(isFollowed ? MESSAGES.USER.FOLLOW_SUCCESS('user') : MESSAGES.USER.UNFOLLOW_SUCCESS('user'), 'success');
+
+      // Update global users list
       setUsers((prev) =>
         prev.map((u) =>
           u._id === userId
             ? {
-                ...u,
-                followers:
-                  message === 'Followed successfully'
-                    ? [...u.followers, { _id: user._id }]
-                    : u.followers.filter((f) => f._id !== user._id),
-              }
+              ...u,
+              followers: isFollowed
+                ? [...(u.followers || []), { _id: user._id }]
+                : (u.followers || []).filter((f) => f._id !== user._id),
+            }
             : u
         )
       );
 
-      // تحديث بيانات المستخدم الحالي
-      const updatedUser =
-        message === 'Followed successfully'
-          ? { ...user, following: [...user.following, { _id: userId }] }
-          : { ...user, following: user.following.filter((f) => f._id !== userId) };
+      // Update current user state
+      const updatedUser = isFollowed
+        ? { ...user, following: [...(user.following || []), { _id: userId }] }
+        : { ...user, following: (user.following || []).filter((f) => f._id !== userId) };
 
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
     } catch (err) {
-      console.error(err);
-      showAlert('حدث خطأ أثناء العملية');
+      console.error('Follow error:', err);
+      showToast(err.response?.data?.message || MESSAGES.COMMON.ERROR_OCCURRED, 'error');
     } finally {
       setLoading(false);
     }
-  }, [user, showAlert, setUser, setUsers]);
+  }, [user, getAuthHeader, setUser, setUsers, showToast]);
 
-  // ✅ تحديث الصورة
-  const updatePhoto = useCallback(async (photo) => {
+  /**
+   * Update profile photo
+   */
+  const updatePhoto = useCallback(async (photoFile) => {
     const formData = new FormData();
-    formData.append('image', photo);
+    formData.append('image', photoFile);
 
+    const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
     try {
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/photo`,
         formData,
         {
           headers: {
-            authorization: `Bearer ${user?.token}`,
+            ...getAuthHeader().headers,
             'Content-Type': 'multipart/form-data',
           },
         }
       );
-
-      showAlert('Photo Updated Successfully');
 
       const updatedUser = {
         ...user,
         profilePhoto: res.data?.profilePhoto || res.data,
       };
 
-      localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      showToast(MESSAGES.USER.PHOTO_UPDATE_SUCCESS, 'success', { id: loadingToast });
     } catch (err) {
-      console.error(err);
-      showAlert('Failed to update profile photo.');
+      console.error('Photo update error:', err);
+      showToast(MESSAGES.USER.PHOTO_UPDATE_ERROR, 'error', { id: loadingToast });
     }
-  }, [user, showAlert, setUser]);
+  }, [user, getAuthHeader, setUser, showToast]);
 
-  // ✅ تحديث الملف الشخصي
+  /**
+   * Update profile information
+   */
   const updateProfile = useCallback(async (fields) => {
     const payload = {};
-    const normalFields = [
+    const allowedFields = [
       'username', 'profileName', 'description', 'country',
       'city', 'phone', 'gender', 'preferedLanguage', 'relationshipStatus'
     ];
 
-    for (const key of normalFields) {
+    allowedFields.forEach(key => {
       const newValue = fields[key]?.trim?.() || fields[key];
-      if (newValue && newValue !== user[key]) payload[key] = newValue;
+      if (newValue !== undefined && newValue !== user[key]) {
+        payload[key] = newValue;
+      }
+    });
+
+    if (fields.dateOfBirth && fields.dateOfBirth !== user.dateOfBirth) {
+      payload.dateOfBirth = fields.dateOfBirth;
     }
 
-    if (fields.dateOfBirth && fields.dateOfBirth !== user.dateOfBirth)
-      payload.dateOfBirth = fields.dateOfBirth;
-
-    if (fields.partner !== undefined && fields.partner !== user.partner)
+    if (fields.partner !== undefined && fields.partner !== user.partner) {
       payload.partner = fields.partner || null;
+    }
 
-    if (
-      Array.isArray(fields.interests) &&
-      JSON.stringify(fields.interests) !== JSON.stringify(user.interests)
-    ) {
+    if (Array.isArray(fields.interests)) {
       payload.interests = fields.interests;
     }
 
     if (fields.socialLinks) {
-      const socialPayload = {};
-      const socialKeys = ['github', 'twitter', 'linkedin', 'facebook', 'website'];
-
-      for (const key of socialKeys) {
-        const newVal = fields.socialLinks[key]?.trim?.() || '';
-        const oldVal = user.socialLinks?.[key] || '';
-        if (newVal && newVal !== oldVal) socialPayload[key] = newVal;
-      }
-
-      if (Object.keys(socialPayload).length > 0)
-        payload.socialLinks = socialPayload;
+      payload.socialLinks = { ...user.socialLinks, ...fields.socialLinks };
     }
 
-    if (Object.keys(payload).length === 0)
-      return showAlert('No changes detected to update.');
+    if (Object.keys(payload).length === 0) {
+      return showToast('No changes detected.', 'info');
+    }
 
     setUpdateProfileLoading(true);
+    const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
+
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update`,
         payload,
-        { headers: { authorization: `Bearer ${user.token}` } }
+        getAuthHeader()
       );
 
       const newUserData = res.data.user || res.data;
       const updatedUser = { ...user, ...newUserData, token: user.token };
 
-      localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
-      showAlert('Profile updated successfully.');
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      showToast(MESSAGES.USER.PROFILE_UPDATE_SUCCESS, 'success', { id: loadingToast });
 
-      // يمكن إلغاء reload لو التحديث فوري في الواجهة
-      setTimeout(() => window.location.reload(), 1500);
+      setTimeout(() => window.location.reload(), 1000);
     } catch (err) {
-      console.error(err);
-      showAlert('Failed to update profile.');
+      console.error('Profile update error:', err);
+      showToast(MESSAGES.USER.PROFILE_UPDATE_ERROR, 'error', { id: loadingToast });
     } finally {
       setUpdateProfileLoading(false);
     }
-  }, [user, showAlert, setUser]);
+  }, [user, getAuthHeader, setUser, showToast]);
 
-  // ✅ تحديث كلمة المرور
+  /**
+   * Update password
+   */
   const updatePassword = useCallback(async (password) => {
+    const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update/pass`,
         { password },
-        { headers: { authorization: `Bearer ${user.token}` } }
+        getAuthHeader()
       );
-      showAlert(res.data.message);
+      showToast(res.data.message || MESSAGES.AUTH.PASSWORD_UPDATE_SUCCESS, 'success', { id: loadingToast });
     } catch (err) {
-      console.error(err);
-      showAlert('Failed to update password.');
+      showToast(MESSAGES.AUTH.PASSWORD_UPDATE_ERROR, 'error', { id: loadingToast });
     }
-  }, [user, showAlert]);
+  }, [getAuthHeader, showToast]);
 
-  // ✅ تبديل الخصوصية
+  /**
+   * Toggle account privacy
+   */
   const togglePrivateAccount = useCallback(async () => {
-    if (!user?.token) return showAlert('You must be logged in');
+    if (!user) return;
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/account/private`,
         {},
-        { headers: { Authorization: `Bearer ${user.token}` } }
+        getAuthHeader()
       );
-      setUser((prev) => ({ ...prev, isPrivate: !prev.isPrivate }));
-      showAlert(res.data.message);
+      const isPrivate = !user.isPrivate;
+      setUser(prev => ({ ...prev, isPrivate }));
+      showToast(MESSAGES.USER.PRIVACY_UPDATE(isPrivate), 'success');
     } catch (err) {
-      console.error(err);
-      showAlert('Failed to update privacy');
+      showToast('Failed to update privacy settings.', 'error');
     }
-  }, [user, showAlert, setUser]);
+  }, [user, getAuthHeader, setUser, showToast]);
 
-  // ✅ الحصول على مستخدم بالـ ID
+  /**
+   * Fetch user by ID
+   */
   const getUserById = useCallback(async (id) => {
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/${id}`);
       return res.data;
     } catch (err) {
-      console.error(err);
+      console.error('Fetch user error:', err);
       return null;
     }
   }, []);
 
-  // ✅ حفظ موسيقى في Playlist
+  /**
+   * Save music to playlist
+   */
   const saveMusicInPlayList = useCallback(async (musicId) => {
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/save/music/${musicId}`,
         {},
-        { headers: { Authorization: `Bearer ${user?.token}` } }
+        getAuthHeader()
       );
-      showAlert(res.data.message || 'Music saved successfully');
+      showToast(res.data.message || MESSAGES.COMMON.SAVED, 'success');
       return res.data;
     } catch (err) {
-      console.error(err);
+      showToast('Failed to save music.', 'error');
       return null;
     }
-  }, [user, showAlert]);
+  }, [getAuthHeader, showToast]);
 
-  // ✅ تفعيل حظر الإشعارات
+  /**
+   * Block notifications from a specific user
+   */
   const toggleBlockNotification = useCallback(async (targetUserId) => {
-    if (!user?.token) return showAlert('You must be logged in');
     try {
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/block/notify/${targetUserId}`,
         {},
-        { headers: { Authorization: `Bearer ${user.token}` } }
+        getAuthHeader()
       );
 
       const updatedUser = {
@@ -616,88 +265,101 @@ export const UserContextProvider = ({ children }) => {
 
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
-      showAlert(res.data.message || 'Notification preference updated');
+      showToast(res.data.message || 'Preferences updated.', 'success');
       return res.data;
     } catch (err) {
-      console.error(err);
-      showAlert('Failed to update notification block');
+      showToast('Failed to update notification settings.', 'error');
     }
-  }, [user, showAlert, setUser]);
+  }, [user, getAuthHeader, setUser, showToast]);
 
-  // ✅ حفظ الريل
+  /**
+   * Save/Unsave a reel
+   */
   const toggleSaveReel = useCallback(async (reelId) => {
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/save/reel/${reelId}`,
         {},
-        { headers: { Authorization: `Bearer ${user?.token}` } }
+        getAuthHeader()
       );
-      showAlert(res.data.message || 'Reel saved successfully');
+      showToast(res.data.message || MESSAGES.COMMON.SAVED, 'success');
       return res.data;
     } catch (err) {
-      console.error(err);
+      showToast('Failed to update reel status.', 'error');
       return null;
     }
-  }, [user, showAlert]);
+  }, [getAuthHeader, showToast]);
 
-  // ✅ pin post
-  const pinPost = useCallback(async (id) => {
+  /**
+   * Pin a post to profile
+   */
+  const pinPost = useCallback(async (postId) => {
     try {
       const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/pin/${id}`,
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/pin/${postId}`,
         {},
-        { headers: { Authorization: `Bearer ${user.token}` } }
+        getAuthHeader()
       );
-      showAlert(res.data.message);
+      showToast(res.data.message || MESSAGES.POST.PIN_SUCCESS, 'success');
     } catch (err) {
-      console.error(err);
+      showToast('Failed to pin post.', 'error');
     }
-  }, [user, showAlert]);
+  }, [getAuthHeader, showToast]);
 
-  // ✅ جلب المستخدمين المقترحين
+  // --- Effects ---
+
+  // Fetch suggested users
   useEffect(() => {
-    const getSuggestedUsers = async () => {
+    const fetchSuggested = async () => {
       if (!user?.token) return;
       try {
         const res = await axios.get(
           `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/suggested`,
-          { headers: { Authorization: `Bearer ${user.token}` } }
+          getAuthHeader()
         );
         setSuggestedUsers(res.data);
       } catch (err) {
-        console.error('Error fetching suggested users:', err);
+        console.error('Suggested users fetch error:', err);
       }
     };
-    getSuggestedUsers();
-  }, [user?.token]);
+    fetchSuggested();
+  }, [user?.token, getAuthHeader]);
 
-  // ✅ مراقبة المستخدمين الأونلاين عبر socket
+  // Handle Socket Events for Online Users
   useEffect(() => {
     if (!socket) return;
     socket.on('getOnlineUsers', setOnlineUsers);
     return () => socket.off('getOnlineUsers');
   }, [socket]);
 
+  // --- Context Value ---
+  const value = useMemo(() => ({
+    suggestedUsers,
+    onlineUsers,
+    loading,
+    updateProfileLoading,
+    followUser,
+    updatePhoto,
+    updateProfile,
+    updatePassword,
+    togglePrivateAccount,
+    getUserById,
+    saveMusicInPlayList,
+    toggleBlockNotification,
+    toggleSaveReel,
+    pinPost,
+  }), [
+    suggestedUsers, onlineUsers, loading, updateProfileLoading,
+    followUser, updatePhoto, updateProfile, updatePassword,
+    togglePrivateAccount, getUserById, saveMusicInPlayList,
+    toggleBlockNotification, toggleSaveReel, pinPost
+  ]);
+
   return (
-    <UserContext.Provider
-      value={{
-        followUser,
-        updatePhoto,
-        updateProfile,
-        updatePassword,
-        togglePrivateAccount,
-        getUserById,
-        saveMusicInPlayList,
-        toggleBlockNotification,
-        toggleSaveReel,
-        pinPost,
-        suggestedUsers,
-        onlineUsers,
-        loading,
-        updateProfileLoading,
-      }}
-    >
+    <UserContext.Provider value={value}>
       {children}
     </UserContext.Provider>
   );
 };
+
+export default UserContext;

@@ -13,7 +13,7 @@ import { NotifyContextProvider } from "./Context/NotifyContext";
 import { NewsContextProvider } from "./Context/NewsContext";
 import { CommunityContextProvider } from "./Context/CommunityContext";
 import { StoryContextProvider } from "./Context/StoryContext";
-import { AlertContextProvider } from "./Context/AlertContext";
+import { FeedbackProvider } from "./Context/FeedbackContext";
 import { ReportContextProvider } from "./Context/ReportContext";
 import { SocketProvider } from "./Context/SocketContext";
 import { EventProvider } from "./Context/EventContext";
@@ -61,7 +61,7 @@ export default function RootLayout({ children }) {
         className={`antialiased bg-lightMode-bg dark:bg-darkMode-bg transition-all duration-500`}
       >
         <I18nProvider>
-          <AlertContextProvider>
+          <FeedbackProvider>
             <AuthContextProvider>
               <SocketProvider>
                 <UserContextProvider>
@@ -109,7 +109,7 @@ export default function RootLayout({ children }) {
                 </UserContextProvider>
               </SocketProvider>
             </AuthContextProvider>
-          </AlertContextProvider>
+          </FeedbackProvider>
         </I18nProvider>
       </body>
     </html>

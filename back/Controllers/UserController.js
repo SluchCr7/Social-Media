@@ -510,16 +510,43 @@ const updateProfile = asyncHandler(async (req, res) => {
   };
 
   // تحديث المستخدم
-  const updatedUser = await User.findByIdAndUpdate(
-    currentUserId,
-    { $set: updateData },
-    { new: true }
-  );
+  import User from "../models/User.model.js";
+import { UpdateUserValidate } from "../validation/userValidation.js";
+import bcrypt from "bcryptjs";
 
+export const updateUserProfile = async (req, res) => {
+  // 1. Validate input
+  const { error } = UpdateUserValidate(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });
+
+  // 2. Find user
+  const user = await User.findById(req.user.id);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  // 3. Prepare update object dynamically
+  const updateData = {};
+  const { name, email, bio, avatar, resume, password } = req.body;
+
+  if (name) updateData.name = name;
+  if (email) updateData.email = email;
+  if (bio !== undefined) updateData.bio = bio;
+  if (avatar !== undefined) updateData.avatar = avatar;
+  if (resume !== undefined) updateData.resume = resume;
+  if (password) {
+    const salt = await bcrypt.genSalt(10);
+    updateData.password = await bcrypt.hash(password, salt);
+  }
+
+  // 4. Update user
+  const updatedUser = await User.findByIdAndUpdate(req.user.id, { $set: updateData }, { new: true }).select("-password");
+
+  // 5. Return response
   res.status(200).json({
     message: "Profile updated successfully",
     user: updatedUser,
   });
+};
+
 });
 
 const updatePassword = asyncHandler(async (req, res) => {

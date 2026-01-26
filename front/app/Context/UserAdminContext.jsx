@@ -1,307 +1,198 @@
-// 'use client';
-// import { createContext, useContext, useState } from 'react';
-// import axios from 'axios';
-// import { useAuth } from './AuthContext';
-// import { useAlert } from './AlertContext';
-
-// const UserAdminContext = createContext();
-// export const useAdmin = () => useContext(UserAdminContext);
-
-// export const UserAdminContextProvider = ({ children }) => {
-//   const { user, setUser, setUsers } = useAuth();
-//   const [loading, setLoading] = useState(false);
-//   const {showAlert} = useAlert()
-//   // 🧩 1️⃣ Make User Admin
-//   const makeUserAdmin = async (userId) => {
-//     if (!user?.token) return showAlert('You must be logged in as an admin');
-//     try {
-//       setLoading(true);
-//       const res = await axios.put(
-//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/admin/${userId}`,
-//         {},
-//         { headers: { Authorization: `Bearer ${user.token}` } }
-//       );
-//       setUsers((prev) =>
-//         prev.map((u) =>
-//           u._id === userId ? { ...u, isAdmin: true } : u
-//         )
-//       );
-//       showAlert(res.data.message || 'User is now an Admin');
-//     } catch (err) {
-//       console.error(err);
-//       showAlert(err.response?.data?.message || 'Failed to make user Admin');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   // 🧩 2️⃣ Block / Unblock User
-//   const blockOrUnblockUser = async (id) => {
-//     if (!user?.token) return showAlert('Login required');
-//     try {
-//       const res = await axios.put(
-//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/block/${id}`,
-//         {},
-//         { headers: { Authorization: `Bearer ${user.token}` } }
-//       );
-
-//       setUser((prevUser) => {
-//         const isBlocked = prevUser.blockedUsers.includes(id);
-//         const updatedUser = {
-//           ...prevUser,
-//           blockedUsers: isBlocked
-//             ? prevUser.blockedUsers.filter((b) => b !== id)
-//             : [...prevUser.blockedUsers, id],
-//         };
-//         localStorage.setItem('user', JSON.stringify(updatedUser));
-//         return updatedUser;
-//       });
-
-//       showAlert(res.data.message);
-//       return res.data.updatedTargetUser;
-//     } catch (err) {
-//       console.error(err);
-//       showAlert(err.response?.data?.message || 'Error blocking user');
-//     }
-//   };
-
-//   // 🧩 3️⃣ Update Account Status (Suspend / Active / etc)
-//   const makeAccountPremiumVerify = async () => {
-//     if (!user?.token) return showAlert('You must be logged in');
-//     try {
-//       const res = await axios.put(
-//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/verify`,
-//         {},
-//         { headers: { Authorization: `Bearer ${user.token}` } }
-//       );
-
-//       // تحديث حالة الحساب المحليًا
-//       setUser((prev) => ({ ...prev, isAccountWithPremiumVerify: true }));
-
-//       showAlert(res.data.message || 'Account verified successfully');
-//     } catch (err) {
-//       console.error(err);
-//       showAlert(err.response?.data?.message || 'Failed to verify account');
-//     }
-//   };
-
-
-//   const updateAccountStatus = async (userId, status, days = 7) => {
-//     if (!user?.token) return showAlert('You must be logged in as an admin');
-
-//     try {
-//       const body = { accountStatus: status };
-//       if (status === "suspended" && days) {
-//         body.days = days; // نضيف مدة التعليق لو فيه
-//       }
-
-//       const res = await axios.put(
-//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/status/${userId}`,
-//         body,
-//         {
-//           headers: { Authorization: `Bearer ${user.token}` },
-//         }
-//       );
-
-//       // تحديث الـ users في الـ state لو عندك لستة users
-//       setUsers((prev) =>
-//         prev.map((u) =>
-//           u._id === userId ? { ...u, accountStatus: status } : u
-//         )
-//       );
-
-//       // لو بتعدل نفسك كـ user (حالة خاصة)
-//       if (user._id === userId) {
-//         const updatedUser = { ...user, accountStatus: status };
-//         setUser(updatedUser);
-//         localStorage.setItem("user", JSON.stringify(updatedUser));
-//       }
-
-//       showAlert(res.data.message || `Account status updated to ${status}`);
-//     } catch (err) {
-//       console.error(err);
-//       showAlert(err.response?.data?.message || 'Failed to update account status');
-//     }
-//   };
-
-//   // 🧩 4️⃣ Delete User (اختياري)
-//   const deleteUser = async (id) => {
-//     try {
-//       const res = await axios.delete(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/delete/${id}`, {
-//         headers: { Authorization: `Bearer ${user.token}` },
-//       });
-//       showAlert(res.data.message || 'User deleted successfully');
-//       setUsers((prev) => prev.filter((u) => u._id !== id));
-//     } catch (err) {
-//       console.error(err);
-//       showAlert(err.response?.data?.message || 'Failed to delete user');
-//     }
-//   };
-
-//   return (
-//     <UserAdminContext.Provider
-//       value={{
-//         makeUserAdmin,
-//         blockOrUnblockUser,
-//         updateAccountStatus,
-//         deleteUser,
-//         makeAccountPremiumVerify,
-//         loading,
-//       }}
-//     >
-//       {children}
-//     </UserAdminContext.Provider>
-//   );
-// };
 'use client';
-import { createContext, useContext, useState, useCallback } from 'react';
+
 import axios from 'axios';
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
-import { useAlert } from './AlertContext';
+import { useFeedback } from './FeedbackContext';
+import { MESSAGES } from '../utils/messages';
 
 const UserAdminContext = createContext();
-export const useAdmin = () => useContext(UserAdminContext);
+
+export const useAdmin = () => {
+  const context = useContext(UserAdminContext);
+  if (!context) {
+    throw new Error('useAdmin must be used within a UserAdminContextProvider');
+  }
+  return context;
+};
 
 export const UserAdminContextProvider = ({ children }) => {
   const { user, setUser, setUsers } = useAuth();
+  const { showToast, confirmAction } = useFeedback();
   const [loading, setLoading] = useState(false);
-  const { showAlert } = useAlert();
 
-  // 🧩 1️⃣ Make User Admin
+  const getAuthHeader = useCallback(() => ({
+    headers: { Authorization: `Bearer ${user?.token}` }
+  }), [user?.token]);
+
+  // --- Admin Actions ---
+
+  /**
+   * Promote a user to Admin rank
+   */
   const makeUserAdmin = useCallback(async (userId) => {
-    if (!user?.token) return showAlert('You must be logged in as an admin');
+    if (!user?.isAdmin) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
 
+    const isConfirmed = await confirmAction({
+      title: 'Promote User',
+      text: 'Are you sure you want to grant admin privileges to this user?',
+      confirmButtonText: 'Confirm Promotion'
+    });
+
+    if (!isConfirmed) return;
+
+    setLoading(true);
     try {
-      setLoading(true);
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/admin/${userId}`,
         {},
-        { headers: { Authorization: `Bearer ${user.token}` } }
+        getAuthHeader()
       );
 
       setUsers((prev) =>
         prev.map((u) => (u._id === userId ? { ...u, isAdmin: true } : u))
       );
-      showAlert(res.data.message || 'User is now an Admin');
+      showToast(res.data.message || 'User promoted to Admin successfully.', 'success');
     } catch (err) {
       console.error(err);
-      showAlert(err.response?.data?.message || 'Failed to make user Admin');
+      showToast(err.response?.data?.message || 'Failed to update user role.', 'error');
     } finally {
       setLoading(false);
     }
-  }, [user, showAlert, setUsers]);
+  }, [user?.isAdmin, confirmAction, getAuthHeader, setUsers, showToast]);
 
-  // 🧩 2️⃣ Block / Unblock User
+  /**
+   * Block or Unblock a user
+   */
   const blockOrUnblockUser = useCallback(async (id) => {
-    if (!user?.token) return showAlert('Login required');
+    if (!user?.token) return showToast('Login required', 'error');
+
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/block/${id}`,
         {},
-        { headers: { Authorization: `Bearer ${user.token}` } }
+        getAuthHeader()
       );
 
       setUser((prevUser) => {
-        const isBlocked = prevUser.blockedUsers.includes(id);
+        const isBlocked = prevUser.blockedUsers?.includes(id);
         const updatedUser = {
           ...prevUser,
           blockedUsers: isBlocked
             ? prevUser.blockedUsers.filter((b) => b !== id)
-            : [...prevUser.blockedUsers, id],
+            : [...(prevUser.blockedUsers || []), id],
         };
         localStorage.setItem('user', JSON.stringify(updatedUser));
         return updatedUser;
       });
 
-      showAlert(res.data.message);
+      showToast(res.data.message || 'Block status updated.', 'success');
       return res.data.updatedTargetUser;
     } catch (err) {
       console.error(err);
-      showAlert(err.response?.data?.message || 'Error blocking user');
+      showToast(err.response?.data?.message || 'Error updating block status.', 'error');
     }
-  }, [user, showAlert, setUser]);
+  }, [user?.token, getAuthHeader, setUser, showToast]);
 
-  // 🧩 3️⃣ Verify Premium Account
+  /**
+   * Verify an account (Premium/Blue Badge)
+   */
   const makeAccountPremiumVerify = useCallback(async () => {
-    if (!user?.token) return showAlert('You must be logged in');
+    if (!user?.token) return;
 
     try {
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/verify`,
         {},
-        { headers: { Authorization: `Bearer ${user.token}` } }
+        getAuthHeader()
       );
 
-      setUser((prev) => ({ ...prev, isAccountWithPremiumVerify: true }));
-      showAlert(res.data.message || 'Account verified successfully');
+      const updatedUser = { ...user, isAccountWithPremiumVerify: true };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      showToast(res.data.message || 'Account verified successfully.', 'success');
     } catch (err) {
       console.error(err);
-      showAlert(err.response?.data?.message || 'Failed to verify account');
+      showToast('Failed to verify account.', 'error');
     }
-  }, [user, showAlert, setUser]);
+  }, [user, getAuthHeader, setUser, showToast]);
 
-  // 🧩 4️⃣ Update Account Status (Suspend / Active)
+  /**
+   * Update account status (e.g., active, suspended)
+   */
   const updateAccountStatus = useCallback(async (userId, status, days = 7) => {
-    if (!user?.token) return showAlert('You must be logged in as an admin');
+    if (!user?.isAdmin) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
 
     try {
       const body = { accountStatus: status };
-      if (status === 'suspended' && days) body.days = days;
+      if (status === 'suspended') body.days = days;
 
       const res = await axios.put(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/status/${userId}`,
         body,
-        { headers: { Authorization: `Bearer ${user.token}` } }
+        getAuthHeader()
       );
 
       setUsers((prev) =>
-        prev.map((u) =>
-          u._id === userId ? { ...u, accountStatus: status } : u
-        )
+        prev.map((u) => (u._id === userId ? { ...u, accountStatus: status } : u))
       );
 
-      // لو المستخدم هو نفسه
       if (user._id === userId) {
         const updatedUser = { ...user, accountStatus: status };
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
       }
 
-      showAlert(res.data.message || `Account status updated to ${status}`);
+      showToast(res.data.message || `Account status updated to ${status}.`, 'success');
     } catch (err) {
       console.error(err);
-      showAlert(err.response?.data?.message || 'Failed to update account status');
+      showToast('Failed to update account status.', 'error');
     }
-  }, [user, showAlert, setUser, setUsers]);
+  }, [user, getAuthHeader, setUser, setUsers, showToast]);
 
-  // 🧩 5️⃣ Delete User
+  /**
+   * Permanently delete a user account
+   */
   const deleteUser = useCallback(async (id) => {
-    if (!user?.token) return showAlert('Login required');
+    if (!user?.isAdmin) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+
+    const isConfirmed = await confirmAction({
+      title: 'Delete User',
+      text: 'This action is permanent and cannot be undone!',
+      confirmButtonText: 'Delete Permanently'
+    });
+
+    if (!isConfirmed) return;
+
     try {
       const res = await axios.delete(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/delete/${id}`,
-        { headers: { Authorization: `Bearer ${user.token}` } }
+        getAuthHeader()
       );
 
-      showAlert(res.data.message || 'User deleted successfully');
+      showToast(res.data.message || 'User account deleted.', 'success');
       setUsers((prev) => prev.filter((u) => u._id !== id));
     } catch (err) {
       console.error(err);
-      showAlert(err.response?.data?.message || 'Failed to delete user');
+      showToast('Failed to delete user account.', 'error');
     }
-  }, [user, showAlert, setUsers]);
+  }, [user?.isAdmin, confirmAction, getAuthHeader, setUsers, showToast]);
+
+  // --- Context Value ---
+  const value = useMemo(() => ({
+    makeUserAdmin,
+    blockOrUnblockUser,
+    updateAccountStatus,
+    deleteUser,
+    makeAccountPremiumVerify,
+    loading,
+  }), [
+    makeUserAdmin, blockOrUnblockUser, updateAccountStatus,
+    deleteUser, makeAccountPremiumVerify, loading
+  ]);
 
   return (
-    <UserAdminContext.Provider
-      value={{
-        makeUserAdmin,
-        blockOrUnblockUser,
-        updateAccountStatus,
-        deleteUser,
-        makeAccountPremiumVerify,
-        loading,
-      }}
-    >
+    <UserAdminContext.Provider value={value}>
       {children}
     </UserAdminContext.Provider>
   );

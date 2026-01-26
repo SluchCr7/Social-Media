@@ -1,24 +1,17 @@
-
-// app/Context/AlertContext.js
 'use client';
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import Alert from '../Component/Alert'; // تأكد من المسار الصحيح
 
-const AlertContext = createContext();
+/**
+ * DEPRECATED: This context is deprecated.
+ * Please use FeedbackContext or useFeedback hook instead.
+ * 
+ * This file is kept for backward compatibility and points to the new Feedback system.
+ */
 
-export const AlertContextProvider = ({ children }) => {
-  const [notify, setNotify] = useState('');
+import { useFeedback } from './FeedbackContext';
 
-  const showAlert = (message) => {
-    setNotify(message);
-  };
-
-  return (
-    <AlertContext.Provider value={{ showAlert }}>
-      {children}
-      <Alert notify={notify} />
-    </AlertContext.Provider>
-  );
+export { FeedbackProvider as AlertContextProvider } from './FeedbackContext';
+export const useAlert = () => {
+  const { showAlert } = useFeedback();
+  return { showAlert };
 };
-
-export const useAlert = () => useContext(AlertContext);
+export default useAlert;

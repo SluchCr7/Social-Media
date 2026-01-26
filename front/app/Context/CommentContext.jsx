@@ -1,22 +1,31 @@
 'use client';
 
 import axios from 'axios';
-import { createContext, useContext, useState,useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
-import { useNotify } from './NotifyContext';
-import { useAlert } from './AlertContext';
-import { checkUserStatus } from '../utils/checkUserLog';
+import { useFeedback } from './FeedbackContext';
+import { MESSAGES } from '../utils/messages';
 import { useCommentModify } from '../Custome/Comment/useCommentModify';
-export const CommentContext = createContext();
-export const useComment = () => useContext(CommentContext);
+
+const CommentContext = createContext();
+
+export const useComment = () => {
+  const context = useContext(CommentContext);
+  if (!context) {
+    throw new Error('useComment must be used within a CommentContextProvider');
+  }
+  return context;
+};
 
 export const CommentContextProvider = ({ children }) => {
-  
-  const [comments, setComments] = useState([]);
   const { user } = useAuth();
-  const { addNotify } = useNotify();
-  const { showAlert } = useAlert();
+  const { showToast } = useFeedback();
+
+  // --- State ---
+  const [comments, setComments] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // --- External Hook for CRUD ---
   const {
     fetchCommentsByPostId,
     AddComment,
@@ -25,18 +34,21 @@ export const CommentContextProvider = ({ children }) => {
     updateCommentInTree
   } = useCommentModify({
     user,
-    showAlert,
     setComments,
     setIsLoading,
   });
 
-  // 📌 لايك على كومنت
-  const likeComment = useCallback(async (id) => {
-    if (!checkUserStatus("like comments", showAlert, user)) return;
+  // --- Actions ---
+
+  /**
+   * Toggle like on a comment
+   */
+  const likeComment = useCallback(async (commentId) => {
+    if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
 
     try {
       const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/like/${id}`,
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/like/${commentId}`,
         {},
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
@@ -44,29 +56,32 @@ export const CommentContextProvider = ({ children }) => {
       const updatedComment = res.data.comment;
       setComments(prev => updateCommentInTree(prev, updatedComment));
 
-      showAlert(res.data.message);
+      // showToast(res.data.message, 'success'); // Optional, might be too noisy
       return updatedComment;
     } catch (err) {
-      console.error(err);
-      showAlert(err?.response?.data?.message || "Failed to like comment.");
+      console.error('Like comment error:', err);
+      showToast(err?.response?.data?.message || "Failed to update like status.", 'error');
     }
-  },[user,showAlert,setComments]);
+  }, [user, showToast, updateCommentInTree]);
+
+  // --- Context Value ---
+  const value = useMemo(() => ({
+    comments,
+    setComments,
+    isLoading,
+    AddComment,
+    deleteComment,
+    likeComment,
+    updateComment,
+    fetchCommentsByPostId,
+  }), [
+    comments, isLoading, AddComment, deleteComment,
+    likeComment, updateComment, fetchCommentsByPostId
+  ]);
+
   return (
-    <CommentContext.Provider
-      value={{
-        comments,
-        setComments,
-        AddComment,
-        deleteComment,
-        likeComment,
-        updateComment,
-        fetchCommentsByPostId,
-        isLoading
-      }}
-    >
+    <CommentContext.Provider value={value}>
       {children}
     </CommentContext.Provider>
   );
 };
-
-

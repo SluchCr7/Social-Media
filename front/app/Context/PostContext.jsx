@@ -1,120 +1,151 @@
 'use client';
 
 import axios from "axios";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import { useAuth } from "./AuthContext";
-import { useAlert } from "./AlertContext";
-import { useNotify } from "./NotifyContext";
-import { checkUserStatus } from "../utils/checkUserLog";
 import { usePostActions } from "../Custome/Post/usePostActions";
 import { usePostManagement } from "../Custome/Post/usePostManage";
 
-export const PostContext = createContext();
+const PostContext = createContext();
+
+export const usePost = () => {
+  const context = useContext(PostContext);
+  if (!context) {
+    throw new Error('usePost must be used within a PostContextProvider');
+  }
+  return context;
+};
 
 export const PostContextProvider = ({ children }) => {
+  const { user } = useAuth();
+
+  // --- State ---
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { user , isLogin } = useAuth();
-  const { showAlert } = useAlert();
-  const [imageView , setImageView] = useState(null);
+  const [isLoadingPostCreated, setIsLoadingPostCreated] = useState(false);
+
+  // UI State
+  const [imageView, setImageView] = useState(null);
   const [showPostModelEdit, setShowPostModelEdit] = useState(false);
   const [postIsEdit, setPostIsEdit] = useState(null);
+
+  // Pagination State (Feed)
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [userPosts, setUserPosts] = useState([]);
-  const [userPages, setUserPages] = useState(1);
-  const [userHasMore, setUserHasMore] = useState(true);
-  const [userIsLoading , setUserIsLoading] = useState(false);
-  const [isLoadingPostCreated , setIsLoadingPostCreated] = useState(false)
-  
-  const { AddPost, editPost } = usePostManagement({ user, showAlert, setPosts, setIsLoadingPostCreated, setIsLoading });
-  const {likePost , deletePost , savePost , hahaPost , displayOrHideComments,sharePost , viewPost,copyPostLink} = usePostActions({ user, showAlert, setPosts, setIsLoading});
 
-  const fetchPosts = async (pageNum = 1) => {
+  // User Profile Posts State
+  const [userPosts, setUserPosts] = useState([]);
+  const [userHasMore, setUserHasMore] = useState(true);
+  const [userIsLoading, setUserIsLoading] = useState(false);
+
+  // --- External Hooks ---
+  const postManagement = usePostManagement({
+    user,
+    setPosts,
+    setIsLoadingPostCreated,
+    setIsLoading
+  });
+
+  const postActions = usePostActions({
+    user,
+    setPosts,
+    setIsLoading
+  });
+
+  // --- Actions ---
+
+  /**
+   * Fetch home feed posts with pagination
+   */
+  const fetchPosts = useCallback(async (pageNum = 1) => {
     if (!hasMore && pageNum !== 1) return;
 
     setIsLoading(true);
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post?page=${pageNum}&limit=10`);
-      const newPosts = Array.isArray(res.data.posts) ? res.data.posts : [];
+      const fetchedPosts = Array.isArray(res.data.posts) ? res.data.posts : [];
 
-      // تحديث posts
-      setPosts(prev => (pageNum === 1 ? newPosts : [...prev, ...newPosts]));
-
-      // تحديث hasMore
+      setPosts(prev => (pageNum === 1 ? fetchedPosts : [...prev, ...fetchedPosts]));
       setHasMore(pageNum < res.data.pages);
     } catch (err) {
-      console.error("Error fetching posts", err.response?.data || err.message);
+      console.error("Error fetching feed posts:", err.message);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [hasMore]);
 
-  // fetch عند mount أو عند تغير page
-  useEffect(() => {
-    fetchPosts(page);
-  }, [page]);
-  
-  // ✅ جلب بوستات يوزر معين (مع pagination)
-  const fetchUserPosts = async (userId, pageNum = 1, limit = 5) => {
+  /**
+   * Fetch posts for a specific user profile
+   */
+  const fetchUserPosts = useCallback(async (userId, pageNum = 1, limit = 5) => {
     setUserIsLoading(true);
     try {
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/user/${userId}?page=${pageNum}&limit=${limit}`
       );
+      const fetchedPosts = Array.isArray(res.data.posts) ? res.data.posts : [];
 
-      const newPosts = Array.isArray(res.data.posts) ? res.data.posts : [];
-
-      setUserPosts(prev =>
-        pageNum === 1 ? newPosts : [...prev, ...newPosts]
-      );
-
-      // تحديث hasMore
+      setUserPosts(prev => (pageNum === 1 ? fetchedPosts : [...prev, ...fetchedPosts]));
       setUserHasMore(pageNum < res.data.pages);
     } catch (err) {
-      console.error("Error fetching user posts", err.response?.data || err.message);
-    }finally {
+      console.error("Error fetching profile posts:", err.message);
+    } finally {
       setUserIsLoading(false);
     }
-  };
+  }, []);
 
-  const getPostById = async(id) => {
+  /**
+   * Get post by ID
+   */
+  const getPostById = useCallback(async (id) => {
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post/${id}`);
       return res.data;
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching post by ID:", err);
+      return null;
     }
-  };
+  }, []);
+
+  // --- Effects ---
+  useEffect(() => {
+    fetchPosts(page);
+  }, [page, fetchPosts]);
+
+  // --- Context Value ---
+  const value = useMemo(() => ({
+    // State
+    posts,
+    setPosts,
+    isLoading,
+    isLoadingPostCreated,
+    imageView,
+    setImageView,
+    showPostModelEdit,
+    setShowPostModelEdit,
+    postIsEdit,
+    setPostIsEdit,
+    hasMore,
+    setPage,
+    userPosts,
+    userHasMore,
+    userIsLoading,
+
+    // Actions
+    fetchPosts,
+    fetchUserPosts,
+    getPostById,
+    ...postManagement,
+    ...postActions,
+  }), [
+    posts, isLoading, isLoadingPostCreated, imageView, showPostModelEdit,
+    postIsEdit, hasMore, userPosts, userHasMore, userIsLoading,
+    fetchPosts, fetchUserPosts, getPostById, postManagement, postActions
+  ]);
 
   return (
-    <PostContext.Provider
-      value={{
-        posts,
-        AddPost,
-        deletePost,
-        likePost,
-        savePost,
-        sharePost,
-        isLoading,
-        editPost,
-        showPostModelEdit,
-        setShowPostModelEdit,
-        postIsEdit,
-        getPostById,
-        setPostIsEdit,
-        displayOrHideComments,
-        copyPostLink,
-        imageView , setImageView, viewPost,fetchPosts,hasMore, setPage
-        ,hahaPost, userPosts, fetchUserPosts, userPages,setUserPages , userHasMore,userIsLoading
-        ,isLoadingPostCreated,setPosts
-      }}
-    >
+    <PostContext.Provider value={value}>
       {children}
     </PostContext.Provider>
   );
-};
-
-export const usePost = () => {
-  return useContext(PostContext);
 };
