@@ -1,4 +1,4 @@
-const { User,validateUserLinks, LoginValidate, ValidateUser, validateUserUpdate, validatePasswordUpdate } = require('../Modules/User')
+const { User, validateUserLinks, LoginValidate, ValidateUser, validateUserUpdate, validatePasswordUpdate } = require('../Modules/User')
 const asyncHandler = require('express-async-handler')
 const bcrypt = require('bcrypt')
 const Verification = require('../Modules/VerificationToken')
@@ -12,14 +12,14 @@ const { v2 } = require('cloudinary')
 const speakeasy = require("speakeasy");
 const qrcode = require("qrcode");
 const { sendNotificationHelper } = require("../utils/SendNotification");
-const {Post, ValidatePost} = require('../Modules/Post')
+const { Post, ValidatePost } = require('../Modules/Post')
 const { Comment } = require('../Modules/Comment')
-const {Community} = require('../Modules/Community')
+const { Community } = require('../Modules/Community')
 const { Notification } = require('../Modules/Notification');
 const { Report, ValidateReport } = require('../Modules/Report')
 const { validateStory, Story } = require("../Modules/Story");
 const { Music } = require('../Modules/Music')
-const {userOnePopulate} = require("../Populates/Populate")
+const { userOnePopulate } = require("../Populates/Populate")
 const Reel = require('../Modules/Reel')
 /**
  * @desc Register New User
@@ -149,24 +149,24 @@ const RegisterNewUser = async (req, res) => {
 //   //             <p style="font-size: 16px; color: #555555; line-height: 1.6;">
 //   //               Thank you for signing up. To complete your registration, please verify your email address by clicking the button below.
 //   //             </p>
-    
+
 //   //             <div style="text-align: center; margin: 30px 0;">
 //   //               <a href="${link}" style="background-color: #28a745; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
 //   //                 Verify My Email
 //   //               </a>
 //   //             </div>
-    
+
 //   //             <p style="font-size: 14px; color: #999999;">
 //   //               If you didn’t sign up for this account, feel free to ignore this email. Your information will remain secure.
 //   //             </p>
-    
+
 //   //             <p style="font-size: 14px; margin-top: 30px; color: #555555;">
 //   //               Best regards,<br />
 //   //               <strong>Sluchitt Team</strong>
 //   //             </p>
 //   //           </td>
 //   //         </tr>
-    
+
 //   //         <tr>
 //   //           <td style="padding: 20px; text-align: center; font-size: 12px; color: #aaaaaa;">
 //   //             &copy; ${new Date().getFullYear()} Slucitt. All rights reserved.
@@ -186,16 +186,16 @@ const RegisterNewUser = async (req, res) => {
 //   // Email is verified: update last login & return token
 //   user.lastLogin = new Date();
 //   await user.save();
-  
+
 //   const token = jwt.sign(
 //       { _id: user._id, isAdmin: user.isAdmin },
 //       process.env.TOKEN_SECRET
 //   );
-  
+
 //   // استبعاد كلمة المرور وإضافة التوكن إلى بيانات المستخدم
 //   const { password, ...others } = user._doc;
 //   others.token = token; // هنا نضيف التوكن داخل كائن المستخدم
-  
+
 //   return res.status(200).json({
 //       message: "Login successful",
 //       user: others
@@ -271,7 +271,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
   res.status(200).json(users);
 });
 
-  
+
 
 /**
  * @desc get user by id
@@ -282,9 +282,9 @@ const getAllUsers = asyncHandler(async (req, res) => {
 const getUserById = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id).populate(userOnePopulate)
   if (!user) {
-        return res.status(404).json({ message: "User Not Found" })
-    }
-    res.status(200).json(user)
+    return res.status(404).json({ message: "User Not Found" })
+  }
+  res.status(200).json(user)
 })
 
 
@@ -295,17 +295,17 @@ const getUserById = asyncHandler(async (req, res) => {
  */
 
 const DeleteUser = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id)
-    if (!user) {
-        return res.status(404).json({ message: "User Not Found" })
-    }
-    await Post.deleteMany({ owner: req.user._id })
-    await Comment.deleteMany({ owner: req.user._id })
-    await Story.deleteMany({ owner: req.user._id })
-    await Report.deleteMany({ owner: req.user._id })
-    await Community.deleteMany({ owner: req.user._id });
-    await User.findByIdAndDelete(req.user._id)
-    res.status(200).json({message : "User Deleted Successfully"})
+  const user = await User.findById(req.user._id)
+  if (!user) {
+    return res.status(404).json({ message: "User Not Found" })
+  }
+  await Post.deleteMany({ owner: req.user._id })
+  await Comment.deleteMany({ owner: req.user._id })
+  await Story.deleteMany({ owner: req.user._id })
+  await Report.deleteMany({ owner: req.user._id })
+  await Community.deleteMany({ owner: req.user._id });
+  await User.findByIdAndDelete(req.user._id)
+  res.status(200).json({ message: "User Deleted Successfully" })
 })
 
 /**
@@ -465,39 +465,34 @@ const updateProfile = asyncHandler(async (req, res) => {
     preferedLanguage
   } = req.body;
 
-  // تحقق من وجود الشريك إذا تم إدخاله
+  // 1. Check partner if provided
   if (partner) {
     const partnerUser = await User.findById(partner);
-
     if (!partnerUser) {
       return res.status(400).json({ message: "Partner user not found" });
     }
 
-    // تحقق أنه غير مرتبط بشخص آخر
-    if (
-      partnerUser.partner &&
-      partnerUser.partner.toString() !== currentUserId.toString()
-    ) {
-      return res
-        .status(400)
-        .json({ message: "This user is already in a relationship with someone else." });
+    // Check if partner is already in a relationship with someone else
+    if (partnerUser.partner && partnerUser.partner.toString() !== currentUserId.toString()) {
+      return res.status(400).json({ message: "This user is already in a relationship with someone else." });
     }
 
-    // إذا الحالة "In a Relationship" نربط الطرفين
-    if (relationshipStatus === "In a Relationship") {
+    // If "In a Relationship" or "Married", link the other party too
+    if (['In a Relationship', 'Married'].includes(relationshipStatus)) {
       await User.findByIdAndUpdate(partner, {
-        relationshipStatus: "In a Relationship",
+        relationshipStatus,
         partner: currentUserId,
       });
     }
   }
 
-  // البيانات التي سيتم تحديثها
+  // 2. Prepare update object
   const updateData = {
     username,
     description,
     profileName,
     country,
+    city,
     phone,
     socialLinks,
     gender,
@@ -505,88 +500,65 @@ const updateProfile = asyncHandler(async (req, res) => {
     relationshipStatus,
     partner: partner || null,
     interests,
-    city,
     preferedLanguage
   };
 
-  // تحديث المستخدم
-  import User from "../models/User.model.js";
-import { UpdateUserValidate } from "../validation/userValidation.js";
-import bcrypt from "bcryptjs";
+  // 3. Update the user
+  const updatedUser = await User.findByIdAndUpdate(
+    currentUserId,
+    { $set: updateData },
+    { new: true }
+  ).populate(userOnePopulate);
 
-export const updateUserProfile = async (req, res) => {
-  // 1. Validate input
-  const { error } = UpdateUserValidate(req.body);
-  if (error) return res.status(400).json({ message: error.details[0].message });
-
-  // 2. Find user
-  const user = await User.findById(req.user.id);
-  if (!user) return res.status(404).json({ message: "User not found" });
-
-  // 3. Prepare update object dynamically
-  const updateData = {};
-  const { name, email, bio, avatar, resume, password } = req.body;
-
-  if (name) updateData.name = name;
-  if (email) updateData.email = email;
-  if (bio !== undefined) updateData.bio = bio;
-  if (avatar !== undefined) updateData.avatar = avatar;
-  if (resume !== undefined) updateData.resume = resume;
-  if (password) {
-    const salt = await bcrypt.genSalt(10);
-    updateData.password = await bcrypt.hash(password, salt);
+  if (!updatedUser) {
+    return res.status(404).json({ message: "User not found" });
   }
 
-  // 4. Update user
-  const updatedUser = await User.findByIdAndUpdate(req.user.id, { $set: updateData }, { new: true }).select("-password");
-
-  // 5. Return response
+  // 4. Return success response
   res.status(200).json({
     message: "Profile updated successfully",
     user: updatedUser,
   });
-};
-
 });
 
 const updatePassword = asyncHandler(async (req, res) => {
-    const { error } = validatePasswordUpdate(req.body)
-    if (error) {
-        return res.status(400).json({message :error.details[0].message})
+  const { error } = validatePasswordUpdate(req.body)
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message })
+  }
+  if (req.body.password) {
+    const salt = await bcrypt.genSalt(10)
+    req.body.password = await bcrypt.hash(req.body.password, salt)
+  }
+  const updateUserPass = await User.findByIdAndUpdate(req.user._id, {
+    $set: {
+      password: req.body.password
     }
-    if (req.body.password) {
-        const salt = await bcrypt.genSalt(10)
-        req.body.password = await bcrypt.hash(req.body.password , salt) 
-    }
-    const updateUserPass = await User.findByIdAndUpdate(req.user._id, {
-        $set :{
-            password : req.body.password
-        }
-    }, { new: true })
-    return res.status(200).json({
-        message: `Password Updated Successfully`,
-        updateUserPass,
-    })
+  }, { new: true })
+  return res.status(200).json({
+    message: `Password Updated Successfully`,
+    updateUserPass,
+  })
 })
 
 const pinPost = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id)
-    if (!user) {
-        res.status(404)
-        throw new Error('User not found')
-    }
-    if (user.pinsPosts.includes(req.params.id)) {
-        await User.findByIdAndUpdate(req.user._id, {
-            $pull: { pinsPosts: req.params.id },
-        });
-        res.status(200).json({ message: 'Post unPin' })
-    }
-    else {
-        await User.findByIdAndUpdate(req.user._id, {
-            $push: { pinsPosts: req.params.id },
-        });
-        res.status(200).json({ message: 'Post Pin' })
-    }
+  const user = await User.findById(req.user._id)
+  if (!user) {
+    res.status(404)
+    throw new Error('User not found')
+  }
+  if (user.pinsPosts.includes(req.params.id)) {
+    await User.findByIdAndUpdate(req.user._id, {
+      $pull: { pinsPosts: req.params.id },
+    });
+    res.status(200).json({ message: 'Post unPin' })
+  }
+  else {
+    await User.findByIdAndUpdate(req.user._id, {
+      $push: { pinsPosts: req.params.id },
+    });
+    res.status(200).json({ message: 'Post Pin' })
+  }
 })
 
 const blockOrUnblockUser = asyncHandler(async (req, res) => {
@@ -748,34 +720,34 @@ const MakeAccountPreimumVerify = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "This User not be found" });
   }
   await User.findByIdAndUpdate(req.user._id, {
-      $set :{
-          isAccountWithPremiumVerify : true
-      }
+    $set: {
+      isAccountWithPremiumVerify: true
+    }
   }, { new: true })
   return res.status(200).json({
-      message: "Account Become Verify "
+    message: "Account Become Verify "
   })
 })
 
 const togglePrivateAccount = async (req, res) => {
-    try {
-        const userId = req.user._id; // نفترض أنك تستخدم auth middleware لتخزين user
-        const user = await User.findById(userId);
+  try {
+    const userId = req.user._id; // نفترض أنك تستخدم auth middleware لتخزين user
+    const user = await User.findById(userId);
 
-        if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-        // عكس القيمة الحالية
-        user.isPrivate = !user.isPrivate;
-        await user.save();
+    // عكس القيمة الحالية
+    user.isPrivate = !user.isPrivate;
+    await user.save();
 
-        return res.status(200).json({
-            message: `Account is now ${user.isPrivate ? 'private' : 'public'}`,
-            isPrivate: user.isPrivate
-        });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: "Server error" });
-    }
+    return res.status(200).json({
+      message: `Account is now ${user.isPrivate ? 'private' : 'public'}`,
+      isPrivate: user.isPrivate
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
 };
 
 
@@ -940,43 +912,43 @@ const updateRelationship = asyncHandler(async (req, res) => {
 
 
 const deleteAllUsers = asyncHandler(async (req, res) => {
-    await User.deleteMany({});
-    await Post.deleteMany({ })
-    await Comment.deleteMany({ })
-    await Story.deleteMany({ })
-    await Report.deleteMany({ })
-    await Community.deleteMany({ });
+  await User.deleteMany({});
+  await Post.deleteMany({})
+  await Comment.deleteMany({})
+  await Story.deleteMany({})
+  await Report.deleteMany({})
+  await Community.deleteMany({});
   res.status(200).json({ message: "All users deleted successfully" });
 });
 
 const toggleSongInPlaylist = asyncHandler(async (req, res) => {
-    const userId = req.user._id; // المستخدم الحالي
-    const songId = req.params.songId; // ID الأغنية
+  const userId = req.user._id; // المستخدم الحالي
+  const songId = req.params.songId; // ID الأغنية
 
-    const user = await User.findById(userId);
-    if (!user) {
-        return res.status(404).json({ message: "User not found" });
-    }
-    const song = await Music.findById(songId);
-    if (!song) {
-      return res.status(404).json({ message: "Song not found" });
-    }
-    // تحقق إذا الأغنية موجودة في playlist بالفعل
-    const songExists = user.myMusicPlaylist.includes(songId);
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  const song = await Music.findById(songId);
+  if (!song) {
+    return res.status(404).json({ message: "Song not found" });
+  }
+  // تحقق إذا الأغنية موجودة في playlist بالفعل
+  const songExists = user.myMusicPlaylist.includes(songId);
 
-    if (songExists) {
-        // 🔴 إزالة الأغنية
-        user.myMusicPlaylist = user.myMusicPlaylist.filter(
-            id => id.toString() !== songId
-        );
-        await user.save();
-        return res.status(200).json({ message: "Song removed from playlist", playlist: user.myMusicPlaylist });
-    } else {
-        // 🟢 إضافة الأغنية
-        user.myMusicPlaylist.push(songId);
-        await user.save();
-        return res.status(200).json({ message: "Song added to playlist", playlist: user.myMusicPlaylist });
-    }
+  if (songExists) {
+    // 🔴 إزالة الأغنية
+    user.myMusicPlaylist = user.myMusicPlaylist.filter(
+      id => id.toString() !== songId
+    );
+    await user.save();
+    return res.status(200).json({ message: "Song removed from playlist", playlist: user.myMusicPlaylist });
+  } else {
+    // 🟢 إضافة الأغنية
+    user.myMusicPlaylist.push(songId);
+    await user.save();
+    return res.status(200).json({ message: "Song added to playlist", playlist: user.myMusicPlaylist });
+  }
 });
 
 const acceptCookies = asyncHandler(async (req, res) => {
@@ -1045,23 +1017,23 @@ const saveReel = asyncHandler(async (req, res) => {
 
   const user = await User.findById(userId);
   if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    return res.status(404).json({ message: "User not found" });
   }
   const reel = await Reel.findById(reelId);
   if (!reel) return res.status(404).json({ message: "Reel not found" });
   const videoExists = user.savedReels.includes(reelId);
   if (videoExists) {
-      // 🔴 إزالة الأغنية
-      user.savedReels = user.savedReels.filter(
-          id => id.toString() !== reelId
-      );
-      await user.save();
-      return res.status(200).json({ message: "Reel removed from playlist", playlist: user.myMusicPlaylist });
+    // 🔴 إزالة الأغنية
+    user.savedReels = user.savedReels.filter(
+      id => id.toString() !== reelId
+    );
+    await user.save();
+    return res.status(200).json({ message: "Reel removed from playlist", playlist: user.myMusicPlaylist });
   } else {
-      // 🟢 إضافة الأغنية
-      user.savedReels.push(reelId);
-      await user.save();
-      return res.status(200).json({ message: "Reel added to playlist", playlist: user.myMusicPlaylist });
+    // 🟢 إضافة الأغنية
+    user.savedReels.push(reelId);
+    await user.save();
+    return res.status(200).json({ message: "Reel added to playlist", playlist: user.myMusicPlaylist });
   }
 })
 
@@ -1080,6 +1052,6 @@ module.exports = {
   updateProfile, pinPost, updateLinksSocial,
   getRelationship,
   updateRelationship,
-  toggleSongInPlaylist,acceptCookies,toggleBlockNotification,saveReel
+  toggleSongInPlaylist, acceptCookies, toggleBlockNotification, saveReel
 }
 
