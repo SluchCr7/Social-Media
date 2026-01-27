@@ -1,12 +1,12 @@
 'use client';
 
-import axios from 'axios';
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import api from '../utils/api';
 import { useFeedback } from './FeedbackContext';
 import { MESSAGES } from '../utils/messages';
-import getData from '../utils/getData';
 
 export const AuthContext = createContext();
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -31,16 +31,22 @@ export const AuthContextProvider = ({ children }) => {
    * Authenticate user with email and password
    */
   const login = useCallback(async (email, password) => {
+    if (!email || !password) {
+      showToast('Please provide both email and password.', 'error');
+      return;
+    }
+
     setIsLoading(true);
     const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
 
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/login`, {
-        email,
-        password,
-      });
+      const res = await api.post('/auth/login', { email, password });
 
       const userData = res.data.user;
+      if (!userData || !userData.token) {
+        throw new Error('Invalid response from server');
+      }
+
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('loginState', 'true');
@@ -52,7 +58,7 @@ export const AuthContextProvider = ({ children }) => {
         window.location.href = '/';
       }, 1500);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || MESSAGES.AUTH.LOGIN_ERROR;
+      const errorMessage = err.response?.data?.message || err.message || MESSAGES.AUTH.LOGIN_ERROR;
       showToast(errorMessage, 'error', { id: loadingToast });
     } finally {
       setIsLoading(false);
@@ -87,9 +93,7 @@ export const AuthContextProvider = ({ children }) => {
     const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
 
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/register`, {
-        username, email, password
-      });
+      const res = await api.post('/auth/register', { username, email, password });
 
       showToast(res.data.message || MESSAGES.AUTH.REGISTRATION_SUCCESS, 'success', { id: loadingToast });
 
@@ -104,6 +108,18 @@ export const AuthContextProvider = ({ children }) => {
     }
   }, [showToast]);
 
+  /**
+   * Fetch all users
+   */
+  const fetchUsers = useCallback(async () => {
+    try {
+      const res = await api.get('/auth');
+      setUsers(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+    }
+  }, []);
+
   // --- Initialization ---
 
   useEffect(() => {
@@ -114,12 +130,19 @@ export const AuthContextProvider = ({ children }) => {
 
         if (storedUser && loginState === 'true') {
           const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
-          setIsLogin(true);
+          if (parsedUser && parsedUser.token) {
+            setUser(parsedUser);
+            setIsLogin(true);
+          } else {
+            // Invalid data in localStorage
+            localStorage.removeItem('user');
+            localStorage.removeItem('loginState');
+          }
         }
       } catch (error) {
         console.error('Failed to parse stored user:', error);
         localStorage.removeItem('user');
+        localStorage.removeItem('loginState');
       } finally {
         setIsAuthChecked(true);
       }
@@ -128,12 +151,12 @@ export const AuthContextProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  // Fetch all users (admin/list view)
+  // Fetch users list for authenticated users
   useEffect(() => {
-    if (isLogin) {
-      getData('auth', setUsers);
+    if (isLogin && isAuthChecked) {
+      fetchUsers();
     }
-  }, [isLogin]);
+  }, [isLogin, isAuthChecked, fetchUsers]);
 
   // --- Context Value ---
   const value = useMemo(() => ({
@@ -145,12 +168,13 @@ export const AuthContextProvider = ({ children }) => {
     setUser,
     setUsers,
     login,
-    Logout: logout, // alias for backward compatibility
     logout,
+    Logout: logout, // alias for backward compatibility
     registerNewUser,
+    fetchUsers,
   }), [
     user, users, isLogin, isAuthChecked, isLoading,
-    setUser, setUsers, login, logout, registerNewUser
+    setUser, setUsers, login, logout, registerNewUser, fetchUsers
   ]);
 
   return (

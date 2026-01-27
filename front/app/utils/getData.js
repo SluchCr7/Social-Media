@@ -1,14 +1,15 @@
-import axios from "axios";
+import api from "./api";
 
+const getData = async (type, setter) => {
+    try {
+        const res = await api.get(`/${type}`);
+        if (typeof setter === 'function') {
+            setter(res.data);
+        }
+        return res.data;
+    } catch (err) {
+        console.error(`Error fetching ${type}:`, err);
+    }
+};
 
-const getData = async (type , setter) => {
-    await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/${type}`)
-    .then((res) => {
-        setter(res.data)
-    })
-    .catch((err) => {
-        console.log(err)
-    })
-}
-
-export default getData
+export default getData;

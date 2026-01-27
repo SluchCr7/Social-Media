@@ -175,10 +175,10 @@ const Sluchits = ({ activeTab }) => {
     [isLoading, hasMore]
   );
 
-  // جلب البيانات عند تغير الصفحة (لم يتغير المنطق)
-  useEffect(() => {
-    if (page > 1) fetchPosts(page);
-  }, [page]);
+  // جلب البيانات عند تغير الصفحة (تم نقله إلى PostContext)
+  // useEffect(() => {
+  //   if (page > 1) fetchPosts(page);
+  // }, [page]);
 
   return (
     <div className="w-full flex flex-col gap-8">

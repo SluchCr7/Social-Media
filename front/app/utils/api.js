@@ -1,21 +1,50 @@
-// app/utils/api.js
-export const api = async (url, method = "GET", data, isFormData = false) => {
-  const headers = {};
-  if (!isFormData) headers["Content-Type"] = "application/json";
+import axios from 'axios';
 
-  const options = {
-    method,
-    headers,
-    credentials: "include", // في حالة وجود auth cookies
-  };
+const api = axios.create({
+  baseURL: `${process.env.NEXT_PUBLIC_BACK_URL}/api`,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-  if (data) {
-    options.body = isFormData ? data : JSON.stringify(data);
+// Request interceptor to add the auth token from localStorage
+api.interceptors.request.use(
+  (config) => {
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          if (user?.token) {
+            config.headers.Authorization = `Bearer ${user.token}`;
+          }
+        } catch (e) {
+          console.error("Error parsing user from localStorage", e);
+        }
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor for global error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Global handling for 401 Unauthorized
+    if (error.response?.status === 401) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('user');
+        localStorage.removeItem('loginState');
+        // Redirect to login if not already there
+        if (!window.location.pathname.includes('/Login')) {
+          window.location.href = '/Pages/Login';
+        }
+      }
+    }
+    return Promise.reject(error);
   }
+);
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${url}`, options);
-  const result = await response.json();
-
-  if (!response.ok) throw new Error(result.message || "حدث خطأ في السيرفر");
-  return result;
-};
+export default api;

@@ -1,74 +1,67 @@
 'use client';
 
-import axios from "axios";
 import { useCallback } from "react";
+import api from "@/app/utils/api";
 import { useFeedback } from "@/app/Context/FeedbackContext";
 import { MESSAGES } from "@/app/utils/messages";
 
 export const usePostActions = ({ user, setPosts, setIsLoading }) => {
   const { showToast } = useFeedback();
 
-  const getHeaders = useCallback(() => ({
-    headers: { Authorization: `Bearer ${user?.token}` }
-  }), [user?.token]);
-
-  const updatePostInState = useCallback((updatedPost) =>
-    setPosts((prev) => prev.map((p) => (p._id === updatedPost._id ? updatedPost : p))),
-    [setPosts]);
+  const updatePostInState = useCallback((updatedPost) => {
+    if (!updatedPost?._id) return;
+    setPosts((prev) => prev.map((p) => (p._id === updatedPost._id ? updatedPost : p)));
+  }, [setPosts]);
 
   const deletePost = useCallback(async (id) => {
     try {
-      const res = await axios.delete(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post/${id}`, getHeaders());
+      const res = await api.delete(`/post/${id}`);
       showToast(res.data.message || MESSAGES.POST.DELETE_SUCCESS, 'success');
       setPosts((prev) => prev.filter((p) => p._id !== id));
     } catch (err) {
       console.error(err);
       showToast(MESSAGES.POST.DELETE_ERROR, 'error');
     }
-  }, [getHeaders, setPosts, showToast]);
+  }, [setPosts, showToast]);
 
   const likePost = useCallback(async (postId) => {
     if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
     try {
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post/like/${postId}`, {}, getHeaders());
+      const res = await api.put(`/post/like/${postId}`, {});
       updatePostInState(res.data);
     } catch (err) {
       console.error(err);
     }
-  }, [user, getHeaders, updatePostInState, showToast]);
+  }, [user, updatePostInState, showToast]);
 
   const hahaPost = useCallback(async (postId) => {
     if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
     try {
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post/haha/${postId}`, {}, getHeaders());
+      const res = await api.put(`/post/haha/${postId}`, {});
       updatePostInState(res.data);
     } catch (err) {
       console.error(err);
     }
-  }, [user, getHeaders, updatePostInState, showToast]);
+  }, [user, updatePostInState, showToast]);
 
   const savePost = useCallback(async (id) => {
     if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
     try {
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post/save/${id}`, {}, getHeaders());
+      const res = await api.put(`/post/save/${id}`, {});
       updatePostInState(res.data);
       showToast(MESSAGES.COMMON.SAVED, 'success');
     } catch (err) {
       console.error(err);
       showToast('Failed to save post.', 'error');
     }
-  }, [user, getHeaders, updatePostInState, showToast]);
+  }, [user, updatePostInState, showToast]);
 
   const sharePost = useCallback(async (id, customText = "") => {
     if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
     setIsLoading(true);
     const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
     try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/share/${id}`,
-        { customText },
-        getHeaders()
-      );
+      const res = await api.post(`/post/share/${id}`, { customText });
       showToast('Success! Post shared to your profile.', 'success', { id: loadingToast });
       setPosts((prev) => [res.data, ...prev]);
     } catch (err) {
@@ -77,15 +70,11 @@ export const usePostActions = ({ user, setPosts, setIsLoading }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [user, getHeaders, setIsLoading, setPosts, showToast]);
+  }, [user, setIsLoading, setPosts, showToast]);
 
   const displayOrHideComments = useCallback(async (postId) => {
     try {
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/commentsOff/${postId}`,
-        {},
-        getHeaders()
-      );
+      const res = await api.put(`/post/commentsOff/${postId}`, {});
       if (res.data?.message) showToast(res.data.message, 'success');
       setPosts((prev) =>
         prev.map((p) => (p._id === postId ? { ...p, isCommentOff: !p.isCommentOff } : p))
@@ -93,9 +82,10 @@ export const usePostActions = ({ user, setPosts, setIsLoading }) => {
     } catch (err) {
       console.error("Failed to toggle comments:", err);
     }
-  }, [getHeaders, setPosts, showToast]);
+  }, [setPosts, showToast]);
 
   const copyPostLink = useCallback((postId) => {
+    if (typeof window === 'undefined') return;
     const link = `${window.location.origin}/Pages/Post/${postId}`;
     navigator.clipboard
       .writeText(link)
@@ -106,13 +96,14 @@ export const usePostActions = ({ user, setPosts, setIsLoading }) => {
   const viewPost = useCallback(async (postId) => {
     if (!user?.token) return;
     try {
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post/view/${postId}`, {}, getHeaders());
-      updatePostInState(res.data.post);
-      return res.data.post;
+      const res = await api.put(`/post/view/${postId}`, {});
+      const post = res.data.post || res.data;
+      updatePostInState(post);
+      return post;
     } catch (err) {
       console.error("Failed to register post view:", err);
     }
-  }, [user?.token, getHeaders, updatePostInState]);
+  }, [user?.token, updatePostInState]);
 
   return {
     likePost,

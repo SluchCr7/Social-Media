@@ -1,62 +1,67 @@
 'use client';
-import { createContext, useContext, useState } from 'react';
-import axios from 'axios';
-import { useAuth } from './AuthContext';
+
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import api from '../utils/api';
 import { useAlert } from './AlertContext';
 
 const VerifyContext = createContext();
-export const useVerify = () => useContext(VerifyContext);
+
+export const useVerify = () => {
+  const context = useContext(VerifyContext);
+  if (!context) {
+    throw new Error('useVerify must be used within a VerifyContextProvider');
+  }
+  return context;
+};
 
 export const VerifyContextProvider = ({ children }) => {
-    const { user } = useAuth();
-    const {showAlert} = useAlert()
-    const [verifyStatus, setVerifyStatus] = useState(false);
+  const { showAlert } = useAlert();
+  const [verifyStatus, setVerifyStatus] = useState(false);
 
-    const ResetPassword = async (id, token, password) => {
+  const ResetPassword = useCallback(async (id, token, password) => {
     if (!password) return showAlert('All fields are required');
     try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/password/reset-password/${id}/${token}`, { password }, {
-        headers: { authorization: `Bearer ${user.token}` }
-        });
-        showAlert(res.data.message);
+      // Correcting to POST since we are sending a password
+      const res = await api.post(`/password/reset-password/${id}/${token}`, { password });
+      showAlert(res.data.message || 'Password reset successfully');
     } catch (err) {
-        console.error(err);
+      console.error(err);
+      showAlert(err.response?.data?.message || 'Failed to reset password');
     }
-    };
+  }, [showAlert]);
 
-    const ForgetEmail = async (email) => {
+  const ForgetEmail = useCallback(async (email) => {
     if (!email) return showAlert('Email field is required');
     try {
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/password/reset`, { email }, {
-        headers: { authorization: `Bearer ${user.token}` }
-        });
-        showAlert(res.data);
+      const res = await api.post('/password/reset', { email });
+      showAlert(res.data.message || res.data || 'Reset link sent to your email');
     } catch (err) {
-        console.error(err);
+      console.error(err);
+      showAlert(err.response?.data?.message || 'Failed to send reset email');
     }
-    };
+  }, [showAlert]);
 
-
-    const verifyAccount = async (id, token) => {
+  const verifyAccount = useCallback(async (id, token) => {
     try {
-        await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/${id}/verify/${token}`);
-        setVerifyStatus(true);
-        showAlert('Account Verified');
+      await api.get(`/auth/${id}/verify/${token}`);
+      setVerifyStatus(true);
+      showAlert('Account Verified');
     } catch (err) {
-        console.error(err);
+      console.error(err);
+      showAlert(err.response?.data?.message || 'Verification failed');
     }
-    };
-    
+  }, [showAlert]);
 
+  const value = useMemo(() => ({
+    verifyAccount,
+    ResetPassword,
+    ForgetEmail,
+    verifyStatus,
+    setVerifyStatus
+  }), [verifyAccount, ResetPassword, ForgetEmail, verifyStatus]);
 
   return (
-    <VerifyContext.Provider
-          value={{
-            verifyAccount,
-            ResetPassword,
-            ForgetEmail,verifyStatus,setVerifyStatus
-      }}
-    >
+    <VerifyContext.Provider value={value}>
       {children}
     </VerifyContext.Provider>
   );

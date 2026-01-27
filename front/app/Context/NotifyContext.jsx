@@ -1,7 +1,7 @@
 'use client';
 
-import axios from "axios";
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
+import api from "../utils/api";
 import { useAuth } from "./AuthContext";
 import { useSocket } from "./SocketContext";
 import { useFeedback } from "./FeedbackContext";
@@ -23,10 +23,6 @@ export const NotifyContextProvider = ({ children }) => {
   const { socket } = useSocket();
   const { showToast } = useFeedback();
 
-  const getAuthHeader = useCallback(() => ({
-    headers: { Authorization: `Bearer ${user?.token}` },
-  }), [user?.token]);
-
   // --- Persistent Notification Actions ---
 
   /**
@@ -35,58 +31,44 @@ export const NotifyContextProvider = ({ children }) => {
   const addNotify = useCallback(async ({ content, type = 'custom', receiverId, actionRef, actionModel }) => {
     if (!receiverId || receiverId === user?._id || !user?.token) return;
     try {
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/notification/${receiverId}`,
-        { content, type, actionRef, actionModel },
-        getAuthHeader()
-      );
+      await api.post(`/notification/${receiverId}`, { content, type, actionRef, actionModel });
     } catch (err) {
       console.error('Failed to send notification:', err);
     }
-  }, [user?._id, user?.token, getAuthHeader]);
+  }, [user?._id, user?.token]);
 
   /**
    * Delete a single notification
    */
   const deleteNotify = useCallback(async (id) => {
     try {
-      await axios.delete(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/notification/${id}`,
-        getAuthHeader()
-      );
+      await api.delete(`/notification/${id}`);
       setNotificationsByUser(prev => prev.filter(n => n._id !== id));
     } catch (err) {
       console.error('Failed to delete notification:', err);
     }
-  }, [getAuthHeader]);
+  }, []);
 
   /**
    * Clear all user notifications
    */
   const clearAllNotifications = useCallback(async () => {
     try {
-      await axios.delete(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/notification/clear`,
-        getAuthHeader()
-      );
+      await api.delete('/notification/clear');
       setNotificationsByUser([]);
       setUnreadCount(0);
       showToast('Notifications cleared successfully.', 'success');
     } catch (err) {
       console.error('Failed to clear notifications:', err);
     }
-  }, [getAuthHeader, showToast]);
+  }, [showToast]);
 
   /**
    * Mark a notification as read
    */
   const markAsRead = useCallback(async (id) => {
     try {
-      await axios.patch(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/notification/${id}/read`,
-        {},
-        getAuthHeader()
-      );
+      await api.patch(`/notification/${id}/read`, {});
       setNotificationsByUser(prev =>
         prev.map(n => (n._id === id ? { ...n, isRead: true } : n))
       );
@@ -94,24 +76,20 @@ export const NotifyContextProvider = ({ children }) => {
     } catch (err) {
       console.error('Failed to mark notification as read:', err);
     }
-  }, [getAuthHeader]);
+  }, []);
 
   /**
    * Mark all notifications as read
    */
   const markAllAsRead = useCallback(async () => {
     try {
-      await axios.patch(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/notification/read-all`,
-        {},
-        getAuthHeader()
-      );
+      await api.patch('/notification/read-all', {});
       setNotificationsByUser(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (err) {
       console.error('Failed to mark all notifications as read:', err);
     }
-  }, [getAuthHeader]);
+  }, []);
 
   /**
    * Fetch all notifications for current user
@@ -119,15 +97,12 @@ export const NotifyContextProvider = ({ children }) => {
   const fetchUserNotifications = useCallback(async () => {
     if (!user?.token) return;
     try {
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/notification/user`,
-        getAuthHeader()
-      );
-      setNotificationsByUser(res.data);
+      const res = await api.get('/notification/user');
+      setNotificationsByUser(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
     }
-  }, [user?.token, getAuthHeader]);
+  }, [user?.token]);
 
   /**
    * Fetch unread notifications count
@@ -135,15 +110,12 @@ export const NotifyContextProvider = ({ children }) => {
   const fetchUnreadCount = useCallback(async () => {
     if (!user?.token) return;
     try {
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/notification/user/unread-count`,
-        getAuthHeader()
-      );
-      setUnreadCount(res.data.unreadCount);
+      const res = await api.get('/notification/user/unread-count');
+      setUnreadCount(res.data.unreadCount || 0);
     } catch (err) {
       console.error('Failed to fetch unread count:', err);
     }
-  }, [user?.token, getAuthHeader]);
+  }, [user?.token]);
 
   // --- Real-time Socket Listener ---
   useEffect(() => {

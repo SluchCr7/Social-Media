@@ -1,19 +1,12 @@
 'use client';
 
-import axios from "axios";
 import { useCallback } from "react";
+import api from "@/app/utils/api";
 import { useFeedback } from "@/app/Context/FeedbackContext";
 import { MESSAGES } from "@/app/utils/messages";
 
 export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, setIsLoading }) => {
   const { showToast } = useFeedback();
-
-  const getHeaders = useCallback((isFormData = false) => ({
-    headers: {
-      Authorization: `Bearer ${user?.token}`,
-      ...(isFormData ? { "Content-Type": "multipart/form-data" } : { "Content-Type": "application/json" }),
-    }
-  }), [user?.token]);
 
   /**
    * Add a new post
@@ -44,11 +37,9 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
     const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
 
     try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/add`,
-        formData,
-        getHeaders(true)
-      );
+      const res = await api.post('/post/add', formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
 
       const newPost = res.data?.post || res.data;
 
@@ -65,7 +56,7 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
     } finally {
       setIsLoadingPostCreated(false);
     }
-  }, [user, getHeaders, setIsLoadingPostCreated, setPosts, showToast]);
+  }, [user, setIsLoadingPostCreated, setPosts, showToast]);
 
   /**
    * Edit an existing post
@@ -90,11 +81,9 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
       }
       if (links?.length > 0) formData.append('links', JSON.stringify(links));
 
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/edit/${id}`,
-        formData,
-        getHeaders(true)
-      );
+      const res = await api.put(`/post/edit/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
 
       const updatedPost = res.data?.post || res.data;
       showToast(MESSAGES.POST.UPDATE_SUCCESS, 'success', { id: loadingToast });
@@ -107,7 +96,7 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
     } finally {
       setIsLoading(false);
     }
-  }, [user, getHeaders, setIsLoading, setPosts, showToast]);
+  }, [user, setIsLoading, setPosts, showToast]);
 
   return { AddPost, editPost };
 };

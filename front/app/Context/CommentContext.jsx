@@ -1,7 +1,7 @@
 'use client';
 
-import axios from 'axios';
 import { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import api from '../utils/api';
 import { useAuth } from './AuthContext';
 import { useFeedback } from './FeedbackContext';
 import { MESSAGES } from '../utils/messages';
@@ -47,16 +47,11 @@ export const CommentContextProvider = ({ children }) => {
     if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
 
     try {
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/like/${commentId}`,
-        {},
-        { headers: { Authorization: `Bearer ${user.token}` } }
-      );
+      const res = await api.put(`/comment/like/${commentId}`, {});
 
-      const updatedComment = res.data.comment;
+      const updatedComment = res.data.comment || res.data;
       setComments(prev => updateCommentInTree(prev, updatedComment));
 
-      // showToast(res.data.message, 'success'); // Optional, might be too noisy
       return updatedComment;
     } catch (err) {
       console.error('Like comment error:', err);

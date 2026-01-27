@@ -1,7 +1,7 @@
 'use client';
 
-import axios from "axios";
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
+import api from "../utils/api";
 import { useAuth } from "./AuthContext";
 import { usePostActions } from "../Custome/Post/usePostActions";
 import { usePostManagement } from "../Custome/Post/usePostManage";
@@ -38,31 +38,18 @@ export const PostContextProvider = ({ children }) => {
   const [userHasMore, setUserHasMore] = useState(true);
   const [userIsLoading, setUserIsLoading] = useState(false);
 
-  // --- External Hooks ---
-  const postManagement = usePostManagement({
-    user,
-    setPosts,
-    setIsLoadingPostCreated,
-    setIsLoading
-  });
-
-  const postActions = usePostActions({
-    user,
-    setPosts,
-    setIsLoading
-  });
-
   // --- Actions ---
 
   /**
    * Fetch home feed posts with pagination
    */
   const fetchPosts = useCallback(async (pageNum = 1) => {
-    if (!hasMore && pageNum !== 1) return;
+    // If it's not the first page and we know there's no more, return
+    if (pageNum !== 1 && !hasMore) return;
 
     setIsLoading(true);
     try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post?page=${pageNum}&limit=10`);
+      const res = await api.get(`/post?page=${pageNum}&limit=10`);
       const fetchedPosts = Array.isArray(res.data.posts) ? res.data.posts : [];
 
       setPosts(prev => (pageNum === 1 ? fetchedPosts : [...prev, ...fetchedPosts]));
@@ -78,11 +65,11 @@ export const PostContextProvider = ({ children }) => {
    * Fetch posts for a specific user profile
    */
   const fetchUserPosts = useCallback(async (userId, pageNum = 1, limit = 5) => {
+    if (!userId) return;
+
     setUserIsLoading(true);
     try {
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/post/user/${userId}?page=${pageNum}&limit=${limit}`
-      );
+      const res = await api.get(`/post/user/${userId}?page=${pageNum}&limit=${limit}`);
       const fetchedPosts = Array.isArray(res.data.posts) ? res.data.posts : [];
 
       setUserPosts(prev => (pageNum === 1 ? fetchedPosts : [...prev, ...fetchedPosts]));
@@ -98,8 +85,9 @@ export const PostContextProvider = ({ children }) => {
    * Get post by ID
    */
   const getPostById = useCallback(async (id) => {
+    if (!id) return null;
     try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/post/${id}`);
+      const res = await api.get(`/post/${id}`);
       return res.data;
     } catch (err) {
       console.error("Error fetching post by ID:", err);
@@ -107,9 +95,32 @@ export const PostContextProvider = ({ children }) => {
     }
   }, []);
 
+  // --- External Hooks (passed state setters) ---
+  const postManagement = usePostManagement({
+    user,
+    setPosts,
+    setIsLoadingPostCreated,
+    setIsLoading
+  });
+
+  const postActions = usePostActions({
+    user,
+    setPosts,
+    setIsLoading
+  });
+
   // --- Effects ---
+
+  // Initial fetch of posts
   useEffect(() => {
-    fetchPosts(page);
+    fetchPosts(1);
+  }, [fetchPosts]);
+
+  // Fetch more posts when page changes (only for page > 1 as 1 is handled above)
+  useEffect(() => {
+    if (page > 1) {
+      fetchPosts(page);
+    }
   }, [page, fetchPosts]);
 
   // --- Context Value ---
@@ -127,6 +138,7 @@ export const PostContextProvider = ({ children }) => {
     setPostIsEdit,
     hasMore,
     setPage,
+    page,
     userPosts,
     userHasMore,
     userIsLoading,
@@ -139,7 +151,7 @@ export const PostContextProvider = ({ children }) => {
     ...postActions,
   }), [
     posts, isLoading, isLoadingPostCreated, imageView, showPostModelEdit,
-    postIsEdit, hasMore, userPosts, userHasMore, userIsLoading,
+    postIsEdit, hasMore, page, userPosts, userHasMore, userIsLoading,
     fetchPosts, fetchUserPosts, getPostById, postManagement, postActions
   ]);
 

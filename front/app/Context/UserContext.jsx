@@ -1,7 +1,7 @@
 'use client';
 
-import axios from 'axios';
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import api from '../utils/api';
 import { useAuth } from './AuthContext';
 import { useFeedback } from './FeedbackContext';
 import { useSocket } from './SocketContext';
@@ -28,12 +28,15 @@ export const UserContextProvider = ({ children }) => {
   const [suggestedUsers, setSuggestedUsers] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
 
-  // --- Helper for Authorized Requests ---
-  const getAuthHeader = useCallback(() => ({
-    headers: { Authorization: `Bearer ${user?.token}` }
-  }), [user?.token]);
-
   // --- Actions ---
+
+  /**
+   * Helper to update user state locally and in localStorage
+   */
+  const updateLocalUser = useCallback((updatedUserData) => {
+    setUser(updatedUserData);
+    localStorage.setItem('user', JSON.stringify(updatedUserData));
+  }, [setUser]);
 
   /**
    * Toggle follow/unfollow for a user
@@ -43,11 +46,7 @@ export const UserContextProvider = ({ children }) => {
 
     setLoading(true);
     try {
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/follow/${targetId}`,
-        {},
-        getAuthHeader()
-      );
+      const res = await api.put(`/auth/follow/${targetId}`, {});
 
       const { message, userId } = res.data;
       const isFollowed = message === 'Followed successfully';
@@ -73,49 +72,42 @@ export const UserContextProvider = ({ children }) => {
         ? { ...user, following: [...(user.following || []), { _id: userId }] }
         : { ...user, following: (user.following || []).filter((f) => f._id !== userId) };
 
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      updateLocalUser(updatedUser);
     } catch (err) {
       console.error('Follow error:', err);
       showToast(err.response?.data?.message || MESSAGES.COMMON.ERROR_OCCURRED, 'error');
     } finally {
       setLoading(false);
     }
-  }, [user, getAuthHeader, setUser, setUsers, showToast]);
+  }, [user, setUser, setUsers, showToast, updateLocalUser]);
 
   /**
    * Update profile photo
    */
   const updatePhoto = useCallback(async (photoFile) => {
+    if (!photoFile) return;
+
     const formData = new FormData();
     formData.append('image', photoFile);
 
     const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
     try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/photo`,
-        formData,
-        {
-          headers: {
-            ...getAuthHeader().headers,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
+      const res = await api.post('/auth/photo', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
 
       const updatedUser = {
         ...user,
         profilePhoto: res.data?.profilePhoto || res.data,
       };
 
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      updateLocalUser(updatedUser);
       showToast(MESSAGES.USER.PHOTO_UPDATE_SUCCESS, 'success', { id: loadingToast });
     } catch (err) {
       console.error('Photo update error:', err);
       showToast(MESSAGES.USER.PHOTO_UPDATE_ERROR, 'error', { id: loadingToast });
     }
-  }, [user, getAuthHeader, setUser, showToast]);
+  }, [user, showToast, updateLocalUser]);
 
   /**
    * Update profile information
@@ -128,7 +120,7 @@ export const UserContextProvider = ({ children }) => {
     ];
 
     allowedFields.forEach(key => {
-      const newValue = fields[key]?.trim?.() || fields[key];
+      const newValue = typeof fields[key] === 'string' ? fields[key].trim() : fields[key];
       if (newValue !== undefined && newValue !== user[key]) {
         payload[key] = newValue;
       }
@@ -158,17 +150,12 @@ export const UserContextProvider = ({ children }) => {
     const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
 
     try {
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update`,
-        payload,
-        getAuthHeader()
-      );
+      const res = await api.put('/auth/update', payload);
 
       const newUserData = res.data.user || res.data;
       const updatedUser = { ...user, ...newUserData, token: user.token };
 
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      updateLocalUser(updatedUser);
       showToast(MESSAGES.USER.PROFILE_UPDATE_SUCCESS, 'success', { id: loadingToast });
 
       setTimeout(() => window.location.reload(), 1000);
@@ -178,7 +165,7 @@ export const UserContextProvider = ({ children }) => {
     } finally {
       setUpdateProfileLoading(false);
     }
-  }, [user, getAuthHeader, setUser, showToast]);
+  }, [user, showToast, updateLocalUser]);
 
   /**
    * Update password
@@ -186,16 +173,12 @@ export const UserContextProvider = ({ children }) => {
   const updatePassword = useCallback(async (password) => {
     const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
     try {
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/update/pass`,
-        { password },
-        getAuthHeader()
-      );
+      const res = await api.put('/auth/update/pass', { password });
       showToast(res.data.message || MESSAGES.AUTH.PASSWORD_UPDATE_SUCCESS, 'success', { id: loadingToast });
     } catch (err) {
       showToast(MESSAGES.AUTH.PASSWORD_UPDATE_ERROR, 'error', { id: loadingToast });
     }
-  }, [getAuthHeader, showToast]);
+  }, [showToast]);
 
   /**
    * Toggle account privacy
@@ -203,25 +186,22 @@ export const UserContextProvider = ({ children }) => {
   const togglePrivateAccount = useCallback(async () => {
     if (!user) return;
     try {
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/account/private`,
-        {},
-        getAuthHeader()
-      );
+      await api.put('/auth/account/private', {});
       const isPrivate = !user.isPrivate;
-      setUser(prev => ({ ...prev, isPrivate }));
+      updateLocalUser({ ...user, isPrivate });
       showToast(MESSAGES.USER.PRIVACY_UPDATE(isPrivate), 'success');
     } catch (err) {
       showToast('Failed to update privacy settings.', 'error');
     }
-  }, [user, getAuthHeader, setUser, showToast]);
+  }, [user, showToast, updateLocalUser]);
 
   /**
    * Fetch user by ID
    */
   const getUserById = useCallback(async (id) => {
+    if (!id) return null;
     try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/${id}`);
+      const res = await api.get(`/auth/${id}`);
       return res.data;
     } catch (err) {
       console.error('Fetch user error:', err);
@@ -234,77 +214,60 @@ export const UserContextProvider = ({ children }) => {
    */
   const saveMusicInPlayList = useCallback(async (musicId) => {
     try {
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/save/music/${musicId}`,
-        {},
-        getAuthHeader()
-      );
+      const res = await api.put(`/auth/save/music/${musicId}`, {});
       showToast(res.data.message || MESSAGES.COMMON.SAVED, 'success');
       return res.data;
     } catch (err) {
       showToast('Failed to save music.', 'error');
       return null;
     }
-  }, [getAuthHeader, showToast]);
+  }, [showToast]);
 
   /**
    * Block notifications from a specific user
    */
   const toggleBlockNotification = useCallback(async (targetUserId) => {
     try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/block/notify/${targetUserId}`,
-        {},
-        getAuthHeader()
-      );
+      const res = await api.post(`/auth/block/notify/${targetUserId}`, {});
 
       const updatedUser = {
         ...user,
         BlockedNotificationFromUsers: res.data.blockedUsers || [],
       };
 
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      updateLocalUser(updatedUser);
       showToast(res.data.message || 'Preferences updated.', 'success');
       return res.data;
     } catch (err) {
       showToast('Failed to update notification settings.', 'error');
     }
-  }, [user, getAuthHeader, setUser, showToast]);
+  }, [user, updateLocalUser, showToast]);
 
   /**
    * Save/Unsave a reel
    */
   const toggleSaveReel = useCallback(async (reelId) => {
     try {
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/save/reel/${reelId}`,
-        {},
-        getAuthHeader()
-      );
+      const res = await api.put(`/auth/save/reel/${reelId}`, {});
       showToast(res.data.message || MESSAGES.COMMON.SAVED, 'success');
       return res.data;
     } catch (err) {
       showToast('Failed to update reel status.', 'error');
       return null;
     }
-  }, [getAuthHeader, showToast]);
+  }, [showToast]);
 
   /**
    * Pin a post to profile
    */
   const pinPost = useCallback(async (postId) => {
     try {
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/pin/${postId}`,
-        {},
-        getAuthHeader()
-      );
+      const res = await api.put(`/auth/pin/${postId}`, {});
       showToast(res.data.message || MESSAGES.POST.PIN_SUCCESS, 'success');
     } catch (err) {
       showToast('Failed to pin post.', 'error');
     }
-  }, [getAuthHeader, showToast]);
+  }, [showToast]);
 
   // --- Effects ---
 
@@ -313,17 +276,14 @@ export const UserContextProvider = ({ children }) => {
     const fetchSuggested = async () => {
       if (!user?.token) return;
       try {
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth/suggested`,
-          getAuthHeader()
-        );
-        setSuggestedUsers(res.data);
+        const res = await api.get('/auth/suggested');
+        setSuggestedUsers(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error('Suggested users fetch error:', err);
       }
     };
     fetchSuggested();
-  }, [user?.token, getAuthHeader]);
+  }, [user?.token]);
 
   // Handle Socket Events for Online Users
   useEffect(() => {
