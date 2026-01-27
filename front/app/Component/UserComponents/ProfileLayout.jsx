@@ -99,49 +99,52 @@ const ProfileLayout = ({
           <AdultContentWarning />
         )
       }
-      {/* ⚡ Highlights Bar - تم إلغاء التعليق عنه */}
-      <HighlightsBar
-        highlights={user?.highlights}
-        onAddHighlight={handleAddHighlight}   // لفتح قائمة الإضافة
-        isOwner={isOwner}                     // لتحديد إمكانية عرض زر 'New'
-      />
-      
-      {/* 🧾 معلومات المستخدم */}
-      <InfoAboutUser user={user} />
+      <div className="w-full max-w-7xl mx-auto flex flex-col gap-6 items-start">
+        {/* ⚡ Highlights Bar - تم إلغاء التعليق عنه */}
 
-      {/* 🧭 التبويبات والمحتوى */}
-      <div className="flex flex-col gap-6 w-full">
-        <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        <HighlightsBar
+          highlights={user?.highlights}
+          onAddHighlight={handleAddHighlight}   // لفتح قائمة الإضافة
+          isOwner={isOwner}                     // لتحديد إمكانية عرض زر 'New'
+        />
+        
+        {/* 🧾 معلومات المستخدم */}
+        <InfoAboutUser user={user} />
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="w-full"
-          >
-            {activeTab === "Posts" && (
-              <FilterBar filters={filters} setFilters={setFilters} years={postYears} />
-            )}
+        {/* 🧭 التبويبات والمحتوى */}
+        <div className="flex flex-col gap-6 w-full">
+          <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-            <TabsContent
-              activeTab={activeTab}
-              combinedPosts={combinedPosts}
-              userSelected={user}
-              filters={filters}
-            />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="w-full"
+            >
+              {activeTab === "Posts" && (
+                <FilterBar filters={filters} setFilters={setFilters} years={postYears} />
+              )}
 
-            {userHasMore && (
-              <div ref={loaderRef} className="flex justify-center py-6">
-                <span className="text-gray-500">
-                  <PostSkeleton className="animate-pulse" />
-                </span>
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
+              <TabsContent
+                activeTab={activeTab}
+                combinedPosts={combinedPosts}
+                userSelected={user}
+                filters={filters}
+              />
+
+              {userHasMore && (
+                <div ref={loaderRef} className="flex justify-center py-6">
+                  <span className="text-gray-500">
+                    <PostSkeleton className="animate-pulse" />
+                  </span>
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* 👁️ عارض الـ Highlight (HighlightViewerModal) */}
