@@ -522,24 +522,33 @@ const updateProfile = asyncHandler(async (req, res) => {
 });
 
 const updatePassword = asyncHandler(async (req, res) => {
-  const { error } = validatePasswordUpdate(req.body)
+  const { error } = validatePasswordUpdate(req.body);
   if (error) {
-    return res.status(400).json({ message: error.details[0].message })
+    return res.status(400).json({ message: error.details[0].message });
   }
-  if (req.body.password) {
-    const salt = await bcrypt.genSalt(10)
-    req.body.password = await bcrypt.hash(req.body.password, salt)
+
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
   }
-  const updateUserPass = await User.findByIdAndUpdate(req.user._id, {
-    $set: {
-      password: req.body.password
-    }
-  }, { new: true })
+
+  // Verification: compare old password
+  const isMatch = await bcrypt.compare(req.body.oldPassword, user.password);
+  if (!isMatch) {
+    return res.status(400).json({ message: "Old password is incorrect" });
+  }
+
+  // Hash new password
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(req.body.newPassword, salt);
+
+  user.password = hashedPassword;
+  await user.save();
+
   return res.status(200).json({
-    message: `Password Updated Successfully`,
-    updateUserPass,
-  })
-})
+    message: "Password Updated Successfully",
+  });
+});
 
 const pinPost = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id)

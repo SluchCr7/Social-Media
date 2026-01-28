@@ -170,15 +170,33 @@ export const UserContextProvider = ({ children }) => {
   /**
    * Update password
    */
-  const updatePassword = useCallback(async (password) => {
+  const updatePassword = useCallback(async ({ oldPassword, newPassword }) => {
     const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
     try {
-      const res = await api.put('/auth/update/pass', { password });
+      const res = await api.put('/auth/update/pass', { oldPassword, newPassword });
       showToast(res.data.message || MESSAGES.AUTH.PASSWORD_UPDATE_SUCCESS, 'success', { id: loadingToast });
+      return { success: true };
     } catch (err) {
-      showToast(MESSAGES.AUTH.PASSWORD_UPDATE_ERROR, 'error', { id: loadingToast });
+      showToast(err.response?.data?.message || MESSAGES.AUTH.PASSWORD_UPDATE_ERROR, 'error', { id: loadingToast });
+      return { error: err.response?.data?.message };
     }
   }, [showToast]);
+
+  /**
+   * Toggle offline/online visibility
+   */
+  const toggleShowOnlineStatus = useCallback(async () => {
+    if (!user) return;
+    try {
+      const res = await api.put('/auth/update', { showOnlineStatus: !user.showOnlineStatus });
+      const updatedUser = { ...user, showOnlineStatus: !user.showOnlineStatus };
+      updateLocalUser(updatedUser);
+      showToast('Activity status updated.', 'success');
+      return res.data;
+    } catch (err) {
+      showToast('Failed to update activity status.', 'error');
+    }
+  }, [user, updateLocalUser, showToast]);
 
   /**
    * Toggle account privacy
@@ -303,6 +321,7 @@ export const UserContextProvider = ({ children }) => {
     updateProfile,
     updatePassword,
     togglePrivateAccount,
+    toggleShowOnlineStatus,
     getUserById,
     saveMusicInPlayList,
     toggleBlockNotification,
@@ -311,7 +330,7 @@ export const UserContextProvider = ({ children }) => {
   }), [
     suggestedUsers, onlineUsers, loading, updateProfileLoading,
     followUser, updatePhoto, updateProfile, updatePassword,
-    togglePrivateAccount, getUserById, saveMusicInPlayList,
+    togglePrivateAccount, toggleShowOnlineStatus, getUserById, saveMusicInPlayList,
     toggleBlockNotification, toggleSaveReel, pinPost
   ]);
 

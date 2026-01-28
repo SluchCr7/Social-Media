@@ -76,7 +76,7 @@ const Search = () => {
   // -------------------------------
   if (!userData) {
     return (
-      <Loading/>
+      <Loading />
     );
   }
 

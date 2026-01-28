@@ -19,7 +19,10 @@ import {
   HiPlay,
   HiSignal,
   HiCalendarDays,
-  HiCommandLine
+  HiCommandLine,
+  HiSparkles,
+  HiEye,
+  HiHeart
 } from 'react-icons/hi2';
 import Image from 'next/image';
 import { useHighlights } from '@/app/Context/HighlightContext';
@@ -34,8 +37,8 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
   allStories = [],
 }) {
   const { isRTL } = useTranslate();
-  const { addStoryToHighlight, deleteHighlight, updateHighlight, removeStoryFromHighlight } = useHighlights(); // ✅ Added removeStoryFromHighlight
-  const { user } = useAuth(); // ✅ Need user to check ownership
+  const { addStoryToHighlight, deleteHighlight, updateHighlight, removeStoryFromHighlight } = useHighlights();
+  const { user } = useAuth();
   const { t } = useTranslation();
 
   const stories = useMemo(() => highlight?.archivedStories || [], [highlight]);
@@ -45,7 +48,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [search, setSearch] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [isEditing, setIsEditing] = useState(false); // ✅ Edit Mode
+  const [isEditing, setIsEditing] = useState(false);
 
   // Edit State
   const [editTitle, setEditTitle] = useState(highlight?.title || '');
@@ -55,10 +58,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
   const rafRef = useRef(null);
   const lastTimeRef = useRef(null);
   const STORY_DURATION_MS = 6000;
-  useEffect(() => {
-    console.log(highlight)
-    console.log(`stories : ${highlight.stories}`)
-  }, [highlight])
+
   // Cleanup preview
   useEffect(() => {
     return () => {
@@ -66,12 +66,11 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
     };
   }, [editPreview]);
 
-  const isOwner = user?._id === highlight?.user; // Check ownership
+  const isOwner = user?._id === highlight?.user;
 
   const getPhoto = useCallback((story) => {
     if (!story) return '/placeholder.jpg';
 
-    // Try Photo (capital P) first
     if (story.Photo) {
       if (Array.isArray(story.Photo) && story.Photo.length > 0) {
         return story.Photo[0];
@@ -81,7 +80,6 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
       }
     }
 
-    // Fallback to photo (lowercase)
     if (story.photo) {
       if (Array.isArray(story.photo) && story.photo.length > 0) {
         return story.photo[0];
@@ -111,7 +109,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
   }, [currentIndex]);
 
   useEffect(() => {
-    if (isEditing) return; // Pause timer when editing
+    if (isEditing) return;
 
     const tick = (now) => {
       if (isPaused) {
@@ -121,8 +119,6 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
       }
       if (lastTimeRef.current == null) lastTimeRef.current = now;
       const elapsed = now - lastTimeRef.current;
-      const speed = isPaused ? 0 : (100 / STORY_DURATION_MS);
-      const delta = (elapsed * speed) / 1000;
 
       setProgress(prev => {
         const nextVal = prev + (elapsed / STORY_DURATION_MS) * 100;
@@ -166,19 +162,6 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
   const currentStory = stories[currentIndex];
   const currentPhoto = getPhoto(currentStory);
 
-  // Debug logging
-  useEffect(() => {
-    if (highlight && stories.length > 0) {
-      console.log('📸 Highlight Stories Debug:', {
-        highlightTitle: highlight.title,
-        totalStories: stories.length,
-        firstStory: stories[0],
-        currentStory: currentStory,
-        currentPhoto: currentPhoto
-      });
-    }
-  }, [highlight, stories, currentStory, currentPhoto]);
-
   if (!highlight) return null;
 
   return (
@@ -187,23 +170,24 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[1000] flex items-center justify-center bg-[#050505]/95 backdrop-blur-3xl overflow-hidden"
+        className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/98 backdrop-blur-3xl overflow-hidden"
       >
-        {/* Cinematic Particles */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-indigo-500/5 blur-[120px] rounded-full" />
+        {/* Ambient Particles */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 blur-[150px] rounded-full animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 blur-[150px] rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
         </div>
 
-        {/* 🎬 Viewer Console */}
-        <div className="relative w-full h-full max-w-5xl md:h-[90vh] flex flex-col md:rounded-[3rem] bg-black shadow-2xl border border-white/10 overflow-hidden">
+        {/* Main Viewer Container */}
+        <div className="relative w-full h-full max-w-6xl md:h-[92vh] flex flex-col md:rounded-[3rem] bg-gradient-to-br from-black via-gray-900 to-black shadow-2xl border border-white/10 overflow-hidden">
 
           {/* Progress Indicators */}
           {!isEditing && (
             <div className="absolute top-6 left-10 right-10 z-[100] flex gap-2">
               {stories.map((_, idx) => (
-                <div key={idx} className="flex-1 h-1 rounded-full bg-white/20 overflow-hidden">
+                <div key={idx} className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden backdrop-blur-sm">
                   <motion.div
-                    className="h-full bg-white"
+                    className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
                     style={{ width: idx < currentIndex ? '100%' : idx === currentIndex ? `${progress}%` : '0%' }}
                     transition={{ ease: 'linear', duration: 0 }}
                   />
@@ -213,27 +197,26 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
           )}
 
           {/* Top Control Rail */}
-          <div className="absolute top-12 left-10 right-10 z-[100] flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl overflow-hidden border border-white/20 relative">
-                <Image src={highlight.coverImage || '/placeholder.jpg'} width={48} height={48} alt="Cover" className="object-cover h-full" />
+          <div className="absolute top-14 left-10 right-10 z-[100] flex items-center justify-between">
+            <div className="flex items-center gap-4 backdrop-blur-xl bg-black/30 px-6 py-3 rounded-2xl border border-white/10">
+              <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-white/20 relative shadow-xl">
+                <Image src={highlight.coverImage || '/placeholder.jpg'} width={56} height={56} alt="Cover" className="object-cover h-full" />
               </div>
               <div className="text-white">
                 <h3 className="text-sm font-black uppercase tracking-widest">{highlight.title}</h3>
                 <div className="flex items-center gap-2 text-[10px] text-indigo-400 font-bold">
                   <HiSignal className="animate-pulse" />
-                  SIGNAL {currentIndex + 1} / {stories.length}
+                  MEMORY {currentIndex + 1} / {stories.length}
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Controls */}
               {!isEditing && (
                 <>
                   <button
                     onClick={() => setIsPaused(!isPaused)}
-                    className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all"
+                    className="w-12 h-12 rounded-xl bg-white/5 hover:bg-white/10 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white transition-all hover:scale-105"
                   >
                     {isPaused ? <HiPlay className="w-5 h-5" /> : <HiPause className="w-5 h-5" />}
                   </button>
@@ -242,21 +225,21 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
                     <>
                       <button
                         onClick={() => setIsEditing(true)}
-                        className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all"
+                        className="w-12 h-12 rounded-xl bg-white/5 hover:bg-indigo-600 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white transition-all hover:scale-105"
                         title={t("Edit Highlight")}
                       >
                         <HiCommandLine className="w-5 h-5" />
                       </button>
                       <button
                         onClick={() => setShowAddMenu(true)}
-                        className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-indigo-600 text-white font-black text-[10px] uppercase tracking-widest transition-all"
+                        className="hidden sm:flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 hover:bg-indigo-600 backdrop-blur-xl border border-white/10 text-white font-black text-[10px] uppercase tracking-widest transition-all hover:scale-105"
                       >
-                        <HiPlus className="w-4 h-4" /> {t("Inject Data")}
+                        <HiPlus className="w-4 h-4" /> {t("Add Memory")}
                       </button>
 
                       <button
                         onClick={() => setConfirmDelete(true)}
-                        className="w-10 h-10 rounded-xl bg-white/5 hover:bg-rose-500 text-white flex items-center justify-center transition-all"
+                        className="w-12 h-12 rounded-xl bg-white/5 hover:bg-rose-500 backdrop-blur-xl border border-white/10 text-white flex items-center justify-center transition-all hover:scale-105"
                       >
                         <HiTrash className="w-5 h-5" />
                       </button>
@@ -267,7 +250,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
 
               <button
                 onClick={onClose}
-                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white transition-all"
+                className="w-12 h-12 rounded-xl bg-white/5 hover:bg-white/10 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white transition-all hover:scale-105"
               >
                 <HiXMark className="w-6 h-6" />
               </button>
@@ -279,16 +262,21 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
             {isEditing ? (
               <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className="absolute inset-0 z-20 flex items-center justify-center bg-black/80 backdrop-blur-xl"
+                className="absolute inset-0 z-20 flex items-center justify-center bg-black/90 backdrop-blur-2xl"
               >
-                <div className="w-full max-w-md p-8 bg-[#0A0A0A] border border-white/10 rounded-3xl space-y-6">
-                  <h3 className="text-xl font-black text-white uppercase">{t("Edit Frequency")}</h3>
+                <div className="w-full max-w-md p-10 bg-gradient-to-br from-gray-900 to-black border border-white/10 rounded-[3rem] space-y-8 shadow-2xl">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-500">
+                      <HiSparkles className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-2xl font-black text-white uppercase tracking-tight">{t("Edit Memory")}</h3>
+                  </div>
 
                   <div className="flex flex-col items-center gap-4">
-                    <label htmlFor="edit-cover-upload" className="cursor-pointer group relative w-32 h-32 rounded-full overflow-hidden border-2 border-dashed border-gray-600 hover:border-indigo-500 transition-colors">
-                      <Image src={editPreview || highlight.coverImage || '/placeholder.jpg'} fill className="object-cover opacity-50 group-hover:opacity-100 transition-opacity" alt={t("Cover")} />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <HiPlus className="text-white text-2xl drop-shadow-md" />
+                    <label htmlFor="edit-cover-upload" className="cursor-pointer group relative w-40 h-40 rounded-3xl overflow-hidden border-2 border-dashed border-gray-600 hover:border-indigo-500 transition-all">
+                      <Image src={editPreview || highlight.coverImage || '/placeholder.jpg'} fill className="object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt={t("Cover")} />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-all">
+                        <HiPlus className="text-white text-3xl drop-shadow-lg" />
                       </div>
                     </label>
                     <input id="edit-cover-upload" type="file" hidden accept="image/*" onChange={(e) => {
@@ -297,23 +285,24 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
                         setEditPreview(URL.createObjectURL(e.target.files[0]));
                       }
                     }} />
-                    <span className="text-xs text-gray-500 font-bold uppercase">{t("Update Cover Art")}</span>
+                    <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">{t("Update Cover Art")}</span>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-500 uppercase">{t("Designation")}</label>
+                  <div className="space-y-3">
+                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest">{t("Title")}</label>
                     <input
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold outline-none focus:border-indigo-500"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-indigo-500 transition-all"
+                      placeholder={t("Enter highlight title...")}
                     />
                   </div>
 
-                  <div className="flex gap-3 pt-4">
-                    <button onClick={() => setIsEditing(false)} className="flex-1 py-3 rounded-xl bg-white/5 text-gray-400 font-bold text-xs uppercase hover:bg-white/10 transition-colors">
+                  <div className="flex gap-4 pt-6">
+                    <button onClick={() => setIsEditing(false)} className="flex-1 py-4 rounded-2xl bg-white/5 text-gray-400 font-bold text-xs uppercase hover:bg-white/10 transition-all">
                       {t("Cancel")}
                     </button>
-                    <button onClick={handleUpdate} className="flex-1 py-3 rounded-xl bg-indigo-600 text-white font-bold text-xs uppercase hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-600/20">
+                    <button onClick={handleUpdate} className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-xs uppercase hover:shadow-xl hover:shadow-indigo-500/30 transition-all">
                       {t("Save Changes")}
                     </button>
                   </div>
@@ -323,10 +312,10 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentIndex}
-                  initial={{ opacity: 0, scale: 1.1 }}
+                  initial={{ opacity: 0, scale: 1.05 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.7, ease: "circOut" }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
                   className="absolute inset-0 flex items-center justify-center"
                 >
                   <Image
@@ -341,16 +330,18 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
                     }}
                   />
 
-                  {/* Visual Overlays */}
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-transparent to-transparent pointer-events-none" />
+                  {/* Gradient Overlays */}
+                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none" />
+                  <div className="absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
 
                   {currentStory?.text && (
                     <motion.div
-                      initial={{ y: 20, opacity: 0 }}
+                      initial={{ y: 30, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
-                      className="absolute bottom-20 left-10 right-10 text-center"
+                      transition={{ delay: 0.3 }}
+                      className="absolute bottom-24 left-10 right-10 text-center"
                     >
-                      <p className="text-xl md:text-3xl font-black text-white uppercase tracking-tighter leading-tight drop-shadow-2xl">
+                      <p className="text-2xl md:text-4xl font-black text-white uppercase tracking-tight leading-tight drop-shadow-2xl">
                         {currentStory.text}
                       </p>
                     </motion.div>
@@ -359,19 +350,19 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
               </AnimatePresence>
             )}
 
-            {/* Navigation Regions - Disable when editing */}
+            {/* Navigation Regions */}
             {!isEditing && (
               <>
                 <div className="absolute inset-y-0 left-0 w-1/4 z-10 cursor-pointer" onClick={prev} />
                 <div className="absolute inset-y-0 right-0 w-1/4 z-10 cursor-pointer" onClick={next} />
 
                 <div className="hidden md:flex absolute inset-y-0 left-6 items-center z-20 pointer-events-none">
-                  <button onClick={prev} className="w-14 h-14 rounded-full bg-white/5 backdrop-blur-lg border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/viewer:opacity-100 transition-opacity pointer-events-auto hover:bg-white/10">
+                  <button onClick={prev} className="w-16 h-16 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/viewer:opacity-100 transition-all pointer-events-auto hover:bg-white/10 hover:scale-110">
                     <HiChevronLeft className="w-8 h-8" />
                   </button>
                 </div>
                 <div className="hidden md:flex absolute inset-y-0 right-6 items-center z-20 pointer-events-none">
-                  <button onClick={next} className="w-14 h-14 rounded-full bg-white/5 backdrop-blur-lg border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/viewer:opacity-100 transition-opacity pointer-events-auto hover:bg-white/10">
+                  <button onClick={next} className="w-16 h-16 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/viewer:opacity-100 transition-all pointer-events-auto hover:bg-white/10 hover:scale-110">
                     <HiChevronRight className="w-8 h-8" />
                   </button>
                 </div>
@@ -379,26 +370,27 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
             )}
           </div>
 
-          {/* Data Meta Bar (Footer) */}
+          {/* Enhanced Footer with Thumbnails */}
           {!isEditing && (
-            <div className="hidden md:flex items-center justify-between px-10 py-6 bg-white/[0.02] border-t border-white/10">
-              <div className="flex items-center gap-6 overflow-x-auto no-scrollbar py-2">
+            <div className="hidden md:flex items-center justify-between px-10 py-6 bg-gradient-to-t from-black via-gray-900/50 to-transparent border-t border-white/5 backdrop-blur-xl">
+              <div className="flex items-center gap-4 overflow-x-auto no-scrollbar py-2 flex-1">
                 {stories.map((s, i) => (
-                  <div key={s._id} className="relative group/thumb">
+                  <div key={s._id} className="relative group/thumb flex-shrink-0">
                     <button
                       onClick={() => { setCurrentIndex(i); setProgress(0); }}
-                      className={`relative w-24 h-14 rounded-xl overflow-hidden border-2 transition-all ${i === currentIndex ? 'border-indigo-500 scale-105 shadow-lg' : 'border-transparent opacity-40 hover:opacity-100'}`}
+                      className={`relative w-28 h-16 rounded-2xl overflow-hidden border-2 transition-all ${i === currentIndex ? 'border-indigo-500 scale-110 shadow-xl shadow-indigo-500/30' : 'border-transparent opacity-40 hover:opacity-100 hover:scale-105'}`}
                     >
                       <Image src={getPhoto(s)} fill className="object-cover" alt={t("Thumbnail")} />
+                      {i === currentIndex && (
+                        <div className="absolute inset-0 bg-gradient-to-t from-indigo-500/30 to-transparent" />
+                      )}
                     </button>
-                    {/* Delete Story Button - Only for owners */}
                     {isOwner && stories.length > 1 && (
                       <button
                         onClick={async (e) => {
                           e.stopPropagation();
                           if (window.confirm(t("Remove this story from highlight?"))) {
                             await removeStoryFromHighlight(highlight._id, s._id);
-                            // If we deleted the current story, move to previous or next
                             if (i === currentIndex) {
                               if (i > 0) {
                                 setCurrentIndex(i - 1);
@@ -408,17 +400,17 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
                             }
                           }
                         }}
-                        className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 transition-opacity shadow-lg hover:bg-rose-600 z-10"
+                        className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 transition-opacity shadow-lg hover:bg-rose-600 z-10"
                         title={t("Remove story")}
                       >
-                        <HiTrash className="w-3 h-3" />
+                        <HiTrash className="w-3.5 h-3.5" />
                       </button>
                     )}
                   </div>
                 ))}
               </div>
               {highlight.description && (
-                <div className="flex items-center gap-3 text-gray-400">
+                <div className="flex items-center gap-3 text-gray-400 ml-6">
                   <HiCommandLine className="w-4 h-4" />
                   <span className="text-[10px] font-black uppercase tracking-widest">{highlight.description}</span>
                 </div>
@@ -427,69 +419,81 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
           )}
         </div>
 
-        {/* 🏺 Inject Data Menu (Side Panel) */}
+        {/* Add Story Menu */}
         <AnimatePresence>
           {showAddMenu && (
             <motion.aside
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              className="fixed top-0 right-0 w-full sm:w-96 h-full bg-[#0A0A0A] border-l border-white/10 z-[2000] p-10 space-y-8 shadow-2xl"
+              transition={{ type: "spring", damping: 25 }}
+              className="fixed top-0 right-0 w-full sm:w-[420px] h-full bg-gradient-to-br from-gray-900 via-black to-gray-900 border-l border-white/10 z-[2000] p-10 space-y-8 shadow-2xl"
             >
               <div className="flex items-center justify-between mb-10">
-                <h3 className="text-xl font-black text-white uppercase tracking-widest">{t("Data Injection")}</h3>
-                <button onClick={() => setShowAddMenu(false)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white"><HiXMark /></button>
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-500">
+                    <HiPlus className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-2xl font-black text-white uppercase tracking-tight">{t("Add Memories")}</h3>
+                </div>
+                <button onClick={() => setShowAddMenu(false)} className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-white hover:bg-white/10 transition-all">
+                  <HiXMark className="w-6 h-6" />
+                </button>
               </div>
 
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={t("Filter archive...")}
-                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-gray-600 outline-none focus:border-indigo-500"
+                placeholder={t("Search stories...")}
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder-gray-600 outline-none focus:border-indigo-500 transition-all"
               />
 
               <div className="space-y-4 overflow-y-auto h-[calc(100%-250px)] pr-2 custom-scrollbar">
-                {allStories.filter(s => !stories.some(ex => ex._id === s._id)).map(st => (
-                  <div key={st._id} className="group p-4 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center gap-4 hover:border-indigo-500/50 transition-all">
-                    <div className="w-14 h-14 rounded-xl overflow-hidden relative">
-                      <Image src={getPhoto(st)} fill className="object-cover" alt={t("Story")} />
+                {allStories
+                  .filter(s => !stories.some(ex => ex._id === s._id))
+                  .filter(s => !search || s.text?.toLowerCase().includes(search.toLowerCase()))
+                  .map(st => (
+                    <div key={st._id} className="group p-5 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center gap-4 hover:border-indigo-500/50 hover:bg-white/[0.05] transition-all">
+                      <div className="w-16 h-16 rounded-2xl overflow-hidden relative flex-shrink-0">
+                        <Image src={getPhoto(st)} fill className="object-cover" alt={t("Story")} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-black text-white uppercase mb-1 truncate">{st.text || t('MEMORY')}</div>
+                        <div className="text-[9px] text-gray-500 font-bold uppercase">{dayjs(st.createdAt).format('DD MMM YYYY')}</div>
+                      </div>
+                      <button
+                        onClick={() => { addStoryToHighlight(highlight._id, st._id); setShowAddMenu(false); }}
+                        className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center hover:bg-indigo-500 hover:text-white transition-all flex-shrink-0"
+                      >
+                        <HiPlus className="w-5 h-5" />
+                      </button>
                     </div>
-                    <div className="flex-1">
-                      <div className="text-[10px] font-black text-white uppercase mb-1">{st.text || t('SIGNAL')}</div>
-                      <div className="text-[8px] text-gray-500 font-bold uppercase">{dayjs(st.createdAt).format('DD MMM')}</div>
-                    </div>
-                    <button
-                      onClick={() => { addStoryToHighlight(highlight._id, st._id); setShowAddMenu(false); }}
-                      className="w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center hover:bg-indigo-500 hover:text-white transition-all"
-                    >
-                      <HiPlus />
-                    </button>
-                  </div>
-                ))}
+                  ))}
               </div>
             </motion.aside>
           )}
         </AnimatePresence>
 
-        {/* 🗑 Delete Protocol */}
+        {/* Delete Confirmation */}
         <AnimatePresence>
           {confirmDelete && (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="absolute inset-0 z-[3000] flex items-center justify-center bg-black/60 backdrop-blur-md"
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="absolute inset-0 z-[3000] flex items-center justify-center bg-black/80 backdrop-blur-xl"
             >
-              <div className="bg-[#0A0A0A] border border-rose-500/30 rounded-[3rem] p-12 max-w-sm text-center space-y-8">
-                <div className="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center text-rose-500 mx-auto text-3xl">
+              <div className="bg-gradient-to-br from-gray-900 to-black border border-rose-500/30 rounded-[3rem] p-12 max-w-md text-center space-y-8 shadow-2xl">
+                <div className="w-24 h-24 bg-rose-500/10 rounded-full flex items-center justify-center text-rose-500 mx-auto text-4xl">
                   <HiTrash />
                 </div>
-                <div className="space-y-2">
-                  <h4 className="text-xl font-black text-white uppercase tracking-tighter">{t("Purge Protocol")}</h4>
-                  <p className="text-gray-400 text-sm font-medium">{t("This will permanently decouple this highlight from the grid.")}</p>
+                <div className="space-y-3">
+                  <h4 className="text-2xl font-black text-white uppercase tracking-tight">{t("Delete Highlight")}</h4>
+                  <p className="text-gray-400 text-sm font-medium leading-relaxed">{t("This will permanently remove this highlight and all its memories from your profile.")}</p>
                 </div>
                 <div className="flex gap-4">
-                  <button onClick={() => setConfirmDelete(false)} className="flex-1 py-4 rounded-2xl bg-white/5 text-gray-400 font-black text-[10px] uppercase tracking-widest">{t("Abort")}</button>
-                  <button onClick={() => { deleteHighlight(highlight._id); onClose(); }} className="flex-1 py-4 rounded-2xl bg-rose-600 text-white font-black text-[10px] uppercase tracking-widest">{t("Purge")}</button>
+                  <button onClick={() => setConfirmDelete(false)} className="flex-1 py-4 rounded-2xl bg-white/5 text-gray-400 font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">{t("Cancel")}</button>
+                  <button onClick={() => { deleteHighlight(highlight._id); onClose(); }} className="flex-1 py-4 rounded-2xl bg-rose-600 text-white font-black text-[10px] uppercase tracking-widest hover:shadow-xl hover:shadow-rose-500/30 transition-all">{t("Delete")}</button>
                 </div>
               </div>
             </motion.div>

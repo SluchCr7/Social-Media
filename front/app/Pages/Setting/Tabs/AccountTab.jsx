@@ -1,20 +1,21 @@
-'use client';
 import React, { useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HiUserCircle, HiTrash, HiCheckBadge, HiExclamationTriangle, HiLockClosed, HiEye } from 'react-icons/hi2';
+import { HiUserCircle, HiTrash, HiCheckBadge, HiExclamationTriangle, HiLockClosed, HiEye, HiArrowTopRightOnSquare } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
-import ToggleSwitch from '@/app/Component/Setting/ToggleSwitch';
+import PrimaryToggle from '@/app/Component/Setting/PrimaryToggle';
+import { useFeedback } from '@/app/Context/FeedbackContext';
 
 const AccountTab = React.memo(({
   user,
   isVerified,
   setIsVerified,
   onMakePremiumVerify,
-  showConfirmDelete,
-  setShowConfirmDelete,
+  onTogglePrivate,
+  onToggleShowOnlineStatus,
   handleDelete
 }) => {
   const { t } = useTranslation();
+  const { confirmAction } = useFeedback();
 
   const handleVerifyToggle = useCallback(
     (v) => {
@@ -24,13 +25,19 @@ const AccountTab = React.memo(({
     [setIsVerified, onMakePremiumVerify]
   );
 
-  const confirmDelete = useCallback(() => {
-    setShowConfirmDelete(true);
-  }, [setShowConfirmDelete]);
+  const handleDeleteRequest = async () => {
+    const isConfirmed = await confirmAction({
+      title: t('Delete Account'),
+      text: t('This will permanently delete your user profile and all associated data. This action cannot be undone.'),
+      confirmButtonText: t('Delete My Data'),
+      cancelButtonText: t('Go Back'),
+      type: 'danger'
+    });
 
-  const cancelDelete = useCallback(() => {
-    setShowConfirmDelete(false);
-  }, [setShowConfirmDelete]);
+    if (isConfirmed) {
+      handleDelete();
+    }
+  };
 
   return (
     <motion.section
@@ -39,221 +46,162 @@ const AccountTab = React.memo(({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.3 }}
-      className="p-8 space-y-8"
+      className="p-8 space-y-10"
     >
       {/* Header */}
-      <div className="flex items-center gap-4 pb-6 border-b border-gray-200/50 dark:border-white/5">
+      <div className="flex items-center gap-5 pb-8 border-b border-gray-100 dark:border-white/5">
         <div className="relative">
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-400 via-yellow-500 to-orange-500 text-white shadow-xl">
-            <HiUserCircle className="w-6 h-6" />
+          <div className="p-4 rounded-3xl bg-gradient-to-br from-[#FF9D6C] to-[#BB4E75] text-white shadow-2xl shadow-orange-500/20">
+            <HiUserCircle className="w-8 h-8" />
           </div>
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 animate-pulse" />
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-[3px] border-white dark:border-[#0B0F1A]" />
         </div>
         <div>
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">{t('Account')}</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-            {t('Manage privacy, verification and account actions.')}
+          <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight leading-none mb-2">{t('Account Governance')}</h2>
+          <p className="text-sm text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest text-[10px]">
+            {t('Manage your digital identity, privacy & credentials')}
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-        {/* Premium Verification */}
+        {/* Premium Verification Card */}
         <motion.div
-          whileHover={{ scale: 1.01 }}
-          className="relative rounded-2xl p-6 bg-gradient-to-br from-white to-gray-50 dark:from-white/5 dark:to-white/[0.02] border border-gray-200/50 dark:border-white/5 shadow-lg overflow-hidden"
+          whileHover={{ y: -5 }}
+          className="group relative rounded-[2.5rem] p-8 bg-white dark:bg-[#0D1117] border border-gray-100 dark:border-white/5 shadow-xl transition-all duration-500"
         >
-          {/* Decorative Background */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-400/20 to-amber-500/20 rounded-full blur-3xl" />
+          <div className="flex items-center justify-between mb-8">
+            <div className="p-4 rounded-2xl bg-amber-500/10 text-amber-500 group-hover:scale-110 transition-transform duration-500">
+              <HiCheckBadge className="w-7 h-7" />
+            </div>
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-black uppercase tracking-tighter text-gray-400">{t('Status')}</span>
+              <span className={`text-xs font-black uppercase ${isVerified ? 'text-amber-500' : 'text-gray-400'}`}>
+                {isVerified ? t('Elite Verified') : t('Standard Index')}
+              </span>
+            </div>
+          </div>
 
-          <div className="relative">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 rounded-xl bg-yellow-500/10 text-yellow-600 dark:text-yellow-400">
-                <HiCheckBadge className="w-6 h-6" />
+          <div className="space-y-6">
+            <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">{t('Identity Verification')}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+              {t('Gain trust with a verification badge and priority signal rankings across the network.')}
+            </p>
+
+            <div className="flex items-center justify-between p-6 rounded-3xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${isVerified ? 'bg-amber-400/20 text-amber-500 ring-2 ring-amber-400/20' : 'bg-gray-200 dark:bg-gray-800 text-gray-400'}`}>
+                  <HiCheckBadge className="w-6 h-6" />
+                </div>
+                <span className="font-bold text-gray-700 dark:text-gray-300">{t('Verified Status')}</span>
               </div>
-              <h3 className="font-black text-gray-900 dark:text-white uppercase text-sm tracking-wider">{t('Premium Verified')}</h3>
+              <PrimaryToggle
+                checked={isVerified}
+                onChange={handleVerifyToggle}
+                onColor="bg-amber-400"
+              />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Privacy & Visibility Card */}
+        <motion.div
+          whileHover={{ y: -5 }}
+          className="relative rounded-[2.5rem] p-8 bg-gradient-to-br from-indigo-600 to-purple-700 text-white shadow-2xl shadow-indigo-500/20 overflow-hidden"
+        >
+          {/* Ornamental Blur */}
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+
+          <div className="relative space-y-8">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md">
+                <HiLockClosed className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-black tracking-tight">{t('Privacy Control')}</h3>
             </div>
 
             <div className="space-y-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                {t('Get a verified badge and priority support.')}
-              </p>
-
-              <div className="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/5">
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${isVerified ? 'bg-yellow-500/20' : 'bg-gray-200 dark:bg-gray-800'}`}>
-                    <HiCheckBadge className={`w-6 h-6 ${isVerified ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-400'}`} />
+              <div className="p-5 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/10 hover:bg-white/15 transition-all">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <HiEye className="w-5 h-5 opacity-80" />
+                    <span className="font-bold text-sm">{t('Private Account')}</span>
                   </div>
-                  <div>
-                    <div className="font-bold text-gray-900 dark:text-white text-sm">
-                      {isVerified ? t('Verified') : t('Not Verified')}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      {isVerified ? t('Premium member') : t('Standard account')}
-                    </div>
-                  </div>
+                  <PrimaryToggle
+                    checked={user?.isPrivate || false}
+                    onChange={() => onTogglePrivate()}
+                    onColor="bg-white/30"
+                  />
                 </div>
-                <ToggleSwitch
-                  checked={isVerified}
-                  onChange={handleVerifyToggle}
-                  onColor="bg-yellow-400"
-                />
+                <p className="text-[11px] font-medium opacity-60">
+                  {t('Restricts profile access to approved synchronization partners only.')}
+                </p>
               </div>
 
-              {isVerified && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20"
-                >
-                  <div className="flex items-start gap-3">
-                    <HiCheckBadge className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
-                    <div className="text-xs text-yellow-700 dark:text-yellow-300 font-medium">
-                      {t('You have access to premium features including priority support, exclusive badges, and advanced analytics.')}
-                    </div>
+              <div className="p-5 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/10 hover:bg-white/15 transition-all">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <HiUserCircle className="w-5 h-5 opacity-80" />
+                    <span className="font-bold text-sm">{t('Signal Pulse')}</span>
                   </div>
-                </motion.div>
-              )}
+                  <PrimaryToggle
+                    checked={user?.showOnlineStatus !== false}
+                    onChange={() => onToggleShowOnlineStatus()}
+                    onColor="bg-white/30"
+                  />
+                </div>
+                <p className="text-[11px] font-medium opacity-60">
+                  {t('Broadcast your activity status to allow real-time interactions.')}
+                </p>
+              </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Privacy Settings */}
+        {/* Security Summary / Linked Accounts */}
         <motion.div
-          whileHover={{ scale: 1.01 }}
-          className="relative rounded-2xl p-6 bg-gradient-to-br from-white to-gray-50 dark:from-white/5 dark:to-white/[0.02] border border-gray-200/50 dark:border-white/5 shadow-lg"
+          whileHover={{ y: -5 }}
+          className="lg:col-span-2 rounded-[2.5rem] p-8 bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 flex flex-col md:flex-row items-center gap-8"
         >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-              <HiLockClosed className="w-6 h-6" />
-            </div>
-            <h3 className="font-black text-gray-900 dark:text-white uppercase text-sm tracking-wider">{t('Privacy')}</h3>
+          <div className="flex-1 space-y-2">
+            <h4 className="text-lg font-black text-gray-900 dark:text-white">{t('Account Exports')}</h4>
+            <p className="text-sm text-gray-500 font-medium">
+              {t('Download a copy of your personal data archive for portability and local storage.')}
+            </p>
           </div>
-
-          <div className="space-y-4">
-            <div className="p-4 rounded-xl bg-white/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/5">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <HiEye className="w-5 h-5 text-gray-400" />
-                  <span className="font-bold text-gray-900 dark:text-white text-sm">{t('Private Account')}</span>
-                </div>
-                <ToggleSwitch
-                  checked={user?.isPrivate || false}
-                  onChange={() => { }}
-                />
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                {t('Only approved followers can see your posts')}
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-white/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/5">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <HiUserCircle className="w-5 h-5 text-gray-400" />
-                  <span className="font-bold text-gray-900 dark:text-white text-sm">{t('Show Activity Status')}</span>
-                </div>
-                <ToggleSwitch
-                  checked={true}
-                  onChange={() => { }}
-                />
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                {t('Let others see when you\'re active')}
-              </p>
-            </div>
-          </div>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="px-8 py-4 rounded-2xl bg-white dark:bg-white/10 text-gray-900 dark:text-white font-bold text-sm shadow-sm border border-gray-200 dark:border-white/10 flex items-center gap-2 hover:bg-gray-100 transition-all"
+          >
+            {t('Export Data')}
+            <HiArrowTopRightOnSquare className="w-4 h-4" />
+          </motion.button>
         </motion.div>
 
-        {/* Danger Zone - Full Width */}
+        {/* Danger Zone */}
         <div className="lg:col-span-2">
-          <motion.div
-            whileHover={{ scale: 1.005 }}
-            className="relative rounded-2xl p-6 bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-500/5 dark:to-rose-500/5 border-2 border-red-200/50 dark:border-red-500/20 shadow-lg overflow-hidden"
-          >
-            {/* Warning Pattern Background */}
-            <div className="absolute top-0 right-0 w-64 h-64 opacity-5">
-              <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,currentColor_10px,currentColor_20px)] text-red-500" />
+          <div className="relative rounded-[3rem] p-10 bg-red-50 dark:bg-red-500/5 border-2 border-dashed border-red-200 dark:border-red-500/20 flex flex-col items-center text-center space-y-6">
+            <div className="p-5 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600">
+              <HiExclamationTriangle className="w-10 h-10" />
+            </div>
+            <div className="max-w-xl space-y-2">
+              <h3 className="text-2xl font-black text-red-600">{t('The Termination Vector')}</h3>
+              <p className="text-sm text-red-700/60 dark:text-red-400/60 font-medium">
+                {t('Deleting your account is permanent. All posts, media, connections and data will be liquidated from our servers instantly.')}
+              </p>
             </div>
 
-            <div className="relative">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400">
-                  <HiExclamationTriangle className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-black text-red-600 dark:text-red-400 uppercase text-sm tracking-wider">{t('Danger zone')}</h3>
-                  <p className="text-xs text-red-500/70 dark:text-red-400/70 font-medium">
-                    {t('Irreversible actions - proceed with caution')}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-6 rounded-xl bg-white/50 dark:bg-white/5 border border-red-200/50 dark:border-red-500/20">
-                <div className="flex-1">
-                  <div className="font-black text-gray-900 dark:text-white mb-1">
-                    {t('Delete account')}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                    {t('Delete account and data permanently. This action cannot be undone.')}
-                  </div>
-                </div>
-                <motion.button
-                  onClick={confirmDelete}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-red-500/30 hover:shadow-xl transition-all whitespace-nowrap"
-                >
-                  <HiTrash className="w-5 h-5" />
-                  {t('Delete account')}
-                </motion.button>
-              </div>
-
-              {/* Confirm Delete Modal */}
-              <AnimatePresence>
-                {showConfirmDelete && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="mt-6 p-6 rounded-xl bg-red-500/10 border-2 border-red-500/30 backdrop-blur-sm"
-                  >
-                    <div className="flex items-start gap-4 mb-4">
-                      <div className="p-3 rounded-full bg-red-500/20">
-                        <HiExclamationTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-black text-gray-900 dark:text-white mb-2">{t('Are you absolutely sure?')}</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                          {t('This action cannot be undone. This will permanently delete your account and remove all your data from our servers.')}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <motion.button
-                        onClick={handleDelete}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold shadow-lg hover:shadow-xl transition-all"
-                      >
-                        {t('Yes, delete my account')}
-                      </motion.button>
-                      <motion.button
-                        onClick={cancelDelete}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="px-6 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                      >
-                        {t('Cancel')}
-                      </motion.button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.div>
+            <motion.button
+              onClick={handleDeleteRequest}
+              whileHover={{ scale: 1.05, boxShadow: '0 20px 40px -10px rgba(220, 38, 38, 0.4)' }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-red-600 text-white px-12 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest shadow-xl transition-all"
+            >
+              {t('Terminate My Presence')}
+            </motion.button>
+          </div>
         </div>
       </div>
     </motion.section>

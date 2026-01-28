@@ -14,44 +14,44 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    profileName : {
+    profileName: {
         type: String,
         default: "@User_sluchit",
         // unique: true
     },
-    profilePhoto:{
-        type : Object, 
-        default:{
+    profilePhoto: {
+        type: Object,
+        default: {
             url: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
-            publicId : null
+            publicId: null
         }
     },
     isAdmin: {
         type: Boolean,
-        default : false
+        default: false
     },
     isVerify: {
         type: Boolean,
-        default : false
+        default: false
     },
-    verifyAt : {
+    verifyAt: {
         type: Date
     },
-    description : {
+    description: {
         type: String,
-        default : "Profile Description"
+        default: "Profile Description"
     },
-    isAccountWithPremiumVerify : {
+    isAccountWithPremiumVerify: {
         type: Boolean,
-        default : false
+        default: false
     },
     country: {
         type: String,
         default: "Unknown"
     },
-    city : {
+    city: {
         type: String,
-        default : "Unknown"
+        default: "Unknown"
     },
     relationshipStatus: {
         type: String,
@@ -63,9 +63,9 @@ const UserSchema = new mongoose.Schema({
         ref: 'User',
         default: null
     },
-    phone : {
+    phone: {
         type: String,
-        default : ""
+        default: ""
     },
     followersCount: {
         type: Number,
@@ -77,16 +77,16 @@ const UserSchema = new mongoose.Schema({
             ref: 'User',
         }
     ],
-    following : [
+    following: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
         }
     ],
-    savedPosts : [
+    savedPosts: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref : "Post"
+            ref: "Post"
         }
     ],
     blockedUsers: [
@@ -98,9 +98,9 @@ const UserSchema = new mongoose.Schema({
     pinsPosts: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref : "Post"
+            ref: "Post"
         }
-    ], 
+    ],
     lastLogin: {
         type: Date,
         default: Date.now
@@ -119,17 +119,17 @@ const UserSchema = new mongoose.Schema({
         type: String,
         enum: ['active', 'banned', 'suspended'],
         default: 'active'
-    }, 
+    },
     suspendedUntil: {
         type: Date, // التاريخ اللي هينتهي عنده الـ suspension
         default: null
     },
-    userLevelRank : {
+    userLevelRank: {
         type: String,
-        enum: ["Junior", "Challenger", "Warrior", "Elite" , "Master", "Legend"],
+        enum: ["Junior", "Challenger", "Warrior", "Elite", "Master", "Legend"],
         default: "Junior"
     },
-    userLevelPoints : {
+    userLevelPoints: {
         type: Number,
         default: 0
     },
@@ -149,8 +149,8 @@ const UserSchema = new mongoose.Schema({
         default: Date.now
     },
     dateOfBirth: {
-        type : Date,
-        default : null
+        type: Date,
+        default: null
     },
     gender: {
         type: String,
@@ -161,17 +161,17 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    acceptedTerms : {
-        type : Boolean,
-        default : false
+    acceptedTerms: {
+        type: Boolean,
+        default: false
     },
-    acceptedCookies : {
-        type : Boolean,
-        default : false
+    acceptedCookies: {
+        type: Boolean,
+        default: false
     },
-    preferedLanguage : {
-        type : String,
-        default : "English"
+    preferedLanguage: {
+        type: String,
+        default: "English"
     },
     interests: {
         type: [String],
@@ -181,9 +181,13 @@ const UserSchema = new mongoose.Schema({
         type: Array,
         default: []
     },
-    isContainAdultContent : {
-        type : Boolean,
-        default : false
+    isContainAdultContent: {
+        type: Boolean,
+        default: false
+    },
+    showOnlineStatus: {
+        type: Boolean,
+        default: true
     },
     BlockedNotificationFromUsers: [
         {
@@ -200,7 +204,7 @@ const UserSchema = new mongoose.Schema({
 }, {
     timestamps: true,
     toJSON: { virtuals: true },
-    toObject : {virtuals: true}
+    toObject: { virtuals: true }
 });
 
 // 🔹 Virtuals
@@ -223,14 +227,14 @@ UserSchema.virtual("communities", {
 })
 
 UserSchema.virtual("joinedCommunities", {
-  ref: "Community",              // الموديل المرتبط
-  localField: "_id",             // هذا المستخدم
-  foreignField: "members",       // مكان تخزين المستخدم في مجتمع
+    ref: "Community",              // الموديل المرتبط
+    localField: "_id",             // هذا المستخدم
+    foreignField: "members",       // مكان تخزين المستخدم في مجتمع
 });
 UserSchema.virtual("adminCommunities", {
-  ref: "Community",
-  localField: "_id",
-  foreignField: "Admins",
+    ref: "Community",
+    localField: "_id",
+    foreignField: "Admins",
 });
 
 UserSchema.virtual("stories", {
@@ -246,48 +250,48 @@ UserSchema.virtual("reports", {
 })
 
 UserSchema.virtual("notifications", {
-  ref: "Notification",      
-  localField: "_id",         
-  foreignField: "receiver",  
+    ref: "Notification",
+    localField: "_id",
+    foreignField: "receiver",
 });
 UserSchema.virtual("reels", {
-  ref: "Reel",      
-  localField: "_id",         
-  foreignField: "owner",  
+    ref: "Reel",
+    localField: "_id",
+    foreignField: "owner",
 });
 UserSchema.virtual("audios", {
-  ref: "Music",      
-  localField: "_id",         
-  foreignField: "owner",  
+    ref: "Music",
+    localField: "_id",
+    foreignField: "owner",
 });
 UserSchema.virtual("highlights", {
-  ref: "Highlight",      
-  localField: "_id",         
-  foreignField: "user",  
+    ref: "Highlight",
+    localField: "_id",
+    foreignField: "user",
 });
 
 // 🔹 Update Level Rank
 UserSchema.methods.updateLevelRank = function () {
-  if (this.userLevelPoints >= 15000) {
-    this.userLevelRank = "Legend";
-    this.nextLevelPoints = 15000; 
-    this.isAccountWithPremiumVerify = true
-  } else if (this.userLevelPoints >= 10000) {
-    this.userLevelRank = "Master";
-    this.nextLevelPoints = 15000;
-  } else if (this.userLevelPoints >= 7000) {
-    this.userLevelRank = "Elite";
-    this.nextLevelPoints = 10000;
-  } else if (this.userLevelPoints >= 4000) {
-    this.userLevelRank = "Warrior";
-    this.nextLevelPoints = 7000;
-  } else if (this.userLevelPoints >= 2000) {
-    this.userLevelRank = "Challenger";
-    this.nextLevelPoints = 4000;
-  } else {
-    this.userLevelRank = "Junior";
-    this.nextLevelPoints = 2000;
-  }
+    if (this.userLevelPoints >= 15000) {
+        this.userLevelRank = "Legend";
+        this.nextLevelPoints = 15000;
+        this.isAccountWithPremiumVerify = true
+    } else if (this.userLevelPoints >= 10000) {
+        this.userLevelRank = "Master";
+        this.nextLevelPoints = 15000;
+    } else if (this.userLevelPoints >= 7000) {
+        this.userLevelRank = "Elite";
+        this.nextLevelPoints = 10000;
+    } else if (this.userLevelPoints >= 4000) {
+        this.userLevelRank = "Warrior";
+        this.nextLevelPoints = 7000;
+    } else if (this.userLevelPoints >= 2000) {
+        this.userLevelRank = "Challenger";
+        this.nextLevelPoints = 4000;
+    } else {
+        this.userLevelRank = "Junior";
+        this.nextLevelPoints = 2000;
+    }
 };
 
 const User = mongoose.model('User', UserSchema)
@@ -311,34 +315,36 @@ const ValidateUser = (user) => {
 }
 
 const validateUserUpdate = (user) => {
-  const schema = joi.object({
-    username: joi.string().min(3).max(30),
-    description: joi.string().max(500).allow('', null),
-    profileName: joi.string().min(3).max(50).allow('', null),
-    country: joi.string().max(50).allow('', null),
-    phone: joi.string().pattern(/^\+?[0-9\s\-]{7,20}$/).allow('', null),
-    dateOfBirth: joi.date().less('now').allow(null),  
-    gender: joi.string().valid('Male', 'Female', 'Other').allow(null),
-    city : joi.string().max(50).allow(null),
-    socialLinks: joi.object({
-        github: joi.string().uri().allow('', null),
-        twitter: joi.string().uri().allow('', null),
-        linkedin: joi.string().uri().allow('', null),
-        facebook: joi.string().uri().allow('', null),
-        website: joi.string().uri().allow('', null),
-    }).default({}),
-    relationshipStatus: joi.string().valid('Single', 'In a Relationship', 'Married', "It's Complicated").allow(null),
-    partner: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null),
-    interests: joi.array().items(joi.string()).allow(null),
-  })
+    const schema = joi.object({
+        username: joi.string().min(3).max(30),
+        description: joi.string().max(500).allow('', null),
+        profileName: joi.string().min(3).max(50).allow('', null),
+        country: joi.string().max(50).allow('', null),
+        phone: joi.string().pattern(/^\+?[0-9\s\-]{7,20}$/).allow('', null),
+        dateOfBirth: joi.date().less('now').allow(null),
+        gender: joi.string().valid('Male', 'Female', 'Other').allow(null),
+        city: joi.string().max(50).allow(null),
+        socialLinks: joi.object({
+            github: joi.string().uri().allow('', null),
+            twitter: joi.string().uri().allow('', null),
+            linkedin: joi.string().uri().allow('', null),
+            facebook: joi.string().uri().allow('', null),
+            website: joi.string().uri().allow('', null),
+        }).default({}),
+        relationshipStatus: joi.string().valid('Single', 'In a Relationship', 'Married', "It's Complicated").allow(null),
+        partner: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null),
+        interests: joi.array().items(joi.string()).allow(null),
+        showOnlineStatus: joi.boolean().allow(null),
+    })
 
-  return schema.validate(user)
+    return schema.validate(user)
 }
 
 
 const validatePasswordUpdate = (user) => {
     const schema = joi.object({
-        password: joi.string().required(),
+        oldPassword: joi.string().required(),
+        newPassword: joi.string().min(6).required(),
     })
     return schema.validate(user)
 }
@@ -351,24 +357,24 @@ const validateEmail = (user) => {
 }
 
 const validateUserLinks = (user) => {
-  const schema = joi.object({
-    socialLinks: joi.object({
-      github: joi.string().uri().allow(""),
-      twitter: joi.string().uri().allow(""),
-      linkedin: joi.string().uri().allow(""),
-      facebook: joi.string().uri().allow(""),
-      website: joi.string().uri().allow(""),
-    }),
-  });
-  return schema.validate(user);
+    const schema = joi.object({
+        socialLinks: joi.object({
+            github: joi.string().uri().allow(""),
+            twitter: joi.string().uri().allow(""),
+            linkedin: joi.string().uri().allow(""),
+            facebook: joi.string().uri().allow(""),
+            website: joi.string().uri().allow(""),
+        }),
+    });
+    return schema.validate(user);
 };
 
 module.exports = {
-  User,
-  validateUserLinks,
-  LoginValidate,
-  validateEmail,
-  ValidateUser,
-  validateUserUpdate,
-  validatePasswordUpdate
+    User,
+    validateUserLinks,
+    LoginValidate,
+    validateEmail,
+    ValidateUser,
+    validateUserUpdate,
+    validatePasswordUpdate
 }

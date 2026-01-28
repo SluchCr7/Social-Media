@@ -54,7 +54,8 @@ function SettingsView({
   loginHistory = [],
   language,
   handleLanguageChange,
-  onToggleNotificationBlock
+  onToggleNotificationBlock,
+  onToggleShowOnlineStatus
 }) {
   const { t } = useTranslation();
 
@@ -269,6 +270,8 @@ function SettingsView({
                           onMakePremiumVerify={onMakePremiumVerify}
                           showConfirmDelete={showConfirmDelete}
                           setShowConfirmDelete={setShowConfirmDelete}
+                          onTogglePrivate={onTogglePrivate}
+                          onToggleShowOnlineStatus={onToggleShowOnlineStatus}
                           handleDelete={handleDelete}
                         />
                       )}

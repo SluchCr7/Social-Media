@@ -85,7 +85,7 @@ export default function SettingsContainer() {
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
   const { deleteUser, makeAccountPremiumVerify } = useAdmin();
-  const { togglePrivateAccount, updatePassword, toggleBlockNotification } = useUser();
+  const { togglePrivateAccount, updatePassword, toggleBlockNotification, toggleShowOnlineStatus } = useUser();
   const { userData } = useGetData(user?._id);
   const { language, handleLanguageChange } = useTranslate();
 
