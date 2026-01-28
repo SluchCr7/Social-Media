@@ -5,7 +5,7 @@ const helmet = require('helmet')
 const rateLimit = require('express-rate-limit')
 const compression = require('compression')
 const morgan = require('morgan')
-const xss = require('xss-clean')
+const xssProtection = require('./Middelwares/xssProtection')
 const connectDB = require('./Config/db')
 const { notfound, errorhandler } = require('./Middelwares/errorHandler')
 const cookieParser = require('cookie-parser');
@@ -43,7 +43,7 @@ app.use('/api/', limiter);
 // 4. Data Sanitization & Body Parsing
 app.use(express.json({ limit: '50mb' })); // Increased limit for large uploads
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(xss()); // Protect against XSS attacks
+app.use(xssProtection); // Custom XSS protection (Express v5 compatible)
 app.use(cookieParser());
 
 // 5. Performance

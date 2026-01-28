@@ -37,6 +37,7 @@
     "speakeasy": "^2.0.0",
     "streamifier": "^0.1.1",
     "threadsv2": "file:..",
+    "xss": "^1.0.15",
     "xss-clean": "^0.1.4"
   }
 }
