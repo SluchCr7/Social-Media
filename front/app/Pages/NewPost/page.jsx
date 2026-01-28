@@ -298,6 +298,7 @@ import React, {
 import { useAuth } from '@/app/Context/AuthContext'
 import { usePost } from '@/app/Context/PostContext'
 import { useCommunity } from '@/app/Context/CommunityContext'
+import { useMusic } from '@/app/Context/MusicContext'
 import Loading from '@/app/Component/Loading'
 
 // ✅ Lazy Load لتقليل وقت تحميل الصفحة الأولى
@@ -321,12 +322,14 @@ const NewPostContainer = () => {
   const [mentionQuery, setMentionQuery] = useState('')
   const [showMentionBox, setShowMentionBox] = useState(false)
   const [mentionBoxPos, setMentionBoxPos] = useState({ top: 0, left: 0 })
+  const [selectedMusic, setSelectedMusic] = useState(null)
 
   const textareaRef = useRef(null)
 
   const { user, users } = useAuth()
   const { AddPost } = usePost()
   const { communities } = useCommunity()
+  const { music: musicList, isLoading: isMusicLoading } = useMusic() || { music: [], isLoading: false }
 
   /* ------------------------- 🧠 Memoized helpers ------------------------- */
 
@@ -495,7 +498,8 @@ const NewPostContainer = () => {
         selectedMentions.map((u) => u._id),
         scheduleTime,
         links,
-        privacy
+        privacy,
+        selectedMusic?._id
       )
     } finally {
       setLoading(false)
@@ -505,6 +509,7 @@ const NewPostContainer = () => {
       setSelectedMentions([])
       setScheduleEnabled(false)
       setScheduleDate('')
+      setSelectedMusic(null)
     }
   }, [
     postText,
@@ -515,6 +520,7 @@ const NewPostContainer = () => {
     scheduleDate,
     links,
     privacy,
+    selectedMusic,
     AddPost,
     extractHashtags,
   ])
@@ -580,6 +586,10 @@ const NewPostContainer = () => {
           filteredUsers,
           mentionBoxPos,
           textareaRef,
+          selectedMusic,
+          setSelectedMusic,
+          musicList,
+          isMusicLoading
         }}
       />
     </Suspense>

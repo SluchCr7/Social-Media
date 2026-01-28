@@ -19,7 +19,8 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
     mentions = [],
     scheduledAt = null,
     links = [],
-    privacy = "public"
+    privacy = "public",
+    music = null
   ) => {
     if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
 
@@ -32,6 +33,7 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
     if (scheduledAt) formData.append("scheduledAt", scheduledAt);
     if (privacy) formData.append("privacy", privacy);
     if (links.length > 0) formData.append("links", JSON.stringify(links));
+    if (music) formData.append("music", music);
 
     setIsLoadingPostCreated(true);
     const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
@@ -63,7 +65,7 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
    */
   const editPost = useCallback(async (
     id,
-    { text, community, Hashtags, existingPhotos, newPhotos, mentions = [], links = [] }
+    { text, community, Hashtags, existingPhotos, newPhotos, mentions = [], links = [], music = null }
   ) => {
     if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
     setIsLoading(true);
@@ -80,6 +82,7 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
         newPhotos.forEach(photo => formData.append('newPhotos', photo));
       }
       if (links?.length > 0) formData.append('links', JSON.stringify(links));
+      if (music) formData.append('music', music);
 
       const res = await api.put(`/post/edit/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" }

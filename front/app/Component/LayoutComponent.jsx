@@ -69,6 +69,9 @@ const LayoutComponent = ({ children }) => {
     '/Pages/Cookies',
     '/Pages/Analytics',
     '/Pages/Profile',
+    '/Pages/NewPost',
+    '/Pages/Challenge',
+    '/Pages/Videos',
   ];
 
   // Dynamic routes (starts with match)

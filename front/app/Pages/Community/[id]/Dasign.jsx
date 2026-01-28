@@ -197,10 +197,7 @@ const DasignCommunitySelect = memo(({
   const canEdit = isOwner(user?._id) || isAdmin(user?._id);
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white selection:bg-blue-500/30 font-sans">
-      <Head>
-        <title>{CommunitySelected?.Name} | Community</title>
-      </Head>
+    <div className="min-h-screen w-full bg-[#050505] text-white selection:bg-blue-500/30 font-sans">
 
       {/* 🖼️ Hero Section */}
       <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">

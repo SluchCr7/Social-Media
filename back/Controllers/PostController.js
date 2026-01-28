@@ -6,7 +6,7 @@ const { Community } = require("../Modules/Community");
 const cloudinary = require("cloudinary").v2;
 const { moderatePost } = require('../utils/CheckTextPost');
 // 🔔 Socket.io & Notifications
-const {sendNotificationHelper} = require("../utils/SendNotification");
+const { sendNotificationHelper } = require("../utils/SendNotification");
 const { postPopulate } = require("../Populates/Populate");
 const streamifier = require("streamifier");
 
@@ -136,6 +136,7 @@ const addPost = async (req, res) => {
       status: postStatus,
       links,
       privacy,
+      music: req.body.music || null,
       // ✨ الإضافات الجديدة
       isContainWorst,
       badWord,
@@ -186,7 +187,7 @@ const addPost = async (req, res) => {
 //       try { mentions = JSON.parse(mentions); }
 //       catch { mentions = [mentions]; }
 //     } else if (!Array.isArray(mentions)) mentions = [];
-    
+
 //     if (typeof links === "string") {
 //       try {
 //         links = JSON.parse(links);
@@ -309,7 +310,7 @@ const hahaPost = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("Post not found");
   }
-  if (post.likes.includes(req.user._id)){
+  if (post.likes.includes(req.user._id)) {
     return res.status(400).json({ message: "You can't hahed a post that has been liked" });
   }
   if (post.hahas.includes(req.user._id)) {
@@ -328,7 +329,7 @@ const hahaPost = asyncHandler(async (req, res) => {
 
     // 👇 لا ترسل إشعار لنفسك ولا لمن حظرك من الإشعارات
     if (
-      !post.owner.equals(req.user._id) && 
+      !post.owner.equals(req.user._id) &&
       !postOwner.BlockedNotificationFromUsers
         .map(id => id.toString())
         .includes(req.user._id.toString())
@@ -357,7 +358,7 @@ const likePost = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("Post not found");
   }
-  if (post.hahas.includes(req.user._id)){
+  if (post.hahas.includes(req.user._id)) {
     return res.status(400).json({ message: "You can't like a post that has been hahed" });
   }
   // إذا كان المستخدم قد أعجب بالبوست مسبقًا → إلغاء اللايك
@@ -375,19 +376,19 @@ const likePost = asyncHandler(async (req, res) => {
 
     const postOwner = await User.findById(post.owner).select("BlockedNotificationFromUsers");
     if (
-      !post.owner.equals(req.user._id) && 
+      !post.owner.equals(req.user._id) &&
       !postOwner.BlockedNotificationFromUsers
         .map(id => id.toString())
         .includes(req.user._id.toString())
     ) {
       await sendNotificationHelper({
-          sender: req.user._id,
-          receiver: post.owner,
-          content: "liked your post",
-          type: "like",
-          actionRef: post._id,
-          actionModel: "Post",
-        });
+        sender: req.user._id,
+        receiver: post.owner,
+        content: "liked your post",
+        type: "like",
+        actionRef: post._id,
+        actionModel: "Post",
+      });
     }
   }
 
@@ -449,20 +450,20 @@ const sharePost = asyncHandler(async (req, res) => {
     isShared: true,
   });
   const postOwner = await User.findById(originalPost.owner).select("BlockedNotificationFromUsers");
-    if (
-      !originalPost.owner.equals(req.user._id) && 
-      !postOwner.BlockedNotificationFromUsers
-        .map(id => id.toString())
-        .includes(req.user._id.toString())
-    ) {
-      await sendNotificationHelper({
-        sender: req.user._id,
-        receiver: originalPost.owner,
-        content: "shared your post",
-        type: "share",
-        actionRef: sharedPost._id,
-        actionModel: "Post",
-      });
+  if (
+    !originalPost.owner.equals(req.user._id) &&
+    !postOwner.BlockedNotificationFromUsers
+      .map(id => id.toString())
+      .includes(req.user._id.toString())
+  ) {
+    await sendNotificationHelper({
+      sender: req.user._id,
+      receiver: originalPost.owner,
+      content: "shared your post",
+      type: "share",
+      actionRef: sharedPost._id,
+      actionModel: "Post",
+    });
   }
   await sharedPost.save();
   await sharedPost.populate(postPopulate);
@@ -541,6 +542,7 @@ const editPost = asyncHandler(async (req, res) => {
   post.Photos = [...existingPhotos, ...newUploadedPhotos];
   post.mentions = mentions || post.mentions; // 🎯 تحديث mentions
   post.links = links || post.links;
+  post.music = req.body.music || post.music;
   await post.save();
 
   // ✅ populate كامل زي getAllPosts
@@ -586,7 +588,7 @@ const viewPost = asyncHandler(async (req, res) => {
     { $addToSet: { views: req.user._id } }, // $addToSet يمنع التكرار
     { new: true }
   ).populate(postPopulate);
-  
+
   res.status(200).json({
     post: updatedPost
   });
