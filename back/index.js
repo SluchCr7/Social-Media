@@ -45,7 +45,7 @@ app.use('/api/', limiter);
 app.use(express.json({ limit: '50mb' })); // Increased limit for large uploads
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(xss()); // Protect against XSS attacks
-app.use(hpp()); // Protect against HTTP Parameter Pollution
+// app.use(hpp()); // Commented out - causes "Cannot set property query" error in newer Express versions
 app.use(cookieParser());
 
 // 5. Performance
