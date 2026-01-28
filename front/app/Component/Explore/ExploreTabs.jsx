@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-    HiTrendingUp,
+    HiFire,
     HiHashtag,
     HiPhoto,
     HiNewspaper,
@@ -13,7 +13,7 @@ import {
 const ExploreTabs = ({ allTabs, activeTab, setActiveTab }) => {
     const getIcon = (name) => {
         switch (name) {
-            case 'Trending': return <HiTrendingUp className="w-5 h-5" />;
+            case 'Trending': return <HiFire className="w-5 h-5" />;
             case 'Hashtags': return <HiHashtag className="w-5 h-5" />;
             case 'Photos': return <HiPhoto className="w-5 h-5" />;
             case 'News': return <HiNewspaper className="w-5 h-5" />;
@@ -40,8 +40,8 @@ const ExploreTabs = ({ allTabs, activeTab, setActiveTab }) => {
                             whileHover={{ scale: 1.05, y: -2 }}
                             whileTap={{ scale: 0.95 }}
                             className={`relative flex items-center gap-3 px-8 py-5 rounded-2xl transition-all ${isActive
-                                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-2xl shadow-indigo-500/40'
-                                    : 'bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-indigo-500/30'
+                                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-2xl shadow-indigo-500/40'
+                                : 'bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-indigo-500/30'
                                 }`}
                         >
                             {/* Active Glow */}

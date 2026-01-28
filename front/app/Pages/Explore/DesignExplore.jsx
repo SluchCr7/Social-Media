@@ -6,7 +6,7 @@ import {
     HiArrowRight,
     HiSignal,
     HiSparkles,
-    HiTrendingUp,
+    HiFire,
     HiUsers,
     HiPhoto,
     HiHashtag,
@@ -91,7 +91,7 @@ const DesignExplore = memo(({
 
     // Tab icons mapping
     const tabIcons = {
-        'Trending': HiTrendingUp,
+        'Trending': HiFire,
         'Hashtags': HiHashtag,
         'Photos': HiPhoto,
         'News': HiNewspaper

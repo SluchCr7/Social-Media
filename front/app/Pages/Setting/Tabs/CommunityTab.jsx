@@ -2,7 +2,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { HiUserGroup, HiCrown, HiUserPlus, HiSparkles, HiArrowRight } from 'react-icons/hi2';
+import { HiUserGroup, HiShieldCheck, HiUserPlus, HiSparkles, HiArrowRight } from 'react-icons/hi2';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 
@@ -150,7 +150,7 @@ const CommunityTab = ({ user }) => {
 
         <CommunitySection
           title="Admin Communities"
-          icon={HiCrown}
+          icon={HiShieldCheck}
           communities={adminCommunities}
           emptyMessage="You are not an admin in any community yet."
           gradient="bg-gradient-to-br from-yellow-500 to-orange-600"

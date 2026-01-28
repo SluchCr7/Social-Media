@@ -56,7 +56,7 @@ const FullSearchResults = () => {
                 <>
                   {t('Results for')} <br />
                   <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                    "{search}"
+                    &quot;{search}&quot;
                   </span>
                 </>
               ) : (
