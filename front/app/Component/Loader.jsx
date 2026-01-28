@@ -7,53 +7,44 @@ import Image from "next/image";
 const Loader = () => {
   return (
     <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#050505] overflow-hidden">
+      {/* Subtle Background Glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-[#050505] to-[#050505]" />
 
-      {/* Background Gradient Subtle */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-900/10 via-[#050505] to-[#050505]" />
+      <div className="relative flex flex-col items-center justify-center p-12 space-y-8">
+        {/* Logo Container with Breathing Effect */}
+        <motion.div
+          animate={{
+            scale: [1, 1.05, 1],
+            opacity: [0.8, 1, 0.8],
+            filter: ["drop-shadow(0 0 0px rgba(99,102,241,0))", "drop-shadow(0 0 20px rgba(99,102,241,0.3))", "drop-shadow(0 0 0px rgba(99,102,241,0))"]
+          }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="relative w-24 h-24 md:w-32 md:h-32"
+        >
+          <Image
+            src="/Logo.png"
+            alt="Loading..."
+            fill
+            className="object-contain"
+            priority
+          />
+        </motion.div>
 
-      <div className="relative flex flex-col items-center justify-center p-12">
-        {/* Main Logo Container */}
-        <div className="relative mb-8">
-          {/* Animated Glow Behind Logo */}
+        {/* Minimalist Loading Bar */}
+        <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
           <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.6, 0.3],
-            }}
+            initial={{ x: "-100%" }}
+            animate={{ x: "100%" }}
             transition={{
-              duration: 3,
+              duration: 1.5,
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="absolute inset-0 bg-indigo-500/20 blur-[60px] rounded-full"
-          />
-
-          {/* Logo with Breathing Effect */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative w-32 h-32 md:w-40 md:h-40 z-10"
-          >
-            <Image
-              src="/Logo.png"
-              alt="Loading..."
-              fill
-              className="object-contain drop-shadow-2xl"
-              priority
-            />
-          </motion.div>
-
-          {/* Spinning Ring (Minimalist) */}
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-[-20px] rounded-full border border-indigo-500/10 border-t-indigo-500/50 z-0"
-          />
-          <motion.div
-            animate={{ rotate: -360 }}
-            transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-[-10px] rounded-full border border-white/5 border-b-white/20 z-0"
+            className="w-full h-full bg-indigo-500/80 rounded-full"
           />
         </div>
       </div>
