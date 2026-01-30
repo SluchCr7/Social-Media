@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState , useCallback } from 'react'
+import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import { useAuth } from '@/app/Context/AuthContext'
 import { usePost } from '@/app/Context/PostContext'
 import AnalyticsPresentation from './AnalyticsPresentation'
@@ -15,13 +15,15 @@ export default function AnalyticsContainer() {
   const [following, setFollowing] = useState([])
   const [period, setPeriod] = useState('30')
   const [exporting, setExporting] = useState(false)
-  const {userData,loading} = useGetData(user._id)
-  
+  const { userData, loading } = useGetData(user._id)
+
   // Fetch posts
   useEffect(() => {
     if (!userData?._id) return
     fetchUserPosts(userData._id, 1, 200, true)
-  }, [userData?._id])
+    if (userData.followers) setFollowers(userData.followers)
+    if (userData.following) setFollowing(userData.following)
+  }, [userData])
 
   // Derived metrics
   const stats = useMemo(() => {
@@ -95,7 +97,7 @@ export default function AnalyticsContainer() {
     }
   }, [userData, user, followers, following, userPosts, totalLikes, totalComments])
 
-  
+
   if (loading) return <div className="p-6 max-w-6xl mx-auto"><AnalyticsSkeleton /></div>
 
   return (
