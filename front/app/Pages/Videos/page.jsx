@@ -1,75 +1,110 @@
 'use client'
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import Image from 'next/image'
+import { usePost } from '@/app/Context/PostContext'
+import SluchitEntry from '@/app/Component/SluchitEntry'
+import { HiVideoCamera, HiSparkles } from 'react-icons/hi2'
+import Loading from '@/app/Component/Loading'
 
 const Page = () => {
   const { t } = useTranslation()
+  const { posts, isLoading } = usePost()
+
+  // ✅ Filter posts that contain at least one video
+  const videoPosts = useMemo(() => {
+    return posts.filter(post =>
+      post.media?.some(m => m.type === 'video') ||
+      post.Videos?.length > 0 // Legacy support
+    )
+  }, [posts])
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-950 dark:to-black text-center px-6 w-full">
-      
-      {/* خلفية زخرفية */}
-      <motion.div
-        className="absolute -top-40 -right-40 w-[400px] h-[400px] bg-purple-500/20 dark:bg-purple-600/10 rounded-full blur-3xl"
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 1.5 }}
-      />
-      <motion.div
-        className="absolute bottom-0 left-0 w-[350px] h-[350px] bg-blue-400/20 dark:bg-blue-700/10 rounded-full blur-3xl"
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 1.8, delay: 0.3 }}
-      />
+    <div className="relative min-h-screen bg-[#fafafa] dark:bg-[#080808] transition-colors duration-700">
+      {/* 🎭 Premium Ambient Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
 
-      {/* المحتوى */}
-      <motion.div
-        className="z-10 flex flex-col items-center"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <motion.div
-          animate={{ rotate: [0, 5, -5, 0] }}
-          transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
-        >
-          <Image
-            src="/soon.svg"
-            alt="Coming Soon"
-            width={200}
-            height={200}
-            className="mb-6 drop-shadow-xl"
-          />
-        </motion.div>
+      <div className="relative z-10 max-w-4xl mx-auto px-4 py-12 md:py-20">
+        {/* 🎬 Header Section */}
+        <header className="mb-16 text-center space-y-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em]"
+          >
+            <HiSparkles className="animate-spin-slow" />
+            {t("Premium Experience")}
+          </motion.div>
 
-        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-3 tracking-tight">
-          🎬 {t("Videos Section Coming Soon!")}
-        </h1>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl md:text-6xl font-black text-gray-900 dark:text-white tracking-tighter"
+          >
+            {t("Visual")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">{t("Signals")}</span>
+          </motion.h1>
 
-        <p className="max-w-2xl text-gray-600 dark:text-gray-400 text-base md:text-lg leading-relaxed">
-          {t("We're building an amazing video experience where you can watch, share, and explore creative content from around the world. Stay tuned for the launch!")}
-        </p>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-gray-500 dark:text-gray-400 font-medium text-lg max-w-xl mx-auto"
+          >
+            {t("Dive into the most engaging video content from across the network.")}
+          </motion.p>
+        </header>
 
-        <motion.div
-          className="mt-10 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 cursor-default"
-          animate={{ opacity: [0.7, 1, 0.7] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          🚧 {t("Under Development")}
-        </motion.div>
-      </motion.div>
+        {/* 📺 Content Feed */}
+        <div className="space-y-12">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loading />
+              <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-gray-400 animate-pulse">
+                {t("Fetching Visual Streams...")}
+              </p>
+            </div>
+          ) : videoPosts.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-32 rounded-[3rem] bg-white dark:bg-white/[0.02] border border-dashed border-gray-200 dark:border-white/10"
+            >
+              <HiVideoCamera className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-700 mb-6" />
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t("No Visuals Found")}</h3>
+              <p className="text-gray-500 text-sm max-w-xs mx-auto">
+                {t("Be the first to broadcast a video to the world!")}
+              </p>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-1 gap-12">
+              {videoPosts.map((post, idx) => (
+                <motion.div
+                  key={post._id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                >
+                  <SluchitEntry post={post} />
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
 
-      {/* تأثيرات عائمة خفيفة */}
-      <motion.div
-        className="absolute bottom-10 text-gray-400 dark:text-gray-600 text-sm select-none"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-      >
-        © {new Date().getFullYear()} {t("All rights reserved.")}
-      </motion.div>
+        {/* 🔄 Footer / Infinite Scroll Indicator */}
+        {!isLoading && videoPosts.length > 0 && (
+          <div className="mt-20 text-center">
+            <div className="inline-block px-8 py-px bg-gradient-to-r from-transparent via-gray-200 dark:via-white/10 to-transparent w-full mb-8" />
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+              {t("End of Signal Broadcast")}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

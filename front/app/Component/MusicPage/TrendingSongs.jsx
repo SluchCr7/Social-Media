@@ -1,90 +1,101 @@
 'use client';
 
 import Image from 'next/image';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FaPlay, FaHeart, FaEllipsisH } from 'react-icons/fa';
+import { HiPlay, HiHeart, HiArrowTrendingUp } from 'react-icons/hi2';
 import { motion } from 'framer-motion';
 
-const SongCard = memo(({ song, index }) => {
+const SongCard = memo(({ song, index, setTrack, songs }) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: index * 0.05 }}
-      className="group relative flex flex-col gap-3 p-4 rounded-[2rem] bg-white/5 hover:bg-white/10 dark:bg-gray-900/40 dark:hover:bg-gray-800/60 transition-all duration-500 border border-white/5 hover:border-white/10 shadow-xl"
+      whileHover={{ y: -8 }}
+      className="group relative flex flex-col gap-4 p-5 rounded-[2.5rem] bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.05] transition-all duration-500 shadow-2xl"
     >
-      {/* Artwork Container */}
-      <div className="relative aspect-square w-full rounded-[1.5rem] overflow-hidden shadow-2xl">
-        <Image src={song.cover} alt={song.title} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
+      {/* Immersive Artwork Container */}
+      <div className="relative aspect-square w-full rounded-[2rem] overflow-hidden shadow-[0_20px_40px_-5px_rgba(0,0,0,0.5)]">
+        <Image
+          src={song.cover}
+          alt={song.title}
+          fill
+          className="object-cover transition-transform duration-1000 group-hover:scale-110"
+        />
 
-        {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
+        {/* Cinematic Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center">
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center shadow-2xl"
+            onClick={() => setTrack(song, index, songs)}
+            className="w-16 h-16 rounded-3xl bg-white text-black flex items-center justify-center shadow-2xl"
           >
-            <FaPlay size={20} className="ml-1" />
+            <HiPlay size={28} className="ml-1" />
           </motion.button>
         </div>
 
-        {/* Floating Badges */}
-        <div className="absolute top-3 left-3 flex gap-2">
-          <div className="bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg text-[10px] font-bold text-white uppercase tracking-widest border border-white/10">
-            Trending
+        {/* Hot Badge */}
+        <div className="absolute top-4 left-4">
+          <div className="bg-indigo-600/80 backdrop-blur-xl px-3 py-1.5 rounded-xl text-[8px] font-black text-white uppercase tracking-[0.2em] border border-white/10 flex items-center gap-2">
+            <HiArrowTrendingUp size={12} />
+            Hot Signal
           </div>
         </div>
       </div>
 
-      {/* Info */}
-      <div className="flex justify-between items-start px-1">
-        <div className="flex-1 min-w-0">
-          <h4 className="font-bold text-sm dark:text-white truncate group-hover:text-indigo-400 transition-colors">
-            {song.title}
-          </h4>
-          <p className="text-xs text-gray-500 font-medium truncate">
+      {/* Narrative Section */}
+      <div className="px-2 space-y-1">
+        <h4 className="font-bold text-base text-white tracking-tight truncate transition-colors group-hover:text-indigo-400">
+          {song.title}
+        </h4>
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] font-black text-white/30 uppercase tracking-widest truncate">
             {song.artist}
           </p>
+          <div className="flex items-center gap-1.5 text-[9px] font-black text-white/20 uppercase tracking-widest">
+            <HiHeart className="text-red-500" />
+            {song.likesCount || 0}
+          </div>
         </div>
-        <button className="text-gray-500 hover:text-white transition-colors mt-1">
-          <FaEllipsisH size={14} />
-        </button>
       </div>
 
-      {/* Stats/Action Row */}
-      <div className="flex items-center justify-between px-1 pt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-bold">
-          <FaHeart className="text-red-500/80" />
-          <span>{song.likesCount || (Math.floor(Math.random() * 500) + 100)} Likes</span>
-        </div>
-      </div>
+      {/* Decorative Glow */}
+      <div className="absolute -inset-1 bg-gradient-to-tr from-indigo-500/0 via-purple-500/0 to-pink-500/0 rounded-[2.5rem] -z-10 group-hover:from-indigo-500/10 group-hover:via-purple-500/5 group-hover:to-pink-500/10 transition-all duration-700" />
     </motion.div>
   );
 });
 
 SongCard.displayName = 'SongCard';
 
-const TrendingSongs = memo(({ songs }) => {
+const TrendingSongs = memo(({ songs, setTrack }) => {
   const { t } = useTranslation();
 
+  // Get top 5 by likes or just slice
+  const topTracks = useMemo(() => {
+    return [...songs].sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0)).slice(0, 5);
+  }, [songs]);
+
   return (
-    <div className="py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h3 className="text-2xl font-black dark:text-white flex items-center gap-3">
-            <span className="text-red-500">🔥</span> {t("Trending Now")}
+    <div className="space-y-10">
+      <div className="flex items-end justify-between px-2">
+        <div className="space-y-1">
+          <h3 className="text-4xl font-black text-white tracking-tighter uppercase leading-none">
+            Digital <span className="text-indigo-500">Charts</span>
           </h3>
-          <p className="text-sm text-gray-500 font-medium">Top tracks making noise in the community</p>
+          <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Top 5 Broadcasts by Resonance</p>
         </div>
-        <button className="text-xs font-bold uppercase tracking-widest text-indigo-500 hover:text-indigo-400 transition-colors">
-          View All Charts
+        <button className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 hover:text-white transition-colors border-b-2 border-indigo-500 pb-1">
+          Global Rankings
         </button>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {songs.slice(0, 5).map((s, i) => (
-          <SongCard key={s._id} song={s} index={i} />
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+        {topTracks.map((s, i) => (
+          <SongCard key={s._id} song={s} index={i} setTrack={setTrack} songs={songs} />
         ))}
       </div>
     </div>

@@ -11,7 +11,7 @@ import PostHeader from "@/app/Component/Post/PostHeader";
 import RenderPostText from "@/app/Component/Post/RenderText";
 import PostLinks from "@/app/Component/Post/PostLinks";
 import SharedPost from "@/app/Component/Post/SharedPost";
-import PostPhotos from "@/app/Component/Post/PostPhotos";
+import PostMedia from "@/app/Component/Post/PostMedia";
 import PostHashtags from "@/app/Component/Post/PostHashtags";
 import PostActions from "@/app/Component/Post/PostActions";
 import SharedTitle from "@/app/Component/Post/SharedTitle";
@@ -124,12 +124,12 @@ const DesignPostSelect = memo(({
               <div className="space-y-4">
                 {post?.music && <PostMusicPlayer music={post.music} />}
 
-                {!isShared && post.Photos?.length > 0 && (
+                {!isShared && (post.media?.length > 0 || post.Photos?.length > 0) && (
                   <div className="rounded-[2.5rem] overflow-hidden border border-gray-100 dark:border-white/5 shadow-2xl">
-                    <PostPhotos
+                    <PostMedia
+                      media={post.media}
                       photos={post.Photos}
                       setImageView={setImageView}
-                      postId={post._id}
                     />
                   </div>
                 )}
@@ -216,8 +216,8 @@ const DesignPostSelect = memo(({
                   onClick={handleAddComment}
                   disabled={!commentText.trim()}
                   className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${commentText.trim()
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
-                      : 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed'
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                    : 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed'
                     }`}
                 >
                   <HiPaperAirplane className="w-5 h-5 -rotate-45" />

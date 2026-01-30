@@ -1,12 +1,13 @@
 'use client';
+
 import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import { motion } from 'framer-motion';
 
 const ProgressBar = ({ progress, duration, seek }) => {
   const barRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [localProgress, setLocalProgress] = useState(0);
 
-  // 🧠 حساب النسبة والتوقيت الجديد
   const calculateTime = useCallback((clientX) => {
     const bar = barRef.current;
     if (!bar || !duration) return null;
@@ -18,7 +19,6 @@ const ProgressBar = ({ progress, duration, seek }) => {
     return pct * duration;
   }, [duration]);
 
-  // ✅ استخدام useCallback لتثبيت الدوال وتفادي re-renders
   const handleSeekStart = useCallback((clientX) => {
     const newTime = calculateTime(clientX);
     if (newTime != null) {
@@ -40,14 +40,13 @@ const ProgressBar = ({ progress, duration, seek }) => {
     if (newTime != null) seek(newTime);
   }, [isDragging, calculateTime, seek]);
 
-  // 🎧 إضافة/إزالة الأحداث عند السحب
   useEffect(() => {
     if (!isDragging) return;
 
     const handleMouseMove = (e) => handleSeekMove(e.clientX);
     const handleTouchMove = (e) => handleSeekMove(e.touches[0].clientX);
     const handleMouseUp = (e) => handleSeekEnd(e.clientX);
-    const handleTouchEnd = (e) => setIsDragging(false);
+    const handleTouchEnd = () => setIsDragging(false);
 
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
@@ -62,13 +61,11 @@ const ProgressBar = ({ progress, duration, seek }) => {
     };
   }, [isDragging, handleSeekMove, handleSeekEnd]);
 
-  // 🎯 حساب نسبة التقدم بثبات
   const progressPercent = useMemo(() => {
     const pct = isDragging ? localProgress : (progress / (duration || 1));
     return Math.max(0, Math.min(100, pct * 100));
   }, [isDragging, localProgress, progress, duration]);
 
-  // 🕒 تحويل الوقت
   const formatTime = useCallback((time) => {
     if (isNaN(time)) return "0:00";
     const minutes = Math.floor(time / 60);
@@ -77,31 +74,34 @@ const ProgressBar = ({ progress, duration, seek }) => {
   }, []);
 
   return (
-    <div className="w-full select-none">
+    <div className="w-full select-none space-y-2">
       <div
         ref={barRef}
-        className="relative h-2 bg-gray-300 dark:bg-gray-700 rounded-full cursor-pointer group"
+        className="relative h-1.5 bg-white/5 rounded-full cursor-pointer group flex items-center"
         onMouseDown={(e) => handleSeekStart(e.clientX)}
         onTouchStart={(e) => handleSeekStart(e.touches[0].clientX)}
       >
-        {/* الجزء المملوء */}
-        <div
-          style={{ width: `${progressPercent}%` }}
-          className={`absolute h-2 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 transition-[width] duration-150 ease-linear`}
-        />
+        {/* Track Base */}
+        <div className="absolute inset-0 bg-white/[0.05] rounded-full overflow-hidden">
+          {/* Progress Fill */}
+          <motion.div
+            initial={false}
+            animate={{ width: `${progressPercent}%` }}
+            className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
+          />
+        </div>
 
-        {/* النقطة */}
-        <div
-          style={{ left: `${progressPercent}%` }}
-          className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-white border border-indigo-500 shadow 
-            ${isDragging ? 'block' : 'hidden group-hover:block'}`}
+        {/* Tactile Handle */}
+        <motion.div
+          initial={false}
+          animate={{ left: `${progressPercent}%` }}
+          className={`absolute w-4 h-4 rounded-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.5)] transform -translate-x-1/2 transition-opacity duration-300 ${isDragging ? 'opacity-100 scale-110' : 'opacity-0 group-hover:opacity-100'}`}
         />
       </div>
 
-      {/* الوقت */}
-      <div className="flex justify-between text-xs text-gray-400 mt-1">
-        <span>{formatTime(progress)}</span>
-        <span>{formatTime(duration)}</span>
+      <div className="flex justify-between">
+        <span className="text-[10px] font-black font-mono text-white/30 tracking-widest">{formatTime(progress)}</span>
+        <span className="text-[10px] font-black font-mono text-white/30 tracking-widest">{formatTime(duration)}</span>
       </div>
     </div>
   );
