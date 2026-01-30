@@ -12,21 +12,20 @@ const commentSchema = new mongoose.Schema({
     required: true,
   },
   isEdited: { type: Boolean, default: false },
-  postId: {
+
+  // Unified Target System
+  targetId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Post',
-    default: null,
+    required: true,
+    refPath: 'targetType'
   },
-  // reelId: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: 'Reel',
-  //   default: null,
-  // },
-  parent: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Comment',
-    default: null,
+  targetType: {
+    type: String,
+    required: true,
+    enum: ['Post', 'Reel', 'Comment'],
+    default: 'Post'
   },
+
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -42,10 +41,12 @@ const commentSchema = new mongoose.Schema({
   toObject: { virtuals: true },
 });
 
+// Virtual for replies to maintain compatibility with existing tree builders if needed
 commentSchema.virtual('replies', {
   ref: 'Comment',
   localField: '_id',
-  foreignField: 'parent',
+  foreignField: 'targetId',
+  match: { targetType: 'Comment' }
 });
 
 const Comment = mongoose.model('Comment', commentSchema);
@@ -53,8 +54,8 @@ const Comment = mongoose.model('Comment', commentSchema);
 const ValidateComment = (comment) => {
   const schema = joi.object({
     text: joi.string().required(),
-    parent: joi.string().allow(null),
-    postId: joi.string().required(),
+    targetId: joi.string().required(),
+    targetType: joi.string().valid('Post', 'Reel', 'Comment').required(),
   });
   return schema.validate(comment);
 };

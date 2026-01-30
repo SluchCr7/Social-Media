@@ -2,35 +2,34 @@ const asyncHandler = require('express-async-handler');
 const { Comment, ValidateComment, ValidateUpdateComment } = require('../Modules/Comment');
 const { User } = require('../Modules/User');
 const { Post } = require('../Modules/Post');
+const { Reel } = require('../Modules/Reel');
 const { sendNotificationHelper } = require('../utils/SendNotification');
 const { commentPopulate } = require('../Populates/Populate');
 
 
 
 // ================== Get All Comments (nested) ==================
+// ================== Get Comments for a Target (Post, Reel, or Comment) ==================
 const getAllComments = asyncHandler(async (req, res) => {
-  const postId = req.params.postId;
+  const { targetId, targetType } = req.params;
 
-  const comments = await Comment.find({ postId })
-    .populate("owner", "username profileName profilePhoto following followers description");
-
-  const buildCommentTree = (parentId = null) => {
-    return comments
-      .filter(comment => {
-        if (!parentId) return !comment.parent; // لو parent null يبقى comment أساسي
-        return String(comment.parent) === String(parentId);
-      })
-      .map(comment => {
-        const c = comment.toObject(); // أو comment._doc
-        return {
-          ...c,
-          replies: buildCommentTree(comment._id)
-        };
-      });
+  // Fetch comments directly attached to this target
+  // Support both new targetId/targetType and legacy postId/parent fields
+  const query = {
+    $or: [
+      { targetId, targetType },
+    ]
   };
 
-  const nestedComments = buildCommentTree();
-  res.status(200).json(nestedComments);
+  // Legacy mappings
+  if (targetType === "Post") query.$or.push({ postId: targetId, targetType: { $exists: false } });
+  if (targetType === "Comment") query.$or.push({ parent: targetId });
+
+  const comments = await Comment.find(query)
+    .populate("owner", "username profileName profilePhoto following followers description")
+    .sort({ createdAt: -1 });
+
+  res.status(200).json(comments);
 });
 
 
@@ -81,77 +80,71 @@ const getAllComments = asyncHandler(async (req, res) => {
 
 
 // ================== Add New Comment ==================
+// ================== Add New Comment ==================
 const addNewComment = asyncHandler(async (req, res) => {
-  const { error } = ValidateComment({ ...req.body, postId: req.params.postId });
+  const { text, targetId, targetType } = req.body;
+
+  const { error } = ValidateComment({ text, targetId, targetType });
   if (error) return res.status(400).json({ message: error.details[0].message });
 
-  const post = await Post.findById(req.params.postId);
-  if (!post) {
-    res.status(404);
-    throw new Error("Post not found");
-  }
+  let target;
+  let notificationType = "comment";
+  let content = "commented on your post";
+  let actionModel = "Post";
 
-  if (post.isCommentOff) {
-    res.status(403);
-    throw new Error("Comments are disabled for this post");
+  // 🎯 Verify Target Existence & Handle Logic
+  if (targetType === "Post") {
+    target = await Post.findById(targetId);
+    if (!target) return res.status(404).json({ message: "Post not found" });
+    if (target.isCommentOff) return res.status(403).json({ message: "Comments are disabled for this post" });
+  } else if (targetType === "Reel") {
+    target = await Reel.findById(targetId);
+    if (!target) return res.status(404).json({ message: "Reel not found" });
+    content = "commented on your reel";
+    actionModel = "Reel";
+  } else if (targetType === "Comment") {
+    target = await Comment.findById(targetId).populate("owner");
+    if (!target) return res.status(404).json({ message: "Parent comment not found" });
+    notificationType = "reply";
+    content = "replied to your comment";
+    actionModel = "Comment";
   }
 
   const comment = new Comment({
-    text: req.body.text,
+    text,
     owner: req.user._id,
-    postId: req.params.postId,
-    parent: req.body.parent || null,
+    targetId,
+    targetType,
   });
 
   const user = await User.findById(req.user._id);
   user.userLevelPoints += 3;
   user.updateLevelRank();
+
   await Promise.all([user.save(), comment.save()]);
 
   const populatedComment = await Comment.findById(comment._id).populate(commentPopulate);
 
-  // ✅ حالة الرد (Reply)
-  if (comment.parent) {
-    const parentComment = await Comment.findById(comment.parent).populate("owner", "BlockedNotificationFromUsers");
+  // 🔔 Send Notifications
+  if (!target.owner.equals(req.user._id)) {
+    const targetOwner = targetType === "Comment" ? target.owner : await User.findById(target.owner);
 
-    if (parentComment && !parentComment.owner.equals(req.user._id)) {
-      // ⚡ لا ترسل إشعار إذا صاحب الكومنت الأب حظر المستخدم الحالي
-      if (!parentComment.owner.BlockedNotificationFromUsers.includes(req.user._id)) {
-        await sendNotificationHelper({
-          sender: req.user._id,
-          receiver: parentComment.owner,
-          content: "replied to your comment",
-          type: "reply",
-          actionRef: parentComment._id,
-          actionModel: "Comment",
-        });
-      }
-    }
-
-    return res.status(201).json({
-      message: "Reply added",
-      comment: populatedComment,
-      parentComment,
-    });
-  }
-
-  // ✅ حالة التعليق على البوست نفسه
-  if (!post.owner.equals(req.user._id)) {
-    const postOwner = await User.findById(post.owner);
-
-    if (!postOwner.BlockedNotificationFromUsers.includes(req.user._id)) {
+    if (targetOwner && !targetOwner.BlockedNotificationFromUsers.includes(req.user._id)) {
       await sendNotificationHelper({
         sender: req.user._id,
-        receiver: post.owner,
-        content: "commented on your post",
-        type: "comment",
-        actionRef: post._id,
-        actionModel: "Post",
+        receiver: targetOwner._id,
+        content,
+        type: notificationType,
+        actionRef: target._id,
+        actionModel: actionModel,
       });
     }
   }
 
-  res.status(201).json({ message: "Comment added", comment: populatedComment });
+  res.status(201).json({
+    message: targetType === "Comment" ? "Reply added" : "Comment added",
+    comment: populatedComment
+  });
 });
 
 // ================== Delete Comment (with cascade replies) ==================
@@ -167,8 +160,13 @@ const deleteComment = asyncHandler(async (req, res) => {
     return res.status(403).json({ message: "You are not authorized to delete this comment" });
   }
 
-  // حذف كل الردود المرتبطة بالكومنت قبل الحذف
-  await Comment.deleteMany({ parent: comment._id });
+  // Delete all replies associated with this comment (cascade)
+  await Comment.deleteMany({
+    $or: [
+      { targetId: comment._id, targetType: 'Comment' },
+      { parent: comment._id } // Legacy support
+    ]
+  });
 
   await comment.remove();
   res.status(200).json({ message: 'Comment and its replies deleted' });

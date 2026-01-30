@@ -9,15 +9,15 @@ export const useCommentModify = ({
 }) => {
   const headers = { Authorization: `Bearer ${user?.token}` };
 
-  // 📌 جلب التعليقات لبوست معين
-  const fetchCommentsByPostId = async (postId) => {
+  // 📌 Generic fetch for any target
+  const fetchCommentsByTarget = async (targetId, targetType = 'Post') => {
     if (!setIsLoading || !setComments)
       return console.error("setIsLoading or setComments not provided");
 
     setIsLoading(true);
     try {
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/post/${postId}`
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/${targetType}/${targetId}`
       );
       setComments(res.data || []);
     } catch (err) {
@@ -28,10 +28,10 @@ export const useCommentModify = ({
     }
   };
 
-  // 🔹 تحديث كومنت داخل tree
+  // 🔹 Update comment inside tree (recursive)
   const updateCommentInTree = (list, updatedComment) => {
     return list.map((c) => {
-      if (c._id === updatedComment._id) return updatedComment;
+      if (c._id === updatedComment._id) return { ...updatedComment, replies: c.replies || [] };
       if (c.replies?.length > 0) {
         return { ...c, replies: updateCommentInTree(c.replies, updatedComment) };
       }
@@ -39,7 +39,7 @@ export const useCommentModify = ({
     });
   };
 
-  // 🔹 حذف كومنت من tree
+  // 🔹 Delete comment from tree (recursive)
   const deleteCommentFromTree = (list, idToDelete) => {
     return list
       .filter((c) => c._id !== idToDelete)
@@ -49,15 +49,17 @@ export const useCommentModify = ({
       }));
   };
 
-  // 🔹 إدراج كومنت جديد في tree
+  // 🔹 Insert new comment/reply into tree
   const insertCommentToTree = (tree, comment) => {
     const replies = Array.isArray(comment.replies) ? comment.replies : [];
 
-    if (!comment.parent) return [{ ...comment, replies }, ...tree];
+    // If it's a top-level comment (Post or Reel), prepend to tree
+    if (comment.targetType !== "Comment") return [{ ...comment, replies }, ...tree];
 
+    // If it's a reply (targetType === "Comment"), find parent and insert
     return tree.map((c) => {
       const cReplies = Array.isArray(c.replies) ? c.replies : [];
-      if (c._id === comment.parent) {
+      if (c._id === comment.targetId) {
         return { ...c, replies: [{ ...comment, replies }, ...cReplies] };
       }
       if (cReplies.length > 0) {
@@ -67,14 +69,14 @@ export const useCommentModify = ({
     });
   };
 
-  // ➕ إضافة كومنت
-  const AddComment = async (text, postId, receiverId, parent = null) => {
+  // ➕ Generic Add Comment (supports Post, Reel, Comment)
+  const AddComment = async (text, targetId, targetType = 'Post') => {
     if (!checkUserStatus("add comments", showAlert, user)) return;
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/${postId}`,
-        { text, parent },
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment`,
+        { text, targetId, targetType },
         { headers }
       );
 
@@ -84,7 +86,7 @@ export const useCommentModify = ({
       };
 
       setComments((prev) => insertCommentToTree(prev, newComment));
-      showAlert("Comment added successfully.");
+      showAlert(targetType === "Comment" ? "Reply added successfully." : "Comment added successfully.");
 
       return newComment;
     } catch (err) {

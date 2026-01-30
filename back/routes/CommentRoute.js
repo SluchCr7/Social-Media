@@ -10,11 +10,11 @@ const {
 } = require('../Controllers/CommentController');
 const { verifyToken } = require('../Middelwares/verifyToken')
 
-// Get all comments of a specific post (as nested tree)
-route.get('/post/:postId', getAllComments);
+// Get comments of a specific target (Post, Reel, or Comment)
+route.get('/:targetType/:targetId', getAllComments);
 
-// Create comment or reply
-route.post('/:postId', verifyToken, addNewComment);
+// Create comment or reply (targetId and targetType passed in body)
+route.post('/', verifyToken, addNewComment);
 
 // Like / Unlike comment
 route.put('/like/:id', verifyToken, likeComment);

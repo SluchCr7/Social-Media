@@ -29,13 +29,14 @@ const Comment = ({ comment }) => {
     if (!replyText.trim()) return;
     setLoadingReply(true);
     try {
-      await AddComment(replyText, comment.postId, comment.owner._id, comment._id);
+      // Direct reply to this comment
+      await AddComment(replyText, comment._id, 'Comment');
       setReplyText('');
       setIsReplying(false);
     } finally {
       setLoadingReply(false);
     }
-  }, [replyText, comment.postId, comment.owner._id, comment._id]);
+  }, [replyText, comment._id, AddComment]);
 
   const handleUpdateComment = useCallback(async () => {
     if (!editText.trim()) return;
@@ -46,7 +47,7 @@ const Comment = ({ comment }) => {
     } finally {
       setLoadingEdit(false);
     }
-  }, [editText, comment._id]);
+  }, [editText, comment._id, updateComment]);
 
   return (
     <motion.div
@@ -130,7 +131,7 @@ const Comment = ({ comment }) => {
                     <motion.button
                       whileHover={{ scale: 1.1, rotate: -5 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => deleteComment(comment._id, comment.postId)}
+                      onClick={() => deleteComment(comment._id)}
                       className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 transition-colors"
                     >
                       <MdOutlineDelete className="text-base" />
@@ -172,8 +173,8 @@ const Comment = ({ comment }) => {
                       onClick={handleUpdateComment}
                       disabled={loadingEdit}
                       className={`px-5 py-2 rounded-xl text-white text-sm font-semibold shadow-lg transition-all ${loadingEdit
-                          ? 'bg-gray-400 cursor-not-allowed'
-                          : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400'
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400'
                         }`}
                     >
                       {loadingEdit ? t('Saving...') : t('Save')}
@@ -211,7 +212,7 @@ const Comment = ({ comment }) => {
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => likeComment(comment._id, comment.postId)}
+              onClick={() => likeComment(comment._id)}
               className="flex items-center gap-1.5 cursor-pointer group/like"
             >
               {comment?.likes?.includes(user._id) ? (

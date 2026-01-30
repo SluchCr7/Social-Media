@@ -11,8 +11,8 @@ import DesignPostSelect from './Design';
 const PostPage = ({ params }) => {
   const id = params.id;
   const { user, isLogin } = useAuth();
-  const { posts, likePost, savePost, sharePost, setImageView, viewPost,hahaPost } = usePost();
-  const { comments, AddComment, isLoading , fetchCommentsByPostId,} = useComment();
+  const { posts, likePost, savePost, sharePost, setImageView, viewPost, hahaPost } = usePost();
+  const { comments, AddComment, isLoading, fetchCommentsByTarget } = useComment();
   const [openModel, setOpenModel] = useState(false);
   const [post, setPost] = useState(null);
   const [commentText, setCommentText] = useState('');
@@ -25,27 +25,27 @@ const PostPage = ({ params }) => {
   }, [id, posts]);
 
   useEffect(() => {
-    if (!post) return;
-    fetchCommentsByPostId(post._id);
-  }, [post?._id]); // ✅ فقط الـid، لا تضع post كامل
+    if (!post?._id) return;
+    fetchCommentsByTarget(post._id, 'Post');
+  }, [post?._id, fetchCommentsByTarget]);
 
 
   useEffect(() => {
     if (post?._id) {
       viewPost(post._id);
     }
-  }, [post?._id]); // فقط الـid
-  
+  }, [post?._id, viewPost]);
+
   const handleAddComment = useCallback(async () => {
-    if (!commentText.trim()) return;
+    if (!commentText.trim() || !post?._id) return;
 
     try {
-      await AddComment(commentText, post._id, post.owner._id);
+      await AddComment(commentText, post._id, 'Post');
       setCommentText('');
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
-  }, [commentText, post?._id, post?.owner?._id, AddComment]);
+  }, [commentText, post?._id, AddComment]);
 
 
   if (!post) return <Loading />;
@@ -87,7 +87,7 @@ const PostPage = ({ params }) => {
       setCommentText={setCommentText}
       handleAddComment={handleAddComment}
       openModel={openModel}
-      setOpenModel={setOpenModel} 
+      setOpenModel={setOpenModel}
       canComment={canComment}
     />
   );
