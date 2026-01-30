@@ -70,7 +70,7 @@ const SupportPage = () => {
                         How can we <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-cyan-500">help?</span>
                     </h1>
                     <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                        Everything you need to know about using Sluchitt. Can't find the answer you're looking for? Contact our support team.
+                        Everything you need to know about using Sluchitt. Can not find the answer you are looking for? Contact our support team.
                     </p>
                 </motion.div>
 
