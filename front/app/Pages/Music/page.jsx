@@ -100,8 +100,7 @@ import { useUser } from '@/app/Context/UserContext'
 import { useGetData } from '@/app/Custome/useGetData'
 import Loading from '@/app/Component/Loading'
 
-// ✅ Lazy loading للمكون الضخم (تحسين أولي للتحميل)
-const MusicPagePresentation = React.lazy(() => import('./MusicPagePresentation'))
+import MusicPagePresentation from './MusicPagePresentation'
 
 export default function MusicPageContainer() {
   const { music: songs, isLoading, likeMusic, shareMusicAsPost } = useMusic()
@@ -153,7 +152,7 @@ export default function MusicPageContainer() {
   /* ---------------- 🧠 استخدام Suspense للتحميل الذكي ---------------- */
   return (
     <Suspense fallback={
-      <Loading/>
+      <Loading />
     }>
       <MusicPagePresentation
         songs={songs}

@@ -39,41 +39,38 @@ const AllSongsFeed = ({ filtered, current, setTrack, songs }) => {
 
       {/* Smooth Scrollable Container */}
       <div className="relative space-y-4 max-h-[800px] overflow-y-auto pr-4 custom-scrollbar">
-        <AnimatePresence mode="popLayout">
-          {filtered.length > 0 ? (
-            filtered.map((s, i) => (
-              <motion.div
-                key={s._id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.4, delay: i * 0.02 }}
-              >
-                <SongItem
-                  song={s}
-                  index={i}
-                  setTrack={setTrack}
-                  current={current}
-                  songs={songs}
-                />
-              </motion.div>
-            ))
-          ) : (
+        {filtered.length > 0 ? (
+          filtered.map((s, i) => (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="py-32 flex flex-col items-center justify-center text-center space-y-6"
+              key={s._id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: i * 0.02 }}
             >
-              <div className="w-24 h-24 rounded-full border border-dashed border-white/10 flex items-center justify-center animate-pulse">
-                <HiMusicalNote size={32} className="text-white/10" />
-              </div>
-              <div className="space-y-2">
-                <p className="font-black tracking-[0.3em] uppercase text-xs text-white/20">Empty Spectrum</p>
-                <p className="text-white/10 text-[10px] font-bold uppercase tracking-widest">No matching frequencies detected in current sector</p>
-              </div>
+              <SongItem
+                song={s}
+                index={i}
+                setTrack={setTrack}
+                current={current}
+                songs={songs}
+              />
             </motion.div>
-          )}
-        </AnimatePresence>
+          ))
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="py-32 flex flex-col items-center justify-center text-center space-y-6"
+          >
+            <div className="w-24 h-24 rounded-full border border-dashed border-white/10 flex items-center justify-center animate-pulse">
+              <HiMusicalNote size={32} className="text-white/10" />
+            </div>
+            <div className="space-y-2">
+              <p className="font-black tracking-[0.3em] uppercase text-xs text-white/20">Empty Spectrum</p>
+              <p className="text-white/10 text-[10px] font-bold uppercase tracking-widest">No matching frequencies detected in current sector</p>
+            </div>
+          </motion.div>
+        )}
       </div>
 
       {/* Functional Footer */}

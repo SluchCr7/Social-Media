@@ -2,15 +2,15 @@
 
 import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import AddMusicModal from '@/app/Component/MusicPage/AddMusicMenu';
-import MusicSkeleton from '@/app/Skeletons/MusicSkeleton';
-import HeaderMusic from '@/app/Component/MusicPage/Header';
-import NowPlaying from '@/app/Component/MusicPage/NowPlayingMusic';
-import TrendingSongs from '@/app/Component/MusicPage/TrendingSongs';
-import SidebarPlaylist from '@/app/Component/MusicPage/SiedbarPlayList';
-import AllSongsFeed from '@/app/Component/MusicPage/AllSongsFeed';
-import SidebarQueue from '@/app/Component/MusicPage/SidebarQueue';
-import SidebarNowPlaying from '@/app/Component/MusicPage/SidebarNowPlaying';
+import AddMusicModal from '../../Component/MusicPage/AddMusicMenu';
+import MusicSkeleton from '../../Skeletons/MusicSkeleton';
+import HeaderMusic from '../../Component/MusicPage/Header';
+import NowPlaying from '../../Component/MusicPage/NowPlayingMusic';
+import TrendingSongs from '../../Component/MusicPage/TrendingSongs';
+import SidebarPlaylist from '../../Component/MusicPage/SidebarPlayList';
+import AllSongsFeed from '../../Component/MusicPage/AllSongsFeed';
+import SidebarQueue from '../../Component/MusicPage/SidebarQueue';
+import SidebarNowPlaying from '../../Component/MusicPage/SidebarNowPlaying';
 
 function MusicPagePresentation(props) {
   const {
@@ -31,6 +31,7 @@ function MusicPagePresentation(props) {
     <div className="min-h-screen w-full relative bg-[#050505] text-gray-100 selection:bg-indigo-500/30 overflow-x-hidden">
       {/* 🔮 Immersive Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 opacity-30" style={{ background: auroraGlow }} />
         <motion.div
           animate={{
             scale: [1, 1.2, 1],
@@ -51,7 +52,6 @@ function MusicPagePresentation(props) {
 
       <AddMusicModal isOpen={openModel} onClose={() => setOpenModel(false)} />
 
-      {/* 🚀 Pro Header */}
       <HeaderMusic
         search={search}
         setSearch={setSearch}
@@ -60,74 +60,63 @@ function MusicPagePresentation(props) {
       />
 
       <div className="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-8 px-6 py-8 relative z-10">
-
-        {/* 📋 Left Sidebar: Library & Playlists */}
         <aside className="xl:w-80 space-y-8 hidden xl:block sticky top-28 self-start h-[calc(100vh-120px)] overflow-y-auto no-scrollbar pb-10">
           <SidebarNowPlaying current={current} />
           <SidebarPlaylist myPlaylist={myPlaylist} setTrack={setTrack} />
         </aside>
 
-        {/* ⚡ Main Content Center */}
         <main className="flex-1 space-y-12">
           {isLoading || loading ? (
             <MusicSkeleton />
           ) : (
             <div className="space-y-12 pb-24">
-              {/* Feature Hero Section */}
               <section className="relative overflow-hidden rounded-[3rem] border border-white/5 bg-white/[0.02] backdrop-blur-3xl shadow-2xl">
-                <NowPlaying
-                  current={current}
-                  playing={playing}
-                  togglePlay={togglePlay}
-                  next={next}
-                  prev={prev}
-                  isReady={isReady}
-                  shuffle={shuffle}
-                  setShuffle={setShuffle}
-                  repeatMode={repeatMode}
-                  setRepeatMode={setRepeatMode}
-                  progress={progress}
-                  setProgress={setProgress}
-                  duration={duration}
-                  volume={volume}
-                  setVolume={setVolume}
-                  muted={muted}
-                  setMuted={setMuted}
-                  expanded={expanded}
-                  setExpanded={setExpanded}
-                  likeMusic={likeMusic}
-                  shareMusicAsPost={shareMusicAsPost}
-                  saveMusicInPlayList={saveMusicInPlayList}
-                  userData={userData}
-                  myPlaylist={myPlaylist}
-                  setTrack={setTrack}
-                  songs={songs}
-                  currentIndex={currentIndex}
-                />
-              </section>
+            <NowPlaying
+              current={current}
+              playing={playing}
+              togglePlay={togglePlay}
+              next={next}
+              prev={prev}
+              isReady={isReady}
+              shuffle={shuffle}
+              setShuffle={setShuffle}
+              repeatMode={repeatMode}
+              setRepeatMode={setRepeatMode}
+              progress={progress}
+              setProgress={setProgress}
+              duration={duration}
+              volume={volume}
+              setVolume={setVolume}
+              muted={muted}
+              setMuted={setMuted}
+              expanded={expanded}
+              setExpanded={setExpanded}
+              likeMusic={likeMusic}
+              shareMusicAsPost={shareMusicAsPost}
+              saveMusicInPlayList={saveMusicInPlayList}
+              userData={userData}
+              myPlaylist={myPlaylist}
+              setTrack={setTrack}
+              songs={songs}
+              currentIndex={currentIndex}
+            />
+          </section>
 
-              {/* Browse Sections */}
-              <div className="space-y-16">
-                <TrendingSongs songs={songs} setTrack={setTrack} />
+          <div className="space-y-16">
+            <TrendingSongs songs={songs} setTrack={setTrack} />
+            <AllSongsFeed
+              filtered={filtered}
+              current={current}
+              setTrack={setTrack}
+              songs={songs}
+            />
+          </div>
+        )}
+      </main>
 
-                <div className="grid grid-cols-1 lg:grid-cols-1 gap-12">
-                  <AllSongsFeed
-                    filtered={filtered}
-                    current={current}
-                    setTrack={setTrack}
-                    songs={songs}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-        </main>
-
-        {/* 🎧 Right Sidebar: Discovery & Queue */}
         <aside className="xl:w-80 space-y-8 hidden 2xl:block sticky top-28 self-start h-[calc(100vh-120px)] overflow-y-auto no-scrollbar pb-10">
           <SidebarQueue queue={queue} setTrack={setTrack} />
 
-          {/* Static Promotion Card */}
           <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-2xl rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
             <h4 className="text-lg font-black text-white mb-2 leading-tight">Elevate Your Sound</h4>
@@ -137,7 +126,6 @@ function MusicPagePresentation(props) {
             </button>
           </div>
         </aside>
-
       </div>
     </div>
   );

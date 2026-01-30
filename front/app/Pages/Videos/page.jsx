@@ -20,14 +20,14 @@ const Page = () => {
   }, [posts])
 
   return (
-    <div className="relative min-h-screen bg-[#fafafa] dark:bg-[#080808] transition-colors duration-700">
+    <div className="relative w-full min-h-screen bg-[#fafafa] dark:bg-[#080808] transition-colors duration-700">
       {/* 🎭 Premium Ambient Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full animate-pulse" />
         <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto px-4 py-12 md:py-20">
+      <div className="relative z-10 max-w-4xl mx-auto w-full px-4 py-12 md:py-20">
         {/* 🎬 Header Section */}
         <header className="mb-16 text-center space-y-4">
           <motion.div

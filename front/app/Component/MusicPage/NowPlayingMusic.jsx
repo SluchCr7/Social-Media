@@ -21,25 +21,22 @@ const NowPlaying = memo(({
   >
     {/* 🌌 Cinematic Background layers */}
     <div className="absolute inset-0 bg-[#0A0A0A]" />
-    <AnimatePresence mode="wait">
+    {current?.cover && (
       <motion.div
         key={current?._id}
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.25 }}
-        exit={{ opacity: 0 }}
         transition={{ duration: 1 }}
         className="absolute inset-0"
       >
-        {current?.cover && (
-          <Image
-            src={current.cover}
-            alt="bg"
-            fill
-            className="object-cover blur-[100px] scale-125"
-          />
-        )}
+        <Image
+          src={current.cover}
+          alt="bg"
+          fill
+          className="object-cover blur-[100px] scale-125"
+        />
       </motion.div>
-    </AnimatePresence>
+    )}
 
     <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent" />
 

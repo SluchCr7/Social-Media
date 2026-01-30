@@ -4,7 +4,7 @@ import Image from 'next/image';
 import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { HiMusicalNote, HiMiniHeart, HiMiniPlay } from 'react-icons/hi2';
+import { HiMusicalNote, HiHeart, HiPlay } from 'react-icons/hi2';
 
 const SidebarNowPlaying = memo(({ current }) => {
   const { t } = useTranslation();
@@ -35,7 +35,7 @@ const SidebarNowPlaying = memo(({ current }) => {
               </div>
             )}
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/art:opacity-100 flex items-center justify-center transition-all duration-300">
-              <HiMiniPlay size={20} className="text-white translate-y-2 group-hover/art:translate-y-0 transition-transform" />
+              <HiPlay size={20} className="text-white translate-y-2 group-hover/art:translate-y-0 transition-transform" />
             </div>
           </div>
 
@@ -61,7 +61,7 @@ const SidebarNowPlaying = memo(({ current }) => {
             <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Heart rate</p>
             <div className="flex items-center gap-2">
               <span className="text-sm font-black text-white">{current?.likes?.length ?? 0}</span>
-              <HiMiniHeart size={14} className="text-red-500" />
+              <HiHeart size={14} className="text-red-500" />
             </div>
           </div>
         </div>
