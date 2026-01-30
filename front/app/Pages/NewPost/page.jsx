@@ -306,7 +306,7 @@ const NewPostPresenter = React.lazy(() => import('./Design'))
 
 const NewPostContainer = () => {
   const [postText, setPostText] = useState('')
-  const [images, setImages] = useState([])
+  const [media, setMedia] = useState([])
   const [selectedCommunity, setSelectedCommunity] = useState('')
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [errorText, setErrorText] = useState(false)
@@ -433,18 +433,19 @@ const NewPostContainer = () => {
     []
   )
 
-  /* ------------------------- 🖼️ Images ------------------------- */
-  const handleImageChange = useCallback((e) => {
+  /* ------------------------- 🖼️ Media (Images/Videos) ------------------------- */
+  const handleMediaChange = useCallback((e) => {
     const files = Array.from(e.target.files)
     const previews = files.map((file) => ({
       file,
       url: URL.createObjectURL(file),
+      type: file.type.startsWith('video') ? 'video' : 'image'
     }))
-    setImages((prev) => [...prev, ...previews])
+    setMedia((prev) => [...prev, ...previews])
   }, [])
 
-  const removeImage = useCallback((index) => {
-    setImages((prev) => {
+  const removeMedia = useCallback((index) => {
+    setMedia((prev) => {
       URL.revokeObjectURL(prev[index].url)
       return prev.filter((_, i) => i !== index)
     })
@@ -483,7 +484,7 @@ const NewPostContainer = () => {
   const handlePost = useCallback(async () => {
     const hashtags = extractHashtags(postText)
     if (postText.trim().length > 500) return setErrorText(true)
-    if (!postText.trim() && images.length === 0) return
+    if (!postText.trim() && media.length === 0) return
 
     const scheduleTime =
       scheduleEnabled && scheduleDate ? scheduleDate : null
@@ -492,7 +493,7 @@ const NewPostContainer = () => {
     try {
       await AddPost(
         postText.replace(/#[\w\u0600-\u06FF]+/g, '').trim(),
-        images,
+        media,
         hashtags,
         selectedCommunity,
         selectedMentions.map((u) => u._id),
@@ -505,7 +506,7 @@ const NewPostContainer = () => {
       setLoading(false)
       setLinks([])
       setPostText('')
-      setImages([])
+      setMedia([])
       setSelectedMentions([])
       setScheduleEnabled(false)
       setScheduleDate('')
@@ -513,7 +514,7 @@ const NewPostContainer = () => {
     }
   }, [
     postText,
-    images,
+    media,
     selectedCommunity,
     selectedMentions,
     scheduleEnabled,
@@ -554,8 +555,8 @@ const NewPostContainer = () => {
         {...{
           postText,
           setPostText,
-          images,
-          setImages,
+          media,
+          setMedia,
           selectedCommunity,
           setSelectedCommunity,
           showEmojiPicker,
@@ -577,8 +578,8 @@ const NewPostContainer = () => {
           handleSelectMention,
           handleAddLink,
           handleRemoveLink,
-          handleImageChange,
-          removeImage,
+          handleMediaChange,
+          removeMedia,
           handleEmojiClick,
           handlePost,
           communities,

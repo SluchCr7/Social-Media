@@ -13,7 +13,7 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
    */
   const AddPost = useCallback(async (
     content,
-    images = [],
+    mediaFiles = [],
     Hashtags = [],
     communityId = null,
     mentions = [],
@@ -26,7 +26,7 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
 
     const formData = new FormData();
     formData.append("text", content);
-    images.forEach(img => formData.append("image", img.file));
+    mediaFiles.forEach(item => formData.append("media", item.file));
     Hashtags.forEach(tag => formData.append("Hashtags", tag));
     if (communityId) formData.append("community", communityId);
     if (mentions.length > 0) formData.append("mentions", JSON.stringify(mentions));
@@ -65,7 +65,7 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
    */
   const editPost = useCallback(async (
     id,
-    { text, community, Hashtags, existingPhotos, newPhotos, mentions = [], links = [], music = null }
+    { text, community, Hashtags, existingMedia, newMedia, mentions = [], links = [], music = null }
   ) => {
     if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
     setIsLoading(true);
@@ -76,11 +76,15 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
       formData.append('text', text);
       if (community) formData.append('community', community);
       if (Hashtags?.length > 0) formData.append('Hashtags', JSON.stringify(Hashtags));
-      formData.append('existingPhotos', JSON.stringify(existingPhotos || []));
+
+      formData.append('existingMedia', JSON.stringify(existingMedia || []));
+
       if (mentions.length > 0) formData.append('mentions', JSON.stringify(mentions));
-      if (newPhotos?.length > 0) {
-        newPhotos.forEach(photo => formData.append('newPhotos', photo));
+
+      if (newMedia?.length > 0) {
+        newMedia.forEach(item => formData.append('newMedia', item.file || item));
       }
+
       if (links?.length > 0) formData.append('links', JSON.stringify(links));
       if (music) formData.append('music', music);
 

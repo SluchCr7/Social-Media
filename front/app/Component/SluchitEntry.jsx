@@ -5,7 +5,7 @@ import { usePost } from '../Context/PostContext';
 import { useAuth } from '../Context/AuthContext';
 import { ShareModal } from './AddandUpdateMenus/SharePost';
 import PostHeader from './Post/PostHeader';
-import PostPhotos from './Post/PostPhotos';
+import PostMedia from './Post/PostMedia';
 import PostLinks from './Post/PostLinks';
 import PostHashtags from './Post/PostHashtags';
 import RenderPostText from './Post/RenderText';
@@ -143,12 +143,11 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
 
               {/* Media Section */}
               <div className="rounded-[1.5rem] overflow-hidden border border-white/5 bg-white/[0.02]">
-                {!isShared && post?.Photos?.length > 0 && (
-                  <PostPhotos
+                {!isShared && (post?.media?.length > 0 || post?.Photos?.length > 0) && (
+                  <PostMedia
+                    media={post.media}
                     photos={post.Photos}
                     setImageView={setImageView}
-                    postId={post._id}
-                    className="aspect-video"
                   />
                 )}
                 {isShared && original && (

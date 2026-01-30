@@ -3,60 +3,60 @@ import React, { useMemo, useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-    HiXMark,
-    HiOutlineCalendarDays,
-    HiPhoto,
-    HiFaceSmile,
-    HiUsers,
-    HiLink,
-    HiChevronRight,
-    HiCheckBadge,
-    HiSparkles,
-    HiEye,
-    HiTrash,
-    HiInboxArrowDown,
-    HiClock,
-    HiMusicalNote
+  HiXMark,
+  HiOutlineCalendarDays,
+  HiPhoto,
+  HiFaceSmile,
+  HiUsers,
+  HiLink,
+  HiChevronRight,
+  HiCheckBadge,
+  HiSparkles,
+  HiEye,
+  HiTrash,
+  HiInboxArrowDown,
+  HiClock,
+  HiMusicalNote
 } from 'react-icons/hi2'
 import EmojiPicker from 'emoji-picker-react'
 import PostPrivacySelector from '@/app/Component/Post/PostPrivacyAdd'
 import { useTranslation } from 'react-i18next'
 
 const NewPostPresenter = (props) => {
-    const {
-        postText, handleTextareaChange, handlePost, loading, errorText,
-        showEmojiPicker, setShowEmojiPicker, handleEmojiClick,
-        images = [], handleImageChange, removeImage,
-        links = [], linkInput, setLinkInput, handleAddLink, handleRemoveLink,
-        scheduleEnabled, setScheduleEnabled, scheduleDate, setScheduleDate,
-        selectedUser, privacy, setPrivacy, communities = [], selectedCommunity, setSelectedCommunity,
-        filteredUsers = [], handleSelectMention, showMentionBox, mentionBoxPos = {}, textareaRef,
-        selectedMusic, setSelectedMusic, musicList = [], isMusicLoading
-    } = props
+  const {
+    postText, handleTextareaChange, handlePost, loading, errorText,
+    showEmojiPicker, setShowEmojiPicker, handleEmojiClick,
+    media = [], handleMediaChange, removeMedia,
+    links = [], linkInput, setLinkInput, handleAddLink, handleRemoveLink,
+    scheduleEnabled, setScheduleEnabled, scheduleDate, setScheduleDate,
+    selectedUser, privacy, setPrivacy, communities = [], selectedCommunity, setSelectedCommunity,
+    filteredUsers = [], handleSelectMention, showMentionBox, mentionBoxPos = {}, textareaRef,
+    selectedMusic, setSelectedMusic, musicList = [], isMusicLoading
+  } = props
 
-    const { t } = useTranslation()
-    const [viewMode, setViewMode] = useState('edit')
-    const [showMusicPicker, setShowMusicPicker] = useState(false)
-    const [musicQuery, setMusicQuery] = useState('')
+  const { t } = useTranslation()
+  const [viewMode, setViewMode] = useState('edit')
+  const [showMusicPicker, setShowMusicPicker] = useState(false)
+  const [musicQuery, setMusicQuery] = useState('')
 
-    const charCount = postText ? postText.length : 0
-    const isRTL = useMemo(() => /[\u0600-\u06FF]/.test(postText || ''), [postText])
-    const canPost = (postText?.trim() || images.length > 0) && !loading && !errorText
+  const charCount = postText ? postText.length : 0
+  const isRTL = useMemo(() => /[\u0600-\u06FF]/.test(postText || ''), [postText])
+  const canPost = (postText?.trim() || media.length > 0) && !loading && !errorText
 
-    const filteredMusic = useMemo(() => {
-        if (!musicQuery) return musicList.slice(0, 10);
-        return musicList.filter(m =>
-            m.name?.toLowerCase().includes(musicQuery.toLowerCase()) ||
-            m.artist?.toLowerCase().includes(musicQuery.toLowerCase())
-        ).slice(0, 10);
-    }, [musicList, musicQuery]);
+  const filteredMusic = useMemo(() => {
+    if (!musicQuery) return musicList.slice(0, 10);
+    return musicList.filter(m =>
+      m.name?.toLowerCase().includes(musicQuery.toLowerCase()) ||
+      m.artist?.toLowerCase().includes(musicQuery.toLowerCase())
+    ).slice(0, 10);
+  }, [musicList, musicQuery]);
 
-    // Draft handling (Local Feature)
-    const saveDraft = () => {
-        const draft = { postText, links, privacy, selectedCommunity };
-        localStorage.setItem('post_draft', JSON.stringify(draft));
-        alert('Draft saved locally!');
-    }
+  // Draft handling (Local Feature)
+  const saveDraft = () => {
+    const draft = { postText, links, privacy, selectedCommunity };
+    localStorage.setItem('post_draft', JSON.stringify(draft));
+    alert('Draft saved locally!');
+  }
 
   return (
     <main className="min-h-screen w-full bg-[#fafafa] dark:bg-[#080808] flex items-center justify-center p-4 md:p-8 transition-all duration-700 selection:bg-indigo-500/30">
@@ -280,17 +280,21 @@ const NewPostPresenter = (props) => {
 
               {/* Images Grid */}
               <AnimatePresence>
-                {images.length > 0 && (
+                {media.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6">
-                    {images.map((img, idx) => (
+                    {media.map((item, idx) => (
                       <motion.div
                         key={idx}
                         layout
-                        className="relative aspect-square rounded-[1.5rem] overflow-hidden group border border-gray-100 dark:border-white/5"
+                        className="relative aspect-square rounded-[1.5rem] overflow-hidden group border border-gray-100 dark:border-white/5 bg-black"
                       >
-                        <Image src={img.url} alt="P" fill className="object-cover transition-transform group-hover:scale-110" />
+                        {item.type === 'video' ? (
+                          <video src={item.url} className="w-full h-full object-cover" controls />
+                        ) : (
+                          <Image src={item.url} alt="P" fill className="object-cover transition-transform group-hover:scale-110" />
+                        )}
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
-                          <button onClick={() => removeImage(idx)} className="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-lg hover:scale-110">
+                          <button onClick={() => removeMedia(idx)} className="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-lg hover:scale-110">
                             <HiTrash size={20} />
                           </button>
                         </div>
@@ -306,7 +310,7 @@ const NewPostPresenter = (props) => {
               <div className="flex items-center gap-2">
                 <label className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-200/50 dark:border-white/10 text-gray-500 hover:text-indigo-500 hover:bg-white dark:hover:bg-white/10 transition-all cursor-pointer shadow-sm">
                   <HiPhoto size={22} />
-                  <input type="file" multiple accept="image/*" onChange={handleImageChange} className="hidden" />
+                  <input type="file" multiple accept="image/*, video/*" onChange={handleMediaChange} className="hidden" />
                 </label>
                 <button
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -417,13 +421,18 @@ const NewPostPresenter = (props) => {
                 </motion.div>
               )}
 
-              {images.length > 0 && (
+              {media.length > 0 && (
                 <div className="mt-4 grid grid-cols-2 gap-2">
-                  {images.slice(0, 4).map((img, i) => (
-                    <div key={i} className="aspect-square relative rounded-xl overflow-hidden shadow-sm">
-                      <Image src={img.url} alt="i" fill className="object-cover" />
-                      {i === 3 && images.length > 4 && (
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-[10px] text-white font-black">+{images.length - 4}</div>
+                  {media.slice(0, 4).map((item, i) => (
+                    <div key={i} className="aspect-square relative rounded-xl overflow-hidden shadow-sm bg-black">
+                      {item.type === 'video' ? (
+                        <video src={item.url} className="w-full h-full object-cover" muted />
+                      ) : (
+                        <Image src={item.url} alt="i" fill className="object-cover" />
+                      )}
+
+                      {i === 3 && media.length > 4 && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-[10px] text-white font-black">+{media.length - 4}</div>
                       )}
                     </div>
                   ))}

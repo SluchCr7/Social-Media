@@ -6,6 +6,13 @@ const PostSchema = new mongoose.Schema({
   text: String,
   Photos: Array,
   Videos: Array,
+  media: [{
+    type: { type: String, enum: ['image', 'video'], required: true },
+    url: { type: String, required: true },
+    publicId: { type: String, required: true },
+    thumbnail: { type: String },
+    duration: { type: Number },
+  }],
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -89,7 +96,8 @@ const ValidatePost = (post) => {
     text: joi.string().allow('', null),
     Hashtags: joi.array().items(joi.string()).optional(),
     community: joi.string().optional(),
-    image: joi.any().optional(),
+    media: joi.any().optional(), // Replaces image, allows generic file input
+    image: joi.any().optional(), // Keep for legacy if needed, or remove. Keeping for now but logic will handle 'media'.
     mentions: joi.array().items(joi.string()).optional(),
     links: joi.array().items(
       joi.string().uri().message("Invalid link format")

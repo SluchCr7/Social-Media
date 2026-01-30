@@ -39,7 +39,7 @@ const getAllPosts = asyncHandler(async (req, res) => {
 const uploadToCloudinary = (buffer) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: "posts" },
+      { folder: "posts", resource_type: "auto" },
       (error, result) => {
         if (result) resolve(result);
         else reject(error);
@@ -56,50 +56,33 @@ const addPost = async (req, res) => {
     let { text, Hashtags, community, mentions, scheduledAt, links, privacy } = req.body;
     const userId = req.user._id;
 
-    // ✅ تنسيق الحقول لضمان أنها Arrays صحيحة
     if (typeof Hashtags === "string") Hashtags = [Hashtags];
     else if (!Array.isArray(Hashtags)) Hashtags = [];
 
     if (typeof mentions === "string") {
-      try {
-        mentions = JSON.parse(mentions);
-      } catch {
-        mentions = [mentions];
-      }
+      try { mentions = JSON.parse(mentions); }
+      catch { mentions = [mentions]; }
     } else if (!Array.isArray(mentions)) mentions = [];
 
     if (typeof links === "string") {
-      try {
-        links = JSON.parse(links);
-      } catch {
-        links = [links];
-      }
-    } else if (!Array.isArray(links)) {
-      links = [];
-    }
+      try { links = JSON.parse(links); }
+      catch { links = [links]; }
+    } else if (!Array.isArray(links)) links = [];
 
-    // ✅ التحقق من صحة البيانات
     const { error } = ValidatePost({ text, Hashtags, community, mentions });
     if (error) return res.status(400).json({ message: error.details[0].message });
 
-    // ✅ فحص إذا كان التاريخ مستقبلي -> جدولة
     let postStatus = "published";
     let scheduleDate = null;
-
     if (scheduledAt && new Date(scheduledAt) > new Date()) {
       postStatus = "scheduled";
       scheduleDate = new Date(scheduledAt);
     }
 
-    // ✅ فحص المحتوى (Moderation)
     const moderationResult = await moderatePost({ text });
     const isContainWorst = moderationResult.isContainWorst || false;
     const badWord = moderationResult.badWord || null;
 
-    // ❌ لم نعد نحظر النشر حتى لو فيه كلمة سيئة
-    // فقط نخزن المعلومة في البوست
-
-    // ✅ التحقق من المجتمع
     let communityDoc = null;
     if (community) {
       communityDoc = await Community.findById(community);
@@ -108,26 +91,37 @@ const addPost = async (req, res) => {
         return res.status(403).json({ message: "Not a member of this community." });
     }
 
-    // ✅ رفع الصور
-    let uploadedImages = [];
-    let imagesArr = [];
+    // Media Upload
+    let uploadedMedia = [];
+    // Compatible with new 'media' field and legacy 'image' field for robustness
+    const files = req.files?.media || req.files?.image;
+    let mediaFiles = [];
+    if (files) {
+      mediaFiles = Array.isArray(files) ? files : [files];
+    }
 
-    if (Array.isArray(req.files?.image)) imagesArr = req.files.image;
-    else if (req.files?.image) imagesArr = [req.files.image];
-
-    if (imagesArr.length > 0) {
-      uploadedImages = await Promise.all(
-        imagesArr.map(async (img) => {
-          const result = await uploadToCloudinary(img.buffer);
-          return { url: result.secure_url, publicId: result.public_id };
+    if (mediaFiles.length > 0) {
+      uploadedMedia = await Promise.all(
+        mediaFiles.map(async (file) => {
+          const result = await uploadToCloudinary(file.buffer);
+          const type = result.resource_type === 'video' ? 'video' : 'image';
+          return {
+            type,
+            url: result.secure_url,
+            publicId: result.public_id,
+            thumbnail: type === 'video' ? result.secure_url.replace(/\.[^/.]+$/, ".jpg") : null,
+            duration: result.duration || 0
+          };
         })
       );
     }
 
-    // ✅ إنشاء البوست
+    const legacyPhotos = uploadedMedia.filter(m => m.type !== 'video').map(m => ({ url: m.url, publicId: m.publicId }));
+
     const post = new Post({
       text,
-      Photos: uploadedImages,
+      media: uploadedMedia,
+      Photos: legacyPhotos,
       Hashtags,
       mentions,
       owner: userId,
@@ -137,12 +131,10 @@ const addPost = async (req, res) => {
       links,
       privacy,
       music: req.body.music || null,
-      // ✨ الإضافات الجديدة
       isContainWorst,
       badWord,
     });
 
-    // ✅ إشعارات Mentions (فقط إذا تم النشر فورًا)
     if (postStatus === "published" && mentions.length > 0) {
       for (const mentionedUserId of mentions) {
         if (mentionedUserId.toString() !== userId.toString()) {
@@ -158,17 +150,14 @@ const addPost = async (req, res) => {
       }
     }
 
-    // ✅ تحديث مستوى المستخدم
     const user = await User.findById(userId);
     user.userLevelPoints += 7;
     user.updateLevelRank();
     await user.save();
 
-    // ✅ حفظ البوست
     await post.save();
     await post.populate(postPopulate);
 
-    // ✅ إرجاع النتيجة
     return res.status(201).json(post);
   } catch (err) {
     return res.status(500).json({ message: err.message || "Internal Server Error" });
@@ -297,11 +286,13 @@ const deletePost = asyncHandler(async (req, res) => {
     return res.status(403).json({ message: "You are not authorized to delete this post" });
   }
 
-  // حذف صور Cloudinary
-  for (const photo of post.Photos) {
-    if (photo.publicId) {
-      await cloudinary.uploader.destroy(photo.publicId);
-    }
+  // Gather publicIds from media and Photos to ensure full cleanup
+  const idsToDelete = new Set();
+  if (post.media) post.media.forEach(m => { if (m.publicId) idsToDelete.add(m.publicId); });
+  if (post.Photos) post.Photos.forEach(p => { if (p.publicId) idsToDelete.add(p.publicId); });
+
+  for (const publicId of idsToDelete) {
+    await cloudinary.uploader.destroy(publicId);
   }
 
   await Post.findByIdAndDelete(req.params.id);
@@ -481,33 +472,25 @@ const sharePost = asyncHandler(async (req, res) => {
 
 // ================== Edit Post ==================
 const editPost = asyncHandler(async (req, res) => {
-  let { text, community, Hashtags, existingPhotos, mentions, links } = req.body;
+  let { text, community, Hashtags, existingMedia, existingPhotos, mentions, links } = req.body;
 
   try {
-    existingPhotos = existingPhotos ? JSON.parse(existingPhotos) : [];
+    existingMedia = existingMedia ? JSON.parse(existingMedia) : [];
+    // Fallback: if frontend sends existingPhotos but not existingMedia
+    if (existingMedia.length === 0 && existingPhotos) {
+      const photos = JSON.parse(existingPhotos);
+      existingMedia = photos.map(p => ({ ...p, type: 'image' }));
+    }
+
     Hashtags = Hashtags ? JSON.parse(Hashtags) : [];
 
-    // ✅ Parse mentions لو جايه كـ string
     if (typeof mentions === "string") {
-      try {
-        mentions = JSON.parse(mentions);
-      } catch {
-        mentions = [mentions];
-      }
-    } else if (!Array.isArray(mentions)) {
-      mentions = [];
-    }
-    // ✅ معالجة الروابط لو جت كـ string
-    if (typeof links === "string") {
-      try {
-        links = JSON.parse(links);
-      } catch {
-        links = [links];
-      }
-    } else if (!Array.isArray(links)) {
-      links = [];
-    }
+      try { mentions = JSON.parse(mentions); } catch { mentions = [mentions]; }
+    } else if (!Array.isArray(mentions)) mentions = [];
 
+    if (typeof links === "string") {
+      try { links = JSON.parse(links); } catch { links = [links]; }
+    } else if (!Array.isArray(links)) links = [];
 
   } catch (err) {
     return res.status(400).json({ message: "Invalid JSON in body fields" });
@@ -518,40 +501,56 @@ const editPost = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Post not found" });
   }
 
-  const newFiles = req.files?.newPhotos
-    ? Array.isArray(req.files.newPhotos) ? req.files.newPhotos : [req.files.newPhotos]
-    : [];
+  // New media files (field: newMedia, fallback to newPhotos)
+  let newFiles = [];
+  if (req.files?.newMedia) {
+    newFiles = Array.isArray(req.files.newMedia) ? req.files.newMedia : [req.files.newMedia];
+  } else if (req.files?.newPhotos) {
+    newFiles = Array.isArray(req.files.newPhotos) ? req.files.newPhotos : [req.files.newPhotos];
+  }
 
-  if (!text && existingPhotos.length === 0 && newFiles.length === 0) {
+  if (!text && existingMedia.length === 0 && newFiles.length === 0) {
     return res.status(400).json({ message: "Post cannot be empty" });
   }
 
-  // ✅ احذف الصور اللي اتشالت
-  const removedPhotos = post.Photos.filter(
-    (img) => !existingPhotos.some((existing) => existing.publicId === img.publicId)
-  );
-  for (const photo of removedPhotos) {
-    if (photo.publicId) await cloudinary.uploader.destroy(photo.publicId);
+  // Identify removed items
+  // Current post.media (or build from Photos if media missing)
+  const currentMedia = (post.media && post.media.length > 0) ? post.media : (post.Photos || []).map(p => ({ ...p.toObject(), type: 'image' }));
+
+  const keptPublicIds = new Set(existingMedia.map(m => m.publicId));
+  const removedMedia = currentMedia.filter(m => !keptPublicIds.has(m.publicId));
+
+  for (const item of removedMedia) {
+    if (item.publicId) await cloudinary.uploader.destroy(item.publicId);
   }
 
-  // ✅ ارفع الصور الجديدة
-  const newUploadedPhotos = [];
+  // Upload new
+  const newUploadedMedia = [];
   for (const file of newFiles) {
     const result = await uploadToCloudinary(file.buffer);
-    newUploadedPhotos.push({ url: result.secure_url, publicId: result.public_id });
+    const type = result.resource_type === 'video' ? 'video' : 'image';
+    newUploadedMedia.push({
+      type,
+      url: result.secure_url,
+      publicId: result.public_id,
+      thumbnail: type === 'video' ? result.secure_url.replace(/\.[^/.]+$/, ".jpg") : null,
+      duration: result.duration || 0
+    });
   }
 
-  // ✅ حدّث الداتا
+  const finalMedia = [...existingMedia, ...newUploadedMedia];
+  const finalPhotos = finalMedia.filter(m => m.type !== 'video').map(m => ({ url: m.url, publicId: m.publicId }));
+
   post.text = text ?? post.text;
   post.community = community || post.community;
   post.Hashtags = Hashtags;
-  post.Photos = [...existingPhotos, ...newUploadedPhotos];
-  post.mentions = mentions || post.mentions; // 🎯 تحديث mentions
+  post.media = finalMedia;
+  post.Photos = finalPhotos; // Update legacy
+  post.mentions = mentions || post.mentions;
   post.links = links || post.links;
   post.music = req.body.music || post.music;
-  await post.save();
 
-  // ✅ populate كامل زي getAllPosts
+  await post.save();
   await post.populate(postPopulate);
 
   res.status(200).json(post);

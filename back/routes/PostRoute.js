@@ -15,7 +15,7 @@ const {
 
 const route = require('express').Router();
 const { verifyToken } = require('../Middelwares/verifyToken');
-const photoUpload = require('../Middelwares/uploadPhoto');
+const mediaUpload = require('../Middelwares/uploadMedia');
 
 // Get all posts
 route.route('/').get(getAllPosts);
@@ -25,7 +25,7 @@ route.route('/user/:userId').get(getPostsByUser);
 
 // Add post
 route.route('/add')
-  .post(verifyToken, photoUpload.fields([{ name: 'image', maxCount: 9 }]), addPost);
+  .post(verifyToken, mediaUpload.fields([{ name: 'media', maxCount: 10 }]), addPost);
 
 // Get, delete, or view a specific post
 route.route('/:id')
@@ -43,7 +43,7 @@ route.route('/save/:id').put(verifyToken, savePost);
 route.route('/share/:id').post(verifyToken, sharePost);
 
 // Edit a post
-route.route('/edit/:id').put(verifyToken, photoUpload.array('newPhotos', 9), editPost);
+route.route('/edit/:id').put(verifyToken, mediaUpload.fields([{ name: 'newMedia', maxCount: 10 }]), editPost);
 
 // Turn comments off
 route.route('/commentsOff/:id').put(verifyToken, makeCommentsOff);
