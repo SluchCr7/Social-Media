@@ -1,4 +1,5 @@
-import axios from "axios";
+import { useCallback } from "react";
+import api from "@/app/utils/api";
 import { checkUserStatus } from "@/app/utils/checkUserLog";
 
 export const useCommentModify = ({
@@ -7,29 +8,9 @@ export const useCommentModify = ({
   setComments,
   setIsLoading,
 }) => {
-  const headers = { Authorization: `Bearer ${user?.token}` };
-
-  // 📌 Generic fetch for any target
-  const fetchCommentsByTarget = async (targetId, targetType = 'Post') => {
-    if (!setIsLoading || !setComments)
-      return console.error("setIsLoading or setComments not provided");
-
-    setIsLoading(true);
-    try {
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/${targetType}/${targetId}`
-      );
-      setComments(res.data || []);
-    } catch (err) {
-      console.error("Error fetching comments:", err);
-      showAlert(err?.response?.data?.message || "Failed to load comments.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // 🔹 Update comment inside tree (recursive)
-  const updateCommentInTree = (list, updatedComment) => {
+  const updateCommentInTree = useCallback((list, updatedComment) => {
     return list.map((c) => {
       if (c._id === updatedComment._id) return { ...updatedComment, replies: c.replies || [] };
       if (c.replies?.length > 0) {
@@ -37,20 +18,20 @@ export const useCommentModify = ({
       }
       return c;
     });
-  };
+  }, []);
 
   // 🔹 Delete comment from tree (recursive)
-  const deleteCommentFromTree = (list, idToDelete) => {
+  const deleteCommentFromTree = useCallback((list, idToDelete) => {
     return list
       .filter((c) => c._id !== idToDelete)
       .map((c) => ({
         ...c,
         replies: c.replies ? deleteCommentFromTree(c.replies, idToDelete) : [],
       }));
-  };
+  }, []);
 
   // 🔹 Insert new comment/reply into tree
-  const insertCommentToTree = (tree, comment) => {
+  const insertCommentToTree = useCallback((tree, comment) => {
     const replies = Array.isArray(comment.replies) ? comment.replies : [];
 
     // If it's a top-level comment (Post or Reel), prepend to tree
@@ -67,18 +48,31 @@ export const useCommentModify = ({
       }
       return c;
     });
-  };
+  }, []);
+
+  // 📌 Generic fetch for any target
+  const fetchCommentsByTarget = useCallback(async (targetId, targetType = 'Post') => {
+    if (!setIsLoading || !setComments)
+      return console.error("setIsLoading or setComments not provided");
+
+    setIsLoading(true);
+    try {
+      const res = await api.get(`/comment/${targetType}/${targetId}`);
+      setComments(res.data || []);
+    } catch (err) {
+      console.error("Error fetching comments:", err);
+      if (showAlert) showAlert(err?.response?.data?.message || "Failed to load comments.", 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [setComments, setIsLoading, showAlert]);
 
   // ➕ Generic Add Comment (supports Post, Reel, Comment)
-  const AddComment = async (text, targetId, targetType = 'Post') => {
+  const AddComment = useCallback(async (text, targetId, targetType = 'Post') => {
     if (!checkUserStatus("add comments", showAlert, user)) return;
 
     try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment`,
-        { text, targetId, targetType },
-        { headers }
-      );
+      const res = await api.post('/comment', { text, targetId, targetType });
 
       const newComment = {
         ...res.data.comment,
@@ -86,56 +80,49 @@ export const useCommentModify = ({
       };
 
       setComments((prev) => insertCommentToTree(prev, newComment));
-      showAlert(targetType === "Comment" ? "Reply added successfully." : "Comment added successfully.");
+      if (showAlert) showAlert(targetType === "Comment" ? "Reply added successfully." : "Comment added successfully.", 'success');
 
       return newComment;
     } catch (err) {
-      showAlert(err?.response?.data?.message || "Failed to upload comment.");
+      if (showAlert) showAlert(err?.response?.data?.message || "Failed to upload comment.", 'error');
       throw err;
     }
-  };
+  }, [user, showAlert, setComments, insertCommentToTree]);
 
-  // 🗑️ حذف كومنت
-  const deleteComment = async (id) => {
+  // 🗑️ Delete Comment
+  const deleteComment = useCallback(async (id) => {
     if (!checkUserStatus("delete comments", showAlert, user)) return;
 
     try {
-      const res = await axios.delete(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/${id}`,
-        { headers }
-      );
-      showAlert(res.data.message);
+      const res = await api.delete(`/comment/${id}`);
+      if (showAlert) showAlert(res.data.message, 'success');
       setComments((prev) => deleteCommentFromTree(prev, id));
       return res.data;
     } catch (err) {
       console.error(err);
-      showAlert(err?.response?.data?.message || "Failed to delete comment.");
+      if (showAlert) showAlert(err?.response?.data?.message || "Failed to delete comment.", 'error');
     }
-  };
+  }, [user, showAlert, setComments, deleteCommentFromTree]);
 
-  // ✏️ تعديل كومنت
-  const updateComment = async (id, text) => {
+  // ✏️ Update Comment
+  const updateComment = useCallback(async (id, text) => {
     if (!checkUserStatus("update comments", showAlert, user)) return;
 
     try {
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/comment/update/${id}`,
-        { text },
-        { headers }
-      );
+      const res = await api.put(`/comment/update/${id}`, { text });
 
       const updatedComment = res.data.comment;
       setComments((prev) => updateCommentInTree(prev, updatedComment));
-      showAlert("Comment updated successfully.");
+      if (showAlert) showAlert("Comment updated successfully.", 'success');
       return updatedComment;
     } catch (err) {
       console.error(err);
-      showAlert(err?.response?.data?.message || "Failed to update comment.");
+      if (showAlert) showAlert(err?.response?.data?.message || "Failed to update comment.", 'error');
     }
-  };
+  }, [user, showAlert, setComments, updateCommentInTree]);
 
   return {
-    fetchCommentsByPostId: fetchCommentsByTarget, // Alias for backward compatibility
+    fetchCommentsByPostId: fetchCommentsByTarget,
     fetchCommentsByTarget,
     AddComment,
     deleteComment,

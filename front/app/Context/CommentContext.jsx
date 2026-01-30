@@ -36,6 +36,7 @@ export const CommentContextProvider = ({ children }) => {
     user,
     setComments,
     setIsLoading,
+    showAlert: showToast,
   });
 
   // --- Actions ---

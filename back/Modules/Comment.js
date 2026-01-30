@@ -26,6 +26,17 @@ const commentSchema = new mongoose.Schema({
     default: 'Post'
   },
 
+  // Optimized hierarchy for fetching full trees
+  rootId: {
+    type: mongoose.Schema.Types.ObjectId,
+    refPath: 'rootType',
+    index: true
+  },
+  rootType: {
+    type: String,
+    enum: ['Post', 'Reel'],
+  },
+
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

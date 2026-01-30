@@ -13,23 +13,49 @@ const { commentPopulate } = require('../Populates/Populate');
 const getAllComments = asyncHandler(async (req, res) => {
   const { targetId, targetType } = req.params;
 
-  // Fetch comments directly attached to this target
-  // Support both new targetId/targetType and legacy postId/parent fields
-  const query = {
-    $or: [
-      { targetId, targetType },
-    ]
-  };
+  let query;
+  if (targetType === "Post" || targetType === "Reel") {
+    query = {
+      $or: [
+        { rootId: targetId, rootType: targetType },
+        { targetId: targetId, targetType: targetType }, // Direct children
+        { postId: targetId, targetType: { $exists: false } } // Legacy Post support
+      ]
+    };
+  } else {
+    query = {
+      $or: [
+        { targetId, targetType },
+        { parent: targetId } // Legacy Reply support
+      ]
+    };
+  }
 
-  // Legacy mappings
-  if (targetType === "Post") query.$or.push({ postId: targetId, targetType: { $exists: false } });
-  if (targetType === "Comment") query.$or.push({ parent: targetId });
-
-  const comments = await Comment.find(query)
+  const allComments = await Comment.find(query)
     .populate("owner", "username profileName profilePhoto following followers description")
     .sort({ createdAt: -1 });
 
-  res.status(200).json(comments);
+  // 🌳 Tree Builder Logic
+  const buildTree = (parentId, pType) => {
+    return allComments
+      .filter(c => {
+        const matchesNew = String(c.targetId) === String(parentId) && c.targetType === pType;
+        const matchesOldPost = pType === 'Post' && String(c.postId) === String(parentId) && !c.targetType;
+        const matchesOldComment = pType === 'Comment' && String(c.parent) === String(parentId);
+        return matchesNew || matchesOldPost || matchesOldComment;
+      })
+      .map(c => ({
+        ...c.toObject(),
+        replies: buildTree(c._id, 'Comment')
+      }));
+  };
+
+  if (targetType === "Post" || targetType === "Reel") {
+    const tree = buildTree(targetId, targetType);
+    return res.status(200).json(tree);
+  }
+
+  res.status(200).json(allComments);
 });
 
 
@@ -91,23 +117,30 @@ const addNewComment = asyncHandler(async (req, res) => {
   let notificationType = "comment";
   let content = "commented on your post";
   let actionModel = "Post";
+  let rootId, rootType;
 
   // 🎯 Verify Target Existence & Handle Logic
   if (targetType === "Post") {
     target = await Post.findById(targetId);
     if (!target) return res.status(404).json({ message: "Post not found" });
     if (target.isCommentOff) return res.status(403).json({ message: "Comments are disabled for this post" });
+    rootId = targetId;
+    rootType = "Post";
   } else if (targetType === "Reel") {
     target = await Reel.findById(targetId);
     if (!target) return res.status(404).json({ message: "Reel not found" });
     content = "commented on your reel";
     actionModel = "Reel";
+    rootId = targetId;
+    rootType = "Reel";
   } else if (targetType === "Comment") {
     target = await Comment.findById(targetId).populate("owner");
     if (!target) return res.status(404).json({ message: "Parent comment not found" });
     notificationType = "reply";
     content = "replied to your comment";
     actionModel = "Comment";
+    rootId = target.rootId;
+    rootType = target.rootType;
   }
 
   const comment = new Comment({
@@ -115,6 +148,8 @@ const addNewComment = asyncHandler(async (req, res) => {
     owner: req.user._id,
     targetId,
     targetType,
+    rootId,
+    rootType,
   });
 
   const user = await User.findById(req.user._id);
