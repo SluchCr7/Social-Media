@@ -71,48 +71,49 @@ function MusicPagePresentation(props) {
           ) : (
             <div className="space-y-12 pb-24">
               <section className="relative overflow-hidden rounded-[3rem] border border-white/5 bg-white/[0.02] backdrop-blur-3xl shadow-2xl">
-            <NowPlaying
-              current={current}
-              playing={playing}
-              togglePlay={togglePlay}
-              next={next}
-              prev={prev}
-              isReady={isReady}
-              shuffle={shuffle}
-              setShuffle={setShuffle}
-              repeatMode={repeatMode}
-              setRepeatMode={setRepeatMode}
-              progress={progress}
-              setProgress={setProgress}
-              duration={duration}
-              volume={volume}
-              setVolume={setVolume}
-              muted={muted}
-              setMuted={setMuted}
-              expanded={expanded}
-              setExpanded={setExpanded}
-              likeMusic={likeMusic}
-              shareMusicAsPost={shareMusicAsPost}
-              saveMusicInPlayList={saveMusicInPlayList}
-              userData={userData}
-              myPlaylist={myPlaylist}
-              setTrack={setTrack}
-              songs={songs}
-              currentIndex={currentIndex}
-            />
-          </section>
+                <NowPlaying
+                  current={current}
+                  playing={playing}
+                  togglePlay={togglePlay}
+                  next={next}
+                  prev={prev}
+                  isReady={isReady}
+                  shuffle={shuffle}
+                  setShuffle={setShuffle}
+                  repeatMode={repeatMode}
+                  setRepeatMode={setRepeatMode}
+                  progress={progress}
+                  setProgress={setProgress}
+                  duration={duration}
+                  volume={volume}
+                  setVolume={setVolume}
+                  muted={muted}
+                  setMuted={setMuted}
+                  expanded={expanded}
+                  setExpanded={setExpanded}
+                  likeMusic={likeMusic}
+                  shareMusicAsPost={shareMusicAsPost}
+                  saveMusicInPlayList={saveMusicInPlayList}
+                  userData={userData}
+                  myPlaylist={myPlaylist}
+                  setTrack={setTrack}
+                  songs={songs}
+                  currentIndex={currentIndex}
+                />
+              </section>
 
-          <div className="space-y-16">
-            <TrendingSongs songs={songs} setTrack={setTrack} />
-            <AllSongsFeed
-              filtered={filtered}
-              current={current}
-              setTrack={setTrack}
-              songs={songs}
-            />
-          </div>
-        )}
-      </main>
+              <div className="space-y-16">
+                <TrendingSongs songs={songs} setTrack={setTrack} />
+                <AllSongsFeed
+                  filtered={filtered}
+                  current={current}
+                  setTrack={setTrack}
+                  songs={songs}
+                />
+              </div>
+            </div>
+          )}
+        </main>
 
         <aside className="xl:w-80 space-y-8 hidden 2xl:block sticky top-28 self-start h-[calc(100vh-120px)] overflow-y-auto no-scrollbar pb-10">
           <SidebarQueue queue={queue} setTrack={setTrack} />
