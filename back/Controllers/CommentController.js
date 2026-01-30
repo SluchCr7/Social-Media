@@ -1,8 +1,8 @@
 const asyncHandler = require('express-async-handler');
 const { Comment, ValidateComment, ValidateUpdateComment } = require('../Modules/Comment');
 const { User } = require('../Modules/User');
-const { Post } = require('../Modules/Post');
-const { Reel } = require('../Modules/Reel');
+const { Post, ValidatePost } = require('../Modules/Post');
+const Reel = require('../Modules/Reel');
 const { sendNotificationHelper } = require('../utils/SendNotification');
 const { commentPopulate } = require('../Populates/Populate');
 
