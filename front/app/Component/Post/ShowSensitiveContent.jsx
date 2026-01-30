@@ -1,7 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { IoIosWarning } from 'react-icons/io'
-import { HiEye } from 'react-icons/hi2'
+import { HiOutlineEye, HiOutlineEyeOff } from 'react-icons/hi'
+import { RiAlertLine } from 'react-icons/ri'
 
 const ShowSensitiveContent = ({
   setShowSensitive,
@@ -12,86 +12,58 @@ const ShowSensitiveContent = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.4 }}
-      className="
-        absolute inset-0 z-[60] 
-        flex items-center justify-center 
-        rounded-2xl overflow-hidden
-        p-4 sm:p-8
-      "
+      className="absolute inset-0 z-[60] flex items-center justify-center rounded-2xl overflow-hidden p-6"
     >
-      {/* 🔮 Premium Mesh Gradient Background */}
-      <div className="absolute inset-0 overflow-hidden rounded-2xl">
-        <div className="absolute inset-0 bg-white/40 dark:bg-black/40 backdrop-blur-3xl" />
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[100px] animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
-      </div>
+      {/* 🌫️ Minimal Professional Glass Glass Overlay */}
+      <div className="absolute inset-0 bg-white/60 dark:bg-black/80 backdrop-blur-[20px]" />
+      <div className="absolute inset-0 border border-black/5 dark:border-white/5 rounded-2xl" />
 
-      <div className="absolute inset-0 border border-white/20 dark:border-white/10 rounded-2xl" />
-
-      {/* ⚠️ Content Container */}
+      {/* 📦 Minimal Content Box */}
       <motion.div
-        initial={{ scale: 0.9, opacity: 0, y: 10 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.9, opacity: 0, y: 10 }}
-        transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-        className="
-          relative z-10 flex flex-col items-center 
-          backdrop-blur-md
-          rounded-3xl p-8 sm:p-12
-          max-w-sm w-full text-center
-          shadow-2xl shadow-black/5
-        "
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        className="relative z-10 flex flex-col items-center max-w-[280px] w-full text-center"
       >
-        {/* Warning Icon with Glow */}
-        <div className="relative mb-6">
-          <div className="absolute inset-0 bg-amber-500/40 blur-2xl rounded-full" />
+        {/* Abstract Iconography */}
+        <div className="mb-8 relative">
+          <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center mb-1">
+            <HiOutlineEyeOff className="text-2xl text-slate-400 dark:text-slate-500" />
+          </div>
           <motion.div
-            animate={{
-              scale: [1, 1.1, 1],
-              rotate: [0, 5, -5, 0]
-            }}
-            transition={{
-              repeat: Infinity,
-              duration: 4,
-              ease: "easeInOut"
-            }}
-            className="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-xl shadow-orange-500/20"
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 4, repeat: Infinity }}
+            className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] text-white"
           >
-            <IoIosWarning className="text-4xl" />
+            <RiAlertLine />
           </motion.div>
         </div>
 
-        {/* Text Content */}
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-          {t('Sensitive Content')}
-        </h2>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
-          {t('This content may contain sensitive material')}
-        </p>
+        {/* Professional Typography */}
+        <div className="space-y-2 mb-10">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+            {t('Sensitive Content')}
+          </h2>
+          <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-relaxed">
+            {t('Protected by Community Standards')}
+          </p>
+        </div>
 
-        {/* Action Button */}
+        {/* Refined Action Button */}
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ y: -2 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => setShowSensitive(false)}
           className="
-            group relative flex items-center justify-center gap-2
-            w-full py-4 px-8 
-            bg-gray-900 dark:bg-white
-            text-white dark:text-gray-900
-            rounded-2xl font-bold text-sm
-            transition-all duration-300
-            hover:shadow-xl hover:shadow-black/10 dark:hover:shadow-white/10
+            group relative flex items-center justify-center gap-3
+            w-full py-4 px-6
+            bg-indigo-600 hover:bg-indigo-500
+            text-white rounded-full font-bold text-xs
+            transition-all duration-300 shadow-xl shadow-indigo-600/20
           "
         >
-          <HiEye className="text-lg group-hover:scale-110 transition-transform" />
-          <span>{t('Show Content')}</span>
-
-          {/* Subtle Shine Effect */}
-          <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-            <div className="absolute inset-0 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-          </div>
+          <HiOutlineEye className="text-lg" />
+          <span className="tracking-wide">{t('Reveal Content')}</span>
         </motion.button>
       </motion.div>
     </motion.div>
