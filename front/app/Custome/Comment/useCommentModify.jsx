@@ -135,7 +135,8 @@ export const useCommentModify = ({
   };
 
   return {
-    fetchCommentsByPostId,
+    fetchCommentsByPostId: fetchCommentsByTarget, // Alias for backward compatibility
+    fetchCommentsByTarget,
     AddComment,
     deleteComment,
     updateComment,

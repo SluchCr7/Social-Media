@@ -1,7 +1,7 @@
 'use client';
 
 import React, { memo } from 'react';
-import { HiPlay, HiPause, HiForward, HiBackward, HiShuffle, HiArrowPath, HiSpeakerWave, HiSpeakerXMark } from 'react-icons/hi2';
+import { HiPlay, HiPause, HiForward, HiBackward, HiArrowsRightLeft, HiArrowPath, HiSpeakerWave, HiSpeakerXMark } from 'react-icons/hi2';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProgressBar from './ProgressBar';
 import { formatTime } from '@/app/utils/formatTime';
@@ -27,7 +27,7 @@ const PlayerControls = memo(({
             className={`p-3 rounded-xl transition-all ${shuffle ? 'text-indigo-500 bg-indigo-500/10' : 'text-white/20 hover:text-white'}`}
             title="Shuffle"
           >
-            <HiShuffle size={20} />
+            <HiArrowsRightLeft size={20} />
           </button>
 
           <button
@@ -44,8 +44,8 @@ const PlayerControls = memo(({
             onClick={!isBuffering ? togglePlay : undefined}
             disabled={isBuffering}
             className={`relative w-16 h-16 rounded-[1.5rem] flex items-center justify-center transition-all ${isBuffering
-                ? 'bg-white/5 cursor-not-allowed'
-                : 'bg-white text-black shadow-[0_15px_30px_-5px_rgba(255,255,255,0.2)]'
+              ? 'bg-white/5 cursor-not-allowed'
+              : 'bg-white text-black shadow-[0_15px_30px_-5px_rgba(255,255,255,0.2)]'
               }`}
           >
             <AnimatePresence mode="wait">

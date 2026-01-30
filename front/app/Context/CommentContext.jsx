@@ -27,7 +27,7 @@ export const CommentContextProvider = ({ children }) => {
 
   // --- External Hook for CRUD ---
   const {
-    fetchCommentsByPostId,
+    fetchCommentsByTarget,
     AddComment,
     deleteComment,
     updateComment,
@@ -69,6 +69,7 @@ export const CommentContextProvider = ({ children }) => {
     likeComment,
     updateComment,
     fetchCommentsByTarget,
+    fetchCommentsByPostId: fetchCommentsByTarget, // Legacy alias
   }), [
     comments, isLoading, AddComment, deleteComment,
     likeComment, updateComment, fetchCommentsByTarget
