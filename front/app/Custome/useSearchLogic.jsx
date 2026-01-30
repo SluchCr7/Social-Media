@@ -1,85 +1,63 @@
 // useSearchLogic.js
-
-import { useState, useEffect, useMemo } from 'react';
-import { filterHashtags } from '@/app/utils/filterHashtags'; // تأكد من المسار الصحيح
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useAuth } from '../Context/AuthContext';
 
 /**
- * Custom Hook لإدارة منطق البحث وتصفية النتائج.
- * @param {string} initialSearch - قيمة البحث الأولية (قد تأتي من URL).
- * @param {Array} users - قائمة المستخدمين.
- * @param {Array} posts - قائمة المنشورات.
- * @returns {object} - يحتوي على حالة البحث، ودالة تحديثها، والنتائج.
+ * Custom Hook to manage search logic via Server API.
+ * @param {string} initialSearch - Initial search query.
+ * @returns {object} - Contains search state, setter, results, and hashtags (mocked or fetched).
  */
-export const useSearchLogic = (initialSearch = '', users = [], posts = []) => {
+export const useSearchLogic = (initialSearch = '') => {
+  const { user } = useAuth();
   const [search, setSearch] = useState(initialSearch);
   const [searchResults, setSearchResults] = useState({
     users: [],
     hashtags: [],
-    posts: []
+    posts: [],
+    communities: []
   });
+  const [loading, setLoading] = useState(false);
 
-  // 1. حساب الهاشتاجات الأكثر شيوعًا
-  const hashtagCount = useMemo(() => {
-    const counts = {};
-    filterHashtags(posts, counts);
-    return counts;
-  }, [posts]);
-
-  const topHashtags = useMemo(() => {
-    return Object.entries(hashtagCount).sort((a, b) => b[1] - a[1]);
-  }, [hashtagCount]);
-
-
-  // 2. useEffect لتنفيذ البحث مع تأخير (Debounce)
+  // Debounce Search
   useEffect(() => {
-    const handler = setTimeout(() => {
+    const handler = setTimeout(async () => {
       const trimmed = search.trim();
-      const searchLower = trimmed.toLowerCase();
 
       if (!trimmed) {
-        setSearchResults({ users: [], hashtags: [], posts: [] });
+        setSearchResults({ users: [], hashtags: [], posts: [], communities: [] });
         return;
       }
 
-      if (trimmed.startsWith('#')) {
-        const query = trimmed.slice(1).toLowerCase();
-        const filteredTags = topHashtags.filter(([tag]) =>
-          tag.toLowerCase().includes(query)
-        );
-        setSearchResults({
-          users: [],
-          hashtags: filteredTags.map(([tag, count]) => ({ tag, count })),
-          posts: []
-        });
-      } else {
-        const filteredUsers = Array.isArray(users)
-          ? users.filter((u) =>
-              (u.username + ' ' + (u.profileName || '')).toLowerCase().includes(searchLower)
-            )
-          : [];
+      setLoading(true);
+      try {
+        const config = {
+          headers: { Authorization: `Bearer ${user?.token}` }
+        };
 
-        const filteredPosts = Array.isArray(posts)
-          ? posts.filter(
-              (p) =>
-                (p.text && p.text.toLowerCase().includes(searchLower)) ||
-                (p.Hashtags && p.Hashtags.some(tag => tag.toLowerCase().includes(searchLower))) ||
-                (p.owner?.username && p.owner.username.toLowerCase().includes(searchLower)) ||
-                (p.owner?.interests && p.owner.interests.some(interest => interest.toLowerCase().includes(searchLower))) ||
-                (p.community?.Name && p.community.Name.toLowerCase().includes(searchLower)) ||
-                (p.community?.tags && p.community.tags.some(tag => tag.toLowerCase().includes(searchLower)))
-            )
-          : [];
+        const { data } = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/search?q=${encodeURIComponent(trimmed)}`, config);
 
+        // Hashtags extraction from posts can still be done client side if needed, 
+        // or backend should return them. For now we just return posts/users.
         setSearchResults({
-          users: filteredUsers,
-          hashtags: [],
-          posts: filteredPosts
+          users: data.users || [],
+          posts: data.posts || [],
+          communities: data.communities || [],
+          hashtags: [] // Backend doesn't return hashtags yet
         });
+
+      } catch (error) {
+        console.error("Search API Error:", error);
+      } finally {
+        setLoading(false);
       }
-    }, 300); // Debounce time
+    }, 500); // 500ms debounce
 
     return () => clearTimeout(handler);
-  }, [search, users, posts, topHashtags]);
+  }, [search, user?.token]);
 
-  return { search, setSearch, searchResults, topHashtags };
+  // Mock top hashtags for now or fetch from a trending API
+  const topHashtags = [];
+
+  return { search, setSearch, searchResults, topHashtags, loading };
 };

@@ -11,6 +11,7 @@ import {
   HiGlobeAlt,
   HiSignal,
   HiArrowPath,
+  HiExclamationTriangle,
 } from 'react-icons/hi2';
 import { chartData } from '@/app/utils/Data';
 import { useTranslation } from 'react-i18next';
@@ -54,6 +55,7 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
       >
         <StatCard icon={<HiUsers />} title="Users" value={stats?.totalUsers} gradient="from-blue-500 to-blue-600" />
         <StatCard icon={<HiDocumentText />} title="Posts" value={stats?.totalPosts} gradient="from-green-500 to-green-600" />
+        <StatCard icon={<HiExclamationTriangle />} title="Reports" value={stats?.pendingReports} gradient="from-red-500 to-red-600" />
         <StatCard icon={<HiGlobeAlt />} title="Communities" value={stats?.totalCommunities} gradient="from-purple-500 to-purple-600" />
         <StatCard icon={<HiMusicalNote />} title="Music" value={stats?.totalMusic} gradient="from-pink-500 to-pink-600" />
         <StatCard icon={<HiFilm />} title="Reels" value={stats?.totalReels} gradient="from-rose-500 to-rose-600" />

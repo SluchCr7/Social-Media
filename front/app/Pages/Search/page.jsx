@@ -18,13 +18,12 @@ import { useUser } from '@/app/Context/UserContext';
 const FullSearchResults = () => {
   const searchParams = useSearchParams();
 
-  const { users, user } = useAuth();
-  const { posts } = usePost();
+  const { user } = useAuth();
   const { suggestedUsers } = useUser();
   const { t } = useTranslation();
 
   const initialSearchQuery = searchParams.get('q') || '';
-  const { search, setSearch, searchResults, topHashtags } = useSearchLogic(initialSearchQuery, users, posts);
+  const { search, setSearch, searchResults, topHashtags } = useSearchLogic(initialSearchQuery);
 
   useEffect(() => {
     const currentQ = searchParams.get('q') || '';

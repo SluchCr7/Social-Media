@@ -151,12 +151,12 @@ export const AuthContextProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  // Fetch users list for authenticated users
+  // Fetch users list for authenticated users (ADMIN ONLY)
   useEffect(() => {
-    if (isLogin && isAuthChecked) {
+    if (isLogin && isAuthChecked && user?.isAdmin) {
       fetchUsers();
     }
-  }, [isLogin, isAuthChecked, fetchUsers]);
+  }, [isLogin, isAuthChecked, user?.isAdmin, fetchUsers]);
 
   // --- Context Value ---
   const value = useMemo(() => ({

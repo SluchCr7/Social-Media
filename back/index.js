@@ -75,6 +75,7 @@ app.use('/api/music', require('./routes/MusicRoute'))
 app.use('/api/translate', require('./routes/TranslateRoute'))
 app.use('/api/admin', require('./routes/AdminRoute'))
 app.use('/api/highlight', require('./routes/HighlightRoute'))
+app.use('/api/search', require('./routes/SearchRoute'))
 app.use(notfound)
 app.use(errorhandler)
 

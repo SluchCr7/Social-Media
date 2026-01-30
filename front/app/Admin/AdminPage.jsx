@@ -7,6 +7,7 @@ import { useAdminUser } from '@/app/Context/AdminContext';
 import AdminUsersPage from '../Component/Admin/Users/UsersTab';
 import AdminReportsPage from '../Component/Admin/Reports/ReportsTab';
 import DashboardTab from '../Component/Admin/DashboardTab';
+import SettingsTab from '../Component/Admin/Settings/SettingsTab';
 import { useTranslation } from 'react-i18next';
 
 const Admin = () => {
@@ -18,6 +19,7 @@ const Admin = () => {
     { name: 'Dashboard', icon: <HiChartBar className="w-5 h-5" />, label: t('Dashboard') },
     { name: 'Users', icon: <HiUsers className="w-5 h-5" />, label: t('Users') },
     { name: 'Reports', icon: <HiDocumentText className="w-5 h-5" />, label: t('Reports') },
+    { name: 'Settings', icon: <HiCog className="w-5 h-5" />, label: t('Settings') },
   ];
 
   if (loading)
@@ -35,15 +37,15 @@ const Admin = () => {
   return (
     <div className="min-h-screen w-full flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-[#050505] dark:via-[#0A0A0A] dark:to-[#050505]">
       {/* 🎭 Premium Header */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#0A0A0A]/90 backdrop-blur-3xl border-b border-gray-200 dark:border-white/5 shadow-xl">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#0A0A0A]/90 backdrop-blur-3xl border-b border-gray-200 dark:border-white/5 shadow-xl transition-all duration-300">
+        <div className="w-full px-6 md:px-10 py-5">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
                 <HiCog className="w-6 h-6 text-indigo-500 animate-spin-slow" />
               </div>
               <div>
-                <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase">
+                <h1 className="text-3xl font-black tracking-tighter text-gray-900 dark:text-white uppercase transition-colors">
                   {t('Admin')} <span className="text-indigo-500">{t('Console')}</span>
                 </h1>
                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-500">
@@ -55,16 +57,16 @@ const Admin = () => {
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2">
+          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-1">
             {tabs.map((tab) => (
               <motion.button
                 key={tab.name}
                 onClick={() => setActiveTab(tab.name)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className={`flex items-center gap-3 px-6 py-4 rounded-2xl transition-all whitespace-nowrap ${activeTab === tab.name
-                  ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/30'
-                  : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10'
+                className={`flex items-center gap-3 px-6 py-4 rounded-2xl transition-all whitespace-nowrap border-2 ${activeTab === tab.name
+                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-500/30'
+                    : 'bg-transparent border-transparent hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400'
                   }`}
               >
                 {tab.icon}
@@ -76,14 +78,15 @@ const Admin = () => {
       </header>
 
       {/* 📊 Content Area */}
-      <main className="flex-1 w-full">
+      <main className="flex-1 w-full bg-transparent">
         <AnimatePresence mode="wait">
           {activeTab === 'Dashboard' && (
             <motion.div
               key="dashboard"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, scale: 0.99 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.99 }}
+              transition={{ duration: 0.3 }}
               className="w-full"
             >
               <DashboardTab stats={stats} loading={loading} getAdminStats={getAdminStats} />
@@ -93,10 +96,11 @@ const Admin = () => {
           {activeTab === 'Users' && (
             <motion.div
               key="users"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="w-full p-6 md:p-8"
+              initial={{ opacity: 0, scale: 0.99 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.99 }}
+              transition={{ duration: 0.3 }}
+              className="w-full"
             >
               <AdminUsersPage />
             </motion.div>
@@ -105,12 +109,26 @@ const Admin = () => {
           {activeTab === 'Reports' && (
             <motion.div
               key="reports"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="w-full p-6 md:p-8"
+              initial={{ opacity: 0, scale: 0.99 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.99 }}
+              transition={{ duration: 0.3 }}
+              className="w-full"
             >
               <AdminReportsPage />
+            </motion.div>
+          )}
+
+          {activeTab === 'Settings' && (
+            <motion.div
+              key="settings"
+              initial={{ opacity: 0, scale: 0.99 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.99 }}
+              transition={{ duration: 0.3 }}
+              className="w-full"
+            >
+              <SettingsTab />
             </motion.div>
           )}
         </AnimatePresence>

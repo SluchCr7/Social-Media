@@ -162,6 +162,11 @@ const deleteComment = asyncHandler(async (req, res) => {
     throw new Error('Comment not found');
   }
 
+  // Check if user is owner or admin
+  if (comment.owner.toString() !== req.user._id && !req.user.isAdmin) {
+    return res.status(403).json({ message: "You are not authorized to delete this comment" });
+  }
+
   // حذف كل الردود المرتبطة بالكومنت قبل الحذف
   await Comment.deleteMany({ parent: comment._id });
 
@@ -250,7 +255,7 @@ const updateComment = asyncHandler(async (req, res) => {
 
 
 const getCommentsByUser = asyncHandler(async (req, res) => {
-  const userId = req.params.userId; 
+  const userId = req.params.userId;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;

@@ -284,11 +284,17 @@ const addPost = async (req, res) => {
 
 
 // ================== Delete Post ==================
+// ================== Delete Post ==================
 const deletePost = asyncHandler(async (req, res) => {
   const post = await Post.findById(req.params.id);
   if (!post) {
     res.status(404);
     throw new Error("Post not found");
+  }
+
+  // Check if user is owner or admin
+  if (post.owner.toString() !== req.user._id && !req.user.isAdmin) {
+    return res.status(403).json({ message: "You are not authorized to delete this post" });
   }
 
   // حذف صور Cloudinary

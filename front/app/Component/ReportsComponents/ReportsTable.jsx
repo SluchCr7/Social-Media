@@ -1,167 +1,75 @@
-// 'use client'
-// import React from 'react';
-// import Image from 'next/image';
-// import StatusBadge from './StatusBadge';
-// import DropdownActions from './DropdownActions';
-// import { useTranslation } from 'react-i18next';
-
-// const ReportsTable = ({ reports, type, openModal }) => {
-//   const { t } = useTranslation();
-
-//   return (
-//     <div className="w-full overflow-x-auto bg-lightMode-bg dark:bg-darkMode-bg rounded-2xl shadow-md border border-gray-200 dark:border-gray-800 transition-all duration-300">
-//       <table className="w-full text-sm text-left border-collapse">
-//         <thead className="bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text2 dark:text-darkMode-text font-semibold uppercase text-xs tracking-wider">
-//           <tr>
-//             <th className="px-6 py-4">{t("Reporter")}</th>
-//             <th className="px-6 py-4">{t("Target")}</th>
-//             <th className="px-6 py-4">{t("Reason")}</th>
-//             <th className="px-6 py-4">{t("Status")}</th>
-//             <th className="px-6 py-4 text-center">{t("Actions")}</th>
-//           </tr>
-//         </thead>
-
-//         <tbody>
-//           {reports.map((report, idx) => (
-//             <tr
-//               key={report._id || idx}
-//               className="border-b border-gray-200 dark:border-gray-700 hover:bg-lightMode-menu dark:hover:bg-gray-800 transition-colors duration-200"
-//             >
-//               {/* Reporter */}
-//               <td className="px-6 py-4 flex items-center gap-3">
-//                 <div className="relative">
-//                   <Image
-//                     src={report.owner?.profilePhoto?.url || '/default-profile.png'}
-//                     alt="Reporter"
-//                     width={36}
-//                     height={36}
-//                     className="w-9 h-9 rounded-full object-cover border-2 border-lightMode-text dark:border-darkMode-text shadow-sm"
-//                   />
-//                 </div>
-//                 <div>
-//                   <p className="font-semibold text-lightMode-fg dark:text-darkMode-fg">
-//                     {report.owner?.username}
-//                   </p>
-//                   <p className="text-xs text-gray-500">@{report.owner?.profileName}</p>
-//                 </div>
-//               </td>
-
-//               {/* Target */}
-//               <td className="px-6 py-4 text-lightMode-text2 dark:text-darkMode-text2">
-//                 {type === 'user' && <span>{report.reportedUserId?.username}</span>}
-//                 {type === 'post' && (
-//                   <span>{report.postId?.text?.slice(0, 40) || t("Post")}</span>
-//                 )}
-//                 {type === 'comment' && (
-//                   <span>{report.commentId?.text?.slice(0, 40) || t("Comment")}</span>
-//                 )}
-//               </td>
-
-//               {/* Reason */}
-//               <td className="px-6 py-4 text-lightMode-text2 dark:text-darkMode-text2 italic">
-//                 {report.reason || t("No reason provided")}
-//               </td>
-
-//               {/* Status */}
-//               <td className="px-6 py-4">
-//                 <StatusBadge status={report.status} />
-//               </td>
-
-//               {/* Actions - التعديل هنا: إضافة relative و style={{ overflow: 'visible' }} */}
-//               <td
-//                 className="px-6 py-4 text-center relative"
-//                 style={{ overflow: 'visible' }}
-//               >
-//                 <DropdownActions
-//                   type={type}
-//                   onDeleteReport={() => openModal('deleteReport', report)}
-//                   onDeleteTarget={() => openModal('deleteTarget', report)}
-//                   onSuspend={() => openModal('suspendUser', report)}
-//                   onBan={() => openModal('banUser', report)}
-//                   onResolve={() => openModal('resolve', report)}
-//                 />
-//               </td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-
-//       {reports.length === 0 && (
-//         <div className="py-10 text-center text-lightMode-text2 dark:text-darkMode-text2 text-sm">
-//           {t("No reports found")}
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default ReportsTable;
 'use client'
 import React, { useCallback, memo } from 'react';
 import Image from 'next/image';
 import StatusBadge from './StatusBadge';
 import DropdownActions from './DropdownActions';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 
-// صف واحد من الجدول - memoized
 const ReportRow = memo(({ report, type, openModal, callbacks, t }) => {
   return (
-    <tr
-      key={report._id}
-      className="border-b border-gray-200 dark:border-gray-700 hover:bg-lightMode-menu dark:hover:bg-gray-800 transition-colors duration-200"
+    <motion.tr
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="group border-b border-gray-100 dark:border-white/5 hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors"
     >
       {/* Reporter */}
-      <td className="px-6 py-4 flex items-center gap-3">
-        <div className="relative">
-          <Image
-            src={report.owner?.profilePhoto?.url || '/default-profile.png'}
-            alt="Reporter"
-            width={36}
-            height={36}
-            className="w-9 h-9 rounded-full object-cover border-2 border-lightMode-text dark:border-darkMode-text shadow-sm"
-          />
-        </div>
-        <div>
-          <p className="font-semibold text-lightMode-fg dark:text-darkMode-fg">
-            {report.owner?.username}
-          </p>
-          <p className="text-xs text-gray-500">@{report.owner?.profileName}</p>
+      <td className="px-8 py-5">
+        <div className="flex items-center gap-4">
+          <div className="relative w-10 h-10 rounded-full overflow-hidden ring-2 ring-gray-100 dark:ring-white/10">
+            <Image
+              src={report.owner?.profilePhoto?.url || '/default-profile.png'}
+              alt="Reporter"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div>
+            <p className="font-bold text-gray-900 dark:text-white text-sm">
+              {report.owner?.username}
+            </p>
+            <p className="text-[11px] text-gray-400 font-medium">@{report.owner?.profileName}</p>
+          </div>
         </div>
       </td>
 
       {/* Target */}
-      <td className="px-6 py-4 text-lightMode-text2 dark:text-darkMode-text2">
-        {type === 'user' && <span>{report.reportedUserId?.username}</span>}
-        {type === 'post' && (
-          <span>{report.postId?.text?.slice(0, 40) || t("Post")}</span>
-        )}
-        {type === 'comment' && (
-          <span>{report.commentId?.text?.slice(0, 40) || t("Comment")}</span>
-        )}
+      <td className="px-8 py-5">
+        <div className="max-w-xs">
+          <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 font-medium">
+            {type === 'user' && <span className="font-bold text-indigo-500">@{report.reportedUserId?.username}</span>}
+            {type === 'post' && (report.postId?.text || <span className="italic text-gray-400">{t("Content unavailable")}</span>)}
+            {type === 'comment' && (report.commentId?.text || <span className="italic text-gray-400">{t("Content unavailable")}</span>)}
+          </p>
+        </div>
       </td>
 
       {/* Reason */}
-      <td className="px-6 py-4 text-lightMode-text2 dark:text-darkMode-text2 italic">
-        {report.reason || t("No reason provided")}
+      <td className="px-8 py-5">
+        <span className="px-3 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-xs font-bold text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-white/5">
+          {report.reason || t("No reason")}
+        </span>
       </td>
 
       {/* Status */}
-      <td className="px-6 py-4">
+      <td className="px-8 py-5">
         <StatusBadge status={report.status} />
       </td>
 
       {/* Actions */}
-      <td className="px-6 py-4 text-center relative" style={{ overflow: 'visible' }}>
-        <DropdownActions
-          type={type}
-          onDeleteReport={() => callbacks.handleDeleteReport(report)}
-          onDeleteTarget={() => callbacks.handleDeleteTarget(report)}
-          onSuspend={() => callbacks.handleSuspend(report)}
-          onBan={() => callbacks.handleBan(report)}
-          onResolve={() => callbacks.handleResolve(report)}
-        />
+      <td className="px-8 py-5 text-right">
+        <div className="inline-block relative">
+          <DropdownActions
+            type={type}
+            onDeleteReport={() => callbacks.handleDeleteReport(report)}
+            onDeleteTarget={() => callbacks.handleDeleteTarget(report)}
+            onSuspend={() => callbacks.handleSuspend(report)}
+            onBan={() => callbacks.handleBan(report)}
+            onResolve={() => callbacks.handleResolve(report)}
+          />
+        </div>
       </td>
-    </tr>
+    </motion.tr>
   );
 }, (prev, next) => prev.report === next.report && prev.type === next.type);
 ReportRow.displayName = 'ReportRow'
@@ -170,29 +78,12 @@ ReportRow.displayName = 'ReportRow'
 const ReportsTable = ({ reports, type, openModal }) => {
   const { t } = useTranslation();
 
-  // تثبيت الدوال باستخدام useCallback
-  const handleDeleteReport = useCallback(
-    (report) => openModal('deleteReport', report),
-    [openModal]
-  );
-  const handleDeleteTarget = useCallback(
-    (report) => openModal('deleteTarget', report),
-    [openModal]
-  );
-  const handleSuspend = useCallback(
-    (report) => openModal('suspendUser', report),
-    [openModal]
-  );
-  const handleBan = useCallback(
-    (report) => openModal('banUser', report),
-    [openModal]
-  );
-  const handleResolve = useCallback(
-    (report) => openModal('resolve', report),
-    [openModal]
-  );
+  const handleDeleteReport = useCallback((report) => openModal('deleteReport', report), [openModal]);
+  const handleDeleteTarget = useCallback((report) => openModal('deleteTarget', report), [openModal]);
+  const handleSuspend = useCallback((report) => openModal('suspendUser', report), [openModal]);
+  const handleBan = useCallback((report) => openModal('banUser', report), [openModal]);
+  const handleResolve = useCallback((report) => openModal('resolve', report), [openModal]);
 
-  // تمرير كل callbacks كمجموعة واحدة لتسهيل الاستخدام داخل ReportRow
   const callbacks = {
     handleDeleteReport,
     handleDeleteTarget,
@@ -201,16 +92,27 @@ const ReportsTable = ({ reports, type, openModal }) => {
     handleResolve,
   };
 
+  if (!reports || reports.length === 0) {
+    return (
+      <div className="py-24 text-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-white/5 mb-4">
+          <span className="text-2xl">📝</span>
+        </div>
+        <p className="text-gray-500 dark:text-gray-400 font-bold">{t("No pending reports found")}</p>
+      </div>
+    )
+  }
+
   return (
-    <div className="w-full overflow-x-auto bg-lightMode-bg dark:bg-darkMode-bg rounded-2xl shadow-md border border-gray-200 dark:border-gray-800 transition-all duration-300">
-      <table className="w-full text-sm text-left border-collapse">
-        <thead className="bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text2 dark:text-darkMode-text font-semibold uppercase text-xs tracking-wider">
+    <div className="w-full overflow-x-auto">
+      <table className="w-full text-left border-collapse">
+        <thead className="bg-gray-50/50 dark:bg-white/[0.02] border-b border-gray-100 dark:border-white/5">
           <tr>
-            <th className="px-6 py-4">{t("Reporter")}</th>
-            <th className="px-6 py-4">{t("Target")}</th>
-            <th className="px-6 py-4">{t("Reason")}</th>
-            <th className="px-6 py-4">{t("Status")}</th>
-            <th className="px-6 py-4 text-center">{t("Actions")}</th>
+            <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-gray-400">{t("Reporter")}</th>
+            <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-gray-400">{t("Target Content")}</th>
+            <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-gray-400">{t("Reason")}</th>
+            <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-gray-400">{t("Status")}</th>
+            <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest text-gray-400 text-right">{t("Actions")}</th>
           </tr>
         </thead>
 
@@ -227,12 +129,6 @@ const ReportsTable = ({ reports, type, openModal }) => {
           ))}
         </tbody>
       </table>
-
-      {reports.length === 0 && (
-        <div className="py-10 text-center text-lightMode-text2 dark:text-darkMode-text2 text-sm">
-          {t("No reports found")}
-        </div>
-      )}
     </div>
   );
 };
