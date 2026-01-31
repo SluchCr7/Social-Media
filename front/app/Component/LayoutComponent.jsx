@@ -61,6 +61,7 @@ const LayoutComponent = ({ children }) => {
     '/Pages/CommunityGuidelines',
     '/Pages/Terms',
     '/Pages/Support',
+    '/Pages/Friends',
     '/Pages/Forgot',
     '/Pages/Setting',
     '/Pages/Privacy',
@@ -82,6 +83,7 @@ const LayoutComponent = ({ children }) => {
     '/Pages/Community/',
     '/Pages/User/',
     '/Pages/Post/',
+    '/Pages/Hashtag/',
     '/Pages/ResetPassword/',
     '/Pages/UserVerify/',
   ];
