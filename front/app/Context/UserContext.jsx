@@ -48,38 +48,23 @@ export const UserContextProvider = ({ children }) => {
     try {
       const res = await api.put(`/auth/follow/${targetId}`, {});
 
-      const { message, userId } = res.data;
-      const isFollowed = message === 'Followed successfully';
-
-      showToast(isFollowed ? MESSAGES.USER.FOLLOW_SUCCESS('user') : MESSAGES.USER.UNFOLLOW_SUCCESS('user'), 'success');
+      const { user: updatedCurrentUser, targetUser: updatedTargetUser } = res.data;
 
       // Update global users list
       setUsers((prev) =>
-        prev.map((u) =>
-          u._id === userId
-            ? {
-              ...u,
-              followers: isFollowed
-                ? [...(u.followers || []), { _id: user._id }]
-                : (u.followers || []).filter((f) => f._id !== user._id),
-            }
-            : u
-        )
+        prev.map((u) => (u._id === targetId ? updatedTargetUser : u))
       );
 
       // Update current user state
-      const updatedUser = isFollowed
-        ? { ...user, following: [...(user.following || []), { _id: userId }] }
-        : { ...user, following: (user.following || []).filter((f) => f._id !== userId) };
-
-      updateLocalUser(updatedUser);
+      updateLocalUser({ ...updatedCurrentUser, token: user.token });
+      showToast(res.data.message, 'success');
     } catch (err) {
       console.error('Follow error:', err);
       showToast(err.response?.data?.message || MESSAGES.COMMON.ERROR_OCCURRED, 'error');
     } finally {
       setLoading(false);
     }
-  }, [user, setUser, setUsers, showToast, updateLocalUser]);
+  }, [user, setUsers, showToast, updateLocalUser]);
 
   /**
    * Update profile photo
@@ -157,8 +142,6 @@ export const UserContextProvider = ({ children }) => {
 
       updateLocalUser(updatedUser);
       showToast(MESSAGES.USER.PROFILE_UPDATE_SUCCESS, 'success', { id: loadingToast });
-
-      setTimeout(() => window.location.reload(), 1000);
     } catch (err) {
       console.error('Profile update error:', err);
       showToast(MESSAGES.USER.PROFILE_UPDATE_ERROR, 'error', { id: loadingToast });
@@ -282,10 +265,35 @@ export const UserContextProvider = ({ children }) => {
     try {
       const res = await api.put(`/auth/pin/${postId}`, {});
       showToast(res.data.message || MESSAGES.POST.PIN_SUCCESS, 'success');
+      if (res.data.pinsPosts) {
+        updateLocalUser({ ...user, pinsPosts: res.data.pinsPosts });
+      }
     } catch (err) {
       showToast('Failed to pin post.', 'error');
     }
-  }, [showToast]);
+  }, [user, updateLocalUser, showToast]);
+
+  /**
+   * Block/Unblock a user
+   */
+  const blockUser = useCallback(async (targetUserId) => {
+    try {
+      const res = await api.put(`/auth/block/${targetUserId}`, {});
+
+      if (res.data.blockedUsers) {
+        updateLocalUser({
+          ...user,
+          blockedUsers: res.data.blockedUsers,
+          following: res.data.following || user.following
+        });
+      }
+
+      showToast(res.data.message || 'Action completed.', 'success');
+      return res.data;
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to block user.', 'error');
+    }
+  }, [user, updateLocalUser, showToast]);
 
   // --- Effects ---
 
@@ -327,11 +335,12 @@ export const UserContextProvider = ({ children }) => {
     toggleBlockNotification,
     toggleSaveReel,
     pinPost,
+    blockUser,
   }), [
     suggestedUsers, onlineUsers, loading, updateProfileLoading,
     followUser, updatePhoto, updateProfile, updatePassword,
     togglePrivateAccount, toggleShowOnlineStatus, getUserById, saveMusicInPlayList,
-    toggleBlockNotification, toggleSaveReel, pinPost
+    toggleBlockNotification, toggleSaveReel, pinPost, blockUser
   ]);
 
   return (

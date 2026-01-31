@@ -73,7 +73,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
   }, [post?.isContainWorst]);
 
   return (
-    <div className="relative w-full mb-12">
+    <div className="relative w-full mb-6 md:mb-12">
       <ShareModal
         post={post}
         isOpen={openModel}
@@ -86,11 +86,11 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
         id={post?._id}
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        className="group relative overflow-hidden rounded-[2.5rem] bg-[#0A0A0A] border border-white/5 shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-all hover:border-white/10"
+        viewport={{ once: true, margin: "-50px" }}
+        className="group relative overflow-hidden rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-white/5 shadow-xl dark:shadow-[0_30px_60px_rgba(0,0,0,0.5)] transition-all hover:border-indigo-500/30 dark:hover:border-white/10"
       >
         {/* Decorative Ambient Logic */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
         <AnimatePresence>
           {showSensitive && (
@@ -98,18 +98,18 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
           )}
         </AnimatePresence>
 
-        <div className={`p-6 md:p-8 flex flex-col gap-6 transition-all ${showSensitive ? 'blur-2xl pointer-events-none' : ''}`}>
+        <div className={`p-5 md:p-8 flex flex-col gap-5 md:gap-6 transition-all ${showSensitive ? 'blur-2xl pointer-events-none' : ''}`}>
 
           {/* Top Metadata Row */}
           <div className="flex items-center justify-between">
             <div className="flex gap-2">
               {post?.isPinned && (
-                <div className="px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-[10px] font-black uppercase tracking-widest text-yellow-500">
+                <div className="px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-[9px] font-black uppercase tracking-widest text-yellow-600 dark:text-yellow-500">
                   Pinned
                 </div>
               )}
               {isShared && (
-                <div className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-black uppercase tracking-widest text-indigo-500">
+                <div className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[9px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-500">
                   Shared Vision
                 </div>
               )}
@@ -117,7 +117,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
             {isShared && <SharedTitle user={user} post={post} original={original} />}
           </div>
 
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-5 md:gap-6">
             {/* Header with User Info */}
             <PostHeader
               post={post}
@@ -129,8 +129,8 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
             />
 
             {/* Content Area */}
-            <div className="flex flex-col gap-5">
-              <div className="text-lg md:text-xl font-medium leading-relaxed dark:text-white/90">
+            <div className="flex flex-col gap-4 md:gap-5">
+              <div className="text-base md:text-xl font-medium leading-relaxed text-gray-800 dark:text-white/90">
                 <RenderPostText
                   text={post?.text}
                   mentions={post?.mentions}
@@ -142,7 +142,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
               {post?.music && <PostMusicPlayer music={post.music} />}
 
               {/* Media Section */}
-              <div className="rounded-[1.5rem] overflow-hidden border border-white/5 bg-white/[0.02]">
+              <div className="rounded-[1.2rem] md:rounded-[1.5rem] overflow-hidden border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02]">
                 {!isShared && (post?.media?.length > 0 || post?.Photos?.length > 0) && (
                   <PostMedia
                     media={post.media}
@@ -167,23 +167,25 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
             <AnimatePresence>
               {showTranslateButton && !showOriginal && (
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handleTranslate}
-                  className="text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 w-fit"
+                  className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 w-fit flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 transition-all"
                 >
-                  {loading ? "Decrypting..." : "Translate Logic"}
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                  {loading ? (t("Processing...") || "Processing...") : (t("Translate Post") || "Translate Post")}
                 </motion.button>
               )}
               {translated && showOriginal && (
                 <motion.div
                   initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
-                  className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2"
+                  className="p-4 md:p-6 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 space-y-3"
                 >
-                  <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-[0.2em] text-white/30">
+                  <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-white/30">
                     <span>Translated Output</span>
-                    <button onClick={handleShowOriginal} className="hover:text-white transition-colors">Original Version</button>
+                    <button onClick={handleShowOriginal} className="hover:text-indigo-600 dark:hover:text-white transition-colors border-b border-transparent hover:border-current pb-0.5">Show Original</button>
                   </div>
-                  <div className="text-base text-white/70">
+                  <div className="text-sm md:text-base text-gray-700 dark:text-white/80 leading-relaxed italic">
                     <RenderPostText text={translated} />
                   </div>
                 </motion.div>
@@ -192,7 +194,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
 
             {/* Action Bar - Premium Dock */}
             {isLogin && (
-              <div className="mt-4 pt-6 border-t border-white/5">
+              <div className="mt-2 md:mt-4 pt-4 md:pt-6 border-t border-gray-100 dark:border-white/5">
                 <PostActions
                   post={post}
                   user={user}
@@ -212,19 +214,19 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                   <div className="flex items-center justify-between">
                     <div className="flex -space-x-2">
                       {post.comments.slice(0, 3).map((c, i) => (
-                        <div key={i} className="w-6 h-6 rounded-full border-2 border-black overflow-hidden bg-gray-800">
+                        <div key={i} className="w-6 h-6 rounded-full border-2 border-white dark:border-black overflow-hidden bg-gray-200 dark:bg-gray-800 shadow-sm">
                           <img src={c?.owner?.profilePhoto?.url} alt="av" className="w-full h-full object-cover" />
                         </div>
                       ))}
                     </div>
-                    <Link href={`/Pages/Post/${post?._id}`} className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-indigo-400 transition-colors">
+                    <Link href={`/Pages/Post/${post?._id}`} className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-white/20 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                       View Discourse ({post.comments.length})
                     </Link>
                   </div>
                 )}
                 {highlightedComment && (
                   <div className="relative">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500/20 rounded-full" />
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500/30 rounded-full" />
                     <div className="pl-6">
                       <HighlightedComment highlightedComment={highlightedComment} />
                     </div>

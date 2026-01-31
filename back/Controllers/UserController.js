@@ -406,16 +406,11 @@ const makeFollow = asyncHandler(async (req, res) => {
   const isFollowing = user.followers.includes(req.user._id);
 
   if (isFollowing) {
-    // 🔴 إلغاء المتابعة (Unfollow)
+    // 🔴 Unfollow
     await User.findByIdAndUpdate(user._id, { $pull: { followers: req.user._id } });
     await User.findByIdAndUpdate(currentUser._id, { $pull: { following: user._id } });
-
-    return res.status(200).json({
-      message: "Unfollowed successfully",
-      userId: user._id, // أضف هذا ليسهل التحديث في الواجهة
-    });
   } else {
-    // 🟢 متابعة (Follow)
+    // 🟢 Follow
     await User.findByIdAndUpdate(user._id, { $push: { followers: req.user._id } });
     await User.findByIdAndUpdate(currentUser._id, { $push: { following: user._id } });
 
@@ -434,12 +429,16 @@ const makeFollow = asyncHandler(async (req, res) => {
         });
       }
     }
-
-    return res.status(200).json({
-      message: "Followed successfully",
-      userId: user._id,
-    });
   }
+
+  const updatedCurrentUser = await User.findById(req.user._id).populate(userOnePopulate);
+  const updatedTargetUser = await User.findById(req.params.id).populate(userOnePopulate);
+
+  return res.status(200).json({
+    message: isFollowing ? "Unfollowed successfully" : "Followed successfully",
+    user: updatedCurrentUser,
+    targetUser: updatedTargetUser
+  });
 });
 
 const updateProfile = asyncHandler(async (req, res) => {
@@ -556,19 +555,24 @@ const pinPost = asyncHandler(async (req, res) => {
     res.status(404)
     throw new Error('User not found')
   }
+
+  let message = "";
   if (user.pinsPosts.includes(req.params.id)) {
     await User.findByIdAndUpdate(req.user._id, {
       $pull: { pinsPosts: req.params.id },
     });
-    res.status(200).json({ message: 'Post unPin' })
+    message = 'Post unPinned';
   }
   else {
     await User.findByIdAndUpdate(req.user._id, {
       $push: { pinsPosts: req.params.id },
     });
-    res.status(200).json({ message: 'Post Pin' })
+    message = 'Post Pinned';
   }
-})
+
+  const updatedUser = await User.findById(req.user._id).select("pinsPosts");
+  res.status(200).json({ message, pinsPosts: updatedUser.pinsPosts });
+});
 
 const blockOrUnblockUser = asyncHandler(async (req, res) => {
   const currentUserId = req.user._id;
@@ -587,6 +591,7 @@ const blockOrUnblockUser = asyncHandler(async (req, res) => {
   }
 
   const isBlocked = currentUser.blockedUsers.includes(targetUserId);
+  let message = "";
 
   if (isBlocked) {
     // 🔓 Unblock user
@@ -594,8 +599,7 @@ const blockOrUnblockUser = asyncHandler(async (req, res) => {
       (id) => id.toString() !== targetUserId
     );
     await currentUser.save();
-
-    return res.status(200).json({ message: "User has been unblocked." });
+    message = "User has been unblocked.";
   } else {
     // 🔒 Block user
     currentUser.blockedUsers.push(targetUserId);
@@ -609,9 +613,11 @@ const blockOrUnblockUser = asyncHandler(async (req, res) => {
     });
 
     await currentUser.save();
-
-    return res.status(200).json({ message: "User has been blocked." });
+    message = "User has been blocked.";
   }
+
+  const updatedUser = await User.findById(currentUserId).select("blockedUsers following");
+  res.status(200).json({ message, blockedUsers: updatedUser.blockedUsers, following: updatedUser.following });
 });
 
 

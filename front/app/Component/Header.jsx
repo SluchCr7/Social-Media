@@ -18,35 +18,27 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
   const { t } = useTranslation();
 
   return (
-    <header className="sticky top-0 z-[100] w-full border-b border-white/5 bg-[#050505cc] backdrop-blur-2xl">
+    <header className="sticky top-0 z-[100] w-full border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-[#050505cc] backdrop-blur-2xl transition-colors duration-300">
       <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-16 flex items-center justify-between gap-8">
 
-        {/* Brand/Logo */}
-        {/* <Link href="/" className="flex items-center gap-2 group shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
-            <span className="text-white font-black text-xl italic">Z</span>
-          </div>
-          <span className="hidden sm:block text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 tracking-tight">
-            Zocial
-          </span>
-        </Link> */}
+        {/* Brand/Logo - Optional: You can uncomment or add a logo here if needed */}
 
         {/* Tab Navigation - Professional Pill Design */}
-        <nav className="flex items-center bg-white/5 p-1 rounded-2xl border border-white/5 hidden md:flex">
+        <nav className="flex items-center bg-gray-100 dark:bg-white/5 p-1 rounded-2xl border border-gray-200 dark:border-white/5 hidden md:flex transition-colors">
           {tabsHeader.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`relative px-6 py-2 text-xs font-black uppercase tracking-widest transition-all duration-300 ${activeTab === tab.key
-                  ? "text-white"
-                  : "text-white/40 hover:text-white/70"
+              className={`relative px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeTab === tab.key
+                ? "text-indigo-600 dark:text-white"
+                : "text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/70"
                 }`}
             >
               <span className="relative z-10">{t(tab.label)}</span>
               {activeTab === tab.key && (
                 <motion.div
                   layoutId="headerTabPill"
-                  className="absolute inset-0 bg-white/10 rounded-xl border border-white/10 shadow-inner"
+                  className="absolute inset-0 bg-white dark:bg-white/10 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-inner"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
@@ -57,7 +49,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
         {/* Action Controls */}
         <div className="flex items-center gap-2 md:gap-4">
           {/* Quick Search Trigger */}
-          <button className="p-2.5 rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white transition-all hover:bg-white/10">
+          <button className="p-2.5 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 text-gray-500 dark:text-white/40 hover:text-indigo-600 dark:hover:text-white transition-all hover:bg-gray-200 dark:hover:bg-white/10">
             <Link href="/Pages/Search"><Search className="w-5 h-5" /></Link>
           </button>
 
@@ -67,7 +59,9 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
               <div className="relative">
                 <button
                   onClick={() => setShowNotifications(true)}
-                  className={`p-2.5 rounded-xl border transition-all ${unreadCount > 0 ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-white/5 border-white/5 text-white/40 hover:text-white hover:bg-white/10'}`}
+                  className={`p-2.5 rounded-xl border transition-all ${unreadCount > 0
+                    ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-500'
+                    : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/5 text-gray-500 dark:text-white/40 hover:text-indigo-600 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10'}`}
                 >
                   <Bell className="w-5 h-5" />
                 </button>
@@ -87,7 +81,9 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
               {/* Messenger Port */}
               <Link href="/Pages/Messanger" className="relative">
                 <button
-                  className={`p-2.5 rounded-xl border transition-all ${unReadedMessage > 0 ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 'bg-white/5 border-white/5 text-white/40 hover:text-white hover:bg-white/10'}`}
+                  className={`p-2.5 rounded-xl border transition-all ${unReadedMessage > 0
+                    ? 'bg-purple-500/10 border-purple-500/20 text-purple-500'
+                    : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/5 text-gray-500 dark:text-white/40 hover:text-purple-600 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10'}`}
                 >
                   <MessageCircle className="w-5 h-5" />
                 </button>
@@ -102,7 +98,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
               {isMobile && (
                 <button
                   onClick={() => setIsMobileMenuOpen(true)}
-                  className="p-2.5 rounded-xl bg-white/10 text-white"
+                  className="p-2.5 rounded-xl bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/5 text-gray-700 dark:text-white"
                 >
                   <Menu className="w-5 h-5" />
                 </button>
@@ -111,7 +107,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
           ) : (
             <Link
               href="/Pages/Login"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black font-black text-xs uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-xl shadow-white/5"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/20"
             >
               <IoIosLogIn size={18} />
               <span>Enter</span>

@@ -1,5 +1,5 @@
 'use client'
-import React, { memo } from 'react'
+import React, { memo, useState, useEffect } from 'react'
 import { HiBadgeCheck } from 'react-icons/hi'
 import UserHoverCard from '../UserHoverCard'
 import RenderPostText from './RenderText'
@@ -8,12 +8,51 @@ import PostLinks from './PostLinks'
 import Link from 'next/link'
 import Image from 'next/image'
 import { formatRelativeTime } from '@/app/utils/FormatDataCreatedAt'
+import { useTranslate } from '../../Context/TranslateContext'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const SharedPost = memo(({
     original,
     user,
     setImageView
 }) => {
+    const { translate, loading, language } = useTranslate();
+    const [translated, setTranslated] = useState(null);
+    const [showTranslateButton, setShowTranslateButton] = useState(false);
+    const [showOriginal, setShowOriginal] = useState(false);
+
+    useEffect(() => {
+        import('franc').then(({ franc }) => {
+            import('@/app/utils/Data').then(({ iso6391Map }) => {
+                if (!original?.text || !language) return;
+                if (original.text.length < 3) return setShowTranslateButton(false);
+                const langCode3 = franc(original.text, { minLength: 3 });
+                if (langCode3 === 'und') return setShowTranslateButton(false);
+                const textLang = iso6391Map[langCode3] || 'en';
+                setShowTranslateButton(textLang !== language);
+            });
+        });
+    }, [original?.text, language]);
+
+    const handleTranslate = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!original?.text || !language) return;
+        const result = await translate(original.text, language);
+        setTranslated(result);
+        setShowOriginal(true);
+        setShowTranslateButton(false);
+    };
+
+    const handleShowOriginal = (e) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        setShowOriginal(false);
+        setTranslated(null);
+        setShowTranslateButton(true);
+    };
     return (
         <Link href={`/Pages/Post/${original?._id}`}
             className="bg-white/40 dark:bg-white/5 backdrop-blur-md 
@@ -57,6 +96,35 @@ const SharedPost = memo(({
                 hashtags={original?.Hashtags}
                 italic={true}
             />
+
+            {/* Translation Widget */}
+            <AnimatePresence>
+                {showTranslateButton && !showOriginal && (
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleTranslate}
+                        className="text-[9px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 w-fit flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 transition-all"
+                    >
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                        {loading ? "Processing..." : "Translate Source"}
+                    </motion.button>
+                )}
+                {translated && showOriginal && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
+                        className="p-3 rounded-xl bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 space-y-2"
+                    >
+                        <div className="flex justify-between items-center text-[7px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-white/30">
+                            <span>Relayed Translation</span>
+                            <button onClick={handleShowOriginal} className="hover:text-indigo-600 dark:hover:text-white transition-colors border-b border-transparent hover:border-current pb-0.5">Show Original</button>
+                        </div>
+                        <div className="text-xs text-gray-700 dark:text-white/80 leading-relaxed italic">
+                            <RenderPostText text={translated} />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {(original?.media?.length > 0 || original?.Photos?.length > 0) && (
                 <PostMedia media={original?.media} photos={original?.Photos} setImageView={setImageView} />

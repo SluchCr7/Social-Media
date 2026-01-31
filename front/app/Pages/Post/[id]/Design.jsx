@@ -46,6 +46,37 @@ const DesignPostSelect = memo(({
   canComment
 }) => {
   const { t } = useTranslation();
+  const { translate, loading, language } = useTranslate();
+  const [translated, setTranslated] = useState(null);
+  const [showTranslateButton, setShowTranslateButton] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
+
+  React.useEffect(() => {
+    import('franc').then(({ franc }) => {
+      import('@/app/utils/Data').then(({ iso6391Map }) => {
+        if (!post?.text || !language) return;
+        if (post.text.length < 3) return setShowTranslateButton(false);
+        const langCode3 = franc(post.text, { minLength: 3 });
+        if (langCode3 === 'und') return setShowTranslateButton(false);
+        const textLang = iso6391Map[langCode3] || 'en';
+        setShowTranslateButton(textLang !== language);
+      });
+    });
+  }, [post?.text, language]);
+
+  const handleTranslate = async () => {
+    if (!post?.text || !language) return;
+    const result = await translate(post.text, language);
+    setTranslated(result);
+    setShowOriginal(true);
+    setShowTranslateButton(false);
+  };
+
+  const handleShowOriginal = () => {
+    setShowOriginal(false);
+    setTranslated(null);
+    setShowTranslateButton(true);
+  };
 
   return (
     <div className="relative w-full min-h-screen py-10 px-4 sm:px-8">
@@ -147,6 +178,35 @@ const DesignPostSelect = memo(({
 
                 <PostLinks links={post?.links} />
               </div>
+
+              {/* Translation Widget */}
+              <AnimatePresence>
+                {showTranslateButton && !showOriginal && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleTranslate}
+                    className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 w-fit flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 transition-all"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                    {loading ? (t("Processing...") || "Processing...") : (t("Translate Post") || "Translate Post")}
+                  </motion.button>
+                )}
+                {translated && showOriginal && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
+                    className="p-4 md:p-6 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 space-y-3"
+                  >
+                    <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-white/30">
+                      <span>Translated Output</span>
+                      <button onClick={handleShowOriginal} className="hover:text-indigo-600 dark:hover:text-white transition-colors border-b border-transparent hover:border-current pb-0.5">Show Original</button>
+                    </div>
+                    <div className="text-sm md:text-base text-gray-700 dark:text-white/80 leading-relaxed italic">
+                      <RenderPostText text={translated} />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {post?.Hashtags?.length > 0 && (
                 <div className="pt-4">

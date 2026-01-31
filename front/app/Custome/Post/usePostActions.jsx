@@ -76,13 +76,13 @@ export const usePostActions = ({ user, setPosts, setIsLoading }) => {
     try {
       const res = await api.put(`/post/commentsOff/${postId}`, {});
       if (res.data?.message) showToast(res.data.message, 'success');
-      setPosts((prev) =>
-        prev.map((p) => (p._id === postId ? { ...p, isCommentOff: !p.isCommentOff } : p))
-      );
+      if (res.data?.post) {
+        updatePostInState(res.data.post);
+      }
     } catch (err) {
       console.error("Failed to toggle comments:", err);
     }
-  }, [setPosts, showToast]);
+  }, [updatePostInState, showToast]);
 
   const copyPostLink = useCallback((postId) => {
     if (typeof window === 'undefined') return;

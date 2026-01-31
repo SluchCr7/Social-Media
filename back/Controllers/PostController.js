@@ -575,7 +575,9 @@ const makeCommentsOff = asyncHandler(async (req, res) => {
     ? "Comments are now off for this post."
     : "Comments are now on for this post";
 
-  res.status(200).json({ message });
+  const updatedPost = await Post.findById(req.params.id).populate(postPopulate);
+
+  res.status(200).json({ message, post: updatedPost });
 });
 
 const viewPost = asyncHandler(async (req, res) => {
