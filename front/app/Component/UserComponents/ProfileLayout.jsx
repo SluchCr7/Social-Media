@@ -21,6 +21,7 @@ import HighlightViewerModal from '../HighlightView'; // جلب مُكون الع
 import AddHighlightMenu from '../AddandUpdateMenus/AddHighlight'; // جلب مُكون الإضافة 
 import StickyProfileBar from "./StickyProfileBar"
 import AdultContentWarning from "../AdultAlert"
+import { useUser } from "@/app/Context/UserContext"
 
 
 const ProfileLayout = ({
