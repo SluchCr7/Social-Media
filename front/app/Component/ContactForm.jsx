@@ -37,12 +37,12 @@ const ContactModal = memo(({ show, setShow, sent, setSent }) => {
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="relative w-full max-w-md bg-[#111827] text-white rounded-2xl border border-white/10 shadow-2xl p-6"
+          className="relative w-full max-w-md bg-white dark:bg-[#111827] text-gray-900 dark:text-white rounded-2xl border border-gray-200 dark:border-white/10 shadow-2xl p-6"
         >
           {/* Close Button */}
           <button
             onClick={() => setShow(false)}
-            className="absolute top-3 right-3 text-gray-400 hover:text-white transition"
+            className="absolute top-3 right-3 text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
           >
             <FiX size={22} />
           </button>
@@ -54,7 +54,7 @@ const ContactModal = memo(({ show, setShow, sent, setSent }) => {
             </div>
             <div>
               <h2 className="text-xl font-bold">{t('Contact Support')}</h2>
-              <p className="text-gray-400 text-sm">{t('We’re here to help you 24/7')}</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">{t('We’re here to help you 24/7')}</p>
             </div>
           </div>
 
@@ -76,7 +76,7 @@ const ContactModal = memo(({ show, setShow, sent, setSent }) => {
                 placeholder={t('Your Email')}
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="p-3 rounded-lg bg-[#1f2937] border border-white/10 text-sm placeholder-gray-400 focus:ring-2 focus:ring-[#fbbf24]"
+                className="p-3 rounded-lg bg-gray-50 dark:bg-[#1f2937] border border-gray-200 dark:border-white/10 text-sm  text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-[#fbbf24]"
                 required
               />
               <input
@@ -84,7 +84,7 @@ const ContactModal = memo(({ show, setShow, sent, setSent }) => {
                 placeholder={t('Subject')}
                 value={form.subject}
                 onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                className="p-3 rounded-lg bg-[#1f2937] border border-white/10 text-sm placeholder-gray-400 focus:ring-2 focus:ring-[#fbbf24]"
+                className="p-3 rounded-lg bg-gray-50 dark:bg-[#1f2937] border border-gray-200 dark:border-white/10 text-sm  text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-[#fbbf24]"
                 required
               />
               <textarea
@@ -92,7 +92,7 @@ const ContactModal = memo(({ show, setShow, sent, setSent }) => {
                 rows="4"
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
-                className="p-3 rounded-lg bg-[#1f2937] border border-white/10 text-sm placeholder-gray-400 focus:ring-2 focus:ring-[#fbbf24] resize-none"
+                className="p-3 rounded-lg bg-gray-50 dark:bg-[#1f2937] border border-gray-200 dark:border-white/10 text-sm  text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-[#fbbf24] resize-none"
                 required
               />
 

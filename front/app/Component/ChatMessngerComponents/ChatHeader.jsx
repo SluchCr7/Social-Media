@@ -24,14 +24,14 @@ const ChatHeader = ({ onBack }) => {
         {onBack && (
           <button
             onClick={onBack}
-            className="md:hidden mr-2 p-2 rounded-full hover:bg-white/10 text-white/60 transition-colors"
+            className="md:hidden mr-2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-white/60 transition-colors"
           >
             <FiX size={20} />
           </button>
         )}
 
         <div className="relative cursor-pointer group">
-          <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white/10 group-hover:ring-indigo-500/50 transition-all">
+          <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-gray-200 dark:ring-white/10 group-hover:ring-indigo-500/50 transition-all">
             <Image
               src={selectedUser?.profilePhoto?.url || '/placeholder.png'}
               alt="Profile"
@@ -46,10 +46,10 @@ const ChatHeader = ({ onBack }) => {
         </div>
 
         <div className="flex flex-col">
-          <h3 className="text-sm font-semibold text-white tracking-wide">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white tracking-wide">
             {selectedUser?.username || "Unknown"}
           </h3>
-          <span className={`text-[10px] font-medium tracking-wider uppercase ${isOnline ? 'text-emerald-400' : 'text-white/30'}`}>
+          <span className={`text-[10px] font-medium tracking-wider uppercase ${isOnline ? 'text-emerald-500 dark:text-emerald-400' : 'text-gray-400 dark:text-white/30'}`}>
             {isOnline ? 'Active Now' : 'Offline'}
           </span>
         </div>
@@ -57,21 +57,21 @@ const ChatHeader = ({ onBack }) => {
 
       {/* Actions */}
       <div className="flex items-center gap-1 sm:gap-2">
-        <button className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all hidden sm:block">
+        <button className="p-2 rounded-xl text-gray-400 dark:text-white/40 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-all hidden sm:block">
           <IoCall size={18} />
         </button>
-        <button className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all hidden sm:block">
+        <button className="p-2 rounded-xl text-gray-400 dark:text-white/40 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-all hidden sm:block">
           <IoVideocam size={18} />
         </button>
-        <div className="w-px h-6 bg-white/10 mx-1 hidden sm:block" />
+        <div className="w-px h-6 bg-gray-200 dark:bg-white/10 mx-1 hidden sm:block" />
 
-        <button className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all">
+        <button className="p-2 rounded-xl text-gray-400 dark:text-white/40 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-all">
           <FiMoreVertical size={18} />
         </button>
 
         <button
           onClick={() => setSelectedUser(null)}
-          className="p-2 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all md:flex hidden"
+          className="p-2 rounded-xl text-gray-400 dark:text-white/40 hover:text-red-500 hover:bg-red-500/10 transition-all md:flex hidden"
           title="Close"
         >
           <FiX size={20} />

@@ -28,9 +28,9 @@ const ReceiverMessage = ({ message, user }) => {
 
         {/* Reply Indicator (If receiver is replying to someone) - Less common to track nicely without complex logic but good for consistency */}
         {message.replyTo && (
-          <div className="ml-12 mb-1 flex items-center justify-start gap-2 opacity-50 text-[10px] text-white">
+          <div className="ml-12 mb-1 flex items-center justify-start gap-2 opacity-50 text-[10px] text-gray-500 dark:text-white">
             <BsArrowReturnLeft className="rotate-180 -scale-x-100" />
-            <span className="bg-white/10 px-2 py-1 rounded max-w-[150px] truncate border-l-2 border-white/30">
+            <span className="bg-gray-200 dark:bg-white/10 px-2 py-1 rounded max-w-[150px] truncate border-l-2 border-gray-300 dark:border-white/30">
               Replying to: {message.replyTo.text || 'Attachment'}
             </span>
           </div>
@@ -42,9 +42,9 @@ const ReceiverMessage = ({ message, user }) => {
             <div
               className={`
                         relative px-4 py-3 
-                        bg-[#1e1e1e] text-white/90
+                        bg-white border border-gray-200 dark:bg-[#1e1e1e] text-gray-900 dark:text-white/90
                         rounded-[1.2rem] rounded-tl-none 
-                        border border-white/10
+                        dark:border-white/10
                     `}
             >
               {/* Images Grid */}
@@ -58,7 +58,7 @@ const ReceiverMessage = ({ message, user }) => {
                       width={200}
                       height={200}
                       className={`
-                                        object-cover rounded-lg bg-white/5
+                                        object-cover rounded-lg bg-gray-100 dark:bg-white/5
                                         ${message.Photos.length === 1 ? 'max-w-full max-h-[200px] w-auto h-auto' : 'w-full h-24'}
                                     `}
                     />
@@ -84,7 +84,7 @@ const ReceiverMessage = ({ message, user }) => {
 
           {/* Avatar */}
           <div className="flex-shrink-0">
-            <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 bg-white/5">
+            <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5">
               <Image
                 src={user?.profilePhoto?.url || '/default.jpg'}
                 alt={user?.username}
@@ -98,7 +98,7 @@ const ReceiverMessage = ({ message, user }) => {
 
         {/* Metadata & Actions */}
         <div className="flex items-center gap-2 ml-12 mt-1 flex-row-reverse self-start">
-          <span className="text-[9px] font-bold text-white/20 tracking-wider">
+          <span className="text-[9px] font-bold text-gray-400 dark:text-white/20 tracking-wider">
             {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
 
@@ -109,18 +109,18 @@ const ReceiverMessage = ({ message, user }) => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="flex items-center gap-1 bg-[#2a2a2a] p-1 rounded-lg border border-white/5 shadow-xl mr-2"
+                className="flex items-center gap-1 bg-white dark:bg-[#2a2a2a] p-1 rounded-lg border border-gray-200 dark:border-white/5 shadow-xl mr-2"
               >
-                <button onClick={() => toggleLikeMessage(message._id)} className="p-1.5 hover:bg-white/10 rounded-md text-white/60 hover:text-pink-500 transition-colors">
+                <button onClick={() => toggleLikeMessage(message._id)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md text-gray-500 dark:text-white/60 hover:text-pink-500 transition-colors">
                   {isLiked ? <AiFillLike size={12} /> : <AiOutlineLike size={12} />}
                 </button>
-                <button onClick={() => setReplyingTo(message)} className="p-1.5 hover:bg-white/10 rounded-md text-white/60 hover:text-indigo-400 transition-colors">
+                <button onClick={() => setReplyingTo(message)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md text-gray-500 dark:text-white/60 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
                   <BsReply size={14} />
                 </button>
-                <button onClick={() => copyMessageText(message.text || '')} className="p-1.5 hover:bg-white/10 rounded-md text-white/60 hover:text-white transition-colors">
+                <button onClick={() => copyMessageText(message.text || '')} className="p-1.5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition-colors">
                   <BsCopy size={12} />
                 </button>
-                <button onClick={() => deleteForMe(message._id)} className="p-1.5 hover:bg-white/10 rounded-md text-white/60 hover:text-amber-500 transition-colors">
+                <button onClick={() => deleteForMe(message._id)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md text-gray-500 dark:text-white/60 hover:text-amber-500 transition-colors">
                   <BsTrash size={12} />
                 </button>
               </motion.div>

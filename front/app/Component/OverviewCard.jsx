@@ -10,9 +10,9 @@ const OverviewCard = ({ title, value, formatNumber, children }) => (
     className="
       relative overflow-hidden
       p-6 rounded-[2.5rem]
-      bg-white/[0.03] dark:bg-black/40
+      bg-white dark:bg-black/40
       backdrop-blur-3xl
-      border border-white/10 dark:border-white/5
+      border border-gray-200 dark:border-white/5
       shadow-[0_20px_50px_rgba(0,0,0,0.3)]
       hover:shadow-indigo-500/10
       transition-all duration-500

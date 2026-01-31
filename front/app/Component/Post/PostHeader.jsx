@@ -25,7 +25,7 @@ const PostHeader = memo(({ post, user, isLogin, showMenu, setShowMenu, isCommuni
       <div className="flex items-center gap-4">
         {/* User Avatar - Professional Scale */}
         <UserHoverCard userSelected={owner}>
-          <Link href={userProfileLink} className="relative w-12 h-12 rounded-2xl overflow-hidden border border-white/10 shrink-0 group">
+          <Link href={userProfileLink} className="relative w-12 h-12 rounded-2xl overflow-hidden border border-gray-100 dark:border-white/10 shrink-0 group">
             <img
               src={owner?.profilePhoto?.url || '/default-profile.png'}
               alt={owner?.username}
@@ -40,7 +40,7 @@ const PostHeader = memo(({ post, user, isLogin, showMenu, setShowMenu, isCommuni
             <UserHoverCard userSelected={owner}>
               <Link
                 href={userProfileLink}
-                className="text-white font-black text-sm tracking-tight hover:text-indigo-400 transition-colors"
+                className="text-gray-900 dark:text-white font-black text-sm tracking-tight hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
               >
                 {owner?.username || 'Phantom'}
               </Link>
@@ -48,16 +48,16 @@ const PostHeader = memo(({ post, user, isLogin, showMenu, setShowMenu, isCommuni
             {owner?.isAccountWithPremiumVerify && (
               <HiBadgeCheck className="text-indigo-500 text-lg" title="Verified Asset" />
             )}
-            <span className="text-[10px] text-white/30 font-black uppercase tracking-widest ml-1">
+            <span className="text-[10px] text-gray-400 dark:text-white/30 font-black uppercase tracking-widest ml-1">
               • {formatRelativeTime(post?.createdAt)}
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-white/40 truncate max-w-[120px]">@{owner?.profileName || owner?.username}</span>
+            <span className="text-[10px] font-bold text-gray-500 dark:text-white/40 truncate max-w-[120px]">@{owner?.profileName || owner?.username}</span>
             {isCommunityPost && (
               <>
-                <span className="w-1 h-1 bg-white/20 rounded-full" />
-                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">In Community</span>
+                <span className="w-1 h-1 bg-gray-300 dark:bg-white/20 rounded-full" />
+                <span className="text-[10px] font-black text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">In Community</span>
               </>
             )}
           </div>
@@ -70,7 +70,7 @@ const PostHeader = memo(({ post, user, isLogin, showMenu, setShowMenu, isCommuni
           <button
             ref={triggerRef}
             onClick={handleToggleMenu}
-            className="w-10 h-10 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] flex items-center justify-center text-white/40 hover:text-white transition-all border border-white/5"
+            className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-white/[0.03] hover:bg-gray-200 dark:hover:bg-white/[0.08] flex items-center justify-center text-gray-500 dark:text-white/40 hover:text-gray-900 dark:hover:text-white transition-all border border-gray-200 dark:border-white/5"
           >
             <BsThreeDots size={18} />
           </button>

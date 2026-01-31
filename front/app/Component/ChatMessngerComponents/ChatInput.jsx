@@ -54,10 +54,10 @@ const ChatInput = () => {
   return (
     <div className={`
       relative w-full
-      bg-white/[0.03] backdrop-blur-xl 
-      border border-white/5 
+      bg-white dark:bg-white/[0.03] backdrop-blur-xl 
+      border border-gray-200 dark:border-white/5 
       rounded-2xl transition-all duration-300
-      ${isFocused ? 'ring-1 ring-indigo-500/30 bg-black/40' : 'hover:bg-white/[0.05]'}
+      ${isFocused ? 'ring-1 ring-indigo-500/30 bg-white dark:bg-black/40' : 'hover:bg-gray-50 dark:hover:bg-white/[0.05]'}
     `}>
 
       {/* 💬 شريط الرد (Reply Preview) - Floating on top */}
@@ -75,21 +75,21 @@ const ChatInput = () => {
                   Reply to {replyingTo.sender?.username || 'user'}
                 </span>
                 {replyingTo.text ? (
-                  <p className="text-white/60 truncate">
+                  <p className="text-gray-600 dark:text-white/60 truncate">
                     {replyingTo.text}
                   </p>
                 ) : replyingTo.Photos?.length > 0 ? (
-                  <div className="flex items-center gap-1.5 text-white/50 italic">
+                  <div className="flex items-center gap-1.5 text-gray-500 dark:text-white/50 italic">
                     <IoImage size={10} />
                     <span>Image attachment</span>
                   </div>
                 ) : (
-                  <p className="text-white/30 italic">No content</p>
+                  <p className="text-gray-400 dark:text-white/30 italic">No content</p>
                 )}
               </div>
               <button
                 onClick={() => setReplyingTo(null)}
-                className="p-1 hover:bg-white/10 rounded-full transition-colors text-white/60 hover:text-white"
+                className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full transition-colors text-gray-400 dark:text-white/60 hover:text-gray-900 dark:hover:text-white"
               >
                 <IoClose size={16} />
               </button>
@@ -106,7 +106,7 @@ const ChatInput = () => {
             {images.map((img, idx) => (
               <div
                 key={idx}
-                className="relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-white/10 group"
+                className="relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 group"
               >
                 <Image
                   width={100}
@@ -127,7 +127,7 @@ const ChatInput = () => {
         )}
 
         {/* 📝 أدوات الإدخال */}
-        <div className="flex items-end gap-2 text-white/60">
+        <div className="flex items-end gap-2 text-gray-500 dark:text-white/60">
 
           {/* أدوات المرفقات */}
           <div className="flex items-center gap-1 pb-1">
@@ -141,18 +141,18 @@ const ChatInput = () => {
             />
             <button
               onClick={() => fileInputRef.current.click()}
-              className="p-2 rounded-xl hover:bg-white/10 text-white/40 hover:text-indigo-400 transition-colors"
+              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 dark:text-white/40 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
               title="Add Image"
             >
               <IoImage size={20} />
             </button>
             <button
-              className="hidden sm:block p-2 rounded-xl hover:bg-white/10 text-white/40 hover:text-amber-400 transition-colors"
+              className="hidden sm:block p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 dark:text-white/40 hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
             >
               <IoHappyOutline size={20} />
             </button>
             <button
-              className="hidden sm:block p-2 rounded-xl hover:bg-white/10 text-white/40 hover:text-emerald-400 transition-colors"
+              className="hidden sm:block p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 dark:text-white/40 hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
             >
               <IoMic size={20} />
             </button>
@@ -168,7 +168,7 @@ const ChatInput = () => {
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder="Type a message..."
-              className="w-full bg-transparent border-none text-white placeholder:text-white/20 text-sm font-medium focus:ring-0 px-2 py-2"
+              className="w-full bg-transparent border-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/20 text-sm font-medium focus:ring-0 px-2 py-2"
             />
           </div>
 
@@ -179,7 +179,7 @@ const ChatInput = () => {
             className={`
               p-2.5 rounded-xl transition-all duration-300
               ${(!message.trim() && images.length === 0)
-                ? 'bg-white/5 text-white/20 cursor-not-allowed'
+                ? 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/20 cursor-not-allowed'
                 : 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-500 active:scale-95'
               }
             `}

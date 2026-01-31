@@ -67,9 +67,11 @@ const AddEventModal = React.memo(({
             <h3 className="text-2xl font-black text-gray-900 dark:text-white">
               {t("Create Event")}
             </h3>
-            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 mt-1">
-              {selectedDate.format("DD MMMM YYYY")}
-            </div>
+            {selectedDate && (
+              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 mt-1">
+                {selectedDate.format("DD MMMM YYYY")}
+              </div>
+            )}
           </div>
           <button
             onClick={() => setSelectedDate(null)}

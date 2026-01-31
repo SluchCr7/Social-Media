@@ -91,4 +91,4 @@ const ShowAllEvents = ({ setSelectedEvent, showDayEvents, setShowDayEvents, type
   );
 };
 
-export default React.memo(ShowAllEvents);
+export default ShowAllEvents;

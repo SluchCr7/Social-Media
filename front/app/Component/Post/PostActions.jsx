@@ -12,11 +12,11 @@ const ActionButton = React.memo(({ onClick, icon: Icon, label, active, color, ac
     onClick={onClick}
     className="group flex items-center gap-2 px-2 py-1.5 rounded-xl transition-all"
   >
-    <div className={`p-2 rounded-lg transition-all ${active ? activeColor : 'bg-white/5 text-white/40 group-hover:bg-white/10 group-hover:text-white'}`}>
+    <div className={`p-2 rounded-lg transition-all ${active ? activeColor : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/40 group-hover:bg-gray-200 dark:group-hover:bg-white/10 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
       <Icon size={18} fill={active ? "currentColor" : "none"} strokeWidth={active ? 2.5 : 2} />
     </div>
     {label !== undefined && (
-      <span className={`text-[11px] font-black uppercase tracking-widest ${active ? color : 'text-white/40 group-hover:text-white'}`}>
+      <span className={`text-[11px] font-black uppercase tracking-widest ${active ? color : 'text-gray-400 dark:text-white/40 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
         {label}
       </span>
     )}
@@ -88,9 +88,9 @@ const PostActions = React.memo(({ post, user, likePost, hahaPost, sharePost, sav
 
         {/* Views (Owner Only) */}
         {userId === post?.owner?._id && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.02] border border-white/5">
-            <Eye size={14} className="text-white/20" />
-            <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{post?.views?.length || 0}</span>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-100 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5">
+            <Eye size={14} className="text-gray-400 dark:text-white/20" />
+            <span className="text-[10px] font-black text-gray-400 dark:text-white/40 uppercase tracking-widest">{post?.views?.length || 0}</span>
           </div>
         )}
       </div>

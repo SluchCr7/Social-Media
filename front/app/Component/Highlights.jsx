@@ -9,7 +9,7 @@ export default function HighlightsBar({
   onAddHighlight,
   isOwner = false
 }) {
-  const {setSelectedHighlight} = useHighlights()
+  const { setSelectedHighlight } = useHighlights()
   return (
     <div className="w-full flex flex-col items-center gap-3 py-4">
       <div className="flex w-full overflow-x-auto scrollbar-hide gap-4 px-3">
@@ -21,8 +21,8 @@ export default function HighlightsBar({
             className="
               flex-shrink-0 w-20 h-20 rounded-full border-2 border-dashed 
               border-gray-400 dark:border-gray-600 flex flex-col items-center 
-              justify-center text-gray-500 dark:text-gray-400 cursor-pointer 
-              hover:bg-lightMode-menu dark:hover:bg-darkMode-bg transition-colors
+              justify-center text-gray-400 dark:text-gray-500 cursor-pointer 
+              hover:bg-gray-100 dark:hover:bg-white/5 hover:border-gray-400 dark:hover:border-gray-400 transition-all
             "
           >
             <FaPlus size={18} />
@@ -41,11 +41,11 @@ export default function HighlightsBar({
           >
             <div
               className="
-                w-20 h-20 rounded-full border-2 border-lightMode-text dark:border-darkMode-text 
-                p-[3px] bg-gradient-to-tr from-pink-500 to-yellow-400
+                w-20 h-20 rounded-full border-2 border-white dark:border-black 
+                p-[3px] bg-gradient-to-tr from-pink-500 to-yellow-400 shadow-md
               "
             >
-              <div className="w-full h-full rounded-full overflow-hidden bg-lightMode-bg dark:bg-darkMode-bg">
+              <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-black border-2 border-white dark:border-black">
                 <Image
                   src={highlight.coverImage || '/placeholder.jpg'}
                   alt={highlight.title}
@@ -55,7 +55,7 @@ export default function HighlightsBar({
                 />
               </div>
             </div>
-            <p className="text-sm mt-1 text-lightMode-text2 dark:text-darkMode-text2 text-center truncate w-20">
+            <p className="text-xs font-semibold mt-2 text-gray-700 dark:text-gray-300 text-center truncate w-20">
               {highlight.title}
             </p>
           </motion.div>

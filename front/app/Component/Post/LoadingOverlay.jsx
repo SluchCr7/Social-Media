@@ -33,7 +33,7 @@ const LoadingOverlay = memo(function LoadingOverlay({ isLoading, progress = null
         <motion.div
           key="overlay"
           className="fixed inset-0 z-50 flex flex-col items-center justify-center 
-                     bg-gradient-to-br from-black/70 via-gray-900/60 to-black/70 
+                     bg-gradient-to-br from-white/80 via-gray-100/90 to-white/80 dark:from-black/70 dark:via-gray-900/60 dark:to-black/70 
                      backdrop-blur-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -50,7 +50,7 @@ const LoadingOverlay = memo(function LoadingOverlay({ isLoading, progress = null
                             border-l-transparent border-r-transparent 
                             shadow-md shadow-blue-400/20" />
             {progress !== null && (
-              <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">
+              <div className="absolute inset-0 flex items-center justify-center text-gray-900 dark:text-white font-bold text-lg">
                 {Math.floor(progress)}%
               </div>
             )}
@@ -63,7 +63,7 @@ const LoadingOverlay = memo(function LoadingOverlay({ isLoading, progress = null
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -10, opacity: 0 }}
             transition={{ duration: 0.4 }}
-            className="text-white font-semibold text-lg text-center"
+            className="text-gray-900 dark:text-white font-semibold text-lg text-center"
           >
             {progress !== null
               ? `${t('Uploading...')} ${Math.floor(progress)}%`

@@ -52,13 +52,13 @@ const Chat = ({ onBack }) => {
 
       {/* Header */}
       <div className="flex-none p-4 pb-0 z-20">
-        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-2xl overflow-hidden shadow-lg">
+        <div className="bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden shadow-lg">
           <ChatHeader onBack={onBack} />
         </div>
       </div>
 
       {/* Messages Feed */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+      <div className="flex-1 overflow-y-auto px-4 py-6 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-white/10 scrollbar-track-transparent">
         <div className="space-y-8 min-h-full flex flex-col justify-end">
           {isMessagesLoading ? (
             <div className="flex flex-col gap-6 p-4">
@@ -67,12 +67,12 @@ const Chat = ({ onBack }) => {
               ))}
             </div>
           ) : messages?.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-white/20 select-none pb-20">
-              <div className="w-24 h-24 rounded-full border border-white/5 bg-white/[0.02] flex items-center justify-center mb-6 relative">
-                <div className="absolute inset-0 rounded-full border border-dashed border-white/10 animate-[spin_10s_linear_infinite]" />
+            <div className="flex-1 flex flex-col items-center justify-center text-gray-400 dark:text-white/20 select-none pb-20">
+              <div className="w-24 h-24 rounded-full border border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02] flex items-center justify-center mb-6 relative">
+                <div className="absolute inset-0 rounded-full border border-dashed border-gray-300 dark:border-white/10 animate-[spin_10s_linear_infinite]" />
                 <span className="text-4xl">👋</span>
               </div>
-              <h3 className="text-lg font-medium text-white/40 mb-2">Say Hello</h3>
+              <h3 className="text-lg font-medium text-gray-500 dark:text-white/40 mb-2">Say Hello</h3>
               <p className="text-xs uppercase tracking-widest font-bold opacity-50">Start encrypted thread</p>
             </div>
           ) : (
@@ -81,8 +81,8 @@ const Chat = ({ onBack }) => {
                 <div key={dateKey} className="space-y-6">
                   {/* Date Divider */}
                   <div className="flex items-center justify-center">
-                    <div className="px-4 py-1 rounded-full bg-white/5 border border-white/5 backdrop-blur-sm">
-                      <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                    <div className="px-4 py-1 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 backdrop-blur-sm">
+                      <span className="text-[10px] font-bold text-gray-500 dark:text-white/40 uppercase tracking-widest">
                         {getDisplayDate(dateKey)}
                       </span>
                     </div>

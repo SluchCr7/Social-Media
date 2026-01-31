@@ -34,7 +34,7 @@ const Login = () => {
   };
 
   return (
-    <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-[#050505] overflow-hidden">
+    <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-gray-50 dark:bg-[#050505] overflow-hidden transition-colors duration-300">
       {/* Dynamic Background Elements */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/20 rounded-full blur-[120px]" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-purple-600/20 rounded-full blur-[120px]" />
@@ -44,7 +44,7 @@ const Login = () => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="relative z-10 w-full max-w-5xl grid md:grid-cols-2 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden min-h-[600px]"
+        className="relative z-10 w-full max-w-5xl grid md:grid-cols-2 bg-white dark:bg-white/5 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden min-h-[600px]"
       >
         {/* Left Side: Visual/Branding */}
         <div className="hidden md:flex flex-col items-center justify-center relative p-12 bg-gradient-to-br from-indigo-900/50 to-purple-900/50">
@@ -66,18 +66,18 @@ const Login = () => {
         </div>
 
         {/* Right Side: Form */}
-        <div className="flex flex-col justify-center p-10 md:p-14 bg-black/20">
+        <div className="flex flex-col justify-center p-10 md:p-14 bg-white dark:bg-black/20">
           <div className="md:hidden text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-2">Login</h2>
-            <p className="text-gray-400">Welcome back to the community</p>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Login</h2>
+            <p className="text-gray-500 dark:text-gray-400">Welcome back to the community</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto w-full">
             {/* Email Field */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Email</label>
+              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Email</label>
               <div className="relative group">
-                <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-indigo-400 transition-colors" size={20} />
+                <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 group-focus-within:text-indigo-500 dark:group-focus-within:text-indigo-400 transition-colors" size={20} />
                 <input
                   type="email"
                   name="email"
@@ -85,16 +85,16 @@ const Login = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:bg-white/10 focus:border-indigo-500/50 transition-all font-medium"
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-white/10 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:focus:border-indigo-500/50 transition-all font-medium"
                 />
               </div>
             </div>
 
             {/* Password Field */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Password</label>
+              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">Password</label>
               <div className="relative group">
-                <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-indigo-400 transition-colors" size={20} />
+                <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 group-focus-within:text-indigo-500 dark:group-focus-within:text-indigo-400 transition-colors" size={20} />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
@@ -102,18 +102,18 @@ const Login = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="w-full pl-12 pr-12 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:bg-white/10 focus:border-indigo-500/50 transition-all font-medium"
+                  className="w-full pl-12 pr-12 py-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-white/10 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:focus:border-indigo-500/50 transition-all font-medium"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-white transition-colors"
                 >
                   {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
                 </button>
               </div>
               <div className="flex justify-end">
-                <Link href="/Pages/Forgot" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-medium">
+                <Link href="/Pages/Forgot" className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors font-medium">
                   Forgot Password?
                 </Link>
               </div>
@@ -149,15 +149,15 @@ const Login = () => {
 
             {/* Divider */}
             <div className="relative flex items-center py-2">
-              <div className="flex-grow border-t border-white/10"></div>
-              <span className="flex-shrink-0 mx-4 text-gray-500 text-xs uppercase tracking-widest">Or Continue With</span>
-              <div className="flex-grow border-t border-white/10"></div>
+              <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
+              <span className="flex-shrink-0 mx-4 text-gray-400 dark:text-gray-500 text-xs uppercase tracking-widest">Or Continue With</span>
+              <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
             </div>
 
             {/* Social Login */}
             <button
               type="button"
-              className="w-full py-3.5 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-white font-medium group"
+              className="w-full py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-gray-700 dark:text-white font-medium group"
             >
               <FcGoogle className="text-xl group-hover:scale-110 transition-transform" />
               <span>Google Account</span>
@@ -166,7 +166,7 @@ const Login = () => {
             {/* Register Link */}
             <p className="text-center text-gray-400 text-sm mt-6">
               New here?{' '}
-              <Link href="/Pages/Register" className="text-indigo-400 hover:text-indigo-300 font-bold transition-colors">
+              <Link href="/Pages/Register" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-bold transition-colors">
                 Create an account
               </Link>
             </p>

@@ -25,8 +25,8 @@ const MenuOption = ({ icon, text, action, className, loading }) => (
     whileTap={{ scale: 0.98 }}
     onClick={action}
     disabled={loading}
-    className={`flex items-center gap-4 px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-left transition-all rounded-xl border border-transparent hover:border-white/5
-      ${className || 'text-white/60 hover:text-white'}
+    className={`flex items-center gap-4 px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-left transition-all rounded-xl border border-transparent hover:bg-gray-100 dark:hover:bg-white/5
+      ${className || 'text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white'}
       ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
   >
     <span className="text-xl opacity-40">{icon}</span>
@@ -109,7 +109,7 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
         await deletePost(post?._id);
         setLoadingBtn(false);
       }),
-      className: 'text-red-500 hover:bg-red-500/10 hover:border-red-500/20',
+      className: 'text-red-500 hover:bg-red-500/10 border-red-500/10 hover:border-red-500/20',
     },
   ], [userData, post, t]);
 
@@ -144,7 +144,7 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
         await blockOrUnblockUser(post?.owner?._id);
         setLoadingBtn(false);
       }),
-      className: 'text-red-500 hover:bg-red-500/10 hover:border-red-500/20',
+      className: 'text-red-500 hover:bg-red-500/10 border-red-500/10 hover:border-red-500/20',
     }
   ], [user, post, t]);
 
@@ -170,7 +170,7 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
               left: coords.left,
               width: '280px',
             }}
-            className="z-[1001] bg-[#0A0A0ACC] backdrop-blur-3xl border border-white/10 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden p-3"
+            className="z-[1001] bg-white/90 dark:bg-[#0A0A0ACC] backdrop-blur-3xl border border-gray-200 dark:border-white/10 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden p-3"
           >
             <div className="flex flex-col gap-1">
               {optionsToShow.map((option, index) => (
@@ -198,20 +198,20 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
       <AnimatePresence>
         {confirmAction && (
           <motion.div
-            className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-[10000] p-4"
+            className="fixed inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-xl flex items-center justify-center z-[10000] p-4"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="bg-[#0A0A0A] rounded-[3rem] p-10 border border-white/10 shadow-2xl max-w-sm w-full text-center"
+              className="bg-white dark:bg-[#0A0A0A] rounded-[3rem] p-10 border border-gray-200 dark:border-white/10 shadow-2xl max-w-sm w-full text-center"
             >
               <div className="w-20 h-20 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
                 <AiOutlineDelete size={40} className="text-red-500" />
               </div>
-              <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">Confirm Termination</h3>
-              <p className="text-white/40 text-sm font-bold leading-relaxed mb-10 px-4">
+              <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-4">Confirm Termination</h3>
+              <p className="text-gray-500 dark:text-white/40 text-sm font-bold leading-relaxed mb-10 px-4">
                 This action will permanently sever the data link. It cannot be recovered once initiated.
               </p>
               <div className="flex flex-col gap-3">
@@ -226,7 +226,7 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
                 </button>
                 <button
                   onClick={() => setConfirmAction(null)}
-                  className="w-full py-4 rounded-2xl bg-white/5 text-white/40 font-black text-xs uppercase tracking-widest hover:text-white transition-all"
+                  className="w-full py-4 rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/40 font-black text-xs uppercase tracking-widest hover:text-gray-900 dark:hover:text-white transition-all"
                 >
                   Abort Action
                 </button>

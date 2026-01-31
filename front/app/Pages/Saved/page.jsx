@@ -17,16 +17,16 @@ import { Disc3, Layers, Film, Grid } from 'lucide-react'
 const EmptyState = React.memo(function EmptyState({ type }) {
   const { t } = useTranslation()
   return (
-    <div className="col-span-full flex flex-col items-center justify-center p-20 rounded-[2rem] bg-white/[0.02] border border-white/5 text-center relative overflow-hidden group">
+    <div className="col-span-full flex flex-col items-center justify-center p-20 rounded-[2rem] bg-white dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 text-center relative overflow-hidden group">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-      <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-white/10 to-white/5 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(255,255,255,0.05)] border border-white/10">
-        <FaBookmark className="text-4xl text-white/20" />
+      <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-gray-100 to-gray-50 dark:from-white/10 dark:to-white/5 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(0,0,0,0.05)] dark:shadow-[0_0_30px_rgba(255,255,255,0.05)] border border-gray-100 dark:border-white/10">
+        <FaBookmark className="text-4xl text-gray-400 dark:text-white/20" />
       </div>
-      <div className="font-black text-2xl mb-2 text-white tracking-tight">{t("Vault Empty")}</div>
+      <div className="font-black text-2xl mb-2 text-gray-900 dark:text-white tracking-tight">{t("Vault Empty")}</div>
       <div className="text-sm text-white/40 mb-8 max-w-sm font-medium tracking-wide">
         {t("Your personal collection is waiting. Save content to build your archive.")}
       </div>
-      <button className="px-8 py-3 rounded-xl bg-white text-black font-bold text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+      <button className="px-8 py-3 rounded-xl bg-gray-900 text-white dark:bg-white dark:text-black font-bold text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl dark:shadow-[0_0_20px_rgba(255,255,255,0.2)]">
         {t("Start Collecting")}
       </button>
     </div>
@@ -105,7 +105,7 @@ export default function SavedPage() {
   if (isLoading) return <SavedPageSkeleton activeTab={active} />
 
   return (
-    <div className="min-h-screen w-full relative bg-[#050505] text-white overflow-hidden">
+    <div className="min-h-screen w-full relative bg-gray-50 dark:bg-[#050505] text-gray-900 dark:text-white overflow-hidden transition-colors duration-300">
       {/* Ambient Backlights */}
       <div className="fixed top-0 left-0 w-[500px] h-[500px] bg-indigo-600/10 blur-[150px] pointer-events-none rounded-full" />
       <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-purple-600/10 blur-[150px] pointer-events-none rounded-full" />
@@ -182,16 +182,16 @@ export default function SavedPage() {
 
 // ✅ Premium Header
 const Header = React.memo(({ t, active, setActive, tabs, query, setQuery }) => (
-  <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8 pb-8 border-b border-white/5">
+  <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8 pb-8 border-b border-gray-200 dark:border-white/5">
     <div className="space-y-4">
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-widest text-indigo-400">
+      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-white/5 border border-indigo-100 dark:border-white/5 text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
         <Layers size={10} />
         Library
       </div>
-      <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-2">
-        Saved <span className="text-white/20">Collection</span>
+      <h1 className="text-4xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white mb-2">
+        Saved <span className="text-gray-400 dark:text-white/20">Collection</span>
       </h1>
-      <p className="text-sm font-medium text-white/40 max-w-md">
+      <p className="text-sm font-medium text-gray-500 dark:text-white/40 max-w-md">
         The archives of your digital journey. Access your favorite resonance, signals, and visuals instantly.
       </p>
     </div>
@@ -200,19 +200,19 @@ const Header = React.memo(({ t, active, setActive, tabs, query, setQuery }) => (
       {/* Search */}
       <div className="relative group w-full md:w-80">
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
-        <div className="relative flex items-center bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3.5 backdrop-blur-sm group-focus-within:bg-black/50 transition">
-          <FaSearch className="text-white/30 mr-3 group-focus-within:text-white transition-colors" />
+        <div className="relative flex items-center bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3.5 backdrop-blur-sm focus-within:ring-2 focus-within:ring-indigo-500/20 group-focus-within:bg-white dark:group-focus-within:bg-black/50 transition">
+          <FaSearch className="text-gray-400 dark:text-white/30 mr-3 group-focus-within:text-indigo-500 dark:group-focus-within:text-white transition-colors" />
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder={t("Filter archives...")}
-            className="bg-transparent border-none outline-none w-full text-sm font-medium placeholder:text-white/20 text-white"
+            className="bg-transparent border-none outline-none w-full text-sm font-medium placeholder:text-gray-400 dark:placeholder:text-white/20 text-gray-900 dark:text-white"
           />
         </div>
       </div>
 
       {/* Custom Tabs */}
-      <div className="flex p-1 bg-white/[0.03] border border-white/5 rounded-xl backdrop-blur-md">
+      <div className="flex p-1 bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/5 rounded-xl backdrop-blur-md">
         {tabs.map(tab => {
           const isActive = active === tab
           return (
@@ -221,13 +221,13 @@ const Header = React.memo(({ t, active, setActive, tabs, query, setQuery }) => (
               onClick={() => setActive(tab)}
               className={`
                             flex-1 px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 relative
-                            ${isActive ? 'text-white' : 'text-white/40 hover:text-white'}
+                            ${isActive ? 'text-indigo-600 dark:text-white' : 'text-gray-500 dark:text-white/40 hover:text-gray-900 dark:hover:text-white'}
                         `}
             >
               {isActive && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute inset-0 bg-white/10 rounded-lg shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]"
+                  className="absolute inset-0 bg-gray-100 dark:bg-white/10 rounded-lg shadow-sm dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]"
                 />
               )}
               <span className="relative z-10 flex items-center justify-center gap-2">
@@ -251,7 +251,7 @@ const MusicTab = React.memo(({ filteredMusic, current, playing, handleMusicActio
   return (
     <div className="space-y-2">
       {/* Table Header */}
-      <div className="grid grid-cols-[1fr_auto] md:grid-cols-[auto_1fr_auto_auto] gap-4 px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-white/30 border-b border-white/5">
+      <div className="grid grid-cols-[1fr_auto] md:grid-cols-[auto_1fr_auto_auto] gap-4 px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-white/30 border-b border-gray-200 dark:border-white/5">
         <span className="hidden md:block">#</span>
         <span>Track</span>
         <span className="hidden md:block text-right">Duration</span>
@@ -270,8 +270,8 @@ const MusicTab = React.memo(({ filteredMusic, current, playing, handleMusicActio
                 group relative grid grid-cols-[1fr_auto] md:grid-cols-[auto_1fr_auto_auto] items-center gap-4 px-4 py-3 
                 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden
                 ${isPlayingThis
-                ? 'bg-neutral-900/80 border-indigo-500/50 shadow-[0_4px_20px_-10px_rgba(99,102,241,0.5)]'
-                : 'bg-transparent border-transparent hover:bg-white/[0.02] hover:border-white/5'}
+                ? 'bg-gray-100 dark:bg-neutral-900/80 border-indigo-500/50 shadow-sm dark:shadow-[0_4px_20px_-10px_rgba(99,102,241,0.5)]'
+                : 'bg-white dark:bg-transparent border-gray-100 dark:border-transparent hover:bg-gray-50 dark:hover:bg-white/[0.02] hover:border-gray-200 dark:hover:border-white/5'}
             `}
             onClick={() => {
               handleMusicAction(track)
@@ -289,7 +289,7 @@ const MusicTab = React.memo(({ filteredMusic, current, playing, handleMusicActio
               />
             )}
 
-            <div className="hidden md:block w-8 text-center text-xs font-bold text-white/20">
+            <div className="hidden md:block w-8 text-center text-xs font-bold text-gray-400 dark:text-white/20">
               {isPlayingThis ? <div className="w-3 h-3 bg-indigo-500 rounded-full animate-pulse mx-auto" /> : index + 1}
             </div>
 
@@ -305,14 +305,14 @@ const MusicTab = React.memo(({ filteredMusic, current, playing, handleMusicActio
                 )}
               </div>
               <div className="flex flex-col min-w-0">
-                <h3 className={`text-sm font-bold truncate ${isPlayingThis ? 'text-white' : 'text-white/90 group-hover:text-white'}`}>
+                <h3 className={`text-sm font-bold truncate ${isPlayingThis ? 'text-indigo-600 dark:text-white' : 'text-gray-900 dark:text-white/90 group-hover:text-indigo-600 dark:group-hover:text-white'}`}>
                   {track.title}
                 </h3>
-                <p className="text-xs text-white/40 truncate">{track.artist}</p>
+                <p className="text-xs text-gray-500 dark:text-white/40 truncate">{track.artist}</p>
               </div>
             </div>
 
-            <div className="hidden md:block text-xs font-medium text-white/30 text-right">
+            <div className="hidden md:block text-xs font-medium text-gray-400 dark:text-white/30 text-right">
               {track.duration || "3:45"}
             </div>
 
@@ -323,8 +323,8 @@ const MusicTab = React.memo(({ filteredMusic, current, playing, handleMusicActio
                   handleMusicAction(track)
                 }}
                 className={`
-                        w-10 h-10 rounded-full flex items-center justify-center transition-all bg-white/5 hover:bg-white text-black
-                        ${isPlayingThis ? 'bg-indigo-500 text-white' : 'text-white group-hover:bg-white group-hover:text-black'}
+                        w-10 h-10 rounded-full flex items-center justify-center transition-all bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white text-gray-900 dark:text-black
+                        ${isPlayingThis ? 'bg-indigo-500 text-white dark:text-white hover:bg-indigo-600' : 'text-gray-900 dark:text-white group-hover:bg-indigo-500 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black'}
                     `}
               >
                 {isPlayingThis ? <FaPause size={12} /> : <FaPlay size={12} className="ml-0.5" />}
@@ -351,7 +351,7 @@ const ReelsTab = React.memo(({ filteredReels, setOpenReel }) => (
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: i * 0.1 }}
-          className="group relative aspect-[9/16] rounded-2xl overflow-hidden bg-white/5 cursor-pointer border border-white/5 hover:border-white/20 transition-all duration-300 shadow-2xl"
+          className="group relative aspect-[9/16] rounded-2xl overflow-hidden bg-white dark:bg-white/5 cursor-pointer border border-gray-200 dark:border-white/5 hover:border-indigo-500/50 dark:hover:border-white/20 transition-all duration-300 shadow-lg dark:shadow-2xl"
           onClick={() => setOpenReel(r)}
         >
           <Image

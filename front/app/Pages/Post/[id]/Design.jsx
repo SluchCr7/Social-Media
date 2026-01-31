@@ -113,7 +113,7 @@ const DesignPostSelect = memo(({
         <motion.article
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[3rem] border border-gray-100 dark:border-white/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] overflow-hidden"
+          className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[3rem] border border-gray-100 dark:border-white/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] overflow-hidden"
         >
           {/* Decorative Header */}
           <div className="p-8 pb-4 flex flex-wrap gap-2">
@@ -143,7 +143,7 @@ const DesignPostSelect = memo(({
             {/* Content Body */}
             <div className="space-y-6">
               {post.text && (
-                <div className="text-2xl md:text-3xl font-medium leading-tight dark:text-white/90 tracking-tight">
+                <div className="text-2xl md:text-3xl font-medium leading-tight text-gray-900 dark:text-white/90 tracking-tight">
                   <RenderPostText
                     text={post.text}
                     mentions={post.mentions}
@@ -267,7 +267,7 @@ const DesignPostSelect = memo(({
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     placeholder={`${t('Contribute to discourse')}...`}
-                    className="w-full bg-transparent text-lg font-medium outline-none placeholder-gray-400 dark:placeholder-gray-600 px-2"
+                    className="w-full bg-transparent text-lg font-medium outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 px-2"
                   />
                 </div>
 
@@ -297,7 +297,7 @@ const DesignPostSelect = memo(({
           {/* Feed of Comments */}
           <div className="space-y-4">
             {post.isCommentOff ? (
-              <div className="py-20 text-center text-gray-400 font-black uppercase text-[10px] tracking-widest bg-white/[0.02] rounded-[3rem] border border-white/5 border-dashed">
+              <div className="py-20 text-center text-gray-400 font-black uppercase text-[10px] tracking-widest bg-gray-50 dark:bg-white/[0.02] rounded-[3rem] border border-gray-100 dark:border-white/5 border-dashed">
                 Discourse Disabled for this Entity
               </div>
             ) : isLoading ? (
