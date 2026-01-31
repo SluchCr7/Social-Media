@@ -5,7 +5,7 @@ import api from "@/app/utils/api";
 import { useFeedback } from "@/app/Context/FeedbackContext";
 import { MESSAGES } from "@/app/utils/messages";
 
-export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, setIsLoading }) => {
+export const usePostManagement = ({ user, setPosts, setUserPosts, setIsLoadingPostCreated, setIsLoading }) => {
   const { showToast } = useFeedback();
 
   /**
@@ -49,7 +49,11 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
         showToast("Great! Your post has been scheduled.", 'success', { id: loadingToast });
       } else {
         showToast(MESSAGES.POST.CREATE_SUCCESS, 'success', { id: loadingToast });
-        setPosts(prev => [newPost, ...prev]);
+        const updater = prev => [newPost, ...(prev || [])];
+        setPosts(updater);
+        if (setUserPosts) {
+          setUserPosts(updater);
+        }
       }
       return newPost;
     } catch (err) {
@@ -58,7 +62,7 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
     } finally {
       setIsLoadingPostCreated(false);
     }
-  }, [user, setIsLoadingPostCreated, setPosts, showToast]);
+  }, [user, setIsLoadingPostCreated, setPosts, setUserPosts, showToast]);
 
   /**
    * Edit an existing post
@@ -95,7 +99,11 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
       const updatedPost = res.data?.post || res.data;
       showToast(MESSAGES.POST.UPDATE_SUCCESS, 'success', { id: loadingToast });
 
-      setPosts(prev => prev.map(p => p._id === id ? updatedPost : p));
+      const updater = (prev) => (prev || []).map(p => p._id === id ? updatedPost : p);
+      setPosts(updater);
+      if (setUserPosts) {
+        setUserPosts(updater);
+      }
       return updatedPost;
     } catch (err) {
       console.error(err);
@@ -103,7 +111,7 @@ export const usePostManagement = ({ user, setPosts, setIsLoadingPostCreated, set
     } finally {
       setIsLoading(false);
     }
-  }, [user, setIsLoading, setPosts, showToast]);
+  }, [user, setIsLoading, setPosts, setUserPosts, showToast]);
 
   return { AddPost, editPost };
 };

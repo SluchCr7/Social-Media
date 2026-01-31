@@ -65,7 +65,7 @@ export const PostContextProvider = ({ children }) => {
    * Fetch posts for a specific user profile
    */
   const fetchUserPosts = useCallback(async (userId, pageNum = 1, limit = 5) => {
-    if (!userId || userIsLoading) return;
+    if (!userId || (pageNum !== 1 && userIsLoading)) return;
 
     setUserIsLoading(true);
     try {
@@ -79,7 +79,7 @@ export const PostContextProvider = ({ children }) => {
     } finally {
       setUserIsLoading(false);
     }
-  }, []);
+  }, [userIsLoading]);
 
   /**
    * Get post by ID
@@ -99,6 +99,7 @@ export const PostContextProvider = ({ children }) => {
   const postManagement = usePostManagement({
     user,
     setPosts,
+    setUserPosts,
     setIsLoadingPostCreated,
     setIsLoading
   });
@@ -106,21 +107,15 @@ export const PostContextProvider = ({ children }) => {
   const postActions = usePostActions({
     user,
     setPosts,
+    setUserPosts,
     setIsLoading
   });
 
   // --- Effects ---
 
-  // Initial fetch of posts
+  // Consolidated fetch effect
   useEffect(() => {
-    fetchPosts(1);
-  }, [fetchPosts]);
-
-  // Fetch more posts when page changes (only for page > 1 as 1 is handled above)
-  useEffect(() => {
-    if (page > 1) {
-      fetchPosts(page);
-    }
+    fetchPosts(page);
   }, [page, fetchPosts]);
 
   // --- Context Value ---

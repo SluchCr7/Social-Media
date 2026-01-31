@@ -3,7 +3,7 @@ const { Message, ValidateMessage } = require('../Modules/Message');
 const { v2 } = require('cloudinary');
 const fs = require('fs');
 const { getReceiverSocketId, io } = require('../Config/socket');
-const asyncHandler= require('express-async-handler')
+const asyncHandler = require('express-async-handler')
 const mongoose = require("mongoose");
 const { messagePopulate } = require('../Populates/Populate');
 const { sendNotificationHelper } = require('../utils/SendNotification');
@@ -169,22 +169,22 @@ const sendMessage = async (req, res) => {
 };
 
 
-const getMessagesByUser = async(req,res) =>{
+const getMessagesByUser = async (req, res) => {
   try {
     const user = req.params.id
     const messages = await Message.find({ receiver: user }).populate(messagePopulate);
     res.status(200).json(messages)
   }
-  catch(error){
+  catch (error) {
     res.status(500).json({ message: error.message });
   }
 }
 
 const makeAllMessagesIsReadBetweenUsers = asyncHandler(async (req, res) => {
   await Message.updateMany(
-    { receiver: req.user._id, sender : req.params.id , isRead: false },
+    { receiver: req.user._id, sender: req.params.id, isRead: false },
     { $set: { isRead: true } }
-  );  
+  );
   res.status(200).json({ message: 'All Messages marked as read' });
 })
 
@@ -320,5 +320,5 @@ module.exports = {
   getMessagesByUser,
   makeAllMessagesIsReadBetweenUsers,
   getUnreadMessages,
-  deleteMessageForMe,deleteMessage,addLike
+  deleteMessageForMe, deleteMessage, addLike
 };

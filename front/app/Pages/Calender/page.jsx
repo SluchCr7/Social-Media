@@ -1,5 +1,5 @@
 "use client";
-import React, { useState , useCallback , useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
 import {
@@ -7,6 +7,8 @@ import {
   FaUsers,
   FaCalendarAlt,
   FaRegStar,
+  FaBell,
+  FaFlag,
 } from "react-icons/fa";
 import { useEvent } from "@/app/Context/EventContext";
 import DesignCalender from "./DesignCalender";
@@ -16,30 +18,78 @@ const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(dayjs());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [newEvent, setNewEvent] = useState({ title: "", description: "", type: "custom", repeatYearly: false });
+  const [newEvent, setNewEvent] = useState({
+    title: "",
+    description: "",
+    type: "custom",
+    repeatYearly: false,
+    repeatPattern: "none",
+    startTime: "09:00",
+    endTime: "10:00",
+    location: "",
+    isVirtual: false,
+    meetingLink: "",
+    color: "#6366f1",
+    priority: "medium",
+    reminders: [],
+    tags: [],
+    invitedUsers: [],
+    notes: ""
+  });
   const [showDayEvents, setShowDayEvents] = useState(null);
+  const [viewMode, setViewMode] = useState("month"); // month, week, agenda
+  const [filterType, setFilterType] = useState("all");
+  const [filterPriority, setFilterPriority] = useState("all");
 
-  const { events, loading, addEvent, updateEvent, deleteEvent,setIsCreating , isCreating } = useEvent();
+  const { events, loading, addEvent, updateEvent, deleteEvent, setIsCreating, isCreating } = useEvent();
 
   const typeIcons = useMemo(() => ({
     birthday: <FaBirthdayCake />,
     meeting: <FaUsers />,
     public: <FaCalendarAlt />,
     custom: <FaRegStar />,
+    reminder: <FaBell />,
+    deadline: <FaFlag />,
   }), []);
 
   const typeColors = useMemo(() => ({
-    birthday: "bg-pink-200 text-pink-800",
-    meeting: "bg-green-200 text-green-800",
-    public: "bg-blue-200 text-blue-800",
-    custom: "bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text",
+    birthday: "bg-pink-500/10 text-pink-600 border-pink-500/20",
+    meeting: "bg-green-500/10 text-green-600 border-green-500/20",
+    public: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    custom: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20",
+    reminder: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
+    deadline: "bg-red-500/10 text-red-600 border-red-500/20",
+  }), []);
+
+  const priorityColors = useMemo(() => ({
+    low: "bg-gray-500/10 text-gray-600",
+    medium: "bg-blue-500/10 text-blue-600",
+    high: "bg-orange-500/10 text-orange-600",
+    urgent: "bg-red-500/10 text-red-600",
   }), []);
 
   const handleAddEvent = useCallback(async () => {
     if (!newEvent.title) return;
     const event = { ...newEvent, date: selectedDate.format("YYYY-MM-DD") };
     await addEvent(event);
-    setNewEvent({ title: "", description: "", type: "custom", repeatYearly: false });
+    setNewEvent({
+      title: "",
+      description: "",
+      type: "custom",
+      repeatYearly: false,
+      repeatPattern: "none",
+      startTime: "09:00",
+      endTime: "10:00",
+      location: "",
+      isVirtual: false,
+      meetingLink: "",
+      color: "#6366f1",
+      priority: "medium",
+      reminders: [],
+      tags: [],
+      invitedUsers: [],
+      notes: ""
+    });
     setSelectedDate(null);
   }, [newEvent, selectedDate, addEvent]);
 
@@ -56,7 +106,6 @@ const Calendar = () => {
     setSelectedEvent(null);
   }, [selectedEvent, deleteEvent]);
 
-
   const startOfMonth = currentDate.startOf("month");
   const endOfMonth = currentDate.endOf("month");
   const startDate = startOfMonth.startOf("week");
@@ -68,10 +117,11 @@ const Calendar = () => {
     days.push(date);
     date = date.add(1, "day");
   }
-   // توليد الأحداث السنوية المتكررة لعدة سنوات قادمة
+
+  // Generate recurring events
   const expandedEvents = useMemo(() => {
     return events.flatMap((ev) => {
-      if (!ev.repeatYearly) return [ev];
+      if (!ev.repeatYearly && ev.repeatPattern === "none") return [ev];
 
       const originalDate = dayjs(ev.date);
       const startYear = dayjs().year();
@@ -90,22 +140,60 @@ const Calendar = () => {
     });
   }, [events]);
 
+  // Filter events
+  const filteredEvents = useMemo(() => {
+    let filtered = expandedEvents;
+
+    if (filterType !== "all") {
+      filtered = filtered.filter(ev => ev.type === filterType);
+    }
+
+    if (filterPriority !== "all") {
+      filtered = filtered.filter(ev => ev.priority === filterPriority);
+    }
+
+    return filtered;
+  }, [expandedEvents, filterType, filterPriority]);
+
   const isToday = (d) => dayjs().isSame(d, "day");
+
   if (loading) return (
     <div className="w-full">
       <CalenderSkeleton />
     </div>
-  )
+  );
+
   return (
     <>
       <DesignCalender
-        setNewEvent={setNewEvent} newEvent={newEvent} 
-        setSelectedEvent={setSelectedEvent} selectedEvent={selectedEvent}
-        currentDate={currentDate} days={days} isToday={isToday} setSelectedDate={setSelectedDate}
-        typeIcons={typeIcons} setCurrentDate={setCurrentDate} showDayEvents={showDayEvents} setShowDayEvents={setShowDayEvents}
-        loading={loading} events={expandedEvents} typeColors={typeColors} handleAddEvent={handleAddEvent} handleUpdateEvent={handleUpdateEvent}
-        handleDeleteEvent={handleDeleteEvent} selectedDate={selectedDate}
-        setIsCreating={setIsCreating} isCreating={isCreating}
+        setNewEvent={setNewEvent}
+        newEvent={newEvent}
+        setSelectedEvent={setSelectedEvent}
+        selectedEvent={selectedEvent}
+        currentDate={currentDate}
+        days={days}
+        isToday={isToday}
+        setSelectedDate={setSelectedDate}
+        typeIcons={typeIcons}
+        setCurrentDate={setCurrentDate}
+        showDayEvents={showDayEvents}
+        setShowDayEvents={setShowDayEvents}
+        loading={loading}
+        events={filteredEvents}
+        typeColors={typeColors}
+        priorityColors={priorityColors}
+        handleAddEvent={handleAddEvent}
+        handleUpdateEvent={handleUpdateEvent}
+        handleDeleteEvent={handleDeleteEvent}
+        selectedDate={selectedDate}
+        setIsCreating={setIsCreating}
+        isCreating={isCreating}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        filterType={filterType}
+        setFilterType={setFilterType}
+        filterPriority={filterPriority}
+        setFilterPriority={setFilterPriority}
       />
     </>
   );

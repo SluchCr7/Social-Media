@@ -5,19 +5,14 @@ const Verification = require('../Modules/VerificationToken')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 const sendEmail = require('../utils/sendMail')
-const path = require('path')
 const { cloudUpload, cloudRemove } = require('../Config/cloudUpload')
 const fs = require('fs')
-const { v2 } = require('cloudinary')
-const speakeasy = require("speakeasy");
-const qrcode = require("qrcode");
 const { sendNotificationHelper } = require("../utils/SendNotification");
-const { Post, ValidatePost } = require('../Modules/Post')
+const { Post } = require('../Modules/Post')
 const { Comment } = require('../Modules/Comment')
 const { Community } = require('../Modules/Community')
-const { Notification } = require('../Modules/Notification');
 const { Report, ValidateReport } = require('../Modules/Report')
-const { validateStory, Story } = require("../Modules/Story");
+const { Story } = require("../Modules/Story");
 const { Music } = require('../Modules/Music')
 const { userOnePopulate } = require("../Populates/Populate")
 const Reel = require('../Modules/Reel')
@@ -54,58 +49,9 @@ const RegisterNewUser = async (req, res) => {
 
     await user.save();
 
-    // ✅ Create verification token
-    // const VerificationToken = new Verification({
-    //   userId: user._id,
-    //   tokenVer: crypto.randomBytes(32).toString("hex"),
-    // });
-    // await VerificationToken.save();
-
-    // // ✅ Prepare verification link
-    // const link = `${process.env.DOMAIN_NAME}/Pages/UserVerify/${user._id}/verify/${VerificationToken.tokenVer}`;
-
-    // const htmlTemp = `
-    //   <div style="font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 40px;">
-    //     <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-    //       <tr>
-    //         <td style="padding: 30px;">
-    //           <h2 style="color: #333333;">Welcome to Sluchitt, ${user.username}!</h2>
-    //           <p style="font-size: 16px; color: #555555; line-height: 1.6;">
-    //             Thank you for signing up. To complete your registration, please verify your email address by clicking the button below.
-    //           </p>
-    //           <div style="text-align: center; margin: 30px 0;">
-    //             <a href="${link}" style="background-color: #28a745; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
-    //               Verify My Email
-    //             </a>
-    //           </div>
-    //           <p style="font-size: 14px; color: #999999;">
-    //             If you didn’t sign up for this account, feel free to ignore this email. Your information will remain secure.
-    //           </p>
-    //           <p style="font-size: 14px; margin-top: 30px; color: #555555;">
-    //             Best regards,<br />
-    //             <strong>Sluchitt Team</strong>
-    //           </p>
-    //         </td>
-    //       </tr>
-    //       <tr>
-    //         <td style="padding: 20px; text-align: center; font-size: 12px; color: #aaaaaa;">
-    //           &copy; ${new Date().getFullYear()} Sluchitt. All rights reserved.
-    //         </td>
-    //       </tr>
-    //     </table>
-    //   </div>
-    // `;
-
-    // // ✅ Send verification email
-    // await sendEmail(user.email, "Verify your Email", htmlTemp);
-
-    return res.status(201).json({
-      message:
-        "User Created Successfully and we sent an email now, go to verify your email",
-    });
-  } catch (error) {
-    console.error("Register Error:", error);
-    return res.status(500).json({ message: error.message || "Server Error" });
+    return res.status(201).json({ message: "User registered successfully." });
+  } catch (err) {
+    return res.status(500).json({ message: err.message || "Internal Server Error" });
   }
 };
 

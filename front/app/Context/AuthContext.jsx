@@ -169,7 +169,6 @@ export const AuthContextProvider = ({ children }) => {
     setUsers,
     login,
     logout,
-    Logout: logout, // alias for backward compatibility
     registerNewUser,
     fetchUsers,
   }), [

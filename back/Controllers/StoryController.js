@@ -1,11 +1,8 @@
-const { validateStory, Story } = require("../Modules/Story");
+const { Story } = require("../Modules/Story");
 const asyncHandler = require("express-async-handler");
-const fs = require('fs');
-const { v2 } = require('cloudinary');
 // 🔔 Socket.io & Notifications
-const { getReceiverSocketId, io } = require("../Config/socket");
-const { Notification } = require("../Modules/Notification");
-const { cloudUpload } = require("../Config/cloudUpload"); // اللي انت عامله
+const { io } = require("../Config/socket");
+const { cloudUpload } = require("../Config/cloudUpload");
 const { User } = require('../Modules/User');
 const { storyPopulate } = require("../Populates/Populate");
 const { sendNotificationHelper } = require("../utils/SendNotification");
@@ -15,7 +12,6 @@ const { sendNotificationHelper } = require("../utils/SendNotification");
  * @route POST /api/stories
  * @access Private
  */
-
 const addNewStory = asyncHandler(async (req, res) => {
   const { text, collaborators = [] } = req.body;
   let photoUrl = "";
@@ -49,25 +45,10 @@ const addNewStory = asyncHandler(async (req, res) => {
   await user.save();
 
   // 🔔 إرسال تنبيه فوري عبر السوكيت لجميع المستخدمين (أو المتابعين فقط لو حابب)
-  // هنا هنبعتها للكل والفرونت فلتر لو محتاج
   io.emit("new-story", story);
 
   res.status(201).json({ message: "Story added successfully", story });
 });
-
-/**
- * @desc Get all stories
- * @route GET /api/stories
- * @access Private
- */
-
-
-// const getAllStories = asyncHandler(async (req, res) => {
-//   const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-//   // تعديل الفلترة لتشمل القصص التي أُنشئت خلال الـ 24 ساعة الماضية فقط
-//   const stories = await Story.find({ createdAt: { $gte: yesterday } }).populate(storyPopulate);
-//   res.status(200).json(stories);
-// });
 
 const getAllStories = asyncHandler(async (req, res) => {
   try {

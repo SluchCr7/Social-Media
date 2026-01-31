@@ -5,24 +5,32 @@ import api from "@/app/utils/api";
 import { useFeedback } from "@/app/Context/FeedbackContext";
 import { MESSAGES } from "@/app/utils/messages";
 
-export const usePostActions = ({ user, setPosts, setIsLoading }) => {
+export const usePostActions = ({ user, setPosts, setUserPosts, setIsLoading }) => {
   const { showToast } = useFeedback();
 
   const updatePostInState = useCallback((updatedPost) => {
     if (!updatedPost?._id) return;
-    setPosts((prev) => prev.map((p) => (p._id === updatedPost._id ? updatedPost : p)));
-  }, [setPosts]);
+    const updater = (prev) => (prev || []).map((p) => (p._id === updatedPost._id ? updatedPost : p));
+    setPosts(updater);
+    if (setUserPosts) {
+      setUserPosts(updater);
+    }
+  }, [setPosts, setUserPosts]);
 
   const deletePost = useCallback(async (id) => {
     try {
       const res = await api.delete(`/post/${id}`);
       showToast(res.data.message || MESSAGES.POST.DELETE_SUCCESS, 'success');
-      setPosts((prev) => prev.filter((p) => p._id !== id));
+      const filterer = (prev) => (prev || []).filter((p) => p._id !== id);
+      setPosts(filterer);
+      if (setUserPosts) {
+        setUserPosts(filterer);
+      }
     } catch (err) {
       console.error(err);
       showToast(MESSAGES.POST.DELETE_ERROR, 'error');
     }
-  }, [setPosts, showToast]);
+  }, [setPosts, setUserPosts, showToast]);
 
   const likePost = useCallback(async (postId) => {
     if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
@@ -31,6 +39,7 @@ export const usePostActions = ({ user, setPosts, setIsLoading }) => {
       updatePostInState(res.data);
     } catch (err) {
       console.error(err);
+      showToast(err?.response?.data?.message || 'Failed to update like status.', 'error');
     }
   }, [user, updatePostInState, showToast]);
 
@@ -41,6 +50,7 @@ export const usePostActions = ({ user, setPosts, setIsLoading }) => {
       updatePostInState(res.data);
     } catch (err) {
       console.error(err);
+      showToast(err?.response?.data?.message || 'Failed to update haha status.', 'error');
     }
   }, [user, updatePostInState, showToast]);
 
@@ -56,21 +66,24 @@ export const usePostActions = ({ user, setPosts, setIsLoading }) => {
     }
   }, [user, updatePostInState, showToast]);
 
-  const sharePost = useCallback(async (id, customText = "") => {
+  const sharePost = useCallback(async (id, ownerId, customText = "") => {
     if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
     setIsLoading(true);
     const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
     try {
       const res = await api.post(`/post/share/${id}`, { customText });
       showToast('Success! Post shared to your profile.', 'success', { id: loadingToast });
-      setPosts((prev) => [res.data, ...prev]);
+      setPosts((prev) => [res.data, ...(prev || [])]);
+      if (setUserPosts && user?._id === ownerId) {
+        setUserPosts((prev) => [res.data, ...(prev || [])]);
+      }
     } catch (err) {
       console.error(err);
       showToast("Failed to share the post.", 'error', { id: loadingToast });
     } finally {
       setIsLoading(false);
     }
-  }, [user, setIsLoading, setPosts, showToast]);
+  }, [user, setIsLoading, setPosts, setUserPosts, showToast]);
 
   const displayOrHideComments = useCallback(async (postId) => {
     try {

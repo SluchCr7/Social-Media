@@ -1,14 +1,11 @@
 const asyncHandler = require('express-async-handler');
 const { Comment, ValidateComment, ValidateUpdateComment } = require('../Modules/Comment');
 const { User } = require('../Modules/User');
-const { Post, ValidatePost } = require('../Modules/Post');
+const { Post } = require('../Modules/Post');
 const Reel = require('../Modules/Reel');
 const { sendNotificationHelper } = require('../utils/SendNotification');
 const { commentPopulate } = require('../Populates/Populate');
 
-
-
-// ================== Get All Comments (nested) ==================
 // ================== Get Comments for a Target (Post, Reel, or Comment) ==================
 const getAllComments = asyncHandler(async (req, res) => {
   const { targetId, targetType } = req.params;
@@ -58,54 +55,6 @@ const getAllComments = asyncHandler(async (req, res) => {
   res.status(200).json(allComments);
 });
 
-
-// const getAllComments = asyncHandler(async (req, res) => {
-//   const postId = req.params.postId;
-//   const page = parseInt(req.query.page) || 1;
-//   const limit = parseInt(req.query.limit) || 10;
-//   const skip = (page - 1) * limit;
-
-//   // 🎯 هات الكومنتات الرئيسية بس
-//   const topLevelComments = await Comment.find({ postId, parent: null })
-//     .sort({ createdAt: -1 })
-//     .skip(skip)
-//     .limit(limit)
-//     .populate("owner", "username profileName profilePhoto following followers description")
-//     .lean();
-
-//   // 🎯 هات كل الريبلات الخاصة بالبوست
-//   const allReplies = await Comment.find({ postId, parent: { $ne: null } })
-//     .populate("owner", "username profileName profilePhoto following followers description")
-//     .lean();
-
-//   // 🏗️ بناء الشجرة
-//   const buildReplies = (parentId) => {
-//     return allReplies
-//       .filter(reply => String(reply.parent) === String(parentId))
-//       .map(reply => ({
-//         ...reply,
-//         replies: buildReplies(reply._id),
-//       }));
-//   };
-
-//   const nestedComments = topLevelComments.map(comment => ({
-//     ...comment,
-//     replies: buildReplies(comment._id),
-//   }));
-
-//   const total = await Comment.countDocuments({ postId, parent: null });
-//   const pages = Math.ceil(total / limit);
-
-//   res.status(200).json({
-//     nestedComments,
-//     total,
-//     page,
-//     pages,
-//   });
-// });
-
-
-// ================== Add New Comment ==================
 // ================== Add New Comment ==================
 const addNewComment = asyncHandler(async (req, res) => {
   const { text, targetId, targetType } = req.body;

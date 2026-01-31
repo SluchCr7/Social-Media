@@ -17,6 +17,7 @@ import PostActions from "@/app/Component/Post/PostActions";
 import SharedTitle from "@/app/Component/Post/SharedTitle";
 import { useTranslation } from "react-i18next";
 import PostMusicPlayer from "@/app/Component/Post/PostMusic";
+import { useTranslate } from '../../../Context/TranslateContext';
 
 const Comment = dynamic(() => import("@/app/Component/Comment"), {
   loading: () => <div className="h-20 bg-gray-100 dark:bg-white/5 rounded-2xl animate-pulse" />,
