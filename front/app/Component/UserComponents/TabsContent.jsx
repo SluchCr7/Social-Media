@@ -184,7 +184,7 @@ import Image from 'next/image'
 import { MdEventAvailable } from 'react-icons/md'
 
 const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
-  const { setImageView , userIsLoading } = usePost()
+  const { setImageView, userIsLoading } = usePost()
   const { t } = useTranslation()
 
   // ✅ تحسين: فلترة وترتيب البوستات بميمو مع deep compare بسيطة للفلاتر
@@ -235,43 +235,49 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
       <AnimatePresence mode="wait" initial={false}>
         {activeTab === 'Posts' && (
           <motion.div key="posts" {...motionSettings} className="flex flex-col gap-4 w-full">
-            {filteredPosts?.length > 0
-              ? filteredPosts.map((post) => <SluchitEntry key={post?._id} post={post} />)
-              :
-              (
-                <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-                  <MdEventAvailable size={40} className="mb-3 text-gray-500" />
-                  <span>{t("You haven’t posted anything yet.")}</span>
-                </div>
-              )
-            }
-            {userIsLoading && (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <PostSkeleton key={i} className="animate-pulse w-full" />
-                ))
-              )
-            }
+            {userIsLoading && filteredPosts.length === 0 ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <PostSkeleton key={i} className="animate-pulse w-full" />
+              ))
+            ) : filteredPosts.length > 0 ? (
+              filteredPosts.map((post) => <SluchitEntry key={post?._id} post={post} />)
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                <MdEventAvailable size={40} className="mb-3 text-gray-500" />
+                <span>{t("You haven’t posted anything yet.")}</span>
+              </div>
+            )}
+
+            {userIsLoading && filteredPosts.length > 0 && (
+              <PostSkeleton className="animate-pulse w-full" />
+            )}
           </motion.div>
         )}
 
         {activeTab === 'Comments' && (
           <motion.div key="comments" {...motionSettings} className="flex flex-col gap-4 w-full">
-            {userSelected?.comments?.length > 0
-              ? userSelected.comments.map((comment) => (
+            {userIsLoading ? (
+              Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-24 bg-white/5 rounded-2xl animate-pulse" />)
+            ) : userSelected?.comments?.length > 0 ? (
+              userSelected.comments.map((comment) => (
                 <CommentCard key={comment?._id} comment={comment} />
               ))
-              : <div className="text-center text-gray-500 py-10">{t("You haven’t commented yet.")}</div>}
+            ) : (
+              <div className="text-center text-gray-500 py-10">{t("You haven’t commented yet.")}</div>
+            )}
           </motion.div>
         )}
 
         {activeTab === 'Reels' && (
           <motion.div key="reels" {...motionSettings} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-[95%] mx-auto">
-            {userSelected?.reels?.length > 0 ? (
+            {userIsLoading ? (
+              Array.from({ length: 3 }).map((_, i) => <div key={i} className="aspect-[9/16] bg-white/5 rounded-2xl animate-pulse" />)
+            ) : userSelected?.reels?.length > 0 ? (
               userSelected.reels.map((reel) => (
-                <div key={reel?._id} className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition duration-300">
-                  <video src={reel?.videoUrl} controls className="w-full h-[300px] object-cover bg-black" />
-                  <div className="p-3">
-                    <p className="text-gray-800 text-sm">{reel?.caption}</p>
+                <div key={reel?._id} className="bg-[#111] rounded-2xl overflow-hidden shadow-xl border border-white/5 group">
+                  <video src={reel?.videoUrl} controls className="w-full aspect-[9/16] object-cover bg-black" />
+                  <div className="p-4 bg-[#151515]">
+                    <p className="text-white/80 text-sm line-clamp-2">{reel?.caption}</p>
                   </div>
                 </div>
               ))
@@ -285,7 +291,9 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
 
         {activeTab === 'Music' && (
           <motion.div key="music" {...motionSettings} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 w-[95%] mx-auto">
-            {userSelected?.audios?.length > 0 ? (
+            {userIsLoading ? (
+              Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-48 bg-white/5 rounded-2xl animate-pulse" />)
+            ) : userSelected?.audios?.length > 0 ? (
               userSelected.audios.map((music) => <MusicCard key={music?._id} music={music} />)
             ) : (
               <div className="col-span-full text-center text-gray-500 py-10">
@@ -297,12 +305,14 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
 
         {activeTab === 'Photos' && (
           <motion.div key="photos" {...motionSettings} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 w-[95%] mx-auto">
-            {filteredPosts?.some((p) => p?.Photos?.length > 0) ? (
+            {userIsLoading && filteredPosts.length === 0 ? (
+              Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-48 bg-white/5 rounded-2xl animate-pulse" />)
+            ) : filteredPosts?.some((p) => p?.Photos?.length > 0) ? (
               filteredPosts.flatMap((p) =>
                 p.Photos.map((img, i) => (
                   <div
                     key={`${p._id}-${i}`}
-                    className="relative group overflow-hidden rounded-lg shadow hover:shadow-lg transition duration-300"
+                    className="relative group overflow-hidden rounded-2xl shadow-2xl border border-white/5 cursor-pointer"
                     onClick={() => handleImageClick(img?.url, p?._id)}
                   >
                     <Image
@@ -310,8 +320,11 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
                       height={500}
                       src={img?.url || img}
                       alt="post photo"
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                     />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-white text-[10px] font-black uppercase tracking-widest">View Signal</span>
+                    </div>
                   </div>
                 ))
               )

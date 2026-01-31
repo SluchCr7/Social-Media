@@ -5,7 +5,7 @@ import { useAuth } from "@/app/Context/AuthContext"
 import { useUser } from "../Context/UserContext"
 
 export const useProfilePosts = (userId, pinsPosts = []) => {
-  const { fetchUserPosts, userPosts, userHasMore } = usePost()
+  const { fetchUserPosts, userPosts, userHasMore, userIsLoading } = usePost()
   const { getUserById } = useUser()
 
   const [userData, setUserData] = useState(null)
@@ -36,12 +36,12 @@ export const useProfilePosts = (userId, pinsPosts = []) => {
   // Infinite Scroll
   const handleObserver = useCallback((entries) => {
     const target = entries[0]
-    if (target.isIntersecting && userHasMore && userData?._id) {
+    if (target.isIntersecting && userHasMore && userData?._id && !userIsLoading) {
       const nextPage = page + 1
       setPage(nextPage)
       fetchUserPosts(userData._id, nextPage, 10)
     }
-  }, [page, userHasMore, userData?._id, fetchUserPosts])
+  }, [page, userHasMore, userData?._id, fetchUserPosts, userIsLoading])
 
   useEffect(() => {
     if (!loaderRef?.current) return

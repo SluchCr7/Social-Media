@@ -65,7 +65,7 @@ export const PostContextProvider = ({ children }) => {
    * Fetch posts for a specific user profile
    */
   const fetchUserPosts = useCallback(async (userId, pageNum = 1, limit = 5) => {
-    if (!userId) return;
+    if (!userId || userIsLoading) return;
 
     setUserIsLoading(true);
     try {
