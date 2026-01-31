@@ -131,12 +131,22 @@ const userOnePopulate = [
   },
   {
     path: "savedPosts",
-  },
-  {
-    path: "posts"
-  },
-  {
-    path: "comments"
+    populate: [
+      {
+        path: "owner",
+        model: "User",
+        select: userSelect,
+      },
+      {
+        path: "originalPost",
+        model: "Post",
+        populate: {
+          path: "owner",
+          model: "User",
+          select: userSelect,
+        },
+      },
+    ],
   },
   {
     path: "partner",
@@ -174,7 +184,7 @@ const userOnePopulate = [
         select: userSelect,
       },
       {
-        path: "postId",
+        path: "targetId",
         populate: {
           path: "owner",
           model: "User",
@@ -212,16 +222,18 @@ const userOnePopulate = [
   },
   {
     path: "highlights",
-    populate: {
-      path: "user",
-      model: "User",
-      select: userSelect,
-    },
-    populate: {
-      path: "stories",
-      model: "Story",
-      select: "Photo text createdAt originalStory"
-    },
+    populate: [
+      {
+        path: "user",
+        model: "User",
+        select: userSelect,
+      },
+      {
+        path: "stories",
+        model: "Story",
+        select: "Photo text createdAt originalStory"
+      },
+    ],
   },
   {
     path: "BlockedNotificationFromUsers",
