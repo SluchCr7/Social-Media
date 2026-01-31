@@ -14,6 +14,7 @@ const {
   LoginUser,
   verifyAccount,
   uploadPhoto,
+  uploadCoverPhoto,
   makeFollow,
   acceptCookies,
   toggleSongInPlaylist,
@@ -44,6 +45,7 @@ route.route('/register').post(RegisterNewUser);
 route.route('/admin/:id').put(verifyAdmin, makeUserAdmin);
 route.route('/:id/verify/:token').get(verifyAccount);
 route.route('/photo').post(verifyToken, photoUpload.single('image'), uploadPhoto);
+route.route('/cover').post(verifyToken, photoUpload.single('image'), uploadCoverPhoto);
 route.route('/follow/:id').put(verifyToken, makeFollow);
 route.route('/update').put(verifyToken, updateProfile);
 route.route('/update/pass').put(verifyToken, updatePassword);

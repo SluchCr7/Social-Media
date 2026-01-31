@@ -26,6 +26,13 @@ const UserSchema = new mongoose.Schema({
             publicId: null
         }
     },
+    coverPhoto: {
+        type: Object,
+        default: {
+            url: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop",
+            publicId: null
+        }
+    },
     isAdmin: {
         type: Boolean,
         default: false

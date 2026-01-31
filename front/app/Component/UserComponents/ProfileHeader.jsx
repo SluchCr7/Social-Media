@@ -43,6 +43,7 @@ const ProfileHeader = ({
   setOpenMenu,
   openMenu,
   onProfileClick,
+  onCoverChange,
   renderOwnerMenu,
   renderVisitorMenu
 }) => {
@@ -73,17 +74,33 @@ const ProfileHeader = ({
     <div className="relative w-full max-w-7xl mx-auto overflow-hidden rounded-[3rem] bg-[#0A0A0A] border border-white/5 shadow-2xl">
 
       {/* Dynamic Cover Section */}
-      <div className="relative h-64 md:h-80 w-full bg-[#111] overflow-hidden">
+      <div className="relative h-64 md:h-80 w-full bg-[#111] overflow-hidden group/cover">
         <Image
-          src={profileUser?.profilePhoto?.url || "/default-profile.png"}
+          src={profileUser?.coverPhoto?.url || profileUser?.profilePhoto?.url || "/default-profile.png"}
           fill
-          className="object-cover opacity-20 blur-2xl scale-110"
+          className="object-cover transition-transform duration-700 group-hover/cover:scale-110"
           alt="cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#0A0A0A]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0A0A0A]/20 to-[#0A0A0A]" />
+
+        {/* Cover Action */}
+        {isOwner && (
+          <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/cover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm z-10">
+            <div className="flex flex-col items-center gap-2">
+              <FaCamera size={32} className="text-white" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-white">Update Terminal Banner</span>
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={onCoverChange}
+            />
+          </label>
+        )}
 
         {/* Floating Action Bar on Cover */}
-        <div className="absolute top-6 right-6 flex gap-3">
+        <div className="absolute top-6 right-6 flex gap-3 z-20">
           {isOwner && (
             <Link href="/Pages/Analytics" className="p-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 text-white/60 hover:text-white transition-all">
               <SiGoogleanalytics size={20} />
@@ -141,16 +158,19 @@ const ProfileHeader = ({
           <div className="flex-1 pb-4 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
               <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
-                {profileUser?.username}
+                {profileUser?.username || "Incognito"}
               </h1>
               {profileUser?.isAccountWithPremiumVerify && (
                 <HiBadgeCheck className="text-indigo-500 text-3xl" />
               )}
             </div>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-white/40 font-bold text-sm">
-              <span className="text-indigo-400 font-black tracking-widest uppercase text-xs">@{profileUser?.profileName || profileUser?.username}</span>
-              <span className="flex items-center gap-1.5"><IoLocationSharp className="text-indigo-500" /> Earth</span>
-              <span className="flex items-center gap-1.5"><IoCalendarClearOutline className="text-indigo-500" /> Joined Dec 2025</span>
+              <span className="text-indigo-400 font-black tracking-widest uppercase text-xs">@{profileUser?.profileName || profileUser?.username || "user"}</span>
+              <span className="flex items-center gap-1.5"><IoLocationSharp className="text-indigo-500" /> {profileUser?.country || "Earth"}</span>
+              <span className="flex items-center gap-1.5">
+                <IoCalendarClearOutline className="text-indigo-500" />
+                Joined {profileUser?.createdAt ? new Date(profileUser.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Unknown'}
+              </span>
             </div>
           </div>
 

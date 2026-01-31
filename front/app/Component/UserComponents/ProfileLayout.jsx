@@ -43,12 +43,13 @@ const ProfileLayout = ({
   onFollow,
   onUnfollow,
   onShowFollowers,
-  onShowFollowing,
   onProfileClick,
   setOpenMenu,
-  openMenu
+  openMenu,
+  onCoverChange
 }) => {
-  const { highlights, fetchHighlights, setOpenModal,selectedHighlight, setSelectedHighlight } = useHighlights();
+  const { updateCoverPhoto } = useUser();
+  const { highlights, fetchHighlights, setOpenModal, selectedHighlight, setSelectedHighlight } = useHighlights();
   useEffect(() => {
     fetchHighlights();
   }, [fetchHighlights]);
@@ -90,6 +91,7 @@ const ProfileLayout = ({
           onProfileClick={onProfileClick}
           setOpenMenu={setOpenMenu}
           openMenu={openMenu}
+          onCoverChange={(e) => updateCoverPhoto(e.target.files[0])}
           renderOwnerMenu={isOwner ? renderMenu : undefined}
           renderVisitorMenu={!isOwner ? renderMenu : undefined}
         />
@@ -107,7 +109,7 @@ const ProfileLayout = ({
           onAddHighlight={handleAddHighlight}   // لفتح قائمة الإضافة
           isOwner={isOwner}                     // لتحديد إمكانية عرض زر 'New'
         />
-        
+
         {/* 🧾 معلومات المستخدم */}
         <InfoAboutUser user={user} />
 
@@ -151,15 +153,15 @@ const ProfileLayout = ({
       {selectedHighlight && (
         <HighlightViewerModal
           highlight={selectedHighlight}
-          onClose={()=> setSelectedHighlight(null)} // إغلاق الـ Viewer
+          onClose={() => setSelectedHighlight(null)} // إغلاق الـ Viewer
           allStories={user?.stories}
         />
       )}
 
       {/* ➕ قائمة إضافة Highlight (AddHighlightMenu) */}
       {/* تُدار حالة الفتح/الإغلاق بواسطة 'openModal' في الـ Context */}
-      <AddHighlightMenu stories={user?.stories} /> 
-      
+      <AddHighlightMenu stories={user?.stories} />
+
     </motion.div>
   )
 }

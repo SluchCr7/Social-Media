@@ -394,6 +394,31 @@ const uploadPhoto = asyncHandler(async (req, res) => {
   }
 });
 
+const uploadCoverPhoto = asyncHandler(async (req, res) => {
+  if (!req.file) return res.status(400).json({ message: "No cover image uploaded" });
+
+  try {
+    const result = await cloudUpload(req.file);
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.coverPhoto?.publicId) {
+      await cloudRemove(user.coverPhoto.publicId);
+    }
+
+    user.coverPhoto = {
+      url: result.secure_url,
+      publicId: result.public_id,
+    };
+    await user.save();
+
+    res.status(200).json({ message: "Cover photo updated", coverPhoto: user.coverPhoto });
+  } catch (err) {
+    console.error("Cloud upload failed:", err);
+    res.status(500).json({ message: "Error uploading cover photo" });
+  }
+});
+
 
 const makeFollow = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id).select("username profilePhoto BlockedNotificationFromUsers followers");
@@ -1063,7 +1088,7 @@ module.exports = {
   deleteAllUsers, getSuggestedUsers,
   blockOrUnblockUser, getAllUsers, getUserById,
   RegisterNewUser, LoginUser, verifyAccount,
-  uploadPhoto, makeFollow, updatePassword,
+  uploadPhoto, uploadCoverPhoto, makeFollow, updatePassword,
   updateProfile, pinPost, updateLinksSocial,
   getRelationship,
   updateRelationship,

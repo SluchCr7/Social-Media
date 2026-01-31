@@ -95,6 +95,34 @@ export const UserContextProvider = ({ children }) => {
   }, [user, showToast, updateLocalUser]);
 
   /**
+   * Update cover photo
+   */
+  const updateCoverPhoto = useCallback(async (photoFile) => {
+    if (!photoFile) return;
+
+    const formData = new FormData();
+    formData.append('image', photoFile);
+
+    const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
+    try {
+      const res = await api.post('/auth/cover', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      const updatedUser = {
+        ...user,
+        coverPhoto: res.data?.coverPhoto || res.data,
+      };
+
+      updateLocalUser(updatedUser);
+      showToast('Cover photo updated successfully.', 'success', { id: loadingToast });
+    } catch (err) {
+      console.error('Cover photo update error:', err);
+      showToast('Failed to update cover photo.', 'error', { id: loadingToast });
+    }
+  }, [user, showToast, updateLocalUser]);
+
+  /**
    * Update profile information
    */
   const updateProfile = useCallback(async (fields) => {
@@ -331,6 +359,7 @@ export const UserContextProvider = ({ children }) => {
     togglePrivateAccount,
     toggleShowOnlineStatus,
     getUserById,
+    updateCoverPhoto,
     saveMusicInPlayList,
     toggleBlockNotification,
     toggleSaveReel,
@@ -339,7 +368,7 @@ export const UserContextProvider = ({ children }) => {
   }), [
     suggestedUsers, onlineUsers, loading, updateProfileLoading,
     followUser, updatePhoto, updateProfile, updatePassword,
-    togglePrivateAccount, toggleShowOnlineStatus, getUserById, saveMusicInPlayList,
+    togglePrivateAccount, toggleShowOnlineStatus, getUserById, updateCoverPhoto, saveMusicInPlayList,
     toggleBlockNotification, toggleSaveReel, pinPost, blockUser
   ]);
 
