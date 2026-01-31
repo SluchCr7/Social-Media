@@ -59,7 +59,9 @@ const ProfileLayout = ({
     // لفتح قائمة إضافة هايلايت
     setOpenModal(true);
   };
-
+  useEffect(() => {
+    console.log(user)
+  },[user])
   return (
     <motion.div
       initial={{ opacity: 0 }}
