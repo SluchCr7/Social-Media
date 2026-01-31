@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense, lazy } from 'react';
 import {
   HiChevronLeft,
   HiChevronRight,
@@ -24,10 +24,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 
-// Direct imports instead of lazy loading
-import AddEventModal from '@/app/Component/AddandUpdateMenus/AddEventModal';
-import EventDetailsModal from '@/app/Component/AddandUpdateMenus/EventDetailsModal';
-import ShowAllEvents from '@/app/Component/AddandUpdateMenus/ShowAllEvents';
+// Dynamic imports to avoid potential circular dependencies
+const AddEventModal = lazy(() => import('@/app/Component/AddandUpdateMenus/AddEventModal'));
+const EventDetailsModal = lazy(() => import('@/app/Component/AddandUpdateMenus/EventDetailsModal'));
+const ShowAllEvents = lazy(() => import('@/app/Component/AddandUpdateMenus/ShowAllEvents'));
 
 const DesignCalender = React.memo(({
   setNewEvent, newEvent,
@@ -382,42 +382,48 @@ const DesignCalender = React.memo(({
       </div>
 
       {/* Modals */}
-      <AnimatePresence>
-        {selectedDate && !selectedEvent && (
-          <AddEventModal
-            selectedDate={selectedDate}
-            newEvent={newEvent}
-            setNewEvent={setNewEvent}
-            setSelectedDate={setSelectedDate}
-            handleAddEvent={handleAddEvent}
-            isCreating={isCreating}
-            setIsCreating={setIsCreating}
-          />
-        )}
-      </AnimatePresence>
+      <Suspense fallback={null}>
+        <AnimatePresence>
+          {selectedDate && !selectedEvent && (
+            <AddEventModal
+              selectedDate={selectedDate}
+              newEvent={newEvent}
+              setNewEvent={setNewEvent}
+              setSelectedDate={setSelectedDate}
+              handleAddEvent={handleAddEvent}
+              isCreating={isCreating}
+              setIsCreating={setIsCreating}
+            />
+          )}
+        </AnimatePresence>
+      </Suspense>
 
-      <AnimatePresence>
-        {selectedEvent && (
-          <EventDetailsModal
-            handleUpdateEvent={handleUpdateEvent}
-            handleDeleteEvent={handleDeleteEvent}
-            selectedEvent={selectedEvent}
-            setSelectedEvent={setSelectedEvent}
-          />
-        )}
-      </AnimatePresence>
+      <Suspense fallback={null}>
+        <AnimatePresence>
+          {selectedEvent && (
+            <EventDetailsModal
+              handleUpdateEvent={handleUpdateEvent}
+              handleDeleteEvent={handleDeleteEvent}
+              selectedEvent={selectedEvent}
+              setSelectedEvent={setSelectedEvent}
+            />
+          )}
+        </AnimatePresence>
+      </Suspense>
 
-      <AnimatePresence>
-        {showDayEvents && (
-          <ShowAllEvents
-            setSelectedEvent={setSelectedEvent}
-            showDayEvents={showDayEvents}
-            setShowDayEvents={setShowDayEvents}
-            typeColors={typeColors}
-            typeIcons={typeIcons}
-          />
-        )}
-      </AnimatePresence>
+      <Suspense fallback={null}>
+        <AnimatePresence>
+          {showDayEvents && (
+            <ShowAllEvents
+              setSelectedEvent={setSelectedEvent}
+              showDayEvents={showDayEvents}
+              setShowDayEvents={setShowDayEvents}
+              typeColors={typeColors}
+              typeIcons={typeIcons}
+            />
+          )}
+        </AnimatePresence>
+      </Suspense>
     </div>
   );
 });
