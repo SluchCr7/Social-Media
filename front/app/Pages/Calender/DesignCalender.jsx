@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   HiChevronLeft,
   HiChevronRight,
@@ -24,10 +24,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 
-// Lazy load modals
-const AddEventModal = React.lazy(() => import('@/app/Component/AddandUpdateMenus/AddEventModal'));
-const EventDetailsModal = React.lazy(() => import('@/app/Component/AddandUpdateMenus/EventDetailsModal'));
-const ShowAllEvents = React.lazy(() => import('@/app/Component/AddandUpdateMenus/ShowAllEvents'));
+// Direct imports instead of lazy loading
+import AddEventModal from '@/app/Component/AddandUpdateMenus/AddEventModal';
+import EventDetailsModal from '@/app/Component/AddandUpdateMenus/EventDetailsModal';
+import ShowAllEvents from '@/app/Component/AddandUpdateMenus/ShowAllEvents';
 
 const DesignCalender = React.memo(({
   setNewEvent, newEvent,
@@ -384,44 +384,38 @@ const DesignCalender = React.memo(({
       {/* Modals */}
       <AnimatePresence>
         {selectedDate && !selectedEvent && (
-          <Suspense fallback={null}>
-            <AddEventModal
-              selectedDate={selectedDate}
-              newEvent={newEvent}
-              setNewEvent={setNewEvent}
-              setSelectedDate={setSelectedDate}
-              handleAddEvent={handleAddEvent}
-              isCreating={isCreating}
-              setIsCreating={setIsCreating}
-            />
-          </Suspense>
+          <AddEventModal
+            selectedDate={selectedDate}
+            newEvent={newEvent}
+            setNewEvent={setNewEvent}
+            setSelectedDate={setSelectedDate}
+            handleAddEvent={handleAddEvent}
+            isCreating={isCreating}
+            setIsCreating={setIsCreating}
+          />
         )}
       </AnimatePresence>
 
       <AnimatePresence>
         {selectedEvent && (
-          <Suspense fallback={null}>
-            <EventDetailsModal
-              handleUpdateEvent={handleUpdateEvent}
-              handleDeleteEvent={handleDeleteEvent}
-              selectedEvent={selectedEvent}
-              setSelectedEvent={setSelectedEvent}
-            />
-          </Suspense>
+          <EventDetailsModal
+            handleUpdateEvent={handleUpdateEvent}
+            handleDeleteEvent={handleDeleteEvent}
+            selectedEvent={selectedEvent}
+            setSelectedEvent={setSelectedEvent}
+          />
         )}
       </AnimatePresence>
 
       <AnimatePresence>
         {showDayEvents && (
-          <Suspense fallback={null}>
-            <ShowAllEvents
-              setSelectedEvent={setSelectedEvent}
-              showDayEvents={showDayEvents}
-              setShowDayEvents={setShowDayEvents}
-              typeColors={typeColors}
-              typeIcons={typeIcons}
-            />
-          </Suspense>
+          <ShowAllEvents
+            setSelectedEvent={setSelectedEvent}
+            showDayEvents={showDayEvents}
+            setShowDayEvents={setShowDayEvents}
+            typeColors={typeColors}
+            typeIcons={typeIcons}
+          />
         )}
       </AnimatePresence>
     </div>

@@ -24,7 +24,7 @@ export const HighlightContextProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/highlight/${user._id}`,
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/highlight/user/${user._id}`,
         {
           headers: { Authorization: `Bearer ${user.token}` },
         }
