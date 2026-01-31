@@ -44,6 +44,7 @@ const ProfileLayout = ({
   onFollow,
   onUnfollow,
   onShowFollowers,
+  onShowFollowing,
   onProfileClick,
   setOpenMenu,
   openMenu,
