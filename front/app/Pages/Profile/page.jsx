@@ -12,6 +12,7 @@ import { useState } from "react"
 import { useUser } from "@/app/Context/UserContext"
 import { useStory } from "@/app/Context/StoryContext"
 import { FiX } from "react-icons/fi"
+import { useEffect } from "react"
 
 const ProfilePage = () => {
   const { user: authUser } = useAuth()
@@ -27,6 +28,10 @@ const ProfilePage = () => {
   const [menuType, setMenuType] = useState("followers")
   const [openMenu, setOpenMenu] = useState(false)
   // const serializableUserData = userData ? JSON.parse(JSON.stringify(userData)) : null;
+  useEffect(()=>{
+    console.log(userData)
+    console.log(`initial data : ${authUser}`)
+  }, [userData, authUser])
   if (loading) return <ProfileSkeleton />
 
   return (
