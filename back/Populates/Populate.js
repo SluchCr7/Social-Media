@@ -15,7 +15,7 @@ const storyPopulate = [
   { path: "loves", select: userSelect },
   { path: "views", select: userSelect },
   { path: "originalStory", populate: { path: "owner", select: userSelect } },
-  {path: "collaborators" , select: userSelect}
+  { path: "collaborators", select: userSelect }
 ];
 
 const commentPopulate = [
@@ -53,7 +53,7 @@ const EventPopulate = [
 const postPopulate = [
   {
     path: "owner",
-    select: `username profileName profilePhoto isAccountWithPremiumVerify description followers following`, 
+    select: `username profileName profilePhoto isAccountWithPremiumVerify description followers following`,
   },
   {
     path: "community",
@@ -69,7 +69,7 @@ const postPopulate = [
   },
   {
     path: "originalPost",
-    select: "text owner createdAt Photos mentions Hashtags",
+    select: "text owner createdAt Photos media links mentions Hashtags",
     populate: [
       {
         path: "owner",
@@ -133,10 +133,10 @@ const userOnePopulate = [
     path: "savedPosts",
   },
   {
-    path : "posts"
+    path: "posts"
   },
   {
-    path : "comments"
+    path: "comments"
   },
   {
     path: "partner",
@@ -220,7 +220,7 @@ const userOnePopulate = [
     populate: {
       path: "stories",
       model: "Story",
-      select : "Photo text createdAt originalStory"
+      select: "Photo text createdAt originalStory"
     },
   },
   {
@@ -255,4 +255,4 @@ const userOnePopulate = [
   },
 ];
 
-module.exports = { reelPopulate,EventPopulate,messagePopulate, storyPopulate ,postPopulate, commentPopulate,communityPopulate,userOnePopulate};
+module.exports = { reelPopulate, EventPopulate, messagePopulate, storyPopulate, postPopulate, commentPopulate, communityPopulate, userOnePopulate };

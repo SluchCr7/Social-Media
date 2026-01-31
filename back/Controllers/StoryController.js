@@ -1,12 +1,12 @@
 const { validateStory, Story } = require("../Modules/Story");
 const asyncHandler = require("express-async-handler");
 const fs = require('fs');
-const {v2} = require('cloudinary');
+const { v2 } = require('cloudinary');
 // 🔔 Socket.io & Notifications
 const { getReceiverSocketId, io } = require("../Config/socket");
 const { Notification } = require("../Modules/Notification");
 const { cloudUpload } = require("../Config/cloudUpload"); // اللي انت عامله
-const { User} = require('../Modules/User');
+const { User } = require('../Modules/User');
 const { storyPopulate } = require("../Populates/Populate");
 const { sendNotificationHelper } = require("../utils/SendNotification");
 
@@ -40,12 +40,17 @@ const addNewStory = asyncHandler(async (req, res) => {
   });
 
   await story.save();
+  await story.populate(storyPopulate);
 
   // ✅ إضافة نقاط لصاحب القصة
   const user = await User.findById(req.user._id);
   user.userLevelPoints += 5;
   user.updateLevelRank();
   await user.save();
+
+  // 🔔 إرسال تنبيه فوري عبر السوكيت لجميع المستخدمين (أو المتابعين فقط لو حابب)
+  // هنا هنبعتها للكل والفرونت فلتر لو محتاج
+  io.emit("new-story", story);
 
   res.status(201).json({ message: "Story added successfully", story });
 });
@@ -98,7 +103,13 @@ const deleteStory = asyncHandler(async (req, res) => {
   if (!story) {
     return res.status(404).json({ message: "Story not found" });
   }
+
+  const storyId = story._id;
   await story.remove();
+
+  // 🔔 إخبار الجميع بحذف القصة لتحديث الواجهة فوراً
+  io.emit("delete-story", storyId);
+
   res.status(200).json({ message: "Story deleted successfully" });
 });
 
@@ -112,7 +123,7 @@ const getStoriesById = asyncHandler(async (req, res) => {
   const story = await Story.findById(req.params.id).populate(storyPopulate);
 
   if (!story) {
-      return res.status(404).json({ message: "Story Not Found" });
+    return res.status(404).json({ message: "Story Not Found" });
   }
 
   // إضافة المستخدم الحالي إلى المشاهدات إذا لم يكن موجودًا مسبقًا
@@ -149,6 +160,9 @@ const viewStory = asyncHandler(async (req, res) => {
     { $addToSet: { views: req.user._id } }, // $addToSet يمنع التكرار
     { new: true }
   ).populate(storyPopulate);
+
+  // 🔔 تحديث القصة عند الجميع (المشاهدات)
+  io.emit("update-story", updatedStory);
 
   res.status(200).json({
     story: updatedStory
@@ -195,16 +209,20 @@ const toggleLoveStory = asyncHandler(async (req, res) => {
   }
 
   const updatedStory = await Story.findById(req.params.id).populate(storyPopulate);
+
+  // 🔔 تحديث القصة عند الجميع (اللايكات)
+  io.emit("update-story", updatedStory);
+
   res.status(200).json(updatedStory);
 });
 
 
 
 const getRecentStories = asyncHandler(async (req, res) => {
-  
+
   const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-  const stories = await Story.find({ createdAt: { $gte: yesterday } } )
+  const stories = await Story.find({ createdAt: { $gte: yesterday } })
 
   res.status(200).json(stories);
 });
@@ -259,6 +277,10 @@ const shareStory = asyncHandler(async (req, res) => {
 
   await sharedStory.save();
   await sharedStory.populate(storyPopulate);
+
+  // 🔔 إخبار الجميع بالقصة المشتركة الجديدة
+  io.emit("new-story", sharedStory);
+
   res.status(201).json(sharedStory);
 });
 
@@ -266,8 +288,8 @@ const shareStory = asyncHandler(async (req, res) => {
 
 module.exports = {
   addNewStory,
-    getAllStories,
-    deleteStory,
+  getAllStories,
+  deleteStory,
   getStoriesById, getRecentStories,
-  viewStory, toggleLoveStory,getUserStories,shareStory
+  viewStory, toggleLoveStory, getUserStories, shareStory
 };

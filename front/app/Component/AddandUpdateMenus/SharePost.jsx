@@ -53,27 +53,37 @@ const PostPreview = React.memo(({ post }) => {
         </p>
       )}
 
-      {post?.Photos?.length > 0 && (
+      {(post?.media?.length > 0 || post?.Photos?.length > 0) && (
         <div
-          className={`grid gap-2 ${
-            post?.Photos?.length > 1 ? "grid-cols-2" : "grid-cols-1"
-          }`}
+          className={`grid gap-2 ${(post?.media?.length || post?.Photos?.length) > 1 ? "grid-cols-2" : "grid-cols-1"
+            }`}
         >
-          {post?.Photos.slice(0, 2).map((photo, i) => (
+          {(post?.media || post?.Photos).slice(0, 2).map((item, i) => (
             <motion.div
               key={i}
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.2 }}
-              className="overflow-hidden rounded-xl"
+              className="overflow-hidden rounded-xl relative bg-black"
             >
-              <Image
-                src={photo?.url}
-                alt={`Post-${i}`}
-                width={500}
-                height={300}
-                className="rounded-xl object-cover w-full h-[220px]"
-                loading="lazy"
-              />
+              {item.type === 'video' ? (
+                <div className="w-full h-[220px] flex items-center justify-center">
+                  <video src={item.url} className="w-full h-full object-cover opacity-60" muted />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30">
+                      <FaSpinner className="animate-pulse" />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Image
+                  src={item?.url || item}
+                  alt={`Post-${i}`}
+                  width={500}
+                  height={300}
+                  className="rounded-xl object-cover w-full h-[220px]"
+                  loading="lazy"
+                />
+              )}
             </motion.div>
           ))}
         </div>
@@ -152,9 +162,8 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
               <button
                 onClick={onClose}
                 disabled={isLoading}
-                className={`text-gray-400 text-2xl leading-none hover:text-gray-600 dark:hover:text-gray-300 transition-transform ${
-                  isLoading ? "opacity-40 cursor-not-allowed" : "hover:rotate-90"
-                }`}
+                className={`text-gray-400 text-2xl leading-none hover:text-gray-600 dark:hover:text-gray-300 transition-transform ${isLoading ? "opacity-40 cursor-not-allowed" : "hover:rotate-90"
+                  }`}
               >
                 ✕
               </button>
@@ -173,9 +182,8 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
               <div className="flex-1 flex flex-col">
                 <textarea
                   disabled={isLoading}
-                  className={`w-full rounded-xl p-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-gray-100 resize-none transition ${
-                    isLoading && "opacity-50 cursor-not-allowed"
-                  }`}
+                  className={`w-full rounded-xl p-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-gray-100 resize-none transition ${isLoading && "opacity-50 cursor-not-allowed"
+                    }`}
                   rows={3}
                   maxLength={300}
                   placeholder={t("Add your thoughts...")}
@@ -196,11 +204,10 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
               <button
                 onClick={onClose}
                 disabled={isLoading}
-                className={`px-5 py-2 rounded-xl font-medium transition ${
-                  isLoading
+                className={`px-5 py-2 rounded-xl font-medium transition ${isLoading
                     ? "bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
                     : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                }`}
+                  }`}
               >
                 {t("Cancel")}
               </button>
@@ -208,11 +215,10 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
               <button
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className={`px-6 py-2.5 rounded-xl font-semibold text-white shadow-md flex items-center gap-2 transition-transform ${
-                  isLoading
+                className={`px-6 py-2.5 rounded-xl font-semibold text-white shadow-md flex items-center gap-2 transition-transform ${isLoading
                     ? "bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed"
                     : "bg-gradient-to-r from-blue-500 to-purple-500 hover:scale-[1.03] hover:shadow-lg"
-                }`}
+                  }`}
               >
                 {isLoading ? (
                   <>

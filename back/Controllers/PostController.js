@@ -443,6 +443,8 @@ const sharePost = asyncHandler(async (req, res) => {
     text: customText || "",
     owner: req.user._id,
     Photos: originalPost.Photos,
+    media: originalPost.media,
+    links: originalPost.links,
     originalPost: originalPost._id,
     isShared: true,
   });

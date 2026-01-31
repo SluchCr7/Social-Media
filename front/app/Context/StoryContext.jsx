@@ -1,78 +1,74 @@
 'use client';
-import { createContext, useContext, useEffect, useState , useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import axios from "axios";
 import getData from "../utils/getData";
 import { useAuth } from "./AuthContext";
 import { useAlert } from "./AlertContext";
 import { useNotify } from "./NotifyContext";
+import { useSocket } from "./SocketContext";
 
 export const StoryContext = createContext();
 
 export const StoryContextProvider = ({ children }) => {
   const { user } = useAuth();
   const { showAlert } = useAlert();
+  const { addNotify } = useNotify();
+  const { socket } = useSocket();
+
   const [stories, setStories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const {addNotify} = useNotify()
-  const [isStory, setIsStory] = useState(false)
-  // const addNewStory = async (storyData) => {
-  //   const formData = new FormData();
+  const [isStory, setIsStory] = useState(false); // Modal toggle
 
-  //   if (storyData.text) formData.append('text', storyData.text);
-  //   if (storyData.file) formData.append('image', storyData.file);
+  // 📥 Initial Fetch
+  useEffect(() => {
+    const fetchStories = async () => {
+      setIsLoading(true);
+      try {
+        await getData('story', setStories);
+      } catch (err) {
+        console.error("Error fetching stories:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchStories();
+  }, []);
 
-  //   if (!storyData.text && !storyData.file) {
-  //     showAlert("You must provide either an image, text, or both for the story.");
-  //     return;
-  //   }
+  // 🔔 Real-time Socket Listener
+  useEffect(() => {
+    if (!socket) return;
 
-  //   if (storyData.collaborators) {
-  //     for (const collaborator of storyData.collaborators) {
-  //       formData.append('collaborators', collaborator);
-  //     }
-  //   }
+    const handleNewStory = (newStory) => {
+      // Avoid duplicates
+      setStories((prev) => {
+        if (prev.some(s => s._id === newStory._id)) return prev;
+        return [newStory, ...prev];
+      });
+    };
 
-  //   try {
-  //     const res = await axios.post(
-  //       `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/add`,
-  //       formData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${user.token}`,
-  //           'Content-Type': 'multipart/form-data',
-  //         },
-  //       }
-  //     );
+    const handleDeletedStory = (storyId) => {
+      setStories((prev) => prev.filter(s => s._id !== storyId));
+    };
 
-  //     const story = res.data?.story || res.data;
+    socket.on("new-story", handleNewStory);
+    socket.on("delete-story", handleDeletedStory);
 
-  //     // ✅ إضافة القصة الجديدة إلى الـ state مباشرة بدون refresh
-  //     setStories((prev) => [story, ...prev]);
+    // Also listen for interactions if needed
+    socket.on("update-story", (updatedStory) => {
+      setStories(prev => prev.map(s => s._id === updatedStory._id ? updatedStory : s));
+    });
 
-  //     // ✅ إرسال إشعارات للمشاركين (collaborators)
-  //     if (storyData.collaborators?.length > 0 && story?._id) {
-  //       for (const collaborator of storyData.collaborators) {
-  //         await addNotify({
-  //           content: `${user?.username} added you as a collaborator in a story 🎉`,
-  //           type: 'collaborator',
-  //           receiverId: collaborator?._id,
-  //           actionRef: story._id,
-  //           actionModel: 'Story',
-  //         });
-  //       }
-  //     }
+    return () => {
+      socket.off("new-story", handleNewStory);
+      socket.off("delete-story", handleDeletedStory);
+      socket.off("update-story");
+    };
+  }, [socket]);
 
-  //     showAlert("Story added successfully.");
-  //   } catch (err) {
-  //     console.error(err);
-  //     showAlert("Failed to add story.");
-  //   }
-  // };
+  // 📤 Actions
 
-  // ✅ إضافة قصة جديدة
   const addNewStory = useCallback(async (storyData) => {
     const formData = new FormData();
-
     if (storyData.text) formData.append('text', storyData.text);
     if (storyData.file) formData.append('image', storyData.file);
 
@@ -98,10 +94,12 @@ export const StoryContextProvider = ({ children }) => {
       );
 
       const newStory = res.data?.story || res.data;
-      // ✅ تحديث فوري للـ state
-      setStories(prev => [newStory, ...prev]);
+      // Local state is updated via socket or manually here if socket fails
+      setStories(prev => {
+        if (prev.some(s => s._id === newStory._id)) return prev;
+        return [newStory, ...prev];
+      });
 
-      // ✅ إشعار للمشاركين
       if (storyData.collaborators?.length > 0) {
         for (const collaborator of storyData.collaborators) {
           await addNotify({
@@ -114,47 +112,26 @@ export const StoryContextProvider = ({ children }) => {
         }
       }
 
-      showAlert("✅ Story added successfully.");
+      showAlert("✅ Story published successfully.");
+      setIsStory(false); // Close modal
     } catch (err) {
       console.error(err);
       showAlert("❌ Failed to add story.");
     }
   }, [user, showAlert, addNotify]);
 
-  const getUserStories = useCallback(async (userId) => {
-    if (!userId) return [];
+  const deleteStory = useCallback(async (storyId) => {
     try {
-      const { data } = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/user/${userId}`,
-        {
-          headers: { Authorization: `Bearer ${user?.token}` },
-        }
-      );
-      return data;
+      await axios.delete(`${process.env.NEXT_PUBLIC_BACK_URL}/api/story/${storyId}`, {
+        headers: { Authorization: `Bearer ${user?.token}` }
+      });
+      setStories(prev => prev.filter(s => s._id !== storyId));
+      showAlert("Story deleted successfully.");
     } catch (err) {
-      console.error(err);
-      showAlert("Failed to load user stories.");
-      return [];
+      showAlert("Failed to delete story.");
     }
   }, [user, showAlert]);
 
-
-
-  // 📥 جلب القصص
-  useEffect(() => {
-    const fetchStories = async () => {
-      setIsLoading(true);
-      try {
-        await getData('story', setStories);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchStories();
-  }, []);
-
-
-  // ✅ تسجيل المشاهدة مع تحديث فوري للواجهة
   const viewStory = useCallback(async (storyId) => {
     if (!user) return;
     try {
@@ -163,272 +140,74 @@ export const StoryContextProvider = ({ children }) => {
         {},
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
-
-      const updatedStory = data?.story;
-      if (!updatedStory) return;
-
-      // تحديث القصة في الـ state
-      setStories(prev =>
-        prev.map(story =>
-          story._id === storyId ? updatedStory : story
-        )
-      );
+      const updatedStory = data?.story || data;
+      setStories(prev => prev.map(s => s._id === storyId ? updatedStory : s));
     } catch (err) {
-      console.error(err);
+      console.error("View story error:", err);
     }
   }, [user]);
 
-  // ✅ Toggle Love (Like) بشكل فوري
   const toggleLove = useCallback(async (storyId) => {
     if (!user) return;
-
     try {
       const { data } = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/love/${storyId}`,
         {},
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
-
-      // تحديث مباشر داخل الواجهة
-      setStories(prev =>
-        prev.map(story =>
-          story._id === storyId ? data : story
-        )
-      );
-
-      showAlert("❤️ You loved this story!");
+      setStories(prev => prev.map(s => s._id === storyId ? data : s));
     } catch (err) {
       console.error(err);
       showAlert("❌ Failed to toggle love.");
     }
   }, [user, showAlert]);
 
-  // ✅ مشاركة القصة
   const shareStory = useCallback(async (id) => {
     if (!user?.token) return showAlert("You must be logged in.");
-
     try {
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/share/${id}`,
         {},
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
-
-      const newShared = res.data;
-      // ✅ تحديث فوري للـ state بإضافة القصة الجديدة
-      setStories(prev => [newShared, ...prev]);
-
+      setStories(prev => [res.data, ...prev]);
       showAlert("✅ Story shared successfully!");
     } catch (err) {
-      console.error(err);
       showAlert("❌ Failed to share story.");
     }
   }, [user, showAlert]);
 
+  const getUserStories = useCallback(async (userId) => {
+    if (!userId) return [];
+    try {
+      const { data } = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/user/${userId}`,
+        { headers: { Authorization: `Bearer ${user?.token}` } }
+      );
+      return data;
+    } catch (err) {
+      return [];
+    }
+  }, [user]);
+
+  const value = useMemo(() => ({
+    stories,
+    isLoading,
+    isStory,
+    setIsStory,
+    addNewStory,
+    deleteStory,
+    viewStory,
+    toggleLove,
+    getUserStories,
+    shareStory
+  }), [stories, isLoading, isStory, addNewStory, deleteStory, viewStory, toggleLove, getUserStories, shareStory]);
+
   return (
-    <StoryContext.Provider
-      value={{
-        addNewStory,
-        stories,
-        isLoading,
-        viewStory,toggleLove, getUserStories,shareStory,isStory, setIsStory
-      }}
-    >
+    <StoryContext.Provider value={value}>
       {children}
     </StoryContext.Provider>
   );
 };
 
 export const useStory = () => useContext(StoryContext);
-
-// 'use client';
-// import { createContext, useContext, useEffect, useState, useCallback } from "react";
-// import axios from "axios";
-// import getData from "../utils/getData";
-// import { useAuth } from "./AuthContext";
-// import { useAlert } from "./AlertContext";
-// import { useNotify } from "./NotifyContext";
-
-// export const StoryContext = createContext();
-
-// export const StoryContextProvider = ({ children }) => {
-//   const { user } = useAuth();
-//   const { showAlert } = useAlert();
-//   const { addNotify } = useNotify();
-
-//   const [stories, setStories] = useState([]);
-//   const [isLoading, setIsLoading] = useState(false);
-
-//   // ✅ تحسين: جلب جميع القصص فور دخول المستخدم
-//   useEffect(() => {
-//     const fetchStories = async () => {
-//       setIsLoading(true);
-//       try {
-//         await getData('story', setStories);
-//       } finally {
-//         setIsLoading(false);
-//       }
-//     };
-//     fetchStories();
-//   }, []);
-
-//   // ✅ إضافة قصة جديدة
-//   const addNewStory = useCallback(async (storyData) => {
-//     const formData = new FormData();
-
-//     if (storyData.text) formData.append('text', storyData.text);
-//     if (storyData.file) formData.append('image', storyData.file);
-
-//     if (!storyData.text && !storyData.file) {
-//       showAlert("You must provide either text or an image.");
-//       return;
-//     }
-
-//     if (storyData.collaborators) {
-//       storyData.collaborators.forEach(c => formData.append('collaborators', c));
-//     }
-
-//     try {
-//       const res = await axios.post(
-//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/add`,
-//         formData,
-//         {
-//           headers: {
-//             Authorization: `Bearer ${user?.token}`,
-//             'Content-Type': 'multipart/form-data',
-//           },
-//         }
-//       );
-
-//       const newStory = res.data?.story || res.data;
-//       // ✅ تحديث فوري للـ state
-//       setStories(prev => [newStory, ...prev]);
-
-//       // ✅ إشعار للمشاركين
-//       if (storyData.collaborators?.length > 0) {
-//         for (const collaborator of storyData.collaborators) {
-//           await addNotify({
-//             content: `${user?.username} added you as a collaborator in a story 🎉`,
-//             type: 'collaborator',
-//             receiverId: collaborator?._id,
-//             actionRef: newStory._id,
-//             actionModel: 'Story',
-//           });
-//         }
-//       }
-
-//       showAlert("✅ Story added successfully.");
-//     } catch (err) {
-//       console.error(err);
-//       showAlert("❌ Failed to add story.");
-//     }
-//   }, [user, showAlert, addNotify]);
-
-//   // ✅ جلب قصص يوزر معين
-//   const getUserStories = useCallback(async (userId) => {
-//     if (!userId) return [];
-//     try {
-//       const { data } = await axios.get(
-//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/user/${userId}`,
-//         {
-//           headers: { Authorization: `Bearer ${user?.token}` },
-//         }
-//       );
-//       return data;
-//     } catch (err) {
-//       console.error(err);
-//       showAlert("Failed to load user stories.");
-//       return [];
-//     }
-//   }, [user, showAlert]);
-
-//   // ✅ تسجيل المشاهدة مع تحديث فوري للواجهة
-//   const viewStory = useCallback(async (storyId) => {
-//     if (!user) return;
-//     try {
-//       const { data } = await axios.post(
-//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/view/${storyId}`,
-//         {},
-//         { headers: { Authorization: `Bearer ${user.token}` } }
-//       );
-
-//       const updatedStory = data?.story;
-//       if (!updatedStory) return;
-
-//       // تحديث القصة في الـ state
-//       setStories(prev =>
-//         prev.map(story =>
-//           story._id === storyId ? updatedStory : story
-//         )
-//       );
-//     } catch (err) {
-//       console.error(err);
-//     }
-//   }, [user]);
-
-//   // ✅ Toggle Love (Like) بشكل فوري
-//   const toggleLove = useCallback(async (storyId) => {
-//     if (!user) return;
-
-//     try {
-//       const { data } = await axios.post(
-//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/love/${storyId}`,
-//         {},
-//         { headers: { Authorization: `Bearer ${user.token}` } }
-//       );
-
-//       // تحديث مباشر داخل الواجهة
-//       setStories(prev =>
-//         prev.map(story =>
-//           story._id === storyId ? data : story
-//         )
-//       );
-
-//       showAlert("❤️ You loved this story!");
-//     } catch (err) {
-//       console.error(err);
-//       showAlert("❌ Failed to toggle love.");
-//     }
-//   }, [user, showAlert]);
-
-//   // ✅ مشاركة القصة
-//   const shareStory = useCallback(async (id) => {
-//     if (!user?.token) return showAlert("You must be logged in.");
-
-//     try {
-//       const res = await axios.post(
-//         `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/share/${id}`,
-//         {},
-//         { headers: { Authorization: `Bearer ${user.token}` } }
-//       );
-
-//       const newShared = res.data;
-//       // ✅ تحديث فوري للـ state بإضافة القصة الجديدة
-//       setStories(prev => [newShared, ...prev]);
-
-//       showAlert("✅ Story shared successfully!");
-//     } catch (err) {
-//       console.error(err);
-//       showAlert("❌ Failed to share story.");
-//     }
-//   }, [user, showAlert]);
-
-//   return (
-//     <StoryContext.Provider
-//       value={{
-//         addNewStory,
-//         stories,
-//         isLoading,
-//         viewStory,
-//         toggleLove,
-//         getUserStories,
-//         shareStory,
-//         setStories // ✅ أضفناها لتسهيل التحديث اليدوي في مكونات أخرى
-//       }}
-//     >
-//       {children}
-//     </StoryContext.Provider>
-//   );
-// };
-
-// export const useStory = () => useContext(StoryContext);
