@@ -324,7 +324,7 @@ const DasignCommunitySelect = memo(({
                 <div className="text-[10px] uppercase text-gray-500">{t('Members')}</div>
               </div>
               <div className="p-4 rounded-2xl bg-[#090909] border border-white/5 text-center">
-                <div className="text-2xl font-black text-white">{posts?.length}</div>
+                <div className="text-2xl font-black text-white">{postsFiltered?.length}</div>
                 <div className="text-[10px] uppercase text-gray-500">{t('Posts')}</div>
               </div>
             </div>
