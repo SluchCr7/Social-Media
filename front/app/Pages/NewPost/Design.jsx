@@ -6,7 +6,7 @@ import {
   HiXMark,
   HiOutlineCalendarDays,
   HiPhoto,
-  HiPlus
+  HiPlus,
   HiFaceSmile,
   HiUsers,
   HiLink,
