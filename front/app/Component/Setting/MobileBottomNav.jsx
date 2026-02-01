@@ -11,7 +11,8 @@ import {
   HiClock,
   HiBell,
   HiUserGroup,
-  HiCog6Tooth
+  HiCog6Tooth,
+  HiSparkles
 } from 'react-icons/hi2';
 
 const TAB_ICONS = {
