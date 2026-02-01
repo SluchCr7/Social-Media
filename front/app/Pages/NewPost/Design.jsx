@@ -62,42 +62,53 @@ const MediaItem = React.memo(({ item, onRemove }) => (
 ))
 MediaItem.displayName = 'MediaItem'
 
-const MentionsList = React.memo(({ users, onSelect, pos }) => (
+const MentionsList = React.memo(({ users, onSelect, pos, activeIndex }) => (
   <AnimatePresence mode="wait">
     {users.length > 0 && (
       <motion.div
-        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        initial={{ opacity: 0, y: 15, scale: 0.9, filter: 'blur(10px)' }}
+        animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+        exit={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
+        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
         style={{
-          top: (pos.top || 0) + 40,
+          top: (pos.top || 0) + 45,
           left: (pos.left || 0)
         }}
-        className="absolute z-[1000] w-72 bg-white/90 dark:bg-[#0D1117]/90 backdrop-blur-2xl rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden p-2"
+        className="absolute z-[1000] w-72 bg-white/80 dark:bg-[#0D1117]/85 backdrop-blur-3xl rounded-[2.5rem] border border-gray-200/50 dark:border-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.35)] overflow-hidden p-2.5"
       >
-        <div className="max-h-64 overflow-y-auto custom-scrollbar">
+        <div className="max-h-72 overflow-y-auto custom-scrollbar">
           {users.map((u, idx) => (
             <motion.button
               key={u._id}
-              initial={{ opacity: 0, x: -10 }}
+              initial={{ opacity: 0, x: -15 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.03 }}
+              transition={{ delay: idx * 0.04 }}
               onClick={() => onSelect(u)}
-              className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-indigo-600 group transition-all duration-300 mb-1 last:mb-0"
+              className={`w-full flex items-center gap-3.5 p-3 rounded-[1.75rem] transition-all duration-300 group mb-1 last:mb-0
+                ${activeIndex === idx
+                  ? 'bg-indigo-600 shadow-lg shadow-indigo-600/20'
+                  : 'hover:bg-gray-100/80 dark:hover:bg-white/5'
+                }`}
             >
-              <div className="relative w-10 h-10 rounded-xl overflow-hidden border-2 border-white dark:border-gray-800 shadow-md transform group-active:scale-90 transition-transform">
+              <div className={`relative w-11 h-11 rounded-[1.25rem] overflow-hidden border-2 shadow-inner transition-transform group-active:scale-95
+                ${activeIndex === idx ? 'border-white/30' : 'border-white dark:border-gray-800'}`}>
                 <Image src={u.profilePhoto?.url || '/default-avatar.png'} alt={u.username} fill className="object-cover" />
               </div>
               <div className="text-left flex-1 min-w-0">
-                <p className="text-[12px] font-black text-gray-900 dark:text-white group-hover:text-white truncate">
+                <p className={`text-[13px] font-black tracking-tight truncate transition-colors
+                  ${activeIndex === idx ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>
                   @{u.username}
                 </p>
-                <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 group-hover:text-indigo-100 truncate">
+                <p className={`text-[10px] font-bold truncate transition-colors
+                  ${activeIndex === idx ? 'text-indigo-100/70' : 'text-gray-500 dark:text-gray-500'}`}>
                   {u.profileName}
                 </p>
               </div>
-              <HiPlus size={14} className="text-gray-300 dark:text-gray-600 group-hover:text-white" />
+              {activeIndex === idx && (
+                <motion.div layoutId="plus" className="bg-white/20 p-1.5 rounded-xl">
+                  <HiPlus size={12} className="text-white" />
+                </motion.div>
+              )}
             </motion.button>
           ))}
         </div>
@@ -107,6 +118,66 @@ const MentionsList = React.memo(({ users, onSelect, pos }) => (
 ))
 MentionsList.displayName = 'MentionsList'
 
+const LivePreview = React.memo(({ selectedUser, privacy, postText, isRTL, selectedMusic, media, t }) => (
+  <div className="bg-gray-50 dark:bg-white/5 rounded-3xl p-5 border border-gray-100 dark:border-white/5 relative">
+    <div className="flex items-center gap-3 mb-4">
+      <div className="w-8 h-8 rounded-full overflow-hidden">
+        <Image src={selectedUser?.profilePhoto?.url || '/default-avatar.png'} alt="P" width={32} height={32} />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[10px] font-black text-gray-900 dark:text-white truncate">@{selectedUser?.username || 'user'}</p>
+        <p className="text-[8px] text-gray-500 uppercase font-black tracking-widest">{privacy}</p>
+      </div>
+    </div>
+
+    <div className={`text-[12px] leading-relaxed dark:text-gray-300 break-words ${isRTL ? 'text-right' : 'text-left'}`}>
+      {postText || <span className="text-gray-400 dark:text-gray-600 italic">{t("Content signal is empty...")}</span>}
+    </div>
+
+    {selectedMusic && (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="mt-4 p-3 bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center gap-3"
+      >
+        <div className="w-8 h-8 bg-purple-500 text-white rounded-lg flex items-center justify-center shrink-0">
+          <HiMusicalNote size={16} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[10px] font-black dark:text-white truncate">{selectedMusic.name}</p>
+          <p className="text-[8px] text-gray-500 uppercase font-black tracking-widest">{selectedMusic.artist || t("Unknown Artist")}</p>
+        </div>
+      </motion.div>
+    )}
+
+    {media.length > 0 && (
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        {media.slice(0, 4).map((item, i) => (
+          <div key={i} className="aspect-square relative rounded-xl overflow-hidden shadow-sm bg-black">
+            {item.type === 'video' ? (
+              <video src={item.url} className="w-full h-full object-cover" muted />
+            ) : (
+              <Image src={item.url} alt="i" fill className="object-cover" />
+            )}
+            {i === 3 && media.length > 4 && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-[10px] text-white font-black">+{media.length - 4}</div>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+
+    <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between opacity-50">
+      <div className="flex gap-4">
+        <div className="h-2 w-8 bg-gray-200 dark:bg-white/10 rounded-full" />
+        <div className="h-2 w-8 bg-gray-200 dark:bg-white/10 rounded-full" />
+      </div>
+      <div className="h-4 w-4 bg-gray-200 dark:bg-white/10 rounded-full" />
+    </div>
+  </div>
+))
+LivePreview.displayName = 'LivePreview'
+
 const NewPostPresenter = (props) => {
   const {
     postText, handleTextareaChange, handlePost, loading, errorText,
@@ -115,8 +186,8 @@ const NewPostPresenter = (props) => {
     links = [], linkInput, setLinkInput, handleAddLink, handleRemoveLink,
     scheduleEnabled, setScheduleEnabled, scheduleDate, setScheduleDate,
     selectedUser, privacy, setPrivacy, communities = [], selectedCommunity, setSelectedCommunity,
-    filteredUsers = [], handleSelectMention, showMentionBox, mentionBoxPos = {}, textareaRef,
-    selectedMusic, setSelectedMusic, musicList = [], isMusicLoading
+    filteredUsers = [], handleSelectMention, showMentionBox, activeMentionIndex, mentionBoxPos = {}, textareaRef,
+    handleKeyDown, selectedMusic, setSelectedMusic, musicList = [], isMusicLoading
   } = props
 
   const { t } = useTranslation()
@@ -298,6 +369,7 @@ const NewPostPresenter = (props) => {
                   ref={textareaRef}
                   value={postText}
                   onChange={handleTextareaChange}
+                  onKeyDown={handleKeyDown}
                   rows={8}
                   placeholder={t("What's on your mind? Broadcast it to the world...")}
                   dir={isRTL ? 'rtl' : 'ltr'}
@@ -310,6 +382,7 @@ const NewPostPresenter = (props) => {
                     users={filteredUsers}
                     onSelect={handleSelectMention}
                     pos={mentionBoxPos}
+                    activeIndex={activeMentionIndex}
                   />
                 )}
               </div>
@@ -434,87 +507,41 @@ const NewPostPresenter = (props) => {
             </h3>
 
             <div className="bg-gray-50 dark:bg-white/5 rounded-3xl p-5 border border-gray-100 dark:border-white/5 relative">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-full overflow-hidden">
-                  <Image src={selectedUser?.profilePhoto?.url || '/default-avatar.png'} alt="P" width={32} height={32} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-black text-gray-900 dark:text-white truncate">@{selectedUser?.username || 'user'}</p>
-                  <p className="text-[8px] text-gray-500 uppercase font-black tracking-widest">{privacy}</p>
-                </div>
-              </div>
+              <LivePreview
+                selectedUser={selectedUser}
+                privacy={privacy}
+                postText={postText}
+                isRTL={isRTL}
+                selectedMusic={selectedMusic}
+                media={media}
+                t={t}
+              />
 
-              <div className={`text-[12px] leading-relaxed dark:text-gray-300 break-words ${isRTL ? 'text-right' : 'text-left'}`}>
-                {postText || <span className="text-gray-400 dark:text-gray-600 italic">{t("Content signal is empty...")}</span>}
-              </div>
-
-              {selectedMusic && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="mt-4 p-3 bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center gap-3"
-                >
-                  <div className="w-8 h-8 bg-purple-500 text-white rounded-lg flex items-center justify-center shrink-0">
-                    <HiMusicalNote size={16} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-black dark:text-white truncate">{selectedMusic.name}</p>
-                    <p className="text-[8px] text-gray-500 uppercase font-black tracking-widest">{selectedMusic.artist || t("Unknown Artist")}</p>
-                  </div>
-                </motion.div>
-              )}
-
-              {media.length > 0 && (
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  {media.slice(0, 4).map((item, i) => (
-                    <div key={i} className="aspect-square relative rounded-xl overflow-hidden shadow-sm bg-black">
-                      {item.type === 'video' ? (
-                        <video src={item.url} className="w-full h-full object-cover" muted />
-                      ) : (
-                        <Image src={item.url} alt="i" fill className="object-cover" />
-                      )}
-
-                      {i === 3 && media.length > 4 && (
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-[10px] text-white font-black">+{media.length - 4}</div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between opacity-50">
-                <div className="flex gap-4">
-                  <div className="h-2 w-8 bg-gray-200 dark:bg-white/10 rounded-full" />
-                  <div className="h-2 w-8 bg-gray-200 dark:bg-white/10 rounded-full" />
-                </div>
-                <div className="h-4 w-4 bg-gray-200 dark:bg-white/10 rounded-full" />
+              <div className="mt-6 flex items-center justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">
+                <span>{t("Network Latency")}</span>
+                <span className="text-green-500">24ms</span>
               </div>
             </div>
 
-            <div className="mt-6 flex items-center justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">
-              <span>{t("Network Latency")}</span>
-              <span className="text-green-500">24ms</span>
-            </div>
-          </div>
-
-          {/* Quick Stats / Info */}
-          <div className="space-y-4">
-            <div className="bg-white dark:bg-white/5 rounded-3xl p-4 flex items-center gap-4 border border-gray-100 dark:border-white/5 group hover:border-indigo-500/30 transition-all">
-              <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform">
-                <HiSparkles size={18} />
+            {/* Quick Stats / Info */}
+            <div className="space-y-4">
+              <div className="bg-white dark:bg-white/5 rounded-3xl p-4 flex items-center gap-4 border border-gray-100 dark:border-white/5 group hover:border-indigo-500/30 transition-all">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform">
+                  <HiSparkles size={18} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">{t("Reach Potential")}</p>
+                  <p className="text-xs font-bold text-gray-900 dark:text-white">~1.2k impressions</p>
+                </div>
               </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">{t("Reach Potential")}</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">~1.2k impressions</p>
-              </div>
-            </div>
-            <div className="bg-white dark:bg-white/5 rounded-3xl p-4 flex items-center gap-4 border border-gray-100 dark:border-white/5 group hover:border-purple-500/30 transition-all">
-              <div className="w-10 h-10 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500 group-hover:scale-110 transition-transform">
-                <HiCheckBadge size={18} />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">{t("Trust Score")}</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">Verified Stream</p>
+              <div className="bg-white dark:bg-white/5 rounded-3xl p-4 flex items-center gap-4 border border-gray-100 dark:border-white/5 group hover:border-purple-500/30 transition-all">
+                <div className="w-10 h-10 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500 group-hover:scale-110 transition-transform">
+                  <HiCheckBadge size={18} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">{t("Trust Score")}</p>
+                  <p className="text-xs font-bold text-gray-900 dark:text-white">Verified Stream</p>
+                </div>
               </div>
             </div>
           </div>

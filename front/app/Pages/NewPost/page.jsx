@@ -37,6 +37,7 @@ const NewPostContainer = () => {
   const [showMentionBox, setShowMentionBox] = useState(false)
   const [mentionBoxPos, setMentionBoxPos] = useState({ top: 0, left: 0 })
   const [selectedMusic, setSelectedMusic] = useState(null)
+  const [activeMentionIndex, setActiveMentionIndex] = useState(0)
 
   const textareaRef = useRef(null)
 
@@ -114,8 +115,29 @@ const NewPostContainer = () => {
 
       setShowMentionBox(false)
       setMentionQuery('')
+      setActiveMentionIndex(0)
     },
     [cursorPosition, postText]
+  )
+
+  const handleKeyDown = useCallback(
+    (e) => {
+      if (!showMentionBox || filteredUsers.length === 0) return
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setActiveMentionIndex((prev) => (prev + 1) % filteredUsers.length)
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setActiveMentionIndex((prev) => (prev - 1 + filteredUsers.length) % filteredUsers.length)
+      } else if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault()
+        handleSelectMention(filteredUsers[activeMentionIndex])
+      } else if (e.key === 'Escape') {
+        setShowMentionBox(false)
+      }
+    },
+    [showMentionBox, filteredUsers, activeMentionIndex, handleSelectMention]
   )
 
   /* ------------------------- 📍 Mention Box Position ------------------------- */
@@ -301,8 +323,10 @@ const NewPostContainer = () => {
           communities,
           showMentionBox,
           filteredUsers,
+          activeMentionIndex,
           mentionBoxPos,
           textareaRef,
+          handleKeyDown,
           selectedMusic,
           setSelectedMusic,
           musicList,
