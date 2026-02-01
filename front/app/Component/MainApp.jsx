@@ -31,8 +31,8 @@ const MainApp = () => {
       />
 
       {/* محتوى الصفحة */}
-      <div className="w-full pt-10 md:pt-6 pb-5 pl-7">
-        <div className='w-full pl-3'>
+      <div className="w-full pt-10 md:pt-6 pb-5 pl-7 pr-3">
+        <div className='w-full px-3'>
           {isLogin && <Stories />}
         </div>
         <LoadingOverlay isLoading={isLoadingPostCreated}/>

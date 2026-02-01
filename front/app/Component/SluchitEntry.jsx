@@ -101,7 +101,7 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
         <div className={`p-5 md:p-8 flex flex-col gap-5 md:gap-6 transition-all ${showSensitive ? 'blur-2xl pointer-events-none' : ''}`}>
 
           {/* Top Metadata Row */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col items-start md:flex-row md:items-center gap-2 md:justify-between">
             <div className="flex gap-2">
               {post?.isPinned && (
                 <div className="px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-[9px] font-black uppercase tracking-widest text-yellow-600 dark:text-yellow-500">
