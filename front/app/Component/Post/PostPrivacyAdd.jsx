@@ -32,9 +32,9 @@ const PostPrivacySelector = memo(({ onChange, defaultValue = 'public' }) => {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-3 px-4 py-2 bg-white dark:bg-white/10 text-gray-700 dark:text-gray-200 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm transition-all focus:outline-none"
+        className="flex items-center gap-2 sm:gap-3 px-3 py-1.5 sm:px-4 sm:py-2 bg-white dark:bg-white/10 text-gray-700 dark:text-gray-200 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm transition-all focus:outline-none"
       >
-        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+        <div className="flex items-center gap-2 text-[10px] sm:text-xs font-black uppercase tracking-widest">
           <span className="text-indigo-500">{selectedOption.icon}</span>
           <span className="truncate">{selectedOption.label}</span>
         </div>
@@ -58,9 +58,9 @@ const PostPrivacySelector = memo(({ onChange, defaultValue = 'public' }) => {
               <li
                 key={option.value}
                 onClick={() => handleSelect(option)}
-                className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all text-[10px] font-black uppercase tracking-widest ${selected === option.value
-                    ? 'bg-indigo-500 text-white'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-white/5'
+                className={`flex items-center gap-3 px-3 py-2 sm:px-4 sm:py-3 cursor-pointer transition-all text-[10px] sm:text-xs font-black uppercase tracking-widest ${selected === option.value
+                  ? 'bg-indigo-500 text-white'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-white/5'
                   }`}
               >
                 <span className={selected === option.value ? 'text-white' : 'text-indigo-500'}>

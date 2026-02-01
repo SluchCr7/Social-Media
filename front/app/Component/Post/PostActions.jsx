@@ -10,10 +10,10 @@ const ActionButton = React.memo(({ onClick, icon: Icon, label, active, color, ac
     whileHover={{ scale: 1.05 }}
     whileTap={{ scale: 0.95 }}
     onClick={onClick}
-    className="group flex items-center gap-2 px-2 py-1.5 rounded-xl transition-all"
+    className="group flex items-center gap-1.5 sm:gap-2 px-1.5 py-1.5 sm:px-2 sm:py-1.5 rounded-xl transition-all"
   >
     <div className={`p-2 rounded-lg transition-all ${active ? activeColor : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/40 group-hover:bg-gray-200 dark:group-hover:bg-white/10 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
-      <Icon size={18} fill={active ? "currentColor" : "none"} strokeWidth={active ? 2.5 : 2} />
+      <Icon size={18} className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" fill={active ? "currentColor" : "none"} strokeWidth={active ? 2.5 : 2} />
     </div>
     {label !== undefined && (
       <span className={`text-[11px] font-black uppercase tracking-widest ${active ? color : 'text-gray-400 dark:text-white/40 group-hover:text-gray-900 dark:group-hover:text-white'}`}>

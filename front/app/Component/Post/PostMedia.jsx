@@ -44,7 +44,7 @@ const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
     };
 
     return (
-        <div className={`grid gap-1 rounded-2xl overflow-hidden ${gridClass} h-[300px] md:h-[400px]`}>
+        <div className={`grid gap-1 rounded-2xl overflow-hidden ${gridClass} aspect-[4/5] sm:aspect-square md:aspect-[4/3] max-h-[500px]`}>
             {displayItems.map((item, index) => {
                 const isVideo = item.type === 'video';
                 // Logic for specialized 3-item layout (first item big)

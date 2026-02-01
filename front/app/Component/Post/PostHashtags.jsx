@@ -4,19 +4,19 @@ import React, { memo } from 'react'
 const PostHashtags = memo(({
     post
 }) => {
-  return (
+    return (
         <div className="flex flex-wrap gap-2">
             {post?.Hashtags.map((tag, i) => (
                 <Link
-                href={`/Pages/Hashtag/${encodeURIComponent(tag)}`}
-                key={i}
-                className="bg-blue-100 dark:bg-blue-800/30 text-blue-600 dark:text-blue-300 text-xs font-semibold px-3 py-1 rounded-full"
+                    href={`/Pages/Hashtag/${encodeURIComponent(tag)}`}
+                    key={i}
+                    className="bg-blue-100 dark:bg-blue-800/30 text-blue-600 dark:text-blue-300 text-[10px] sm:text-xs font-semibold px-2 py-0.5 sm:px-3 sm:py-1 rounded-full"
                 >
-                #{tag}
+                    #{tag}
                 </Link>
             ))}
         </div>
-  )
+    )
 })
 PostHashtags.displayName = 'PostHashtags'
 export default PostHashtags

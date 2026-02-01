@@ -59,7 +59,7 @@ const NewPostPresenter = (props) => {
   }
 
   return (
-    <main className="min-h-screen w-full bg-[#fafafa] dark:bg-[#080808] flex items-center justify-center p-4 md:p-8 transition-all duration-700 selection:bg-indigo-500/30">
+    <main className="min-h-screen w-full bg-[#fafafa] dark:bg-[#080808] flex items-center justify-center p-3 sm:p-4 md:p-8 transition-all duration-700 selection:bg-indigo-500/30">
       {/* Animated Background Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -155,7 +155,7 @@ const NewPostPresenter = (props) => {
           animate={{ opacity: 1, y: 0 }}
           className="lg:col-span-6 space-y-6"
         >
-          <div className="bg-white dark:bg-[#0D1117] rounded-[3rem] border border-gray-200/50 dark:border-white/5 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15)] overflow-hidden">
+          <div className="bg-white dark:bg-[#0D1117] rounded-3xl sm:rounded-[3rem] border border-gray-200/50 dark:border-white/5 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15)] overflow-hidden">
             {/* Mobile Header (Hidden on Desktop) */}
             <div className="lg:hidden p-6 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-3">

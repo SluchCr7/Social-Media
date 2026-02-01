@@ -59,7 +59,7 @@ const SharedPost = memo(({
             border border-gray-200/40 dark:border-gray-700/40 
             rounded-xl p-4 flex flex-col gap-3 
             shadow-md hover:shadow-lg transition-all duration-300 
-            border-l-4 border-blue-400"
+            border-l-[3px] sm:border-l-4 border-blue-400"
         >
             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 md:gap-4">
                 <Link
@@ -71,7 +71,7 @@ const SharedPost = memo(({
                         alt="Shared_profile_post"
                         width={50}
                         height={50}
-                        className="w-12 h-12 rounded-full object-cover border-2 border-blue-400"
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-blue-400"
                     />
                     <UserHoverCard userSelected={original?.owner}>
                         <div className="flex flex-col">

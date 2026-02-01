@@ -98,7 +98,7 @@ const DesignExplore = memo(({
     };
 
     return (
-        <div className="relative w-full min-h-screen px-4 sm:px-8 py-12 lg:px-16 overflow-hidden">
+        <div className="relative w-full min-h-screen px-3 sm:px-8 py-6 sm:py-12 lg:px-16 overflow-hidden">
             {/* Enhanced Background Elements */}
             <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
                 <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-indigo-500/5 dark:bg-indigo-500/10 blur-[150px] rounded-full animate-pulse" />
@@ -123,7 +123,7 @@ const DesignExplore = memo(({
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 }}
-                            className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-gray-900 dark:text-white leading-[0.85]"
+                            className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-gray-900 dark:text-white leading-[0.85]"
                         >
                             {t('Explore')} <br />
                             <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
@@ -182,7 +182,7 @@ const DesignExplore = memo(({
                                 exit={{ opacity: 0, y: -20 }}
                                 className="relative z-10"
                             >
-                                <div className="bg-white/80 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[3rem] border border-gray-100 dark:border-white/5 shadow-2xl p-10">
+                                <div className="bg-white/80 dark:bg-white/[0.02] backdrop-blur-3xl rounded-3xl sm:rounded-[3rem] border border-gray-100 dark:border-white/5 shadow-2xl p-4 sm:p-10">
                                     <SearchResults
                                         searchResults={searchResults}
                                         searchQuery={search}

@@ -48,12 +48,12 @@ const PostHeader = memo(({ post, user, isLogin, showMenu, setShowMenu, isCommuni
             {owner?.isAccountWithPremiumVerify && (
               <HiBadgeCheck className="text-indigo-500 text-lg" title="Verified Asset" />
             )}
-            <span className="text-[10px] text-gray-400 dark:text-white/30 font-black uppercase tracking-widest ml-1">
+            <span className="text-[9px] sm:text-[10px] text-gray-400 dark:text-white/30 font-black uppercase tracking-widest ml-1">
               • {formatRelativeTime(post?.createdAt)}
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-gray-500 dark:text-white/40 truncate max-w-[120px]">@{owner?.profileName || owner?.username}</span>
+            <span className="text-[10px] sm:text-xs font-bold text-gray-500 dark:text-white/40 truncate max-w-[100px] sm:max-w-[150px] md:max-w-[180px]">@{owner?.profileName || owner?.username}</span>
             {isCommunityPost && (
               <>
                 <span className="w-1 h-1 bg-gray-300 dark:bg-white/20 rounded-full" />

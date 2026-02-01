@@ -23,7 +23,7 @@ const ShowSensitiveContent = ({
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="relative z-10 flex flex-col items-center max-w-[280px] w-full text-center"
+        className="relative z-10 flex flex-col items-center max-w-[90%] sm:max-w-[280px] w-full text-center"
       >
         {/* Abstract Iconography */}
         <div className="mb-8 relative">

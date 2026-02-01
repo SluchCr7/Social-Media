@@ -41,7 +41,7 @@ const LoadingOverlay = memo(function LoadingOverlay({ isLoading, progress = null
         >
           {/* 🔵 Spinner */}
           <motion.div
-            className="relative w-24 h-24 mb-6"
+            className="relative w-16 h-16 sm:w-24 sm:h-24 mb-6"
             animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
           >
@@ -63,7 +63,7 @@ const LoadingOverlay = memo(function LoadingOverlay({ isLoading, progress = null
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -10, opacity: 0 }}
             transition={{ duration: 0.4 }}
-            className="text-gray-900 dark:text-white font-semibold text-lg text-center"
+            className="text-gray-900 dark:text-white font-semibold text-base sm:text-lg text-center"
           >
             {progress !== null
               ? `${t('Uploading...')} ${Math.floor(progress)}%`

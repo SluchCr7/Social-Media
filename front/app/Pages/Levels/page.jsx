@@ -174,7 +174,7 @@ export default function LevelsPage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 w-full px-6 py-20 max-w-7xl mx-auto">
+      <div className="relative z-10 w-full px-3 sm:px-6 py-10 sm:py-20 max-w-7xl mx-auto">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -190,7 +190,7 @@ export default function LevelsPage() {
               >
                 <FaStar className="text-white text-3xl" />
               </motion.div>
-              <h1 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 bg-clip-text text-transparent">
                 {t('Level Up System')}
               </h1>
             </div>
@@ -225,7 +225,7 @@ export default function LevelsPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative rounded-3xl p-8 shadow-2xl backdrop-blur-xl border border-white/20 dark:border-gray-700/30 bg-white/60 dark:bg-gray-800/60 overflow-hidden"
+              className="relative rounded-3xl p-5 sm:p-8 shadow-2xl backdrop-blur-xl border border-white/20 dark:border-gray-700/30 bg-white/60 dark:bg-gray-800/60 overflow-hidden"
             >
               {/* Background gradient */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5" />

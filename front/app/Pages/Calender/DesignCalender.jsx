@@ -14,7 +14,7 @@ import {
   HiListBullet,
   HiSquares2X2,
   HiArrowDownTray,
-  HiFilter,
+  HiFunnel,
   HiMagnifyingGlass,
   HiClock,
   HiMapPin,
@@ -118,7 +118,7 @@ const DesignCalender = React.memo(({
   }, [jumpMonth, setSelectedDate]);
 
   return (
-    <div className="relative w-full min-h-screen p-4 sm:p-6 lg:p-8 overflow-hidden bg-gradient-to-br from-gray-50 via-white to-indigo-50/30 dark:from-[#0A0A0A] dark:via-[#0F0F0F] dark:to-[#0A0A0A]">
+    <div className="relative w-full min-h-screen p-3 sm:p-6 lg:p-8 overflow-hidden bg-gradient-to-br from-gray-50 via-white to-indigo-50/30 dark:from-[#0A0A0A] dark:via-[#0F0F0F] dark:to-[#0A0A0A]">
       {/* Ambient Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         <motion.div
@@ -151,7 +151,7 @@ const DesignCalender = React.memo(({
                 key={currentDate?.format?.('MMMM YYYY')}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="text-3xl md:text-4xl font-black tracking-tighter bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent"
+                className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tighter bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent"
               >
                 {currentDate?.format?.('MMMM YYYY')}
               </motion.h1>
@@ -244,7 +244,7 @@ const DesignCalender = React.memo(({
                         key={idx}
                         onClick={() => setSelectedDate(day)}
                         whileHover={{ scale: 1.02, zIndex: 10 }}
-                        className={`group relative min-h-[120px] p-3 bg-white dark:bg-[#0B0F1A] transition-all cursor-pointer
+                        className={`group relative min-h-[80px] sm:min-h-[120px] p-2 sm:p-3 bg-white dark:bg-[#0B0F1A] transition-all cursor-pointer
                           ${!day.isSame(currentDate, 'month') ? 'opacity-40 grayscale' : ''}
                           ${isTodayFlag ? 'bg-indigo-50/50 dark:bg-indigo-500/5 ring-2 ring-indigo-500/20' : ''}`}
                       >
@@ -331,7 +331,7 @@ const DesignCalender = React.memo(({
             {/* Filters */}
             <div className="p-6 bg-white dark:bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/10 shadow-lg">
               <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">
-                <HiFilter className="w-3 h-3" />
+                <HiFunnel className="w-3 h-3" />
                 {t('Filters')}
               </h4>
 

@@ -14,7 +14,7 @@ const PostImage = memo(({
         alt="profile"
         width={44}
         height={44}
-        className={`rounded-full w-11 h-11 min-w-11 object-cover 
+        className={`rounded-full w-10 h-10 sm:w-11 sm:h-11 min-w-[40px] sm:min-w-[44px] object-cover 
                 ${post?.owner?.stories?.length > 0 ? "ring-2 ring-pink-500 animate-pulse" : ""}
               `}
       />

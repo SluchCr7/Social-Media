@@ -61,14 +61,14 @@ const ProfileLayout = ({
   };
   useEffect(() => {
     console.log(user)
-  },[user])
+  }, [user])
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
       className="w-full min-h-screen bg-lightMode-bg dark:bg-darkMode-bg 
-                  text-lightMode-text dark:text-darkMode-text px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-6"
+                  text-lightMode-text dark:text-darkMode-text px-3 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-4 sm:gap-6"
     >
       {/* ✅ الشريط الثابت */}
       <StickyProfileBar

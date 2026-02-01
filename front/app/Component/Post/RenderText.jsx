@@ -1,4 +1,4 @@
-import React, { useEffect, useState , useMemo , memo } from 'react';
+import React, { useEffect, useState, useMemo, memo } from 'react';
 import { renderTextWithMentionsHashtagsAndLinks } from '@/app/utils/CheckText';
 
 const RenderPostText = memo(({ text, mentions = [], hashtags = [], italic = false }) => {
@@ -24,9 +24,8 @@ const RenderPostText = memo(({ text, mentions = [], hashtags = [], italic = fals
 
   return (
     <p
-      className={`text-sm break-all whitespace-pre-wrap ${italic ? 'italic' : ''} ${
-        isArabic ? 'text-right' : 'text-left'
-      } text-gray-600 dark:text-gray-200`}
+      className={`text-sm sm:text-base break-words whitespace-pre-wrap ${italic ? 'italic' : ''} ${isArabic ? 'text-right' : 'text-left'
+        } text-gray-800 dark:text-gray-100 leading-relaxed`}
       dir={isArabic ? 'rtl' : 'ltr'}
     >
       {renderedText}

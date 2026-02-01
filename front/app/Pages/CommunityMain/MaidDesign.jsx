@@ -63,7 +63,7 @@ const MaidDesign = memo(({
   };
 
   return (
-    <div className="relative min-h-screen px-4 sm:px-8 py-12 lg:px-16 space-y-12 overflow-hidden">
+    <div className="relative min-h-screen px-3 sm:px-8 py-6 sm:py-12 lg:px-16 space-y-8 sm:space-y-12 overflow-hidden">
       {/* 🎭 Animated Background */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-500/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
@@ -78,7 +78,7 @@ const MaidDesign = memo(({
               <HiSignal className="w-3 h-3 animate-pulse" />
               {t('Neural Networks Online')}
             </div>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-gray-900 dark:text-white leading-[0.9]">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter text-gray-900 dark:text-white leading-[0.9]">
               {t('Community')} <br />
               <span className="text-indigo-500">{t('Hub')}</span>
             </h1>
@@ -94,14 +94,14 @@ const MaidDesign = memo(({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={t('Search Nodes...')}
-                className="w-full pl-12 pr-6 py-4 rounded-[1.5rem] bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 focus:border-indigo-500/50 outline-none transition-all shadow-xl shadow-gray-200/20 dark:shadow-none font-medium"
+                className="w-full pl-12 pr-6 py-3 sm:py-4 rounded-[1.5rem] bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 focus:border-indigo-500/50 outline-none transition-all shadow-xl shadow-gray-200/20 dark:shadow-none font-medium"
               />
             </div>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setShowCreateModal(true)}
-              className="w-full sm:w-auto flex items-center justify-center gap-3 bg-indigo-600 px-8 py-4 rounded-[1.5rem] text-white font-black text-[11px] uppercase tracking-widest shadow-xl shadow-indigo-500/30 active:bg-indigo-700"
+              className="w-full sm:w-auto flex items-center justify-center gap-3 bg-indigo-600 px-6 py-3 sm:px-8 sm:py-4 rounded-[1.5rem] text-white font-black text-[11px] uppercase tracking-widest shadow-xl shadow-indigo-500/30 active:bg-indigo-700"
             >
               <HiPlus className="w-5 h-5" />
               {t('Initialize Node')}

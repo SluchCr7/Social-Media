@@ -39,8 +39,8 @@ const TabButton = ({ active, onClick, children, icon: Icon }) => (
   <button
     onClick={onClick}
     className={`relative flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-300 ${active
-        ? 'text-white'
-        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+      ? 'text-white'
+      : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
       }`}
   >
     {active && (
@@ -200,7 +200,7 @@ const DasignCommunitySelect = memo(({
     <div className="min-h-screen w-full bg-[#050505] text-white selection:bg-blue-500/30 font-sans">
 
       {/* 🖼️ Hero Section */}
-      <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">
+      <div className="relative h-[40vh] min-h-[300px] sm:h-[50vh] sm:min-h-[400px] w-full overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent z-10" />
         <Image
           src={CommunitySelected?.Cover?.url || '/default-cover.jpg'}
@@ -219,7 +219,7 @@ const DasignCommunitySelect = memo(({
               animate={{ scale: 1, opacity: 1 }}
               className="relative shrink-0"
             >
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-3xl overflow-hidden border-4 border-[#050505] shadow-2xl relative z-10">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-3xl overflow-hidden border-4 border-[#050505] shadow-2xl relative z-10">
                 <Image
                   src={CommunitySelected?.Picture?.url || '/default-avatar.png'}
                   alt="Avatar"
@@ -239,7 +239,7 @@ const DasignCommunitySelect = memo(({
                 <motion.h1
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  className="text-4xl md:text-6xl font-black uppercase tracking-tight"
+                  className="text-3xl sm:text-4xl md:text-6xl font-black uppercase tracking-tight"
                 >
                   {CommunitySelected?.Name}
                 </motion.h1>

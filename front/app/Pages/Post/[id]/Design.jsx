@@ -80,7 +80,7 @@ const DesignPostSelect = memo(({
   };
 
   return (
-    <div className="relative w-full min-h-screen py-10 px-4 sm:px-8">
+    <div className="relative w-full min-h-screen py-6 px-3 sm:py-10 sm:px-8">
       {/* 🎭 Animated Background */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <div className="absolute top-[10%] left-[10%] w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full" />
@@ -113,10 +113,10 @@ const DesignPostSelect = memo(({
         <motion.article
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl rounded-[3rem] border border-gray-100 dark:border-white/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] overflow-hidden"
+          className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl rounded-3xl sm:rounded-[3rem] border border-gray-100 dark:border-white/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] overflow-hidden"
         >
           {/* Decorative Header */}
-          <div className="p-8 pb-4 flex flex-wrap gap-2">
+          <div className="p-4 sm:p-8 pb-4 flex flex-wrap gap-2">
             {post.isPinned && (
               <span className="px-4 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-[9px] font-black uppercase tracking-widest">
                 Pinned Terminal
@@ -129,7 +129,7 @@ const DesignPostSelect = memo(({
             )}
           </div>
 
-          <div className="px-8 pb-8 space-y-8">
+          <div className="px-4 pb-4 sm:px-8 sm:pb-8 space-y-6 sm:space-y-8">
             {/* User Info Header */}
             <PostHeader
               post={post}
@@ -143,7 +143,7 @@ const DesignPostSelect = memo(({
             {/* Content Body */}
             <div className="space-y-6">
               {post.text && (
-                <div className="text-2xl md:text-3xl font-medium leading-tight text-gray-900 dark:text-white/90 tracking-tight">
+                <div className="text-xl sm:text-2xl md:text-3xl font-medium leading-tight text-gray-900 dark:text-white/90 tracking-tight">
                   <RenderPostText
                     text={post.text}
                     mentions={post.mentions}
@@ -157,7 +157,7 @@ const DesignPostSelect = memo(({
                 {post?.music && <PostMusicPlayer music={post.music} />}
 
                 {!isShared && (post.media?.length > 0 || post.Photos?.length > 0) && (
-                  <div className="rounded-[2.5rem] overflow-hidden border border-gray-100 dark:border-white/5 shadow-2xl">
+                  <div className="rounded-2xl sm:rounded-[2.5rem] overflow-hidden border border-gray-100 dark:border-white/5 shadow-2xl">
                     <PostMedia
                       media={post.media}
                       photos={post.Photos}
@@ -167,7 +167,7 @@ const DesignPostSelect = memo(({
                 )}
 
                 {isShared && original && (
-                  <div className="rounded-[2.5rem] overflow-hidden border border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 p-6">
+                  <div className="rounded-2xl sm:rounded-[2.5rem] overflow-hidden border border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 p-4 sm:p-6">
                     <SharedTitle user={user} post={post} original={original} />
                     <SharedPost
                       original={original}
@@ -248,7 +248,7 @@ const DesignPostSelect = memo(({
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl p-4 md:p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl flex items-center gap-4"
+                className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl p-3 sm:p-4 md:p-6 rounded-2xl sm:rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl flex items-center gap-3 sm:gap-4"
               >
                 <div className="relative shrink-0">
                   <Image
@@ -256,7 +256,7 @@ const DesignPostSelect = memo(({
                     alt="User"
                     width={48}
                     height={48}
-                    className="w-12 h-12 rounded-2xl object-cover ring-2 ring-indigo-500/20"
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl object-cover ring-2 ring-indigo-500/20"
                   />
                   <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-[#0B0F1A] rounded-full" />
                 </div>
@@ -267,7 +267,7 @@ const DesignPostSelect = memo(({
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     placeholder={`${t('Contribute to discourse')}...`}
-                    className="w-full bg-transparent text-lg font-medium outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 px-2"
+                    className="w-full bg-transparent text-base sm:text-lg font-medium outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 px-2"
                   />
                 </div>
 
@@ -276,7 +276,7 @@ const DesignPostSelect = memo(({
                   whileTap={{ scale: 0.95 }}
                   onClick={handleAddComment}
                   disabled={!commentText.trim()}
-                  className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${commentText.trim()
+                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all ${commentText.trim()
                     ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
                     : 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed'
                     }`}

@@ -35,7 +35,7 @@ const FullSearchResults = () => {
   }, [search, searchParams]);
 
   return (
-    <div className="relative w-full min-h-screen px-4 sm:px-8 py-12 lg:px-16 overflow-hidden bg-[#fafafa] dark:bg-[#050505]">
+    <div className="relative w-full min-h-screen px-3 sm:px-8 py-6 sm:py-12 lg:px-16 overflow-hidden bg-[#fafafa] dark:bg-[#050505]">
       {/* 🔮 Background Elements */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-500/10 blur-[150px] rounded-full translate-x-1/2 -translate-y-1/2" />
@@ -50,7 +50,7 @@ const FullSearchResults = () => {
               <HiSignal className="w-3 h-3 animate-pulse" />
               {t('Search Data Index')}
             </div>
-            <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-gray-900 dark:text-white leading-[0.8] break-words">
+            <h1 className="text-3xl sm:text-5xl md:text-8xl font-black tracking-tighter text-gray-900 dark:text-white leading-[0.8] break-words">
               {search ? (
                 <>
                   {t('Results for')} <br />

@@ -58,7 +58,7 @@ const SuggestedFriendsPage = () => {
         />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
+      <div className="relative max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-12">
         {/* Header Section */}
         <div className="mb-12">
           <motion.div

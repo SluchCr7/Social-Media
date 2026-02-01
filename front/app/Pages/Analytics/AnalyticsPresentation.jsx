@@ -44,7 +44,7 @@ function AnalyticsPresentation({
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen w-full bg-[#030712] text-white selection:bg-indigo-500/30 overflow-x-hidden p-4 md:p-8">
+    <div className="min-h-screen w-full bg-[#030712] text-white selection:bg-indigo-500/30 overflow-x-hidden p-3 sm:p-4 md:p-8">
       {/* 🌌 Cinematic Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse" />
@@ -74,7 +74,7 @@ function AnalyticsPresentation({
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-3">
-                <h1 className="text-4xl lg:text-5xl font-black tracking-tighter uppercase italic">
+                <h1 className="text-3xl lg:text-5xl font-black tracking-tighter uppercase italic">
                   {t("Insights")}
                 </h1>
                 <div className="px-3 py-1 bg-indigo-600/20 border border-indigo-500/30 rounded-full">
@@ -122,7 +122,7 @@ function AnalyticsPresentation({
         </header>
 
         {/* 📊 KPI Grid */}
-        <section className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {[
             { label: t("Signals"), value: userPosts.length, icon: <Activity />, color: 'from-blue-600 to-cyan-500' },
             { label: t("Network"), value: followers?.length || 0, icon: <Users />, color: 'from-purple-600 to-indigo-500' },
@@ -138,7 +138,7 @@ function AnalyticsPresentation({
               className="relative group cursor-default"
             >
               <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-[2.5rem] blur-xl" />
-              <div className="relative h-full bg-white/[0.03] border border-white/5 rounded-[2.5rem] p-8 backdrop-blur-3xl overflow-hidden">
+              <div className="relative h-full bg-white/[0.03] border border-white/5 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-8 backdrop-blur-3xl overflow-hidden">
                 <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${kpi.color} opacity-5 blur-[40px] -translate-y-1/2 translate-x-1/2`} />
                 <div className="flex flex-col gap-6">
                   <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform duration-500">
@@ -160,7 +160,7 @@ function AnalyticsPresentation({
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="lg:col-span-8 bg-white/[0.03] border border-white/5 rounded-[3rem] p-8 lg:p-10 backdrop-blur-3xl relative overflow-hidden group"
+            className="lg:col-span-8 bg-white/[0.03] border border-white/5 rounded-3xl sm:rounded-[3rem] p-5 sm:p-8 lg:p-10 backdrop-blur-3xl relative overflow-hidden group"
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-20 group-hover:opacity-100 transition-opacity duration-700" />
             <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-4">
@@ -221,7 +221,7 @@ function AnalyticsPresentation({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
-            className="lg:col-span-4 bg-white/[0.03] border border-white/5 rounded-[3rem] p-8 backdrop-blur-3xl flex flex-col items-center justify-between"
+            className="lg:col-span-4 bg-white/[0.03] border border-white/5 rounded-3xl sm:rounded-[3rem] p-5 sm:p-8 backdrop-blur-3xl flex flex-col items-center justify-between"
           >
             <div className="w-full space-y-1 mb-8">
               <h2 className="text-xl font-black tracking-tight uppercase flex items-center gap-3">

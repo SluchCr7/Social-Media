@@ -59,7 +59,7 @@ function MusicPagePresentation(props) {
         userData={userData}
       />
 
-      <div className="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-8 px-6 py-8 relative z-10">
+      <div className="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-8 px-3 py-6 sm:px-6 sm:py-8 relative z-10">
         <aside className="xl:w-80 space-y-8 hidden xl:block sticky top-28 self-start h-[calc(100vh-120px)] overflow-y-auto no-scrollbar pb-10">
           <SidebarNowPlaying current={current} />
           <SidebarPlaylist myPlaylist={myPlaylist} setTrack={setTrack} />
@@ -70,7 +70,7 @@ function MusicPagePresentation(props) {
             <MusicSkeleton />
           ) : (
             <div className="space-y-12 pb-24">
-              <section className="relative overflow-hidden rounded-[3rem] border border-white/5 bg-white/[0.02] backdrop-blur-3xl shadow-2xl">
+              <section className="relative overflow-hidden rounded-3xl sm:rounded-[3rem] border border-white/5 bg-white/[0.02] backdrop-blur-3xl shadow-2xl">
                 <NowPlaying
                   current={current}
                   playing={playing}
