@@ -120,6 +120,17 @@ const NewPostContainer = () => {
     [cursorPosition, postText]
   )
 
+  /* ------------------------- 🧩 Filtered Users ------------------------- */
+  const filteredUsers = useMemo(() => {
+    if (!mentionQuery || !users) return []
+    return users.filter(
+      (u) =>
+        (u.username?.toLowerCase().includes(mentionQuery.toLowerCase()) ||
+          u.profileName?.toLowerCase().includes(mentionQuery.toLowerCase())) &&
+        u._id !== user?._id
+    )
+  }, [mentionQuery, users, user?._id])
+
   const handleKeyDown = useCallback(
     (e) => {
       if (!showMentionBox || filteredUsers.length === 0) return
@@ -269,16 +280,6 @@ const NewPostContainer = () => {
     setSelectedUser(users?.find((u) => u?._id === user?._id) || user || {})
   }, [users, user])
 
-  /* ------------------------- 🧩 Filtered Users ------------------------- */
-  const filteredUsers = useMemo(() => {
-    if (!mentionQuery || !users) return []
-    return users.filter(
-      (u) =>
-        (u.username?.toLowerCase().includes(mentionQuery.toLowerCase()) ||
-          u.profileName?.toLowerCase().includes(mentionQuery.toLowerCase())) &&
-        u._id !== user._id
-    )
-  }, [mentionQuery, users, user?._id])
 
   /* ------------------------- 🧱 Render ------------------------- */
   return (
