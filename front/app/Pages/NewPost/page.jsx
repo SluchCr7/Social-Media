@@ -121,17 +121,19 @@ const NewPostContainer = () => {
   /* ------------------------- 📍 Mention Box Position ------------------------- */
   useEffect(() => {
     if (showMentionBox && textareaRef.current) {
-      const textarea = textareaRef.current
-      const { top, left } = getCaretCoordinates(
-        textarea,
-        textarea.selectionStart
-      )
+      const textarea = textareaRef.current;
+      const { selectionStart } = textarea;
 
-      // We only need the offsets relative to the textarea's top-left
-      // the parent in Design.jsx is relative, so these offsets will work perfectly.
-      setMentionBoxPos({ top, left })
+      // Use requestAnimationFrame for smoother positioning after layout
+      const updatePos = () => {
+        const { top, left } = getCaretCoordinates(textarea, selectionStart);
+        setMentionBoxPos({ top, left });
+      };
+
+      const frameId = requestAnimationFrame(updatePos);
+      return () => cancelAnimationFrame(frameId);
     }
-  }, [showMentionBox, postText, cursorPosition, getCaretCoordinates])
+  }, [showMentionBox, postText, cursorPosition, getCaretCoordinates]);
 
   /* ------------------------- 🔗 Links ------------------------- */
   const handleAddLink = useCallback(() => {

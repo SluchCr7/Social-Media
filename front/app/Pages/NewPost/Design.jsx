@@ -22,6 +22,90 @@ import EmojiPicker from 'emoji-picker-react'
 import PostPrivacySelector from '@/app/Component/Post/PostPrivacyAdd'
 import { useTranslation } from 'react-i18next'
 
+// --- Performance-optimized Sub-components ---
+
+const ControlGroup = React.memo(({ label, children }) => (
+  <div className="space-y-3">
+    <label className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 dark:text-gray-500 ml-1">
+      {label}
+    </label>
+    <div className="bg-gray-50/50 dark:bg-white/[0.02] rounded-2xl p-1 border border-gray-100 dark:border-white/5 backdrop-blur-sm">
+      {children}
+    </div>
+  </div>
+))
+ControlGroup.displayName = 'ControlGroup'
+
+const MediaItem = React.memo(({ item, onRemove }) => (
+  <motion.div
+    layout
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.9 }}
+    className="relative aspect-square rounded-2xl overflow-hidden group border border-gray-100 dark:border-white/5 bg-black/5"
+  >
+    {item.type === 'video' ? (
+      <video src={item.url} className="w-full h-full object-cover" />
+    ) : (
+      <Image src={item.url} alt="Post media" fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
+    )}
+    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-[2px]">
+      <button
+        onClick={onRemove}
+        className="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+      >
+        <HiTrash size={18} />
+      </button>
+    </div>
+  </motion.div>
+))
+MediaItem.displayName = 'MediaItem'
+
+const MentionsList = React.memo(({ users, onSelect, pos }) => (
+  <AnimatePresence mode="wait">
+    {users.length > 0 && (
+      <motion.div
+        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        style={{
+          top: (pos.top || 0) + 40,
+          left: (pos.left || 0)
+        }}
+        className="absolute z-[1000] w-72 bg-white/90 dark:bg-[#0D1117]/90 backdrop-blur-2xl rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden p-2"
+      >
+        <div className="max-h-64 overflow-y-auto custom-scrollbar">
+          {users.map((u, idx) => (
+            <motion.button
+              key={u._id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.03 }}
+              onClick={() => onSelect(u)}
+              className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-indigo-600 group transition-all duration-300 mb-1 last:mb-0"
+            >
+              <div className="relative w-10 h-10 rounded-xl overflow-hidden border-2 border-white dark:border-gray-800 shadow-md transform group-active:scale-90 transition-transform">
+                <Image src={u.profilePhoto?.url || '/default-avatar.png'} alt={u.username} fill className="object-cover" />
+              </div>
+              <div className="text-left flex-1 min-w-0">
+                <p className="text-[12px] font-black text-gray-900 dark:text-white group-hover:text-white truncate">
+                  @{u.username}
+                </p>
+                <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 group-hover:text-indigo-100 truncate">
+                  {u.profileName}
+                </p>
+              </div>
+              <HiPlus size={14} className="text-gray-300 dark:text-gray-600 group-hover:text-white" />
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+))
+MentionsList.displayName = 'MentionsList'
+
 const NewPostPresenter = (props) => {
   const {
     postText, handleTextareaChange, handlePost, loading, errorText,
@@ -96,21 +180,17 @@ const NewPostPresenter = (props) => {
             </h3>
 
             <div className="space-y-6">
-              <div className="space-y-3">
-                <label className="text-[11px] font-bold text-gray-500 ml-2">{t("Visibility")}</label>
-                <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-1 border border-gray-100 dark:border-white/5">
-                  <PostPrivacySelector defaultValue={privacy} onChange={(v) => setPrivacy(v)} />
-                </div>
-              </div>
+              <ControlGroup label={t("Visibility")}>
+                <PostPrivacySelector defaultValue={privacy} onChange={(v) => setPrivacy(v)} />
+              </ControlGroup>
 
-              <div className="space-y-3">
-                <label className="text-[11px] font-bold text-gray-500 ml-2">{t("Channel")}</label>
+              <ControlGroup label={t("Channel")}>
                 <div className="relative group">
                   <HiUsers className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-indigo-500 transition-colors" size={16} />
                   <select
                     value={selectedCommunity}
                     onChange={(e) => setSelectedCommunity(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl text-[13px] font-bold text-gray-700 dark:text-gray-300 outline-none appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                    className="w-full pl-11 pr-4 py-3 bg-transparent border-none text-[13px] font-bold text-gray-700 dark:text-gray-300 outline-none appearance-none cursor-pointer"
                   >
                     <option value="">{t("Global Feed")}</option>
                     {communities
@@ -120,12 +200,12 @@ const NewPostPresenter = (props) => {
                       ))}
                   </select>
                 </div>
-              </div>
+              </ControlGroup>
 
               <div className="pt-4 space-y-3">
                 <button
                   onClick={saveDraft}
-                  className="w-full flex items-center justify-center gap-3 py-3 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-100 dark:border-white/10 rounded-2xlt transition-all text-[11px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 rounded-2xl"
+                  className="w-full flex items-center justify-center gap-3 py-3 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-100 dark:border-white/10 rounded-2xl transition-all text-[11px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400"
                 >
                   <HiInboxArrowDown size={16} />
                   {t("Save as Draft")}
@@ -224,36 +304,13 @@ const NewPostPresenter = (props) => {
                 />
 
                 {/* Mention Popover */}
-                <AnimatePresence>
-                  {showMentionBox && filteredUsers.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      style={{
-                        top: (mentionBoxPos.top || 0) + 40,
-                        left: (mentionBoxPos.left || 0)
-                      }}
-                      className="absolute z-[1000] w-64 bg-white dark:bg-[#1C2128] backdrop-blur-3xl rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden"
-                    >
-                      {filteredUsers.map((u) => (
-                        <button
-                          key={u._id}
-                          onClick={() => handleSelectMention(u)}
-                          className="w-full flex items-center gap-3 p-3 hover:bg-indigo-600 group transition-all"
-                        >
-                          <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white dark:border-gray-800">
-                            <Image src={u.profilePhoto?.url || '/default-avatar.png'} alt="U" width={32} height={32} />
-                          </div>
-                          <div className="text-left overflow-hidden">
-                            <p className="text-[11px] font-black text-gray-900 dark:text-white group-hover:text-white truncate">@{u.username}</p>
-                            <p className="text-[9px] text-gray-500 dark:text-gray-400 group-hover:text-indigo-100 truncate">{u.profileName}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {showMentionBox && (
+                  <MentionsList
+                    users={filteredUsers}
+                    onSelect={handleSelectMention}
+                    pos={mentionBoxPos}
+                  />
+                )}
               </div>
 
               {/* Links Display */}
@@ -283,22 +340,7 @@ const NewPostPresenter = (props) => {
                 {media.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6">
                     {media.map((item, idx) => (
-                      <motion.div
-                        key={idx}
-                        layout
-                        className="relative aspect-square rounded-[1.5rem] overflow-hidden group border border-gray-100 dark:border-white/5 bg-black"
-                      >
-                        {item.type === 'video' ? (
-                          <video src={item.url} className="w-full h-full object-cover" controls />
-                        ) : (
-                          <Image src={item.url} alt="P" fill className="object-cover transition-transform group-hover:scale-110" />
-                        )}
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
-                          <button onClick={() => removeMedia(idx)} className="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-lg hover:scale-110">
-                            <HiTrash size={20} />
-                          </button>
-                        </div>
-                      </motion.div>
+                      <MediaItem key={idx} item={item} onRemove={() => removeMedia(idx)} />
                     ))}
                   </div>
                 )}
