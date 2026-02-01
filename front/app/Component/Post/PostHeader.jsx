@@ -7,7 +7,7 @@ import { HiBadgeCheck } from 'react-icons/hi';
 import PostMenu from '@/app/Component/PostMenu';
 import UserHoverCard from '../UserHoverCard';
 import { formatRelativeTime } from '@/app/utils/FormatDataCreatedAt';
-
+import Image from 'next/image'
 const PostHeader = memo(({ post, user, isLogin, showMenu, setShowMenu, isCommunityPost }) => {
   const owner = post?.owner;
   const triggerRef = useRef(null);
@@ -26,7 +26,7 @@ const PostHeader = memo(({ post, user, isLogin, showMenu, setShowMenu, isCommuni
         {/* User Avatar - Professional Scale */}
         <UserHoverCard userSelected={owner}>
           <Link href={userProfileLink} className="relative w-12 h-12 rounded-2xl overflow-hidden border border-gray-100 dark:border-white/10 shrink-0 group">
-            <Image
+            <image
               width={500}
               height={500}
               src={owner?.profilePhoto?.url || '/default-profile.png'}
