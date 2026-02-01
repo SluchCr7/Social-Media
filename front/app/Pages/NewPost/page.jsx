@@ -1,3 +1,4 @@
+
 'use client'
 
 import React, {
@@ -17,10 +18,6 @@ import Loading from '@/app/Component/Loading'
 // ✅ Lazy Load لتقليل وقت تحميل الصفحة الأولى
 const NewPostPresenter = React.lazy(() => import('./Design'))
 
-/**
- * NewPostContainer handles the business logic for creating a new post.
- * It manages state for text, media, mentions, scheduling, and music.
- */
 const NewPostContainer = () => {
   const [postText, setPostText] = useState('')
   const [media, setMedia] = useState([])
@@ -48,7 +45,7 @@ const NewPostContainer = () => {
   const { communities } = useCommunity()
   const { music: musicList, isLoading: isMusicLoading } = useMusic() || { music: [], isLoading: false }
 
-  /* ------------------------- 🧠 Helpers ------------------------- */
+  /* ------------------------- 🧠 Memoized helpers ------------------------- */
 
   const getCaretCoordinates = useCallback((element, position) => {
     const div = document.createElement('div')
@@ -67,8 +64,7 @@ const NewPostContainer = () => {
     return { top, left }
   }, [])
 
-  /* ------------------------- ✍️ Handlers ------------------------- */
-
+  /* ------------------------- ✍️ Textarea & Mentions ------------------------- */
   const handleTextareaChange = useCallback((e) => {
     const value = e.target.value
     const cursorPos = e.target.selectionStart
@@ -111,7 +107,9 @@ const NewPostContainer = () => {
       })
 
       setSelectedMentions((prev) =>
-        prev.some((m) => m._id === mention._id) ? prev : [...prev, mention]
+        prev.some((m) => m._id === mention._id)
+          ? prev
+          : [...prev, mention]
       )
 
       setShowMentionBox(false)
@@ -120,13 +118,22 @@ const NewPostContainer = () => {
     [cursorPosition, postText]
   )
 
+  /* ------------------------- 📍 Mention Box Position ------------------------- */
   useEffect(() => {
     if (showMentionBox && textareaRef.current) {
-      const { top, left } = getCaretCoordinates(textareaRef.current, textareaRef.current.selectionStart)
+      const textarea = textareaRef.current
+      const { top, left } = getCaretCoordinates(
+        textarea,
+        textarea.selectionStart
+      )
+
+      // We only need the offsets relative to the textarea's top-left
+      // the parent in Design.jsx is relative, so these offsets will work perfectly.
       setMentionBoxPos({ top, left })
     }
   }, [showMentionBox, postText, cursorPosition, getCaretCoordinates])
 
+  /* ------------------------- 🔗 Links ------------------------- */
   const handleAddLink = useCallback(() => {
     const url = linkInput.trim()
     if (!url) return
@@ -140,6 +147,7 @@ const NewPostContainer = () => {
     []
   )
 
+  /* ------------------------- 🖼️ Media (Images/Videos) ------------------------- */
   const handleMediaChange = useCallback((e) => {
     const files = Array.from(e.target.files)
     const previews = files.map((file) => ({
@@ -157,33 +165,43 @@ const NewPostContainer = () => {
     })
   }, [])
 
+  /* ------------------------- 😀 Emojis ------------------------- */
   const handleEmojiClick = useCallback(
     (emojiData) => {
       const cursorPos = textareaRef.current?.selectionStart || 0
-      const newText = postText.slice(0, cursorPos) + emojiData.emoji + postText.slice(cursorPos)
+      const newText =
+        postText.slice(0, cursorPos) +
+        emojiData.emoji +
+        postText.slice(cursorPos)
       setPostText(newText)
       setShowEmojiPicker(false)
       requestAnimationFrame(() => {
         if (textareaRef.current) {
           textareaRef.current.focus()
-          textareaRef.current.selectionEnd = cursorPos + emojiData.emoji.length
+          textareaRef.current.selectionEnd =
+            cursorPos + emojiData.emoji.length
         }
       })
     },
     [postText]
   )
 
+  /* ------------------------- 🏷️ Hashtags ------------------------- */
   const extractHashtags = useCallback((text) => {
     const matches = text.match(/#[\w\u0600-\u06FF]+/g)
-    return matches ? [...new Set(matches.map((tag) => tag.slice(1).toLowerCase()))] : []
+    return matches
+      ? [...new Set(matches.map((tag) => tag.slice(1).toLowerCase()))]
+      : []
   }, [])
 
+  /* ------------------------- 🚀 Submit Post ------------------------- */
   const handlePost = useCallback(async () => {
     const hashtags = extractHashtags(postText)
     if (postText.trim().length > 500) return setErrorText(true)
     if (!postText.trim() && media.length === 0) return
 
-    const scheduleTime = scheduleEnabled && scheduleDate ? scheduleDate : null
+    const scheduleTime =
+      scheduleEnabled && scheduleDate ? scheduleDate : null
 
     setLoading(true)
     try {
@@ -222,10 +240,12 @@ const NewPostContainer = () => {
     extractHashtags,
   ])
 
+  /* ------------------------- 👤 Sync Current User ------------------------- */
   useEffect(() => {
     setSelectedUser(users?.find((u) => u?._id === user?._id) || user || {})
   }, [users, user])
 
+  /* ------------------------- 🧩 Filtered Users ------------------------- */
   const filteredUsers = useMemo(() => {
     if (!mentionQuery || !users) return []
     return users.filter(
@@ -236,8 +256,15 @@ const NewPostContainer = () => {
     )
   }, [mentionQuery, users, user?._id])
 
+  /* ------------------------- 🧱 Render ------------------------- */
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense
+      fallback={
+        <div className="p-4 text-gray-400 animate-pulse text-center">
+          <Loading />
+        </div>
+      }
+    >
       <NewPostPresenter
         {...{
           postText,
