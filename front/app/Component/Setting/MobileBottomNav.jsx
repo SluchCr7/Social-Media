@@ -23,6 +23,8 @@ const TAB_ICONS = {
   notifications: HiBell,
   communities: HiUserGroup,
   account: HiCog6Tooth,
+  privacy: HiShieldCheck,
+  help: HiSparkles,
 };
 
 export default function MobileBottomNav({ activeTab, setActiveTab }) {

@@ -12,7 +12,8 @@ import {
   HiClock,
   HiBell,
   HiUserGroup,
-  HiPaintBrush
+  HiPaintBrush,
+  HiMagnifyingGlass
 } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import { TABS } from '@/app/utils/Data';
@@ -27,6 +28,8 @@ const HistoryTab = lazy(() => import('./Tabs/HistoryTab'));
 const UpdateProfile = lazy(() => import('@/app/Component/AddandUpdateMenus/UpdateProfile'));
 const NotificationTab = lazy(() => import('./Tabs/NotificationTab'));
 const CommunityTab = lazy(() => import('./Tabs/CommunityTab'));
+const PrivacyTab = lazy(() => import('./Tabs/PrivacyTab'));
+const HelpTab = lazy(() => import('./Tabs/HelpTab'));
 
 // Icon mapping for tabs
 const TAB_ICONS = {
@@ -38,6 +41,8 @@ const TAB_ICONS = {
   notifications: HiBell,
   communities: HiUserGroup,
   account: HiCog6Tooth,
+  privacy: HiShieldCheck,
+  help: HiSparkles,
 };
 
 function SettingsView({
@@ -65,6 +70,13 @@ function SettingsView({
   const [passwordMessage, setPasswordMessage] = useState('');
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isVerified, setIsVerified] = useState(user?.isAccountWithPremiumVerify || false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredTabs = useMemo(() => {
+    return TABS.filter(tab =>
+      t(tab.label).toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery, t]);
 
   const submitPassword = useCallback(
     (e) => {
@@ -127,47 +139,71 @@ function SettingsView({
                 </div>
               </div>
 
+              {/* Search Bar */}
+              <div className="p-6 pb-2">
+                <div className="relative group">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                    <HiGlobeAlt className="w-4 h-4" /> {/* Or a search icon if available */}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder={t('Search settings...')}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200/50 dark:border-white/5 rounded-xl pl-10 pr-4 py-2 text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all placeholder:text-gray-400"
+                  />
+                </div>
+              </div>
+
               {/* Tabs Navigation */}
-              <nav className="flex-1 p-6 space-y-2 overflow-y-auto custom-scrollbar">
-                {TABS.map((tab) => {
-                  const Icon = TAB_ICONS[tab.id] || HiCog6Tooth;
-                  return (
-                    <motion.button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      whileHover={{ scale: 1.02, x: 4 }}
-                      whileTap={{ scale: 0.98 }}
-                      disabled={tab.view === false}
-                      className={`group relative flex items-center gap-4 w-full p-4 rounded-xl text-sm font-black uppercase tracking-wider transition-all ${tab.view === false ? 'pointer-events-none opacity-30' : ''
-                        } ${activeTab === tab.id
-                          ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/30'
-                          : 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400'
-                        }`}
-                    >
-                      {/* Background Glow for Active */}
-                      {activeTab === tab.id && (
-                        <motion.div
-                          layoutId="activeGlow"
-                          className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl blur-xl opacity-50"
-                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                        />
-                      )}
+              <nav className="flex-1 p-6 pt-2 space-y-2 overflow-y-auto custom-scrollbar">
+                {filteredTabs.length > 0 ? (
+                  filteredTabs.map((tab) => {
+                    const Icon = TAB_ICONS[tab.id] || HiCog6Tooth;
+                    return (
+                      <motion.button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        whileHover={{ scale: 1.02, x: 4 }}
+                        whileTap={{ scale: 0.98 }}
+                        disabled={tab.view === false}
+                        className={`group relative flex items-center gap-4 w-full p-4 rounded-xl text-sm font-black uppercase tracking-wider transition-all ${tab.view === false ? 'pointer-events-none opacity-30' : ''
+                          } ${activeTab === tab.id
+                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/30'
+                            : 'hover:bg-gray-100 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400'
+                          }`}
+                      >
+                        {/* Background Glow for Active */}
+                        {activeTab === tab.id && (
+                          <motion.div
+                            layoutId="activeGlow"
+                            className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl blur-xl opacity-50"
+                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                          />
+                        )}
 
-                      <div className="relative text-xl">
-                        <Icon />
-                      </div>
-                      <div className="relative flex-1 text-left text-[10px]">{t(tab.label)}</div>
+                        <div className="relative text-xl">
+                          <Icon />
+                        </div>
+                        <div className="relative flex-1 text-left text-[10px]">{t(tab.label)}</div>
 
-                      {activeTab === tab.id && (
-                        <motion.div
-                          layoutId="activeIndicator"
-                          className="w-2 h-2 rounded-full bg-white"
-                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                        />
-                      )}
-                    </motion.button>
-                  );
-                })}
+                        {activeTab === tab.id && (
+                          <motion.div
+                            layoutId="activeIndicator"
+                            className="w-2 h-2 rounded-full bg-white"
+                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                          />
+                        )}
+                      </motion.button>
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-10">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                      {t('No matches found')}
+                    </p>
+                  </div>
+                )}
               </nav>
 
               {/* Theme Switch Footer */}
@@ -262,6 +298,14 @@ function SettingsView({
                       {activeTab === 'history' && <HistoryTab loginHistory={loginHistory} />}
                       {activeTab === 'notifications' && <NotificationTab user={user} onToggleNotificationBlock={onToggleNotificationBlock} />}
                       {activeTab === 'communities' && <CommunityTab user={user} />}
+                      {activeTab === 'privacy' && (
+                        <PrivacyTab
+                          user={user}
+                          onTogglePrivate={onTogglePrivate}
+                          onToggleShowOnlineStatus={onToggleShowOnlineStatus}
+                        />
+                      )}
+                      {activeTab === 'help' && <HelpTab />}
                       {activeTab === 'account' && (
                         <AccountTab
                           user={user}

@@ -10,7 +10,7 @@ import { MdLanguage, MdOutlineOndemandVideo } from "react-icons/md"
 import { IoTrophyOutline } from "react-icons/io5"
 import { SlCalender } from "react-icons/sl"
 import { IoIosMusicalNotes } from "react-icons/io";
-import { FaHistory, FaLock, FaSun, FaUserCog,FaBookmark, FaBell, FaUsers } from "react-icons/fa"
+import { FaHistory, FaLock, FaSun, FaUserCog, FaBookmark, FaBell, FaUsers, FaQuestionCircle, FaUserShield } from "react-icons/fa"
 import {
   FiMessageCircle,
   FiShield,
@@ -20,38 +20,38 @@ import {
   FiUsers
 } from 'react-icons/fi';
 export const colors = [
-    {
-        name : "warmCream",
-        value : "#fdf0d5"
-    },
-    {
-        name : "warmBlue",
-        value : "#7209b7"
-    },
-    {
-        name : "warmBrown",
-        value : "#7f4f24"
-    },
-    {
-        name : "DarkGreen",
-        value : "#004b23"
-    },
-    {
-        name : "Orange",
-        value : "#ff6700"
-    },
-    {
-        name : "Purple",
-        value : "#6247aa"
-    },
-    {
-        name : "Red",
-        value : "#ff0000"
-    },
-    {
-        name : "Blue",
-        value : "#0047cc"
-    }
+  {
+    name: "warmCream",
+    value: "#fdf0d5"
+  },
+  {
+    name: "warmBlue",
+    value: "#7209b7"
+  },
+  {
+    name: "warmBrown",
+    value: "#7f4f24"
+  },
+  {
+    name: "DarkGreen",
+    value: "#004b23"
+  },
+  {
+    name: "Orange",
+    value: "#ff6700"
+  },
+  {
+    name: "Purple",
+    value: "#6247aa"
+  },
+  {
+    name: "Red",
+    value: "#ff0000"
+  },
+  {
+    name: "Blue",
+    value: "#0047cc"
+  }
 ]
 
 export const navSections = [
@@ -140,34 +140,34 @@ export const languageMap = {
 };
 
 export const iso6391Map = {
-    eng: "en",
-    ara: "ar",
-    fra: "fr",
-    spa: "es",
-    deu: "de",
-    ita: "it",
-    por: "pt",
-    rus: "ru",
-    zho: "zh",
-    jpn: "ja",
-    kor: "ko",
-    tur: "tr",
-    hin: "hi",
-    ben: "bn",
-    urd: "ur",
-    fas: "fa",
-    nld: "nl",
-    ell: "el",
-    pol: "pl",
-    swe: "sv",
-    nor: "no",
-    dan: "da",
-    fin: "fi",
-    tha: "th",
-    vie: "vi",
-    ind: "id",
-    heb: "he",
-    msa: "ms",
+  eng: "en",
+  ara: "ar",
+  fra: "fr",
+  spa: "es",
+  deu: "de",
+  ita: "it",
+  por: "pt",
+  rus: "ru",
+  zho: "zh",
+  jpn: "ja",
+  kor: "ko",
+  tur: "tr",
+  hin: "hi",
+  ben: "bn",
+  urd: "ur",
+  fas: "fa",
+  nld: "nl",
+  ell: "el",
+  pol: "pl",
+  swe: "sv",
+  nor: "no",
+  dan: "da",
+  fin: "fi",
+  tha: "th",
+  vie: "vi",
+  ind: "id",
+  heb: "he",
+  msa: "ms",
 };
 
 
@@ -178,10 +178,12 @@ export const TABS = [
   { id: 'language', label: 'Language', icon: <MdLanguage /> },
   { id: 'history', label: 'Login History', icon: <FaHistory /> },
   { id: 'account', label: 'Account', icon: <FaUserCog /> },
-  { id: 'profile', label: 'Profile', icon: <CgProfile />},
-  { id: 'notifications', label: 'Notifications', icon: <FaBell />},
-  { id: 'communities', label: 'Communities', icon: <FaUsers />},
-  { id: 'billing', label: 'Billing', icon: <MdOutlinePaid />,view : false}
+  { id: 'profile', label: 'Profile', icon: <CgProfile /> },
+  { id: 'notifications', label: 'Notifications', icon: <FaBell /> },
+  { id: 'communities', label: 'Communities', icon: <FaUsers /> },
+  { id: 'privacy', label: 'Privacy', icon: <FaUserShield /> },
+  { id: 'help', label: 'Help', icon: <FaQuestionCircle /> },
+  { id: 'billing', label: 'Billing', icon: <MdOutlinePaid />, view: false }
 ]
 
 export const DEFAULT_COLORS = [
@@ -194,21 +196,21 @@ export const DEFAULT_COLORS = [
 ]
 
 
-  export const tabsHeader = [
-    { key: "following", label: "Following" },
-    { key: "forYou", label: "For You" },
-  ];
+export const tabsHeader = [
+  { key: "following", label: "Following" },
+  { key: "forYou", label: "For You" },
+];
 
-  export const reasons = [
-    { label: 'Spam Content', value: 'spam' },
-    { label: 'Inappropriate Content', value: 'inappropriate' },
-    { label: 'Harassment or Hate Speech', value: 'harassment' },
-    { label: 'Misinformation', value: 'misinformation' },
-    { label: 'Copyright Violation', value: 'copyright' },
-    { label: 'Other', value: 'other' }
-  ];
+export const reasons = [
+  { label: 'Spam Content', value: 'spam' },
+  { label: 'Inappropriate Content', value: 'inappropriate' },
+  { label: 'Harassment or Hate Speech', value: 'harassment' },
+  { label: 'Misinformation', value: 'misinformation' },
+  { label: 'Copyright Violation', value: 'copyright' },
+  { label: 'Other', value: 'other' }
+];
 
- export const months = [
+export const months = [
   { name: "January", value: "January" },
   { name: "February", value: "February" },
   { name: "March", value: "March" },
@@ -236,16 +238,16 @@ export const availableLanguages = [
 ];
 
 export const chartData = [
-    { name: 'Mon', posts: 30 },
-    { name: 'Tue', posts: 50 },
-    { name: 'Wed', posts: 80 },
-    { name: 'Thu', posts: 60 },
-    { name: 'Fri', posts: 100 },
-    { name: 'Sat', posts: 70 },
-    { name: 'Sun', posts: 40 },
-  ];
+  { name: 'Mon', posts: 30 },
+  { name: 'Tue', posts: 50 },
+  { name: 'Wed', posts: 80 },
+  { name: 'Thu', posts: 60 },
+  { name: 'Fri', posts: 100 },
+  { name: 'Sat', posts: 70 },
+  { name: 'Sun', posts: 40 },
+];
 
-  export const TOPICS = [
+export const TOPICS = [
   {
     key: 'account',
     icon: <FiUser />,
@@ -328,19 +330,18 @@ export const FAQ = [
 ];
 
 
-  export const savedPosts = [
-    { id: 'p1', user: 'Ahmed', avatar: '/Home.jpg', image: '/Home.jpg', caption: 'Sunset vibes at the coast 🌅 — a short story about the day.', date: 'Oct 12, 2025' },
-    { id: 'p2', user: 'Lina', avatar: '/Home.jpg', image: '/Home.jpg', caption: "My workspace — minimal and cozy.", date: 'Sep 20, 2025' },
-  ]
-  
-  export const savedMusic = [
-    { id: 'm1', title: 'Lost in Time', artist: 'Nova', cover: '/Home.jpg', url: '/song1.mp3', duration: '3:42' },
-    { id: 'm2', title: 'Dreamstate', artist: 'Orion', cover: '/Home.jpg', url: '/song2.mp3', duration: '4:05' },
-    { id: 'm3', title: 'Midnight Loop', artist: 'Echoes', cover: '/Home.jpg', url: '/song3.mp3', duration: '2:58' }
-  ]
-  
-  export const savedReels = [
-    { id: 'r1', thumbnail: '/reels/thumb1.jpg', video: '/video1.mp4', title: 'Quick Tips for Productivity' },
-    { id: 'r2', thumbnail: '/reels/thumb2.jpg', video: '/video2.mp4', title: 'Street Photography - 60s' },
-  ]
-  
+export const savedPosts = [
+  { id: 'p1', user: 'Ahmed', avatar: '/Home.jpg', image: '/Home.jpg', caption: 'Sunset vibes at the coast 🌅 — a short story about the day.', date: 'Oct 12, 2025' },
+  { id: 'p2', user: 'Lina', avatar: '/Home.jpg', image: '/Home.jpg', caption: "My workspace — minimal and cozy.", date: 'Sep 20, 2025' },
+]
+
+export const savedMusic = [
+  { id: 'm1', title: 'Lost in Time', artist: 'Nova', cover: '/Home.jpg', url: '/song1.mp3', duration: '3:42' },
+  { id: 'm2', title: 'Dreamstate', artist: 'Orion', cover: '/Home.jpg', url: '/song2.mp3', duration: '4:05' },
+  { id: 'm3', title: 'Midnight Loop', artist: 'Echoes', cover: '/Home.jpg', url: '/song3.mp3', duration: '2:58' }
+]
+
+export const savedReels = [
+  { id: 'r1', thumbnail: '/reels/thumb1.jpg', video: '/video1.mp4', title: 'Quick Tips for Productivity' },
+  { id: 'r2', thumbnail: '/reels/thumb2.jpg', video: '/video2.mp4', title: 'Street Photography - 60s' },
+]

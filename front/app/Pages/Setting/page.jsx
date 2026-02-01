@@ -129,6 +129,11 @@ export default function SettingsContainer() {
     [toggleBlockNotification]
   );
 
+  const handleToggleShowOnlineStatus = useCallback(
+    () => toggleShowOnlineStatus(),
+    [toggleShowOnlineStatus]
+  );
+
   const loginHistory = useMemo(() => userData?.loginHistory || [], [userData]);
 
   return (
@@ -147,6 +152,7 @@ export default function SettingsContainer() {
       language={language}
       handleLanguageChange={handleLanguageChange}
       onToggleNotificationBlock={handleToggleNotificationBlock}
+      onToggleShowOnlineStatus={handleToggleShowOnlineStatus}
     />
   );
 }
