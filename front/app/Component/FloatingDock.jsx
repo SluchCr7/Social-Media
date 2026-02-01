@@ -1,146 +1,162 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef, memo, useCallback } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import {
-  FaHome,
-  FaMusic,
-  FaPlus,
-  FaArrowUp,
-  FaUserAlt,
-  FaChevronLeft,
-  FaChevronRight,
-} from 'react-icons/fa';
+  HiHome,
+  HiPlus,
+  HiMusicalNote,
+  HiUser,
+  HiArrowUp,
+  HiChevronRight,
+  HiChevronLeft,
+} from 'react-icons/hi2';
 import { useRouter } from 'next/navigation';
 
-export default function FloatingDrawer({ onOpenMusicPlayer }) {
+const MenuItem = memo(({ item, index, isOpen }) => {
+  return (
+    <motion.button
+      onClick={(e) => {
+        e.stopPropagation();
+        item.action();
+      }}
+      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.8, y: 10 }}
+      transition={{
+        type: 'spring',
+        stiffness: 400,
+        damping: 30,
+        delay: index * 0.03
+      }}
+      whileHover={{ scale: 1.1, y: -2 }}
+      whileTap={{ scale: 0.95 }}
+      className="group relative flex items-center justify-center w-11 h-11 rounded-2xl
+                 bg-white/50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10
+                 border border-white/20 dark:border-white/10
+                 text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400
+                 shadow-sm backdrop-blur-md transition-colors"
+    >
+      <span className="text-xl">{item.icon}</span>
+
+      {/* Tooltip */}
+      <div className="absolute right-full mr-4 px-3 py-1.5 rounded-xl
+                      bg-gray-900 dark:bg-white text-white dark:text-gray-900
+                      text-[10px] font-black uppercase tracking-widest
+                      opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0
+                      transition-all duration-200 pointer-events-none whitespace-nowrap
+                      shadow-xl border border-white/10">
+        {item.label}
+      </div>
+    </motion.button>
+  );
+});
+
+MenuItem.displayName = 'MenuItem';
+
+const FloatingDock = ({ onOpenMusicPlayer }) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [visible, setVisible] = useState(true);
-  const drawerRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const dockRef = useRef(null);
 
-  useEffect(() => {
-    let lastScroll = 0;
-    const handleScroll = () => {
-      const currentScroll = window.scrollY;
-      if (currentScroll > lastScroll && currentScroll > 100) {
-        setVisible(false);
-        setIsOpen(false); // Close drawer on scroll down for better UX
-      } else {
-        setVisible(true);
-      }
-      lastScroll = currentScroll;
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+  const handleScroll = useCallback(() => {
+    const currentScrollY = window.scrollY;
+    if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+      setIsVisible(false);
+      setIsOpen(false);
+    } else {
+      setIsVisible(true);
+    }
+    lastScrollY.current = currentScrollY;
   }, []);
 
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsOpen(false);
+  }, []);
 
   const menuItems = [
-    { icon: <FaHome />, label: 'Home', action: () => router.push('/') },
-    { icon: <FaPlus />, label: 'Post', action: () => router.push('/Pages/NewPost') },
-    { icon: <FaMusic />, label: 'Music', action: onOpenMusicPlayer },
-    { icon: <FaUserAlt />, label: 'Profile', action: () => router.push('/Pages/Profile') },
-    { icon: <FaArrowUp />, label: 'Top', action: scrollToTop },
+    { icon: <HiHome />, label: 'Home', action: () => router.push('/') },
+    { icon: <HiPlus />, label: 'Post', action: () => router.push('/Pages/NewPost') },
+    { icon: <HiMusicalNote />, label: 'Music', action: onOpenMusicPlayer },
+    { icon: <HiUser />, label: 'Profile', action: () => router.push('/Pages/Profile') },
+    { icon: <HiArrowUp />, label: 'Top', action: scrollToTop },
   ];
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (drawerRef.current && !drawerRef.current.contains(event.target)) {
+      if (dockRef.current && !dockRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
-    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
-    else document.removeEventListener('mousedown', handleClickOutside);
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
+  const toggleOpen = useCallback(() => setIsOpen((prev) => !prev), []);
+
   return (
     <div
-      ref={drawerRef}
-      className="fixed top-1/2 right-4 -translate-y-1/2 z-[100] flex items-center gap-4"
+      ref={dockRef}
+      className="fixed bottom-10 right-6 sm:right-10 z-[100] flex flex-col items-center gap-4"
     >
-      {/* 🚀 Hoverable Item Labels & Menu Container */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8, x: 20, filter: 'blur(10px)' }}
-            animate={{ opacity: 1, scale: 1, x: 0, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, scale: 0.8, x: 20, filter: 'blur(10px)' }}
-            transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-            className="flex flex-col items-center gap-3 p-3 
-                       bg-white/10 dark:bg-black/20
-                       backdrop-blur-3xl border border-white/20 dark:border-white/5 
-                       shadow-[0_8px_32px_rgba(0,0,0,0.12)] 
-                       rounded-[2rem]"
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="flex flex-col gap-3 p-2 bg-white/20 dark:bg-black/20 backdrop-blur-2xl
+                       rounded-[2.5rem] border border-white/20 dark:border-white/5
+                       shadow-[0_20px_50px_rgba(0,0,0,0.1)] mb-2"
           >
             {menuItems.map((item, i) => (
-              <motion.button
-                key={i}
-                onClick={() => {
-                  item.action();
-                  setIsOpen(false);
-                }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                whileHover={{ scale: 1.1, backgroundColor: 'rgba(99, 102, 241, 0.15)' }}
-                whileTap={{ scale: 0.9 }}
-                className="group relative w-12 h-12 flex items-center justify-center 
-                           rounded-2xl text-gray-700 dark:text-gray-300
-                           transition-all duration-300"
-              >
-                <span className="text-xl group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">
-                  {item.icon}
-                </span>
-
-                {/* Tooltip-like label */}
-                <span className="absolute right-full mr-4 px-3 py-1.5 rounded-xl bg-gray-900/80 dark:bg-white/90 text-white dark:text-gray-900 text-xs font-bold opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all pointer-events-none whitespace-nowrap">
-                  {item.label}
-                </span>
-              </motion.button>
+              <MenuItem key={item.label} item={item} index={i} isOpen={isOpen} />
             ))}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* 🔘 Main Toggle Button */}
-      <motion.div
+      <motion.button
         animate={{
-          opacity: visible ? 1 : 0,
-          x: visible ? 0 : 40,
-          scale: visible ? 1 : 0.8
+          opacity: isVisible ? 1 : 0,
+          y: isVisible ? 0 : 50,
+          scale: isVisible ? 1 : 0.8,
         }}
-        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={toggleOpen}
+        className={`relative w-14 h-14 flex items-center justify-center rounded-[1.75rem]
+                   transition-all duration-500 shadow-lg group overflow-hidden
+                   ${isOpen
+            ? 'bg-indigo-600 text-white'
+            : 'bg-white dark:bg-zinc-900 text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-white/10'}
+                  `}
       >
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setIsOpen(!isOpen)}
-          className={`
-            relative w-14 h-14 flex items-center justify-center 
-            bg-white dark:bg-[#0B0F1A]
-            border border-gray-100 dark:border-white/10
-            shadow-[0_8px_20px_rgba(0,0,0,0.1)] dark:shadow-none
-            rounded-[1.25rem] transition-all duration-500
-            ${isOpen ? 'ring-2 ring-indigo-500/20' : ''}
-          `}
-        >
-          {/* Animated Background Mesh for the button */}
-          <div className="absolute inset-0 rounded-[1.25rem] overflow-hidden opacity-0 dark:opacity-20 group-hover:opacity-100 transition-opacity">
-            <div className="absolute -top-full -left-full w-[300%] h-[300%] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent animate-spin-slow" />
-          </div>
+        {/* Subtle Ambient Glow */}
+        <div className={`absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 opacity-0 
+                         group-hover:opacity-100 transition-opacity duration-500`} />
 
-          <motion.div
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            className="relative z-10 text-gray-500 dark:text-gray-400"
-          >
-            {isOpen ? <FaChevronRight size={20} /> : <FaChevronLeft size={20} />}
-          </motion.div>
-        </motion.button>
-      </motion.div>
+        <motion.div
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          className="relative z-10"
+        >
+          {isOpen ? <HiChevronRight size={22} /> : <HiChevronLeft size={22} />}
+        </motion.div>
+      </motion.button>
     </div>
   );
-}
+};
+
+export default memo(FloatingDock);
 

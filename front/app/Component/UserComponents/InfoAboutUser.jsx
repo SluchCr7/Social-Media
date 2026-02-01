@@ -125,7 +125,7 @@ const InfoAboutUser = memo(({ user }) => {
               className="relative p-10 rounded-[3rem] bg-gradient-to-br from-rose-500/10 to-purple-500/10 border border-rose-500/20 shadow-2xl overflow-hidden group"
             >
               <HiHeart className="absolute -bottom-10 -right-10 w-48 h-48 text-rose-500 opacity-5 -rotate-12 transition-transform group-hover:scale-110" />
-              <div className="relative flex items-center gap-8">
+              <div className="relative flex flex-col md:flex-row items-start md:items-center gap-8">
                 <div className="w-20 h-20 rounded-full bg-rose-500 flex items-center justify-center text-white text-3xl shadow-xl shadow-rose-500/20">
                   <HiHeart />
                 </div>

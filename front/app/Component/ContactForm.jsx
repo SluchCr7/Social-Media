@@ -12,7 +12,6 @@ const ContactModal = memo(({ show, setShow, sent, setSent }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
-    // محاكاة الإرسال
     setTimeout(() => {
       setLoading(false);
       setSent(true);

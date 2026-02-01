@@ -48,7 +48,7 @@ const Page = ({ params }) => {
       </div>
 
       {/* قائمة البوستات */}
-      <div className="w-full">
+      <div className="w-full max-w-6xl mx-auto">
         {postsRelated.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 w-full">
             {postsRelated.map((post) => (

@@ -27,7 +27,7 @@ const Page = () => {
         <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto w-full px-4 py-12 md:py-20">
+      <div className="relative z-10 max-w-6xl mx-auto w-full px-4 py-12 md:py-20">
         {/* 🎬 Header Section */}
         <header className="mb-16 text-center space-y-4">
           <motion.div

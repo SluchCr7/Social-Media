@@ -1,26 +1,64 @@
 'use client'
-import React, { useMemo, useState } from 'react'
+
+import React, { useMemo, useState, memo } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   HiXMark,
-  HiOutlineCalendarDays,
   HiPhoto,
   HiFaceSmile,
   HiUsers,
   HiLink,
   HiChevronRight,
-  HiCheckBadge,
-  HiSparkles,
   HiEye,
   HiTrash,
   HiInboxArrowDown,
   HiClock,
-  HiMusicalNote
+  HiMusicalNote,
+  HiSparkles
 } from 'react-icons/hi2'
 import EmojiPicker from 'emoji-picker-react'
 import PostPrivacySelector from '@/app/Component/Post/PostPrivacyAdd'
 import { useTranslation } from 'react-i18next'
+
+// --- Sub-components for better performance and organization ---
+
+const ControlGroup = memo(({ label, children }) => (
+  <div className="space-y-3">
+    <label className="text-[10px] font-black uppercase tracking-[0.15em] text-gray-400 dark:text-gray-500 ml-1">
+      {label}
+    </label>
+    <div className="bg-gray-50/50 dark:bg-white/[0.02] rounded-2xl p-1 border border-gray-100 dark:border-white/5 backdrop-blur-sm">
+      {children}
+    </div>
+  </div>
+))
+ControlGroup.displayName = 'ControlGroup'
+
+const MediaItem = memo(({ item, onRemove }) => (
+  <motion.div
+    layout
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.9 }}
+    className="relative aspect-square rounded-2xl overflow-hidden group border border-gray-100 dark:border-white/5 bg-black/5"
+  >
+    {item.type === 'video' ? (
+      <video src={item.url} className="w-full h-full object-cover" />
+    ) : (
+      <Image src={item.url} alt="Post media" fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
+    )}
+    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-[2px]">
+      <button
+        onClick={onRemove}
+        className="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+      >
+        <HiTrash size={18} />
+      </button>
+    </div>
+  </motion.div>
+))
+MediaItem.displayName = 'MediaItem'
 
 const NewPostPresenter = (props) => {
   const {
@@ -39,191 +77,134 @@ const NewPostPresenter = (props) => {
   const [showMusicPicker, setShowMusicPicker] = useState(false)
   const [musicQuery, setMusicQuery] = useState('')
 
-  const charCount = postText ? postText.length : 0
+  const charCount = postText?.length || 0
   const isRTL = useMemo(() => /[\u0600-\u06FF]/.test(postText || ''), [postText])
   const canPost = (postText?.trim() || media.length > 0) && !loading && !errorText
 
   const filteredMusic = useMemo(() => {
-    if (!musicQuery) return musicList.slice(0, 10);
-    return musicList.filter(m =>
-      m.name?.toLowerCase().includes(musicQuery.toLowerCase()) ||
-      m.artist?.toLowerCase().includes(musicQuery.toLowerCase())
-    ).slice(0, 10);
-  }, [musicList, musicQuery]);
+    const query = musicQuery.toLowerCase()
+    return musicList
+      .filter(m => m.name?.toLowerCase().includes(query) || m.artist?.toLowerCase().includes(query))
+      .slice(0, 10)
+  }, [musicList, musicQuery])
 
-  // Draft handling (Local Feature)
   const saveDraft = () => {
-    const draft = { postText, links, privacy, selectedCommunity };
-    localStorage.setItem('post_draft', JSON.stringify(draft));
-    alert('Draft saved locally!');
+    const draft = { postText, links, privacy, selectedCommunity }
+    localStorage.setItem('post_draft', JSON.stringify(draft))
+    alert(t('Draft saved locally!'))
   }
 
   return (
-    <main className="min-h-screen w-full bg-[#fafafa] dark:bg-[#080808] flex items-center justify-center p-3 sm:p-4 md:p-8 transition-all duration-700 selection:bg-indigo-500/30">
-      {/* Animated Background Orbs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 90, 0],
-            opacity: [0.1, 0.15, 0.1]
-          }}
-          transition={{ duration: 15, repeat: Infinity }}
-          className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-gradient-to-br from-indigo-500/20 to-purple-500/20 blur-[140px] rounded-full"
-        />
-        <motion.div
-          animate={{
-            scale: [1.2, 1, 1.2],
-            rotate: [0, -90, 0],
-            opacity: [0.1, 0.15, 0.1]
-          }}
-          transition={{ duration: 15, repeat: Infinity, delay: 2 }}
-          className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-gradient-to-tr from-rose-500/20 to-orange-500/20 blur-[140px] rounded-full"
-        />
+    <main className="min-h-screen w-full bg-[#fafafa] dark:bg-[#050505] flex items-center justify-center p-4 md:p-8 transition-colors duration-500">
+      {/* Background Decor */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-40">
+        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full" />
+        <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full" />
       </div>
 
-      <div className="w-full max-w-6xl relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="w-full max-w-6xl relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-        {/* Left Panel: Controls & Settings */}
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
+        {/* Left Side: Settings */}
+        <motion.aside
+          initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="lg:col-span-3 space-y-6 hidden lg:block"
+          className="lg:col-span-3 space-y-4 hidden lg:block"
         >
-          <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-3xl rounded-[2.5rem] border border-gray-200/50 dark:border-white/5 p-6 shadow-2xl">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 mb-6 px-2 flex items-center gap-2">
-              <HiSparkles className="text-indigo-500" /> {t("Publisher Settings")}
+          <div className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-2xl rounded-[2rem] border border-gray-200/50 dark:border-white/5 p-6 shadow-xl space-y-6">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+              <HiSparkles size={14} /> {t("Publisher Settings")}
             </h3>
 
-            <div className="space-y-6">
-              <div className="space-y-3">
-                <label className="text-[11px] font-bold text-gray-500 ml-2">{t("Visibility")}</label>
-                <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-1 border border-gray-100 dark:border-white/5">
-                  <PostPrivacySelector defaultValue={privacy} onChange={(v) => setPrivacy(v)} />
-                </div>
-              </div>
+            <ControlGroup label={t("Visibility")}>
+              <PostPrivacySelector defaultValue={privacy} onChange={setPrivacy} />
+            </ControlGroup>
 
-              <div className="space-y-3">
-                <label className="text-[11px] font-bold text-gray-500 ml-2">{t("Channel")}</label>
-                <div className="relative group">
-                  <HiUsers className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-indigo-500 transition-colors" size={16} />
-                  <select
-                    value={selectedCommunity}
-                    onChange={(e) => setSelectedCommunity(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl text-[13px] font-bold text-gray-700 dark:text-gray-300 outline-none appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500/20 transition-all"
-                  >
-                    <option value="">{t("Global Feed")}</option>
-                    {communities
-                      ?.filter((com) => com.members.some((m) => m._id === selectedUser?._id))
-                      .map((com) => (
-                        <option key={com._id} value={com._id}>{com.Name}</option>
-                      ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="pt-4 space-y-3">
-                <button
-                  onClick={saveDraft}
-                  className="w-full flex items-center justify-center gap-3 py-3 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-100 dark:border-white/10 rounded-2xlt transition-all text-[11px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 rounded-2xl"
-                >
-                  <HiInboxArrowDown size={16} />
-                  {t("Save as Draft")}
-                </button>
-                <button
-                  onClick={() => handlePost()}
-                  disabled={!canPost}
-                  className="w-full flex items-center justify-center gap-3 py-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-[1.25rem] shadow-xl shadow-indigo-500/20 transition-all text-[11px] font-black uppercase tracking-[0.2em]"
-                >
-                  {loading ? t("Syncing...") : t("Publish Now")}
-                  <HiChevronRight size={16} />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-indigo-600/5 dark:bg-indigo-500/5 backdrop-blur-xl rounded-[2rem] border border-indigo-500/10 p-6">
-            <p className="text-[10px] leading-relaxed text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">
-              {t("Tip: Use @mentions to tag your friends and #hashtags to categorize your broadcast.")}
-            </p>
-          </div>
-        </motion.div>
-
-        {/* Middle Panel: Core Input */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="lg:col-span-6 space-y-6"
-        >
-          <div className="bg-white dark:bg-[#0D1117] rounded-3xl sm:rounded-[3rem] border border-gray-200/50 dark:border-white/5 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15)] overflow-hidden">
-            {/* Mobile Header (Hidden on Desktop) */}
-            <div className="lg:hidden p-6 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-indigo-500/20">
-                  <Image src={selectedUser?.profilePhoto?.url || '/default-avatar.png'} alt="P" width={40} height={40} className="object-cover" />
-                </div>
-                <span className="font-black text-xs text-gray-900 dark:text-white uppercase tracking-wider">{t("New Post")}</span>
-              </div>
-              <div className="flex gap-2">
-                <PostPrivacySelector defaultValue={privacy} onChange={(v) => setPrivacy(v)} />
-              </div>
-            </div>
-
-            {/* Input Header Area */}
-            <div className="px-8 pt-8 flex items-center gap-4">
-              <div className="hidden lg:block relative group">
-                <div className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative w-14 h-14 rounded-2xl overflow-hidden ring-2 ring-white dark:ring-gray-900 shadow-xl">
-                  <Image
-                    src={selectedUser?.profilePhoto?.url || '/default-avatar.png'}
-                    alt="profile"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 lg:mb-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
-                    {selectedUser?.username || 'Zocial User'}
-                  </span>
-                </div>
-                <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">
-                  {t("Spread the Message")}
-                </h2>
-              </div>
-
-              <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-2xl border border-gray-200/50 dark:border-white/10 overflow-hidden">
-                <button
-                  onClick={() => setViewMode('edit')}
-                  className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${viewMode === 'edit' ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                  {t("Edit")}
-                </button>
-                <button
-                  onClick={() => setViewMode('preview')}
-                  className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${viewMode === 'preview' ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                  {t("Preview")}
-                </button>
-              </div>
-            </div>
-
-            {/* Editor Content */}
-            <div className="p-8">
+            <ControlGroup label={t("Channel")}>
               <div className="relative group">
+                <HiUsers className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-indigo-500 transition-colors" size={14} />
+                <select
+                  value={selectedCommunity}
+                  onChange={(e) => setSelectedCommunity(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-transparent border-none text-[12px] font-bold text-gray-700 dark:text-gray-300 outline-none appearance-none cursor-pointer"
+                >
+                  <option value="">{t("Global Feed")}</option>
+                  {communities?.filter(com => com.members.some(m => m._id === selectedUser?._id)).map(com => (
+                    <option key={com._id} value={com._id}>{com.Name}</option>
+                  ))}
+                </select>
+              </div>
+            </ControlGroup>
+
+            <div className="pt-2 space-y-3">
+              <button
+                onClick={saveDraft}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-all text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400"
+              >
+                <HiInboxArrowDown size={14} /> {t("Save Draft")}
+              </button>
+              <button
+                onClick={handlePost}
+                disabled={!canPost}
+                className="w-full flex items-center justify-center gap-2 py-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-2xl shadow-lg shadow-indigo-500/20 transition-all text-xs font-black uppercase tracking-widest"
+              >
+                {loading ? t("Posting...") : t("Publish")}
+                <HiChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        </motion.aside>
+
+        {/* Main Editor */}
+        <section className="lg:col-span-6 space-y-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white dark:bg-[#0a0a0a] rounded-[2.5rem] border border-gray-200/50 dark:border-white/5 shadow-2xl overflow-hidden"
+          >
+            {/* Context Header */}
+            <div className="px-8 pt-8 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="relative w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-indigo-500/10 shadow-lg">
+                  <Image src={selectedUser?.profilePhoto?.url || '/default-avatar.png'} alt="User" fill className="object-cover" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 truncate max-w-[100px]">
+                      {selectedUser?.username || 'User'}
+                    </span>
+                  </div>
+                  <h2 className="text-base font-black text-gray-900 dark:text-white tracking-tight leading-none uppercase">{t("New Broadcast")}</h2>
+                </div>
+              </div>
+
+              <div className="flex bg-gray-100/50 dark:bg-white/5 p-1 rounded-xl border border-gray-200/50 dark:border-white/10">
+                {['edit', 'preview'].map(mode => (
+                  <button
+                    key={mode}
+                    onClick={() => setViewMode(mode)}
+                    className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${viewMode === mode ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+                  >
+                    {t(mode)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Input Area */}
+            <div className="p-8">
+              <div className="relative">
                 <textarea
                   ref={textareaRef}
                   value={postText}
                   onChange={handleTextareaChange}
-                  rows={8}
-                  placeholder={t("What's on your mind? Broadcast it to the world...")}
+                  rows={6}
+                  placeholder={t("What's the message for today?")}
                   dir={isRTL ? 'rtl' : 'ltr'}
-                  className={`w-full text-xl md:text-2xl font-semibold leading-relaxed bg-transparent focus:outline-none resize-none transition-all duration-500 placeholder:text-gray-300 dark:placeholder:text-gray-700 ${errorText ? 'text-rose-500' : 'text-gray-900 dark:text-white/90'}`}
+                  className={`w-full text-xl md:text-2xl font-bold leading-relaxed bg-transparent focus:outline-none resize-none transition-all placeholder:text-gray-300 dark:placeholder:text-gray-800 ${errorText ? 'text-rose-500' : 'text-gray-900 dark:text-white/90'}`}
                 />
 
-                {/* Mention Popover */}
+                {/* Mention Box placeholder for positioning - we'll handle this purely via the absolute position passed from container */}
                 <AnimatePresence>
                   {showMentionBox && filteredUsers.length > 0 && (
                     <motion.div
@@ -231,23 +212,19 @@ const NewPostPresenter = (props) => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       style={{
-                        top: (mentionBoxPos.top || 0) + 40,
+                        top: (mentionBoxPos.top || 0) + 30,
                         left: (mentionBoxPos.left || 0)
                       }}
-                      className="absolute z-[1000] w-64 bg-white dark:bg-[#1C2128] backdrop-blur-3xl rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden"
+                      className="absolute z-50 w-64 bg-white dark:bg-[#121212] backdrop-blur-3xl rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden"
                     >
-                      {filteredUsers.map((u) => (
-                        <button
-                          key={u._id}
-                          onClick={() => handleSelectMention(u)}
-                          className="w-full flex items-center gap-3 p-3 hover:bg-indigo-600 group transition-all"
-                        >
-                          <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white dark:border-gray-800">
+                      {filteredUsers.map(u => (
+                        <button key={u._id} onClick={() => handleSelectMention(u)} className="w-full flex items-center gap-3 p-3 hover:bg-indigo-600 transition-colors group">
+                          <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-100 dark:border-gray-800">
                             <Image src={u.profilePhoto?.url || '/default-avatar.png'} alt="U" width={32} height={32} />
                           </div>
-                          <div className="text-left overflow-hidden">
-                            <p className="text-[11px] font-black text-gray-900 dark:text-white group-hover:text-white truncate">@{u.username}</p>
-                            <p className="text-[9px] text-gray-500 dark:text-gray-400 group-hover:text-indigo-100 truncate">{u.profileName}</p>
+                          <div className="text-left">
+                            <p className="text-[11px] font-black text-gray-900 dark:text-white group-hover:text-white">@{u.username}</p>
+                            <p className="text-[9px] text-gray-500 dark:text-gray-400 group-hover:text-indigo-100">{u.profileName}</p>
                           </div>
                         </button>
                       ))}
@@ -256,114 +233,100 @@ const NewPostPresenter = (props) => {
                 </AnimatePresence>
               </div>
 
-              {/* Links Display */}
-              <AnimatePresence>
-                {links?.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {links.map((link, idx) => (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="flex items-center gap-2 bg-indigo-500/10 px-3 py-1.5 rounded-xl border border-indigo-500/20"
-                      >
-                        <HiLink size={12} className="text-indigo-500" />
-                        <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 max-w-[150px] truncate">{link}</span>
-                        <button onClick={() => handleRemoveLink(idx)} className="text-gray-400 hover:text-rose-500 transition-colors">
-                          <HiXMark size={14} />
-                        </button>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </AnimatePresence>
+              {/* Links */}
+              <div className="flex flex-wrap gap-2 mt-4">
+                <AnimatePresence>
+                  {links?.map((link, idx) => (
+                    <motion.div
+                      key={link}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      className="flex items-center gap-2 bg-gray-100 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-gray-200/50 dark:border-white/10"
+                    >
+                      <HiLink size={12} className="text-indigo-500" />
+                      <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400 max-w-[120px] truncate">{link}</span>
+                      <button onClick={() => handleRemoveLink(idx)} className="text-gray-400 hover:text-rose-500 transition-colors">
+                        <HiXMark size={14} />
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
 
-              {/* Images Grid */}
-              <AnimatePresence>
-                {media.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6">
+              {/* Media Grid */}
+              {media.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+                  <AnimatePresence>
                     {media.map((item, idx) => (
-                      <motion.div
-                        key={idx}
-                        layout
-                        className="relative aspect-square rounded-[1.5rem] overflow-hidden group border border-gray-100 dark:border-white/5 bg-black"
-                      >
-                        {item.type === 'video' ? (
-                          <video src={item.url} className="w-full h-full object-cover" controls />
-                        ) : (
-                          <Image src={item.url} alt="P" fill className="object-cover transition-transform group-hover:scale-110" />
-                        )}
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
-                          <button onClick={() => removeMedia(idx)} className="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-lg hover:scale-110">
-                            <HiTrash size={20} />
-                          </button>
-                        </div>
-                      </motion.div>
+                      <MediaItem key={item.url} item={item} onRemove={() => removeMedia(idx)} />
                     ))}
-                  </div>
-                )}
-              </AnimatePresence>
+                  </AnimatePresence>
+                </div>
+              )}
             </div>
 
-            {/* Editor Controls Bottom */}
-            <div className="px-8 py-6 bg-gray-50/50 dark:bg-white/[0.02] border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
+            {/* Bottom Toolbar */}
+            <div className="px-8 py-5 bg-gray-50/30 dark:bg-white/[0.01] border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <label className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-200/50 dark:border-white/10 text-gray-500 hover:text-indigo-500 hover:bg-white dark:hover:bg-white/10 transition-all cursor-pointer shadow-sm">
-                  <HiPhoto size={22} />
+                <label className="w-11 h-11 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-200/50 dark:border-white/10 text-gray-500 hover:text-indigo-500 hover:shadow-md transition-all cursor-pointer">
+                  <HiPhoto size={20} />
                   <input type="file" multiple accept="image/*, video/*" onChange={handleMediaChange} className="hidden" />
                 </label>
                 <button
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                  className={`w-12 h-12 flex items-center justify-center rounded-2xl border transition-all shadow-sm ${showEmojiPicker ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white dark:bg-white/5 border-gray-200/50 dark:border-white/10 text-gray-500 hover:text-amber-500'}`}
+                  className={`w-11 h-11 flex items-center justify-center rounded-2xl border transition-all ${showEmojiPicker ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white dark:bg-white/5 border-gray-200/50 dark:border-white/10 text-gray-500 hover:text-amber-500 hover:shadow-md'}`}
                 >
-                  <HiFaceSmile size={22} />
+                  <HiFaceSmile size={20} />
                 </button>
                 <button
                   onClick={() => setShowMusicPicker(!showMusicPicker)}
-                  className={`w-12 h-12 flex items-center justify-center rounded-2xl border transition-all shadow-sm ${selectedMusic ? 'bg-purple-600 border-purple-600 text-white' : 'bg-white dark:bg-white/5 border-gray-200/50 dark:border-white/10 text-gray-500 hover:text-purple-500'}`}
+                  className={`w-11 h-11 flex items-center justify-center rounded-2xl border transition-all ${selectedMusic ? 'bg-purple-600 border-purple-600 text-white' : 'bg-white dark:bg-white/5 border-gray-200/50 dark:border-white/10 text-gray-500 hover:text-purple-500 hover:shadow-md'}`}
                 >
-                  <HiMusicalNote size={22} />
+                  <HiMusicalNote size={20} />
                 </button>
-                <div className="h-8 w-px bg-gray-200 dark:bg-white/10 mx-2" />
-                <div className="relative group">
-                  <HiLink size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <div className="h-6 w-px bg-gray-200 dark:bg-white/10 mx-1" />
+                <div className="relative group flex items-center">
+                  <HiLink size={16} className="absolute left-3 text-gray-400" />
                   <input
                     type="text"
-                    placeholder={t("Paste URL...")}
+                    placeholder={t("Link...")}
                     value={linkInput}
                     onChange={(e) => setLinkInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleAddLink()}
-                    className="pl-10 pr-10 py-3 bg-white dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 w-40 md:w-56 transition-all"
+                    className="pl-9 pr-8 py-2.5 bg-white dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-2xl text-[11px] font-bold outline-none focus:ring-2 focus:ring-indigo-500/10 w-32 md:w-48 transition-all"
                   />
                   {linkInput && (
-                    <button onClick={handleAddLink} className="absolute right-2 top-1/2 -translate-y-1/2 text-indigo-500 hover:scale-110 transition-transform"><HiChevronRight size={18} /></button>
+                    <button onClick={handleAddLink} className="absolute right-2 text-indigo-500 hover:scale-110"><HiChevronRight size={16} /></button>
                   )}
                 </div>
               </div>
 
               <div className="flex items-center gap-4">
-                <div className="relative flex items-center justify-center w-10 h-10">
+                <div className="relative w-8 h-8 flex items-center justify-center">
                   <svg className="w-full h-full -rotate-90">
-                    <circle cx="20" cy="20" r="16" fill="transparent" stroke="currentColor" strokeWidth="2.5" className="text-gray-100 dark:text-gray-800" />
-                    <circle cx="20" cy="20" r="16" fill="transparent" stroke="currentColor" strokeWidth="2.5" strokeDasharray={100} strokeDashoffset={100 - (charCount / 500) * 100} className={charCount > 450 ? 'text-rose-500' : 'text-indigo-500 transition-all duration-300'} />
+                    <circle cx="16" cy="16" r="14" fill="transparent" stroke="currentColor" strokeWidth="2" className="text-gray-100 dark:text-gray-800" />
+                    <circle cx="16" cy="16" r="14" fill="transparent" stroke="currentColor" strokeWidth="2" strokeDasharray={88} strokeDashoffset={88 - (Math.min(charCount, 500) / 500) * 88} className={charCount > 450 ? 'text-rose-500' : 'text-indigo-500 transition-all duration-300'} />
                   </svg>
-                  <span className={`absolute text-[8px] font-black ${charCount > 450 ? 'text-rose-500' : 'text-gray-500'}`}>{charCount}</span>
+                  <span className={`absolute text-[8px] font-black ${charCount > 450 ? 'text-rose-500' : 'text-gray-400'}`}>{charCount}</span>
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Scheduling Section */}
+          {/* Scheduling Transmission */}
           <motion.div
-            className="bg-white/50 dark:bg-white/[0.02] backdrop-blur-2xl rounded-[2rem] border border-gray-200/50 dark:border-white/5 p-6 flex flex-col md:flex-row items-center justify-between gap-4"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white/50 dark:bg-white/[0.02] backdrop-blur-xl rounded-[2rem] border border-gray-200/50 dark:border-white/5 p-5 flex flex-col md:flex-row items-center justify-between gap-4"
           >
             <div className="flex items-center gap-4">
-              <div className={`p-4 rounded-2xl ${scheduleEnabled ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-500'} transition-all`}>
-                <HiClock size={20} />
+              <div className={`p-3.5 rounded-2xl ${scheduleEnabled ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-gray-100 dark:bg-white/5 text-gray-500'} transition-all`}>
+                <HiClock size={18} />
               </div>
               <div>
-                <h4 className="text-[11px] font-black uppercase tracking-widest text-gray-900 dark:text-white">{t("Schedule Transmission")}</h4>
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{scheduleEnabled ? t("Post will be broadcasted later") : t("Set a time for your post")}</p>
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white leading-tight">{t("Schedule Publication")}</h4>
+                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">{scheduleEnabled ? t("Post scheduled for later") : t("Set time for auto-broadcast")}</p>
               </div>
             </div>
             <input
@@ -373,224 +336,132 @@ const NewPostPresenter = (props) => {
                 setScheduleDate(e.target.value)
                 setScheduleEnabled(!!e.target.value)
               }}
-              className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 px-6 py-4 rounded-2xl text-xs font-bold text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 px-5 py-3 rounded-2xl text-[11px] font-bold text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all w-full md:w-auto"
             />
           </motion.div>
-        </motion.div>
+        </section>
 
-        {/* Right Panel: Feature-rich Preview */}
-        <motion.div
-          initial={{ opacity: 0, x: 50 }}
+        {/* Right Side: Quick Info */}
+        <motion.aside
+          initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="lg:col-span-3 space-y-6 hidden lg:block"
+          className="lg:col-span-3 space-y-4 hidden lg:block"
         >
-          <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-3xl rounded-[2.5rem] border border-gray-200/50 dark:border-white/5 p-6 shadow-2xl overflow-hidden relative group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl rounded-full" />
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 mb-6 px-2 flex items-center gap-2">
-              <HiEye className="text-indigo-500" /> {t("Live Transmission Preview")}
+          <div className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-2xl rounded-[2rem] border border-gray-200/50 dark:border-white/5 p-6 shadow-xl space-y-6">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+              <HiEye size={14} /> {t("Information")}
             </h3>
 
-            <div className="bg-gray-50 dark:bg-white/5 rounded-3xl p-5 border border-gray-100 dark:border-white/5 relative">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-full overflow-hidden">
-                  <Image src={selectedUser?.profilePhoto?.url || '/default-avatar.png'} alt="P" width={32} height={32} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-black text-gray-900 dark:text-white truncate">@{selectedUser?.username || 'user'}</p>
-                  <p className="text-[8px] text-gray-500 uppercase font-black tracking-widest">{privacy}</p>
-                </div>
+            <div className="space-y-4">
+              <div className="p-4 rounded-[1.5rem] bg-indigo-500/5 border border-indigo-500/10 group transition-all hover:bg-indigo-500/10">
+                <p className="text-[9px] font-black uppercase tracking-widest text-indigo-500 mb-1">{t("Formatting")}</p>
+                <p className="text-[11px] font-bold text-indigo-900 dark:text-indigo-100 leading-relaxed">
+                  {t("Use @mentions to tag friends and #hashtags to trend.")}
+                </p>
               </div>
 
-              <div className={`text-[12px] leading-relaxed dark:text-gray-300 break-words ${isRTL ? 'text-right' : 'text-left'}`}>
-                {postText || <span className="text-gray-400 dark:text-gray-600 italic">{t("Content signal is empty...")}</span>}
-              </div>
-
-              {selectedMusic && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="mt-4 p-3 bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center gap-3"
-                >
-                  <div className="w-8 h-8 bg-purple-500 text-white rounded-lg flex items-center justify-center shrink-0">
-                    <HiMusicalNote size={16} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-black dark:text-white truncate">{selectedMusic.name}</p>
-                    <p className="text-[8px] text-gray-500 uppercase font-black tracking-widest">{selectedMusic.artist || t("Unknown Artist")}</p>
-                  </div>
-                </motion.div>
-              )}
-
-              {media.length > 0 && (
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  {media.slice(0, 4).map((item, i) => (
-                    <div key={i} className="aspect-square relative rounded-xl overflow-hidden shadow-sm bg-black">
-                      {item.type === 'video' ? (
-                        <video src={item.url} className="w-full h-full object-cover" muted />
-                      ) : (
-                        <Image src={item.url} alt="i" fill className="object-cover" />
-                      )}
-
-                      {i === 3 && media.length > 4 && (
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-[10px] text-white font-black">+{media.length - 4}</div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between opacity-50">
-                <div className="flex gap-4">
-                  <div className="h-2 w-8 bg-gray-200 dark:bg-white/10 rounded-full" />
-                  <div className="h-2 w-8 bg-gray-200 dark:bg-white/10 rounded-full" />
-                </div>
-                <div className="h-4 w-4 bg-gray-200 dark:bg-white/10 rounded-full" />
+              <div className="p-4 rounded-[1.5rem] bg-amber-500/5 border border-amber-500/10 group transition-all hover:bg-amber-500/10">
+                <p className="text-[9px] font-black uppercase tracking-widest text-amber-500 mb-1">{t("Character Limit")}</p>
+                <p className="text-[11px] font-bold text-amber-900 dark:text-amber-100 leading-relaxed">
+                  {t("Maintain clear and concise communication within 500 characters.")}
+                </p>
               </div>
             </div>
 
-            <div className="mt-6 flex items-center justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">
-              <span>{t("Network Latency")}</span>
-              <span className="text-green-500">24ms</span>
-            </div>
-          </div>
-
-          {/* Quick Stats / Info */}
-          <div className="space-y-4">
-            <div className="bg-white dark:bg-white/5 rounded-3xl p-4 flex items-center gap-4 border border-gray-100 dark:border-white/5 group hover:border-indigo-500/30 transition-all">
-              <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform">
-                <HiSparkles size={18} />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">{t("Reach Potential")}</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">~1.2k impressions</p>
-              </div>
-            </div>
-            <div className="bg-white dark:bg-white/5 rounded-3xl p-4 flex items-center gap-4 border border-gray-100 dark:border-white/5 group hover:border-purple-500/30 transition-all">
-              <div className="w-10 h-10 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500 group-hover:scale-110 transition-transform">
-                <HiCheckBadge size={18} />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">{t("Trust Score")}</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">Verified Stream</p>
+            <div className="pt-2">
+              <div className="flex items-center justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
+                <span>{t("Network Status")}</span>
+                <span className="text-green-500 animate-pulse">{t("Live")}</span>
               </div>
             </div>
           </div>
-        </motion.div>
+        </motion.aside>
       </div>
 
-      {/* Music Picker Modal */}
+      {/* Modals: Music & Emoji */}
       <AnimatePresence>
-        {showMusicPicker && (
+        {(showMusicPicker || showEmojiPicker) && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setShowMusicPicker(false)}
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => { setShowMusicPicker(false); setShowEmojiPicker(false); }}
+              className="absolute inset-0 bg-black/40 backdrop-blur-md"
             />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative z-10 w-full max-w-md bg-white dark:bg-[#0D1117] shadow-2xl rounded-[2.5rem] overflow-hidden border border-white/20 p-6"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-black dark:text-white">{t("Select Soundtrack")}</h3>
-                <button onClick={() => setShowMusicPicker(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
-                  <HiXMark size={24} />
-                </button>
-              </div>
 
-              <div className="relative mb-6">
+            {showMusicPicker && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="relative z-10 w-full max-w-md bg-white dark:bg-[#0f0f0f] shadow-2xl rounded-[2.5rem] border border-white/10 p-6"
+              >
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-sm font-black dark:text-white uppercase tracking-widest">{t("Select Soundtrack")}</h3>
+                  <button onClick={() => setShowMusicPicker(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
+                    <HiXMark size={20} />
+                  </button>
+                </div>
                 <input
                   type="text"
-                  placeholder={t("Search music or artists...")}
+                  placeholder={t("Search music...")}
                   value={musicQuery}
                   onChange={(e) => setMusicQuery(e.target.value)}
-                  className="w-full pl-6 pr-6 py-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full px-6 py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500/10 mb-4"
                 />
-              </div>
-
-              <div className="space-y-2 max-h-80 overflow-y-auto custom-scrollbar pr-2">
-                {isMusicLoading ? (
-                  <div className="text-center py-8 text-gray-400 text-xs font-bold uppercase tracking-widest">{t("Tuning frequencies...")}</div>
-                ) : filteredMusic.length > 0 ? (
-                  filteredMusic.map((m) => (
-                    <button
-                      key={m._id}
-                      onClick={() => {
-                        setSelectedMusic(m);
-                        setShowMusicPicker(false);
-                      }}
-                      className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all border ${selectedMusic?._id === m._id ? 'bg-purple-600 border-purple-600 text-white' : 'bg-gray-50 dark:bg-white/5 border-transparent hover:border-purple-500/30'}`}
-                    >
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${selectedMusic?._id === m._id ? 'bg-white/20' : 'bg-purple-500/10 text-purple-500'}`}>
-                        <HiMusicalNote size={20} />
-                      </div>
-                      <div className="text-left min-w-0">
-                        <p className="text-xs font-black truncate">{m.name}</p>
-                        <p className={`text-[10px] uppercase tracking-widest font-bold ${selectedMusic?._id === m._id ? 'text-purple-100' : 'text-gray-500'}`}>{m.artist || t("Unknown Artist")}</p>
-                      </div>
-                    </button>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-gray-500 text-xs font-bold uppercase tracking-widest">{t("Silence... Try another search")}</div>
+                <div className="space-y-1.5 max-h-80 overflow-y-auto custom-scrollbar pr-1">
+                  {isMusicLoading ? (
+                    <div className="py-10 text-center text-[10px] font-black uppercase text-gray-400 animate-pulse">{t("Syncing...")}</div>
+                  ) : filteredMusic.length > 0 ? (
+                    filteredMusic.map(m => (
+                      <button
+                        key={m._id}
+                        onClick={() => { setSelectedMusic(m); setShowMusicPicker(false); }}
+                        className={`w-full flex items-center gap-4 p-3.5 rounded-2xl transition-all border ${selectedMusic?._id === m._id ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-transparent border-transparent hover:bg-gray-50 dark:hover:bg-white/5'}`}
+                      >
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${selectedMusic?._id === m._id ? 'bg-white/20' : 'bg-indigo-500/10 text-indigo-500'}`}>
+                          <HiMusicalNote size={18} />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-xs font-black truncate max-w-[200px]">{m.name}</p>
+                          <p className={`text-[9px] uppercase font-bold tracking-widest ${selectedMusic?._id === m._id ? 'text-indigo-100' : 'text-gray-500'}`}>{m.artist}</p>
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="py-10 text-center text-[10px] uppercase text-gray-500 font-bold">{t("No matches found")}</div>
+                  )}
+                </div>
+                {selectedMusic && (
+                  <button onClick={() => setSelectedMusic(null)} className="mt-4 w-full py-3 text-rose-500 text-[10px] font-black uppercase tracking-widest hover:bg-rose-500/10 rounded-xl">
+                    {t("Remove Media")}
+                  </button>
                 )}
-              </div>
+              </motion.div>
+            )}
 
-              {selectedMusic && (
-                <button
-                  onClick={() => setSelectedMusic(null)}
-                  className="mt-6 w-full py-4 text-rose-500 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-rose-500/10 rounded-2xl transition-all"
-                >
-                  {t("Remove Soundtrack")}
-                </button>
-              )}
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Emoji Picker Modal */}
-      <AnimatePresence>
-        {showEmojiPicker && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setShowEmojiPicker(false)}
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative z-10 shadow-2xl rounded-[2.5rem] overflow-hidden border border-white/20"
-            >
-              <EmojiPicker
-                onEmojiClick={handleEmojiClick}
-                theme="dark"
-                width={350}
-                height={450}
-                lazyLoadEmojis={true}
-                skinTonesDisabled
-              />
-            </motion.div>
+            {showEmojiPicker && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="relative z-10 rounded-[2.5rem] border border-white/10 overflow-hidden shadow-2xl"
+              >
+                <EmojiPicker onEmojiClick={handleEmojiClick} theme="dark" width={320} height={400} lazyLoadEmojis skinTonesDisabled />
+              </motion.div>
+            )}
           </div>
         )}
       </AnimatePresence>
 
       {/* Mobile Fab */}
-      <div className="lg:hidden fixed bottom-8 right-8 z-50">
-        <button
-          onClick={() => handlePost()}
+      <div className="lg:hidden fixed bottom-6 right-6 z-[100]">
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={handlePost}
           disabled={!canPost}
-          className="w-16 h-16 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-2xl shadow-indigo-500/40 disabled:opacity-50 active:scale-95 transition-all"
+          className="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-2xl shadow-indigo-500/50 disabled:opacity-50 active:bg-indigo-700 transition-all"
         >
-          {loading ? <HiClock size={24} className="animate-spin" /> : <HiChevronRight size={28} />}
-        </button>
+          {loading ? <HiClock size={24} className="animate-spin" /> : <HiChevronRight size={24} />}
+        </motion.button>
       </div>
     </main>
   )
 }
 
-export default React.memo(NewPostPresenter)
-
+export default memo(NewPostPresenter)

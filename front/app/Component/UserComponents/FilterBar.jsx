@@ -19,14 +19,14 @@ const FilterBar = memo(({ filters, setFilters, years }) => {
 
   const yearOptions = useMemo(
     () => years.map(y => (
-      <option key={y} value={y} className="bg-white dark:bg-[#0B0F1A]">{y}</option>
+      <option key={y} value={y} className="bg-white dark:bg-[#0B0F1A] text-gray-900 dark:text-white">{y}</option>
     )),
     [years]
   );
 
   const monthOptions = useMemo(
     () => months.map(({ name, value }, i) => (
-      <option key={i + 1} value={value} className="bg-white dark:bg-[#0B0F1A]">{name}</option>
+      <option key={i + 1} value={value} className="bg-white dark:bg-[#0B0F1A] text-gray-900 dark:text-white">{name}</option>
     )),
     []
   );
@@ -37,7 +37,7 @@ const FilterBar = memo(({ filters, setFilters, years }) => {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-6xl mx-auto mb-12"
     >
-      <div className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl p-6 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-[0_20px_40px_-12px_rgba(0,0,0,0.1)] flex flex-wrap items-center gap-6">
+      <div className="bg-white/80 dark:bg-white/[0.02] backdrop-blur-3xl p-6 rounded-[2.5rem] border border-gray-200/50 dark:border-white/5 shadow-xl flex flex-wrap items-center gap-6">
 
         {/* Signal Section */}
         <div className="flex items-center gap-3 pr-6 border-r border-gray-100 dark:border-white/5 hidden lg:flex">
@@ -45,8 +45,8 @@ const FilterBar = memo(({ filters, setFilters, years }) => {
             <HiAdjustmentsHorizontal className="w-5 h-5" />
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{t("Tuning")}</span>
-            <span className="text-xs font-bold text-gray-400 uppercase">{t("Parameters")}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">{t("Tuning")}</span>
+            <span className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter">{t("Parameters")}</span>
           </div>
         </div>
 
@@ -58,7 +58,7 @@ const FilterBar = memo(({ filters, setFilters, years }) => {
             value={filters.year}
             onChange={e => handleChange("year", e.target.value)}
             options={[
-              <option key="all" value="all" className="bg-white dark:bg-[#0B0F1A]">{t("All Dimensions")}</option>,
+              <option key="all" value="all" className="bg-white dark:bg-[#0B0F1A] text-gray-900 dark:text-white">{t("All Dimensions")}</option>,
               ...yearOptions
             ]}
           />
@@ -69,7 +69,7 @@ const FilterBar = memo(({ filters, setFilters, years }) => {
             value={filters.month}
             onChange={e => handleChange("month", e.target.value)}
             options={[
-              <option key="all" value="all" className="bg-white dark:bg-[#0B0F1A]">{t("All Phases")}</option>,
+              <option key="all" value="all" className="bg-white dark:bg-[#0B0F1A] text-gray-900 dark:text-white">{t("All Phases")}</option>,
               ...monthOptions
             ]}
           />
@@ -80,9 +80,9 @@ const FilterBar = memo(({ filters, setFilters, years }) => {
             value={filters.sort}
             onChange={e => handleChange("sort", e.target.value)}
             options={[
-              <option key="latest" value="latest" className="bg-white dark:bg-[#0B0F1A]">🆕 {t("Chronological")}</option>,
-              <option key="mostLiked" value="mostLiked" className="bg-white dark:bg-[#0B0F1A]">❤️ {t("Resonant")}</option>,
-              <option key="mostCommented" value="mostCommented" className="bg-white dark:bg-[#0B0F1A]">💬 {t("Active Discourse")}</option>
+              <option key="latest" value="latest" className="bg-white dark:bg-[#0B0F1A] text-gray-900 dark:text-white">🆕 {t("Chronological")}</option>,
+              <option key="mostLiked" value="mostLiked" className="bg-white dark:bg-[#0B0F1A] text-gray-900 dark:text-white">❤️ {t("Resonant")}</option>,
+              <option key="mostCommented" value="mostCommented" className="bg-white dark:bg-[#0B0F1A] text-gray-900 dark:text-white">💬 {t("Active Discourse")}</option>
             ]}
           />
         </div>
@@ -110,14 +110,14 @@ const FilterSelect = memo(({ icon, label, value, onChange, options }) => (
       <span className="text-indigo-500 opacity-60 group-focus-within/select:opacity-100 transition-opacity">
         {icon}
       </span>
-      <span className="hidden sm:inline text-[9px] font-black uppercase tracking-widest text-gray-400">
+      <span className="hidden sm:inline text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
         {label}:
       </span>
     </div>
     <select
       value={value}
       onChange={onChange}
-      className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-2xl pl-24 pr-10 py-4 text-xs font-black uppercase tracking-widest text-gray-700 dark:text-white outline-none focus:border-indigo-500/30 transition-all appearance-none cursor-pointer"
+      className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200/50 dark:border-white/5 rounded-2xl pl-24 pr-10 py-4 text-xs font-black uppercase tracking-widest text-gray-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all appearance-none cursor-pointer"
     >
       {options}
     </select>

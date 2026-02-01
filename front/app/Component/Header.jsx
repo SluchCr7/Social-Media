@@ -19,7 +19,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
 
   return (
     <header className="sticky top-0 z-[100] w-full border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-[#050505cc] backdrop-blur-2xl transition-colors duration-300">
-      <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-16 flex items-center justify-between gap-8">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between gap-8">
 
         {/* Brand/Logo - Optional: You can uncomment or add a logo here if needed */}
 
