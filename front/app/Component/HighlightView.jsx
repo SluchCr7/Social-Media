@@ -13,6 +13,7 @@ import {
   HiXMark,
   HiPlus,
   HiTrash,
+  HiSparkles,
   HiChevronLeft,
   HiChevronRight,
   HiPause,
