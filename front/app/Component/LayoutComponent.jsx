@@ -62,6 +62,7 @@ const LayoutComponent = ({ children }) => {
     '/Pages/Terms',
     '/Pages/Support',
     '/Pages/Friends',
+    '/Pages/Memories',
     '/Pages/Forgot',
     '/Pages/Setting',
     '/Pages/Privacy',

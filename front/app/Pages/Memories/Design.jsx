@@ -11,7 +11,7 @@ const EmptyMemories = React.memo(({ t }) => (
     <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center justify-center py-20 px-6 text-center"
+        className="flex w-full flex-col items-center justify-center py-20 px-6 text-center"
     >
         <div className="relative mb-8">
             <motion.div
@@ -55,10 +55,10 @@ EmptyMemories.displayName = 'EmptyMemories';
 
 const MemoriesDesign = ({ memories, isLoading, t }) => {
     return (
-        <div className="min-h-screen bg-[#fafafa] dark:bg-[#080808] pb-20">
+        <div className="min-h-screen w-full bg-[#fafafa] dark:bg-[#080808] pb-20">
             {/* Header Area */}
             <div className="sticky top-14 lg:top-0 z-30 bg-white/80 dark:bg-[#0D1117]/80 backdrop-blur-xl border-b border-gray-100 dark:border-white/5 px-6 py-5">
-                <div className="max-w-4xl mx-auto flex items-center justify-between">
+                <div className="max-w-6xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Link href="/" className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl transition-colors">
                             <HiArrowLeft className="w-5 h-5 text-gray-500" />
