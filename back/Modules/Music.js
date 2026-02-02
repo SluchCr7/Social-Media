@@ -60,35 +60,44 @@ const MusicSchema = new mongoose.Schema({
         type: String,
         trim: true,
         default: "Unknown"
-    }, 
-    isPopular : {
-        type : Boolean,
-        default : false
+    },
+    isPopular: {
+        type: Boolean,
+        default: false
     },
     isTrending: {
-        type : Boolean,
-        default : false
+        type: Boolean,
+        default: false
     },
-    listenCount : {
-        type : Number,
-        default : 0
+    listenCount: {
+        type: Number,
+        default: 0
     }
 }, {
     timestamps: true
 });
 
-MusicSchema.methods.updatePopularity = async function({ threshold = 50 } = {}) {
-  if (!this.likes) this.likes = [];
+// ✅ تحسين أداء البحث عن طريق الفهرسة
+MusicSchema.index({
+    title: 'text',
+    artist: 'text',
+    album: 'text',
+    genre: 'text',
+    tags: 'text'
+});
 
-  const isNowPopular = this.likes.length >= threshold;
+MusicSchema.methods.updatePopularity = async function ({ threshold = 50 } = {}) {
+    if (!this.likes) this.likes = [];
 
-  // فقط احفظ إذا تغيرت الحالة
-  if (this.isPopular !== isNowPopular) {
-    this.isPopular = isNowPopular;
-    await this.save();
-  }
+    const isNowPopular = this.likes.length >= threshold;
 
-  return this;
+    // فقط احفظ إذا تغيرت الحالة
+    if (this.isPopular !== isNowPopular) {
+        this.isPopular = isNowPopular;
+        await this.save();
+    }
+
+    return this;
 };
 
 // 🎯 Joi validation المحدثة

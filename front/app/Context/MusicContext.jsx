@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import axios from "axios";
 import { useAuth } from "./AuthContext";
 import { useAlert } from "./AlertContext";
@@ -12,64 +12,97 @@ export const MusicContext = createContext();
 export const MusicProvider = ({ children }) => {
   const { user } = useAuth();
   const { showAlert } = useAlert();
-  const { addNotify } = useNotify();
-  const [currentMusic , setCurrentMusic] = useState(null);
   const [music, setMusic] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [genre, setGenre] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [topCharts, setTopCharts] = useState({ trending: [], popular: [] });
   const [showModelAddMusic, setShowModelAddMusic] = useState(false);
-  const { setPosts } = usePost();
-  // ✅ جلب الموسيقى مع pagination
-  const fetchMusic = useCallback(async (pageNum = 1) => {
-    if (!hasMore && pageNum !== 1) return;
+  const [currentMusic, setCurrentMusic] = useState(null);
 
+  const { setPosts } = usePost();
+
+  // ✅ جلب الموسيقى مع التصفية والـ Pagination
+  const fetchMusic = useCallback(async (pageNum = 1, currentGenre = "All") => {
     setIsLoading(true);
     try {
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/music?page=${pageNum}&limit=10`
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/music?page=${pageNum}&limit=12&genre=${currentGenre}`
       );
       const newMusic = Array.isArray(res.data.music) ? res.data.music : [];
 
       setMusic(prev => (pageNum === 1 ? newMusic : [...prev, ...newMusic]));
       setHasMore(pageNum < res.data.totalPages);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch Error:", err);
+      // showAlert("Failed to fetch music.");
     } finally {
       setIsLoading(false);
     }
-  }, [hasMore, showAlert]);
+  }, []);
 
-  // ✅ تحميل أول مرة
+  // ✅ جلب التريند والأكثر شعبية
+  const fetchTopCharts = useCallback(async () => {
+    try {
+      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/music/top-charts`);
+      setTopCharts(data);
+    } catch (err) {
+      console.error("Top Charts Error:", err);
+    }
+  }, []);
+
+  // ✅ البحث عن الموسيقى (Server Side)
+  const searchMusic = useCallback(async (query) => {
+    if (!query) {
+      fetchMusic(1, genre);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/music/search?q=${query}`);
+      setMusic(data);
+      setHasMore(false); // البحث يعيد نتائج ثابتة عادة
+    } catch (err) {
+      console.error("Search Error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [genre, fetchMusic]);
+
+  // ✅ تحميل البيانات عند تغيير النوع أو أول مرة
   useEffect(() => {
-    fetchMusic(page);
-  }, [page, fetchMusic]);
+    setPage(1);
+    fetchMusic(1, genre);
+    fetchTopCharts();
+  }, [genre, fetchMusic, fetchTopCharts]);
 
   // 🎵 رفع موسيقى جديدة
   const uploadMusic = async (formData) => {
     try {
-    const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_BACK_URL}/api/music`,
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-        },
-      }
-    );
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/music`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        }
+      );
 
-    // تحديث state مباشرة بالموسيقى الجديدة
-    setMusic(prev => [res.data, ...prev]);
-    showAlert("Music uploaded successfully!");
-  } catch (err) {
-    console.error(err);
-    showAlert(err?.response?.data?.message || "Failed to upload Music.");
-  }
-};
+      setMusic(prev => [res.data, ...prev]);
+      showAlert("Music uploaded successfully!");
+      setShowModelAddMusic(false);
+    } catch (err) {
+      console.error(err);
+      showAlert(err?.response?.data?.message || "Failed to upload Music.");
+    }
+  };
+
   // 🗑️ حذف موسيقى
   const deleteMusic = useCallback(async (id) => {
     if (!user?.token) return;
-
     try {
       const res = await axios.delete(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/music/${id}`,
@@ -84,66 +117,69 @@ export const MusicProvider = ({ children }) => {
   }, [user, showAlert]);
 
   // ❤️ لايك / إلغاء لايك
-const likeMusic = useCallback(async (id) => {
-  if (!user?.token) return;
-
-  try {
-    const res = await axios.put(
-      `${process.env.NEXT_PUBLIC_BACK_URL}/api/music/like/${id}`,
-      {},
-      { headers: { Authorization: `Bearer ${user.token}` } }
-    );
-
-    const { music, message } = res.data;
-
-    // ✅ تحديث مباشر للحالة بدون refresh
-    setMusic(prev =>
-      prev.map(item => (item._id === music._id ? music : item))
-    );
-
-    // ✅ في حال الموسيقى غير موجودة (مثل عرض مفصل)، نضيفها مؤقتًا
-    setMusic(prev => {
-      if (!prev.find(m => m._id === music._id)) return [...prev, music];
-      return prev;
-    });
-
-    showAlert(message || "Updated successfully");
-  } catch (err) {
-    console.error(err);
-    showAlert("Failed to like music.");
-  }
-}, [user]);
-
-  // 👁️ زيادة المشاهدات
-  const viewMusic = useCallback(async (id) => {
-    if (!user?.token) return;
-
+  const likeMusic = useCallback(async (id) => {
+    if (!user?.token) return showAlert("Please login to like music");
     try {
       const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/music/view/${id}`,
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/music/like/${id}`,
         {},
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
+      const { music: updatedMusic, message } = res.data;
+      setMusic(prev => prev.map(item => (item._id === updatedMusic._id ? updatedMusic : item)));
 
+      // تحديث التريند أيضاً لو كان فيها
+      setTopCharts(prev => ({
+        trending: prev.trending.map(m => m._id === updatedMusic._id ? updatedMusic : m),
+        popular: prev.popular.map(m => m._id === updatedMusic._id ? updatedMusic : m)
+      }));
+
+    } catch (err) {
+      console.error(err);
+      showAlert("Failed to like music.");
+    }
+  }, [user, showAlert]);
+
+  // 👁️ زيادة المشاهدات
+  const viewMusic = useCallback(async (id) => {
+    try {
+      const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/music/view/${id}`);
       const updated = res.data;
       setMusic(prev => prev.map(r => (r?._id === id ? updated : r)));
-    } catch (err) {
-      console.error(err);
-    }
-  }, [user]);
-
-  // 🎧 جلب أغنية معينة
-  const getMusicFileById = useCallback(async (id) => {
-    try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/music/${id}`);
-      return res.data;
-    } catch (err) {
-      console.error(err);
-      return null;
-    }
+    } catch (err) { console.error(err); }
   }, []);
 
-  // 🔍 Infinite Scroll
+  const addListen = useCallback(async (musicId) => {
+    if (!user?.token) return;
+    try {
+      const { data } = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/music/listen/${musicId}`,
+        {},
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+      setMusic(prev => prev.map(m => (m._id === data._id ? data : m)));
+      return data;
+    } catch (error) { console.error('Error adding listen:', error); }
+  }, [user]);
+
+  const shareMusicAsPost = useCallback(async (musicId, customText = '') => {
+    if (!user?.token) return showAlert('You must be logged in to share music.');
+    try {
+      const { data } = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/music/share/${musicId}`,
+        { customText },
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+      setPosts(prev => [data.post, ...prev]);
+      showAlert("Shared successfully as a post!");
+      return data.post;
+    } catch (error) {
+      console.error('Error sharing music:', error);
+      showAlert("Failed to share music.");
+    }
+  }, [user, setPosts, showAlert]);
+
+  // 🔍 Infinite Scroll Logic
   const observer = useRef();
   const lastMusicRef = useCallback(
     (node) => {
@@ -151,73 +187,47 @@ const likeMusic = useCallback(async (id) => {
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMore) {
-          const nextPage = page + 1;
-          setPage(nextPage);
-          fetchMusic(nextPage);
+          setPage(prev => {
+            const nextPage = prev + 1;
+            fetchMusic(nextPage, genre);
+            return nextPage;
+          });
         }
       });
       if (node) observer.current.observe(node);
     },
-    [isLoading, hasMore, page, fetchMusic]
+    [isLoading, hasMore, fetchMusic, genre]
   );
 
-  const addListen = useCallback(async (musicId) => {
-    try {
-      const { data } = await axios.post(`${process.env.NEXT_PUBLIC_BACK_URL}/api/music/listen/${musicId}`,
-        {},
-        { headers: { Authorization: `Bearer ${user.token}` } }
-      );
-      // تحديث الموسيقى في الـ state
-      setMusic((prev) =>
-        prev.map((m) => (m._id === data._id ? data : m))
-      );
-      return data;
-    } catch (error) {
-      console.error('Error adding listen:', error);
-    }
-  },[user])
-  const shareMusicAsPost = useCallback(async (musicId, customText = '') => {
-    if (!user?.token) return showAlert('You must be logged in to share music as a post.');
+  const value = useMemo(() => ({
+    music,
+    topCharts,
+    isLoading,
+    hasMore,
+    genre,
+    setGenre,
+    searchQuery,
+    setSearchQuery,
+    searchMusic,
+    uploadMusic,
+    deleteMusic,
+    likeMusic,
+    viewMusic,
+    addListen,
+    shareMusicAsPost,
+    lastMusicRef,
+    showModelAddMusic,
+    setShowModelAddMusic,
+    currentMusic,
+    setCurrentMusic,
+  }), [
+    music, topCharts, isLoading, hasMore, genre, searchQuery,
+    searchMusic, uploadMusic, deleteMusic, likeMusic, viewMusic,
+    addListen, shareMusicAsPost, lastMusicRef, showModelAddMusic, currentMusic
+  ]);
 
-    try {
-      const { data } = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/music/share/${musicId}`,
-        { customText },
-        {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        }
-      )
-      // ✅ تحديث الـ state فورًا
-      setPosts(prev => [data.post, ...prev])
-      showAlert("Shared successfully");
-      return data.post
-    } catch (error) {
-      console.error('Error sharing music:', error)
-      throw error
-    }
-  }, [user?.token])
   return (
-    <MusicContext.Provider
-      value={{
-        music,
-        fetchMusic,
-        uploadMusic,
-        deleteMusic,
-        likeMusic,
-        viewMusic,
-        getMusicFileById,
-        isLoading,
-        hasMore,
-        lastMusicRef,
-        showModelAddMusic,
-        setShowModelAddMusic,
-        currentMusic,
-        setCurrentMusic,
-        addListen,shareMusicAsPost
-      }}
-    >
+    <MusicContext.Provider value={value}>
       {children}
     </MusicContext.Provider>
   );
