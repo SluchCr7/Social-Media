@@ -1,4 +1,3 @@
-
 'use client'
 
 import React, {
@@ -17,7 +16,7 @@ import { useFeedback } from '@/app/Context/FeedbackContext'
 import api from '@/app/utils/api'
 import Loading from '@/app/Component/Loading'
 
-// ✅ Lazy Load لتقليل وقت تحميل الصفحة الأولى
+// ✅ Lazy Load for better initial bundle size
 const NewPostPresenter = React.lazy(() => import('./Design'))
 
 const NewPostContainer = () => {
@@ -53,21 +52,41 @@ const NewPostContainer = () => {
 
   /* ------------------------- 🧠 Memoized helpers ------------------------- */
 
+  // Optimized caret coordinates tracking
   const getCaretCoordinates = useCallback((element, position) => {
     const div = document.createElement('div')
-    const style = getComputedStyle(element)
-    for (const prop of style) div.style[prop] = style[prop]
+    const style = window.getComputedStyle(element)
+
+    // Copy essential styles for accurate calculation
+    const props = [
+      'direction', 'boxSizing', 'width', 'height', 'overflowX', 'overflowY',
+      'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth', 'borderStyle',
+      'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+      'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch', 'fontSize', 'fontSizeAdjust', 'lineHeight', 'fontFamily',
+      'textAlign', 'textTransform', 'textIndent', 'textDecoration', 'letterSpacing', 'wordSpacing', 'tabSize', 'MozTabSize'
+    ]
+
+    props.forEach(prop => {
+      div.style[prop] = style[prop]
+    })
+
     div.style.position = 'absolute'
     div.style.visibility = 'hidden'
     div.style.whiteSpace = 'pre-wrap'
+    div.style.wordWrap = 'break-word'
+
     div.textContent = element.value.substring(0, position)
     const span = document.createElement('span')
     span.textContent = element.value.substring(position) || '.'
     div.appendChild(span)
+
     document.body.appendChild(div)
-    const { offsetTop: top, offsetLeft: left } = span
+    const coordinates = {
+      top: span.offsetTop + parseInt(style.borderTopWidth),
+      left: span.offsetLeft + parseInt(style.borderLeftWidth)
+    }
     document.body.removeChild(div)
-    return { top, left }
+    return coordinates
   }, [])
 
   /* ------------------------- ✍️ Textarea & Mentions ------------------------- */
@@ -92,6 +111,7 @@ const NewPostContainer = () => {
 
   const handleSelectMention = useCallback(
     (mention) => {
+      if (!mention) return
       const beforeCursor = postText.slice(0, cursorPosition)
       const afterCursor = postText.slice(cursorPosition)
       const match = beforeCursor.match(/@([\w\u0600-\u06FF]*)$/)
@@ -107,8 +127,7 @@ const NewPostContainer = () => {
         const newPos = startIdx + mention.username.length + 2
         if (textareaRef.current) {
           textareaRef.current.focus()
-          textareaRef.current.selectionStart = newPos
-          textareaRef.current.selectionEnd = newPos
+          textareaRef.current.setSelectionRange(newPos, newPos)
         }
       })
 
@@ -127,6 +146,7 @@ const NewPostContainer = () => {
 
   /* ------------------------- 🧩 Mentions Search Logic ------------------------- */
   useEffect(() => {
+    let active = true
     const searchUsers = async () => {
       if (!mentionQuery) {
         setFilteredUsers([])
@@ -136,17 +156,22 @@ const NewPostContainer = () => {
       setIsSearchingUsers(true)
       try {
         const res = await api.get(`/search?q=${mentionQuery}`)
-        const users = res.data?.users || []
-        setFilteredUsers(users.filter(u => u._id !== user?._id))
+        if (active) {
+          const users = res.data?.users || []
+          setFilteredUsers(users.filter(u => u._id !== user?._id))
+        }
       } catch (err) {
         console.error('Mention search error:', err)
       } finally {
-        setIsSearchingUsers(false)
+        if (active) setIsSearchingUsers(false)
       }
     }
 
-    const timer = setTimeout(searchUsers, 300)
-    return () => clearTimeout(timer)
+    const timer = setTimeout(searchUsers, 250)
+    return () => {
+      active = false
+      clearTimeout(timer)
+    }
   }, [mentionQuery, user?._id])
 
   // Sync selectedMentions with current text
@@ -183,28 +208,29 @@ const NewPostContainer = () => {
   /* ------------------------- 📍 Mention Box Position ------------------------- */
   useEffect(() => {
     if (showMentionBox && textareaRef.current) {
-      const textarea = textareaRef.current;
-      const { selectionStart } = textarea;
+      const textarea = textareaRef.current
+      const { selectionStart } = textarea
 
-      // Use requestAnimationFrame for smoother positioning after layout
       const updatePos = () => {
-        const { top, left } = getCaretCoordinates(textarea, selectionStart);
-        setMentionBoxPos({ top, left });
-      };
+        const { top, left } = getCaretCoordinates(textarea, selectionStart)
+        setMentionBoxPos({ top, left })
+      }
 
-      const frameId = requestAnimationFrame(updatePos);
-      return () => cancelAnimationFrame(frameId);
+      const frameId = requestAnimationFrame(updatePos)
+      return () => cancelAnimationFrame(frameId)
     }
-  }, [showMentionBox, postText, cursorPosition, getCaretCoordinates]);
+  }, [showMentionBox, postText, cursorPosition, getCaretCoordinates])
 
   /* ------------------------- 🔗 Links ------------------------- */
   const handleAddLink = useCallback(() => {
     const url = linkInput.trim()
     if (!url) return
     const formattedUrl = /^(https?:\/\/)/i.test(url) ? url : `https://${url}`
-    setLinks((prev) => [...prev, formattedUrl])
+    if (!links.includes(formattedUrl)) {
+      setLinks((prev) => [...prev, formattedUrl])
+    }
     setLinkInput('')
-  }, [linkInput])
+  }, [linkInput, links])
 
   const handleRemoveLink = useCallback(
     (index) => setLinks((prev) => prev.filter((_, i) => i !== index)),
@@ -220,11 +246,13 @@ const NewPostContainer = () => {
       type: file.type.startsWith('video') ? 'video' : 'image'
     }))
     setMedia((prev) => [...prev, ...previews])
+    e.target.value = '' // Reset input
   }, [])
 
   const removeMedia = useCallback((index) => {
     setMedia((prev) => {
-      URL.revokeObjectURL(prev[index].url)
+      const itemToDelete = prev[index]
+      if (itemToDelete) URL.revokeObjectURL(itemToDelete.url)
       return prev.filter((_, i) => i !== index)
     })
   }, [])
@@ -239,11 +267,12 @@ const NewPostContainer = () => {
         postText.slice(cursorPos)
       setPostText(newText)
       setShowEmojiPicker(false)
+
       requestAnimationFrame(() => {
         if (textareaRef.current) {
           textareaRef.current.focus()
-          textareaRef.current.selectionEnd =
-            cursorPos + emojiData.emoji.length
+          const newPos = cursorPos + emojiData.emoji.length
+          textareaRef.current.setSelectionRange(newPos, newPos)
         }
       })
     },
@@ -260,17 +289,17 @@ const NewPostContainer = () => {
 
   /* ------------------------- 🚀 Submit Post ------------------------- */
   const handlePost = useCallback(async () => {
-    const hashtags = extractHashtags(postText)
-    if (postText.trim().length > 500) return setErrorText(true)
-    if (!postText.trim() && media.length === 0) return
+    const trimmedText = postText.trim()
+    if (trimmedText.length > 500) return setErrorText(true)
+    if (!trimmedText && media.length === 0) return
 
-    const scheduleTime =
-      scheduleEnabled && scheduleDate ? scheduleDate : null
+    const hashtags = extractHashtags(trimmedText)
+    const scheduleTime = scheduleEnabled && scheduleDate ? scheduleDate : null
 
     setLoading(true)
     try {
       await AddPost(
-        postText.trim(),
+        trimmedText,
         media,
         hashtags,
         selectedCommunity,
@@ -280,8 +309,8 @@ const NewPostContainer = () => {
         privacy,
         selectedMusic?._id
       )
-    } finally {
-      setLoading(false)
+
+      // Clear state on success
       setLinks([])
       setPostText('')
       setMedia([])
@@ -289,6 +318,9 @@ const NewPostContainer = () => {
       setScheduleEnabled(false)
       setScheduleDate('')
       setSelectedMusic(null)
+      localStorage.removeItem('post_draft')
+    } finally {
+      setLoading(false)
     }
   }, [
     postText,
@@ -315,17 +347,11 @@ const NewPostContainer = () => {
     }
   }, [postText, links, privacy, selectedCommunity, showToast])
 
-  /* ------------------------- 👤 Sync Current User ------------------------- */
-  useEffect(() => {
-    setSelectedUser(user || {})
-  }, [user])
-
-
   /* ------------------------- 🧱 Render ------------------------- */
   return (
     <Suspense
       fallback={
-        <div className="p-4 text-gray-400 animate-pulse text-center">
+        <div className="min-h-screen flex items-center justify-center bg-[#fafafa] dark:bg-[#080808]">
           <Loading />
         </div>
       }
@@ -341,7 +367,7 @@ const NewPostContainer = () => {
           showEmojiPicker,
           setShowEmojiPicker,
           errorText,
-          selectedUser,
+          selectedUser: user || {},
           selectedMentions,
           privacy,
           setPrivacy,
