@@ -163,12 +163,6 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
     toggleLove(story._id);
   }, [story, toggleLove]);
 
-  const handleShare = useCallback((e) => {
-    e?.stopPropagation();
-    if (!story?._id) return;
-    shareStory(story._id);
-  }, [story, shareStory]);
-
   const handleDelete = useCallback(async (e) => {
     e?.stopPropagation();
     if (!story?._id) return;
