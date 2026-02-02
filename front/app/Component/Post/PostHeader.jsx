@@ -1,3 +1,4 @@
+'use client'
 import { motion, AnimatePresence } from 'framer-motion';
 import { BsThreeDots, BsLink45Deg } from 'react-icons/bs';
 import { HiBadgeCheck } from 'react-icons/hi';
@@ -5,7 +6,8 @@ import PostMenu from '@/app/Component/PostMenu';
 import UserHoverCard from '../UserHoverCard';
 import { formatRelativeTime } from '@/app/utils/FormatDataCreatedAt';
 import Image from 'next/image';
-
+import Link from 'next/link';
+import { memo, useCallback, useRef } from 'react';
 const PostHeader = memo(({ post, user, isLogin, showMenu, setShowMenu, isCommunityPost }) => {
   const owner = post?.owner;
   const triggerRef = useRef(null);
