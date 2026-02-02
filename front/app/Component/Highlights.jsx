@@ -1,51 +1,69 @@
 'use client';
 import React from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, Reorder } from 'framer-motion';
 import { FaPlus } from 'react-icons/fa';
 import { useHighlights } from '../Context/HighlightContext';
+
 export default function HighlightsBar({
   highlights = [],
   onAddHighlight,
   isOwner = false
 }) {
-  const { setSelectedHighlight } = useHighlights()
+  const { setSelectedHighlight, reorderHighlights, setHighlights } = useHighlights();
+
+  const handleReorder = (newOrder) => {
+    setHighlights(newOrder);
+    if (isOwner) {
+      reorderHighlights(newOrder.map(h => h._id));
+    }
+  };
+
   return (
     <div className="w-full flex flex-col items-center gap-3 py-4">
-      <div className="flex w-full overflow-x-auto scrollbar-hide gap-4 px-3">
+      <Reorder.Group
+        axis="x"
+        values={highlights}
+        onReorder={handleReorder}
+        className="flex w-full overflow-x-auto scrollbar-hide gap-6 px-4 py-2"
+      >
         {/* زر إنشاء Highlight جديد */}
         {isOwner && (
-          <motion.div
-            whileTap={{ scale: 0.9 }}
-            onClick={onAddHighlight}
-            className="
-              flex-shrink-0 w-20 h-20 rounded-full border-2 border-dashed 
-              border-gray-400 dark:border-gray-600 flex flex-col items-center 
-              justify-center text-gray-400 dark:text-gray-500 cursor-pointer 
-              hover:bg-gray-100 dark:hover:bg-white/5 hover:border-gray-400 dark:hover:border-gray-400 transition-all
-            "
-          >
-            <FaPlus size={18} />
-            <span className="text-xs mt-1 font-medium">New</span>
-          </motion.div>
+          <div className="flex-shrink-0 flex flex-col items-center gap-2">
+            <motion.div
+              whileTap={{ scale: 0.9 }}
+              onClick={onAddHighlight}
+              className="
+                w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-dashed 
+                border-gray-300 dark:border-gray-700 flex flex-col items-center 
+                justify-center text-gray-400 dark:text-gray-500 cursor-pointer 
+                hover:bg-gray-100 dark:hover:bg-white/5 hover:border-indigo-500/50 hover:text-indigo-500 transition-all
+              "
+            >
+              <FaPlus size={18} />
+            </motion.div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-600">New</span>
+          </div>
         )}
 
         {/* عرض جميع الهايلايتس */}
         {highlights.map((highlight) => (
-          <motion.div
+          <Reorder.Item
             key={highlight._id}
+            value={highlight}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setSelectedHighlight(highlight)}
-            className="flex-shrink-0 flex flex-col items-center cursor-pointer"
+            className="flex-shrink-0 flex flex-col items-center cursor-pointer group"
           >
             <div
-              className="
-                w-20 h-20 rounded-full border-2 border-white dark:border-black 
-                p-[3px] bg-gradient-to-tr from-pink-500 to-yellow-400 shadow-md
-              "
+              className={`
+                w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-white dark:border-[#0A0A0A] 
+                p-[2.5px] bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 shadow-lg 
+                transition-transform group-hover:rotate-12
+              `}
             >
-              <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-black border-2 border-white dark:border-black">
+              <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-[#0A0A0A] border-2 border-white dark:border-[#0A0A0A]">
                 <Image
                   src={highlight.coverImage || '/placeholder.jpg'}
                   alt={highlight.title}
@@ -55,12 +73,12 @@ export default function HighlightsBar({
                 />
               </div>
             </div>
-            <p className="text-xs font-semibold mt-2 text-gray-700 dark:text-gray-300 text-center truncate w-20">
+            <p className="text-[10px] font-black mt-3 text-gray-900 dark:text-white/60 uppercase tracking-widest text-center truncate w-20 group-hover:text-white transition-colors">
               {highlight.title}
             </p>
-          </motion.div>
+          </Reorder.Item>
         ))}
-      </div>
+      </Reorder.Group>
     </div>
   );
 }

@@ -53,8 +53,8 @@ const ProfileLayout = ({
   const { updateCoverPhoto } = useUser();
   const { highlights, fetchHighlights, setOpenModal, selectedHighlight, setSelectedHighlight } = useHighlights();
   useEffect(() => {
-    fetchHighlights();
-  }, [fetchHighlights]);
+    if (user?._id) fetchHighlights(user._id);
+  }, [user?._id, fetchHighlights]);
   const handleAddHighlight = () => {
     // لفتح قائمة إضافة هايلايت
     setOpenModal(true);
@@ -109,7 +109,7 @@ const ProfileLayout = ({
         {/* ⚡ Highlights Bar - تم إلغاء التعليق عنه */}
 
         <HighlightsBar
-          highlights={user?.highlights}
+          highlights={highlights}
           onAddHighlight={handleAddHighlight}   // لفتح قائمة الإضافة
           isOwner={isOwner}                     // لتحديد إمكانية عرض زر 'New'
         />
@@ -164,7 +164,7 @@ const ProfileLayout = ({
 
       {/* ➕ قائمة إضافة Highlight (AddHighlightMenu) */}
       {/* تُدار حالة الفتح/الإغلاق بواسطة 'openModal' في الـ Context */}
-      <AddHighlightMenu stories={user?.stories} />
+      <AddHighlightMenu stories={user?.stories || []} />
 
     </motion.div>
   )

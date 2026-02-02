@@ -16,29 +16,15 @@ const createHighlight = asyncHandler(async (req, res) => {
 
   let coverImageUrl = null;
 
-  // Upload cover image if provided
+  // Upload cover image
   if (req.file) {
     const uploadResult = await cloudUpload(req.file);
     coverImageUrl = uploadResult.secure_url;
   }
 
-  // Prepare archived stories
-  let archivedStories = [];
-  let idsToProcess = [];
-
+  let finalStoryIds = [];
   if (storyIds) {
-    idsToProcess = Array.isArray(storyIds) ? storyIds : [storyIds];
-  }
-
-  if (idsToProcess.length > 0) {
-    const stories = await Story.find({ _id: { $in: idsToProcess }, owner: userId });
-    archivedStories = stories.map(s => ({
-      _id: s._id,
-      text: s.text,
-      Photo: s.Photo,
-      originalStory: s.originalStory,
-      createdAt: s.createdAt
-    }));
+    finalStoryIds = Array.isArray(storyIds) ? storyIds : [storyIds];
   }
 
   // Create highlight
@@ -47,64 +33,33 @@ const createHighlight = asyncHandler(async (req, res) => {
     title,
     description: description || '',
     coverImage: coverImageUrl,
-    stories: [],
-    archivedStories: archivedStories,
+    stories: finalStoryIds,
     isPublic: isPublic !== undefined ? isPublic : true,
     tags: tags || [],
     color: color || '#6366f1',
     order: order || 0
   });
 
-  // Format response
-  const response = highlight.toObject();
-  response.stories = highlight.archivedStories;
-  delete response.archivedStories;
+  await highlight.populate('stories');
 
-  res.status(201).json(response);
+  res.status(201).json(highlight);
 });
 
 // ================== Get User Highlights ==================
 const getUserHighlights = asyncHandler(async (req, res) => {
-  let highlights = await Highlight.find({ user: req.params.userId })
+  const highlights = await Highlight.find({ user: req.params.userId })
     .populate({
       path: "stories",
-      select: "Photo text originalStory createdAt",
+      select: "Photo text originalStory createdAt owner views loves reactions music link",
     })
     .sort({ order: 1, createdAt: -1 });
 
-  const processedHighlights = await Promise.all(highlights.map(async (h) => {
-    // Lazy Migration: migrate old data on demand
-    if ((!h.archivedStories || h.archivedStories.length === 0) && h.stories && h.stories.length > 0) {
-      const validStories = h.stories.filter(s => s && s._id);
-
-      if (validStories.length > 0) {
-        h.archivedStories = validStories.map(s => ({
-          _id: s._id,
-          text: s.text,
-          Photo: s.Photo,
-          originalStory: s.originalStory,
-          createdAt: s.createdAt
-        }));
-        h.stories = [];
-        await h.save();
-      }
-    }
-
-    const obj = h.toObject();
-    if (h.archivedStories && h.archivedStories.length > 0) {
-      obj.stories = h.archivedStories;
-    }
-    delete obj.archivedStories;
-
-    return obj;
-  }));
-
-  res.status(200).json(processedHighlights);
+  res.status(200).json(highlights);
 });
 
 // ================== Get Single Highlight ==================
 const getHighlightById = asyncHandler(async (req, res) => {
-  const highlight = await Highlight.findById(req.params.id);
+  const highlight = await Highlight.findById(req.params.id).populate('stories');
 
   if (!highlight) {
     return res.status(404).json({ message: "Highlight not found" });
@@ -114,13 +69,7 @@ const getHighlightById = asyncHandler(async (req, res) => {
   highlight.viewCount += 1;
   await highlight.save();
 
-  const obj = highlight.toObject();
-  if (highlight.archivedStories && highlight.archivedStories.length > 0) {
-    obj.stories = highlight.archivedStories;
-  }
-  delete obj.archivedStories;
-
-  res.status(200).json(obj);
+  res.status(200).json(highlight);
 });
 
 // ================== Delete Highlight ==================
@@ -136,7 +85,7 @@ const deleteHighlight = asyncHandler(async (req, res) => {
     return res.status(403).json({ message: "Not authorized to delete this highlight" });
   }
 
-  // Delete cover image from cloudinary if exists
+  // Delete cover image if exists
   if (highlight.coverImage) {
     try {
       await cloudRemove(highlight.coverImage);
@@ -155,12 +104,10 @@ const addStoryToHighlight = asyncHandler(async (req, res) => {
   const { storyId, storyIds } = req.body;
   const userId = req.user?._id;
 
-  // Support both single storyId and multiple storyIds
   let idsToProcess = [];
   if (storyId) idsToProcess.push(storyId);
   if (storyIds && Array.isArray(storyIds)) idsToProcess = [...idsToProcess, ...storyIds];
 
-  // Remove duplicates from request
   idsToProcess = [...new Set(idsToProcess)];
 
   if (idsToProcess.length === 0) {
@@ -168,65 +115,46 @@ const addStoryToHighlight = asyncHandler(async (req, res) => {
   }
 
   const highlight = await Highlight.findOne({ _id: highlightId, user: userId });
-  if (!highlight) {
-    return res.status(404).json({ message: "Highlight not found" });
-  }
+  if (!highlight) return res.status(404).json({ message: "Highlight not found" });
 
-  // Filter out stories already in the highlight
-  const existingIds = highlight.archivedStories.map(s => s._id.toString());
+  const existingIds = highlight.stories.map(id => id.toString());
   const newIds = idsToProcess.filter(id => !existingIds.includes(id.toString()));
 
   if (newIds.length === 0) {
     return res.status(400).json({ message: "All stories already in highlight" });
   }
 
-  // Verify all new stories exist and belong to user
-  const stories = await Story.find({ _id: { $in: newIds }, owner: userId });
-
-  if (stories.length === 0) {
-    return res.status(404).json({ message: "No valid stories found to add" });
+  // Verify ownership of stories
+  const validStories = await Story.find({ _id: { $in: newIds }, owner: userId });
+  if (validStories.length === 0) {
+    return res.status(404).json({ message: "No valid stories found" });
   }
 
-  // Add stories to archive
-  stories.forEach(story => {
-    highlight.archivedStories.push({
-      _id: story._id,
-      text: story.text,
-      Photo: story.Photo,
-      originalStory: story.originalStory,
-      createdAt: story.createdAt
-    });
-  });
-
+  // Add validated IDs
+  const validIds = validStories.map(s => s._id);
+  highlight.stories.push(...validIds);
   await highlight.save();
 
-  const updatedHighlight = highlight.toObject();
-  updatedHighlight.stories = highlight.archivedStories;
-  delete updatedHighlight.archivedStories;
+  await highlight.populate('stories');
 
   return res.status(200).json({
-    message: stories.length === 1 ? "Story added successfully" : `${stories.length} stories added successfully`,
-    highlight: updatedHighlight
+    message: `${validIds.length} stories added successfully`,
+    highlight
   });
 });
 
 // ================== Update Highlight ==================
 const updateHighlight = asyncHandler(async (req, res) => {
   const { error } = ValidateHighlightUpdate(req.body);
-  if (error) {
-    return res.status(400).json({ message: error.details[0].message });
-  }
+  if (error) return res.status(400).json({ message: error.details[0].message });
 
   const { id } = req.params;
   const { title, description, isPublic, tags, color, order } = req.body;
   const userId = req.user._id;
 
   const highlight = await Highlight.findOne({ _id: id, user: userId });
-  if (!highlight) {
-    return res.status(404).json({ message: "Highlight not found or unauthorized" });
-  }
+  if (!highlight) return res.status(404).json({ message: "Highlight not found" });
 
-  // Update fields
   if (title !== undefined) highlight.title = title;
   if (description !== undefined) highlight.description = description;
   if (isPublic !== undefined) highlight.isPublic = isPublic;
@@ -234,30 +162,16 @@ const updateHighlight = asyncHandler(async (req, res) => {
   if (color !== undefined) highlight.color = color;
   if (order !== undefined) highlight.order = order;
 
-  // Update cover image if provided
   if (req.file) {
-    // Delete old cover if exists
-    if (highlight.coverImage) {
-      try {
-        await cloudRemove(highlight.coverImage);
-      } catch (err) {
-        console.error("Failed to delete old cover:", err);
-      }
-    }
+    if (highlight.coverImage) await cloudRemove(highlight.coverImage).catch(() => { });
     const uploadResult = await cloudUpload(req.file);
     highlight.coverImage = uploadResult.secure_url;
   }
 
   await highlight.save();
+  await highlight.populate('stories');
 
-  // Format response
-  const response = highlight.toObject();
-  if (highlight.archivedStories && highlight.archivedStories.length > 0) {
-    response.stories = highlight.archivedStories;
-  }
-  delete response.archivedStories;
-
-  res.status(200).json(response);
+  res.status(200).json(highlight);
 });
 
 // ================== Remove Story from Highlight ==================
@@ -266,42 +180,47 @@ const removeStoryFromHighlight = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
 
   const highlight = await Highlight.findOne({ _id: highlightId, user: userId });
-  if (!highlight) {
-    return res.status(404).json({ message: "Highlight not found or unauthorized" });
-  }
+  if (!highlight) return res.status(404).json({ message: "Highlight not found" });
 
-  // Check if story exists in highlight
-  const storyExists = highlight.archivedStories && highlight.archivedStories.some(s => s._id.equals(storyId));
-  if (!storyExists) {
-    return res.status(404).json({ message: "Story not found in this highlight" });
-  }
-
-  // Remove story
-  highlight.archivedStories = highlight.archivedStories.filter(s => !s._id.equals(storyId));
-
+  highlight.stories = highlight.stories.filter(s => s.toString() !== storyId);
   await highlight.save();
+  await highlight.populate('stories');
 
-  // Format response
-  const updatedHighlight = highlight.toObject();
-  updatedHighlight.stories = highlight.archivedStories;
-  delete updatedHighlight.archivedStories;
-
-  return res.status(200).json({
-    message: "Story removed successfully",
-    highlight: updatedHighlight
-  });
+  return res.status(200).json({ message: "Story removed successfully", highlight });
 });
 
-// ================== Reorder Highlights ==================
-const reorderHighlights = asyncHandler(async (req, res) => {
-  const { highlightIds } = req.body; // Array of highlight IDs in new order
+// ================== Reorder Highlight Stories ==================
+const updateStoriesOrder = asyncHandler(async (req, res) => {
+  const { highlightId } = req.params;
+  const { storyIds } = req.body; // New order
   const userId = req.user._id;
 
-  if (!Array.isArray(highlightIds)) {
-    return res.status(400).json({ message: "highlightIds must be an array" });
-  }
+  if (!Array.isArray(storyIds)) return res.status(400).json({ message: "storyIds must be an array" });
 
-  // Update order for each highlight
+  const highlight = await Highlight.findOne({ _id: highlightId, user: userId });
+  if (!highlight) return res.status(404).json({ message: "Highlight not found" });
+
+  // Ensure all storyIds in the request are already in the highlight
+  // (Security/Integrity check)
+  const existingIds = highlight.stories.map(id => id.toString());
+  const allExist = storyIds.every(id => existingIds.includes(id.toString()));
+
+  if (!allExist) return res.status(400).json({ message: "Invalid story IDs in reorder list" });
+
+  highlight.stories = storyIds;
+  await highlight.save();
+  await highlight.populate('stories');
+
+  res.status(200).json({ message: "Stories reordered successfully", highlight });
+});
+
+// ================== Reorder Highlights List ==================
+const reorderHighlights = asyncHandler(async (req, res) => {
+  const { highlightIds } = req.body;
+  const userId = req.user._id;
+
+  if (!Array.isArray(highlightIds)) return res.status(400).json({ message: "highlightIds must be an array" });
+
   const updatePromises = highlightIds.map((id, index) =>
     Highlight.findOneAndUpdate(
       { _id: id, user: userId },
@@ -311,7 +230,6 @@ const reorderHighlights = asyncHandler(async (req, res) => {
   );
 
   await Promise.all(updatePromises);
-
   res.status(200).json({ message: "Highlights reordered successfully" });
 });
 
@@ -323,5 +241,6 @@ module.exports = {
   addStoryToHighlight,
   updateHighlight,
   removeStoryFromHighlight,
-  reorderHighlights
+  reorderHighlights,
+  updateStoriesOrder
 };

@@ -8,7 +8,8 @@ const {
     addStoryToHighlight,
     updateHighlight,
     removeStoryFromHighlight,
-    reorderHighlights
+    reorderHighlights,
+    updateStoriesOrder
 } = require("../Controllers/HighlightController");
 const { verifyToken } = require("../Middelwares/verifyToken");
 const photoUpload = require('../Middelwares/uploadPhoto');
@@ -29,5 +30,6 @@ router.delete("/:highlightId/stories/:storyId", verifyToken, removeStoryFromHigh
 
 // Reorder
 router.post("/reorder", verifyToken, reorderHighlights);
+router.patch("/:highlightId/reorder-stories", verifyToken, updateStoriesOrder);
 
 module.exports = router;

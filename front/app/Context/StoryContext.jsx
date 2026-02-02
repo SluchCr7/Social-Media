@@ -113,9 +113,11 @@ export const StoryContextProvider = ({ children }) => {
 
       showAlert("✅ Story published successfully.");
       setIsStory(false); // Close modal
+      return newStory;
     } catch (err) {
       console.error(err);
       showAlert("❌ Failed to add story.");
+      return null;
     }
   }, [user, showAlert]);
 

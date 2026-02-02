@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Select from 'react-select';
 import { useStory } from '../../Context/StoryContext';
 import { useAuth } from '../../Context/AuthContext';
+import { useHighlights } from '@/app/Context/HighlightContext';
 import { useGetData } from '@/app/Custome/useGetData';
 import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
@@ -70,9 +71,11 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
   const [music, setMusic] = useState(null); // { title, artist, url, cover }
   const [link, setLink] = useState({ url: '', text: '' });
   const [showLinkInput, setShowLinkInput] = useState(false);
+  const [targetHighlight, setTargetHighlight] = useState(null); // { value: id, label: title }
 
   const { addNewStory } = useStory();
   const { user } = useAuth();
+  const { highlights, addStoryToHighlight } = useHighlights();
   const { userData } = useGetData(user?._id);
   const { t } = useTranslation();
 
@@ -163,7 +166,7 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
     if (storyImage) await simulateUploadProgress();
 
     try {
-      await addNewStory({
+      const newStory = await addNewStory({
         text: storyText.trim(),
         file: storyImage || null,
         collaborators: collaborators.map((c) => c.value),
@@ -172,6 +175,11 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
         link: link.url ? link : null,
         isCloseFriends,
       });
+
+      if (newStory && targetHighlight) {
+        await addStoryToHighlight(targetHighlight.value, newStory._id);
+      }
+
       setSuccess(true);
       localStorage.removeItem('storyDraft');
       setTimeout(() => {
@@ -183,7 +191,7 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [storyText, storyImage, collaborators, mentions, music, link, isCloseFriends, simulateUploadProgress, addNewStory, clearInput, t, setIsStory]);
+  }, [storyText, storyImage, collaborators, mentions, music, link, isCloseFriends, targetHighlight, simulateUploadProgress, addNewStory, addStoryToHighlight, clearInput, t, setIsStory]);
 
   const previewUrl = useMemo(() => {
     if (!storyImage) return null;
@@ -446,6 +454,22 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
                     </div>
                   </section>
                 </div>
+
+                {/* Add to Highlight */}
+                <section>
+                  <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4 flex items-center justify-between">
+                    Add to Highlight
+                    <span className="text-purple-400 text-[8px] tracking-normal font-bold">NEW</span>
+                  </h3>
+                  <Select
+                    options={(highlights || []).map(h => ({ value: h._id, label: h.title }))}
+                    value={targetHighlight}
+                    onChange={setTargetHighlight}
+                    placeholder="Choose a highlight..."
+                    isClearable
+                    styles={selectStyles}
+                  />
+                </section>
 
                 {/* Collaborators Section */}
                 <section>

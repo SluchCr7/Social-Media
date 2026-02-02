@@ -25,16 +25,7 @@ const highlightSchema = new mongoose.Schema({
   stories: [
     { type: mongoose.Schema.Types.ObjectId, ref: "Story" }
   ],
-  archivedStories: [
-    {
-      _id: { type: mongoose.Schema.Types.ObjectId },
-      text: { type: String },
-      Photo: { type: Array },
-      originalStory: { type: mongoose.Schema.Types.ObjectId, ref: "Story" },
-      createdAt: { type: Date }
-    }
-  ],
-  // Additional metadata
+  // Metadata
   viewCount: {
     type: Number,
     default: 0
@@ -60,7 +51,7 @@ const highlightSchema = new mongoose.Schema({
 
 // Virtual for story count
 highlightSchema.virtual('storyCount').get(function () {
-  return this.archivedStories?.length || 0;
+  return this.stories?.length || 0;
 });
 
 // Indexes for better performance
@@ -76,7 +67,8 @@ function ValidateHighlight(obj) {
     isPublic: Joi.boolean(),
     tags: Joi.array().items(Joi.string().max(20)),
     color: Joi.string().pattern(/^#[0-9A-Fa-f]{6}$/),
-    order: Joi.number().min(0)
+    order: Joi.number().min(0),
+    stories: Joi.array().items(Joi.string()) // Allow direct stories array
   });
   return schema.validate(obj);
 }

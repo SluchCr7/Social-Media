@@ -98,28 +98,21 @@ const getAllStories = asyncHandler(async (req, res) => {
   try {
     const now = new Date();
 
-    // 1. Filter out expired stories (default logic)
-    // 2. Filter stories by privacy (Close Friends check if user is logged in)
+    // 1. Filter out expired stories (for the feed only)
+    // 2. Stories must not be archived or deleted
     let query = {
       expiresAt: { $gt: now },
-      $or: [
-        { isHighlighted: { $exists: false } },
-        { isHighlighted: false }
-      ]
+      isArchived: false
     };
 
     const stories = await Story.find(query)
       .populate(storyPopulate)
       .sort({ createdAt: -1 });
 
-    // Filter Close Friends stories if necessary
+    // Filter Close Friends stories
     const filteredStories = stories.filter(story => {
       if (!story.isCloseFriends) return true;
       if (!req.user) return false;
-      // Should check if req.user is in story.owner's close friends list
-      // For now, let's assume if it's close friends, only the owner or someone they explicitly allow sees it.
-      // This part requires a CloseFriends list on User model which might be missing.
-      // For simplicity, let's allow owner to see it.
       return story.owner._id.toString() === req.user._id.toString();
     });
 
@@ -132,7 +125,7 @@ const getAllStories = asyncHandler(async (req, res) => {
 
 /**
  * @desc Delete a story
- * @route DELETE /api/stories/delete/:id
+ * @route DELETE /api/story/delete/:id
  * @access Private
  */
 const deleteStory = asyncHandler(async (req, res) => {
@@ -146,9 +139,18 @@ const deleteStory = asyncHandler(async (req, res) => {
   }
 
   const storyId = story._id;
-  await story.remove();
 
-  // 🔔 إخبار الجميع بحذف القصة لتحديث الواجهة فوراً
+  // ✅ Remove from all Highlights
+  const { Highlight } = require("../Modules/Highlight");
+  await Highlight.updateMany(
+    { stories: storyId },
+    { $pull: { stories: storyId } }
+  );
+
+  // ✅ Remove the story itself
+  await story.deleteOne();
+
+  // 🔔 Notify all about deletion
   io.emit("delete-story", storyId);
 
   res.status(200).json({ message: "Story deleted successfully" });

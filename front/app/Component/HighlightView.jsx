@@ -8,7 +8,7 @@ import React, {
   useMemo,
   memo,
 } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import {
   HiXMark,
   HiPlus,
@@ -20,7 +20,8 @@ import {
   HiPlay,
   HiPencil,
   HiPhoto,
-  HiArrowPath
+  HiArrowPath,
+  HiBars3,
 } from 'react-icons/hi2';
 import Image from 'next/image';
 import { useHighlights } from '@/app/Context/HighlightContext';
@@ -35,11 +36,19 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
   allStories = [],
 }) {
   const { isRTL } = useTranslate();
-  const { addStoryToHighlight, deleteHighlight, updateHighlight, removeStoryFromHighlight, loading } = useHighlights();
+  const { addStoryToHighlight, deleteHighlight, updateHighlight, removeStoryFromHighlight, reorderStoriesInHighlight, loading } = useHighlights();
   const { user } = useAuth();
   const { t } = useTranslation();
 
-  const stories = useMemo(() => highlight?.stories || highlight?.archivedStories || [], [highlight]);
+  const originalStories = useMemo(() => highlight?.stories || highlight?.archivedStories || [], [highlight]);
+  const [localStories, setLocalStories] = useState(originalStories);
+  const [hasReordered, setHasReordered] = useState(false);
+
+  useEffect(() => {
+    setLocalStories(originalStories);
+    setHasReordered(false);
+  }, [originalStories]);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -93,13 +102,13 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
   }, []);
 
   const next = useCallback(() => {
-    if (currentIndex < stories.length - 1) {
+    if (currentIndex < localStories.length - 1) {
       setCurrentIndex(currentIndex + 1);
       setProgress(0);
     } else {
       onClose();
     }
-  }, [currentIndex, stories.length, onClose]);
+  }, [currentIndex, localStories.length, onClose]);
 
   const prev = useCallback(() => {
     if (currentIndex > 0) {
@@ -153,6 +162,9 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
   }, [isRTL, next, prev, onClose, isEditing]);
 
   const handleUpdate = async () => {
+    if (hasReordered) {
+      await reorderStoriesInHighlight(highlight._id, localStories.map(s => s._id));
+    }
     await updateHighlight(highlight._id, {
       title: editTitle,
       description: editDescription,
@@ -162,7 +174,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
     setIsEditing(false);
   };
 
-  const currentStory = stories[currentIndex];
+  const currentStory = localStories[currentIndex];
   const currentPhoto = getPhoto(currentStory);
 
   if (!highlight) return null;
@@ -181,7 +193,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
           {/* Progress Indicators */}
           {!isEditing && (
             <div className="absolute top-4 left-4 right-4 z-50 flex gap-1.5">
-              {stories.map((_, idx) => (
+              {localStories.map((_, idx) => (
                 <div key={idx} className="flex-1 h-1 rounded-full bg-white/20 overflow-hidden">
                   <motion.div
                     className="h-full bg-white"
@@ -202,7 +214,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
               <div className="text-white">
                 <h3 className="text-sm font-bold">{highlight.title}</h3>
                 <div className="text-[10px] text-white/60 font-medium">
-                  {currentIndex + 1} / {stories.length}
+                  {currentIndex + 1} / {localStories.length}
                 </div>
               </div>
             </div>
@@ -369,39 +381,52 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
                       </button>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-8 grid grid-cols-2 md:grid-cols-3 gap-4 scrollbar-hide">
-                      {stories.map((story, idx) => (
-                        <motion.div
-                          key={story._id}
-                          layout
-                          className="relative aspect-[9/16] rounded-2xl overflow-hidden border border-white/10 group"
-                        >
-                          <Image src={getPhoto(story)} fill className="object-cover" alt="Story" />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-3 backdrop-blur-[2px]">
-                            <button
-                              onClick={() => {
-                                if (window.confirm(t("Remove this story from highlight?"))) {
-                                  removeStoryFromHighlight(highlight._id, story._id);
-                                }
-                              }}
-                              className="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center hover:scale-110 transition-transform shadow-xl"
-                            >
-                              <HiTrash className="w-4 h-4" />
-                            </button>
-                            <span className="text-[8px] font-black text-white uppercase tracking-tighter">{t("Remove")}</span>
-                          </div>
-                          <div className="absolute bottom-3 left-3 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-md text-[8px] font-black text-white/80 border border-white/10">
-                            #{idx + 1}
-                          </div>
-                        </motion.div>
-                      ))}
+                    <div className="flex-1 overflow-hidden flex flex-col">
+                      <Reorder.Group
+                        axis="y"
+                        values={localStories}
+                        onReorder={(newOrder) => {
+                          setLocalStories(newOrder);
+                          setHasReordered(true);
+                        }}
+                        className="flex-1 overflow-y-auto p-8 space-y-3 scrollbar-hide"
+                      >
+                        {localStories.map((story, idx) => (
+                          <Reorder.Item
+                            key={story._id}
+                            value={story}
+                            className="group relative flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-2xl hover:border-indigo-500/30 transition-all cursor-grab active:cursor-grabbing"
+                          >
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                              <div className="text-white/20 font-black text-xs w-4">#{idx + 1}</div>
+                              <div className="relative w-12 h-20 rounded-xl overflow-hidden border border-white/10 flex-shrink-0">
+                                <Image src={getPhoto(story)} fill className="object-cover" alt="Story" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-white truncate">{story.text || t("Moment")}</p>
+                                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">{dayjs(story.createdAt).format('DD MMM YYYY')}</p>
+                              </div>
+                            </div>
 
-                      {stories.length === 0 && (
-                        <div className="col-span-full h-full flex flex-col items-center justify-center text-white/20 gap-4">
-                          <HiPhoto className="text-6xl" />
-                          <p className="text-xs font-black uppercase tracking-widest">{t("No Stories Found")}</p>
-                        </div>
-                      )}
+                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (window.confirm(t("Remove this story?"))) {
+                                    removeStoryFromHighlight(highlight._id, story._id);
+                                  }
+                                }}
+                                className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all"
+                              >
+                                <HiTrash className="w-4 h-4" />
+                              </button>
+                              <div className="w-10 h-10 rounded-xl bg-white/5 text-white/20 flex items-center justify-center">
+                                <HiBars3 className="w-5 h-5" />
+                              </div>
+                            </div>
+                          </Reorder.Item>
+                        ))}
+                      </Reorder.Group>
                     </div>
                   </div>
                 </div>
@@ -465,9 +490,9 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
           </div>
 
           {/* Thumbnail Strip */}
-          {!isEditing && stories.length > 1 && (
+          {!isEditing && localStories.length > 1 && (
             <div className="hidden md:flex items-center gap-3 px-6 py-4 bg-black/80 backdrop-blur-xl border-t border-white/10 overflow-x-auto">
-              {stories.map((s, i) => (
+              {localStories.map((s, i) => (
                 <div key={s._id} className="relative group/thumb flex-shrink-0">
                   <button
                     onClick={() => { setCurrentIndex(i); setProgress(0); }}
@@ -476,7 +501,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
                   >
                     <Image src={getPhoto(s)} fill className="object-cover" alt={t("Thumbnail")} />
                   </button>
-                  {isOwner && stories.length > 1 && (
+                  {isOwner && localStories.length > 1 && (
                     <button
                       onClick={async (e) => {
                         e.stopPropagation();
@@ -528,7 +553,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
 
               <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
                 {allStories
-                  ?.filter(s => !stories.some(ex => ex._id === s._id))
+                  ?.filter(s => !localStories.some(ex => ex._id === (s._id || s)))
                   .filter(s => !search || s.text?.toLowerCase().includes(search.toLowerCase()))
                   .map((st, i) => (
                     <motion.div
@@ -554,7 +579,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
                     </motion.div>
                   ))}
 
-                {allStories?.filter(s => !stories.some(ex => ex._id === s._id)).length === 0 && (
+                {allStories?.filter(s => !localStories.some(ex => ex._id === (s._id || s))).length === 0 && (
                   <div className="h-full flex flex-col items-center justify-center text-white/20 p-8 text-center space-y-4">
                     <HiSparkles className="text-5xl" />
                     <p className="text-xs font-black uppercase tracking-widest leading-loose">

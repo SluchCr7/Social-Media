@@ -51,11 +51,18 @@ const StorySchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    isArchived: {
+        type: Boolean,
+        default: false,
+    },
     expiresAt: {
         type: Date,
         default: () => new Date(+new Date() + 24 * 60 * 60 * 1000) // Default 24h
     }
 }, { timestamps: true })
+
+StorySchema.index({ owner: 1, expiresAt: -1 });
+StorySchema.index({ expiresAt: 1 });
 
 const Story = mongoose.model('Story', StorySchema)
 

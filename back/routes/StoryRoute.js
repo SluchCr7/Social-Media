@@ -27,6 +27,8 @@ route.route("/user/:id")
     .get(getUserStories);
 route.route('/view/:id')
     .post(verifyToken, viewStory);
+route.route('/love/:id')
+    .post(verifyToken, toggleLoveStory);
 route.route("/share/:id")
     .post(verifyToken, shareStory);
 route.route('/react/:id')

@@ -1,9 +1,8 @@
-'use client';
-
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 import { useAlert } from './AlertContext';
+import { useSocket } from './SocketContext';
 
 const HighlightContext = createContext();
 export const useHighlights = () => useContext(HighlightContext);
@@ -17,24 +16,57 @@ export const HighlightContextProvider = ({ children }) => {
 
   const { user } = useAuth();
   const { showAlert } = useAlert();
+  const { socket } = useSocket();
+
+  // 🔔 Real-time Socket Listener
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleDeletedStory = (storyId) => {
+      // If a story is deleted globally, remove it from all highlights in the UI
+      setHighlights((prev) =>
+        prev.map((highlight) => ({
+          ...highlight,
+          stories: highlight.stories?.filter((s) => (s._id || s) !== storyId)
+        }))
+      );
+
+      // Also update selected highlight if it has the deleted story
+      setSelectedHighlight((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          stories: prev.stories?.filter((s) => (s._id || s) !== storyId)
+        };
+      });
+    };
+
+    socket.on("delete-story", handleDeletedStory);
+    return () => {
+      socket.off("delete-story", handleDeletedStory);
+    };
+  }, [socket]);
 
   // 🟢 جلب الهايلايتس الخاصة بالمستخدم
-  const fetchHighlights = useCallback(async () => {
-    if (!user?.token) return;
+  const fetchHighlights = useCallback(async (targetUserId) => {
+    const userIdToFetch = targetUserId || user?._id;
+    if (!userIdToFetch) return;
     setLoading(true);
     try {
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/highlight/user/${user._id}`,
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/highlight/user/${userIdToFetch}`,
         {
-          headers: { Authorization: `Bearer ${user.token}` },
+          headers: user?.token ? { Authorization: `Bearer ${user.token}` } : {},
         }
       );
-      setHighlights(res.data || []);
+      // Sort by order field
+      const sorted = (res.data || []).sort((a, b) => (a.order || 0) - (b.order || 0));
+      setHighlights(sorted);
       setError(null);
     } catch (err) {
       const message = err.response?.data?.message || 'Failed to load highlights.';
       setError(message);
-      showAlert(message);
+      // showAlert(message); // Silent fail often better for highlights on profiles
     } finally {
       setLoading(false);
     }
@@ -230,6 +262,46 @@ export const HighlightContextProvider = ({ children }) => {
     [user, showAlert]
   );
 
+  // ↕️ إعادة ترتيب الستوريز داخل الهايلايت
+  const reorderStoriesInHighlight = useCallback(
+    async (highlightId, storyIds) => {
+      if (!user?.token) return;
+      try {
+        const res = await axios.patch(
+          `${process.env.NEXT_PUBLIC_BACK_URL}/api/highlight/${highlightId}/reorder-stories`,
+          { storyIds },
+          { headers: { Authorization: `Bearer ${user.token}` } }
+        );
+
+        const updated = res.data?.highlight;
+        setHighlights((prev) => prev.map((h) => (h._id === updated._id ? updated : h)));
+        setSelectedHighlight((prev) => prev && prev._id === updated._id ? updated : prev);
+        showAlert("✅ Order saved.");
+      } catch (err) {
+        showAlert("❌ Failed to reorder stories.");
+      }
+    },
+    [user, showAlert]
+  );
+
+  // ↕️ إعادة ترتيب الهايلايتس نفسها
+  const reorderHighlights = useCallback(
+    async (highlightIds) => {
+      if (!user?.token) return;
+      try {
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_BACK_URL}/api/highlight/reorder`,
+          { highlightIds },
+          { headers: { Authorization: `Bearer ${user.token}` } }
+        );
+        showAlert("✅ Highlights reordered.");
+      } catch (err) {
+        showAlert("❌ Failed to reorder highlights.");
+      }
+    },
+    [user, showAlert]
+  );
+
 
   return (
     <HighlightContext.Provider
@@ -243,6 +315,8 @@ export const HighlightContextProvider = ({ children }) => {
         addStoryToHighlight,
         updateHighlight,
         removeStoryFromHighlight,
+        reorderHighlights,
+        reorderStoriesInHighlight,
         openModal,
         setOpenModal,
         selectedHighlight,
