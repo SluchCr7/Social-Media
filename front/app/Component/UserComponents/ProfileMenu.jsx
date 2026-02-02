@@ -63,7 +63,7 @@ const ProfileMenu = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className={`absolute mt-2 w-64 rounded-xl bg-white dark:bg-gray-800 shadow-lg 
+            className={`absolute mt-10 w-64 rounded-xl bg-white dark:bg-gray-800 shadow-lg 
               border border-gray-200 dark:border-gray-700 overflow-hidden z-50
               ${
                 isRTL

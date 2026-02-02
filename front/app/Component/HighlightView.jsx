@@ -344,7 +344,7 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
                       <div className="p-5 rounded-2xl bg-indigo-500/5 border border-indigo-500/20">
                         <div className="flex items-center justify-between text-indigo-300">
                           <span className="text-xs font-bold">{t("Stories")}</span>
-                          <span className="text-sm font-black">{stories.length}</span>
+                          <span className="text-sm font-black">{localStories.length}</span>
                         </div>
                       </div>
                     </div>
