@@ -317,8 +317,8 @@ const NewPostContainer = () => {
 
   /* ------------------------- 👤 Sync Current User ------------------------- */
   useEffect(() => {
-    setSelectedUser(users?.find((u) => u?._id === user?._id) || user || {})
-  }, [users, user])
+    setSelectedUser(user || {})
+  }, [user])
 
 
   /* ------------------------- 🧱 Render ------------------------- */
