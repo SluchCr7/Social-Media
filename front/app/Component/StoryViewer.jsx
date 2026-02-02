@@ -21,6 +21,7 @@ import { useSwipeable } from 'react-swipeable';
 import { useStory } from '../Context/StoryContext';
 import { useAuth } from '../Context/AuthContext';
 import { useMessage } from '../Context/MessageContext';
+import { useAlert } from '../Context/AlertContext';
 import { useTranslation } from 'react-i18next';
 import { useTranslate } from '../Context/TranslateContext';
 import { formatRelativeTime } from '../utils/FormatDataCreatedAt';
@@ -33,12 +34,16 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
   const [fitMode, setFitMode] = useState(initialFit);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [showViewers, setShowViewers] = useState(false);
+  const [viewersList, setViewersList] = useState([]);
+  const [isViewersLoading, setIsViewersLoading] = useState(false);
 
-  const { viewStory, toggleLove, shareStory, deleteStory } = useStory();
+  const { viewStory, toggleLove, reactToStory, getStoryViewers, shareStory, deleteStory } = useStory();
   const { user } = useAuth();
   const { AddNewMessage, setSelectedUser } = useMessage();
   const { t } = useTranslation();
   const { isRTL } = useTranslate();
+  const { showAlert } = useAlert();
 
   const timerRef = useRef(null);
   const durationRef = useRef(5000);
@@ -57,11 +62,46 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
   useEffect(() => {
     if (story?._id) {
       viewStory(story._id);
-      setSelectedUser(story?.originalStory ? story.originalStory.owner : story?.owner);
+      setSelectedUser(story?.owner);
     }
     setProgress(0);
     setIsImageLoaded(false);
+    setShowViewers(false);
   }, [currentIndex, story, viewStory, setSelectedUser]);
+
+  const handleOpenViewers = async () => {
+    setIsPaused(true);
+    setIsViewersLoading(true);
+    const list = await getStoryViewers(story._id);
+    setViewersList(list);
+    setIsViewersLoading(false);
+    setShowViewers(true);
+  };
+
+  const handleReaction = (emoji) => {
+    reactToStory(story._id, emoji);
+    showAlert?.(t("Reacted with ") + emoji);
+  };
+
+  const handleStoryReply = async () => {
+    if (!comment.trim()) return;
+    try {
+      await AddNewMessage(`Replying to story: ${comment.trim()}`, null);
+      setComment('');
+      setIsPaused(false);
+      showAlert?.(t("Reply sent as message!"));
+    } catch (err) {
+      console.error(err);
+      showAlert?.(t("Failed to send reply"));
+    }
+  };
+
+  const handleShare = useCallback(async (e) => {
+    e?.stopPropagation();
+    if (!story?._id) return;
+    await shareStory(story._id);
+    showAlert?.(t("Story shared to your profile!"));
+  }, [story, shareStory, showAlert, t]);
 
   // Progress timer
   useEffect(() => {
@@ -256,6 +296,54 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
                     className={`${fitMode === 'cover' ? 'object-cover' : 'object-contain'}`}
                     onLoadingComplete={() => setIsImageLoaded(true)}
                   />
+
+                  {/* Overlays */}
+                  <div className="absolute inset-0 z-40 p-10 flex flex-col items-center justify-center pointer-events-none">
+                    {story?.isCloseFriends && (
+                      <div className="absolute top-2 left-0 right-0 flex justify-center">
+                        <span className="bg-green-500 text-[10px] font-black text-white px-2 py-1 rounded-lg uppercase tracking-tighter">Close Friends</span>
+                      </div>
+                    )}
+
+                    <div className="space-y-6 flex flex-col items-center">
+                      {story?.music && (
+                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-white/20 flex items-center gap-3 pointer-events-auto cursor-pointer">
+                          <div className="w-10 h-10 rounded-lg overflow-hidden relative">
+                            {story.music.cover ? <Image src={story.music.cover} fill alt="art" /> : <HiPlay className="m-auto text-white/40" />}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-white text-[10px] font-bold">{story.music.title}</span>
+                            <span className="text-white/40 text-[8px]">{story.music.artist}</span>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {story?.link?.url && (
+                        <motion.a
+                          href={story.link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="px-6 py-2 bg-white text-black rounded-full font-black text-xs shadow-2xl flex items-center gap-2 pointer-events-auto"
+                        >
+                          {story.link.text || t("Visit Link")}
+                          <HiShare size={14} />
+                        </motion.a>
+                      )}
+
+                      {story?.mentions?.length > 0 && (
+                        <div className="flex flex-wrap gap-2 justify-center">
+                          {story.mentions.map(m => (
+                            <Link key={m._id} href={`/Pages/User/${m._id}`} className="px-3 py-1 bg-indigo-500/80 backdrop-blur-sm text-white rounded-full text-[10px] font-bold pointer-events-auto">
+                              @{m.username}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   {story?.text && (
                     <div className="absolute bottom-32 inset-x-8 text-center bg-black/40 backdrop-blur-md p-4 rounded-3xl border border-white/5">
                       <p className="text-white font-medium text-lg italic">{story.text}</p>
@@ -272,49 +360,126 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
         </main>
 
         {/* Bottom Actions */}
-        <div className="absolute bottom-8 inset-x-6 z-50 flex items-center gap-4">
+        <div className="absolute bottom-8 inset-x-6 z-50 flex flex-col gap-4">
           {!isOwner && (
-            <div className="flex-1 relative group">
-              <input
-                type="text"
-                placeholder="Reply to story..."
-                className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-all"
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                onFocus={() => setIsPaused(true)}
-                onBlur={() => setIsPaused(false)}
-              />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors">
-                <HiPaperAirplane size={20} />
-              </button>
+            <div className="flex gap-2 justify-center mb-2">
+              {['🔥', '😂', '😮', '😢', '😍', '👏'].map(emoji => (
+                <button
+                  key={emoji}
+                  onClick={() => handleReaction(emoji)}
+                  className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-xl transition-all hover:scale-125"
+                >
+                  {emoji}
+                </button>
+              ))}
             </div>
           )}
 
-          <div className="flex items-center gap-2">
-            {!isOwner ? (
-              <>
-                <button onClick={handleLove} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isLoved ? 'bg-rose-500/10 text-rose-500' : 'bg-white/5 text-white/40 hover:text-white'}`}>
-                  <HiHeart size={24} className={isLoved ? 'fill-current' : ''} />
+          <div className="flex items-center gap-4">
+            {!isOwner && (
+              <div className="flex-1 relative group">
+                <input
+                  type="text"
+                  placeholder={t("Reply to story...")}
+                  className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-all font-medium"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  onFocus={() => setIsPaused(true)}
+                  onBlur={() => setIsPaused(false)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleStoryReply()}
+                />
+                <button
+                  onClick={handleStoryReply}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors"
+                >
+                  <HiPaperAirplane size={20} />
                 </button>
-                <button onClick={handleShare} className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all">
-                  <HiShare size={24} />
-                </button>
-              </>
-            ) : (
-              <div className="flex items-center gap-4 bg-white/5 px-6 h-12 rounded-2xl border border-white/5 backdrop-blur-md">
-                <div className="flex items-center gap-2 text-white/60">
-                  <HiEye size={18} />
-                  <span className="text-xs font-black">{story?.views?.length || 0}</span>
-                </div>
-                <div className="w-px h-4 bg-white/10" />
-                <div className="flex items-center gap-2 text-rose-500/80">
-                  <HiHeart size={18} className="fill-current" />
-                  <span className="text-xs font-black">{story?.loves?.length || 0}</span>
-                </div>
               </div>
             )}
+
+            <div className="flex items-center gap-2">
+              {!isOwner ? (
+                <>
+                  <button onClick={handleLove} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isLoved ? 'bg-rose-500/10 text-rose-500' : 'bg-white/5 text-white/40 hover:text-white'}`}>
+                    <HiHeart size={24} className={isLoved ? 'fill-current' : ''} />
+                  </button>
+                  <button onClick={handleShare} className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all">
+                    <HiShare size={24} />
+                  </button>
+                </>
+              ) : (
+                <div
+                  onClick={handleOpenViewers}
+                  className="flex items-center gap-4 bg-white/5 px-6 h-12 rounded-2xl border border-white/5 backdrop-blur-md cursor-pointer hover:bg-white/10 transition-all hover:scale-105"
+                >
+                  <div className="flex items-center gap-2 text-white/60">
+                    <HiEye size={18} />
+                    <span className="text-xs font-black">{story?.views?.length || 0}</span>
+                  </div>
+                  <div className="w-px h-4 bg-white/10" />
+                  <div className="flex flex-wrap gap-1 max-w-[40px] overflow-hidden">
+                    {story?.reactions?.slice(0, 3).map((r, i) => (
+                      <span key={i} className="text-[10px]">{r.emoji}</span>
+                    ))}
+                    {story?.reactions?.length > 3 && <span className="text-[8px] text-white/40">+{story.reactions.length - 3}</span>}
+                  </div>
+                  <div className="w-px h-4 bg-white/10" />
+                  <div className="flex items-center gap-2 text-rose-500/80">
+                    <HiHeart size={18} className="fill-current" />
+                    <span className="text-xs font-black">{story?.loves?.length || 0}</span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Viewers Modal */}
+        <AnimatePresence>
+          {showViewers && (
+            <motion.div
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              className="absolute inset-0 z-[60] bg-black/90 backdrop-blur-xl p-8 flex flex-col rounded-[2.5rem]"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-white font-black uppercase tracking-widest text-sm">{t("Viewers")}</h3>
+                <button onClick={() => setShowViewers(false)} className="text-white/40 hover:text-white"><HiXMark size={24} /></button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-4 custom-scrollbar pr-2">
+                {isViewersLoading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : viewersList.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-white/20">
+                    <HiEye size={48} className="mb-4" />
+                    <p className="text-sm font-bold">{t("No views yet")}</p>
+                  </div>
+                ) : (
+                  viewersList.map(v => (
+                    <div key={v._id} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all">
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-black/50">
+                          <Image src={v.profilePhoto?.url || '/default-avatar.png'} fill alt="v" className="object-cover" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-white text-xs font-black">{v.username}</span>
+                          <span className="text-white/40 text-[10px] uppercase font-bold tracking-tighter">{v.profileName}</span>
+                        </div>
+                      </div>
+                      <Link href={`/Pages/User/${v._id}`} className="px-4 py-1.5 rounded-xl bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all">
+                        {t("Profile")}
+                      </Link>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Side Desktop Controls */}

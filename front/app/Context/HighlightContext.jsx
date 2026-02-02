@@ -103,15 +103,19 @@ export const HighlightContextProvider = ({ children }) => {
     [user, showAlert]
   );
 
-  // 🟠 إضافة ستوري إلى Highlight
+  // 🟠 إضافة ستوري (أو أكثر) إلى Highlight
   const addStoryToHighlight = useCallback(
-    async (highlightId, storyId) => {
+    async (highlightId, storyIdOrIds) => {
       if (!user?.token) return showAlert("You must be logged in.");
 
       try {
-        const res = await axios.post(
-          `${process.env.NEXT_PUBLIC_BACK_URL}/api/highlight/${highlightId}/add-story`,
-          { storyId },
+        const payload = Array.isArray(storyIdOrIds)
+          ? { storyIds: storyIdOrIds }
+          : { storyId: storyIdOrIds };
+
+        const res = await axios.patch(
+          `${process.env.NEXT_PUBLIC_BACK_URL}/api/highlight/${highlightId}/stories`,
+          payload,
           {
             headers: { Authorization: `Bearer ${user.token}` },
           }
@@ -129,12 +133,13 @@ export const HighlightContextProvider = ({ children }) => {
             prev && prev._id === updated._id ? updated : prev
           );
 
-          showAlert('📌 Story added to highlight.');
+          showAlert(Array.isArray(storyIdOrIds) ? '📌 Stories added to highlight.' : '📌 Story added to highlight.');
         }
         return updated;
       } catch (err) {
         console.error('Error adding story to highlight:', err);
-        showAlert('❌ Failed to add story.');
+        const message = err.response?.data?.message || 'Failed to add story.';
+        showAlert(`❌ ${message}`);
         throw err;
       }
     },
@@ -150,9 +155,11 @@ export const HighlightContextProvider = ({ children }) => {
       try {
         const formData = new FormData();
         if (updates.title) formData.append('title', updates.title);
+        if (updates.description !== undefined) formData.append('description', updates.description);
+        if (updates.isPublic !== undefined) formData.append('isPublic', updates.isPublic);
         if (updates.image) formData.append('image', updates.image);
 
-        const res = await axios.put(
+        const res = await axios.patch(
           `${process.env.NEXT_PUBLIC_BACK_URL}/api/highlight/${id}`,
           formData,
           {
@@ -192,7 +199,7 @@ export const HighlightContextProvider = ({ children }) => {
 
       try {
         const res = await axios.delete(
-          `${process.env.NEXT_PUBLIC_BACK_URL}/api/highlight/${highlightId}/story/${storyId}`,
+          `${process.env.NEXT_PUBLIC_BACK_URL}/api/highlight/${highlightId}/stories/${storyId}`,
           {
             headers: { Authorization: `Bearer ${user.token}` },
           }

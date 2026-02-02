@@ -6,7 +6,7 @@ const StorySchema = new mongoose.Schema({
         type: String,
     },
     Photo: {
-        type: Array,
+        type: Array, // Stores media URL
     },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
@@ -14,18 +14,31 @@ const StorySchema = new mongoose.Schema({
         required: true
     },
     loves: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    reactions: [
+        {
+            user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+            emoji: { type: String }, // e.g., '🔥', '😂', '😮'
+            createdAt: { type: Date, default: Date.now }
+        }
+    ],
     views: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     originalStory: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Story',
         default: null,
     },
-    collaborators: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        }
-    ],
+    collaborators: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    mentions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    music: {
+        title: String,
+        artist: String,
+        url: String,
+        cover: String
+    },
+    link: {
+        url: String,
+        text: String
+    },
     isShared: {
         type: Boolean,
         default: false,
@@ -34,6 +47,14 @@ const StorySchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    isCloseFriends: {
+        type: Boolean,
+        default: false,
+    },
+    expiresAt: {
+        type: Date,
+        default: () => new Date(+new Date() + 24 * 60 * 60 * 1000) // Default 24h
+    }
 }, { timestamps: true })
 
 const Story = mongoose.model('Story', StorySchema)

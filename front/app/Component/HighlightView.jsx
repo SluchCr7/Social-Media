@@ -34,11 +34,11 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
   allStories = [],
 }) {
   const { isRTL } = useTranslate();
-  const { addStoryToHighlight, deleteHighlight, updateHighlight, removeStoryFromHighlight } = useHighlights();
+  const { addStoryToHighlight, deleteHighlight, updateHighlight, removeStoryFromHighlight, loading } = useHighlights();
   const { user } = useAuth();
   const { t } = useTranslation();
 
-  const stories = useMemo(() => highlight?.archivedStories || [], [highlight]);
+  const stories = useMemo(() => highlight?.stories || highlight?.archivedStories || [], [highlight]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -49,6 +49,8 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
 
   // Edit State
   const [editTitle, setEditTitle] = useState(highlight?.title || '');
+  const [editDescription, setEditDescription] = useState(highlight?.description || '');
+  const [isPublic, setIsPublic] = useState(highlight?.isPublic ?? true);
   const [editCover, setEditCover] = useState(null);
   const [editPreview, setEditPreview] = useState(null);
 
@@ -150,7 +152,12 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
   }, [isRTL, next, prev, onClose, isEditing]);
 
   const handleUpdate = async () => {
-    await updateHighlight(highlight._id, { title: editTitle, image: editCover });
+    await updateHighlight(highlight._id, {
+      title: editTitle,
+      description: editDescription,
+      isPublic: isPublic,
+      image: editCover
+    });
     setIsEditing(false);
   };
 
@@ -249,45 +256,152 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
           <div className="flex-1 relative bg-black group">
             {isEditing ? (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="absolute inset-0 z-20 flex items-center justify-center bg-black/90 backdrop-blur-xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-3xl overflow-y-auto p-4 sm:p-8"
               >
-                <div className="w-full max-w-md p-8 bg-gray-900 border border-white/10 rounded-3xl space-y-6">
-                  <h3 className="text-xl font-bold text-white">{t("Edit Highlight")}</h3>
+                <div className="w-full max-w-4xl bg-gray-900/80 border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row h-full max-h-[85vh]">
 
-                  <div className="flex flex-col items-center gap-3">
-                    <label htmlFor="edit-cover-upload" className="cursor-pointer relative w-32 h-32 rounded-2xl overflow-hidden border-2 border-dashed border-gray-600 hover:border-indigo-500 transition-all">
-                      <Image src={editPreview || highlight.coverImage || '/placeholder.jpg'} fill className="object-cover" alt={t("Cover")} />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/20 transition-all">
-                        <HiPhoto className="text-white text-2xl" />
+                  {/* Left: Metadata Edit */}
+                  <div className="w-full md:w-80 p-8 border-b md:border-b-0 md:border-r border-white/5 space-y-8 overflow-y-auto scrollbar-hide">
+                    <h3 className="text-2xl font-black text-white tracking-tight">{t("Manage Highlight")}</h3>
+
+                    {/* Cover Preview & Edit */}
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest px-1">{t("Cover Image")}</label>
+                      <div className="relative aspect-square w-full rounded-2xl overflow-hidden border border-white/10 shadow-lg group">
+                        <Image
+                          src={editPreview || highlight.coverImage || '/placeholder.jpg'}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                          alt="Cover"
+                        />
+                        <label htmlFor="edit-cover-input" className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-sm">
+                          <HiPhoto className="text-3xl text-white mb-2" />
+                          <span className="text-[10px] font-bold text-white uppercase">{t("Change")}</span>
+                        </label>
+                        <input
+                          id="edit-cover-input"
+                          type="file"
+                          hidden
+                          accept="image/*"
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) {
+                              setEditCover(e.target.files[0]);
+                              setEditPreview(URL.createObjectURL(e.target.files[0]));
+                            }
+                          }}
+                        />
                       </div>
-                    </label>
-                    <input id="edit-cover-upload" type="file" hidden accept="image/*" onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        setEditCover(e.target.files[0]);
-                        setEditPreview(URL.createObjectURL(e.target.files[0]));
-                      }
-                    }} />
+                    </div>
+
+                    {/* Form Fields */}
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest px-1">{t("Title")}</label>
+                        <input
+                          value={editTitle}
+                          onChange={(e) => setEditTitle(e.target.value)}
+                          className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white font-bold outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all text-sm"
+                          placeholder={t("Highlight Name")}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest px-1">{t("Description")}</label>
+                        <textarea
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white font-medium outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all text-sm resize-none h-24"
+                          placeholder={t("Tell a story about these moments...")}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all cursor-pointer" onClick={() => setIsPublic(!isPublic)}>
+                        <div className="space-y-1">
+                          <span className="text-xs font-bold text-white block">{t("Public Highlight")}</span>
+                          <span className="text-[10px] text-white/40 font-bold uppercase tracking-tighter">{t("Anyone can view")}</span>
+                        </div>
+                        <div className={`w-12 h-6 rounded-full transition-all duration-300 p-1 ${isPublic ? 'bg-indigo-500' : 'bg-white/10'}`}>
+                          <div className={`w-4 h-4 rounded-full bg-white transition-all duration-300 ${isPublic ? 'translate-x-6' : 'translate-x-0'}`} />
+                        </div>
+                      </div>
+
+                      {/* We can add more metadata here like description, tags if needed */}
+                      <div className="p-5 rounded-2xl bg-indigo-500/5 border border-indigo-500/20">
+                        <div className="flex items-center justify-between text-indigo-300">
+                          <span className="text-xs font-bold">{t("Stories")}</span>
+                          <span className="text-sm font-black">{stories.length}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 flex flex-col gap-3">
+                      <button
+                        onClick={handleUpdate}
+                        disabled={loading}
+                        className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {loading && <HiArrowPath className="w-4 h-4 animate-spin" />}
+                        {loading ? t("Saving...") : t("Save Changes")}
+                      </button>
+                      <button
+                        onClick={() => setIsEditing(false)}
+                        disabled={loading}
+                        className="w-full py-4 rounded-2xl bg-white/5 text-white/60 font-black text-xs uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
+                      >
+                        {t("Back to Viewer")}
+                      </button>
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="text-xs font-bold text-gray-400 uppercase mb-2 block">{t("Title")}</label>
-                    <input
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-medium outline-none focus:border-indigo-500 transition-all"
-                      placeholder={t("Enter title...")}
-                    />
-                  </div>
+                  {/* Right: Story Management */}
+                  <div className="flex-1 flex flex-col overflow-hidden bg-black/20">
+                    <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between">
+                      <h4 className="text-sm font-black text-white/50 uppercase tracking-widest">{t("Included Stories")}</h4>
+                      <button
+                        onClick={() => setShowAddMenu(true)}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all"
+                      >
+                        <HiPlus className="w-3 h-3" />
+                        {t("Add More")}
+                      </button>
+                    </div>
 
-                  <div className="flex gap-3 pt-4">
-                    <button onClick={() => setIsEditing(false)} className="flex-1 py-3 rounded-xl bg-white/5 text-gray-400 font-bold text-sm hover:bg-white/10 transition-all">
-                      {t("Cancel")}
-                    </button>
-                    <button onClick={handleUpdate} className="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-sm hover:shadow-xl transition-all">
-                      {t("Save")}
-                    </button>
+                    <div className="flex-1 overflow-y-auto p-8 grid grid-cols-2 md:grid-cols-3 gap-4 scrollbar-hide">
+                      {stories.map((story, idx) => (
+                        <motion.div
+                          key={story._id}
+                          layout
+                          className="relative aspect-[9/16] rounded-2xl overflow-hidden border border-white/10 group"
+                        >
+                          <Image src={getPhoto(story)} fill className="object-cover" alt="Story" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-3 backdrop-blur-[2px]">
+                            <button
+                              onClick={() => {
+                                if (window.confirm(t("Remove this story from highlight?"))) {
+                                  removeStoryFromHighlight(highlight._id, story._id);
+                                }
+                              }}
+                              className="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center hover:scale-110 transition-transform shadow-xl"
+                            >
+                              <HiTrash className="w-4 h-4" />
+                            </button>
+                            <span className="text-[8px] font-black text-white uppercase tracking-tighter">{t("Remove")}</span>
+                          </div>
+                          <div className="absolute bottom-3 left-3 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-md text-[8px] font-black text-white/80 border border-white/10">
+                            #{idx + 1}
+                          </div>
+                        </motion.div>
+                      ))}
+
+                      {stories.length === 0 && (
+                        <div className="col-span-full h-full flex flex-col items-center justify-center text-white/20 gap-4">
+                          <HiPhoto className="text-6xl" />
+                          <p className="text-xs font-black uppercase tracking-widest">{t("No Stories Found")}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -390,44 +504,72 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25 }}
-              className="fixed top-0 right-0 w-full sm:w-96 h-full bg-gray-900 border-l border-white/10 z-[2000] p-6 space-y-6 shadow-2xl"
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 w-full sm:w-96 h-full bg-gray-950 border-l border-white/10 z-[2000] flex flex-col shadow-2xl"
             >
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold text-white">{t("Add Stories")}</h3>
-                <button onClick={() => setShowAddMenu(false)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white hover:bg-white/10 transition-all">
-                  <HiXMark className="w-5 h-5" />
-                </button>
+              <div className="p-8 border-b border-white/5 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-black text-white tracking-tight uppercase tracking-widest">{t("Add Stories")}</h3>
+                  <button onClick={() => setShowAddMenu(false)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white hover:bg-white/10 transition-all">
+                    <HiXMark className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder={t("Search by text...")}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm font-bold placeholder-white/20 outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all"
+                  />
+                </div>
               </div>
 
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t("Search stories...")}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 outline-none focus:border-indigo-500 transition-all"
-              />
-
-              <div className="space-y-3 overflow-y-auto h-[calc(100%-150px)]">
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
                 {allStories
-                  .filter(s => !stories.some(ex => ex._id === s._id))
+                  ?.filter(s => !stories.some(ex => ex._id === s._id))
                   .filter(s => !search || s.text?.toLowerCase().includes(search.toLowerCase()))
-                  .map(st => (
-                    <div key={st._id} className="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3 hover:border-indigo-500/50 transition-all">
-                      <div className="w-12 h-12 rounded-xl overflow-hidden relative flex-shrink-0">
-                        <Image src={getPhoto(st)} fill className="object-cover" alt={t("Story")} />
+                  .map((st, i) => (
+                    <motion.div
+                      key={st._id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="group p-4 rounded-[2rem] bg-white/5 border border-white/5 flex items-center gap-4 hover:border-indigo-500/30 hover:bg-white/10 transition-all cursor-pointer"
+                    >
+                      <div className="w-14 h-20 rounded-2xl overflow-hidden relative flex-shrink-0 border border-white/10 shadow-lg">
+                        <Image src={getPhoto(st)} fill className="object-cover transition-transform duration-500 group-hover:scale-110" alt="Story" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs font-bold text-white truncate">{st.text || t('Story')}</div>
-                        <div className="text-[10px] text-gray-400">{dayjs(st.createdAt).format('DD MMM YYYY')}</div>
+                        <div className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">{dayjs(st.createdAt).format('DD MMM YYYY')}</div>
+                        <div className="text-sm font-bold text-white truncate pr-2">{st.text || t('Moment')}</div>
                       </div>
                       <button
-                        onClick={() => { addStoryToHighlight(highlight._id, st._id); setShowAddMenu(false); }}
-                        className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center hover:bg-indigo-500 hover:text-white transition-all flex-shrink-0"
+                        onClick={() => { addStoryToHighlight(highlight._id, st._id); }}
+                        className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center hover:bg-indigo-500 hover:text-white transition-all flex-shrink-0 shadow-lg"
                       >
                         <HiPlus className="w-4 h-4" />
                       </button>
-                    </div>
+                    </motion.div>
                   ))}
+
+                {allStories?.filter(s => !stories.some(ex => ex._id === s._id)).length === 0 && (
+                  <div className="h-full flex flex-col items-center justify-center text-white/20 p-8 text-center space-y-4">
+                    <HiSparkles className="text-5xl" />
+                    <p className="text-xs font-black uppercase tracking-widest leading-loose">
+                      {t("All your stories are already in this highlight")}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-8 border-t border-white/5">
+                <button
+                  onClick={() => setShowAddMenu(false)}
+                  className="w-full py-4 rounded-2xl bg-white text-black font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all"
+                >
+                  {t("Done")}
+                </button>
               </div>
             </motion.aside>
           )}

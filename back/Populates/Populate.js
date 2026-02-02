@@ -14,6 +14,8 @@ const storyPopulate = [
   { path: "owner", select: userSelect },
   { path: "loves", select: userSelect },
   { path: "views", select: userSelect },
+  { path: "mentions", select: userSelect },
+  { path: "reactions.user", select: userSelect },
   { path: "originalStory", populate: { path: "owner", select: userSelect } },
   { path: "collaborators", select: userSelect }
 ];

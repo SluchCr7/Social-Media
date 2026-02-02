@@ -152,11 +152,19 @@ const deleteHighlight = asyncHandler(async (req, res) => {
 // ================== Add Story to Highlight ==================
 const addStoryToHighlight = asyncHandler(async (req, res) => {
   const { highlightId } = req.params;
-  const { storyId } = req.body;
+  const { storyId, storyIds } = req.body;
   const userId = req.user?._id;
 
-  if (!storyId) {
-    return res.status(400).json({ message: "storyId is required" });
+  // Support both single storyId and multiple storyIds
+  let idsToProcess = [];
+  if (storyId) idsToProcess.push(storyId);
+  if (storyIds && Array.isArray(storyIds)) idsToProcess = [...idsToProcess, ...storyIds];
+
+  // Remove duplicates from request
+  idsToProcess = [...new Set(idsToProcess)];
+
+  if (idsToProcess.length === 0) {
+    return res.status(400).json({ message: "storyId or storyIds is required" });
   }
 
   const highlight = await Highlight.findOne({ _id: highlightId, user: userId });
@@ -164,25 +172,30 @@ const addStoryToHighlight = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Highlight not found" });
   }
 
-  // Check for duplicates
-  const alreadyExists = highlight.archivedStories && highlight.archivedStories.some(s => s._id.equals(storyId));
-  if (alreadyExists) {
-    return res.status(400).json({ message: "Story already in highlight" });
+  // Filter out stories already in the highlight
+  const existingIds = highlight.archivedStories.map(s => s._id.toString());
+  const newIds = idsToProcess.filter(id => !existingIds.includes(id.toString()));
+
+  if (newIds.length === 0) {
+    return res.status(400).json({ message: "All stories already in highlight" });
   }
 
-  // Verify story exists and belongs to user
-  const story = await Story.findOne({ _id: storyId, owner: userId });
-  if (!story) {
-    return res.status(404).json({ message: "Story not found or unauthorized" });
+  // Verify all new stories exist and belong to user
+  const stories = await Story.find({ _id: { $in: newIds }, owner: userId });
+
+  if (stories.length === 0) {
+    return res.status(404).json({ message: "No valid stories found to add" });
   }
 
-  // Add story to archive
-  highlight.archivedStories.push({
-    _id: story._id,
-    text: story.text,
-    Photo: story.Photo,
-    originalStory: story.originalStory,
-    createdAt: story.createdAt
+  // Add stories to archive
+  stories.forEach(story => {
+    highlight.archivedStories.push({
+      _id: story._id,
+      text: story.text,
+      Photo: story.Photo,
+      originalStory: story.originalStory,
+      createdAt: story.createdAt
+    });
   });
 
   await highlight.save();
@@ -192,7 +205,7 @@ const addStoryToHighlight = asyncHandler(async (req, res) => {
   delete updatedHighlight.archivedStories;
 
   return res.status(200).json({
-    message: "Story added successfully",
+    message: stories.length === 1 ? "Story added successfully" : `${stories.length} stories added successfully`,
     highlight: updatedHighlight
   });
 });

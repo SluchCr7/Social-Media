@@ -1,11 +1,11 @@
 const route = require('express').Router();
-const { 
-  addNewStory, 
-  getAllStories, 
-  deleteStory, 
-  getStoriesById, 
+const {
+    addNewStory,
+    getAllStories,
+    deleteStory,
+    getStoriesById,
     getRecentStories,
-  viewStory,toggleLoveStory,getUserStories,shareStory
+    viewStory, toggleLoveStory, getUserStories, shareStory, reactToStory, getStoryViewers
 } = require('../Controllers/StoryController');
 const { verifyToken } = require('../Middelwares/verifyToken');
 const photoUpload = require('../Middelwares/uploadPhoto');
@@ -26,12 +26,15 @@ route.route('/:id')
 route.route("/user/:id")
     .get(getUserStories);
 route.route('/view/:id')
-    .post(verifyToken,viewStory);
+    .post(verifyToken, viewStory);
 route.route("/share/:id")
-    .post(verifyToken,shareStory);
-route.route('/love/:id')
-    .post(verifyToken,toggleLoveStory);
-    
+    .post(verifyToken, shareStory);
+route.route('/react/:id')
+    .post(verifyToken, reactToStory);
+
+route.route('/viewers/:id')
+    .get(verifyToken, getStoryViewers);
+
 route.route('/recent')
     .get(getRecentStories);
 

@@ -78,7 +78,19 @@ export const StoryContextProvider = ({ children }) => {
     }
 
     if (storyData.collaborators) {
-      storyData.collaborators.forEach(c => formData.append('collaborators', c));
+      formData.append('collaborators', JSON.stringify(storyData.collaborators));
+    }
+    if (storyData.mentions) {
+      formData.append('mentions', JSON.stringify(storyData.mentions));
+    }
+    if (storyData.music) {
+      formData.append('music', JSON.stringify(storyData.music));
+    }
+    if (storyData.link) {
+      formData.append('link', JSON.stringify(storyData.link));
+    }
+    if (storyData.isCloseFriends !== undefined) {
+      formData.append('isCloseFriends', storyData.isCloseFriends);
     }
 
     try {
@@ -94,23 +106,10 @@ export const StoryContextProvider = ({ children }) => {
       );
 
       const newStory = res.data?.story || res.data;
-      // Local state is updated via socket or manually here if socket fails
       setStories(prev => {
         if (prev.some(s => s._id === newStory._id)) return prev;
         return [newStory, ...prev];
       });
-
-      if (storyData.collaborators?.length > 0) {
-        for (const collaborator of storyData.collaborators) {
-          await addNotify({
-            content: `${user?.username} added you as a collaborator in a story 🎉`,
-            type: 'collaborator',
-            receiverId: collaborator?._id,
-            actionRef: newStory._id,
-            actionModel: 'Story',
-          });
-        }
-      }
 
       showAlert("✅ Story published successfully.");
       setIsStory(false); // Close modal
@@ -118,11 +117,11 @@ export const StoryContextProvider = ({ children }) => {
       console.error(err);
       showAlert("❌ Failed to add story.");
     }
-  }, [user, showAlert, addNotify]);
+  }, [user, showAlert]);
 
   const deleteStory = useCallback(async (storyId) => {
     try {
-      await axios.delete(`${process.env.NEXT_PUBLIC_BACK_URL}/api/story/${storyId}`, {
+      await axios.delete(`${process.env.NEXT_PUBLIC_BACK_URL}/api/story/delete/${storyId}`, {
         headers: { Authorization: `Bearer ${user?.token}` }
       });
       setStories(prev => prev.filter(s => s._id !== storyId));
@@ -162,6 +161,35 @@ export const StoryContextProvider = ({ children }) => {
     }
   }, [user, showAlert]);
 
+  const reactToStory = useCallback(async (storyId, emoji) => {
+    if (!user) return;
+    try {
+      const { data } = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/react/${storyId}`,
+        { emoji },
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+      setStories(prev => prev.map(s => s._id === storyId ? data : s));
+    } catch (err) {
+      console.error(err);
+      showAlert("❌ Failed to react.");
+    }
+  }, [user, showAlert]);
+
+  const getStoryViewers = useCallback(async (storyId) => {
+    if (!user) return [];
+    try {
+      const { data } = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/viewers/${storyId}`,
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+      return data;
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  }, [user]);
+
   const shareStory = useCallback(async (id) => {
     if (!user?.token) return showAlert("You must be logged in.");
     try {
@@ -199,9 +227,11 @@ export const StoryContextProvider = ({ children }) => {
     deleteStory,
     viewStory,
     toggleLove,
+    reactToStory,
+    getStoryViewers,
     getUserStories,
     shareStory
-  }), [stories, isLoading, isStory, addNewStory, deleteStory, viewStory, toggleLove, getUserStories, shareStory]);
+  }), [stories, isLoading, isStory, addNewStory, deleteStory, viewStory, toggleLove, reactToStory, getStoryViewers, getUserStories, shareStory]);
 
   return (
     <StoryContext.Provider value={value}>
