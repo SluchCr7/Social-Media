@@ -10,7 +10,7 @@ import { useUser } from '@/app/Context/UserContext'
 import { useTranslate } from '@/app/Context/TranslateContext'
 
 const Aside = ({ isCollapsed, setIsCollapsed }) => {
-  const { user, Logout } = useAuth()
+  const { user, logout } = useAuth()
   const { onlineUsers } = useUser()
   const { isMobile, setIsMobile, isMobileMenuOpen, setIsMobileMenuOpen } = useAside()
   const { language } = useTranslate();
@@ -52,7 +52,7 @@ const Aside = ({ isCollapsed, setIsCollapsed }) => {
           isMobile={false}
           setIsCollapsed={setIsCollapsed}
           setIsMobileMenuOpen={setIsMobileMenuOpen}
-          user={{ ...user, Logout }}
+          user={{ ...user, logout }}
           onlineUsers={onlineUsers}
         />
       </motion.aside>
@@ -94,7 +94,7 @@ const Aside = ({ isCollapsed, setIsCollapsed }) => {
                 isCollapsed={false}
                 isMobile={true}
                 setIsMobileMenuOpen={setIsMobileMenuOpen}
-                user={{ ...user, Logout }}
+                user={{ ...user, logout }}
                 onlineUsers={onlineUsers}
               />
             </motion.aside>

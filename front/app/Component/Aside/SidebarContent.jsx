@@ -161,7 +161,7 @@ const SidebarContent = memo(({ isCollapsed, setIsCollapsed, isMobile, setIsMobil
             <motion.button
               whileHover={{ scale: 1.1, backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}
               whileTap={{ scale: 0.9 }}
-              onClick={user?.Logout}
+              onClick={user?.logout}
               className="p-2.5 rounded-xl text-gray-400 transition-all duration-300"
               title={t('Terminate Session')}
             >
@@ -174,7 +174,7 @@ const SidebarContent = memo(({ isCollapsed, setIsCollapsed, isMobile, setIsMobil
           <motion.button
             whileHover={{ scale: 1.1, backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}
             whileTap={{ scale: 0.9 }}
-            onClick={user?.Logout}
+            onClick={user?.logout}
             className="flex mx-auto mt-4 p-3 rounded-2xl text-gray-400 transition-all duration-300"
             title={t('Terminate')}
           >

@@ -232,7 +232,7 @@ const ProfileHeader = ({
             </div>
 
             {/* Stats Grid */}
-            <div className="flex flex-wrap justify-center md:justify-start gap-12 pt-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 w-full gap-12 pt-4">
               <StatItem label="Posts Broadcast" value={profileUser?.posts?.length} />
               <StatItem label="Followers Hub" value={profileUser?.followers?.length} onClick={onShowFollowers} />
               <StatItem label="Following Orbit" value={profileUser?.following?.length} onClick={onShowFollowing} />
