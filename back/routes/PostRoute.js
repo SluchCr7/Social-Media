@@ -10,7 +10,8 @@ const {
   editPost,
   viewPost,
   hahaPost,
-  getPostsByUser
+  getPostsByUser,
+  getMemories
 } = require('../Controllers/PostController');
 
 const route = require('express').Router();
@@ -22,6 +23,9 @@ route.route('/').get(getAllPosts);
 
 // Get posts by specific user (pagination)
 route.route('/user/:userId').get(getPostsByUser);
+
+// Get memories (On this day)
+route.route('/memories').get(verifyToken, getMemories);
 
 // Add post
 route.route('/add')

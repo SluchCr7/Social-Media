@@ -47,6 +47,10 @@ const PostSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
+// ✅ Indexes
+PostSchema.index({ createdAt: -1 });
+PostSchema.index({ owner: 1, createdAt: -1 });
+
 // ✅ Virtuals
 PostSchema.virtual("comments", {
   ref: "Comment",

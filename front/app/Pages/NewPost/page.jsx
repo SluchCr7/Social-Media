@@ -13,6 +13,8 @@ import { useAuth } from '@/app/Context/AuthContext'
 import { usePost } from '@/app/Context/PostContext'
 import { useCommunity } from '@/app/Context/CommunityContext'
 import { useMusic } from '@/app/Context/MusicContext'
+import { useFeedback } from '@/app/Context/FeedbackContext'
+import api from '@/app/utils/api'
 import Loading from '@/app/Component/Loading'
 
 // ✅ Lazy Load لتقليل وقت تحميل الصفحة الأولى
@@ -38,13 +40,16 @@ const NewPostContainer = () => {
   const [mentionBoxPos, setMentionBoxPos] = useState({ top: 0, left: 0 })
   const [selectedMusic, setSelectedMusic] = useState(null)
   const [activeMentionIndex, setActiveMentionIndex] = useState(0)
+  const [filteredUsers, setFilteredUsers] = useState([])
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false)
 
   const textareaRef = useRef(null)
 
-  const { user, users } = useAuth()
+  const { user } = useAuth()
   const { AddPost } = usePost()
   const { communities } = useCommunity()
   const { music: musicList, isLoading: isMusicLoading } = useMusic() || { music: [], isLoading: false }
+  const { showToast } = useFeedback()
 
   /* ------------------------- 🧠 Memoized helpers ------------------------- */
 
@@ -120,16 +125,40 @@ const NewPostContainer = () => {
     [cursorPosition, postText]
   )
 
-  /* ------------------------- 🧩 Filtered Users ------------------------- */
-  const filteredUsers = useMemo(() => {
-    if (!mentionQuery || !users) return []
-    return users.filter(
-      (u) =>
-        (u.username?.toLowerCase().includes(mentionQuery.toLowerCase()) ||
-          u.profileName?.toLowerCase().includes(mentionQuery.toLowerCase())) &&
-        u._id !== user?._id
+  /* ------------------------- 🧩 Mentions Search Logic ------------------------- */
+  useEffect(() => {
+    const searchUsers = async () => {
+      if (!mentionQuery) {
+        setFilteredUsers([])
+        return
+      }
+
+      setIsSearchingUsers(true)
+      try {
+        const res = await api.get(`/search?q=${mentionQuery}`)
+        const users = res.data?.users || []
+        setFilteredUsers(users.filter(u => u._id !== user?._id))
+      } catch (err) {
+        console.error('Mention search error:', err)
+      } finally {
+        setIsSearchingUsers(false)
+      }
+    }
+
+    const timer = setTimeout(searchUsers, 300)
+    return () => clearTimeout(timer)
+  }, [mentionQuery, user?._id])
+
+  // Sync selectedMentions with current text
+  useEffect(() => {
+    if (selectedMentions.length === 0) return
+    const currentMentions = selectedMentions.filter(m =>
+      postText.includes(`@${m.username}`)
     )
-  }, [mentionQuery, users, user?._id])
+    if (currentMentions.length !== selectedMentions.length) {
+      setSelectedMentions(currentMentions)
+    }
+  }, [postText, selectedMentions])
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -241,7 +270,7 @@ const NewPostContainer = () => {
     setLoading(true)
     try {
       await AddPost(
-        postText.replace(/#[\w\u0600-\u06FF]+/g, '').trim(),
+        postText.trim(),
         media,
         hashtags,
         selectedCommunity,
@@ -274,6 +303,17 @@ const NewPostContainer = () => {
     AddPost,
     extractHashtags,
   ])
+
+  /* ------------------------- 💾 Draft Handling ------------------------- */
+  const handleSaveDraft = useCallback(() => {
+    try {
+      const draft = { postText, links, privacy, selectedCommunity }
+      localStorage.setItem('post_draft', JSON.stringify(draft))
+      showToast('Draft saved successfully locally!', 'success')
+    } catch (err) {
+      showToast('Failed to save draft.', 'error')
+    }
+  }, [postText, links, privacy, selectedCommunity, showToast])
 
   /* ------------------------- 👤 Sync Current User ------------------------- */
   useEffect(() => {
@@ -321,6 +361,7 @@ const NewPostContainer = () => {
           removeMedia,
           handleEmojiClick,
           handlePost,
+          handleSaveDraft,
           communities,
           showMentionBox,
           filteredUsers,
@@ -331,7 +372,8 @@ const NewPostContainer = () => {
           selectedMusic,
           setSelectedMusic,
           musicList,
-          isMusicLoading
+          isMusicLoading,
+          isSearchingUsers
         }}
       />
     </Suspense>

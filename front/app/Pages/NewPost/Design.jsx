@@ -62,55 +62,63 @@ const MediaItem = React.memo(({ item, onRemove }) => (
 ))
 MediaItem.displayName = 'MediaItem'
 
-const MentionsList = React.memo(({ users, onSelect, pos, activeIndex }) => (
+const MentionsList = React.memo(({ users, onSelect, pos, activeIndex, isSearching }) => (
   <AnimatePresence mode="wait">
-    {users.length > 0 && (
+    {(users.length > 0 || isSearching) && (
       <motion.div
-        initial={{ opacity: 0, y: 15, scale: 0.9, filter: 'blur(10px)' }}
+        initial={{ opacity: 0, y: 15, scale: 0.95, filter: 'blur(10px)' }}
         animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-        exit={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
+        exit={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
         transition={{ type: 'spring', stiffness: 500, damping: 35 }}
         style={{
-          top: (pos.top || 0) + 45,
+          top: (pos.top || 0) + 40,
           left: (pos.left || 0)
         }}
-        className="absolute z-[1000] w-72 bg-white/80 dark:bg-[#0D1117]/85 backdrop-blur-3xl rounded-[2.5rem] border border-gray-200/50 dark:border-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.35)] overflow-hidden p-2.5"
+        className="absolute z-[1000] w-72 bg-white/90 dark:bg-[#0D1117]/90 backdrop-blur-2xl rounded-[2rem] border border-gray-200/50 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden p-2"
       >
-        <div className="max-h-72 overflow-y-auto custom-scrollbar">
-          {users.map((u, idx) => (
-            <motion.button
-              key={u._id}
-              initial={{ opacity: 0, x: -15 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.04 }}
-              onClick={() => onSelect(u)}
-              className={`w-full flex items-center gap-3.5 p-3 rounded-[1.75rem] transition-all duration-300 group mb-1 last:mb-0
-                ${activeIndex === idx
-                  ? 'bg-indigo-600 shadow-lg shadow-indigo-600/20'
-                  : 'hover:bg-gray-100/80 dark:hover:bg-white/5'
-                }`}
-            >
-              <div className={`relative w-11 h-11 rounded-[1.25rem] overflow-hidden border-2 shadow-inner transition-transform group-active:scale-95
-                ${activeIndex === idx ? 'border-white/30' : 'border-white dark:border-gray-800'}`}>
-                <Image src={u.profilePhoto?.url || '/default-avatar.png'} alt={u.username} fill className="object-cover" />
-              </div>
-              <div className="text-left flex-1 min-w-0">
-                <p className={`text-[13px] font-black tracking-tight truncate transition-colors
-                  ${activeIndex === idx ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>
-                  @{u.username}
-                </p>
-                <p className={`text-[10px] font-bold truncate transition-colors
-                  ${activeIndex === idx ? 'text-indigo-100/70' : 'text-gray-500 dark:text-gray-500'}`}>
-                  {u.profileName}
-                </p>
-              </div>
-              {activeIndex === idx && (
-                <motion.div layoutId="plus" className="bg-white/20 p-1.5 rounded-xl">
-                  <HiPlus size={12} className="text-white" />
-                </motion.div>
-              )}
-            </motion.button>
-          ))}
+        <div className="max-h-64 overflow-y-auto custom-scrollbar">
+          {isSearching ? (
+            <div className="p-8 flex flex-col items-center justify-center gap-3">
+              <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Searching...</span>
+            </div>
+          ) : users.length > 0 ? (
+            users.map((u, idx) => (
+              <motion.button
+                key={u._id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.03 }}
+                onClick={() => onSelect(u)}
+                className={`w-full flex items-center gap-3 p-2.5 rounded-[1.5rem] transition-all duration-300 group mb-1 last:mb-0
+                  ${activeIndex === idx
+                    ? 'bg-indigo-600 shadow-lg shadow-indigo-600/30 text-white'
+                    : 'hover:bg-gray-100/80 dark:hover:bg-white/5 text-gray-900 dark:text-gray-100'
+                  }`}
+              >
+                <div className={`relative w-10 h-10 rounded-xl overflow-hidden border-2 transition-transform group-active:scale-95
+                  ${activeIndex === idx ? 'border-white/30' : 'border-white dark:border-gray-800 shadow-sm'}`}>
+                  <Image src={u.profilePhoto?.url || '/default-avatar.png'} alt={u.username} fill className="object-cover" />
+                </div>
+                <div className="text-left flex-1 min-w-0">
+                  <p className="text-[13px] font-black tracking-tight truncate leading-tight">
+                    @{u.username}
+                  </p>
+                  <p className={`text-[10px] font-bold truncate opacity-70
+                    ${activeIndex === idx ? 'text-indigo-100' : 'text-gray-500'}`}>
+                    {u.profileName}
+                  </p>
+                </div>
+                {u.isVerify && (
+                  <HiCheckBadge className={activeIndex === idx ? 'text-white' : 'text-indigo-500'} size={14} />
+                )}
+              </motion.button>
+            ))
+          ) : (
+            <div className="p-8 text-center">
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">No users found</span>
+            </div>
+          )}
         </div>
       </motion.div>
     )}
@@ -118,61 +126,77 @@ const MentionsList = React.memo(({ users, onSelect, pos, activeIndex }) => (
 ))
 MentionsList.displayName = 'MentionsList'
 
+const highlightText = (text) => {
+  if (!text) return text;
+  return text.split(/(\s+)/).map((part, i) => {
+    if (part.startsWith('#')) {
+      return <span key={i} className="text-indigo-500 font-bold">{part}</span>;
+    }
+    if (part.startsWith('@')) {
+      return <span key={i} className="text-purple-500 font-bold">{part}</span>;
+    }
+    return part;
+  });
+};
+
 const LivePreview = React.memo(({ selectedUser, privacy, postText, isRTL, selectedMusic, media, t }) => (
-  <div className="bg-gray-50 dark:bg-white/5 rounded-3xl p-5 border border-gray-100 dark:border-white/5 relative">
+  <div className="bg-white dark:bg-white/5 rounded-3xl p-5 border border-gray-100 dark:border-white/5 shadow-inner">
     <div className="flex items-center gap-3 mb-4">
-      <div className="w-8 h-8 rounded-full overflow-hidden">
-        <Image src={selectedUser?.profilePhoto?.url || '/default-avatar.png'} alt="P" width={32} height={32} />
+      <div className="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-indigo-500/10">
+        <Image src={selectedUser?.profilePhoto?.url || '/default-avatar.png'} alt="P" width={40} height={40} className="object-cover" />
       </div>
       <div className="min-w-0">
-        <p className="text-[10px] font-black text-gray-900 dark:text-white truncate">@{selectedUser?.username || 'user'}</p>
-        <p className="text-[8px] text-gray-500 uppercase font-black tracking-widest">{privacy}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-[12px] font-black text-gray-900 dark:text-white truncate">@{selectedUser?.username || 'user'}</p>
+          <HiCheckBadge className="text-indigo-500" size={12} />
+        </div>
+        <p className="text-[8px] text-gray-400 uppercase font-black tracking-widest">{privacy}</p>
       </div>
     </div>
 
-    <div className={`text-[12px] leading-relaxed dark:text-gray-300 break-words ${isRTL ? 'text-right' : 'text-left'}`}>
-      {postText || <span className="text-gray-400 dark:text-gray-600 italic">{t("Content signal is empty...")}</span>}
+    <div className={`text-[14px] leading-relaxed text-gray-800 dark:text-gray-200 break-words whitespace-pre-wrap ${isRTL ? 'text-right font-arabic' : 'text-left font-medium'}`}>
+      {postText ? highlightText(postText) : <span className="text-gray-400 dark:text-gray-600 italic font-normal tracking-wide">{t("Your message will appear here...")}</span>}
     </div>
 
     {selectedMusic && (
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="mt-4 p-3 bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center gap-3"
+        className="mt-4 p-3 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/20 rounded-2xl flex items-center gap-3"
       >
-        <div className="w-8 h-8 bg-purple-500 text-white rounded-lg flex items-center justify-center shrink-0">
-          <HiMusicalNote size={16} />
+        <div className="w-9 h-9 bg-purple-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+          <HiMusicalNote size={18} className="animate-pulse" />
         </div>
-        <div className="min-w-0">
-          <p className="text-[10px] font-black dark:text-white truncate">{selectedMusic.name}</p>
-          <p className="text-[8px] text-gray-500 uppercase font-black tracking-widest">{selectedMusic.artist || t("Unknown Artist")}</p>
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-black text-gray-900 dark:text-white truncate">{selectedMusic.name}</p>
+          <p className="text-[9px] text-purple-500/70 font-black tracking-widest uppercase truncate">{selectedMusic.artist || t("Unknown Artist")}</p>
         </div>
       </motion.div>
     )}
 
     {media.length > 0 && (
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className={`mt-4 grid gap-2 ${media.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
         {media.slice(0, 4).map((item, i) => (
-          <div key={i} className="aspect-square relative rounded-xl overflow-hidden shadow-sm bg-black">
+          <div key={i} className={`relative rounded-2xl overflow-hidden bg-black shadow-lg ${media.length === 1 ? 'aspect-video' : 'aspect-square'}`}>
             {item.type === 'video' ? (
               <video src={item.url} className="w-full h-full object-cover" muted />
             ) : (
               <Image src={item.url} alt="i" fill className="object-cover" />
             )}
             {i === 3 && media.length > 4 && (
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-[10px] text-white font-black">+{media.length - 4}</div>
+              <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center text-xs text-white font-black">+{media.length - 4}</div>
             )}
           </div>
         ))}
       </div>
     )}
 
-    <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between opacity-50">
+    <div className="mt-5 pt-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between opacity-30">
       <div className="flex gap-4">
-        <div className="h-2 w-8 bg-gray-200 dark:bg-white/10 rounded-full" />
-        <div className="h-2 w-8 bg-gray-200 dark:bg-white/10 rounded-full" />
+        <div className="h-1.5 w-10 bg-gray-200 dark:bg-white/10 rounded-full" />
+        <div className="h-1.5 w-10 bg-gray-200 dark:bg-white/10 rounded-full" />
       </div>
-      <div className="h-4 w-4 bg-gray-200 dark:bg-white/10 rounded-full" />
+      <div className="h-5 w-5 bg-gray-200 dark:bg-white/10 rounded-full" />
     </div>
   </div>
 ))
@@ -180,14 +204,14 @@ LivePreview.displayName = 'LivePreview'
 
 const NewPostPresenter = (props) => {
   const {
-    postText, handleTextareaChange, handlePost, loading, errorText,
+    postText, handleTextareaChange, handlePost, handleSaveDraft, loading, errorText,
     showEmojiPicker, setShowEmojiPicker, handleEmojiClick,
     media = [], handleMediaChange, removeMedia,
     links = [], linkInput, setLinkInput, handleAddLink, handleRemoveLink,
     scheduleEnabled, setScheduleEnabled, scheduleDate, setScheduleDate,
     selectedUser, privacy, setPrivacy, communities = [], selectedCommunity, setSelectedCommunity,
     filteredUsers = [], handleSelectMention, showMentionBox, activeMentionIndex, mentionBoxPos = {}, textareaRef,
-    handleKeyDown, selectedMusic, setSelectedMusic, musicList = [], isMusicLoading
+    handleKeyDown, selectedMusic, setSelectedMusic, musicList = [], isMusicLoading, isSearchingUsers
   } = props
 
   const { t } = useTranslation()
@@ -200,19 +224,13 @@ const NewPostPresenter = (props) => {
   const canPost = (postText?.trim() || media.length > 0) && !loading && !errorText
 
   const filteredMusic = useMemo(() => {
+    if (!musicList) return [];
     if (!musicQuery) return musicList.slice(0, 10);
     return musicList.filter(m =>
       m.name?.toLowerCase().includes(musicQuery.toLowerCase()) ||
       m.artist?.toLowerCase().includes(musicQuery.toLowerCase())
     ).slice(0, 10);
   }, [musicList, musicQuery]);
-
-  // Draft handling (Local Feature)
-  const saveDraft = () => {
-    const draft = { postText, links, privacy, selectedCommunity };
-    localStorage.setItem('post_draft', JSON.stringify(draft));
-    alert('Draft saved locally!');
-  }
 
   return (
     <main className="min-h-screen w-full bg-[#fafafa] dark:bg-[#080808] flex items-center justify-center p-3 sm:p-4 md:p-8 transition-all duration-700 selection:bg-indigo-500/30">
@@ -276,10 +294,10 @@ const NewPostPresenter = (props) => {
 
               <div className="pt-4 space-y-3">
                 <button
-                  onClick={saveDraft}
-                  className="w-full flex items-center justify-center gap-3 py-3 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-100 dark:border-white/10 rounded-2xl transition-all text-[11px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400"
+                  onClick={handleSaveDraft}
+                  className="w-full flex items-center justify-center gap-3 py-3 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-100 dark:border-white/10 rounded-2xl transition-all text-[11px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 group"
                 >
-                  <HiInboxArrowDown size={16} />
+                  <HiInboxArrowDown size={16} className="group-hover:-translate-y-0.5 transition-transform" />
                   {t("Save as Draft")}
                 </button>
                 <button
@@ -383,6 +401,7 @@ const NewPostPresenter = (props) => {
                     onSelect={handleSelectMention}
                     pos={mentionBoxPos}
                     activeIndex={activeMentionIndex}
+                    isSearching={isSearchingUsers}
                   />
                 )}
               </div>

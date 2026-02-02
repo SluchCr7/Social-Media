@@ -38,6 +38,10 @@ export const PostContextProvider = ({ children }) => {
   const [userHasMore, setUserHasMore] = useState(true);
   const [userIsLoading, setUserIsLoading] = useState(false);
 
+  // Memories State
+  const [memories, setMemories] = useState([]);
+  const [memoriesLoading, setMemoriesLoading] = useState(false);
+
   // --- Actions ---
 
   /**
@@ -95,6 +99,21 @@ export const PostContextProvider = ({ children }) => {
     }
   }, []);
 
+  /**
+   * Fetch user memories (posts from this day in past years)
+   */
+  const fetchMemories = useCallback(async () => {
+    setMemoriesLoading(true);
+    try {
+      const res = await api.get('/post/memories');
+      setMemories(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Error fetching memories:", err.message);
+    } finally {
+      setMemoriesLoading(false);
+    }
+  }, []);
+
   // --- External Hooks (passed state setters) ---
   const postManagement = usePostManagement({
     user,
@@ -137,17 +156,21 @@ export const PostContextProvider = ({ children }) => {
     userPosts,
     userHasMore,
     userIsLoading,
+    memories,
+    memoriesLoading,
 
     // Actions
     fetchPosts,
     fetchUserPosts,
     getPostById,
+    fetchMemories,
     ...postManagement,
     ...postActions,
   }), [
     posts, isLoading, isLoadingPostCreated, imageView, showPostModelEdit,
     postIsEdit, hasMore, page, userPosts, userHasMore, userIsLoading,
-    fetchPosts, fetchUserPosts, getPostById, postManagement, postActions
+    memories, memoriesLoading,
+    fetchPosts, fetchUserPosts, getPostById, fetchMemories, postManagement, postActions
   ]);
 
   return (

@@ -520,6 +520,35 @@ const getPostsByUser = asyncHandler(async (req, res) => {
     pages,
   });
 });
+/**
+ * @desc Get memories (Posts on this day in past years)
+ * @route GET /api/post/memories
+ * @access Private
+ */
+const getMemories = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const now = new Date();
+  const day = now.getDate();
+  const month = now.getMonth() + 1; // JS months are 0-indexed
+  const year = now.getFullYear();
+
+  const memories = await Post.find({
+    owner: userId,
+    status: "published",
+    $expr: {
+      $and: [
+        { $eq: [{ $dayOfMonth: "$createdAt" }, day] },
+        { $eq: [{ $month: "$createdAt" }, month] },
+        { $lt: [{ $year: "$createdAt" }, year] }
+      ]
+    }
+  })
+    .sort({ createdAt: -1 })
+    .populate(postPopulate)
+    .lean();
+
+  res.status(200).json(memories);
+});
 
 const getPostById = asyncHandler(async (req, res) => {
   const post = await Post.findById(req.params.id).populate(postPopulate);
@@ -544,5 +573,6 @@ module.exports = {
   editPost,
   viewPost,
   hahaPost,
-  getPostsByUser
+  getPostsByUser,
+  getMemories
 };

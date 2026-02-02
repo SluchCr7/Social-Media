@@ -11,6 +11,9 @@ import { IoTrophyOutline } from "react-icons/io5"
 import { SlCalender } from "react-icons/sl"
 import { IoIosMusicalNotes } from "react-icons/io";
 import { FaHistory, FaLock, FaSun, FaUserCog, FaBookmark, FaBell, FaUsers, FaQuestionCircle, FaUserShield } from "react-icons/fa"
+import { RiMemoriesFill } from "react-icons/ri";
+import { FaUserFriends } from "react-icons/fa";
+
 import {
   FiMessageCircle,
   FiShield,
@@ -63,6 +66,7 @@ export const navSections = [
       { icon: <FaBookmark />, text: "Saved", link: "/Pages/Saved" },
       { icon: <MdOutlineOndemandVideo />, text: "Videos", link: "/Pages/Videos" },
       { icon: <IoIosMusicalNotes />, text: "Music", link: "/Pages/Music" },
+      { icon: <FaUserFriends />, text: "Friends", link: "/Pages/Friends" },
     ]
   },
   {
@@ -76,6 +80,7 @@ export const navSections = [
   {
     title: "Personal",
     items: [
+      { icon: <RiMemoriesFill />, text: "Memories", link: "/Pages/Memories" },
       { icon: <SiGoogledisplayandvideo360 />, text: "Shorts", link: "/Pages/Reels" },
       { icon: <IoTrophyOutline />, text: "Challenge", link: "/Pages/Challenge" },
       { icon: <SlCalender />, text: "Calendar", link: "/Pages/Calender" },
