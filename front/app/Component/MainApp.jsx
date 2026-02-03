@@ -19,7 +19,7 @@ const MainApp = () => {
   const { unReadedMessage } = useMessage();
   const [activeTab, setActiveTab] = useState("following");
   return (
-    <div className="flex-1 w-full min-h-screen px-8">
+    <div className="flex-1 w-full min-h-screen pr-6 pl-8 md:pl-12">
       {/* Container wrapper that aligns both Header and Main content */}
       <div className="max-w-6xl mx-auto w-full flex flex-col">
         {/* Header ثابت أعلى الصفحة */}
