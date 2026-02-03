@@ -18,15 +18,11 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
   const { t } = useTranslation();
 
   return (
-    <header className="sticky top-0 z-[100] w-full border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-[#050505cc] backdrop-blur-2xl transition-colors duration-300">
-      {/* 
-        Container constraints:
-        - Max width matches the main content for perfect alignment.
-        - Horizontal padding matches the content area for vertical rhythm.
-      */}
-      <div className="w-full h-16 px-4 md:px-8 flex items-center justify-between gap-8">
+    <header className="sticky top-0 z-[100] w-full border-b rounded-b-xl border-gray-200 dark:border-white/5 bg-white/80 dark:bg-[#050505cc] backdrop-blur-2xl transition-colors duration-300">
+
+      <div className="w-full h-16 flex items-center justify-between gap-8">
         {/* Tab Navigation - Aligned with the feed area */}
-        <nav className="flex items-center bg-gray-100 dark:bg-white/5 p-1 rounded-2xl border border-gray-200 dark:border-white/5 hidden md:flex transition-colors">
+        <nav className="items-center bg-gray-100 dark:bg-white/5 p-1 rounded-2xl border border-gray-200 dark:border-white/5 hidden md:flex transition-colors">
           {tabsHeader.map((tab) => (
             <button
               key={tab.key}
