@@ -101,7 +101,7 @@ const CommunityGuidelines = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#fafafa] dark:bg-[#050505]">
+        <div className="min-h-screen w-full bg-[#fafafa] dark:bg-[#050505]">
             <InfoHero
                 title={t('Community Guidelines')}
                 subtitle={t('The core principles that govern interaction and resonance within the Sluchitt Network.')}

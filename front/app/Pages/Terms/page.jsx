@@ -106,7 +106,7 @@ const TermsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#050505]">
+    <div className="min-h-screen w-full bg-[#fafafa] dark:bg-[#050505]">
       <InfoHero
         title={t('Terms of Service')}
         subtitle={t('The rules and regulations for the use of the Sluchitt Network.')}

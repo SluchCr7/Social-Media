@@ -55,7 +55,7 @@ const SupportPage = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-[#fafafa] dark:bg-[#050505]">
+        <div className="min-h-screen w-full bg-[#fafafa] dark:bg-[#050505]">
             <InfoHero
                 title={t('Support Center')}
                 subtitle={t('Connect with our resonance team for technical assistance or network inquiries.')}

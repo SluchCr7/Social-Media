@@ -7,11 +7,12 @@ import Link from 'next/link';
 import { filterHashtags } from '../../utils/filterHashtags';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 const HashtagsMenu = React.memo(() => {
   const { posts } = usePost();
   const { t } = useTranslation()
-
+  const route = useRouter();
   const hashtagCount = {};
   filterHashtags(posts, hashtagCount);
 
@@ -75,7 +76,7 @@ const HashtagsMenu = React.memo(() => {
 
       {/* Footer Link */}
       <div className="px-7 py-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
-        <button className="text-[12px] font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors tracking-wide uppercase">
+        <button onClick={() => route.push('/Pages/Explore')} className="text-[12px] font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors tracking-wide uppercase">
           Explore all trends
         </button>
       </div>

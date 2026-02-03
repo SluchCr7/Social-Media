@@ -38,7 +38,7 @@ const HelpPresentationPage = memo(
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto">
+        <div className="relative w-full max-w-7xl mx-auto">
           {/* Header */}
           <motion.header
             initial={{ opacity: 0, y: -20 }}

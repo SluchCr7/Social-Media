@@ -35,7 +35,7 @@ const Loader = () => {
         </motion.div>
 
         {/* Minimalist Loading Bar */}
-        <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+        {/* <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
           <motion.div
             initial={{ x: "-100%" }}
             animate={{ x: "100%" }}
@@ -46,7 +46,7 @@ const Loader = () => {
             }}
             className="w-full h-full bg-indigo-500/80 rounded-full"
           />
-        </div>
+        </div> */}
       </div>
     </div>
   );

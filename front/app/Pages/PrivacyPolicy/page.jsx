@@ -106,7 +106,7 @@ const PrivacyPolicy = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#fafafa] dark:bg-[#050505]">
+        <div className="min-h-screen w-full bg-[#fafafa] dark:bg-[#050505]">
             <InfoHero
                 title={t('Privacy Policy')}
                 subtitle={t('Understanding how your data is processed, stored, and protected within our network.')}
