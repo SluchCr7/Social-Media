@@ -28,7 +28,7 @@ const CommunityGuidelines = () => {
             icon: <HiHeart className="w-6 h-6" />,
             content: (
                 <>
-                    <p>We're all in this together to create a welcoming environment. Let's treat everyone with respect. Healthy debates are natural, but kindness is required.</p>
+                    <p>We are all in this together to create a welcoming environment. Let is treat everyone with respect. Healthy debates are natural, but kindness is required.</p>
                     <p>Disruptive behavior, personal attacks, and inflammatory language have no place in our community.</p>
                 </>
             )
@@ -40,7 +40,7 @@ const CommunityGuidelines = () => {
             icon: <HiNoSymbol className="w-6 h-6" />,
             content: (
                 <>
-                    <p>Make sure everyone feels safe. Bullying of any kind isn't allowed, and degrading comments about things like race, religion, culture, sexual orientation, gender or identity will not be tolerated.</p>
+                    <p>Make sure everyone feels safe. Bullying of any kind is not allowed, and degrading comments about things like race, religion, culture, sexual orientation, gender or identity will not be tolerated.</p>
                     <p>We have a zero-tolerance policy for harassment. Reporting such behavior is encouraged and will be handled with high priority.</p>
                 </>
             )
@@ -52,7 +52,7 @@ const CommunityGuidelines = () => {
             icon: <HiShieldCheck className="w-6 h-6" />,
             content: (
                 <>
-                    <p>Being part of this community requires mutual trust. Authentic, expressive discussions make groups great, but may also be sensitive and private. What's shared in the group should stay in the group.</p>
+                    <p>Being part of this community requires mutual trust. Authentic, expressive discussions make groups great, but may also be sensitive and private. What is shared in the group should stay in the group.</p>
                     <p>Do not share personal information of others (doxing) under any circumstances.</p>
                 </>
             )
@@ -64,7 +64,7 @@ const CommunityGuidelines = () => {
             icon: <HiChatBubbleLeftRight className="w-6 h-6" />,
             content: (
                 <>
-                    <p>Feedback is welcome if it's constructive. If you have a problem with something, explain why and offer a solution. Don't just complain.</p>
+                    <p>Feedback is welcome if it is constructive. If you have a problem with something, explain why and offer a solution. Do not just complain.</p>
                     <p>Contribute to the network pulse by sharing high-quality content that adds value to the grid.</p>
                 </>
             )

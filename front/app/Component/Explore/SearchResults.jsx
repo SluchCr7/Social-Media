@@ -42,7 +42,7 @@ const SearchResults = memo(({ searchResults, searchQuery, user, t, maxResults })
           {t('No signals found')}
         </h3>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          {t('We couldn’t find any matches for')} <span className="text-indigo-500 font-bold">"{searchQuery}"</span>
+          {t('We couldn’t find any matches for')} <span className="text-indigo-500 font-bold">{searchQuery}</span>
         </p>
       </motion.div>
     );
