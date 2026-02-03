@@ -19,11 +19,13 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
 
   return (
     <header className="sticky top-0 z-[100] w-full border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-[#050505cc] backdrop-blur-2xl transition-colors duration-300">
-      <div className="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between gap-8">
-
-        {/* Brand/Logo - Optional: You can uncomment or add a logo here if needed */}
-
-        {/* Tab Navigation - Professional Pill Design */}
+      {/* 
+        Container constraints:
+        - Max width matches the main content for perfect alignment.
+        - Horizontal padding matches the content area for vertical rhythm.
+      */}
+      <div className="w-full h-16 px-4 md:px-8 flex items-center justify-between gap-8">
+        {/* Tab Navigation - Aligned with the feed area */}
         <nav className="flex items-center bg-gray-100 dark:bg-white/5 p-1 rounded-2xl border border-gray-200 dark:border-white/5 hidden md:flex transition-colors">
           {tabsHeader.map((tab) => (
             <button
@@ -46,12 +48,12 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
           ))}
         </nav>
 
-        {/* Action Controls */}
+        {/* Action Controls - Right Side */}
         <div className="flex items-center gap-2 md:gap-4">
-          {/* Quick Search Trigger */}
           <button className="p-2.5 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 text-gray-500 dark:text-white/40 hover:text-indigo-600 dark:hover:text-white transition-all hover:bg-gray-200 dark:hover:bg-white/10">
             <Link href="/Pages/Search"><Search className="w-5 h-5" /></Link>
           </button>
+
 
           {isLogin ? (
             <>
