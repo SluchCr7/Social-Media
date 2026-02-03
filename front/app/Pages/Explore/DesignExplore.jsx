@@ -22,6 +22,7 @@ import TrendingTabContent from '../../Component/Explore/TrendingTabContent';
 import HashtagsTabContent from '../../Component/Explore/HashtagsTabContent';
 import PhotosTabContent from '../../Component/Explore/PhotosTabContent';
 import DefaultTabContent from '../../Component/Explore/DefaultTabContent';
+import ExploreSkeleton from '../../Skeletons/ExploreSkeleton';
 import Link from 'next/link';
 
 const useTrendingPosts = (trendingPosts, timeFilter) => {
@@ -67,7 +68,7 @@ const useFollowingPhotos = (user, posts) => useMemo(() => {
 
 const DesignExplore = memo(({
     search, setSearch, searchResults, activeTab, setActiveTab,
-    finalTabs, topHashtags, user, trendingPosts = [], posts, suggestedUsersArr = []
+    finalTabs, topHashtags, user, trendingPosts = [], posts, suggestedUsersArr = [], loading = false
 }) => {
     const { t } = useTranslation();
     const [timeFilter, setTimeFilter] = useState('today');
@@ -107,159 +108,165 @@ const DesignExplore = memo(({
             </div>
 
             <div className="max-w-7xl mx-auto space-y-12">
-                {/* Enhanced Header */}
-                <header className="flex flex-col md:flex-row items-end justify-between gap-8 border-b border-gray-100 dark:border-white/5 pb-12">
-                    <div className="space-y-6 max-w-2xl">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em]"
-                        >
-                            <HiSignal className="w-4 h-4 animate-pulse" />
-                            {t('Discovery Engine Active')}
-                        </motion.div>
+                {loading ? (
+                    <ExploreSkeleton />
+                ) : (
+                    <>
+                        {/* Enhanced Header */}
+                        <header className="flex flex-col md:flex-row items-end justify-between gap-8 border-b border-gray-100 dark:border-white/5 pb-12">
+                            <div className="space-y-6 max-w-2xl">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em]"
+                                >
+                                    <HiSignal className="w-4 h-4 animate-pulse" />
+                                    {t('Discovery Engine Active')}
+                                </motion.div>
 
-                        <motion.h1
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-gray-900 dark:text-white leading-[0.85]"
-                        >
-                            {t('Explore')} <br />
-                            <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                                {t('Everything')}
-                            </span>
-                        </motion.h1>
+                                <motion.h1
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.1 }}
+                                    className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-gray-900 dark:text-white leading-[0.85]"
+                                >
+                                    {t('Explore')} <br />
+                                    <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                        {t('Everything')}
+                                    </span>
+                                </motion.h1>
 
-                        <motion.p
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="text-lg text-gray-600 dark:text-gray-400 font-medium leading-relaxed"
-                        >
-                            {t('Discover trending content, connect with creators, and explore the global conversation.')}
-                        </motion.p>
-                    </div>
+                                <motion.p
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="text-lg text-gray-600 dark:text-gray-400 font-medium leading-relaxed"
+                                >
+                                    {t('Discover trending content, connect with creators, and explore the global conversation.')}
+                                </motion.p>
+                            </div>
 
-                    {/* Stats Cards */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="grid grid-cols-2 gap-4"
-                    >
-                        <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 backdrop-blur-xl">
-                            <div className="text-3xl font-black text-indigo-600 dark:text-indigo-400">{stats.trendingCount}</div>
-                            <div className="text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 mt-1">{t('Trending')}</div>
-                        </div>
-                        <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 backdrop-blur-xl">
-                            <div className="text-3xl font-black text-purple-600 dark:text-purple-400">{stats.totalHashtags}</div>
-                            <div className="text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 mt-1">{t('Hashtags')}</div>
-                        </div>
-                    </motion.div>
-                </header>
-
-                {/* Enhanced Search Interface */}
-                <div className="space-y-12">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                    >
-                        <ExploreSearchBar
-                            search={search}
-                            setSearch={setSearch}
-                            placeholder={t("Search users, posts, hashtags, or topics...")}
-                        />
-                    </motion.div>
-
-                    <AnimatePresence mode="wait">
-                        {hasSearchQuery ? (
+                            {/* Stats Cards */}
                             <motion.div
-                                key="search-results"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3 }}
+                                className="grid grid-cols-2 gap-4"
+                            >
+                                <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 backdrop-blur-xl">
+                                    <div className="text-3xl font-black text-indigo-600 dark:text-indigo-400">{stats.trendingCount}</div>
+                                    <div className="text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 mt-1">{t('Trending')}</div>
+                                </div>
+                                <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 backdrop-blur-xl">
+                                    <div className="text-3xl font-black text-purple-600 dark:text-purple-400">{stats.totalHashtags}</div>
+                                    <div className="text-[9px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 mt-1">{t('Hashtags')}</div>
+                                </div>
+                            </motion.div>
+                        </header>
+
+                        {/* Enhanced Search Interface */}
+                        <div className="space-y-12">
+                            <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                className="relative z-10"
+                                transition={{ delay: 0.4 }}
                             >
-                                <div className="bg-white/80 dark:bg-white/[0.02] backdrop-blur-3xl rounded-3xl sm:rounded-[3rem] border border-gray-100 dark:border-white/5 shadow-2xl p-4 sm:p-10">
-                                    <SearchResults
-                                        searchResults={searchResults}
-                                        searchQuery={search}
-                                        user={user}
-                                        t={t}
-                                        maxResults={6}
-                                    />
-                                    <div className="mt-12 text-center">
-                                        <Link
-                                            href={`/Pages/Search?q=${encodeURIComponent(search.trim())}`}
-                                            className="inline-flex items-center gap-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-10 py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/40 active:scale-95 transition-all"
-                                        >
-                                            <span>
-                                                {`${t("View All Results for")} "${search?.trim() || ''}"`}
-                                            </span>
-                                            <HiArrowRight className="w-5 h-5 rtl:rotate-180" />
-                                        </Link>
-                                    </div>
-                                </div>
+                                <ExploreSearchBar
+                                    search={search}
+                                    setSearch={setSearch}
+                                    placeholder={t("Search users, posts, hashtags, or topics...")}
+                                />
                             </motion.div>
-                        ) : (
-                            <motion.div
-                                key="tabs-content"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                            >
-                                {/* Enhanced Tabs */}
-                                <div className="mb-10">
-                                    <ExploreTabs
-                                        allTabs={allTabs}
-                                        activeTab={activeTab}
-                                        setActiveTab={setActiveTab}
-                                    />
-                                </div>
 
-                                {/* Tab Content */}
-                                <motion.div
-                                    layout
-                                    className="max-w-5xl mx-auto"
-                                >
-                                    <AnimatePresence mode="wait">
-                                        {allTabs.map((tab) => (
-                                            activeTab === tab.name && (
-                                                <TabContentWrapper key={tab.name}>
-                                                    {tab.name === 'Trending' ? (
-                                                        <TrendingTabContent
-                                                            trendingToShow={trendingToShow}
-                                                            timeFilter={timeFilter}
-                                                            setTimeFilter={setTimeFilter}
-                                                            t={t}
-                                                        />
-                                                    ) : tab.name === 'Hashtags' ? (
-                                                        <HashtagsTabContent
-                                                            topHashtags={topHashtags}
-                                                            t={t}
-                                                        />
-                                                    ) : tab.name === 'Photos' ? (
-                                                        <PhotosTabContent
-                                                            followingPhotos={followingPhotos}
-                                                            t={t}
-                                                        />
-                                                    ) : (
-                                                        <DefaultTabContent
-                                                            news={tab.news}
-                                                            t={t}
-                                                        />
-                                                    )}
-                                                </TabContentWrapper>
-                                            )
-                                        ))}
-                                    </AnimatePresence>
-                                </motion.div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
+                            <AnimatePresence mode="wait">
+                                {hasSearchQuery ? (
+                                    <motion.div
+                                        key="search-results"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -20 }}
+                                        className="relative z-10"
+                                    >
+                                        <div className="bg-white/80 dark:bg-white/[0.02] backdrop-blur-3xl rounded-3xl sm:rounded-[3rem] border border-gray-100 dark:border-white/5 shadow-2xl p-4 sm:p-10">
+                                            <SearchResults
+                                                searchResults={searchResults}
+                                                searchQuery={search}
+                                                user={user}
+                                                t={t}
+                                                maxResults={6}
+                                            />
+                                            <div className="mt-12 text-center">
+                                                <Link
+                                                    href={`/Pages/Search?q=${encodeURIComponent(search.trim())}`}
+                                                    className="inline-flex items-center gap-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-10 py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/40 active:scale-95 transition-all"
+                                                >
+                                                    <span>
+                                                        {`${t("View All Results for")} "${search?.trim() || ''}"`}
+                                                    </span>
+                                                    <HiArrowRight className="w-5 h-5 rtl:rotate-180" />
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ) : (
+                                    <motion.div
+                                        key="tabs-content"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                    >
+                                        {/* Enhanced Tabs */}
+                                        <div className="mb-10">
+                                            <ExploreTabs
+                                                allTabs={allTabs}
+                                                activeTab={activeTab}
+                                                setActiveTab={setActiveTab}
+                                            />
+                                        </div>
+
+                                        {/* Tab Content */}
+                                        <motion.div
+                                            layout
+                                            className="max-w-5xl mx-auto"
+                                        >
+                                            <AnimatePresence mode="wait">
+                                                {allTabs.map((tab) => (
+                                                    activeTab === tab.name && (
+                                                        <TabContentWrapper key={tab.name}>
+                                                            {tab.name === 'Trending' ? (
+                                                                <TrendingTabContent
+                                                                    trendingToShow={trendingToShow}
+                                                                    timeFilter={timeFilter}
+                                                                    setTimeFilter={setTimeFilter}
+                                                                    t={t}
+                                                                />
+                                                            ) : tab.name === 'Hashtags' ? (
+                                                                <HashtagsTabContent
+                                                                    topHashtags={topHashtags}
+                                                                    t={t}
+                                                                />
+                                                            ) : tab.name === 'Photos' ? (
+                                                                <PhotosTabContent
+                                                                    followingPhotos={followingPhotos}
+                                                                    t={t}
+                                                                />
+                                                            ) : (
+                                                                <DefaultTabContent
+                                                                    news={tab.news}
+                                                                    t={t}
+                                                                />
+                                                            )}
+                                                        </TabContentWrapper>
+                                                    )
+                                                ))}
+                                            </AnimatePresence>
+                                        </motion.div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </>
+                )}
             </div>
 
             {/* Enhanced Status Indicator */}

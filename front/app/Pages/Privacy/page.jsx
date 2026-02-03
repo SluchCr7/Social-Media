@@ -1,124 +1,151 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { useScroll, useSpring } from 'framer-motion';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Info, Lock, Share2, ShieldCheck, RefreshCw, Mail, UserCheck,
-} from 'lucide-react';
+  HiShieldCheck,
+  HiLockClosed,
+  HiEye,
+  HiServer,
+  HiShare,
+  HiCheckBadge,
+  HiArrowsRightLeft
+} from 'react-icons/hi2';
 
-import PrivacyPolicyPresentation from './PrivactPresentation';
+import InfoHero from '@/app/Component/Management/InfoHero';
+import ContentSidebar from '@/app/Component/Management/ContentSidebar';
+import ManagementCard from '@/app/Component/Management/ManagementCard';
 
-export default function PrivacyPolicyPage() {
+const PrivacyPage = () => {
   const { t } = useTranslation();
-  const sectionRefs = useRef({});
-  const observerRef = useRef(null);
+  const [activeId, setActiveId] = useState('collection');
 
-  // ✅ تثبيت البيانات بـ useMemo لتقليل re-renders
-  const sectionsData = useMemo(() => [
+  const sections = [
     {
-      id: 'info',
+      id: 'collection',
+      label: t('Collection'),
       title: t('1. Information We Collect'),
-      icon: <Info className="w-5 h-5 text-indigo-500" />,
-      content: t('We may collect information you provide such as name, email, profile picture, etc.'),
+      icon: <HiEye className="w-6 h-6" />,
+      content: (
+        <>
+          <p>{t('We may collect information you provide such as name, email, profile picture, etc.')}</p>
+          <p>{t('We also collect usage data, device information, and diagnostic signals to ensure network stability.')}</p>
+        </>
+      )
     },
     {
-      id: 'use',
+      id: 'usage',
+      label: t('Usage'),
       title: t('2. How We Use Your Information'),
-      icon: <UserCheck className="w-5 h-5 text-green-500" />,
-      content: t('We use your info to operate, personalize, and improve your experience.'),
+      icon: <HiServer className="w-6 h-6" />,
+      content: (
+        <>
+          <p>{t('We use your info to operate, personalize, and improve your experience.')}</p>
+          <ul className="list-disc pl-6 space-y-2">
+            <li>{t('Processing social signals and network resonance.')}</li>
+            <li>{t('Synchronizing cross-device experiences.')}</li>
+            <li>{t('Providing high-priority technical support.')}</li>
+          </ul>
+        </>
+      )
     },
     {
-      id: 'share',
+      id: 'sharing',
+      label: t('Sharing'),
       title: t('3. Sharing of Information'),
-      icon: <Share2 className="w-5 h-5 text-purple-500" />,
-      content: t('We don’t sell personal info; only share with trusted partners when needed.'),
+      icon: <HiShare className="w-6 h-6" />,
+      content: (
+        <>
+          <p>{t('We don’t sell personal info; only share with trusted partners when needed.')}</p>
+          <p>{t('Data sharing is strictly governed by our privacy protocols and legal mandates.')}</p>
+        </>
+      )
     },
     {
       id: 'security',
+      label: t('Security'),
       title: t('4. Data Security'),
-      icon: <Lock className="w-5 h-5 text-red-500" />,
-      content: t('We use reasonable security measures, but no system is 100% secure.'),
+      icon: <HiLockClosed className="w-6 h-6" />,
+      content: (
+        <>
+          <p>{t('We use reasonable security measures, but no system is 100% secure.')}</p>
+          <p>{t('Multi-layer encryption and real-time threat monitoring are active across the entire grid.')}</p>
+        </>
+      )
     },
     {
       id: 'choices',
+      label: t('Your Choices'),
       title: t('5. Your Choices'),
-      icon: <ShieldCheck className="w-5 h-5 text-blue-500" />,
-      content: t('You can update, delete, or request data removal anytime.'),
-    },
-    {
-      id: 'changes',
-      title: t('6. Changes to This Policy'),
-      icon: <RefreshCw className="w-5 h-5 text-orange-500" />,
-      content: t('We may update this policy periodically; continued use means acceptance.'),
-    },
-    {
-      id: 'contact',
-      title: t('7. Contact'),
-      icon: <Mail className="w-5 h-5 text-teal-500" />,
+      icon: <HiCheckBadge className="w-6 h-6" />,
       content: (
         <>
-          {t('For inquiries, contact us at:')}{' '}
-          <a href="mailto:privacy@socialmediaapp.com" className="text-indigo-600 dark:text-indigo-300 underline">
-            privacy@socialmediaapp.com
-          </a>
+          <p>{t('You can update, delete, or request data removal anytime.')}</p>
+          <p>{t('Privacy controls are integrated directly into your global settings panel.')}</p>
         </>
-      ),
-    },
-  ], [t]);
-
-  const [openIds, setOpenIds] = useState(() => sectionsData.map((s) => s.id));
-  const [mobileTocOpen, setMobileTocOpen] = useState(false);
-  const [activeId, setActiveId] = useState(sectionsData[0].id);
-
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 200, damping: 30 });
-
-  // ✅ ملاحظة: نستخدم useEffect مرة واحدة لإنشاء observer
-  useEffect(() => {
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-            break;
-          }
-        }
-      },
-      { rootMargin: '-35% 0px -45% 0px' }
-    );
-
-    Object.values(sectionRefs.current).forEach((el) => el && observerRef.current.observe(el));
-    return () => observerRef.current?.disconnect();
-  }, []);
-
-  // ✅ تثبيت الدوال لتجنب إعادة إنشائها في كل render
-  const toggleSection = useCallback((id) => {
-    setOpenIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  }, []);
-
-  const goTo = useCallback((id) => {
-    const el = sectionRefs.current[id];
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setMobileTocOpen(false);
+      )
     }
-  }, []);
+  ];
+
+  const handleScrollTo = (id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      const offset = 100;
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = el.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      setActiveId(id);
+    }
+  };
 
   return (
-    <PrivacyPolicyPresentation
-      t={t}
-      sectionsData={sectionsData}
-      openIds={openIds}
-      toggleSection={toggleSection}
-      goTo={goTo}
-      mobileTocOpen={mobileTocOpen}
-      setMobileTocOpen={setMobileTocOpen}
-      sectionRefs={sectionRefs}
-      activeId={activeId}
-      scaleX={scaleX}
-    />
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#050505]">
+      <InfoHero
+        title={t('Privacy Protocols')}
+        subtitle={t('Comprehensive documentation on how your digital footprint is analyzed and protected.')}
+        icon={HiShieldCheck}
+        gradient="from-purple-600 to-indigo-600"
+      />
+
+      <div className="max-w-7xl mx-auto px-6 pb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+          <div className="lg:col-span-1">
+            <ContentSidebar
+              items={sections.map(s => ({ id: s.id, label: s.label, icon: s.icon }))}
+              activeId={activeId}
+              onItemClick={handleScrollTo}
+            />
+          </div>
+
+          <div className="lg:col-span-3 space-y-12">
+            {sections.map((section, index) => (
+              <ManagementCard
+                key={section.id}
+                id={section.id}
+                title={section.title}
+                icon={section.icon}
+                delay={index * 0.1}
+              >
+                {section.content}
+              </ManagementCard>
+            ))}
+
+            <div className="pt-12 border-t border-gray-100 dark:border-white/5 text-center">
+              <p className="text-gray-400 text-sm font-black uppercase tracking-widest">
+                {t('Last updated')}: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-}
+};
+
+export default PrivacyPage;

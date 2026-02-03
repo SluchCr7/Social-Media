@@ -1,86 +1,149 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { HiShieldCheck, HiLockClosed, HiEye, HiServer } from 'react-icons/hi2';
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+    HiShieldCheck,
+    HiLockClosed,
+    HiEye,
+    HiServer,
+    HiShare,
+    HiCheckBadge,
+    HiArrowsRightLeft
+} from 'react-icons/hi2';
+
+import InfoHero from '@/app/Component/Management/InfoHero';
+import ContentSidebar from '@/app/Component/Management/ContentSidebar';
+import ManagementCard from '@/app/Component/Management/ManagementCard';
 
 const PrivacyPolicy = () => {
+    const { t } = useTranslation();
+    const [activeId, setActiveId] = useState('collection');
+
     const sections = [
         {
-            title: "Data We Collect",
-            icon: <HiEye className="w-6 h-6 text-indigo-500" />,
-            content: "We collect information you provide directly to us, such as when you create an account, update your profile, or communicate with us. This may include your name, email address, profile information, and any other information you choose to provide."
+            id: 'collection',
+            label: t('Collection'),
+            title: t('Data We Collect'),
+            icon: <HiEye className="w-6 h-6" />,
+            content: (
+                <>
+                    <p>We collect information you provide directly to us, such as when you create an account, update your profile, or communicate with us. This may include your name, email address, profile information, and any other information you choose to provide.</p>
+                    <p>We also automatically collect certain information when you use our services, including log information, device information, and information collected by cookies and other tracking technologies.</p>
+                </>
+            )
         },
         {
-            title: "How We Use Your Data",
-            icon: <HiServer className="w-6 h-6 text-pink-500" />,
-            content: "We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect Sluchitt and our users. We also use the information to personalize your experience and to send you updates and administrative messages."
+            id: 'usage',
+            label: t('Usage'),
+            title: t('How We Use Your Data'),
+            icon: <HiServer className="w-6 h-6" />,
+            content: (
+                <>
+                    <p>We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect Sluchitt and our users.</p>
+                    <ul className="list-disc pl-6 space-y-2">
+                        <li>Personalize your experience.</li>
+                        <li>Send technical notices and updates.</li>
+                        <li>Monitor and analyze trends and usage.</li>
+                        <li>Detect and prevent fraudulent transactions.</li>
+                    </ul>
+                </>
+            )
         },
         {
-            title: "Data Security",
-            icon: <HiLockClosed className="w-6 h-6 text-cyan-500" />,
-            content: "We take reasonable measures to help protect information about you from loss, theft, misuse and unauthorized access, disclosure, alteration and destruction. Your password is encrypted and we use secure socket layer technology (SSL)."
+            id: 'sharing',
+            label: t('Sharing'),
+            title: t('Information Sharing'),
+            icon: <HiShare className="w-6 h-6" />,
+            content: (
+                <>
+                    <p>We do not share your personal information with third parties except as described in this policy. We may share information with vendors, consultants, and other service providers who need access to such information to carry out work on our behalf.</p>
+                    <p>We may also share information if we believe disclosure is in accordance with, or required by, any applicable law or legal process.</p>
+                </>
+            )
         },
         {
-            title: "Your Choices",
-            icon: <HiShieldCheck className="w-6 h-6 text-emerald-500" />,
-            content: "You may update, correct or delete information about you at any time by logging into your online account or by contacting us. If you wish to delete or deactivate your account, please contact our support team."
+            id: 'security',
+            label: t('Security'),
+            title: t('Data Security'),
+            icon: <HiLockClosed className="w-6 h-6" />,
+            content: (
+                <>
+                    <p>We take reasonable measures to help protect information about you from loss, theft, misuse and unauthorized access, disclosure, alteration and destruction.</p>
+                    <p>Your data is encrypted both at rest and in transit. We regularly audit our security protocols to ensure the highest level of protection for our users.</p>
+                </>
+            )
+        },
+        {
+            id: 'choices',
+            label: t('Your Choices'),
+            title: t('Data Rights & Choices'),
+            icon: <HiCheckBadge className="w-6 h-6" />,
+            content: (
+                <>
+                    <p>You may update, correct or delete information about you at any time by logging into your account. You have the right to request a copy of the data we hold about you or request its deletion.</p>
+                    <p>Most web browsers are set to accept cookies by default. If you prefer, you can usually choose to set your browser to remove or reject browser cookies.</p>
+                </>
+            )
         }
     ];
 
+    const handleScrollTo = (id) => {
+        const el = document.getElementById(id);
+        if (el) {
+            const offset = 100;
+            const bodyRect = document.body.getBoundingClientRect().top;
+            const elementRect = el.getBoundingClientRect().top;
+            const elementPosition = elementRect - bodyRect;
+            const offsetPosition = elementPosition - offset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+            setActiveId(id);
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-white dark:bg-[#050505] pt-24 pb-12 px-6 transition-colors duration-300">
-            <div className="max-w-4xl mx-auto">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="text-center mb-16"
-                >
-                    <h1 className="text-4xl md:text-6xl font-black text-gray-900 dark:text-white mb-6 tracking-tight">
-                        Privacy <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">Policy</span>
-                    </h1>
-                    <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                        Your privacy is critically important to us. At Sluchitt, we have a few fundamental principles regarding your data.
-                    </p>
-                </motion.div>
+        <div className="min-h-screen bg-[#fafafa] dark:bg-[#050505]">
+            <InfoHero
+                title={t('Privacy Policy')}
+                subtitle={t('Understanding how your data is processed, stored, and protected within our network.')}
+                icon={HiShieldCheck}
+                gradient="from-purple-600 to-pink-600"
+            />
 
-                <div className="grid gap-8">
-                    {sections.map((section, index) => (
-                        <motion.div
-                            key={index}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.1, duration: 0.5 }}
-                            className="group relative p-8 rounded-3xl bg-gray-50 dark:bg-[#0A0A0A] border border-gray-100 dark:border-white/5 hover:border-indigo-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10"
-                        >
-                            <div className="flex items-start gap-6">
-                                <div className="p-3 rounded-2xl bg-white dark:bg-white/5 shadow-sm group-hover:scale-110 transition-transform duration-300">
-                                    {section.icon}
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                                        {section.title}
-                                    </h3>
-                                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                                        {section.content}
-                                    </p>
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))}
+            <div className="max-w-7xl mx-auto px-6 pb-24">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+                    <div className="lg:col-span-1">
+                        <ContentSidebar
+                            items={sections.map(s => ({ id: s.id, label: s.label, icon: s.icon }))}
+                            activeId={activeId}
+                            onItemClick={handleScrollTo}
+                        />
+                    </div>
+
+                    <div className="lg:col-span-3 space-y-12">
+                        {sections.map((section, index) => (
+                            <ManagementCard
+                                key={section.id}
+                                id={section.id}
+                                title={section.title}
+                                icon={section.icon}
+                                delay={index * 0.1}
+                            >
+                                {section.content}
+                            </ManagementCard>
+                        ))}
+
+                        <div className="pt-12 border-t border-gray-100 dark:border-white/5 text-center">
+                            <p className="text-gray-400 text-sm font-black uppercase tracking-widest">
+                                {t('Last updated')}: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                            </p>
+                        </div>
+                    </div>
                 </div>
-
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 }}
-                    className="mt-16 text-center border-t border-gray-200 dark:border-white/10 pt-8"
-                >
-                    <p className="text-gray-500 dark:text-gray-500 text-sm">
-                        Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                    </p>
-                </motion.div>
             </div>
         </div>
     );

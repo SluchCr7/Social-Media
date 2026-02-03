@@ -207,6 +207,14 @@ const UserSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: "Reel"
         }
+    ],
+    searchHistory: [
+        {
+            query: String,
+            searchType: { type: String, enum: ['user', 'post', 'community', 'hashtag', 'text'], default: 'text' },
+            refId: { type: mongoose.Schema.Types.ObjectId }, // Optional reference to the searched item
+            createdAt: { type: Date, default: Date.now }
+        }
     ]
 }, {
     timestamps: true,

@@ -3,30 +3,27 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../../Context/AuthContext';
 import { useNews } from '@/app/Context/NewsContext';
-import { usePost } from '@/app/Context/PostContext';
+import { useExplore } from '@/app/Context/ExploreContext';
+import { useSearch } from '@/app/Context/SearchContext';
 import DesignExplore from './DesignExplore';
 import { useUser } from '@/app/Context/UserContext';
 import { useGetData } from '@/app/Custome/useGetData';
-import { useSearchLogic } from '../../Custome/useSearchLogic'; // Hook البحث
 import Loading from '@/app/Component/Loading';
 
-// ==============================
-// 🔹 المكون الرئيسي
-// ==============================
-const Search = () => {
-  const { users, user } = useAuth();
+const ExplorePage = () => {
+  const { user } = useAuth();
   const { suggestedUsers } = useUser();
   const { news } = useNews();
-  const { posts } = usePost();
 
-  // 🧠 منطق البحث المفصول في hook مستقل
-  const { search, setSearch, searchResults, topHashtags } = useSearchLogic('', users, posts);
+  // Use new contexts
+  const { explorePosts, trendingPosts, trendingHashtags, loading: exploreLoading } = useExplore();
+  const { searchQuery, setSearchQuery, searchResults } = useSearch();
 
-  // 🔹 بيانات المستخدم الكاملة من الـ Hook المخصص
-  const { userData } = useGetData(user?._id);
+  // User data from hook
+  const { userData, loading: userLoading } = useGetData(user?._id);
 
   // -------------------------------
-  // 🧩 المستخدمون المقترحون (Memoized)
+  // 🧩 Suggested Users (Memoized)
   // -------------------------------
   const suggestedUsersArr = useMemo(() => {
     if (!Array.isArray(suggestedUsers)) return [];
@@ -34,12 +31,11 @@ const Search = () => {
   }, [suggestedUsers]);
 
   // -------------------------------
-  // 🔹 إنشاء تبويبات الاهتمامات للمستخدم (Interest Tabs)
+  // 🔹 Create Interest Tabs
   // -------------------------------
   const interestTabs = useMemo(() => {
     if (!news?.length || !userData?.interests) return [];
 
-    // نحول العناوين إلى lowercase مرة واحدة فقط لتحسين الأداء
     const lowerTitles = news.map(item => ({
       ...item,
       lowerTitle: item.title.toLowerCase(),
@@ -59,7 +55,7 @@ const Search = () => {
   }, [news, userData?.interests]);
 
   // -------------------------------
-  // 🔹 التبويب الأساسي (الأخبار) + الاهتمامات
+  // 🔹 Final Tabs (News + Interests)
   // -------------------------------
   const finalTabs = useMemo(
     () => [{ name: 'News', news }, ...interestTabs],
@@ -67,37 +63,48 @@ const Search = () => {
   );
 
   // -------------------------------
-  // 🔹 حالة التبويب النشط
+  // 🔹 Active Tab State
   // -------------------------------
   const [activeTab, setActiveTab] = useState('News');
 
+  // Update active tab when tabs change
+  useEffect(() => {
+    if (finalTabs.length > 0 && !finalTabs.find(tab => tab.name === activeTab)) {
+      setActiveTab(finalTabs[0].name);
+    }
+  }, [finalTabs, activeTab]);
+
+  // Convert trending hashtags to the format expected by components
+  const formattedHashtags = useMemo(() => {
+    return trendingHashtags.map(h => [h.name, h.count]);
+  }, [trendingHashtags]);
+
   // -------------------------------
-  // 🧭 شرط التحميل المبدئي لتجنب مشاكل البيانات الناقصة
+  // 🧭 Loading State
   // -------------------------------
-  if (!userData) {
-    return (
-      <Loading />
-    );
+  if (userLoading || !userData) {
+    return <Loading />;
   }
 
   // -------------------------------
-  // 🎨 واجهة العرض الرئيسية (تمرير كل القيم لـ DesignExplore)
+  // 🎨 Main Render
   // -------------------------------
   return (
     <DesignExplore
       user={userData}
-      search={search}
-      setSearch={setSearch}
+      search={searchQuery}
+      setSearch={setSearchQuery}
       searchResults={searchResults}
       activeTab={activeTab}
       setActiveTab={setActiveTab}
       finalTabs={finalTabs}
-      topHashtags={topHashtags}
-      trendingPosts={posts}
+      topHashtags={formattedHashtags}
+      trendingPosts={trendingPosts}
       suggestedUsersArr={suggestedUsersArr}
-      posts={posts}
+      posts={explorePosts}
+      loading={exploreLoading}
     />
   );
 };
 
-export default Search;
+export default ExplorePage;
