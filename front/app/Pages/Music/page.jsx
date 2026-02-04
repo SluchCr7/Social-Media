@@ -32,8 +32,7 @@ export default function MusicPageContainer() {
     shuffle, setShuffle, repeatMode, setRepeatMode,
     progress, duration, volume, setVolume, muted, setMuted,
     setTrack, currentIndex, setCurrentIndex,
-    expanded, setExpanded, setProgress, isReady,
-    queue
+    expanded, setExpanded, setProgress, isReady 
   } = useMusicPlayer()
 
   const { loading, userData } = useGetData(user?._id)
