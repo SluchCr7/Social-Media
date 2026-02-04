@@ -4,13 +4,26 @@ import { useAuth } from '@/app/Context/AuthContext';
 import { useCommunity } from '@/app/Context/CommunityContext';
 import { usePost } from '@/app/Context/PostContext';
 import Loading from '@/app/Component/Loading';
-import DasignCommunitySelect from './Dasign';
+import DesignCommunitySelect from './Design';
 
 // ✅ مكون الهيكل العظمي منفصل ومذكّر (memo)
+// ✅ Premium Skeleton Loader for Community Page
 const SkeletonCover = () => (
-  <div className="animate-pulse">
-    <div className="w-full h-48 bg-gray-200 rounded-b-xl" />
-    <div className="-mt-12 ml-6 w-24 h-24 rounded-full bg-gray-200 border-4 border-white shadow-md" />
+  <div className="animate-pulse space-y-8">
+    <div className="relative h-[45vh] lg:h-[60vh] min-h-[400px] w-full bg-gray-800/20 rounded-b-[3rem] overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
+      <div className="absolute bottom-16 left-6 lg:left-12 flex flex-col md:flex-row items-center md:items-end gap-10">
+        <div className="w-40 h-40 lg:w-48 lg:h-48 rounded-[2.5rem] bg-gray-700/30 border-[6px] border-[#050505]" />
+        <div className="flex-1 space-y-4">
+          <div className="h-4 w-24 bg-gray-700/30 rounded-full" />
+          <div className="h-12 w-64 lg:w-96 bg-gray-700/50 rounded-2xl" />
+          <div className="flex gap-4">
+            <div className="h-6 w-20 bg-gray-700/30 rounded-full" />
+            <div className="h-6 w-20 bg-gray-700/30 rounded-full" />
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 );
 
@@ -81,10 +94,10 @@ const Page = ({ params }) => {
     const q = searchTerm.trim().toLowerCase();
     const byQuery = q
       ? base.filter(
-          (m) =>
-            (m?.username || '').toLowerCase().includes(q) ||
-            (m?.profileName || '').toLowerCase().includes(q)
-        )
+        (m) =>
+          (m?.username || '').toLowerCase().includes(q) ||
+          (m?.profileName || '').toLowerCase().includes(q)
+      )
       : base;
 
     if (activeMemberTab === 'admins') return byQuery.filter((m) => isAdmin(m._id));
@@ -137,19 +150,17 @@ const Page = ({ params }) => {
   // ✅ أثناء التحميل
   if (!CommunitySelected) {
     return (
-      <div className="flex justify-center items-center min-h-[80vh] text-gray-500 w-full">
-        <div className="w-full max-w-5xl mx-auto p-4">
-          <SkeletonCover />
-          <div className="mt-6">
-            <Loading />
-          </div>
+      <div className="min-h-screen bg-[#050505] text-white">
+        <SkeletonCover />
+        <div className="container mx-auto px-6 mt-12">
+          <Loading />
         </div>
       </div>
     );
   }
 
   return (
-    <DasignCommunitySelect
+    <DesignCommunitySelect
       user={user}
       id={id}
       isAdmin={isAdmin}
