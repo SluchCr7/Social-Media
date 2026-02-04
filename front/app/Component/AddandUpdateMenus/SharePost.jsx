@@ -58,7 +58,7 @@ const PostPreview = React.memo(({ post }) => {
 
       {post?.text && (
         <p className="text-gray-600 dark:text-gray-400 text-xs font-medium leading-relaxed mb-4 line-clamp-2 italic">
-          "{post?.text}"
+          {post?.text}
         </p>
       )}
 
