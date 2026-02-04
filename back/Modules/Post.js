@@ -12,6 +12,7 @@ const PostSchema = new mongoose.Schema({
     publicId: { type: String, required: true },
     thumbnail: { type: String },
     duration: { type: Number },
+    isSensitive: { type: Boolean, default: false }
   }],
   owner: {
     type: mongoose.Schema.Types.ObjectId,

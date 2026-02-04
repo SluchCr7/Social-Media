@@ -9,6 +9,7 @@ const { moderatePost } = require('../utils/CheckTextPost');
 const { sendNotificationHelper } = require("../utils/SendNotification");
 const { postPopulate } = require("../Populates/Populate");
 const streamifier = require("streamifier");
+const { checkImageSensitivity } = require('../utils/ImgShield');
 
 // ================== Get All Posts ==================
 const getAllPosts = asyncHandler(async (req, res) => {
@@ -105,18 +106,27 @@ const addPost = async (req, res) => {
         mediaFiles.map(async (file) => {
           const result = await uploadToCloudinary(file.buffer);
           const type = result.resource_type === 'video' ? 'video' : 'image';
+
+          // Automatically detect sensitive content for images
+          const isSensitive = type === 'image' ? await checkImageSensitivity(result.secure_url) : false;
+
           return {
             type,
             url: result.secure_url,
             publicId: result.public_id,
             thumbnail: type === 'video' ? result.secure_url.replace(/\.[^/.]+$/, ".jpg") : null,
-            duration: result.duration || 0
+            duration: result.duration || 0,
+            isSensitive
           };
         })
       );
     }
 
-    const legacyPhotos = uploadedMedia.filter(m => m.type !== 'video').map(m => ({ url: m.url, publicId: m.publicId }));
+    const legacyPhotos = uploadedMedia.filter(m => m.type !== 'video').map(m => ({
+      url: m.url,
+      publicId: m.publicId,
+      isSensitive: m.isSensitive
+    }));
 
     const post = new Post({
       text,
@@ -421,17 +431,26 @@ const editPost = asyncHandler(async (req, res) => {
   for (const file of newFiles) {
     const result = await uploadToCloudinary(file.buffer);
     const type = result.resource_type === 'video' ? 'video' : 'image';
+
+    // Automatically detect sensitive content for images
+    const isSensitive = type === 'image' ? await checkImageSensitivity(result.secure_url) : false;
+
     newUploadedMedia.push({
       type,
       url: result.secure_url,
       publicId: result.public_id,
       thumbnail: type === 'video' ? result.secure_url.replace(/\.[^/.]+$/, ".jpg") : null,
-      duration: result.duration || 0
+      duration: result.duration || 0,
+      isSensitive
     });
   }
 
   const finalMedia = [...existingMedia, ...newUploadedMedia];
-  const finalPhotos = finalMedia.filter(m => m.type !== 'video').map(m => ({ url: m.url, publicId: m.publicId }));
+  const finalPhotos = finalMedia.filter(m => m.type !== 'video').map(m => ({
+    url: m.url,
+    publicId: m.publicId,
+    isSensitive: m.isSensitive
+  }));
 
   post.text = text ?? post.text;
   post.community = community || post.community;

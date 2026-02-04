@@ -2,19 +2,20 @@
 import React, { memo } from 'react';
 import Image from 'next/image';
 import { HiPlay } from 'react-icons/hi2';
+import SensitiveImage from './SensitiveImage';
+import { useTranslation } from 'react-i18next';
 
 const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
+    const { t } = useTranslation();
     // Consolidate media sources
-    // If 'media' (mixed) exists, use it. Else fallback to 'photos' (legacy images).
-    // Ensure we map legacy photos to a unified structure { url, type: 'image' } if needed.
-
     const items = React.useMemo(() => {
         if (media && media.length > 0) return media;
         if (photos && photos.length > 0) {
             return photos.map(p => ({
                 url: p.url || p,
                 type: 'image',
-                publicId: p.publicId
+                publicId: p.publicId,
+                isSensitive: p.isSensitive || false
             }));
         }
         return [];
@@ -22,74 +23,122 @@ const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
 
     if (!items || items.length === 0) return null;
 
-    // Grid Logic
     const count = items.length;
-    let gridClass = 'grid-cols-1';
-    if (count === 2) gridClass = 'grid-cols-2';
-    else if (count === 3) gridClass = 'grid-cols-2 md:grid-cols-3'; // Or custom layout
-    else if (count >= 4) gridClass = 'grid-cols-2';
-
-    // Display max 4 items, 4th item has "+N" overlay if count > 4
-    const displayItems = items.slice(0, 4);
-    const remaining = count - 4;
+    const displayItems = items.slice(0, 5);
+    const remaining = count - 5;
 
     const handlePreview = (item) => {
         if (setImageView) {
             setImageView({
                 url: item.url,
-                type: item.type || 'image', // explicit type
+                type: item.type || 'image',
                 postId: item._id
             });
         }
     };
 
+    /**
+     * Get specific class names for grid items based on count and index
+     */
+    const getItemClassName = (index) => {
+        let base = "relative overflow-hidden cursor-pointer group bg-black/5 dark:bg-white/5";
+
+        if (count === 1) return `${base} aspect-auto max-h-[650px] rounded-2xl`;
+        if (count === 2) return `${base} aspect-[3/4] sm:aspect-square`;
+
+        if (count === 3) {
+            if (index === 0) return `${base} col-span-2 row-span-2 aspect-[4/3] sm:aspect-video md:aspect-[16/10]`;
+            return `${base} col-span-1 aspect-square`;
+        }
+
+        if (count === 4) {
+            return `${base} aspect-square`;
+        }
+
+        if (count >= 5) {
+            if (index === 0 || index === 1) return `${base} col-span-3 aspect-[4/3]`;
+            return `${base} col-span-2 aspect-square`;
+        }
+
+        return base;
+    };
+
+    /**
+     * Get grid container classes
+     */
+    const getGridClassName = () => {
+        let base = "grid gap-1.5 sm:gap-2 w-full";
+        if (count === 1) return "block"; // Single item doesn't need grid
+        if (count === 2) return `${base} grid-cols-2`;
+        if (count === 3) return `${base} grid-cols-2`;
+        if (count === 4) return `${base} grid-cols-2 grid-rows-2`;
+        if (count >= 5) return `${base} grid-cols-6`;
+        return base;
+    };
+
     return (
-        <div className={`grid gap-1 rounded-2xl overflow-hidden ${gridClass} aspect-[4/5] sm:aspect-square md:aspect-[4/3] max-h-[500px]`}>
+        <div className={getGridClassName()}>
             {displayItems.map((item, index) => {
                 const isVideo = item.type === 'video';
-                // Logic for specialized 3-item layout (first item big)
-                // If 3 items, make first item span 2 rows if in 2-col grid? 
-                // Simple grid for now:
-                // 1: full
-                // 2: split
-                // 3: 1 top, 2 bottom? Or just 3 cols.
-                // Let's stick to standard 2x2 for 4.
-
-                // For 3 items: let's do customized className index 0 -> row-span-2 ?
-                let itemClass = "relative w-full h-full cursor-pointer group bg-black";
-                if (count === 3 && index === 0) itemClass += " row-span-2 col-span-2 md:col-span-1";
+                const isSensitive = item.isSensitive;
 
                 return (
-                    <div key={index} className={itemClass} onClick={() => handlePreview(item)}>
+                    <div
+                        key={index}
+                        className={getItemClassName(index)}
+                        onClick={() => !isSensitive && handlePreview(item)}
+                    >
                         {isVideo ? (
-                            // Thumbnail for video if avaiable? Or just the video element muted
-                            <div className="relative w-full h-full">
+                            <div className="relative w-full h-full flex items-center justify-center">
                                 <video
                                     src={item.url}
-                                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                    poster={item.thumbnail}
+                                    className={`w-full h-full object-cover transition-all duration-700 ${isSensitive ? 'blur-3xl scale-110' : 'opacity-90 group-hover:opacity-100 group-hover:scale-105'}`}
                                     muted
                                     playsInline
+                                    loop
+                                    onMouseOver={(e) => e.target.play()}
+                                    onMouseOut={(e) => e.target.pause()}
                                 />
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 group-hover:scale-110 transition-transform">
-                                        <HiPlay size={24} fill="currentColor" />
+                                {!isSensitive && (
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity duration-300">
+                                        <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-2xl flex items-center justify-center text-white border border-white/20 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+                                            <HiPlay size={32} className="ml-1" fill="currentColor" />
+                                        </div>
                                     </div>
-                                </div>
+                                )}
+                                {isSensitive && (
+                                    <div className="absolute inset-0 bg-black/50 backdrop-blur-3xl flex flex-col items-center justify-center p-6 text-center">
+                                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3 border border-white/10 shadow-inner">
+                                            <HiPlay size={24} className="text-white/20" />
+                                        </div>
+                                        <p className="text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-sm">{t("Sensitive Content") || "Sensitive Content"}</p>
+                                    </div>
+                                )}
                             </div>
                         ) : (
-                            <Image
+                            <SensitiveImage
                                 src={item.url}
-                                alt="media"
-                                fill
-                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                alt={`media-${index}`}
+                                fill={count > 1}
+                                width={count === 1 ? 1200 : undefined}
+                                height={count === 1 ? 800 : undefined}
+                                isSensitive={isSensitive}
+                                className={`object-cover transition-all duration-1000 group-hover:scale-110 ${count === 1 ? 'w-full h-auto rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10' : ''}`}
                             />
                         )}
 
-                        {/* Overlay for +N */}
-                        {index === 3 && remaining > 0 && (
-                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center text-xl font-bold text-white">
-                                +{remaining}
+                        {/* Overlay for +N on the last visible item */}
+                        {index === 4 && remaining > 0 && (
+                            <div className="absolute inset-0 bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center text-white z-20 pointer-events-none select-none transition-all group-hover:bg-black/60">
+                                <span className="text-4xl font-black tracking-tighter mb-1">+{remaining}</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400">{t("Explore") || "Explore"}</span>
                             </div>
+                        )}
+
+                        {/* Hover Overlay Gradient */}
+                        {!isSensitive && (
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                         )}
                     </div>
                 );

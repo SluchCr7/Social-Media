@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FiMessageSquare, FiHeart, FiShare2 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import SensitiveImage from './Post/SensitiveImage';
 
 const PostFeedItem = ({ post, t, isPreview = false }) => {
     // isPreview تُستخدم في تبويب "Top" لتصغير العرض قليلاً
@@ -46,11 +47,12 @@ const PostFeedItem = ({ post, t, isPreview = false }) => {
                 {/* Media (Images/Videos) */}
                 {Array.isArray(post?.Photos) && post?.Photos?.length > 0 && (
                     <div className="mt-3 rounded-lg overflow-hidden max-h-96 w-full relative">
-                        <Image 
-                            src={post?.Photos[0].url} 
-                            alt="Post media" 
+                        <SensitiveImage
+                            src={post?.Photos[0].url}
+                            alt="Post media"
                             width={500}
                             height={300}
+                            isSensitive={post?.Photos[0].isSensitive}
                             className="w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                         />
                     </div>
@@ -71,7 +73,7 @@ const PostFeedItem = ({ post, t, isPreview = false }) => {
                         <span className="text-sm">{post.likes?.length || 0}</span>
                     </div>
                 </div>
-                
+
                 <button className="text-gray-500 dark:text-gray-400 hover:text-indigo-500 transition">
                     <FiShare2 size={18} />
                 </button>

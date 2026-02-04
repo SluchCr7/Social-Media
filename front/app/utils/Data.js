@@ -13,6 +13,7 @@ import { IoIosMusicalNotes } from "react-icons/io";
 import { FaHistory, FaLock, FaSun, FaUserCog, FaBookmark, FaBell, FaUsers, FaQuestionCircle, FaUserShield } from "react-icons/fa"
 import { RiMemoriesFill } from "react-icons/ri";
 import { FaUserFriends } from "react-icons/fa";
+import { IoGameController } from "react-icons/io5";
 
 import {
   FiMessageCircle,
@@ -67,6 +68,7 @@ export const navSections = [
       { icon: <MdOutlineOndemandVideo />, text: "Videos", link: "/Pages/Videos" },
       { icon: <IoIosMusicalNotes />, text: "Music", link: "/Pages/Music" },
       { icon: <FaUserFriends />, text: "Friends", link: "/Pages/Friends" },
+      { icon: <IoGameController />, text: "Games", link: "/Pages/Games" },
     ]
   },
   {
@@ -80,6 +82,7 @@ export const navSections = [
   {
     title: "Personal",
     items: [
+      { icon: <RiMemoriesFill />, text: "Memories", link: "/Pages/Memories" },
       { icon: <RiMemoriesFill />, text: "Memories", link: "/Pages/Memories" },
       { icon: <SiGoogledisplayandvideo360 />, text: "Shorts", link: "/Pages/Reels" },
       { icon: <IoTrophyOutline />, text: "Challenge", link: "/Pages/Challenge" },

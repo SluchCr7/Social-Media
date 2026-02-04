@@ -5,7 +5,8 @@ const Verification = require('../Modules/VerificationToken')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 const sendEmail = require('../utils/sendMail')
-const { cloudUpload, cloudRemove } = require('../Config/cloudUpload')
+const { cloudUpload, cloudRemove } = require('../Config/cloudUpload');
+const { checkImageSensitivity } = require('../utils/ImgShield');
 const fs = require('fs')
 const { sendNotificationHelper } = require("../utils/SendNotification");
 const { Post } = require('../Modules/Post')
@@ -302,7 +303,6 @@ const uploadPhoto = asyncHandler(async (req, res) => {
   if (!req.file) return res.status(400).json({ message: "No image uploaded" });
 
   try {
-    // رفع الصورة للسحابة
     const result = await cloudUpload(req.file);
 
     // جلب المستخدم
@@ -314,10 +314,14 @@ const uploadPhoto = asyncHandler(async (req, res) => {
       await cloudRemove(user.profilePhoto.publicId);
     }
 
+    // Check for sensitive content
+    const isSensitive = await checkImageSensitivity(result.secure_url);
+
     // تحديث صورة البروفايل
     user.profilePhoto = {
       url: result.secure_url,
       publicId: result.public_id,
+      isSensitive
     };
     await user.save();
 
@@ -327,7 +331,8 @@ const uploadPhoto = asyncHandler(async (req, res) => {
     const ImageChangePost = new Post({
       text: postText,
       owner: req.user._id,
-      Photos: [user.profilePhoto.url], // حطيناها كمصفوفة
+      Photos: [{ url: user.profilePhoto.url, publicId: user.profilePhoto.publicId, isSensitive }],
+      media: [{ type: 'image', url: user.profilePhoto.url, publicId: user.profilePhoto.publicId, isSensitive }],
       privacy: 'public',
     });
 
@@ -345,6 +350,7 @@ const uploadCoverPhoto = asyncHandler(async (req, res) => {
 
   try {
     const result = await cloudUpload(req.file);
+
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -352,9 +358,13 @@ const uploadCoverPhoto = asyncHandler(async (req, res) => {
       await cloudRemove(user.coverPhoto.publicId);
     }
 
+    // Check for sensitive content
+    const isSensitive = await checkImageSensitivity(result.secure_url);
+
     user.coverPhoto = {
       url: result.secure_url,
       publicId: result.public_id,
+      isSensitive
     };
     await user.save();
 
@@ -364,7 +374,8 @@ const uploadCoverPhoto = asyncHandler(async (req, res) => {
     const ImageChangePost = new Post({
       text: postText,
       owner: req.user._id,
-      Photos: [user.coverPhoto.url],
+      Photos: [{ url: user.coverPhoto.url, publicId: user.coverPhoto.publicId, isSensitive }],
+      media: [{ type: 'image', url: user.coverPhoto.url, publicId: user.coverPhoto.publicId, isSensitive }],
       privacy: 'public',
     });
 

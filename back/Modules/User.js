@@ -23,14 +23,16 @@ const UserSchema = new mongoose.Schema({
         type: Object,
         default: {
             url: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
-            publicId: null
+            publicId: null,
+            isSensitive: false
         }
     },
     coverPhoto: {
         type: Object,
         default: {
             url: "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop",
-            publicId: null
+            publicId: null,
+            isSensitive: false
         }
     },
     isAdmin: {

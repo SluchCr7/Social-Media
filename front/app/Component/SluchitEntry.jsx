@@ -57,15 +57,21 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
   const handleTranslate = async () => {
     if (!post?.text || !language) return;
     const result = await translate(post.text, language);
-    setTranslated(result);
-    setShowOriginal(true);
-    setShowTranslateButton(false);
+    if (result) {
+      setTranslated(result);
+      setShowOriginal(true);
+      setShowTranslateButton(false);
+    }
   };
 
   const handleShowOriginal = () => {
     setShowOriginal(false);
-    setTranslated(null);
     setShowTranslateButton(true);
+  };
+
+  const handleShowTranslated = () => {
+    setShowOriginal(true);
+    setShowTranslateButton(false);
   };
 
   useEffect(() => {
@@ -132,12 +138,66 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
             <div className="flex flex-col gap-4 md:gap-5">
               <div className="text-base md:text-xl font-medium leading-relaxed text-gray-800 dark:text-white/90">
                 <RenderPostText
-                  text={post?.text}
+                  text={showOriginal && translated ? translated : post?.text}
                   mentions={post?.mentions}
                   hashtags={post?.Hashtags}
                   italic={post?.isShared}
                 />
               </div>
+
+              {/* Translation Widget */}
+              <AnimatePresence mode="wait">
+                {showTranslateButton && !showOriginal && (
+                  <motion.button
+                    key="translate-btn"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleTranslate}
+                    disabled={loading}
+                    className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 w-fit flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 transition-all disabled:opacity-50"
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full bg-indigo-500 ${loading ? 'animate-ping' : 'animate-pulse'}`} />
+                    {loading ? (t("Translating...") || "Translating...") : (t("Translate Post") || "Translate Post")}
+                  </motion.button>
+                )}
+
+                {translated && showOriginal && (
+                  <motion.div
+                    key="translated-info"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-white/30"
+                  >
+                    <span className="flex items-center gap-1">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 11.37 9.188 16.503 6 20" />
+                      </svg>
+                      {t("Translated by Zocial AI")}
+                    </span>
+                    <button
+                      onClick={handleShowOriginal}
+                      className="text-indigo-500 hover:text-indigo-400 transition-colors underline underline-offset-4"
+                    >
+                      {t("See Original")}
+                    </button>
+                  </motion.div>
+                )}
+
+                {translated && !showOriginal && (
+                  <motion.button
+                    key="show-translated-btn"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    onClick={handleShowTranslated}
+                    className="text-[10px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-400 w-fit transition-all"
+                  >
+                    {t("Show Translation")}
+                  </motion.button>
+                )}
+              </AnimatePresence>
 
               {post?.music && <PostMusicPlayer music={post.music} />}
 
@@ -162,35 +222,6 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
               {post?.links && <PostLinks links={post?.links} />}
               {post?.Hashtags?.length > 0 && <PostHashtags post={post} />}
             </div>
-
-            {/* Translation Widget */}
-            <AnimatePresence>
-              {showTranslateButton && !showOriginal && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleTranslate}
-                  className="text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 w-fit flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 transition-all"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-                  {loading ? (t("Processing...") || "Processing...") : (t("Translate Post") || "Translate Post")}
-                </motion.button>
-              )}
-              {translated && showOriginal && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
-                  className="p-4 md:p-6 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 space-y-3"
-                >
-                  <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-white/30">
-                    <span>Translated Output</span>
-                    <button onClick={handleShowOriginal} className="hover:text-indigo-600 dark:hover:text-white transition-colors border-b border-transparent hover:border-current pb-0.5">Show Original</button>
-                  </div>
-                  <div className="text-sm md:text-base text-gray-700 dark:text-white/80 leading-relaxed italic">
-                    <RenderPostText text={translated} />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
             {/* Action Bar - Premium Dock */}
             {isLogin && (

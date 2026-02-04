@@ -13,6 +13,7 @@ import { useAuth } from "@/app/Context/AuthContext";
 import { useUser } from "@/app/Context/UserContext";
 import { useTranslation } from "react-i18next";
 import { MdInfo } from "react-icons/md";
+import SensitiveImage from "@/app/Component/Post/SensitiveImage";
 
 const StatItem = ({ label, value, onClick }) => (
   <div
@@ -75,13 +76,14 @@ const ProfileHeader = ({
 
       {/* Dynamic Cover Section */}
       <div className="relative h-64 md:h-80 w-full bg-[#111] overflow-hidden group/cover">
-        <Image
+        <SensitiveImage
           src={profileUser?.coverPhoto?.url || profileUser?.profilePhoto?.url || "/default-profile.png"}
           fill
+          isSensitive={profileUser?.coverPhoto?.isSensitive}
           className="object-cover transition-transform duration-700 group-hover/cover:scale-110"
           alt="cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0A0A0A]/20 to-[#0A0A0A]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0A0A0A]/20 to-[#0A0A0A] pointer-events-none" />
 
         {/* Cover Action */}
         {isOwner && (
@@ -130,13 +132,15 @@ const ProfileHeader = ({
               onClick={!isOwner ? onProfileClick : undefined}
             >
               <div className="relative w-full h-full rounded-[3rem] overflow-hidden bg-black border-4 border-black group">
-                <img
+                <SensitiveImage
                   src={preview || profileUser?.profilePhoto?.url || "/default-profile.png"}
                   alt="profile"
+                  fill
+                  isSensitive={!preview && profileUser?.profilePhoto?.isSensitive}
                   className="w-full h-full object-cover"
                 />
                 {isOwner && (
-                  <label className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm">
+                  <label className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm z-30">
                     <FaCamera size={32} className="text-white mb-2" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-white">Change Identity</span>
                     <input type="file" accept="image/*" className="hidden" onChange={onImageChange} />
