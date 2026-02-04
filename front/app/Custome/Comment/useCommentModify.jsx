@@ -77,7 +77,7 @@ export const useCommentModify = ({
   }, [setComments, setIsLoading, showAlert]);
 
   // 🔄 Fetch Replies for a Comment
-  const fetchCommentReplies = useCallback(async (commentId, cursor = null) => {
+  const getRepliesForComment = useCallback(async (commentId, cursor = null) => {
     try {
       const res = await api.get(`/comment/${commentId}/replies`, {
         params: { cursor, limit: 5 }
@@ -164,7 +164,7 @@ export const useCommentModify = ({
 
   return {
     fetchCommentsByTarget,
-    fetchCommentReplies,
+    getRepliesForComment,
     AddComment,
     deleteComment,
     updateComment,

@@ -69,11 +69,12 @@ export const UserContextProvider = ({ children }) => {
   /**
    * Update profile photo
    */
-  const updatePhoto = useCallback(async (photoFile) => {
+  const updatePhoto = useCallback(async (photoFile, customText = '') => {
     if (!photoFile) return;
 
     const formData = new FormData();
     formData.append('image', photoFile);
+    if (customText) formData.append('customText', customText);
 
     const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
     try {
@@ -97,11 +98,12 @@ export const UserContextProvider = ({ children }) => {
   /**
    * Update cover photo
    */
-  const updateCoverPhoto = useCallback(async (photoFile) => {
+  const updateCoverPhoto = useCallback(async (photoFile, customText = '') => {
     if (!photoFile) return;
 
     const formData = new FormData();
     formData.append('image', photoFile);
+    if (customText) formData.append('customText', customText);
 
     const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
     try {

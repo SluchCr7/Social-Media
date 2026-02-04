@@ -29,7 +29,7 @@ const socialFields = Object.freeze([
 ]);
 
 const UpdateProfile = ({ user }) => {
-  const { updateProfile, updateProfileLoading } = useUser();
+  const { updateProfile, updateProfileLoading, updatePhoto, updateCoverPhoto } = useUser();
   const { t } = useTranslation();
 
   // --------------------------- State ---------------------------
@@ -184,6 +184,65 @@ const UpdateProfile = ({ user }) => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
+            {/* ==================== Photos Section ==================== */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 pb-2 border-b border-white/5">
+                <span className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400"><FaCamera size={20} /></span>
+                <h3 className="text-lg font-bold text-white tracking-wide">{t('Profile & Cover')}</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Profile Photo */}
+                <div className="relative group/photo overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-4 flex flex-col items-center gap-4 transition-all hover:bg-white/10">
+                  <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-indigo-500/50">
+                    <Image
+                      src={user?.profilePhoto?.url || '/default-avatar.png'}
+                      alt="Profile"
+                      fill
+                      className="object-cover"
+                    />
+                    <label className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover/photo:opacity-100 transition-opacity cursor-pointer">
+                      <FaPlus className="text-white text-xl" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => updatePhoto(e.target.files[0])}
+                      />
+                    </label>
+                  </div>
+                  <div className="text-center">
+                    <h4 className="text-sm font-bold text-white">{t('Profile Photo')}</h4>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">{t('Identity Avatar')}</p>
+                  </div>
+                </div>
+
+                {/* Cover Photo */}
+                <div className="relative group/cover overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-4 flex flex-col items-center gap-4 transition-all hover:bg-white/10">
+                  <div className="relative w-full h-24 rounded-xl overflow-hidden border-2 border-indigo-500/50">
+                    <Image
+                      src={user?.coverPhoto?.url || '/default-profile.png'}
+                      alt="Cover"
+                      fill
+                      className="object-cover"
+                    />
+                    <label className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover/cover:opacity-100 transition-opacity cursor-pointer">
+                      <FaPlus className="text-white text-xl" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => updateCoverPhoto(e.target.files[0])}
+                      />
+                    </label>
+                  </div>
+                  <div className="text-center">
+                    <h4 className="text-sm font-bold text-white">{t('Cover Photo')}</h4>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">{t('Terminal Banner')}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* ==================== Basic Info ==================== */}
             <div className="space-y-6">
@@ -292,8 +351,8 @@ const UpdateProfile = ({ user }) => {
                           key={f._id}
                           onClick={() => setFormData((prev) => ({ ...prev, partner: f._id }))}
                           className={`flex items-center gap-3 p-3 cursor-pointer rounded-xl transition-all border ${formData.partner === f._id
-                              ? 'bg-indigo-500/10 border-indigo-500/50'
-                              : 'bg-transparent border-transparent hover:bg-white/5'
+                            ? 'bg-indigo-500/10 border-indigo-500/50'
+                            : 'bg-transparent border-transparent hover:bg-white/5'
                             }`}
                         >
                           <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${formData.partner === f._id ? 'border-indigo-500 bg-indigo-500' : 'border-gray-600'}`}>

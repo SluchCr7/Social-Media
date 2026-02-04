@@ -358,6 +358,18 @@ const uploadCoverPhoto = asyncHandler(async (req, res) => {
     };
     await user.save();
 
+    // ✅ إنشاء بوست تلقائي لتغيير غلاف الحساب
+    const postText = `🖼 ${user.username} has updated their cover photo. ${req.body.customText || ''}`;
+
+    const ImageChangePost = new Post({
+      text: postText,
+      owner: req.user._id,
+      Photos: [user.coverPhoto.url],
+      privacy: 'public',
+    });
+
+    await ImageChangePost.save();
+
     res.status(200).json({ message: "Cover photo updated", coverPhoto: user.coverPhoto });
   } catch (err) {
     console.error("Cloud upload failed:", err);

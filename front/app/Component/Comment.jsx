@@ -32,7 +32,7 @@ const Comment = ({ comment }) => {
     deleteComment,
     AddComment,
     updateComment,
-    fetchCommentReplies
+    getRepliesForComment
   } = useComment();
   const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport();
   const { user } = useAuth();
@@ -42,17 +42,17 @@ const Comment = ({ comment }) => {
   const handleToggleExpand = useCallback(async () => {
     if (!expanded && (!comment.replies || comment.replies.length === 0) && comment.replyCount > 0) {
       setLoadingReplies(true);
-      await fetchCommentReplies(comment._id);
+      await getRepliesForComment(comment._id);
       setLoadingReplies(false);
     }
     setExpanded(!expanded);
-  }, [expanded, comment._id, comment.replies, comment.replyCount, fetchCommentReplies]);
+  }, [expanded, comment._id, comment.replies, comment.replyCount, getRepliesForComment]);
 
   const handleLoadMoreReplies = useCallback(async () => {
     setLoadingReplies(true);
-    await fetchCommentReplies(comment._id, comment.replyCursor);
+    await getRepliesForComment(comment._id, comment.replyCursor);
     setLoadingReplies(false);
-  }, [comment._id, comment.replyCursor, fetchCommentReplies]);
+  }, [comment._id, comment.replyCursor, getRepliesForComment]);
 
   const handleSendReply = useCallback(async () => {
     if (!replyText.trim()) return;
