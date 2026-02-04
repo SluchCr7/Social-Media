@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo, useCallback, useDeferredValue } fr
 import { FiX, FiLoader, FiUser, FiCalendar, FiMapPin, FiHeart, FiGlobe, FiPhone } from 'react-icons/fi';
 import {
   FaGithub, FaLinkedin, FaTwitter, FaFacebook, FaGlobe, FaPlus, FaCheckCircle,
+  FaCamera,
 } from 'react-icons/fa';
 import Image from 'next/image';
 import { toast } from 'react-toastify';

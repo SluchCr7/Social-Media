@@ -4,6 +4,7 @@ import Link from 'next/link';
 import React, { memo } from 'react';
 import { HiMagnifyingGlass, HiCloudArrowUp, HiBell } from 'react-icons/hi2';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 const HeaderMusic = memo(({ search, setSearch, setOpenModel, userData }) => {
   return (
@@ -70,7 +71,7 @@ const HeaderMusic = memo(({ search, setSearch, setOpenModel, userData }) => {
               <div className="relative group cursor-pointer">
                 <div className="absolute inset-0 bg-indigo-500/40 blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-white/10 bg-gray-900 shadow-xl">
-                  <img src={userData?.profilePhoto?.url || '/default-avatar.png'} alt="user" className="w-full h-full object-cover" />
+                  <Image width={500} height={500} src={userData?.profilePhoto?.url || '/default-avatar.png'} alt="user" className="w-full h-full object-cover" />
                 </div>
               </div>
             </div>
