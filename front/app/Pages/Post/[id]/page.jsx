@@ -16,25 +16,42 @@ const PostPage = ({ params }) => {
   const [openModel, setOpenModel] = useState(false);
   const [post, setPost] = useState(null);
   const [commentText, setCommentText] = useState('');
-  const [loading, setLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
+
+  // Pagination State
+  const [nextCursor, setNextCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     const matchedPost = posts.find(p => p?._id === id);
     if (matchedPost) setPost(matchedPost);
   }, [id, posts]);
 
+  // Initial Fetch
   useEffect(() => {
     if (!post?._id) return;
-    fetchCommentsByTarget(post._id, 'Post');
+    const load = async () => {
+      const res = await fetchCommentsByTarget(post._id, 'Post');
+      if (res) {
+        setNextCursor(res.nextCursor);
+        setHasMore(res.hasMore);
+      }
+    };
+    load();
   }, [post?._id, fetchCommentsByTarget]);
 
-
-  useEffect(() => {
-    if (post?._id) {
-      viewPost(post._id);
+  // Load More Handler
+  const handleLoadMore = useCallback(async () => {
+    if (loadingMore || !hasMore || !post?._id) return;
+    setLoadingMore(true);
+    const res = await fetchCommentsByTarget(post._id, 'Post', nextCursor);
+    if (res) {
+      setNextCursor(res.nextCursor);
+      setHasMore(res.hasMore);
     }
-  }, [post?._id, viewPost]);
+    setLoadingMore(false);
+  }, [loadingMore, hasMore, nextCursor, post?._id, fetchCommentsByTarget]);
 
   const handleAddComment = useCallback(async () => {
     if (!commentText.trim() || !post?._id) return;
@@ -89,6 +106,9 @@ const PostPage = ({ params }) => {
       openModel={openModel}
       setOpenModel={setOpenModel}
       canComment={canComment}
+      hasMore={hasMore}
+      handleLoadMore={handleLoadMore}
+      loadingMore={loadingMore}
     />
   );
 };

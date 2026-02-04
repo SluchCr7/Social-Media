@@ -70,10 +70,11 @@ export const CommentContextProvider = ({ children }) => {
     likeComment,
     updateComment,
     fetchCommentsByTarget,
-    fetchCommentsByPostId: fetchCommentsByTarget, // Legacy alias
+    fetchCommentReplies,
   }), [
     comments, isLoading, AddComment, deleteComment,
-    likeComment, updateComment, fetchCommentsByTarget
+    likeComment, updateComment, fetchCommentsByTarget,
+    fetchCommentReplies
   ]);
 
   return (

@@ -7,11 +7,15 @@ const {
   deleteComment,
   getCommentById,
   likeComment,
+  getCommentReplies,
 } = require('../Controllers/CommentController');
 const { verifyToken } = require('../Middelwares/verifyToken')
 
 // Get comments of a specific target (Post, Reel, or Comment)
 route.get('/:targetType/:targetId', getAllComments);
+
+// Get replies for a specific comment
+route.get('/:commentId/replies', getCommentReplies);
 
 // Create comment or reply (targetId and targetType passed in body)
 route.post('/', verifyToken, addNewComment);

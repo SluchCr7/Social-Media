@@ -7,52 +7,141 @@ const { sendNotificationHelper } = require('../utils/SendNotification');
 const { commentPopulate } = require('../Populates/Populate');
 
 // ================== Get Comments for a Target (Post, Reel, or Comment) ==================
+// ================== Get Comments for a Target (Paginated) ==================
 const getAllComments = asyncHandler(async (req, res) => {
   const { targetId, targetType } = req.params;
+  const { limit = 10, cursor } = req.query;
+  const limitNum = parseInt(limit);
 
-  let query;
+  let query = {
+    targetId,
+    targetType
+  };
+
+  // If fetching for Post/Reel, we only want TOP-LEVEL comments
+  // Replies will be fetched lazily
   if (targetType === "Post" || targetType === "Reel") {
-    query = {
-      $or: [
-        { rootId: targetId, rootType: targetType },
-        { targetId: targetId, targetType: targetType }, // Direct children
-        { postId: targetId, targetType: { $exists: false } } // Legacy Post support
-      ]
-    };
-  } else {
+    // Legacy support: some old comments might not have targetType/targetId set correctly
+    // but the rootId/rootType indexing project used previously is better.
+    // However, to strictly paginated TOP-LEVEL:
     query = {
       $or: [
         { targetId, targetType },
-        { parent: targetId } // Legacy Reply support
+        { postId: targetId, targetType: { $exists: false } } // Legacy
       ]
     };
   }
 
-  const allComments = await Comment.find(query)
-    .populate("owner", "username profileName profilePhoto following followers description")
-    .sort({ createdAt: -1 });
-
-  // 🌳 Tree Builder Logic
-  const buildTree = (parentId, pType) => {
-    return allComments
-      .filter(c => {
-        const matchesNew = String(c.targetId) === String(parentId) && c.targetType === pType;
-        const matchesOldPost = pType === 'Post' && String(c.postId) === String(parentId) && !c.targetType;
-        const matchesOldComment = pType === 'Comment' && String(c.parent) === String(parentId);
-        return matchesNew || matchesOldPost || matchesOldComment;
-      })
-      .map(c => ({
-        ...c.toObject(),
-        replies: buildTree(c._id, 'Comment')
-      }));
-  };
-
-  if (targetType === "Post" || targetType === "Reel") {
-    const tree = buildTree(targetId, targetType);
-    return res.status(200).json(tree);
+  // Cursor logic: createdAt_id
+  if (cursor) {
+    const [createdAt, _id] = Buffer.from(cursor, 'base64').toString('ascii').split('|');
+    query.$or = [
+      { createdAt: { $lt: new Date(createdAt) } },
+      {
+        createdAt: new Date(createdAt),
+        _id: { $lt: _id }
+      }
+    ];
   }
 
-  res.status(200).json(allComments);
+  const comments = await Comment.find(query)
+    .populate("owner", "username profileName profilePhoto following followers description isAccountWithPremiumVerify")
+    .sort({ createdAt: -1, _id: -1 })
+    .limit(limitNum + 1)
+    .lean();
+
+  const hasMore = comments.length > limitNum;
+  const results = hasMore ? comments.slice(0, limitNum) : comments;
+
+  let nextCursor = null;
+  if (hasMore && results.length > 0) {
+    const lastComment = results[results.length - 1];
+    nextCursor = Buffer.from(`${lastComment.createdAt.toISOString()}|${lastComment._id}`).toString('base64');
+  }
+
+  // 🚀 Optimize: Fetch reply counts in ONE aggregation query instead of N+1 countDocuments
+  const commentIds = results.map(c => c._id);
+  const counts = await Comment.aggregate([
+    { $match: { targetId: { $in: commentIds }, targetType: 'Comment' } },
+    { $group: { _id: '$targetId', count: { $sum: 1 } } }
+  ]);
+  const countMap = counts.reduce((acc, curr) => {
+    acc[curr._id.toString()] = curr.count;
+    return acc;
+  }, {});
+
+  const commentsWithMeta = results.map(c => ({
+    ...c,
+    replies: [],
+    replyCount: countMap[c._id.toString()] || 0
+  }));
+
+  res.status(200).json({
+    comments: commentsWithMeta,
+    nextCursor,
+    hasMore
+  });
+});
+
+// ================== Get Replies for a Comment (Paginated) ==================
+const getCommentReplies = asyncHandler(async (req, res) => {
+  const { commentId } = req.params;
+  const { limit = 5, cursor } = req.query;
+  const limitNum = parseInt(limit);
+
+  let query = {
+    targetId: commentId,
+    targetType: 'Comment'
+  };
+
+  if (cursor) {
+    const [createdAt, _id] = Buffer.from(cursor, 'base64').toString('ascii').split('|');
+    query.$or = [
+      { createdAt: { $lt: new Date(createdAt) } },
+      {
+        createdAt: new Date(createdAt),
+        _id: { $lt: _id }
+      }
+    ];
+  }
+
+  const replies = await Comment.find(query)
+    .populate("owner", "username profileName profilePhoto following followers description isAccountWithPremiumVerify")
+    .sort({ createdAt: -1, _id: -1 })
+    .limit(limitNum + 1)
+    .lean();
+
+  const hasMore = replies.length > limitNum;
+  const results = hasMore ? replies.slice(0, limitNum) : replies;
+
+  let nextCursor = null;
+  if (hasMore && results.length > 0) {
+    const lastReply = results[results.length - 1];
+    nextCursor = Buffer.from(`${lastReply.createdAt.toISOString()}|${lastReply._id}`).toString('base64');
+  }
+
+  // 🚀 Optimize: Fetch reply counts for these replies in ONE aggregation
+  const replyIds = results.map(r => r._id);
+  const counts = await Comment.aggregate([
+    { $match: { targetId: { $in: replyIds }, targetType: 'Comment' } },
+    { $group: { _id: '$targetId', count: { $sum: 1 } } }
+  ]);
+  const countMap = counts.reduce((acc, curr) => {
+    acc[curr._id.toString()] = curr.count;
+    return acc;
+  }, {});
+
+  const repliesWithMeta = results.map(r => ({
+    ...r,
+    replies: [],
+    replyCount: countMap[r._id.toString()] || 0
+  }));
+
+  res.status(200).json({
+    comments: repliesWithMeta,
+    nextCursor,
+    hasMore
+  });
 });
 
 // ================== Add New Comment ==================
@@ -267,6 +356,7 @@ module.exports = {
   deleteComment,
   getCommentById,
   likeComment,
-  getCommentsByUser
+  getCommentsByUser,
+  getCommentReplies
 };
 

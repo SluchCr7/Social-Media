@@ -44,7 +44,10 @@ const DesignPostSelect = memo(({
   setCommentText,
   handleAddComment,
   openModel, setOpenModel,
-  canComment
+  canComment,
+  hasMore,
+  handleLoadMore,
+  loadingMore
 }) => {
   const { t } = useTranslation();
   const { translate, loading, language } = useTranslate();
@@ -313,6 +316,20 @@ const DesignPostSelect = memo(({
                     <Comment comment={comment} />
                   </motion.div>
                 ))}
+
+                {hasMore && (
+                  <div className="flex justify-center pt-8">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleLoadMore}
+                      disabled={loadingMore}
+                      className="px-8 py-3 rounded-2xl bg-white/[0.03] border border-white/10 text-gray-400 hover:text-white hover:border-indigo-500/50 transition-all text-xs font-black uppercase tracking-widest disabled:opacity-50"
+                    >
+                      {loadingMore ? t("Syncing...") : t("Load More Discussion")}
+                    </motion.button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="py-20 text-center text-gray-400 font-black uppercase text-[10px] tracking-widest">

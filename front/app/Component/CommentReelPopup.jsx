@@ -18,16 +18,43 @@ const CommentsPopup = ({ reelId, isOpen, onClose }) => {
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Pagination State
+  const [nextCursor, setNextCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   // 🔄 Fetch Reel Comments
   useEffect(() => {
     if (isOpen && reelId) {
-      fetchCommentsByTarget(reelId, 'Reel');
+      const load = async () => {
+        const res = await fetchCommentsByTarget(reelId, 'Reel');
+        if (res) {
+          setNextCursor(res.nextCursor);
+          setHasMore(res.hasMore);
+        }
+      };
+      load();
     }
     // Cleanup comments when closing to avoid flicker
     return () => {
-      if (!isOpen) setComments([]);
+      if (!isOpen) {
+        setComments([]);
+        setNextCursor(null);
+        setHasMore(false);
+      }
     };
   }, [isOpen, reelId, fetchCommentsByTarget, setComments]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (loadingMore || !hasMore || !reelId) return;
+    setLoadingMore(true);
+    const res = await fetchCommentsByTarget(reelId, 'Reel', nextCursor);
+    if (res) {
+      setNextCursor(res.nextCursor);
+      setHasMore(res.hasMore);
+    }
+    setLoadingMore(false);
+  }, [loadingMore, hasMore, nextCursor, reelId, fetchCommentsByTarget]);
 
   const handleAddComment = useCallback(async () => {
     if (!newComment.trim() || loading) return;
@@ -93,9 +120,22 @@ const CommentsPopup = ({ reelId, isOpen, onClose }) => {
               {isLoading ? (
                 Array.from({ length: 4 }).map((_, i) => <CommentSkeleton key={i} />)
               ) : comments.length > 0 ? (
-                comments.map((c) => (
-                  <Comment key={c._id} comment={c} />
-                ))
+                <>
+                  {comments.map((c) => (
+                    <Comment key={c._id} comment={c} />
+                  ))}
+                  {hasMore && (
+                    <div className="flex justify-center pt-4">
+                      <button
+                        onClick={handleLoadMore}
+                        disabled={loadingMore}
+                        className="text-[10px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-400 disabled:opacity-50"
+                      >
+                        {loadingMore ? t('Refreshing Signals...') : t('Load More Discussions')}
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-30">
                   <HiChatBubbleLeftRight size={64} className="text-gray-600" />

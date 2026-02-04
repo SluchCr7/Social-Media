@@ -9,10 +9,10 @@ export const useCommentModify = ({
   setIsLoading,
 }) => {
 
-  // 🔹 Update comment inside tree (recursive)
+  // 🌳 Helper: Update deeply nested comment
   const updateCommentInTree = useCallback((list, updatedComment) => {
     return list.map((c) => {
-      if (c._id === updatedComment._id) return { ...updatedComment, replies: c.replies || [] };
+      if (c._id === updatedComment._id) return { ...c, ...updatedComment };
       if (c.replies?.length > 0) {
         return { ...c, replies: updateCommentInTree(c.replies, updatedComment) };
       }
@@ -20,7 +20,7 @@ export const useCommentModify = ({
     });
   }, []);
 
-  // 🔹 Delete comment from tree (recursive)
+  // 🗑️ Helper: Delete from tree
   const deleteCommentFromTree = useCallback((list, idToDelete) => {
     return list
       .filter((c) => c._id !== idToDelete)
@@ -30,35 +30,44 @@ export const useCommentModify = ({
       }));
   }, []);
 
-  // 🔹 Insert new comment/reply into tree
+  // ➕ Helper: Insert into tree
   const insertCommentToTree = useCallback((tree, comment) => {
-    const replies = Array.isArray(comment.replies) ? comment.replies : [];
+    if (comment.targetType !== "Comment") return [comment, ...tree];
 
-    // If it's a top-level comment (Post or Reel), prepend to tree
-    if (comment.targetType !== "Comment") return [{ ...comment, replies }, ...tree];
-
-    // If it's a reply (targetType === "Comment"), find parent and insert
     return tree.map((c) => {
-      const cReplies = Array.isArray(c.replies) ? c.replies : [];
       if (c._id === comment.targetId) {
-        return { ...c, replies: [{ ...comment, replies }, ...cReplies] };
+        return {
+          ...c,
+          replies: [comment, ...(c.replies || [])],
+          replyCount: (c.replyCount || 0) + 1
+        };
       }
-      if (cReplies.length > 0) {
-        return { ...c, replies: insertCommentToTree(cReplies, comment) };
+      if (c.replies?.length > 0) {
+        return { ...c, replies: insertCommentToTree(c.replies, comment) };
       }
       return c;
     });
   }, []);
 
-  // 📌 Generic fetch for any target
-  const fetchCommentsByTarget = useCallback(async (targetId, targetType = 'Post') => {
-    if (!setIsLoading || !setComments)
-      return console.error("setIsLoading or setComments not provided");
-
+  // 📌 Fetch Post/Reel Comments (Top-Level)
+  const fetchCommentsByTarget = useCallback(async (targetId, targetType = 'Post', cursor = null) => {
     setIsLoading(true);
     try {
-      const res = await api.get(`/comment/${targetType}/${targetId}`);
-      setComments(res.data || []);
+      const res = await api.get(`/comment/${targetType}/${targetId}`, {
+        params: { cursor, limit: 10 }
+      });
+
+      const { comments: newComments, nextCursor, hasMore } = res.data;
+
+      setComments(prev => {
+        if (!cursor) return newComments; // Fresh load
+        // Avoid duplicates
+        const existingIds = new Set(prev.map(c => c._id));
+        const uniqueNew = newComments.filter(c => !existingIds.has(c._id));
+        return [...prev, ...uniqueNew];
+      });
+
+      return { nextCursor, hasMore };
     } catch (err) {
       console.error("Error fetching comments:", err);
       if (showAlert) showAlert(err?.response?.data?.message || "Failed to load comments.", 'error');
@@ -67,24 +76,59 @@ export const useCommentModify = ({
     }
   }, [setComments, setIsLoading, showAlert]);
 
-  // ➕ Generic Add Comment (supports Post, Reel, Comment)
+  // 🔄 Fetch Replies for a Comment
+  const fetchCommentReplies = useCallback(async (commentId, cursor = null) => {
+    try {
+      const res = await api.get(`/comment/${commentId}/replies`, {
+        params: { cursor, limit: 5 }
+      });
+
+      const { comments: newReplies, nextCursor, hasMore } = res.data;
+
+      setComments(prev => {
+        const updateReplies = (list) => {
+          return list.map(c => {
+            if (c._id === commentId) {
+              const existingRepliesIds = new Set((c.replies || []).map(r => r._id));
+              const uniqueNew = newReplies.filter(r => !existingRepliesIds.has(r._id));
+              return {
+                ...c,
+                replies: cursor ? [...(c.replies || []), ...uniqueNew] : newReplies,
+                replyCursor: nextCursor,
+                hasMoreReplies: hasMore
+              };
+            }
+            if (c.replies?.length > 0) {
+              return { ...c, replies: updateReplies(c.replies) };
+            }
+            return c;
+          });
+        };
+        return updateReplies(prev);
+      });
+
+      return { nextCursor, hasMore };
+    } catch (err) {
+      console.error("Error fetching replies:", err);
+      if (showAlert) showAlert("Failed to load replies.", 'error');
+    }
+  }, [setComments, showAlert]);
+
+  // ➕ Add Comment/Reply
   const AddComment = useCallback(async (text, targetId, targetType = 'Post') => {
     if (!checkUserStatus("add comments", showAlert, user)) return;
 
     try {
       const res = await api.post('/comment', { text, targetId, targetType });
+      const newComment = { ...res.data.comment, replies: [], replyCount: 0 };
 
-      const newComment = {
-        ...res.data.comment,
-        replies: res.data.comment.replies || [],
-      };
-
+      // Optimistic update
       setComments((prev) => insertCommentToTree(prev, newComment));
-      if (showAlert) showAlert(targetType === "Comment" ? "Reply added successfully." : "Comment added successfully.", 'success');
 
+      if (showAlert) showAlert(targetType === "Comment" ? "Reply added." : "Comment added.", 'success');
       return newComment;
     } catch (err) {
-      if (showAlert) showAlert(err?.response?.data?.message || "Failed to upload comment.", 'error');
+      if (showAlert) showAlert(err?.response?.data?.message || "Failed to add comment.", 'error');
       throw err;
     }
   }, [user, showAlert, setComments, insertCommentToTree]);
@@ -95,11 +139,10 @@ export const useCommentModify = ({
 
     try {
       const res = await api.delete(`/comment/${id}`);
-      if (showAlert) showAlert(res.data.message, 'success');
       setComments((prev) => deleteCommentFromTree(prev, id));
+      if (showAlert) showAlert(res.data.message, 'success');
       return res.data;
     } catch (err) {
-      console.error(err);
       if (showAlert) showAlert(err?.response?.data?.message || "Failed to delete comment.", 'error');
     }
   }, [user, showAlert, setComments, deleteCommentFromTree]);
@@ -110,20 +153,18 @@ export const useCommentModify = ({
 
     try {
       const res = await api.put(`/comment/update/${id}`, { text });
-
       const updatedComment = res.data.comment;
       setComments((prev) => updateCommentInTree(prev, updatedComment));
-      if (showAlert) showAlert("Comment updated successfully.", 'success');
+      if (showAlert) showAlert("Comment updated.", 'success');
       return updatedComment;
     } catch (err) {
-      console.error(err);
       if (showAlert) showAlert(err?.response?.data?.message || "Failed to update comment.", 'error');
     }
   }, [user, showAlert, setComments, updateCommentInTree]);
 
   return {
-    fetchCommentsByPostId: fetchCommentsByTarget,
     fetchCommentsByTarget,
+    fetchCommentReplies,
     AddComment,
     deleteComment,
     updateComment,

@@ -52,6 +52,11 @@ const commentSchema = new mongoose.Schema({
   toObject: { virtuals: true },
 });
 
+// 🚀 Performance Indexing for Pagination & Lazy Loading
+commentSchema.index({ targetId: 1, targetType: 1, createdAt: -1, _id: -1 });
+commentSchema.index({ rootId: 1, rootType: 1, createdAt: -1, _id: -1 });
+commentSchema.index({ owner: 1, createdAt: -1 });
+
 // Virtual for replies to maintain compatibility with existing tree builders if needed
 commentSchema.virtual('replies', {
   ref: 'Comment',
