@@ -73,8 +73,13 @@ export const CommentContextProvider = ({ children }) => {
     fetchCommentsByTarget,
     fetchCommentReplies,
   }), [
-    comments, isLoading, AddComment, deleteComment,
-    likeComment, updateComment, fetchCommentsByTarget,
+    comments,
+    isLoading,
+    AddComment,
+    deleteComment,
+    likeComment,
+    updateComment,
+    fetchCommentsByTarget,
     fetchCommentReplies
   ]);
 

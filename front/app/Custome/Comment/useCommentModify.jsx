@@ -120,13 +120,13 @@ export const useCommentModify = ({
 
     try {
       const res = await api.post('/comment', { text, targetId, targetType });
-      const newComment = { ...res.data.comment, replies: [], replyCount: 0 };
+      const newCommentData = { ...res.data.comment, replies: [], replyCount: 0 };
 
       // Optimistic update
-      setComments((prev) => insertCommentToTree(prev, newComment));
+      setComments((prev) => insertCommentToTree(prev, newCommentData));
 
       if (showAlert) showAlert(targetType === "Comment" ? "Reply added." : "Comment added.", 'success');
-      return newComment;
+      return newCommentData;
     } catch (err) {
       if (showAlert) showAlert(err?.response?.data?.message || "Failed to add comment.", 'error');
       throw err;
@@ -153,10 +153,10 @@ export const useCommentModify = ({
 
     try {
       const res = await api.put(`/comment/update/${id}`, { text });
-      const updatedComment = res.data.comment;
-      setComments((prev) => updateCommentInTree(prev, updatedComment));
+      const updatedCommentData = res.data.comment;
+      setComments((prev) => updateCommentInTree(prev, updatedCommentData));
       if (showAlert) showAlert("Comment updated.", 'success');
-      return updatedComment;
+      return updatedCommentData;
     } catch (err) {
       if (showAlert) showAlert(err?.response?.data?.message || "Failed to update comment.", 'error');
     }
