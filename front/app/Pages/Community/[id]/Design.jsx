@@ -381,7 +381,7 @@ const DesignCommunitySelect = memo(({
               </div>
 
               <p className="text-gray-400 text-base leading-relaxed mb-8 font-medium italic">
-                "{CommunitySelected?.description || t('No description provided.')}"
+                {CommunitySelected?.description || t('No description provided.')}
               </p>
 
               <div className="space-y-4">
