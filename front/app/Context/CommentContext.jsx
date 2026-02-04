@@ -28,6 +28,7 @@ export const CommentContextProvider = ({ children }) => {
   // --- External Hook for CRUD ---
   const {
     fetchCommentsByTarget,
+    fetchCommentReplies,
     AddComment,
     deleteComment,
     updateComment,
