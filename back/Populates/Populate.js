@@ -120,6 +120,14 @@ const userOnePopulate = [
     },
   },
   {
+    path: "activeStories",
+    populate: {
+      path: "owner",
+      model: "User",
+      select: userSelect,
+    },
+  },
+  {
     path: "following",
     select: userSelect,
   },

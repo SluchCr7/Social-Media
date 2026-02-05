@@ -82,29 +82,35 @@ app.use(errorhandler)
 
 // ================== Scheduled Posts System and Story Cleanup ==================
 
-// الدالة المسؤولة عن حذف القصص المنتهية
-const deleteExpiredStories = async () => {
+// الدالة المسؤولة عن أرشفة القصص المنتهية
+const archiveExpiredStories = async () => {
     try {
-        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const now = new Date();
 
-        const result = await Story.deleteMany({
-            createdAt: { $lt: twentyFourHoursAgo }, // شرط: أقدم من 24 ساعة
-            isHighlighted: false                   // شرط: ليست محفوظة في Highlight
-        });
+        // تحديث كل القصص التي انتهى وقتها ولم تؤرشف بعد
+        const result = await Story.updateMany(
+            {
+                expiresAt: { $lt: now },
+                isArchived: false,
+                isDeleted: false
+            },
+            { $set: { isArchived: true } }
+        );
 
-        console.log(`[Cron Job] Deleted ${result.deletedCount} expired stories.`);
+        if (result.modifiedCount > 0) {
+            console.log(`[Cron Job] Archived ${result.modifiedCount} expired stories.`);
+        }
     } catch (error) {
-        console.error("Error in story deletion cron job:", error);
+        console.error("Error in story archiving cron job:", error);
     }
 };
 
-// ✅ جدولة تشغيل دالة deleteExpiredStories مرة واحدة يوميًا
-// هذا التعبير '0 0 * * *' يعني: "كل يوم في الساعة 00:00" (منتصف الليل)
-cron.schedule('0 0 * * *', deleteExpiredStories, {
+// ✅ جدولة تشغيل دالة archiveExpiredStories كل ساعة للتأكد من تحديث الحالات أولاً بأول
+cron.schedule('0 * * * *', archiveExpiredStories, {
     scheduled: true,
-    timezone: "Asia/Riyadh" // يفضل تحديد التوقيت لضمان دقة التنفيذ اليومي
+    timezone: "Asia/Riyadh"
 });
-console.log("Story cleanup job scheduled (Daily at 00:00).");
+console.log("Story archiving job scheduled (Hourly).");
 
 // فحص المنشورات المجدولة كل دقيقة
 setInterval(() => {

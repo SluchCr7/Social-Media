@@ -40,7 +40,10 @@ const createHighlight = asyncHandler(async (req, res) => {
     order: order || 0
   });
 
-  await highlight.populate('stories');
+  await highlight.populate({
+    path: 'stories',
+    match: { isDeleted: false }
+  });
 
   res.status(201).json(highlight);
 });
@@ -50,6 +53,7 @@ const getUserHighlights = asyncHandler(async (req, res) => {
   const highlights = await Highlight.find({ user: req.params.userId })
     .populate({
       path: "stories",
+      match: { isDeleted: false },
       select: "Photo text originalStory createdAt owner views loves reactions music link",
     })
     .sort({ order: 1, createdAt: -1 });
@@ -59,7 +63,10 @@ const getUserHighlights = asyncHandler(async (req, res) => {
 
 // ================== Get Single Highlight ==================
 const getHighlightById = asyncHandler(async (req, res) => {
-  const highlight = await Highlight.findById(req.params.id).populate('stories');
+  const highlight = await Highlight.findById(req.params.id).populate({
+    path: 'stories',
+    match: { isDeleted: false }
+  });
 
   if (!highlight) {
     return res.status(404).json({ message: "Highlight not found" });
@@ -135,7 +142,10 @@ const addStoryToHighlight = asyncHandler(async (req, res) => {
   highlight.stories.push(...validIds);
   await highlight.save();
 
-  await highlight.populate('stories');
+  await highlight.populate({
+    path: 'stories',
+    match: { isDeleted: false }
+  });
 
   return res.status(200).json({
     message: `${validIds.length} stories added successfully`,
@@ -169,7 +179,10 @@ const updateHighlight = asyncHandler(async (req, res) => {
   }
 
   await highlight.save();
-  await highlight.populate('stories');
+  await highlight.populate({
+    path: 'stories',
+    match: { isDeleted: false }
+  });
 
   res.status(200).json(highlight);
 });
@@ -184,7 +197,10 @@ const removeStoryFromHighlight = asyncHandler(async (req, res) => {
 
   highlight.stories = highlight.stories.filter(s => s.toString() !== storyId);
   await highlight.save();
-  await highlight.populate('stories');
+  await highlight.populate({
+    path: 'stories',
+    match: { isDeleted: false }
+  });
 
   return res.status(200).json({ message: "Story removed successfully", highlight });
 });
@@ -209,7 +225,10 @@ const updateStoriesOrder = asyncHandler(async (req, res) => {
 
   highlight.stories = storyIds;
   await highlight.save();
-  await highlight.populate('stories');
+  await highlight.populate({
+    path: 'stories',
+    match: { isDeleted: false }
+  });
 
   res.status(200).json({ message: "Stories reordered successfully", highlight });
 });

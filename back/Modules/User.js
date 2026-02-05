@@ -257,7 +257,19 @@ UserSchema.virtual("adminCommunities", {
 UserSchema.virtual("stories", {
     ref: "Story",
     localField: "_id",
-    foreignField: "owner"
+    foreignField: "owner",
+    match: { isDeleted: false }
+})
+
+UserSchema.virtual("activeStories", {
+    ref: "Story",
+    localField: "_id",
+    foreignField: "owner",
+    match: () => ({
+        expiresAt: { $gt: new Date() },
+        isArchived: false,
+        isDeleted: false
+    })
 })
 
 UserSchema.virtual("reports", {

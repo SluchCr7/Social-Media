@@ -3,6 +3,8 @@ import { createContext, useContext, useEffect, useState, useCallback, useMemo } 
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from './AuthContext';
+import { useUser } from './UserContext';
+import { languageMap } from '../utils/Data';
 
 const TranslateContext = createContext();
 export const useTranslate = () => useContext(TranslateContext);
@@ -10,6 +12,7 @@ export const useTranslate = () => useContext(TranslateContext);
 export const TranslateContextProvider = ({ children }) => {
   const { i18n } = useTranslation();
   const { user } = useAuth();
+  const { updateProfile } = useUser();
   const [loading, setLoading] = useState(false);
 
   // Initialize language: User Settings > Local Storage > i18next > Default 'en'
@@ -21,12 +24,16 @@ export const TranslateContextProvider = ({ children }) => {
   // ✅ Helper to apply direction to HTML
   const applyDirection = useCallback((langCode) => {
     const isRightToLeft = ['ar', 'fa', 'he', 'ur'].includes(langCode);
-    document.documentElement.dir = isRightToLeft ? 'rtl' : 'ltr';
-    document.documentElement.lang = langCode;
+    if (typeof document !== 'undefined') {
+      document.documentElement.dir = isRightToLeft ? 'rtl' : 'ltr';
+      document.documentElement.lang = langCode;
+      // Also update body direction for some CSS frameworks/styles
+      document.body.dir = isRightToLeft ? 'rtl' : 'ltr';
+    }
   }, []);
 
-  // ✅ Unified language setter
-  const updateLanguage = useCallback((langCode) => {
+  // ✅ Unified language setter (Local Only)
+  const updateLanguageLocal = useCallback((langCode) => {
     if (!langCode) return;
     i18n.changeLanguage(langCode);
     setLanguage(langCode);
@@ -34,16 +41,42 @@ export const TranslateContextProvider = ({ children }) => {
     applyDirection(langCode);
   }, [i18n, applyDirection]);
 
+  // ✅ Persist change to Backend
+  const handleLanguageChange = useCallback(async (langCode) => {
+    if (!langCode) return;
+
+    // 1. Update UI immediately
+    updateLanguageLocal(langCode);
+
+    // 2. Persist to Backend if user is logged in
+    if (user?._id) {
+      // Find the name (e.g., "English") for the code (e.g., "en")
+      const langName = Object.keys(languageMap).find(key => languageMap[key] === langCode) || langCode;
+      try {
+        await updateProfile({ preferedLanguage: langName });
+      } catch (err) {
+        console.error("Failed to update language on server:", err);
+      }
+    }
+  }, [updateLanguageLocal, user?._id, updateProfile]);
+
   // ✅ Effect to sync with user settings or local storage
   useEffect(() => {
     const savedLang = localStorage.getItem('language');
-    const userLang = user?.preferedLanguage; // From DB
+    const userLangName = user?.preferedLanguage; // From DB (e.g., "English")
     const currentI18n = i18n.language;
 
-    const initialLang = userLang || savedLang || currentI18n || 'en';
+    // Convert "English" -> "en"
+    const userLangCode = userLangName ? (languageMap[userLangName] || userLangName) : null;
 
-    updateLanguage(initialLang);
-  }, [user?.preferedLanguage, i18n.language, updateLanguage]);
+    // Priority: User DB Settings > Local Storage > current i18n > default 'en'
+    const initialLang = userLangCode || savedLang || currentI18n || 'en';
+
+    // Only update if different to avoid infinite loops
+    if (initialLang !== language) {
+      updateLanguageLocal(initialLang);
+    }
+  }, [user?.preferedLanguage, i18n.language, language, updateLanguageLocal]);
 
   // ✅ Translation function
   const translate = useCallback(
@@ -71,8 +104,8 @@ export const TranslateContextProvider = ({ children }) => {
     isRTL,
     loading,
     language,
-    handleLanguageChange: updateLanguage,
-  }), [translate, isRTL, loading, language, updateLanguage]);
+    handleLanguageChange,
+  }), [translate, isRTL, loading, language, handleLanguageChange]);
 
   return (
     <TranslateContext.Provider value={value}>
@@ -80,3 +113,4 @@ export const TranslateContextProvider = ({ children }) => {
     </TranslateContext.Provider>
   );
 };
+

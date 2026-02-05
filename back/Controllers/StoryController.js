@@ -102,7 +102,8 @@ const getAllStories = asyncHandler(async (req, res) => {
     // 2. Stories must not be archived or deleted
     let query = {
       expiresAt: { $gt: now },
-      isArchived: false
+      isArchived: false,
+      isDeleted: false
     };
 
     const stories = await Story.find(query)
@@ -140,20 +141,29 @@ const deleteStory = asyncHandler(async (req, res) => {
 
   const storyId = story._id;
 
-  // ✅ Remove from all Highlights
+  // ✅ Soft delete instead of physical delete
+  story.isDeleted = true;
+  await story.save();
+
+  // ✅ Also remove from all Highlights if manually deleted
   const { Highlight } = require("../Modules/Highlight");
   await Highlight.updateMany(
     { stories: storyId },
     { $pull: { stories: storyId } }
   );
 
-  // ✅ Remove the story itself
-  await story.deleteOne();
-
   // 🔔 Notify all about deletion
   io.emit("delete-story", storyId);
 
   res.status(200).json({ message: "Story deleted successfully" });
+});
+
+/**
+ * @desc Hard delete a story (Optional, if needed for admin or permanent removal)
+ */
+const hardDeleteStory = asyncHandler(async (req, res) => {
+  const story = await Story.findById(req.params.id);
+  // ... rest of previous deletion logic if physical deletion is ever needed
 });
 
 /**
@@ -164,16 +174,18 @@ const deleteStory = asyncHandler(async (req, res) => {
 const getStoriesById = asyncHandler(async (req, res) => {
   const story = await Story.findById(req.params.id).populate(storyPopulate);
 
-  if (!story) {
+  if (!story || story.isDeleted) {
     return res.status(404).json({ message: "Story Not Found" });
   }
 
-  // إضافة المستخدم الحالي إلى المشاهدات إذا لم يكن موجودًا مسبقًا
-  await Story.findByIdAndUpdate(
-    req.params.id,
-    { $addToSet: { views: req.user._id } },
-    { new: true }
-  );
+  // Add current user to views if not already present
+  if (req.user) {
+    await Story.findByIdAndUpdate(
+      req.params.id,
+      { $addToSet: { views: req.user._id } },
+      { new: true }
+    );
+  }
 
   const updatedStory = await Story.findById(req.params.id).populate(storyPopulate);
   res.status(200).json(updatedStory);
@@ -300,12 +312,20 @@ const getRecentStories = asyncHandler(async (req, res) => {
 });
 
 
+/**
+ * @desc Get sub-stories for a user (Active only, for profile ring)
+ */
 const getUserStories = asyncHandler(async (req, res) => {
-  const stories = await Story.find({ owner: req.params.id })
+  const now = new Date();
+  const stories = await Story.find({
+    owner: req.params.id,
+    isDeleted: false,
+    isArchived: false,
+    expiresAt: { $gt: now }
+  })
     .populate("owner", "username profilePhoto")
     .sort({ createdAt: -1 });
 
-  if (!stories.length) return res.status(404).json({ message: "No stories found" });
   res.json(stories);
 });
 

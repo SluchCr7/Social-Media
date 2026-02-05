@@ -128,7 +128,7 @@ const ProfileHeader = ({
             <div className="absolute inset-0 bg-indigo-500/30 blur-3xl rounded-full scale-75 animate-pulse" />
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className={`relative w-40 h-40 md:w-52 md:h-52 rounded-[3.5rem] p-1.5 transition-all ${profileUser?.stories?.length > 0 ? 'bg-gradient-to-tr from-indigo-500 via-purple-600 to-pink-500' : 'bg-white/10'}`}
+              className={`relative w-40 h-40 md:w-52 md:h-52 rounded-[3.5rem] p-1.5 transition-all ${profileUser?.activeStories?.length > 0 ? 'bg-gradient-to-tr from-indigo-500 via-purple-600 to-pink-500' : 'bg-white/10'}`}
               onClick={!isOwner ? onProfileClick : undefined}
             >
               <div className="relative w-full h-full rounded-[3rem] overflow-hidden bg-black border-4 border-black group">
