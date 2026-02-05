@@ -33,7 +33,7 @@ export const TranslateContextProvider = ({ children }) => {
   }, []);
 
   // ✅ Unified language setter (Local Only)
-  const updateLanguageLocal = useCallback((langCode) => {
+  const handleLanguageChange = useCallback((langCode) => {
     if (!langCode) return;
     i18n.changeLanguage(langCode);
     setLanguage(langCode);
@@ -41,42 +41,24 @@ export const TranslateContextProvider = ({ children }) => {
     applyDirection(langCode);
   }, [i18n, applyDirection]);
 
-  // ✅ Persist change to Backend
-  const handleLanguageChange = useCallback(async (langCode) => {
-    if (!langCode) return;
-
-    // 1. Update UI immediately
-    updateLanguageLocal(langCode);
-
-    // 2. Persist to Backend if user is logged in
-    if (user?._id) {
-      // Find the name (e.g., "English") for the code (e.g., "en")
-      const langName = Object.keys(languageMap).find(key => languageMap[key] === langCode) || langCode;
-      try {
-        await updateProfile({ preferedLanguage: langName });
-      } catch (err) {
-        console.error("Failed to update language on server:", err);
-      }
-    }
-  }, [updateLanguageLocal, user?._id, updateProfile]);
-
-  // ✅ Effect to sync with user settings or local storage
+  // ✅ Effect to sync with local storage or user settings
   useEffect(() => {
     const savedLang = localStorage.getItem('language');
     const userLangName = user?.preferedLanguage; // From DB (e.g., "English")
     const currentI18n = i18n.language;
 
-    // Convert "English" -> "en"
+    // Convert DB name to code
     const userLangCode = userLangName ? (languageMap[userLangName] || userLangName) : null;
 
-    // Priority: User DB Settings > Local Storage > current i18n > default 'en'
-    const initialLang = userLangCode || savedLang || currentI18n || 'en';
+    // Priority: Local Storage (User's device choice) > User DB Settings > current i18n > default 'en'
+    const initialLang = savedLang || userLangCode || currentI18n || 'en';
 
-    // Only update if different to avoid infinite loops
     if (initialLang !== language) {
-      updateLanguageLocal(initialLang);
+      i18n.changeLanguage(initialLang);
+      setLanguage(initialLang);
+      applyDirection(initialLang);
     }
-  }, [user?.preferedLanguage, i18n.language, language, updateLanguageLocal]);
+  }, [user?.preferedLanguage, i18n.language, language, applyDirection, i18n]);
 
   // ✅ Translation function
   const translate = useCallback(

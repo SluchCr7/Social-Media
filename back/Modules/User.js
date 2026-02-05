@@ -364,6 +364,7 @@ const validateUserUpdate = (user) => {
         partner: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null),
         interests: joi.array().items(joi.string()).allow(null),
         showOnlineStatus: joi.boolean().allow(null),
+        preferedLanguage: joi.string().allow('', null),
     })
 
     return schema.validate(user)
