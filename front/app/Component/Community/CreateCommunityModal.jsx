@@ -99,7 +99,7 @@ const CreateCommunityModal = React.memo(({ show, onClose, form, setForm, handleC
                   className="w-full mt-1 p-3 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text"
                 >
                   {categoryOptions.map(({ name, value }) => (
-                    <option key={value} value={value}>{name}</option>
+                    <option key={value} value={value}>{t(name)}</option>
                   ))}
                 </select>
               </div>
@@ -113,7 +113,7 @@ const CreateCommunityModal = React.memo(({ show, onClose, form, setForm, handleC
                   required
                   rows={4}
                   className="w-full mt-1 p-3 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text"
-                  placeholder="Short description about what the community is for"
+                  placeholder={t("Short description about what the community is for")}
                 />
               </div>
 
@@ -135,10 +135,10 @@ const CreateCommunityModal = React.memo(({ show, onClose, form, setForm, handleC
                   <input
                     value={form.newTag || ''}
                     onChange={(e) => handleChange("newTag", e.target.value)}
-                    placeholder="Add a tag"
+                    placeholder={t("Add a tag")}
                     className="flex-1 p-2 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text"
                   />
-                  <button type="button" onClick={addTag} className="px-4 py-2 bg-sky-600 text-white rounded-lg">Add</button>
+                  <button type="button" onClick={addTag} className="px-4 py-2 bg-sky-600 text-white rounded-lg">{t('Add')}</button>
                 </div>
               </div>
 
@@ -157,18 +157,18 @@ const CreateCommunityModal = React.memo(({ show, onClose, form, setForm, handleC
                   <input
                     value={form.newRule || ''}
                     onChange={(e) => handleChange("newRule", e.target.value)}
-                    placeholder="Add a rule"
+                    placeholder={t("Add a rule")}
                     className="flex-1 p-2 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text"
                   />
-                  <button type="button" onClick={addRule} className="px-4 py-2 bg-sky-600 text-white rounded-lg">Add</button>
+                  <button type="button" onClick={addRule} className="px-4 py-2 bg-sky-600 text-white rounded-lg">{t('Add')}</button>
                 </div>
               </div>
 
               {/* Preview */}
               <div className="mt-2 border rounded-lg p-3 bg-lightMode-menu dark:bg-darkMode-menu">
                 <h4 className="font-semibold">{labels.preview}:</h4>
-                <p className="text-sm text-lightMode-text dark:text-darkMode-text">{form.Name || 'Community Name'}</p>
-                <p className="text-xs text-lightMode-text2 dark:text-darkMode-text2">{form.description || 'Community Description'}</p>
+                <p className="text-sm text-lightMode-text dark:text-darkMode-text">{form.Name || t('Community Name')}</p>
+                <p className="text-xs text-lightMode-text2 dark:text-darkMode-text2">{form.description || t('Community Description')}</p>
                 <div className="flex gap-2 flex-wrap mt-1">
                   {(form.tags || []).map((tag) => (
                     <Badge key={tag} className="bg-sky-100 text-sky-700 dark:bg-sky-900/30">{tag}</Badge>
@@ -193,7 +193,7 @@ const CreateCommunityModal = React.memo(({ show, onClose, form, setForm, handleC
                   disabled={isCreating}
                   className="px-6 py-2 rounded-lg bg-sky-600 text-white font-semibold"
                 >
-                  {isCreating ? 'Creating...' : labels.create}
+                  {isCreating ? t('Creating...') : labels.create}
                 </button>
               </div>
             </form>

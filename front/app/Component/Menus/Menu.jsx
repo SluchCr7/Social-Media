@@ -76,15 +76,15 @@ const Menu = () => {
             <div className="w-20 h-20 mx-auto mb-8 rounded-3xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center shadow-indigo-500/20 shadow-2xl">
               <span className="text-white text-3xl font-black">Z</span>
             </div>
-            <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">Welcome to Sluchit</h2>
+            <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">{t("Welcome to Sluchit")}</h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed font-medium">
-              Join our community to explore curated hashtags, real-time news, and connect with passionate creators worldwide.
+              {t("Join our community to explore curated hashtags, real-time news, and connect with passionate creators worldwide.")}
             </p>
             <Link
               href="/Pages/Login"
               className="mt-8 inline-block px-8 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-bold text-sm hover:shadow-xl transition-all"
             >
-              Get Started
+              {t("Get Started")}
             </Link>
           </motion.div>
         </div>

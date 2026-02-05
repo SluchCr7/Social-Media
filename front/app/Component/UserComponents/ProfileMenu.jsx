@@ -52,9 +52,8 @@ const ProfileMenu = ({
 
   return (
     <div
-      className={`relative inline-block text-left ${
-        isRTL ? 'text-right' : 'text-left'
-      }`}
+      className={`relative inline-block text-left ${isRTL ? 'text-right' : 'text-left'
+        }`}
     >
       <AnimatePresence>
         {open && (
@@ -65,10 +64,9 @@ const ProfileMenu = ({
             transition={{ duration: 0.2 }}
             className={`absolute mt-10 w-64 rounded-xl bg-white dark:bg-gray-800 shadow-lg 
               border border-gray-200 dark:border-gray-700 overflow-hidden z-50
-              ${
-                isRTL
-                  ? 'left-0 origin-top-left md:left-auto md:right-auto'
-                  : 'right-0 origin-top-right'
+              ${isRTL
+                ? 'left-0 origin-top-left md:left-auto md:right-auto'
+                : 'right-0 origin-top-right'
               }`}
           >
             <div className="flex flex-col">

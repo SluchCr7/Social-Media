@@ -57,7 +57,7 @@ const MenuUpComingEvents = () => {
               <HiCalendarDays className="text-3xl text-gray-300 dark:text-gray-600 group-hover:text-indigo-500 transition-colors" />
             </div>
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-relaxed mb-6">
-              {t('No signals on the radar')}
+              {t('No events on the radar')}
             </p>
             <Link
               href="/Pages/Calender"

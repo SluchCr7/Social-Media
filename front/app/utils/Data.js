@@ -83,7 +83,6 @@ export const navSections = [
     title: "Personal",
     items: [
       { icon: <RiMemoriesFill />, text: "Memories", link: "/Pages/Memories" },
-      { icon: <RiMemoriesFill />, text: "Memories", link: "/Pages/Memories" },
       { icon: <SiGoogledisplayandvideo360 />, text: "Shorts", link: "/Pages/Reels" },
       { icon: <IoTrophyOutline />, text: "Challenge", link: "/Pages/Challenge" },
       { icon: <SlCalender />, text: "Calendar", link: "/Pages/Calender" },

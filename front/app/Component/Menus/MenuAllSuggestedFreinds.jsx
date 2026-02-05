@@ -103,8 +103,8 @@ const MenuAllSuggestedFriends = memo(() => {
                           whileHover={{ scale: 1.05 }}
                           onClick={() => followUser(userData?._id)}
                           className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm ${isFollowing
-                              ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                              : 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                            ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                            : 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
                             }`}
                         >
                           {isFollowing ? <HiCheckBadge size={16} /> : <HiUserPlus size={16} />}
@@ -128,7 +128,7 @@ const MenuAllSuggestedFriends = memo(() => {
 
             <div className="px-8 py-6 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] text-center">
               <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-[0.2em]">
-                Zocial Neural Explorer &bull; {new Date().getFullYear()}
+                {t("Zocial Neural Explorer")} &bull; {new Date().getFullYear()}
               </p>
             </div>
           </motion.div>

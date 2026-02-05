@@ -22,11 +22,12 @@ import { useAdmin } from '@/app/Context/UserAdminContext';
 // ================== Main Page ==================
 const AdminReportsPage = () => {
   const { reports, loading, getAllReports, deleteReport } = useReport();
+  const { t } = useTranslation();
   const { user } = useAuth();
-  const {deleteUser, updateAccountStatus} = useAdmin()
+  const { deleteUser, updateAccountStatus } = useAdmin()
   // updateAccountStatus => to make acccount baned or susbended 
   const { deletePost } = usePost()
-  const {deleteComment} = useComment()
+  const { deleteComment } = useComment()
   const [activeTab, setActiveTab] = useState('post');
   const [modal, setModal] = useState({ open: false, action: null, report: null });
 
@@ -46,46 +47,46 @@ const AdminReportsPage = () => {
       switch (modal.action) {
         case 'deleteReport':
           await deleteReport(_id);
-          toast.success('✅ Report deleted');
+          toast.success(t('Report deleted'));
           break;
 
         case 'deleteTarget':
           if (reportedOnType === 'post' && postId?._id) {
             await deletePost(postId._id);
-            toast.success('🗑️ Post deleted');
+            toast.success(t('Post deleted'));
           }
           if (reportedOnType === 'comment' && commentId?._id) {
             await deleteComment(commentId._id);
-            toast.success('🗑️ Comment deleted');
+            toast.success(t('Comment deleted'));
           }
           break;
 
         case 'suspendUser':
           if (reportedOnType === 'user' && reportedUserId?._id) {
             await updateAccountStatus(reportedUserId._id, 'suspended');
-            toast.success('⏸️ User suspended');
+            toast.success(t('User suspended'));
           }
           break;
 
         case 'banUser':
           if (reportedOnType === 'user' && reportedUserId?._id) {
             await updateAccountStatus(reportedUserId._id, 'banned');
-            toast.success('⛔ User banned');
+            toast.success(t('User banned'));
           }
           break;
 
         case 'resolve':
           // هنا تقدر تستدعي updateReportStatus من useReport لو حابب
           // await updateReportStatus(_id, "resolved");
-          toast.success('✅ Report resolved');
+          toast.success(t('Report resolved'));
           break;
 
         default:
-          toast.error('❌ Unknown action');
+          toast.error(t('Unknown action'));
       }
     } catch (err) {
       console.error(err);
-      toast.error('❌ Failed to complete action');
+      toast.error(t('Failed to complete action'));
     } finally {
       getAllReports(); // refresh reports
     }

@@ -33,7 +33,7 @@ const InfoItem = memo(({ icon, label, value, colorClass }) => (
       <div className="flex flex-col min-w-0">
         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">{label}</span>
         <p className="text-base font-bold text-gray-900 dark:text-white truncate">
-          {value || "—"}
+          {value || t("—")}
         </p>
       </div>
     </div>

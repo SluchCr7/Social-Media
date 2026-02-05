@@ -183,12 +183,12 @@ const EditPostModal = memo(({ post, onClose }) => {
                   type="text"
                   value={linkInput}
                   onChange={(e) => setLinkInput(e.target.value)}
-                  placeholder="Paste your link here..."
+                  placeholder={t("Paste your link here...")}
                   className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 text-sm text-white focus:outline-none focus:border-indigo-500/50"
                   autoFocus
                   onKeyDown={(e) => e.key === 'Enter' && handleAddLink()}
                 />
-                <button onClick={handleAddLink} className="px-4 py-2 bg-indigo-600 rounded-xl text-white text-xs font-bold uppercase tracking-wider">Add</button>
+                <button onClick={handleAddLink} className="px-4 py-2 bg-indigo-600 rounded-xl text-white text-xs font-bold uppercase tracking-wider">{t('Add')}</button>
               </motion.div>
             )}
           </AnimatePresence>

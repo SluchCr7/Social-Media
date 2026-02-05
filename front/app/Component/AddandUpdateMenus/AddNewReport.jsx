@@ -11,7 +11,7 @@ const AddNewReport = React.memo(function AddNewReport({
   targetId,
   reportedOnType = "post",
   onClose,
-  title = "Report Item"
+  title = t("Report Item")
 }) {
   const { addReport } = useReport();
   const [reason, setReason] = useState('');
@@ -23,7 +23,7 @@ const AddNewReport = React.memo(function AddNewReport({
   const reasonOptions = useMemo(
     () => reasons.map((r, idx) => (
       <option key={idx} value={r.value} className="bg-white dark:bg-[#0A0A0A]">
-        {r.label}
+        {t(r.label)}
       </option>
     )),
     []

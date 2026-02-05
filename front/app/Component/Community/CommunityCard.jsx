@@ -8,8 +8,8 @@ import Badge from './Badge'
 import { useTranslation } from 'react-i18next'
 
 const CommunityCard = React.memo(({ comm }) => {
-  const {t} = useTranslation()
-  return (    
+  const { t } = useTranslation()
+  return (
     <motion.article
       whileHover={{ y: -6 }}
       className="bg-lightMode-menu dark:bg-darkMode-menu rounded-2xl shadow-md overflow-hidden border border-transparent hover:shadow-lg transition relative"
@@ -48,9 +48,9 @@ const CommunityCard = React.memo(({ comm }) => {
         <p className="mt-1 text-sm text-lightMode-text2 dark:text-darkMode-text2 line-clamp-1">{comm.description}</p>
 
         <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
-          <Badge className="bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text">{comm.Category}</Badge>
+          <Badge className="bg-lightMode-bg dark:bg-darkMode-bg text-lightMode-text dark:text-darkMode-text">{t(comm.Category)}</Badge>
           <Badge className={`${comm.isPrivate ? 'bg-red-100 text-red-700 dark:bg-red-900/30' : 'bg-green-100 text-green-700 dark:bg-green-900/30'}`}>
-            {comm.isPrivate ? <><FaLock className="inline mr-1" />Private</> : <><FaGlobe className="inline mr-1" />Public</>}
+            {comm.isPrivate ? <><FaLock className="inline mr-1" />{t('Private')}</> : <><FaGlobe className="inline mr-1" />{t('Public')}</>}
           </Badge>
           <span className="flex items-center gap-1 text-sm text-lightMode-text2 dark:text-darkMode-text2"><FaUsers /> {comm.members?.length || 0}</span>
         </div>

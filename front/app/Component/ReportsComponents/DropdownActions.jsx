@@ -43,8 +43,8 @@ const DropdownActions = ({
 
   // حفظ نصوص الترجمة
   const deleteReportText = t("Delete Report");
-  const deletePostText = t("Delete") + ' Post';
-  const deleteCommentText = t("Delete") + ' Comment';
+  const deletePostText = t("Delete Post");
+  const deleteCommentText = t("Delete Comment");
   const suspendText = t("Suspend User");
   const banText = t("Ban User");
   const resolveText = t("Mark as Resolved");

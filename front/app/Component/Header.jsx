@@ -108,7 +108,7 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/20"
             >
               <IoIosLogIn size={18} />
-              <span>Enter</span>
+              <span>{t('Enter')}</span>
             </Link>
           )}
         </div>

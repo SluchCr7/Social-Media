@@ -124,7 +124,7 @@ const MaidDesign = memo(({
                 onClick={() => setActiveCategory(cat)}
                 className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeCategory === cat ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10'}`}
               >
-                {cat}
+                {t(cat)}
               </button>
             ))}
           </div>

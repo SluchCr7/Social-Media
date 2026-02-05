@@ -14,8 +14,8 @@ const CommunityFilter = ({
   sortBy,
   setSortBy,
 }) => {
-  const {t} = useTranslation()
-  return(
+  const { t } = useTranslation()
+  return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -37,7 +37,7 @@ const CommunityFilter = ({
                   : 'bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text border-gray-200 dark:border-gray-700 hover:border-sky-400'
                 }`}
             >
-              {cat}
+              {t(cat)}
             </motion.button>
           ))
         ) : (
@@ -53,7 +53,7 @@ const CommunityFilter = ({
             aria-label="Search communities"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search communities..."
+            placeholder={t("Search communities...")}
             className="bg-transparent outline-none text-sm w-full placeholder-lightMode-text2 dark:placeholder-darkMode-text2"
           />
         </div>
@@ -63,9 +63,9 @@ const CommunityFilter = ({
           onChange={(e) => setSortBy(e.target.value)}
           className="p-2 rounded-lg border text-sm bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text min-w-[120px] focus:ring-2 focus:ring-sky-500 focus:outline-none"
         >
-          {SORT_OPTIONS.map(({name,value}) => (
+          {SORT_OPTIONS.map(({ name, value }) => (
             <option key={value} value={value}>
-              {name}
+              {t(name)}
             </option>
           ))}
         </select>

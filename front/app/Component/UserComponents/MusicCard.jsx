@@ -5,8 +5,10 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IoClose } from 'react-icons/io5';
 import { FaPlay, FaMusic } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 const MusicCard = ({ music }) => {
+  const { t } = useTranslation();
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -61,10 +63,10 @@ const MusicCard = ({ music }) => {
         {/* الاسم والفنان */}
         <div className="mt-3 text-center w-full">
           <p className="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-100 truncate">
-            {music?.title || 'Unknown Track'}
+            {music?.title || t('Unknown Track')}
           </p>
           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
-            {music?.artist || 'Unknown Artist'}
+            {music?.artist || t('Unknown Artist')}
           </p>
         </div>
       </motion.div>
@@ -123,11 +125,11 @@ const MusicCard = ({ music }) => {
               {/* التفاصيل */}
               <div className="mt-6 space-y-1">
                 <h2 className="text-lg sm:text-xl font-bold text-white flex items-center justify-center gap-2">
-                  <FaMusic className="text-indigo-400" /> {music?.title || 'Unknown Track'}
+                  <FaMusic className="text-indigo-400" /> {music?.title || t('Unknown Track')}
                 </h2>
-                <p className="text-sm text-gray-300">{music?.artist || 'Unknown Artist'}</p>
+                <p className="text-sm text-gray-300">{music?.artist || t('Unknown Artist')}</p>
                 {music?.album && (
-                  <p className="text-xs text-gray-400 italic">Album: {music.album}</p>
+                  <p className="text-xs text-gray-400 italic">{t('Album')}: {music.album}</p>
                 )}
               </div>
 
@@ -140,7 +142,7 @@ const MusicCard = ({ music }) => {
                   style={{ accentColor: '#6366f1' }}
                 />
               ) : (
-                <p className="text-sm text-gray-400 mt-6 italic">No audio available</p>
+                <p className="text-sm text-gray-400 mt-6 italic">{t('No audio available')}</p>
               )}
             </motion.div>
           </motion.div>

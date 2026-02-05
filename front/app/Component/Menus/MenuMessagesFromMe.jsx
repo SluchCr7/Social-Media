@@ -97,7 +97,7 @@ const MenuMessagesFromMe = memo(() => {
       {/* 🚀 Footer Link */}
       <div className="px-7 py-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
         <Link href="/Pages/Messanger" className="text-[12px] font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors tracking-wide uppercase">
-          Jump to inbox
+          {t("Jump to inbox")}
         </Link>
       </div>
     </div>

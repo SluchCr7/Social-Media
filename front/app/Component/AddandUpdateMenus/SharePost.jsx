@@ -12,22 +12,25 @@ import React from "react";
 /**
  * @component LoadingOverlay
  */
-const LoadingOverlay = React.memo(() => (
-  <motion.div
-    className="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center rounded-[2.5rem] z-[100]"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-  >
+const LoadingOverlay = React.memo(() => {
+  const { t } = useTranslation();
+  return (
     <motion.div
-      animate={{ rotate: 360 }}
-      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-      className="text-indigo-500 text-5xl mb-4"
+      className="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center rounded-[2.5rem] z-[100]"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
     >
-      <FaSpinner />
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+        className="text-indigo-500 text-5xl mb-4"
+      >
+        <FaSpinner />
+      </motion.div>
+      <p className="text-white text-xs font-black uppercase tracking-[0.3em]">{t("Syncing...")}</p>
     </motion.div>
-    <p className="text-white text-xs font-black uppercase tracking-[0.3em]">{t("Syncing...")}</p>
-  </motion.div>
-));
+  );
+});
 LoadingOverlay.displayName = 'LoadingOverlay'
 
 /**
@@ -74,7 +77,7 @@ const PostPreview = React.memo(({ post }) => {
           <div className="absolute bottom-3 right-3 flex gap-2">
             <div className="px-3 py-1 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center gap-1.5">
               <HiPhotograph className="text-white/80 text-xs" />
-              <span className="text-[9px] text-white font-black uppercase tracking-tighter">Media Preview</span>
+              <span className="text-[9px] text-white font-black uppercase tracking-tighter">{t('Media Preview')}</span>
             </div>
           </div>
         </div>
@@ -222,8 +225,8 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className={`px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.25em] text-white shadow-xl flex items-center gap-3 transition-all ${isLoading
-                  ? "bg-gray-400 opacity-50 cursor-not-allowed"
-                  : "bg-indigo-600 shadow-indigo-600/20 hover:bg-indigo-500 active:bg-indigo-700"
+                ? "bg-gray-400 opacity-50 cursor-not-allowed"
+                : "bg-indigo-600 shadow-indigo-600/20 hover:bg-indigo-500 active:bg-indigo-700"
                 }`}
             >
               {isLoading ? (

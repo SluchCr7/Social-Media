@@ -19,20 +19,23 @@ import { IoVolumeMute } from "react-icons/io5";
 import { GoUnmute } from "react-icons/go";
 import { useTranslate } from '../Context/TranslateContext';
 
-const MenuOption = ({ icon, text, action, className, loading }) => (
-  <motion.button
-    whileHover={{ x: 4, backgroundColor: 'rgba(255,255,255,0.05)' }}
-    whileTap={{ scale: 0.98 }}
-    onClick={action}
-    disabled={loading}
-    className={`flex items-center gap-4 px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-left transition-all rounded-xl border border-transparent hover:bg-gray-100 dark:hover:bg-white/5
-      ${className || 'text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white'}
-      ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-  >
-    <span className="text-xl opacity-40">{icon}</span>
-    <span className="flex-1">{loading ? 'SYNCING...' : text}</span>
-  </motion.button>
-);
+const MenuOption = ({ icon, text, action, className, loading }) => {
+  const { t } = useTranslation();
+  return (
+    <motion.button
+      whileHover={{ x: 4, backgroundColor: 'rgba(255,255,255,0.05)' }}
+      whileTap={{ scale: 0.98 }}
+      onClick={action}
+      disabled={loading}
+      className={`flex items-center gap-4 px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-left transition-all rounded-xl border border-transparent hover:bg-gray-100 dark:hover:bg-white/5
+        ${className || 'text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white'}
+        ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+    >
+      <span className="text-xl opacity-40">{icon}</span>
+      <span className="flex-1">{loading ? t('SYNCING...') : text}</span>
+    </motion.button>
+  );
+};
 
 const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
   const { pinPost, toggleBlockNotification } = useUser();
@@ -60,7 +63,10 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
         top: rect.bottom + 12,
         left: isRTL ? rect.left : rect.right - menuWidth
       });
-      window.addEventListener('scroll', () => setShowMenu(false), { once: true });
+
+      const handleScroll = () => setShowMenu(false);
+      window.addEventListener('scroll', handleScroll, { once: true });
+      return () => window.removeEventListener('scroll', handleScroll);
     }
   }, [showMenu, isRTL, triggerRef, setShowMenu]);
 
@@ -76,6 +82,7 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
 
   const ownerOptions = useMemo(() => [
     {
+      id: 'pin',
       icon: <CiMapPin />,
       text: userData?.pinsPosts?.some((p) => p?.id === post?._id) ? t('Unpin Terminal') : t('Pin Terminal'),
       action: async () => {
@@ -85,6 +92,7 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
       },
     },
     {
+      id: 'edit',
       icon: <CiEdit />,
       text: t('Modify Data'),
       action: () => {
@@ -93,6 +101,7 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
       },
     },
     {
+      id: 'comments',
       icon: <FaRegCommentDots />,
       text: post?.isCommentOff ? t('Open Discourse') : t('Close Discourse'),
       action: async () => {
@@ -102,24 +111,29 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
       },
     },
     {
+      id: 'delete',
       icon: <AiOutlineDelete />,
       text: t('Terminated'),
-      action: () => setConfirmAction(() => async () => {
-        setLoadingBtn(true);
-        await deletePost(post?._id);
-        setLoadingBtn(false);
-      }),
+      action: () => {
+        setConfirmAction(() => async () => {
+          setLoadingBtn(true);
+          await deletePost(post?._id);
+          setLoadingBtn(false);
+        });
+      },
       className: 'text-red-500 hover:bg-red-500/10 border-red-500/10 hover:border-red-500/20',
     },
   ], [userData, post, t, pinPost, setPostIsEdit, setShowPostModelEdit, displayOrHideComments, deletePost]);
 
   const visitorOptions = useMemo(() => [
     {
+      id: 'mute',
       icon: user?.BlockedNotificationFromUsers?.includes(post?.owner?._id) ? <GoUnmute /> : <IoVolumeMute />,
       text: user?.BlockedNotificationFromUsers?.includes(post?.owner?._id) ? t('Unmute Waves') : t('Mute Waves'),
       action: () => toggleBlockNotification(post?.owner?._id),
     },
     {
+      id: 'report',
       icon: <MdOutlineReport />,
       text: t('Flag Anomaly'),
       action: () => {
@@ -129,21 +143,25 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
       },
     },
     {
+      id: 'copy',
       icon: <MdContentCopy />,
       text: t('Copy Hash'),
       action: () => {
         copyPostLink(post?._id);
-        showAlert('Signal Hash Copied!');
+        showAlert(t('Signal Hash Copied!'));
       },
     },
     {
+      id: 'block',
       icon: <AiOutlineDelete />,
       text: user?.blockedUsers?.includes(post?.owner?._id) ? t('Restore Link') : t('Sever Connection'),
-      action: () => setConfirmAction(() => async () => {
-        setLoadingBtn(true);
-        await blockOrUnblockUser(post?.owner?._id);
-        setLoadingBtn(false);
-      }),
+      action: () => {
+        setConfirmAction(() => async () => {
+          setLoadingBtn(true);
+          await blockOrUnblockUser(post?.owner?._id);
+          setLoadingBtn(false);
+        });
+      },
       className: 'text-red-500 hover:bg-red-500/10 border-red-500/10 hover:border-red-500/20',
     }
   ], [user, post, t, toggleBlockNotification, setIsTargetId, setReportedOnType, setShowMenuReport, copyPostLink, showAlert, blockOrUnblockUser]);
@@ -155,8 +173,14 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
       {showMenu && (
         <>
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[1000]" onClick={() => setShowMenu(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[1000]"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowMenu(false);
+            }}
           />
 
           <motion.div
@@ -164,6 +188,7 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
             initial={{ opacity: 0, scale: 0.95, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            onClick={(e) => e.stopPropagation()}
             style={{
               position: 'fixed',
               top: coords.top,
@@ -179,10 +204,10 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
                   {...option}
                   loading={loadingBtn}
                   action={(e) => {
-                    e?.stopPropagation();
+                    e.stopPropagation();
                     option.action();
-                    // Close menu unless it's an action that opens a nested confirmation modal
-                    if (option.text !== t('Terminated') && option.text !== t('Sever Connection') && option.text !== t('Modify Data')) {
+                    // Close menu only for actions that don't trigger sub-modals
+                    if (!['delete', 'block', 'edit'].includes(option.id)) {
                       setShowMenu(false);
                     }
                   }}
@@ -190,6 +215,67 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
               ))}
             </div>
           </motion.div>
+
+          {/* Confirmation Modal - Also Portaled */}
+          <AnimatePresence>
+            {confirmAction && (
+              <motion.div
+                className="fixed inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-xl flex items-center justify-center z-[10000] p-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setConfirmAction(null);
+                }}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-white dark:bg-[#0A0A0A] rounded-[3rem] p-10 border border-gray-200 dark:border-white/10 shadow-2xl max-w-sm w-full text-center"
+                >
+                  <div className="w-20 h-20 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
+                    <AiOutlineDelete size={40} className="text-red-500" />
+                  </div>
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-4">{t('Confirm Termination')}</h3>
+                  <p className="text-gray-500 dark:text-white/40 text-sm font-bold leading-relaxed mb-10 px-4">
+                    {t('This action will permanently sever the data link. It cannot be recovered once initiated.')}
+                  </p>
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        if (typeof confirmAction === 'function') {
+                          await confirmAction();
+                        }
+                        setConfirmAction(null);
+                        setShowMenu(false);
+                      }}
+                      disabled={loadingBtn}
+                      className="w-full py-4 rounded-2xl bg-red-500 text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-red-500/20 hover:bg-red-600 transition-all disabled:opacity-50"
+                    >
+                      {loadingBtn ? (
+                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin mx-auto" />
+                      ) : (
+                        t('Confirm Delete')
+                      )}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmAction(null);
+                      }}
+                      className="w-full py-4 rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/40 font-black text-xs uppercase tracking-widest hover:text-gray-900 dark:hover:text-white transition-all"
+                    >
+                      {t('Abort Action')}
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </>
       )}
     </AnimatePresence>
@@ -198,55 +284,6 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
   return (
     <>
       {typeof document !== 'undefined' && createPortal(menuContent, document.body)}
-
-      <AnimatePresence>
-        {confirmAction && (
-          <motion.div
-            className="fixed inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-xl flex items-center justify-center z-[10000] p-4"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="bg-white dark:bg-[#0A0A0A] rounded-[3rem] p-10 border border-gray-200 dark:border-white/10 shadow-2xl max-w-sm w-full text-center"
-            >
-              <div className="w-20 h-20 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
-                <AiOutlineDelete size={40} className="text-red-500" />
-              </div>
-              <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-4">{t('Confirm Termination')}</h3>
-              <p className="text-gray-500 dark:text-white/40 text-sm font-bold leading-relaxed mb-10 px-4">
-                {t('This action will permanently sever the data link. It cannot be recovered once initiated.')}
-              </p>
-              <div className="flex flex-col gap-3">
-                <button
-                  onClick={async () => {
-                    if (typeof confirmAction === 'function') {
-                      await confirmAction();
-                    }
-                    setConfirmAction(null);
-                    setShowMenu(false);
-                  }}
-                  disabled={loadingBtn}
-                  className="w-full py-4 rounded-2xl bg-red-500 text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-red-500/20 hover:bg-red-600 transition-all disabled:opacity-50"
-                >
-                  {loadingBtn ? (
-                    <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin mx-auto" />
-                  ) : (
-                    t('Confirm Delete')
-                  )}
-                </button>
-                <button
-                  onClick={() => setConfirmAction(null)}
-                  className="w-full py-4 rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/40 font-black text-xs uppercase tracking-widest hover:text-gray-900 dark:hover:text-white transition-all"
-                >
-                  {t('Abort Action')}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 };

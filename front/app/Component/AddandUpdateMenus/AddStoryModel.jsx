@@ -272,7 +272,7 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
                     </div>
                     {isCloseFriends && (
                       <div className="px-2 py-1 rounded-lg bg-green-500 text-[8px] font-black text-white uppercase tracking-tighter">
-                        Close Friends
+                        {t('Close Friends')}
                       </div>
                     )}
                   </div>
@@ -292,7 +292,7 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
 
                     {link.url && (
                       <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="px-4 py-2 bg-white text-black rounded-full font-bold text-xs flex items-center gap-2 shadow-xl">
-                        <span>{link.text || "Visit Link"}</span>
+                        <span>{link.text || t("Visit Link")}</span>
                       </motion.div>
                     )}
 
@@ -324,8 +324,8 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
                       transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
                       className="w-16 h-16 rounded-full border-2 border-white/10 border-t-white mb-4"
                     />
-                    <h3 className="text-xl font-bold mb-1">Publishing...</h3>
-                    <p className="text-sm text-white/50">{Math.floor(uploadProgress)}% uploaded</p>
+                    <h3 className="text-xl font-bold mb-1">{t('Publishing...')}</h3>
+                    <p className="text-sm text-white/50">{Math.floor(uploadProgress)}% {t('uploaded')}</p>
                   </div>
                 )}
               </div>
@@ -337,7 +337,7 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
               <div className="p-8 pb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                  <h2 className="text-white font-bold tracking-tight text-xl">Story Studio</h2>
+                  <h2 className="text-white font-bold tracking-tight text-xl">{t('Story Studio')}</h2>
                 </div>
                 <div className="flex gap-4">
                   <button className={`transition-colors ${isCloseFriends ? 'text-green-500' : 'text-white/20'}`} onClick={() => setIsCloseFriends(!isCloseFriends)}>
@@ -355,11 +355,11 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
               <div className="flex-1 overflow-y-auto custom-scrollbar p-8 pt-0 space-y-8">
                 {/* Visual Asset Section */}
                 <section>
-                  <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">Capture Moment</h3>
+                  <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">{t('Capture Moment')}</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <label className="group flex flex-col items-center justify-center aspect-video rounded-3xl bg-white/[0.03] border-2 border-dashed border-white/5 hover:border-indigo-500/50 hover:bg-white/[0.05] transition-all cursor-pointer">
                       <IoCamera size={32} className="text-white/20 group-hover:text-indigo-400 group-hover:scale-110 transition-all mb-2" />
-                      <span className="text-[10px] font-bold text-white/40 group-hover:text-white transition-colors uppercase">Camera</span>
+                      <span className="text-[10px] font-bold text-white/40 group-hover:text-white transition-colors uppercase">{t('Camera')}</span>
                       <input type="file" accept="image/*" capture="camera" onChange={handleImageChange} className="hidden" />
                     </label>
                     <label className="group flex flex-col items-center justify-center aspect-video rounded-3xl bg-white/[0.03] border-2 border-dashed border-white/5 hover:border-purple-500/50 hover:bg-white/[0.05] transition-all cursor-pointer relative overflow-hidden">
@@ -368,13 +368,13 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
                           <Image src={previewUrl} alt="Preview" fill className="object-cover opacity-30 grayscale" />
                           <div className="relative z-10 flex flex-col items-center">
                             <IoImage size={24} className="text-white mb-2" />
-                            <span className="text-[10px] font-bold text-white uppercase">Replace</span>
+                            <span className="text-[10px] font-bold text-white uppercase">{t('Replace')}</span>
                           </div>
                         </>
                       ) : (
                         <>
                           <IoImage size={32} className="text-white/20 group-hover:text-purple-400 group-hover:scale-110 transition-all mb-2" />
-                          <span className="text-[10px] font-bold text-white/40 group-hover:text-white transition-colors uppercase">Gallery</span>
+                          <span className="text-[10px] font-bold text-white/40 group-hover:text-white transition-colors uppercase">{t('Gallery')}</span>
                         </>
                       )}
                       <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
@@ -385,12 +385,12 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
                 {/* Caption & Stickers */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <section>
-                    <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">Caption Script</h3>
+                    <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">{t('Caption Script')}</h3>
                     <div className="relative group">
                       <textarea
                         value={storyText}
                         onChange={handleTextChange}
-                        placeholder="Start typing your story..."
+                        placeholder={t("Start typing your story...")}
                         maxLength={300}
                         className="w-full min-h-[140px] bg-white/[0.02] rounded-3xl p-6 text-white placeholder:text-white/10 border border-white/5 focus:border-indigo-500/50 focus:bg-white/[0.04] focus:outline-none transition-all resize-none italic leading-relaxed"
                       />
@@ -400,7 +400,7 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
                   {showLinkInput && (
                     <section>
                       <h3 className="text-[10px] font-black text-purple-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                        <IoShareSocialOutline size={14} /> Link Sticker
+                        <IoShareSocialOutline size={14} /> {t('Link Sticker')}
                       </h3>
                       <div className="space-y-3">
                         <input
@@ -412,7 +412,7 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
                         />
                         <input
                           type="text"
-                          placeholder="Sticker Label"
+                          placeholder={t("Sticker Label")}
                           value={link.text}
                           onChange={(e) => setLink({ ...link, text: e.target.value })}
                           className="w-full bg-white/[0.02] rounded-2xl p-4 text-xs text-white border border-white/5 focus:border-purple-500/50 outline-none"
@@ -425,27 +425,27 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
                 {/* Tags & Privacy */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <section>
-                    <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">Tag People</h3>
+                    <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">{t('Tag People')}</h3>
                     <Select
                       isMulti
                       options={followerOptions}
                       value={mentions}
                       onChange={setMentions}
-                      placeholder="Mention..."
+                      placeholder={t("Mention...")}
                       styles={selectStyles}
                     />
                   </section>
 
                   <section>
-                    <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4 font-bold">Privacy Settings</h3>
+                    <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4 font-bold">{t('Privacy Settings')}</h3>
                     <div className={`p-4 rounded-3xl border transition-all cursor-pointer flex items-center justify-between ${isCloseFriends ? 'bg-green-500/10 border-green-500/20' : 'bg-white/[0.02] border-white/5'}`} onClick={() => setIsCloseFriends(!isCloseFriends)}>
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${isCloseFriends ? 'bg-green-500 text-white' : 'bg-white/5 text-white/20'}`}>
                           <IoSparklesOutline size={20} />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-xs font-bold text-white uppercase tracking-wider">{isCloseFriends ? "Close Friends Only" : "Everyone"}</span>
-                          <span className="text-[10px] text-white/40 font-medium">Toggle story visibility</span>
+                          <span className="text-xs font-bold text-white uppercase tracking-wider">{isCloseFriends ? t("Close Friends Only") : t("Everyone")}</span>
+                          <span className="text-[10px] text-white/40 font-medium">{t("Toggle story visibility")}</span>
                         </div>
                       </div>
                       <div className={`w-10 h-5 rounded-full p-1 transition-all ${isCloseFriends ? 'bg-green-500' : 'bg-white/10'}`}>
@@ -458,14 +458,14 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
                 {/* Add to Highlight */}
                 <section>
                   <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4 flex items-center justify-between">
-                    Add to Highlight
-                    <span className="text-purple-400 text-[8px] tracking-normal font-bold">NEW</span>
+                    {t('Add to Highlight')}
+                    <span className="text-purple-400 text-[8px] tracking-normal font-bold">{t('NEW')}</span>
                   </h3>
                   <Select
                     options={(highlights || []).map(h => ({ value: h._id, label: h.title }))}
                     value={targetHighlight}
                     onChange={setTargetHighlight}
-                    placeholder="Choose a highlight..."
+                    placeholder={t("Choose a highlight...")}
                     isClearable
                     styles={selectStyles}
                   />
@@ -474,8 +474,8 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
                 {/* Collaborators Section */}
                 <section>
                   <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4 flex items-center justify-between">
-                    Tag Collaborators
-                    <span className="text-indigo-400 text-[8px] tracking-normal font-bold">OPTIONAL</span>
+                    {t('Tag Collaborators')}
+                    <span className="text-indigo-400 text-[8px] tracking-normal font-bold">{t('OPTIONAL')}</span>
                   </h3>
                   {userData?.following?.length > 0 && (
                     <div className="studio-select-wrapper">
@@ -484,7 +484,7 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
                         options={followerOptions}
                         value={collaborators}
                         onChange={setCollaborators}
-                        placeholder="Search followers..."
+                        placeholder={t("Search followers...")}
                         styles={{
                           control: (base) => ({
                             ...base,
@@ -571,12 +571,12 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
                   ) : success ? (
                     <>
                       <IoCheckmarkCircleOutline size={22} />
-                      Studio Live!
+                      {t('Studio Live!')}
                     </>
                   ) : (
                     <>
                       <IoShareSocialOutline size={20} />
-                      Launch Story
+                      {t('Launch Story')}
                     </>
                   )}
                 </motion.button>

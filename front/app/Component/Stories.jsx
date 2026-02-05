@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
+import { useTranslation } from 'react-i18next';
 import { useStory } from '../Context/StoryContext';
 import StoryViewer from './StoryViewer';
 import StorySkeleton from '../Skeletons/StoriesSkeleton';
@@ -11,6 +12,7 @@ import { FiPlus } from 'react-icons/fi';
 
 const Stories = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const { stories, isLoading, viewStory, setIsStory } = useStory();
   const [viewerStories, setViewerStories] = useState(null);
 
@@ -93,7 +95,7 @@ const Stories = () => {
               </div>
             </div>
           </div>
-          <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-white/60 transition-colors">Start</span>
+          <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-white/60 transition-colors">{t("Start")}</span>
         </motion.div>
 
         {/* LOADING STATE */}
@@ -141,13 +143,13 @@ const Stories = () => {
                     {/* Live indicator for others */}
                     {!isMine && unseen && (
                       <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-indigo-600 text-[6px] font-black text-white uppercase tracking-tighter border border-white/10 whitespace-nowrap z-20 shadow-lg">
-                        Live
+                        {t("Live")}
                       </span>
                     )}
                   </div>
 
                   <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest truncate w-16 md:w-20 text-center transition-colors ${unseen ? 'text-white/80' : 'text-white/30 group-hover:text-white/50'}`}>
-                    {isMine ? 'You' : group?.user?.username}
+                    {isMine ? t('You') : group?.user?.username}
                   </span>
                 </motion.div>
               );

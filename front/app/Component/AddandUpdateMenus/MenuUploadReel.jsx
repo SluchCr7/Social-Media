@@ -31,7 +31,7 @@ const ReelUploadModal = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith("video")) return showAlert("⚠️ Please upload a valid video file.");
+    if (!file.type.startsWith("video")) return showAlert(t("Please upload a valid video file."));
     setVideoFile(file);
     setPreviewUrl(URL.createObjectURL(file));
   };
@@ -40,21 +40,21 @@ const ReelUploadModal = () => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (!file) return;
-    if (!file.type.startsWith("video")) return showAlert("⚠️ Please upload a valid video file.");
+    if (!file.type.startsWith("video")) return showAlert(t("Please upload a valid video file."));
     setVideoFile(file);
     setPreviewUrl(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!videoFile) return showAlert("⚠️ Please select a video first.");
+    if (!videoFile) return showAlert(t("Please select a video first."));
     setIsUploading(true);
     try {
       await uploadReel(videoFile, caption);
-      showAlert("✅ Signal broadcasted successfully!");
+      showAlert(t("Signal broadcasted successfully!"));
     } catch (error) {
       console.error(error);
-      showAlert("❌ Broadcast failed.");
+      showAlert(t("Broadcast failed."));
     } finally {
       setIsUploading(false);
       setVideoFile(null);
@@ -96,7 +96,7 @@ const ReelUploadModal = () => {
                     {t("Broadcast Signal")}
                     <HiSparkles className="text-indigo-400" />
                   </h2>
-                  <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">New Reel</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">{t("New Reel")}</p>
                 </div>
               </div>
               <button

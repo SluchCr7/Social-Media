@@ -33,7 +33,7 @@ const SidebarContent = memo(({ isCollapsed, setIsCollapsed, isMobile, setIsMobil
                   <span className="text-lg font-black bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-indigo-600 to-purple-600 dark:from-white dark:via-indigo-400 dark:to-purple-400 tracking-tighter leading-none">
                     {process.env.NEXT_PUBLIC_WEBSITE_NAME || "Zocial"}
                   </span>
-                  <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-0.5">Network</span>
+                  <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-0.5">{t('Network')}</span>
                 </div>
               </motion.div>
             </Link>
@@ -148,10 +148,10 @@ const SidebarContent = memo(({ isCollapsed, setIsCollapsed, isMobile, setIsMobil
                 className="flex flex-col flex-1 truncate"
               >
                 <p className="text-[13px] font-black text-gray-900 dark:text-white truncate tracking-tight">
-                  {user?.username || "Guest Signal"}
+                  {user?.username || t("Guest Signal")}
                 </p>
                 <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 truncate uppercase tracking-widest mt-0.5">
-                  {user?.profileName || "@syncing..."}
+                  {user?.profileName || t("@syncing...")}
                 </p>
               </motion.div>
             )}

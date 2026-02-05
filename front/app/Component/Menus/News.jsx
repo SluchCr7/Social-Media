@@ -82,7 +82,7 @@ const News = ({ showAllNews, setShowAllNews }) => {
                           </span>
                           <span className="w-1 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
                           <span className="text-[10px] font-black text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">
-                            News
+                            {t("News")}
                           </span>
                         </div>
                       </div>

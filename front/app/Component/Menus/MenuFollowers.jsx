@@ -6,11 +6,13 @@ import Link from 'next/link';
 import { useUser } from '@/app/Context/UserContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiUserGroup, HiChevronRight } from 'react-icons/hi2';
+import { useTranslation } from 'react-i18next';
 
 const MenuFollowers = () => {
   const { user, users } = useAuth();
   const [myUser, setMyUser] = useState(null);
   const { followUser } = useUser();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const currentUser = users.find((userObj) => userObj._id === user?._id);
@@ -27,7 +29,7 @@ const MenuFollowers = () => {
       <div className="px-7 pt-7 pb-4 flex items-center justify-between">
         <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
           <span className="w-2 h-6 bg-blue-600 dark:bg-blue-500 rounded-full" />
-          Followers
+          {t("Followers")}
         </h2>
         <div className="p-2 rounded-xl bg-gray-50 dark:bg-white/5 text-gray-400">
           <HiUserGroup size={20} />
@@ -43,7 +45,7 @@ const MenuFollowers = () => {
               className="px-4 py-10 text-center"
             >
               <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-relaxed">
-                No followers yet.
+                {t("No followers yet.")}
               </p>
             </motion.div>
           ) : (
@@ -87,7 +89,7 @@ const MenuFollowers = () => {
       {/* Footer Link */}
       <div className="px-7 py-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
         <button className="text-[12px] font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors tracking-wide uppercase flex items-center gap-2 group">
-          View all connections
+          {t("View all connections")}
           <HiChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
         </button>
       </div>

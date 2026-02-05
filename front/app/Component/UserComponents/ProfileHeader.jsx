@@ -90,7 +90,7 @@ const ProfileHeader = ({
           <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/cover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm z-10">
             <div className="flex flex-col items-center gap-2">
               <FaCamera size={32} className="text-white" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-white">Update Terminal Banner</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-white">{t("Update Terminal Banner")}</span>
             </div>
             <input
               type="file"
@@ -142,7 +142,7 @@ const ProfileHeader = ({
                 {isOwner && (
                   <label className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm z-30">
                     <FaCamera size={32} className="text-white mb-2" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white">Change Identity</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white">{t("Change Identity")}</span>
                     <input type="file" accept="image/*" className="hidden" onChange={onImageChange} />
                   </label>
                 )}
@@ -173,7 +173,7 @@ const ProfileHeader = ({
               <span className="flex items-center gap-1.5"><IoLocationSharp className="text-indigo-500" /> {profileUser?.country || "Earth"}</span>
               <span className="flex items-center gap-1.5">
                 <IoCalendarClearOutline className="text-indigo-500" />
-                Joined {profileUser?.createdAt ? new Date(profileUser.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Unknown'}
+                {t("Joined")} {profileUser?.createdAt ? new Date(profileUser.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : t('Unknown')}
               </span>
             </div>
           </div>
@@ -188,7 +188,7 @@ const ProfileHeader = ({
                 disabled={loading}
                 className={`px-12 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all ${isFollowing ? 'bg-white/5 text-white border border-white/10 hover:bg-red-500 hover:text-white hover:border-red-500' : 'bg-white text-black hover:bg-indigo-600 hover:text-white shadow-xl shadow-indigo-600/20'}`}
               >
-                {loading ? <FaSpinner className="animate-spin" /> : (isFollowing ? "Disconnect" : "Connect")}
+                {loading ? <FaSpinner className="animate-spin" /> : (isFollowing ? t("Disconnect") : t("Connect"))}
               </motion.button>
             </div>
           )}
@@ -198,7 +198,7 @@ const ProfileHeader = ({
         <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-12">
           <div className="lg:col-span-12 space-y-8">
             <p className="text-xl md:text-2xl font-medium text-white/60 leading-relaxed max-w-4xl italic">
-              {`"${profileUser?.description || "A visionary user exploring the Zocial universe. No formal broadcast yet."}"`}
+              {`"${profileUser?.description || t("A visionary user exploring the Zocial universe. No formal broadcast yet.")}"`}
             </p>
 
 
@@ -214,13 +214,13 @@ const ProfileHeader = ({
                     <FaFire className="text-white" />
                   </div>
                   <div>
-                    <div className="text-[10px] font-black text-white/30 uppercase tracking-widest">Growth Level</div>
+                    <div className="text-[10px] font-black text-white/30 uppercase tracking-widest">{t("Growth Level")}</div>
                     <div className="text-xl font-black text-white">{profileUser?.userLevelRank || "Apprentice"}</div>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-black text-indigo-500">{profileUser?.userLevelPoints || 0} <span className="text-[10px] text-white/40 tracking-widest uppercase">XP</span></div>
-                  <Link href="/Pages/Levels" className="text-[8px] font-black uppercase text-white/20 hover:text-white transition-colors underline underline-offset-4">Logic Breakdown</Link>
+                  <Link href="/Pages/Levels" className="text-[8px] font-black uppercase text-white/20 hover:text-white transition-colors underline underline-offset-4">{t("Logic Breakdown")}</Link>
                 </div>
               </div>
               <div className="relative w-full h-3 bg-white/5 rounded-full overflow-hidden">
@@ -230,16 +230,16 @@ const ProfileHeader = ({
                 />
               </div>
               <div className="mt-3 flex justify-between items-center text-[10px] font-bold text-white/20 uppercase tracking-widest">
-                <span>Current Evolution</span>
-                <span>{Math.max((profileUser?.nextLevelPoints || 500) - (profileUser?.userLevelPoints || 0), 0)} XP to Next Terminal</span>
+                <span>{t("Current Evolution")}</span>
+                <span>{Math.max((profileUser?.nextLevelPoints || 500) - (profileUser?.userLevelPoints || 0), 0)} {t("XP to Next Terminal")}</span>
               </div>
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 w-full gap-12 pt-4">
-              <StatItem label="Posts Broadcast" value={profileUser?.posts?.length} />
-              <StatItem label="Followers Hub" value={profileUser?.followers?.length} onClick={onShowFollowers} />
-              <StatItem label="Following Orbit" value={profileUser?.following?.length} onClick={onShowFollowing} />
+              <StatItem label={t("Posts Broadcast")} value={profileUser?.posts?.length} />
+              <StatItem label={t("Followers Hub")} value={profileUser?.followers?.length} onClick={onShowFollowers} />
+              <StatItem label={t("Following Orbit")} value={profileUser?.following?.length} onClick={onShowFollowing} />
             </div>
           </div>
         </div>
