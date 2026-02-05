@@ -224,6 +224,18 @@ const deleteMessage = asyncHandler(async (req, res) => {
   }
 
   await message.deleteOne();
+
+  // 🔔 socket emit to receiver
+  const receiverId = message.sender.toString() === userId.toString() ? message.receiver : message.sender;
+  // If the user deleting is the sender, notify receiver.
+  // If user deleting is NOT sender (admin?), notify both?
+  // Logic says "Only sender can delete".
+
+  const receiverSocketId = getReceiverSocketId(receiverId);
+  if (receiverSocketId) {
+    io.to(receiverSocketId).emit("message:delete", messageId);
+  }
+
   res.status(200).json({ message: "Message deleted successfully" });
 });
 

@@ -7,6 +7,7 @@ const cloudinary = require("cloudinary").v2;
 const { moderatePost } = require('../utils/CheckTextPost');
 // 🔔 Socket.io & Notifications
 const { sendNotificationHelper } = require("../utils/SendNotification");
+const { io } = require("../Config/socket");
 const { postPopulate } = require("../Populates/Populate");
 const streamifier = require("streamifier");
 const { checkImageSensitivity } = require('../utils/ImgShield');
@@ -168,6 +169,9 @@ const addPost = async (req, res) => {
     await post.save();
     await post.populate(postPopulate);
 
+    // 🟢 Emit Socket Event (Real-time Feed)
+    io.emit("post:create", post);
+
     return res.status(201).json(post);
   } catch (err) {
     return res.status(500).json({ message: err.message || "Internal Server Error" });
@@ -197,6 +201,10 @@ const deletePost = asyncHandler(async (req, res) => {
   }
 
   await Post.findByIdAndDelete(req.params.id);
+
+  // 🔴 Emit Socket Event (Real-time Delete)
+  io.emit("post:delete", req.params.id);
+
   res.status(200).json({ message: "Post deleted" });
 });
 
@@ -243,6 +251,9 @@ const hahaPost = asyncHandler(async (req, res) => {
   }
   const updatedPost = await Post.findById(req.params.id)
     .populate(postPopulate);
+
+  // 🔵 Emit Socket Event (Real-time Update)
+  io.emit("post:update", updatedPost);
 
   res.status(200).json(updatedPost);
 })
@@ -293,6 +304,9 @@ const likePost = asyncHandler(async (req, res) => {
   const updatedPost = await Post.findById(req.params.id)
     .populate(postPopulate);
 
+  // 🔵 Emit Socket Event (Real-time Update)
+  io.emit("post:update", updatedPost);
+
   res.status(200).json(updatedPost);
 });
 
@@ -321,6 +335,9 @@ const savePost = asyncHandler(async (req, res) => {
   // ✅ هات البوست كامل بعد التعديل
   const updatedPost = await Post.findById(req.params.id)
     .populate(postPopulate);
+
+  // 🔵 Emit Socket Event (Real-time Update)
+  io.emit("post:update", updatedPost);
 
   res.status(200).json(updatedPost);
 });
@@ -464,6 +481,9 @@ const editPost = asyncHandler(async (req, res) => {
   await post.save();
   await post.populate(postPopulate);
 
+  // 🔵 Emit Socket Event (Real-time Update)
+  io.emit("post:update", post);
+
   res.status(200).json(post);
 });
 
@@ -487,6 +507,9 @@ const makeCommentsOff = asyncHandler(async (req, res) => {
     : "Comments are now on for this post";
 
   const updatedPost = await Post.findById(req.params.id).populate(postPopulate);
+
+  // 🔵 Emit Socket Event (Real-time Update)
+  io.emit("post:update", updatedPost);
 
   res.status(200).json({ message, post: updatedPost });
 });

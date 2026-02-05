@@ -16,6 +16,7 @@ const { Report, ValidateReport } = require('../Modules/Report')
 const { Story } = require("../Modules/Story");
 const { Music } = require('../Modules/Music')
 const { userOnePopulate } = require("../Populates/Populate")
+const { io } = require("../Config/socket"); // Import IO
 const Reel = require('../Modules/Reel')
 /**
  * @desc Register New User
@@ -338,6 +339,11 @@ const uploadPhoto = asyncHandler(async (req, res) => {
 
     await ImageChangePost.save();
 
+    await ImageChangePost.save();
+
+    // Socket Emit
+    io.emit("user:update", user);
+
     res.status(200).json({ message: "Profile photo updated", profilePhoto: user.profilePhoto });
   } catch (err) {
     console.error("Cloud upload failed:", err);
@@ -380,6 +386,11 @@ const uploadCoverPhoto = asyncHandler(async (req, res) => {
     });
 
     await ImageChangePost.save();
+
+    await ImageChangePost.save();
+
+    // Socket Emit
+    io.emit("user:update", user);
 
     res.status(200).json({ message: "Cover photo updated", coverPhoto: user.coverPhoto });
   } catch (err) {
@@ -438,6 +449,10 @@ const makeFollow = asyncHandler(async (req, res) => {
     targetUser: updatedTargetUser,
     isFollowing: !isFollowing
   });
+
+  // Socket Emit (Update both users for real-time counts)
+  io.emit("user:update", updatedTargetUser);
+  io.emit("user:update", updatedCurrentUser);
 });
 
 const updateProfile = asyncHandler(async (req, res) => {
@@ -517,6 +532,9 @@ const updateProfile = asyncHandler(async (req, res) => {
     message: "Profile updated successfully",
     user: updatedUser,
   });
+
+  // Socket Emit
+  io.emit("user:update", updatedUser);
 });
 
 const updatePassword = asyncHandler(async (req, res) => {

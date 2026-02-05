@@ -4,8 +4,8 @@ const { cloudUploadVideo } = require('../Config/cloudUploadVideo'); // خاصة 
 const { getReceiverSocketId, io } = require("../Config/socket");
 const { Notification } = require("../Modules/Notification");
 const asyncHandler = require("express-async-handler");
-const { User} = require('../Modules/User')
-const {sendNotificationHelper} = require("../utils/SendNotification");
+const { User } = require('../Modules/User')
+const { sendNotificationHelper } = require("../utils/SendNotification");
 const { reelPopulate } = require('../Populates/Populate');
 
 const createReel = asyncHandler(async (req, res) => {
@@ -27,6 +27,11 @@ const createReel = asyncHandler(async (req, res) => {
 
   await newReel.populate(reelPopulate);
 
+
+
+  // 🔔 Socket Emit
+  io.emit("reel:create", newReel);
+
   res.status(201).json(newReel);
 });
 
@@ -46,6 +51,11 @@ const deleteReel = async (req, res) => {
     await cloudRemove(publicId, 'video');
 
     await reel.remove();
+
+
+
+    // 🔔 Socket Emit
+    io.emit("reel:delete", req.params.id);
 
     res.status(200).json({ message: "Reel deleted successfully" });
   } catch (error) {
@@ -121,6 +131,9 @@ const likeReel = async (req, res) => {
     const updatedReel = await Reel.findById(req.params.id)
       .populate(reelPopulate);
 
+    // 🔔 Socket Emit
+    io.emit("reel:update", updatedReel);
+
     res.status(200).json(updatedReel);
   } catch (error) {
     console.error(error);
@@ -143,6 +156,12 @@ const viewReel = asyncHandler(async (req, res) => {
     .populate(reelPopulate)
     .populate("views", "username profilePhoto");
 
+
+
+  // 🔔 Socket Emit (Maybe excessive for every view? But requested "Real Time")
+  // Only emit if view count changed significantly? No, just emit.
+  io.emit("reel:update", updatedReel);
+
   res.status(200).json(updatedReel);
 });
 
@@ -157,11 +176,11 @@ const shareReel = asyncHandler(async (req, res) => {
   }
 
   const sharedReel = new Reel({
-      videoUrl: originalPost.videoUrl,
-      thumbnailUrl: originalPost.thumbnailUrl,
-      caption: originalPost.caption,
-      originalPost: originalPost._id,
-      owner: req.user._id,
+    videoUrl: originalPost.videoUrl,
+    thumbnailUrl: originalPost.thumbnailUrl,
+    caption: originalPost.caption,
+    originalPost: originalPost._id,
+    owner: req.user._id,
   });
   if (!originalPost.owner.equals(req.user._id)) {
     const reelOwner = await User.findById(originalPost.owner).select('BlockedNotificationFromUsers');
@@ -184,9 +203,14 @@ const shareReel = asyncHandler(async (req, res) => {
   await sharedReel.populate(reelPopulate);
 
   // ✅ رجع بوست كامل فقط
+
+
+  // 🔔 Socket Emit
+  io.emit("reel:create", sharedReel);
+
   res.status(201).json(sharedReel);
 });
 
 
 
-module.exports = { createReel, deleteReel, getAllReels,likeReel,viewReel,shareReel };
+module.exports = { createReel, deleteReel, getAllReels, likeReel, viewReel, shareReel };

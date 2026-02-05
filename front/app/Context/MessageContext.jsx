@@ -187,13 +187,44 @@ export const MessageContextProvider = ({ children }) => {
     if (!socket) return;
     const handleNewMessage = (message) => {
       const senderId = message.sender?._id || message.sender;
+      // If we are chatting with this user, add to list
       if (selectedUser?._id === senderId) {
         setMessages(prev => [...prev, message]);
+        // Mark as read locally or notify "read"? 
+        // We usually mark read on focus or explicit action.
       }
       updateUnreadCounters(message);
     };
+
+    const handleMessageLike = ({ messageId, userId, action }) => {
+      setMessages(prev => prev.map(m => {
+        if (m._id === messageId) {
+          let newLikes = m.likes || [];
+          // Ensure we don't duplicate ID if already there
+          if (action === "liked" && !newLikes.includes(userId)) {
+            newLikes = [...newLikes, userId];
+          } else if (action === "unliked") {
+            newLikes = newLikes.filter(id => id !== userId);
+          }
+          return { ...m, likes: newLikes };
+        }
+        return m;
+      }));
+    };
+
+    const handleDeleteMessage = (messageId) => {
+      setMessages(prev => prev.filter(m => m._id !== messageId));
+    };
+
     socket.on("newMessage", handleNewMessage);
-    return () => socket.off("newMessage", handleNewMessage);
+    socket.on("messageLikeUpdate", handleMessageLike);
+    socket.on("message:delete", handleDeleteMessage);
+
+    return () => {
+      socket.off("newMessage", handleNewMessage);
+      socket.off("messageLikeUpdate", handleMessageLike);
+      socket.off("message:delete", handleDeleteMessage);
+    };
   }, [socket, selectedUser, updateUnreadCounters]);
 
   // Context value

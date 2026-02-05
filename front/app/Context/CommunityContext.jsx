@@ -4,6 +4,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState, use
 import api from '../utils/api';
 import { useAuth } from './AuthContext';
 import { useAlert } from './AlertContext';
+import { useSocket } from './SocketContext';
 import { useCommunityAdmin } from '../Custome/Community/useCommunityAdmin';
 import { useCommunityRequests } from '../Custome/Community/useCommunityRequests';
 
@@ -22,6 +23,7 @@ export const CommunityContextProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const { showAlert } = useAlert();
+  const { socket } = useSocket();
 
   // --- Actions ---
 
@@ -90,6 +92,30 @@ export const CommunityContextProvider = ({ children }) => {
       fetchCommunities();
     }
   }, [user?.token, fetchCommunities]);
+
+  // 🔔 Socket Listeners
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleCreate = (newCom) => {
+      const currentUserId = user?._id?.toString();
+      const ownerId = newCom?.owner?._id?.toString() || newCom?.owner?.toString();
+      if (currentUserId && ownerId === currentUserId) return;
+      setCommunities(prev => [newCom, ...prev]);
+    };
+    const handleUpdate = (updated) => setCommunities(prev => prev.map(c => c._id === updated._id ? updated : c));
+    const handleDelete = (id) => setCommunities(prev => prev.filter(c => c._id !== id));
+
+    socket.on("community:create", handleCreate);
+    socket.on("community:update", handleUpdate);
+    socket.on("community:delete", handleDelete);
+
+    return () => {
+      socket.off("community:create", handleCreate);
+      socket.off("community:update", handleUpdate);
+      socket.off("community:delete", handleDelete);
+    };
+  }, [socket, user]);
 
   // --- Context Value ---
   const value = useMemo(() => ({

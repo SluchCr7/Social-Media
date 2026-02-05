@@ -4,6 +4,7 @@ const { User } = require('../Modules/User');
 const { Post } = require('../Modules/Post');
 const Reel = require('../Modules/Reel');
 const { sendNotificationHelper } = require('../utils/SendNotification');
+const { io } = require("../Config/socket");
 const { commentPopulate } = require('../Populates/Populate');
 
 // ================== Get Comments for a Target (Post, Reel, or Comment) ==================
@@ -214,6 +215,12 @@ const addNewComment = asyncHandler(async (req, res) => {
     }
   }
 
+  /* 
+    populatedComment has targetId/targetType. 
+    Frontend needs to know if this comment is relevant to current view.
+  */
+  io.emit("comment:create", populatedComment);
+
   res.status(201).json({
     message: targetType === "Comment" ? "Reply added" : "Comment added",
     comment: populatedComment
@@ -242,6 +249,9 @@ const deleteComment = asyncHandler(async (req, res) => {
   });
 
   await comment.remove();
+
+  io.emit("comment:delete", req.params.id);
+
   res.status(200).json({ message: 'Comment and its replies deleted' });
 });
 
@@ -273,6 +283,9 @@ const likeComment = asyncHandler(async (req, res) => {
 
     comment = await Comment.findById(req.params.id).populate(commentPopulate);
 
+    // Emit update
+    io.emit("comment:update", comment);
+
     return res.status(200).json({ message: "Comment Unliked", comment });
   }
 
@@ -297,6 +310,9 @@ const likeComment = asyncHandler(async (req, res) => {
       });
     }
   }
+  // Emit update
+  io.emit("comment:update", comment);
+
   res.status(200).json({ message: "Comment Liked", comment });
 });
 
@@ -316,6 +332,9 @@ const updateComment = asyncHandler(async (req, res) => {
     },
     { new: true }
   ).populate(commentPopulate);
+
+  // Emit update
+  io.emit("comment:update", updated);
 
   res
     .status(200)

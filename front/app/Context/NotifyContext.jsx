@@ -122,6 +122,7 @@ export const NotifyContextProvider = ({ children }) => {
     if (!socket) return;
 
     const handleNotification = (notify) => {
+      // Prevent duplicate
       setNotificationsByUser(prev => {
         if (prev.some(n => n._id === notify._id)) return prev;
         return [notify, ...prev];
@@ -130,8 +131,47 @@ export const NotifyContextProvider = ({ children }) => {
       showToast(notify.content || "You have a new notification!", 'info');
     };
 
+    const handleUpdate = (updated) => {
+      setNotificationsByUser(prev => prev.map(n => n._id === updated._id ? updated : n));
+      // If marked as read, decrease count
+      if (updated.isRead) {
+        setUnreadCount(prev => {
+          // Check if it was already read locally? Hard to know strict sync state.
+          // But usually this event comes from "markAsRead".
+          return Math.max(0, prev - 1);
+        });
+      }
+    };
+
+    const handleDelete = (id) => {
+      setNotificationsByUser(prev => prev.filter(n => n._id !== id));
+      // Use fetchUnreadCount to ensure accuracy
+      fetchUnreadCount();
+    };
+
+    const handleReadAll = () => {
+      setNotificationsByUser(prev => prev.map(n => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    };
+
+    const handleClearAll = () => {
+      setNotificationsByUser([]);
+      setUnreadCount(0);
+    };
+
     socket.on("notification", handleNotification);
-    return () => socket.off("notification", handleNotification);
+    socket.on("notification:update", handleUpdate);
+    socket.on("notification:delete", handleDelete);
+    socket.on("notification:read-all", handleReadAll);
+    socket.on("notification:clear-all", handleClearAll);
+
+    return () => {
+      socket.off("notification", handleNotification);
+      socket.off("notification:update", handleUpdate);
+      socket.off("notification:delete", handleDelete);
+      socket.off("notification:read-all", handleReadAll);
+      socket.off("notification:clear-all", handleClearAll);
+    };
   }, [socket, showToast]);
 
   // --- Initial Data Fetch ---

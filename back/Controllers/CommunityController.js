@@ -4,25 +4,27 @@ const path = require('path')
 const { cloudUpload, cloudRemove } = require('../Config/cloudUpload')
 const fs = require('fs')
 const { v2 } = require('cloudinary')
-const { User} = require('../Modules/User')
+const { User } = require('../Modules/User')
+const { sendNotificationHelper } = require('../utils/SendNotification')
 const { sendNotificationHelper } = require('../utils/SendNotification')
 const { communityPopulate } = require('../Populates/Populate')
+const { io } = require("../Config/socket");
 
 const getAllCommunities = asyncHandler(async (req, res) => {
-    const communities = await Community.find({}).populate(communityPopulate);
-    res.status(200).json(communities)
+  const communities = await Community.find({}).populate(communityPopulate);
+  res.status(200).json(communities)
 })
-  const getCommunityById = asyncHandler(async (req, res) => {
-    const community = await Community.findById(req.params.id).populate(communityPopulate);
-    if (!community) {
-      return res.status(404).json({ message: "Community Not Found" });
-    }
+const getCommunityById = asyncHandler(async (req, res) => {
+  const community = await Community.findById(req.params.id).populate(communityPopulate);
+  if (!community) {
+    return res.status(404).json({ message: "Community Not Found" });
+  }
 
-    res.status(200).json(community);
-  });
+  res.status(200).json(community);
+});
 const getCommunityByCategory = asyncHandler(async (req, res) => {
   const communities = await Community.find({ Category: req.params.Category }).populate(communityPopulate);
-    res.status(200).json(communities)
+  res.status(200).json(communities)
 })
 
 const addNewCommunity = asyncHandler(async (req, res) => {
@@ -60,6 +62,9 @@ const addNewCommunity = asyncHandler(async (req, res) => {
     { path: 'members', select: 'username profileName profilePhoto' }
   ]);
 
+  // 🔔 Socket Emit
+  io.emit("community:create", community);
+
   res.status(201).json({
     message: 'Community created successfully',
     community
@@ -67,72 +72,81 @@ const addNewCommunity = asyncHandler(async (req, res) => {
 });
 
 const deleteCommunity = asyncHandler(async (req, res) => {
-    const community = await Community.findById(req.params.id)
-    if (!community) {
-        res.status(404)
-        throw new Error('Community not found')
-    }
-    await community.remove()
-    res.status(200).json({ message: 'Community removed' })
+  const community = await Community.findById(req.params.id)
+  if (!community) {
+    res.status(404)
+    throw new Error('Community not found')
+  }
+  await community.remove()
+
+  // 🔔 Socket Emit
+  io.emit("community:delete", req.params.id);
+  res.status(200).json({ message: 'Community removed' })
 })
 
 const joinTheCommunity = asyncHandler(async (req, res) => {
-    let community = await Community.findById(req.params.id);
-    if (!community) {
-      res.status(404);
-      throw new Error('Community not found');
-    }
-  
-    // ✅ تحقق إذا كان المستخدم هو المالك
-    if (community.owner.toString() === req.user._id.toString()) {
-      return res.status(400).json({ message: "Owner can't join or leave their own community" });
-    }
+  let community = await Community.findById(req.params.id);
+  if (!community) {
+    res.status(404);
+    throw new Error('Community not found');
+  }
 
-    if (community.members.includes(req.user._id)) {
+  // ✅ تحقق إذا كان المستخدم هو المالك
+  if (community.owner.toString() === req.user._id.toString()) {
+    return res.status(400).json({ message: "Owner can't join or leave their own community" });
+  }
+
+  if (community.members.includes(req.user._id)) {
     community = await Community.findByIdAndUpdate(
       req.params.id,
       { $pull: { members: req.user._id } },
       { new: true }
     ).populate(communityPopulate);
 
+    // 🔔 Socket Emit
+    io.emit("community:update", community);
     res.status(200).json({ message: "Community Left", community });
-    } else {
-      community = await Community.findByIdAndUpdate(
-        req.params.id,
-        { $push: { members: req.user._id } },
-        { new: true }
-      ).populate(communityPopulate);
-
-      res.status(200).json({ message: "Community Joined", community });
-    }
-});
-  
-const editCommunity = asyncHandler(async (req, res) => {
-    const { error } = ValidateCommunityUpdate(req.body);
-    if (error) {
-        return res.status(400).json({ message: error.details[0].message });
-    }
-
-    const updateData = {
-        ...(req.body.Name && { Name: req.body.Name }),
-        ...(req.body.Category && { Category: req.body.Category }),
-        ...(req.body.description && { description: req.body.description }),
-        ...(typeof req.body.isPrivate === "boolean" && { isPrivate: req.body.isPrivate }),
-        ...(typeof req.body.isForAdults === "boolean" && { isForAdults: req.body.isForAdults }),
-        ...(req.body.tags && { tags: req.body.tags }),
-        ...(req.body.rules && { rules: req.body.rules })
-    };
-
-    const community = await Community.findByIdAndUpdate(
-        req.params.id,
-        { $set: updateData },
-        { new: true }
+  } else {
+    community = await Community.findByIdAndUpdate(
+      req.params.id,
+      { $push: { members: req.user._id } },
+      { new: true }
     ).populate(communityPopulate);
-    if (!community) {
-        return res.status(404).json({ message: "Community not found" });
-    }
 
-    res.status(200).json({ message: "Community updated successfully", community });
+    // 🔔 Socket Emit
+    io.emit("community:update", community);
+    res.status(200).json({ message: "Community Joined", community });
+  }
+});
+
+const editCommunity = asyncHandler(async (req, res) => {
+  const { error } = ValidateCommunityUpdate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
+  const updateData = {
+    ...(req.body.Name && { Name: req.body.Name }),
+    ...(req.body.Category && { Category: req.body.Category }),
+    ...(req.body.description && { description: req.body.description }),
+    ...(typeof req.body.isPrivate === "boolean" && { isPrivate: req.body.isPrivate }),
+    ...(typeof req.body.isForAdults === "boolean" && { isForAdults: req.body.isForAdults }),
+    ...(req.body.tags && { tags: req.body.tags }),
+    ...(req.body.rules && { rules: req.body.rules })
+  };
+
+  const community = await Community.findByIdAndUpdate(
+    req.params.id,
+    { $set: updateData },
+    { new: true }
+  ).populate(communityPopulate);
+  if (!community) {
+    return res.status(404).json({ message: "Community not found" });
+  }
+
+  // 🔔 Socket Emit
+  io.emit("community:update", community);
+  res.status(200).json({ message: "Community updated successfully", community });
 });
 /**
  * @desc update Community Photo
@@ -166,6 +180,14 @@ const updateCommunityPicture = asyncHandler(async (req, res) => {
     };
 
     await community.save();
+
+    // 🔔 Socket Emit
+    // Need full community to update properly or just fetch?
+    // Let's emit updated object (needs populate manually or standard populate?)
+    // This function doesn't full-populate community, so let's populate lightly or trust frontend to patch.
+    // Ideally we populate.
+    const updatedCommunity = await Community.findById(id).populate(communityPopulate);
+    io.emit("community:update", updatedCommunity);
 
     return res.status(200).json({
       message: "Community picture updated successfully",
@@ -213,6 +235,9 @@ const updateCommunityCover = asyncHandler(async (req, res) => {
     };
 
     await community.save();
+
+    const updatedCommunity = await Community.findById(id).populate(communityPopulate);
+    io.emit("community:update", updatedCommunity);
 
     return res.status(200).json({
       message: "Community cover updated successfully",
@@ -272,41 +297,41 @@ const removeMember = asyncHandler(async (req, res) => {
 
 // Toggle Admin status
 const makeAdmin = asyncHandler(async (req, res) => {
-    const { id } = req.params; // community ID
-    const { userIdToMakeAdmin } = req.body;
-  
-    const community = await Community.findById(id);
-    if (!community) {
-      return res.status(404).json({ message: "Community not found" });
-    }
-  
-    // فقط المالك أو الأدمنز يمكنهم التحكم
-    const isRequesterOwner = community.owner.equals(req.user._id);
-    const isRequesterAdmin = community.Admins.includes(req.user._id);
-  
-    if (!isRequesterOwner && !isRequesterAdmin) {
-      return res.status(403).json({ message: "Only community owner or admins can manage admins" });
-    }
-  
-    if (!community.members.includes(userIdToMakeAdmin)) {
-      return res.status(400).json({ message: "User is not a member of the community" });
-    }
-  
-    const isAlreadyAdmin = community.Admins.includes(userIdToMakeAdmin);
-  
-    if (isAlreadyAdmin) {
-      // إزالة الأدمن
-      community.Admins.pull(userIdToMakeAdmin);
-      await community.save();
-      return res.status(200).json({ message: "Admin removed successfully" });
-    } else {
-      // تعيينه كأدمن
-      community.Admins.push(userIdToMakeAdmin);
-      await community.save();
-      return res.status(200).json({ message: "Admin added successfully" });
-    }
+  const { id } = req.params; // community ID
+  const { userIdToMakeAdmin } = req.body;
+
+  const community = await Community.findById(id);
+  if (!community) {
+    return res.status(404).json({ message: "Community not found" });
+  }
+
+  // فقط المالك أو الأدمنز يمكنهم التحكم
+  const isRequesterOwner = community.owner.equals(req.user._id);
+  const isRequesterAdmin = community.Admins.includes(req.user._id);
+
+  if (!isRequesterOwner && !isRequesterAdmin) {
+    return res.status(403).json({ message: "Only community owner or admins can manage admins" });
+  }
+
+  if (!community.members.includes(userIdToMakeAdmin)) {
+    return res.status(400).json({ message: "User is not a member of the community" });
+  }
+
+  const isAlreadyAdmin = community.Admins.includes(userIdToMakeAdmin);
+
+  if (isAlreadyAdmin) {
+    // إزالة الأدمن
+    community.Admins.pull(userIdToMakeAdmin);
+    await community.save();
+    return res.status(200).json({ message: "Admin removed successfully" });
+  } else {
+    // تعيينه كأدمن
+    community.Admins.push(userIdToMakeAdmin);
+    await community.save();
+    return res.status(200).json({ message: "Admin added successfully" });
+  }
 });
-  
+
 
 /**
  * @desc Send join request to a community
@@ -381,6 +406,8 @@ const approveJoinRequest = asyncHandler(async (req, res) => {
     actionModel: "Community",
   });
 
+  // 🔔 Socket Emit
+  io.emit("community:update", community);
   res.status(200).json({ message: "User added to community", community });
 });
 

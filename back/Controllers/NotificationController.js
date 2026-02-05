@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const { Notification } = require("../Modules/Notification");
-const { sendNotification } = require("../Config/socket");
+const { sendNotification, io, getReceiverSocketId } = require("../Config/socket");
 
 // ================== Add Notification ==================
 const addNewNotify = asyncHandler(async (req, res) => {
@@ -64,6 +64,18 @@ const markAsRead = asyncHandler(async (req, res) => {
   notify.isRead = true;
   await notify.save();
 
+  notify.isRead = true;
+  await notify.save();
+
+  // 🔔 Socket Emit (Sync across devices)
+  const receiverSocketId = getReceiverSocketId(req.user._id);
+  // Send to ALL devices of this user?
+  // getReceiverSocketId likely returns one. 
+  // Ideally room = user._id. 
+  if (receiverSocketId) {
+    io.to(receiverSocketId).emit("notification:update", notify);
+  }
+
   res.status(200).json({ message: "Marked as read", notification: notify });
 });
 
@@ -77,6 +89,12 @@ const markAllAsRead = asyncHandler(async (req, res) => {
   const updated = await Notification.find({ receiver: req.user._id })
     .populate("sender", "username profilePhoto")
     .sort({ createdAt: -1 });
+
+  // 🔔 Socket Emit
+  const receiverSocketId = getReceiverSocketId(req.user._id);
+  if (receiverSocketId) {
+    io.to(receiverSocketId).emit("notification:read-all");
+  }
 
   res.status(200).json({ message: "All notifications marked as read", notifications: updated });
 });
@@ -93,12 +111,26 @@ const deleteNotify = asyncHandler(async (req, res) => {
   }
 
   await notify.deleteOne();
+
+  // 🔔 Socket Emit
+  const receiverSocketId = getReceiverSocketId(req.user._id);
+  if (receiverSocketId) {
+    io.to(receiverSocketId).emit("notification:delete", req.params.id);
+  }
+
   res.status(200).json({ message: "Notification deleted" });
 });
 
 // ================== Delete All ==================
 const clearAllNotifications = asyncHandler(async (req, res) => {
   await Notification.deleteMany({ receiver: req.user._id });
+
+  // 🔔 Socket Emit
+  const receiverSocketId = getReceiverSocketId(req.user._id);
+  if (receiverSocketId) {
+    io.to(receiverSocketId).emit("notification:clear-all");
+  }
+
   res.status(200).json({ message: "All notifications deleted" });
 });
 

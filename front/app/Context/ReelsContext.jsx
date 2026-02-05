@@ -199,13 +199,16 @@ import { useAuth } from "./AuthContext";
 import { useAlert } from "./AlertContext";
 import { useNotify } from "./NotifyContext";
 import { checkUserStatus } from "../utils/checkUserLog";
+import { useSocket } from "./SocketContext";
 
 export const ReelsContext = createContext();
 
 export const ReelsProvider = ({ children }) => {
   const { user } = useAuth();
   const { showAlert } = useAlert();
+  const { showAlert } = useAlert();
   const { addNotify } = useNotify();
+  const { socket } = useSocket();
 
   const [reels, setReels] = useState([]);
   const [page, setPage] = useState(1);
@@ -235,9 +238,58 @@ export const ReelsProvider = ({ children }) => {
     fetchReels(page);
   }, [page, fetchReels]);
 
+  // 🔔 Socket Listeners
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleCreate = (newReel) => {
+      const currentUserId = user?._id?.toString();
+      const ownerId = newReel?.owner?._id?.toString() || newReel?.owner?.toString();
+      if (currentUserId && ownerId === currentUserId) return; // Handled by Upload
+      setReels(prev => [newReel, ...prev]);
+    };
+
+    const handleUpdate = (updated) => {
+      setReels(prev => prev.map(r => r._id === updated._id ? updated : r));
+    };
+
+    const handleDelete = (id) => {
+      setReels(prev => prev.filter(r => r._id !== id));
+    };
+
+    socket.on("reel:create", handleCreate);
+    socket.on("reel:update", handleUpdate);
+    socket.on("reel:delete", handleDelete);
+
+    return () => {
+      socket.off("reel:create", handleCreate);
+      socket.off("reel:update", handleUpdate);
+      socket.off("reel:delete", handleDelete);
+    };
+  }, [socket, user]);
+
   // 🎥 رفع Reel جديد
   const uploadReel = useCallback(async (file, caption = "") => {
     if (!user?.token) return showAlert("You must be logged in to upload a reel.");
+
+    // Optimistic UI (Temp Reel)
+    const tempId = `temp-${Date.now()}`;
+    const tempReel = {
+      _id: tempId,
+      videoUrl: URL.createObjectURL(file), // Local blob
+      thumbnailUrl: URL.createObjectURL(file), // Use video as thumb for now
+      caption,
+      owner: user,
+      likes: [],
+      views: [],
+      comments: [],
+      createdAt: new Date().toISOString(),
+      isOptimistic: true
+    };
+
+    setReels(prev => [tempReel, ...prev]);
+    setShowModelAddReel(false); // Close modal immediately
+    showAlert("Uploading reel...", 'loading');
 
     try {
       const formData = new FormData();
@@ -255,27 +307,34 @@ export const ReelsProvider = ({ children }) => {
         }
       );
 
-      setReels(prev => [res.data.reel, ...prev]);
-      showAlert("Reel uploaded successfully!");
+      const realReel = res.data.reel || res.data;
+      // Replace temp
+      setReels(prev => prev.map(r => r._id === tempId ? realReel : r));
+      showAlert("Reel uploaded successfully!", 'success');
     } catch (err) {
       console.error(err);
-      showAlert(err?.response?.data?.message || "Failed to upload reel.");
+      // Remove temp
+      setReels(prev => prev.filter(r => r._id !== tempId));
+      showAlert(err?.response?.data?.message || "Failed to upload reel.", 'error');
     }
-  }, [user, showAlert]);
+  }, [user, showAlert, setShowModelAddReel]);
 
   // 🗑️ حذف Reel
   const deleteReel = useCallback(async (id) => {
     if (!user?.token) return;
+
+    // Optimistic Delete
+    setReels(prev => prev.filter(r => r._id !== id));
 
     try {
       const res = await axios.delete(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/reel/${id}`,
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
-      setReels(prev => prev.filter(r => r._id !== id));
       showAlert(res.data.message);
     } catch (err) {
       console.error(err);
+      // Revert if needed, but risky to restore deleted. Just show error.
       showAlert("Failed to delete reel.");
     }
   }, [user, showAlert]);
@@ -283,6 +342,18 @@ export const ReelsProvider = ({ children }) => {
   // ❤️ لايك / أنلايك على Reel
   const likeReel = useCallback(async (id) => {
     if (!user?.token) return;
+
+    // Optimistic Like
+    setReels(prev => prev.map(r => {
+      if (r._id === id) {
+        const isLiked = r.likes.includes(user._id);
+        const newLikes = isLiked
+          ? r.likes.filter(uid => uid !== user._id)
+          : [...r.likes, user._id];
+        return { ...r, likes: newLikes };
+      }
+      return r;
+    }));
 
     try {
       const res = await axios.put(
@@ -293,10 +364,11 @@ export const ReelsProvider = ({ children }) => {
 
       const updated = res.data;
       setReels(prev => prev.map(r => (r?._id === id ? updated : r)));
-      showAlert(res.data.message || "You like this Reel ");
+      // showAlert(res.data.message || "You like this Reel "); // optional toast
     } catch (err) {
       console.error(err);
       showAlert("Failed to like reel.");
+      // Revert could be here
     }
   }, [user, showAlert]);
 

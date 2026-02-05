@@ -5,12 +5,15 @@ import axios from "axios";
 import { useAuth } from "./AuthContext";
 import { useAlert } from "./AlertContext";
 import { useNotify } from "./NotifyContext";
+import { useNotify } from "./NotifyContext";
 import { usePost } from "./PostContext";
+import { useSocket } from "./SocketContext";
 
 export const MusicContext = createContext();
 
 export const MusicProvider = ({ children }) => {
   const { user } = useAuth();
+  const { socket } = useSocket();
   const { showAlert } = useAlert();
   const [music, setMusic] = useState([]);
   const [page, setPage] = useState(1);
@@ -77,6 +80,43 @@ export const MusicProvider = ({ children }) => {
     fetchMusic(1, genre);
     fetchTopCharts();
   }, [genre, fetchMusic, fetchTopCharts]);
+
+  // 🔔 Socket Listeners
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleCreate = (newM) => {
+      const currentUserId = user?._id?.toString();
+      const ownerId = newM?.owner?._id?.toString() || newM?.owner?.toString();
+      if (currentUserId && ownerId === currentUserId) return;
+      setMusic(prev => [newM, ...prev]);
+    };
+    const handleUpdate = (updated) => {
+      setMusic(prev => prev.map(m => m._id === updated._id ? updated : m));
+      // Update charts locally (though they might need re-fetch for precise ordering, but this updates data)
+      setTopCharts(prev => ({
+        trending: prev.trending.map(m => m._id === updated._id ? updated : m),
+        popular: prev.popular.map(m => m._id === updated._id ? updated : m)
+      }));
+    };
+    const handleDelete = (id) => {
+      setMusic(prev => prev.filter(m => m._id !== id));
+      setTopCharts(prev => ({
+        trending: prev.trending.filter(m => m._id !== id),
+        popular: prev.popular.filter(m => m._id !== id)
+      }));
+    };
+
+    socket.on("music:create", handleCreate);
+    socket.on("music:update", handleUpdate);
+    socket.on("music:delete", handleDelete);
+
+    return () => {
+      socket.off("music:create", handleCreate);
+      socket.off("music:update", handleUpdate);
+      socket.off("music:delete", handleDelete);
+    };
+  }, [socket, user]);
 
   // 🎵 رفع موسيقى جديدة
   const uploadMusic = async (formData) => {

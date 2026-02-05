@@ -2,7 +2,9 @@ const { Event, ValidateEvent, ValidateEventUpdate } = require("../Modules/Event"
 const { EventPopulate } = require("../Populates/Populate");
 const asyncHandler = require("express-async-handler");
 const { sendNotificationHelper } = require("../utils/SendNotification");
+
 const { User } = require("../Modules/User");
+const { io } = require("../Config/socket");
 
 // ================== Create Event ==================
 exports.createEvent = asyncHandler(async (req, res) => {
@@ -36,6 +38,9 @@ exports.createEvent = asyncHandler(async (req, res) => {
       });
     }
   }
+
+  // 🔔 Socket Emit
+  io.emit("event:create", event);
 
   res.status(201).json({
     success: true,
@@ -154,6 +159,9 @@ exports.updateEvent = asyncHandler(async (req, res) => {
     }
   }
 
+  // 🔔 Socket Emit
+  io.emit("event:update", updatedEvent);
+
   res.status(200).json({ success: true, message: "Event updated", event: updatedEvent });
 });
 
@@ -171,6 +179,9 @@ exports.deleteEvent = asyncHandler(async (req, res) => {
   }
 
   await event.deleteOne();
+
+  // 🔔 Socket Emit
+  io.emit("event:delete", req.params.id);
 
   res.status(200).json({ success: true, message: "Event deleted" });
 });
@@ -222,6 +233,9 @@ exports.respondToEvent = asyncHandler(async (req, res) => {
     actionRef: event._id,
     actionModel: "Event"
   });
+
+  // 🔔 Socket Emit
+  io.emit("event:update", event);
 
   res.status(200).json({ success: true, message: "RSVP updated", event });
 });

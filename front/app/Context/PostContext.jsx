@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import api from "../utils/api";
 import { useAuth } from "./AuthContext";
+import { useSocket } from "./SocketContext";
 import { usePostActions } from "../Custome/Post/usePostActions";
 import { usePostManagement } from "../Custome/Post/usePostManage";
 
@@ -136,6 +137,47 @@ export const PostContextProvider = ({ children }) => {
   useEffect(() => {
     fetchPosts(page);
   }, [page, fetchPosts]);
+
+  // 🔌 Real-time Socket Events
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleCreate = (newPost) => {
+      // Avoid duplicating my own post (already handled by AddPost)
+      const currentUserId = user?._id?.toString();
+      const ownerId = newPost?.owner?._id?.toString() || newPost?.owner?.toString();
+
+      if (currentUserId && ownerId === currentUserId) return;
+
+      setPosts((prev) => [newPost, ...prev]);
+    };
+
+    const handleUpdate = (updatedPost) => {
+      const updateList = (list) => list.map(p => p._id === updatedPost._id ? updatedPost : p);
+      setPosts(prev => updateList(prev));
+      setUserPosts(prev => updateList(prev));
+      setMemories(prev => updateList(prev));
+    };
+
+    const handleDelete = (postId) => {
+      const filterList = (list) => list.filter(p => p._id !== postId);
+      setPosts(prev => filterList(prev));
+      setUserPosts(prev => filterList(prev));
+      setMemories(prev => filterList(prev));
+    };
+
+    socket.on("post:create", handleCreate);
+    socket.on("post:update", handleUpdate);
+    socket.on("post:delete", handleDelete);
+
+    return () => {
+      socket.off("post:create", handleCreate);
+      socket.off("post:update", handleUpdate);
+      socket.off("post:delete", handleDelete);
+    };
+  }, [socket, user]);
 
   // --- Context Value ---
   const value = useMemo(() => ({

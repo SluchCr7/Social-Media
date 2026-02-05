@@ -7,6 +7,7 @@ const { cloudUploadMusic } = require("../Config/cloudUploadMusic");
 const { sendNotificationHelper } = require("../utils/SendNotification");
 const { Post } = require("../Modules/Post");
 const { postPopulate } = require("../Populates/Populate");
+const { io } = require("../Config/socket");
 const createMusic = asyncHandler(async (req, res) => {
   try {
     const audioFile = req.files?.audio?.[0];
@@ -63,6 +64,9 @@ const createMusic = asyncHandler(async (req, res) => {
     await user.save();
 
     await newMusic.populate("owner", "username profilePhoto");
+
+    // 🔔 Socket Emit
+    io.emit("music:create", newMusic);
 
     res.status(201).json(newMusic);
   } catch (error) {
@@ -194,6 +198,8 @@ const updateMusic = asyncHandler(async (req, res) => {
   const updated = await Music.findByIdAndUpdate(id, req.body, { new: true })
     .populate("owner", "username profilePhoto");
 
+  // 🔔 Socket Emit
+  io.emit("music:update", updated);
   res.json(updated);
 });
 
@@ -224,6 +230,9 @@ const deleteMusic = asyncHandler(async (req, res) => {
   }
 
   await Music.findByIdAndDelete(id);
+
+  // 🔔 Socket Emit
+  io.emit("music:delete", id);
 
   res.json({ message: "Music deleted successfully" });
 });
@@ -275,6 +284,9 @@ const toggleLike = asyncHandler(async (req, res) => {
     .populate("owner", "username profilePhoto")
     .lean();
 
+  // 🔔 Socket Emit
+  io.emit("music:update", updatedMusic);
+
   res.status(200).json({
     success: true,
     message: hasLiked ? "Like removed" : "Music liked",
@@ -301,6 +313,11 @@ const addView = asyncHandler(async (req, res) => {
   )
     .populate("owner", "username profilePhoto");
 
+
+
+  // 🔔 Socket Emit
+  io.emit("music:update", updatedMusic);
+
   res.status(200).json(updatedMusic);
 });
 
@@ -318,6 +335,11 @@ const addListen = asyncHandler(async (req, res) => {
     { $inc: { listenCount: 1 } },
     { new: true }
   ).populate("owner", "username profilePhoto");
+
+
+
+  // 🔔 Socket Emit
+  io.emit("music:update", updatedMusic);
 
   res.status(200).json(updatedMusic);
 });

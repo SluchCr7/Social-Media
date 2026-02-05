@@ -34,17 +34,53 @@ export const usePostActions = ({ user, setPosts, setUserPosts, setIsLoading }) =
 
   const likePost = useCallback(async (postId) => {
     if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+
+    // Optimistic Update
+    const updater = (prev) => (prev || []).map((p) => {
+      if (p._id === postId) {
+        if (p.hahas?.includes(user._id)) return p; // Prevent liking if hahed
+        const isLiked = p.likes?.includes(user._id);
+        const newLikes = isLiked
+          ? p.likes.filter(id => id !== user._id)
+          : [...(p.likes || []), user._id];
+        return { ...p, likes: newLikes };
+      }
+      return p;
+    });
+
+    setPosts(updater);
+    if (setUserPosts) setUserPosts(updater);
+
     try {
       const res = await api.put(`/post/like/${postId}`, {});
+      // Authority update provided by socket or response
       updatePostInState(res.data);
     } catch (err) {
       console.error(err);
       showToast(err?.response?.data?.message || 'Failed to update like status.', 'error');
+      // Revert could be implemented here, but typically we rely on subsequent fetch/socket to fix desync
     }
-  }, [user, updatePostInState, showToast]);
+  }, [user, setPosts, setUserPosts, updatePostInState, showToast]);
 
   const hahaPost = useCallback(async (postId) => {
     if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+
+    // Optimistic Update
+    const updater = (prev) => (prev || []).map((p) => {
+      if (p._id === postId) {
+        if (p.likes?.includes(user._id)) return p; // Prevent hahaing if liked
+        const isHahed = p.hahas?.includes(user._id);
+        const newHahas = isHahed
+          ? p.hahas.filter(id => id !== user._id)
+          : [...(p.hahas || []), user._id];
+        return { ...p, hahas: newHahas };
+      }
+      return p;
+    });
+
+    setPosts(updater);
+    if (setUserPosts) setUserPosts(updater);
+
     try {
       const res = await api.put(`/post/haha/${postId}`, {});
       updatePostInState(res.data);
@@ -52,10 +88,26 @@ export const usePostActions = ({ user, setPosts, setUserPosts, setIsLoading }) =
       console.error(err);
       showToast(err?.response?.data?.message || 'Failed to update haha status.', 'error');
     }
-  }, [user, updatePostInState, showToast]);
+  }, [user, setPosts, setUserPosts, updatePostInState, showToast]);
 
   const savePost = useCallback(async (id) => {
     if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+
+    // Optimistic Update
+    const updater = (prev) => (prev || []).map((p) => {
+      if (p._id === id) {
+        const isSaved = p.saved?.includes(user._id);
+        const newSaved = isSaved
+          ? p.saved.filter(uid => uid !== user._id)
+          : [...(p.saved || []), user._id];
+        return { ...p, saved: newSaved };
+      }
+      return p;
+    });
+
+    setPosts(updater);
+    if (setUserPosts) setUserPosts(updater);
+
     try {
       const res = await api.put(`/post/save/${id}`, {});
       updatePostInState(res.data);
@@ -64,7 +116,7 @@ export const usePostActions = ({ user, setPosts, setUserPosts, setIsLoading }) =
       console.error(err);
       showToast('Failed to save post.', 'error');
     }
-  }, [user, updatePostInState, showToast]);
+  }, [user, setPosts, setUserPosts, updatePostInState, showToast]);
 
   const sharePost = useCallback(async (id, ownerId, customText = "") => {
     if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');

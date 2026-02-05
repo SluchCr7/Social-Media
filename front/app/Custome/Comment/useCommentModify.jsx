@@ -35,6 +35,7 @@ export const useCommentModify = ({
     if (comment.targetType !== "Comment") return [comment, ...tree];
 
     return tree.map((c) => {
+      // If this comment is the parent
       if (c._id === comment.targetId) {
         return {
           ...c,
@@ -42,8 +43,31 @@ export const useCommentModify = ({
           replyCount: (c.replyCount || 0) + 1
         };
       }
+      // If parent might be deeper
       if (c.replies?.length > 0) {
         return { ...c, replies: insertCommentToTree(c.replies, comment) };
+      }
+      return c;
+    });
+  }, []);
+
+  // 🔄 Helper: Replace temporary node with real node
+  const replaceCommentInTree = useCallback((list, tempId, realComment) => {
+    return list.map((c) => {
+      if (c._id === tempId) return realComment;
+      if (c.replies?.length > 0) {
+        return { ...c, replies: replaceCommentInTree(c.replies, tempId, realComment) };
+      }
+      return c;
+    });
+  }, []);
+
+  // 🛠 Helper: Modify node with callback (for Optimistic Like)
+  const modifyCommentInTree = useCallback((list, finderId, modifier) => {
+    return list.map((c) => {
+      if (c._id === finderId) return modifier(c);
+      if (c.replies?.length > 0) {
+        return { ...c, replies: modifyCommentInTree(c.replies, finderId, modifier) };
       }
       return c;
     });
@@ -115,23 +139,43 @@ export const useCommentModify = ({
   }, [setComments, showAlert]);
 
   // ➕ Add Comment/Reply
+  // ➕ Add Comment/Reply
   const AddComment = useCallback(async (text, targetId, targetType = 'Post') => {
     if (!checkUserStatus("add comments", showAlert, user)) return;
 
+    // Optimistic Logic
+    const tempId = `temp-${Date.now()}`;
+    const optimisticComment = {
+        _id: tempId,
+        text,
+        owner: user,
+        targetId,
+        targetType,
+        likes: [],
+        replies: [],
+        replyCount: 0,
+        createdAt: new Date().toISOString(),
+        isOptimistic: true
+    };
+
+    setComments((prev) => insertCommentToTree(prev, optimisticComment));
+
     try {
       const res = await api.post('/comment', { text, targetId, targetType });
-      const newCommentData = { ...res.data.comment, replies: [], replyCount: 0 };
+      const newCommentData = { ...res.data.comment, replies: [], replyCount: 0 }; // Ensure structure
 
-      // Optimistic update
-      setComments((prev) => insertCommentToTree(prev, newCommentData));
+      // Replace temp with real
+      setComments((prev) => replaceCommentInTree(prev, tempId, newCommentData));
 
       if (showAlert) showAlert(targetType === "Comment" ? "Reply added." : "Comment added.", 'success');
       return newCommentData;
     } catch (err) {
+      // Revert
+      setComments((prev) => deleteCommentFromTree(prev, tempId));
       if (showAlert) showAlert(err?.response?.data?.message || "Failed to add comment.", 'error');
       throw err;
     }
-  }, [user, showAlert, setComments, insertCommentToTree]);
+  }, [user, showAlert, setComments, insertCommentToTree, replaceCommentInTree, deleteCommentFromTree]);
 
   // 🗑️ Delete Comment
   const deleteComment = useCallback(async (id) => {
@@ -168,6 +212,10 @@ export const useCommentModify = ({
     AddComment,
     deleteComment,
     updateComment,
-    updateCommentInTree
+    updateCommentInTree,
+    insertCommentToTree,
+    deleteCommentFromTree,
+    replaceCommentInTree,
+    modifyCommentInTree
   };
 };

@@ -39,7 +39,11 @@ export const StoryContextProvider = ({ children }) => {
     if (!socket) return;
 
     const handleNewStory = (newStory) => {
-      // Avoid duplicates
+      // Avoid duplicates from Optimistic UI
+      const currentUserId = user?._id?.toString();
+      const ownerId = newStory?.owner?._id?.toString() || newStory?.owner?.toString();
+      if (currentUserId && ownerId === currentUserId) return;
+
       setStories((prev) => {
         if (prev.some(s => s._id === newStory._id)) return prev;
         return [newStory, ...prev];
@@ -63,7 +67,7 @@ export const StoryContextProvider = ({ children }) => {
       socket.off("delete-story", handleDeletedStory);
       socket.off("update-story");
     };
-  }, [socket]);
+  }, [socket, user]);
 
   // 📤 Actions
 
@@ -93,6 +97,25 @@ export const StoryContextProvider = ({ children }) => {
       formData.append('isCloseFriends', storyData.isCloseFriends);
     }
 
+    // Optimistic UI
+    const tempId = `temp-${Date.now()}`;
+    const tempStory = {
+      _id: tempId,
+      text: storyData.text || "",
+      Photo: storyData.file ? [URL.createObjectURL(storyData.file)] : [],
+      owner: user,
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      loves: [],
+      views: [],
+      reactions: [],
+      isOptimistic: true
+    };
+
+    setStories(prev => [tempStory, ...prev]);
+    setIsStory(false);
+    showAlert("Posting story...", 'loading');
+
     try {
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/add`,
@@ -106,17 +129,13 @@ export const StoryContextProvider = ({ children }) => {
       );
 
       const newStory = res.data?.story || res.data;
-      setStories(prev => {
-        if (prev.some(s => s._id === newStory._id)) return prev;
-        return [newStory, ...prev];
-      });
-
-      showAlert("✅ Story published successfully.");
-      setIsStory(false); // Close modal
+      setStories(prev => prev.map(s => s._id === tempId ? newStory : s));
+      showAlert("✅ Story published successfully.", 'success');
       return newStory;
     } catch (err) {
       console.error(err);
-      showAlert("❌ Failed to add story.");
+      setStories(prev => prev.filter(s => s._id !== tempId));
+      showAlert("❌ Failed to add story.", 'error');
       return null;
     }
   }, [user, showAlert]);
@@ -150,6 +169,19 @@ export const StoryContextProvider = ({ children }) => {
 
   const toggleLove = useCallback(async (storyId) => {
     if (!user) return;
+
+    // Optimistic Update
+    setStories(prev => prev.map(s => {
+      if (s._id === storyId) {
+        const isLoved = s.loves.includes(user._id);
+        const newLoves = isLoved
+          ? s.loves.filter(id => id !== user._id)
+          : [...s.loves, user._id];
+        return { ...s, loves: newLoves };
+      }
+      return s;
+    }));
+
     try {
       const { data } = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/love/${storyId}`,
@@ -160,11 +192,30 @@ export const StoryContextProvider = ({ children }) => {
     } catch (err) {
       console.error(err);
       showAlert("❌ Failed to toggle love.");
+      // Revert if needed
     }
   }, [user, showAlert]);
 
   const reactToStory = useCallback(async (storyId, emoji) => {
     if (!user) return;
+
+    // Optimistic Reaction
+    setStories(prev => prev.map(s => {
+      if (s._id === storyId) {
+        // Check if user already reacted
+        const existingReactionIndex = s.reactions.findIndex(r => r.user === user._id || r.user?._id === user._id);
+        let newReactions = [...s.reactions];
+
+        if (existingReactionIndex > -1) {
+          newReactions[existingReactionIndex] = { ...newReactions[existingReactionIndex], emoji, createdAt: new Date() };
+        } else {
+          newReactions.push({ user: user._id, emoji, createdAt: new Date() });
+        }
+        return { ...s, reactions: newReactions };
+      }
+      return s;
+    }));
+
     try {
       const { data } = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/react/${storyId}`,

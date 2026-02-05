@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "@/app/Context/AuthContext";
 import axios from "axios";
 import { useAlert } from "./AlertContext";
+import { useSocket } from "./SocketContext";
 import dayjs from "dayjs";
 
 const EventContext = createContext();
@@ -12,45 +13,46 @@ export const useEvent = () => useContext(EventContext);
 
 export const EventProvider = ({ children }) => {
   const { user } = useAuth();
+  const { socket } = useSocket();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
   const { showAlert } = useAlert();
   const [upcomingEvents, setUpcomingEvents] = useState([]);
-  const [isCreating , setIsCreating] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
   // ---------------------------
   // Fetch all events
   // ---------------------------
-const fetchEvents = async () => {
-  if (!user?.token) return;
-  setLoading(true);
-  try {
-    const res = await axios.get(
-      `${process.env.NEXT_PUBLIC_BACK_URL}/api/events/user/${user._id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      }
-    );
-
-    if (res.data.success) {
-      const eventsWithCurrentYear = res.data.events.map((event) => {
-        if (event.repeatYearly) {
-          const originalDate = dayjs(event.date);
-          const currentYearDate = originalDate.year(dayjs().year());
-          return { ...event, date: currentYearDate.toDate() };
+  const fetchEvents = async () => {
+    if (!user?.token) return;
+    setLoading(true);
+    try {
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/events/user/${user._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
         }
-        return event;
-      });
+      );
 
-      setEvents(eventsWithCurrentYear);
+      if (res.data.success) {
+        const eventsWithCurrentYear = res.data.events.map((event) => {
+          if (event.repeatYearly) {
+            const originalDate = dayjs(event.date);
+            const currentYearDate = originalDate.year(dayjs().year());
+            return { ...event, date: currentYearDate.toDate() };
+          }
+          return event;
+        });
+
+        setEvents(eventsWithCurrentYear);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // ---------------------------
   // Check upcoming events and show alerts
@@ -173,9 +175,40 @@ const fetchEvents = async () => {
     if (events.length > 0) checkUpcomingEvents();
   }, [events]);
 
+  // 🔔 Socket Listeners
+  useEffect(() => {
+    if (!socket) return;
+
+    const processEventDate = (event) => {
+      if (event.repeatYearly) {
+        return { ...event, date: dayjs(event.date).year(dayjs().year()).toDate() };
+      }
+      return event;
+    };
+
+    const handleCreate = (newEv) => {
+      const currentUserId = user?._id?.toString();
+      const creatorId = newEv?.createdBy?._id?.toString() || newEv?.createdBy?.toString();
+      if (currentUserId && creatorId === currentUserId) return;
+      setEvents(prev => [processEventDate(newEv), ...prev]);
+    };
+    const handleUpdate = (updated) => setEvents(prev => prev.map(e => e._id === updated._id ? processEventDate(updated) : e));
+    const handleDelete = (id) => setEvents(prev => prev.filter(e => e._id !== id));
+
+    socket.on("event:create", handleCreate);
+    socket.on("event:update", handleUpdate);
+    socket.on("event:delete", handleDelete);
+
+    return () => {
+      socket.off("event:create", handleCreate);
+      socket.off("event:update", handleUpdate);
+      socket.off("event:delete", handleDelete);
+    };
+  }, [socket, user]);
+
   return (
     <EventContext.Provider
-      value={{ events, loading, fetchEvents, addEvent, updateEvent, deleteEvent ,upcomingEvents , setIsCreating , isCreating}}
+      value={{ events, loading, fetchEvents, addEvent, updateEvent, deleteEvent, upcomingEvents, setIsCreating, isCreating }}
     >
       {children}
     </EventContext.Provider>

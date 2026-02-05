@@ -362,12 +362,34 @@ export const UserContextProvider = ({ children }) => {
     fetchSuggested();
   }, [user?.token]);
 
-  // Handle Socket Events for Online Users
+  // Handle Socket Events for Online Users & Real-time Profile Updates
   useEffect(() => {
     if (!socket) return;
+
+    // Online Users
     socket.on('getOnlineUsers', setOnlineUsers);
-    return () => socket.off('getOnlineUsers');
-  }, [socket]);
+
+    // Profile Updates (Follow/Unfollow/Photo/etc)
+    const handleUserUpdate = (updatedUser) => {
+      // Update global list (AuthContext)
+      setUsers(prev => prev.map(u => u._id === updatedUser._id ? updatedUser : u));
+
+      // Update Suggested
+      setSuggestedUsers(prev => prev.map(u => u._id === updatedUser._id ? updatedUser : u));
+
+      // Update Self (preserve token)
+      if (user && user._id === updatedUser._id) {
+        updateLocalUser({ ...updatedUser, token: user.token });
+      }
+    };
+
+    socket.on('user:update', handleUserUpdate);
+
+    return () => {
+      socket.off('getOnlineUsers');
+      socket.off('user:update', handleUserUpdate);
+    };
+  }, [socket, user, setUsers, updateLocalUser]);
 
   // --- Context Value ---
   const value = useMemo(() => ({
