@@ -481,7 +481,7 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
                     <div className="studio-select-wrapper">
                       <Select
                         isMulti
-                        options={collaboratorOptions}
+                        options={followerOptions}
                         value={collaborators}
                         onChange={setCollaborators}
                         placeholder="Search followers..."

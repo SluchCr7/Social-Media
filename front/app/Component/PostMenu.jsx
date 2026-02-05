@@ -214,26 +214,33 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
               <div className="w-20 h-20 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
                 <AiOutlineDelete size={40} className="text-red-500" />
               </div>
-              <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-4">Confirm Termination</h3>
+              <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-4">{t('Confirm Termination')}</h3>
               <p className="text-gray-500 dark:text-white/40 text-sm font-bold leading-relaxed mb-10 px-4">
-                This action will permanently sever the data link. It cannot be recovered once initiated.
+                {t('This action will permanently sever the data link. It cannot be recovered once initiated.')}
               </p>
               <div className="flex flex-col gap-3">
                 <button
-                  onClick={() => {
-                    confirmAction();
+                  onClick={async () => {
+                    if (typeof confirmAction === 'function') {
+                      await confirmAction();
+                    }
                     setConfirmAction(null);
                     setShowMenu(false);
                   }}
-                  className="w-full py-4 rounded-2xl bg-red-500 text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-red-500/20 hover:bg-red-600 transition-all"
+                  disabled={loadingBtn}
+                  className="w-full py-4 rounded-2xl bg-red-500 text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-red-500/20 hover:bg-red-600 transition-all disabled:opacity-50"
                 >
-                  Confirm Delete
+                  {loadingBtn ? (
+                    <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin mx-auto" />
+                  ) : (
+                    t('Confirm Delete')
+                  )}
                 </button>
                 <button
                   onClick={() => setConfirmAction(null)}
                   className="w-full py-4 rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-white/40 font-black text-xs uppercase tracking-widest hover:text-gray-900 dark:hover:text-white transition-all"
                 >
-                  Abort Action
+                  {t('Abort Action')}
                 </button>
               </div>
             </motion.div>
