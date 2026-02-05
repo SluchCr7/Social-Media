@@ -22,6 +22,7 @@ import AddHighlightMenu from '../AddandUpdateMenus/AddHighlight'; // جلب مُ
 import StickyProfileBar from "./StickyProfileBar"
 import AdultContentWarning from "../AdultAlert"
 import { useUser } from "@/app/Context/UserContext"
+import { useAuth } from "@/app/Context/AuthContext"
 
 
 const ProfileLayout = ({
@@ -51,7 +52,46 @@ const ProfileLayout = ({
   onCoverChange
 }) => {
   const { updateCoverPhoto } = useUser();
+  const { user: currentUser } = useAuth();
   const { highlights, fetchHighlights, setOpenModal, selectedHighlight, setSelectedHighlight } = useHighlights();
+
+  // Local state for optimistic updates
+  const [localUser, setLocalUser] = useState(user);
+  const [localIsFollowing, setLocalIsFollowing] = useState(isFollowing);
+
+  useEffect(() => {
+    setLocalUser(user);
+  }, [user]);
+
+  useEffect(() => {
+    setLocalIsFollowing(isFollowing);
+  }, [isFollowing]);
+
+  const handleOptimisticFollow = async () => {
+    const wasFollowing = localIsFollowing;
+    const newIsFollowing = !wasFollowing;
+    setLocalIsFollowing(newIsFollowing);
+
+    // Update localUser followers count optimistically
+    if (localUser) {
+      let newFollowers = localUser.followers || [];
+      if (wasFollowing) {
+        // Remove current user
+        newFollowers = newFollowers.filter(f => (f?._id || f) !== currentUser?._id);
+      } else {
+        // Add current user (mock object)
+        if (currentUser) newFollowers = [...newFollowers, currentUser];
+      }
+      setLocalUser({ ...localUser, followers: newFollowers });
+    }
+
+    // Call original handlers
+    if (wasFollowing) {
+      if (onUnfollow) await onUnfollow();
+    } else {
+      if (onFollow) await onFollow();
+    }
+  };
   useEffect(() => {
     if (user?._id) fetchHighlights(user._id);
   }, [user?._id, fetchHighlights]);
@@ -72,24 +112,24 @@ const ProfileLayout = ({
     >
       {/* ✅ الشريط الثابت */}
       <StickyProfileBar
-        user={user}
+        user={localUser}
         isOwner={isOwner}
-        isFollowing={isFollowing}
-        onFollow={onFollow}
-        onUnfollow={onUnfollow}
+        isFollowing={localIsFollowing}
+        onFollow={handleOptimisticFollow}
+        onUnfollow={handleOptimisticFollow}
       />
       {/* 👤 رأس البروفايل */}
       <div id="profile-header">
         <ProfileHeader
-          user={user}
+          user={localUser}
           isOwner={isOwner}
-          isFollowing={isFollowing}
+          isFollowing={localIsFollowing}
           canSeePrivateContent={canSeePrivateContent}
           onImageChange={onImageChange}
           onEdit={onEdit}
           onAddStory={onAddStory}
-          onFollow={onFollow}
-          onUnfollow={onUnfollow}
+          onFollow={handleOptimisticFollow}
+          onUnfollow={handleOptimisticFollow}
           onShowFollowers={onShowFollowers}
           onShowFollowing={onShowFollowing}
           onProfileClick={onProfileClick}
@@ -115,7 +155,7 @@ const ProfileLayout = ({
         />
 
         {/* 🧾 معلومات المستخدم */}
-        <InfoAboutUser user={user} />
+        <InfoAboutUser user={localUser} />
 
         {/* 🧭 التبويبات والمحتوى */}
         <div className="flex flex-col gap-6 w-full">

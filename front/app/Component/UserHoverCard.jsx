@@ -6,8 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../Context/AuthContext'
 import { useState, useEffect } from 'react'
 import { FaUserPlus, FaUserCheck } from 'react-icons/fa'
+import { HiCheckBadge, HiUsers, HiChatBubbleLeftRight } from 'react-icons/hi2'
 import { useUser } from '../Context/UserContext'
-import { HiBadgeCheck } from 'react-icons/hi'
 import { useGetData } from '../Custome/useGetData'
 import { useTranslation } from 'react-i18next'
 
@@ -15,17 +15,45 @@ const UserHoverCard = ({ userSelected, children, side = 'right' }) => {
   const { user } = useAuth()
   const [isHovered, setIsHovered] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const {followUser} = useUser()
-  const {userData} = useGetData(user?._id)
-  // 🧩 التحقق من حجم الشاشة لتجنب عرض الكارد في الموبايل
+  const { followUser, loading } = useUser()
+  const { userData } = useGetData(user?._id)
+  const { t } = useTranslation()
+
+  // Local state for real-time updates
+  const [localIsFollowing, setLocalIsFollowing] = useState(
+    userData?.following?.some(member => member._id === userSelected._id)
+  )
+  const [localFollowerCount, setLocalFollowerCount] = useState(userSelected?.followers?.length || 0)
+
+  // Check screen size to avoid showing card on mobile
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 640)
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
-  const isFollowing = userData?.following?.some(member => member._id === userSelected._id)
-  const {t} = useTranslation()
+
+  // Update local state when userData changes
+  useEffect(() => {
+    const isFollowing = userData?.following?.some(member => member._id === userSelected._id)
+    setLocalIsFollowing(isFollowing)
+  }, [userData?.following, userSelected._id])
+
+  const handleFollow = async () => {
+    // Optimistic update
+    const wasFollowing = localIsFollowing
+    setLocalIsFollowing(!wasFollowing)
+    setLocalFollowerCount(prev => wasFollowing ? prev - 1 : prev + 1)
+
+    const result = await followUser(userSelected._id)
+
+    // If failed, revert
+    if (!result?.success) {
+      setLocalIsFollowing(wasFollowing)
+      setLocalFollowerCount(userSelected?.followers?.length || 0)
+    }
+  }
+
   if (isMobile) {
     return (
       <Link
@@ -36,7 +64,9 @@ const UserHoverCard = ({ userSelected, children, side = 'right' }) => {
       </Link>
     )
   }
+
   if (!userSelected) return null
+
   return (
     <HoverCard.Root openDelay={200} closeDelay={150}>
       <HoverCard.Trigger asChild>
@@ -58,81 +88,128 @@ const UserHoverCard = ({ userSelected, children, side = 'right' }) => {
             align="center"
             avoidCollisions={true}
             collisionPadding={8}
-            className={`
-              z-50 rounded-2xl border border-gray-200 dark:border-gray-700 
-              bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 
-              shadow-xl overflow-hidden transition-transform duration-300 
-              max-w-[90vw] sm:max-w-[280px]
-            `}
+            className="z-50 rounded-[1.5rem] border border-gray-200/50 dark:border-white/10 bg-white/95 dark:bg-[#0D1117]/95 backdrop-blur-2xl shadow-2xl overflow-hidden max-w-[90vw] sm:max-w-[320px]"
             onPointerEnter={() => setIsHovered(true)}
             onPointerLeave={() => setIsHovered(false)}
           >
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.2 }}
-              className="p-4"
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
-              {/* Header */}
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Image
-                    src={userSelected?.profilePhoto?.url || '/default-avatar.png'}
-                    alt="Profile"
-                    width={50}
-                    height={50}
-                    className="rounded-full w-12 h-12 object-cover transition-transform duration-300 hover:scale-105"
-                  />
-                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></span>
-                </div>
-
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1">
-                    <span className="font-bold text-gray-900 dark:text-white truncate">
-                      {userSelected?.username}
-                    </span>
-                    {userSelected?.isAccountWithPremiumVerify && (
-                      <HiBadgeCheck className="text-blue-500 text-lg sm:text-xl" title="Verified" />
-                    )}
-                  </div>
-                  <span className="text-sm text-gray-500">@{userSelected?.profileName}</span>
-                </div>
+              {/* Gradient Header Background */}
+              <div className="relative h-20 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 overflow-hidden">
+                <motion.div
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 90, 0]
+                  }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"
+                />
               </div>
 
-              {/* Bio */}
-              <p className="mt-3 text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
-                {userSelected?.description || "No bio available"}
-              </p>
-
-              {/* Stats */}
-              <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
-                <span>
-                  <b>{userSelected?.followers?.length || 0}</b> {t("Followers")}
-                </span>
-                <span>
-                  <b>{userSelected?.following?.length || 0}</b> {t("Following")}
-                </span>
-              </div>
-
-              {/* Action Button */}
-              {user?._id !== userSelected._id && (
-                <div className="mt-4">
-                  <button
-                    onClick={() => followUser(userSelected._id)}
-                    className={`w-full py-1.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all 
-                      ${isFollowing
-                        ? 'bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700'
-                        : 'bg-blue-500 hover:bg-blue-600 text-white shadow-sm'}`}
+              {/* Content */}
+              <div className="relative px-5 pb-5 -mt-10">
+                {/* Profile Image */}
+                <div className="flex items-start justify-between mb-4">
+                  <motion.div
+                    whileHover={{ scale: 1.05, rotate: 5 }}
+                    className="relative"
                   >
-                    {isFollowing ? <FaUserCheck size={14} /> : <FaUserPlus size={14} />}
-                    {isFollowing ? t('Following') : t('Follow')}
-                  </button>
+                    <div className="w-20 h-20 rounded-[1.5rem] overflow-hidden ring-4 ring-white dark:ring-[#0D1117] shadow-xl">
+                      <Image
+                        src={userSelected?.profilePhoto?.url || '/default-avatar.png'}
+                        alt="Profile"
+                        width={80}
+                        height={80}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    {userSelected?.isOnline && (
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-4 border-white dark:border-[#0D1117] shadow-lg" />
+                    )}
+                  </motion.div>
+
+                  {/* Follow Button (Top Right) */}
+                  {user?._id !== userSelected._id && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleFollow}
+                      disabled={loading}
+                      className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg ${localIsFollowing
+                        ? 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20'
+                        : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-indigo-500/30 hover:shadow-xl'
+                        }`}
+                    >
+                      {localIsFollowing ? <FaUserCheck size={12} /> : <FaUserPlus size={12} />}
+                      {localIsFollowing ? t('Following') : t('Follow')}
+                    </motion.button>
+                  )}
                 </div>
-              )}
+
+                {/* User Info */}
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-black text-lg text-gray-900 dark:text-white truncate">
+                        {userSelected?.username}
+                      </h3>
+                      {userSelected?.isAccountWithPremiumVerify && (
+                        <HiCheckBadge className="text-indigo-500 text-xl flex-shrink-0" title="Verified" />
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                      @{userSelected?.profileName}
+                    </p>
+                  </div>
+
+                  {/* Bio */}
+                  {userSelected?.description && (
+                    <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 leading-relaxed">
+                      {userSelected.description}
+                    </p>
+                  )}
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-200/50 dark:border-white/10">
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      className="p-3 rounded-xl bg-gradient-to-br from-indigo-500/10 to-indigo-500/5 dark:from-indigo-500/20 dark:to-indigo-500/10 border border-indigo-500/20"
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <HiUsers className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">
+                          {t("Followers")}
+                        </span>
+                      </div>
+                      <div className="text-xl font-black text-gray-900 dark:text-white">
+                        {localFollowerCount}
+                      </div>
+                    </motion.div>
+
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      className="p-3 rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-500/5 dark:from-purple-500/20 dark:to-purple-500/10 border border-purple-500/20"
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <HiChatBubbleLeftRight className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">
+                          {t("Following")}
+                        </span>
+                      </div>
+                      <div className="text-xl font-black text-gray-900 dark:text-white">
+                        {userSelected?.following?.length || 0}
+                      </div>
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
             </motion.div>
 
-            <HoverCard.Arrow className="fill-white dark:fill-gray-900" />
+            <HoverCard.Arrow className="fill-white dark:fill-[#0D1117]" />
           </HoverCard.Content>
         </AnimatePresence>
       </HoverCard.Portal>

@@ -398,6 +398,7 @@ const makeFollow = asyncHandler(async (req, res) => {
   }
 
   const isFollowing = user.followers.includes(req.user._id);
+  const action = isFollowing ? 'unfollow' : 'follow';
 
   if (isFollowing) {
     // 🔴 Unfollow
@@ -425,13 +426,17 @@ const makeFollow = asyncHandler(async (req, res) => {
     }
   }
 
+  // Get updated user data with full population
   const updatedCurrentUser = await User.findById(req.user._id).populate(userOnePopulate);
   const updatedTargetUser = await User.findById(req.params.id).populate(userOnePopulate);
 
   return res.status(200).json({
+    success: true,
     message: isFollowing ? "Unfollowed successfully" : "Followed successfully",
+    action,
     user: updatedCurrentUser,
-    targetUser: updatedTargetUser
+    targetUser: updatedTargetUser,
+    isFollowing: !isFollowing
   });
 });
 

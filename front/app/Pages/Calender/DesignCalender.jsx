@@ -244,51 +244,66 @@ const DesignCalender = React.memo(({
                         key={idx}
                         onClick={() => setSelectedDate(day)}
                         whileHover={{ scale: 1.02, zIndex: 10 }}
-                        className={`group relative min-h-[80px] sm:min-h-[120px] p-2 sm:p-3 bg-white dark:bg-[#0B0F1A] transition-all cursor-pointer
-                          ${!day.isSame(currentDate, 'month') ? 'opacity-40 grayscale' : ''}
-                          ${isTodayFlag ? 'bg-indigo-50/50 dark:bg-indigo-500/5 ring-2 ring-indigo-500/20' : ''}`}
+                        className={`group relative min-h-[100px] sm:min-h-[140px] p-2 bg-white dark:bg-[#0B0F1A] transition-all cursor-pointer border-b border-r border-gray-100 dark:border-white/5
+                          ${!day.isSame(currentDate, 'month') ? 'opacity-40 grayscale bg-gray-50/50 dark:bg-black/20' : ''}
+                          ${isTodayFlag ? 'bg-indigo-50/30 dark:bg-indigo-500/5' : 'hover:bg-gray-50 dark:hover:bg-white/[0.02]'}`}
                       >
+                        {/* Day Header */}
                         <div className="flex items-start justify-between mb-2">
-                          <span className={`text-base font-bold ${isTodayFlag ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
+                          <span className={`flex items-center justify-center w-7 h-7 rounded-full text-sm font-bold transition-all ${isTodayFlag
+                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                            : 'text-gray-600 dark:text-gray-400 group-hover:bg-gray-200 dark:group-hover:bg-white/10 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
                             {day.date()}
                           </span>
+
+                          {/* Mini dots for mobile or quick view */}
                           {dayEvents.length > 0 && (
-                            <div className="flex gap-1">
+                            <div className="flex -space-x-1">
                               {dayEvents.slice(0, 3).map((ev, i) => (
                                 <div
                                   key={i}
-                                  className="w-1.5 h-1.5 rounded-full"
+                                  className="w-2 h-2 rounded-full border border-white dark:border-[#0B0F1A]"
                                   style={{ backgroundColor: ev.color || '#6366f1' }}
                                 />
                               ))}
+                              {dayEvents.length > 3 && (
+                                <div className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 border border-white dark:border-[#0B0F1A]" />
+                              )}
                             </div>
                           )}
                         </div>
 
-                        <div className="space-y-1">
+                        {/* Events List */}
+                        <div className="space-y-1.5 mt-2">
                           {preview.map((ev) => (
                             <motion.div
                               key={ev._id}
-                              whileHover={{ x: 2 }}
+                              layoutId={`event-${ev._id}`}
+                              whileHover={{ x: 2, scale: 1.02 }}
                               onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); }}
-                              className={`px-2 py-1 rounded-lg text-[8px] font-bold uppercase tracking-wider truncate border ${typeColors?.[ev.type] || 'bg-gray-100 dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'}`}
+                              className={`
+                                relative px-2 py-1.5 rounded-lg text-[9px] font-bold truncate border shadow-sm transition-all
+                                ${typeColors?.[ev.type] || 'bg-gray-100 dark:bg-gray-800/40 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'}
+                                ${ev.priority === 'urgent' ? 'border-l-4 border-l-red-500' : ''}
+                              `}
                             >
-                              <div className="flex items-center gap-1">
-                                {ev.priority === 'urgent' && <span className="text-red-500">!</span>}
-                                {ev.isVirtual && <HiVideoCamera className="w-2.5 h-2.5" />}
-                                <span className="truncate">{ev.title}</span>
+                              <div className="flex items-center gap-1.5">
+                                {ev.isVirtual && <HiVideoCamera className="w-2.5 h-2.5 opacity-70" />}
+                                {ev.priority === 'urgent' && <HiFlag className="w-2.5 h-2.5 text-red-500" />}
+                                <span className="truncate flex-1">{ev.title}</span>
                               </div>
                             </motion.div>
                           ))}
                           {moreCount > 0 && (
-                            <div className="text-[7px] font-black uppercase tracking-widest text-indigo-500/60 pl-2">
-                              +{moreCount} {t('more')}
+                            <div className="text-[8px] font-black uppercase tracking-widest text-indigo-500/80 pl-1 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                              +{moreCount} {t('more events')}
                             </div>
                           )}
                         </div>
 
+                        {/* Today Highlight Indicator */}
                         {isTodayFlag && (
-                          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-t-lg" />
+                          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-50" />
                         )}
                       </motion.div>
                     );

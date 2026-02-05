@@ -39,10 +39,23 @@ export const UserContextProvider = ({ children }) => {
   }, [setUser]);
 
   /**
-   * Toggle follow/unfollow for a user
+   * Toggle follow/unfollow for a user with real-time updates
    */
   const followUser = useCallback(async (targetId) => {
     if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+
+    // Optimistic update - update UI immediately
+    const isCurrentlyFollowing = user.following?.some(
+      u => (typeof u === 'string' ? u : u._id) === targetId
+    );
+
+    // Create optimistic user state
+    const optimisticFollowing = isCurrentlyFollowing
+      ? user.following.filter(u => (typeof u === 'string' ? u : u._id) !== targetId)
+      : [...(user.following || []), targetId];
+
+    // Update UI immediately for instant feedback
+    updateLocalUser({ ...user, following: optimisticFollowing });
 
     setLoading(true);
     try {
@@ -50,17 +63,25 @@ export const UserContextProvider = ({ children }) => {
 
       const { user: updatedCurrentUser, targetUser: updatedTargetUser } = res.data;
 
-      // Update global users list
+      // Update global users list with the target user's new follower count
       setUsers((prev) =>
         prev.map((u) => (u._id === targetId ? updatedTargetUser : u))
       );
 
-      // Update current user state
+      // Update current user state with server response
       updateLocalUser({ ...updatedCurrentUser, token: user.token });
+
       showToast(res.data.message, 'success');
+
+      return { success: true, isFollowing: res.data.isFollowing };
     } catch (err) {
+      // Revert optimistic update on error
+      updateLocalUser({ ...user, following: user.following });
+
       console.error('Follow error:', err);
       showToast(err.response?.data?.message || MESSAGES.COMMON.ERROR_OCCURRED, 'error');
+
+      return { success: false, error: err.response?.data?.message };
     } finally {
       setLoading(false);
     }

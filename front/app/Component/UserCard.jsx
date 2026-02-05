@@ -11,15 +11,38 @@ const UserCard = ({ user: targetUser, t, isCompact = false }) => {
     const { followUser, loading } = useUser();
     const { user: currentUser } = useAuth();
 
-    const isFollowing = currentUser?.following?.some(u =>
-        (typeof u === 'string' ? u : u._id) === targetUser._id
+    // Local state for real-time updates
+    const [localIsFollowing, setLocalIsFollowing] = React.useState(
+        currentUser?.following?.some(u =>
+            (typeof u === 'string' ? u : u._id) === targetUser._id
+        )
     );
-    const followerCount = targetUser.followers?.length || 0;
+    const [localFollowerCount, setLocalFollowerCount] = React.useState(targetUser.followers?.length || 0);
 
-    const handleFollow = (e) => {
+    // Update local state when currentUser changes
+    React.useEffect(() => {
+        const isFollowing = currentUser?.following?.some(u =>
+            (typeof u === 'string' ? u : u._id) === targetUser._id
+        );
+        setLocalIsFollowing(isFollowing);
+    }, [currentUser?.following, targetUser._id]);
+
+    const handleFollow = async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        followUser(targetUser._id);
+
+        // Optimistic update
+        const wasFollowing = localIsFollowing;
+        setLocalIsFollowing(!wasFollowing);
+        setLocalFollowerCount(prev => wasFollowing ? prev - 1 : prev + 1);
+
+        const result = await followUser(targetUser._id);
+
+        // If failed, revert
+        if (!result?.success) {
+            setLocalIsFollowing(wasFollowing);
+            setLocalFollowerCount(targetUser.followers?.length || 0);
+        }
     };
 
     if (isCompact) {
@@ -56,12 +79,12 @@ const UserCard = ({ user: targetUser, t, isCompact = false }) => {
                     <button
                         onClick={handleFollow}
                         disabled={loading}
-                        className={`ml-4 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${isFollowing
-                                ? 'bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-rose-500'
-                                : 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 hover:scale-105'
+                        className={`ml-4 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${localIsFollowing
+                            ? 'bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-rose-500'
+                            : 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 hover:scale-105'
                             }`}
                     >
-                        {isFollowing ? t('Following') : t('Follow')}
+                        {localIsFollowing ? t('Following') : t('Follow')}
                     </button>
                 )}
             </motion.div>
@@ -112,7 +135,7 @@ const UserCard = ({ user: targetUser, t, isCompact = false }) => {
                 <div className="grid grid-cols-2 gap-4 w-full mb-8">
                     <div className="p-4 rounded-3xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
                         <div className="text-lg font-black text-gray-900 dark:text-white leading-none mb-1">
-                            {followerCount > 1000 ? `${(followerCount / 1000).toFixed(1)}k` : followerCount}
+                            {localFollowerCount > 1000 ? `${(localFollowerCount / 1000).toFixed(1)}k` : localFollowerCount}
                         </div>
                         <div className="text-[9px] font-black uppercase text-gray-400 tracking-widest">{t('Followers')}</div>
                     </div>
@@ -129,12 +152,12 @@ const UserCard = ({ user: targetUser, t, isCompact = false }) => {
                 <button
                     onClick={handleFollow}
                     disabled={loading}
-                    className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 ${isFollowing
-                            ? 'bg-gray-100 dark:bg-white/5 text-gray-500 hover:bg-rose-500 hover:text-white'
-                            : 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95'
+                    className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 ${localIsFollowing
+                        ? 'bg-gray-100 dark:bg-white/5 text-gray-500 hover:bg-rose-500 hover:text-white'
+                        : 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 hover:scale-[1.02] active:scale-95'
                         }`}
                 >
-                    {isFollowing ? (
+                    {localIsFollowing ? (
                         <>
                             <HiUserMinus size={14} />
                             {t('Unlink Node')}

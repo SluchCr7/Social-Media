@@ -34,20 +34,40 @@ const SuggestionCard = memo(({ item, type, delay }) => {
   const { t } = useTranslation();
   const { userData } = useGetData(user?._id);
 
+  // Local state for real-time updates
   const isUserType = type === "user";
-  const isFollowingOrMember = isContained(
-    isUserType ? item.followers : item.members,
-    userData?._id
+  const [localIsFollowingOrMember, setLocalIsFollowingOrMember] = React.useState(
+    isContained(isUserType ? item.followers : item.members, userData?._id)
   );
+
+  // Sync with prop updates
+  React.useEffect(() => {
+    setLocalIsFollowingOrMember(
+      isContained(isUserType ? item.followers : item.members, userData?._id)
+    );
+  }, [item, userData?._id, isUserType]);
 
   const isOwner = useMemo(() => !isUserType && item?.owner?._id === userData?._id, [item, userData, isUserType]);
   const hrefPath = useMemo(() => isUserType ? `/Pages/User/${item?._id}` : `/Pages/Community/${item?._id}`, [item?._id, isUserType]);
 
-  const followHandler = (e) => {
+  const followHandler = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isUserType) followUser(item._id);
-    else joinToCommunity(item._id);
+
+    if (isUserType) {
+      // Optimistic user update
+      const wasFollowing = localIsFollowingOrMember;
+      setLocalIsFollowingOrMember(!wasFollowing);
+
+      const result = await followUser(item._id);
+
+      if (!result?.success) {
+        setLocalIsFollowingOrMember(wasFollowing);
+      }
+    } else {
+      // For community, we keep existing behavior or implement similar if accessible
+      joinToCommunity(item._id);
+    }
   };
 
   return (
@@ -131,12 +151,12 @@ const SuggestionCard = memo(({ item, type, delay }) => {
           whileTap={{ scale: 0.96 }}
           onClick={followHandler}
           className={`relative z-10 w-full py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all duration-300
-            ${isFollowingOrMember
+            ${localIsFollowingOrMember
               ? 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-rose-500 hover:text-white border border-gray-200/50 dark:border-white/10 overflow-hidden group/btn'
               : 'text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/25'
             }`}
         >
-          {isFollowingOrMember ? (
+          {localIsFollowingOrMember ? (
             <>
               <HiUserMinus size={14} className="group-hover/btn:scale-110 transition-transform" />
               {isUserType ? t("Sever Link") : t("Leave Hub")}
@@ -149,7 +169,7 @@ const SuggestionCard = memo(({ item, type, delay }) => {
           )}
 
           {/* Subtle Button Shine */}
-          {!isFollowingOrMember && (
+          {!localIsFollowingOrMember && (
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
           )}
         </motion.button>
