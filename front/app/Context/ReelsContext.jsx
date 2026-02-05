@@ -206,7 +206,6 @@ export const ReelsContext = createContext();
 export const ReelsProvider = ({ children }) => {
   const { user } = useAuth();
   const { showAlert } = useAlert();
-  const { showAlert } = useAlert();
   const { addNotify } = useNotify();
   const { socket } = useSocket();
 
