@@ -72,7 +72,7 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
     };
     if (showMenu) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showMenu, triggerRef]);
+  }, [showMenu, triggerRef, setShowMenu]);
 
   const ownerOptions = useMemo(() => [
     {
@@ -111,7 +111,7 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
       }),
       className: 'text-red-500 hover:bg-red-500/10 border-red-500/10 hover:border-red-500/20',
     },
-  ], [userData, post, t]);
+  ], [userData, post, t, pinPost, setPostIsEdit, setShowPostModelEdit, displayOrHideComments, deletePost]);
 
   const visitorOptions = useMemo(() => [
     {
@@ -146,7 +146,7 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
       }),
       className: 'text-red-500 hover:bg-red-500/10 border-red-500/10 hover:border-red-500/20',
     }
-  ], [user, post, t]);
+  ], [user, post, t, toggleBlockNotification, setIsTargetId, setReportedOnType, setShowMenuReport, copyPostLink, showAlert, blockOrUnblockUser]);
 
   const optionsToShow = isOwner ? ownerOptions : visitorOptions;
 
@@ -178,9 +178,13 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
                   key={index}
                   {...option}
                   loading={loadingBtn}
-                  action={() => {
+                  action={(e) => {
+                    e?.stopPropagation();
                     option.action();
-                    setShowMenu(false);
+                    // Close menu unless it's an action that opens a nested confirmation modal
+                    if (option.text !== t('Terminated') && option.text !== t('Sever Connection') && option.text !== t('Modify Data')) {
+                      setShowMenu(false);
+                    }
                   }}
                 />
               ))}
@@ -219,6 +223,7 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
                   onClick={() => {
                     confirmAction();
                     setConfirmAction(null);
+                    setShowMenu(false);
                   }}
                   className="w-full py-4 rounded-2xl bg-red-500 text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-red-500/20 hover:bg-red-600 transition-all"
                 >
