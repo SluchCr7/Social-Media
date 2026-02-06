@@ -6,7 +6,7 @@ const fs = require('fs')
 const { v2 } = require('cloudinary')
 const { User } = require('../Modules/User')
 const { sendNotificationHelper } = require('../utils/SendNotification')
-const { sendNotificationHelper } = require('../utils/SendNotification')
+
 const { communityPopulate } = require('../Populates/Populate')
 const { io } = require("../Config/socket");
 
