@@ -1080,20 +1080,7 @@ const saveReel = asyncHandler(async (req, res) => {
 
 
 
-module.exports = {
-  updateAccountStatus,
-  makeUserAdmin,
-  MakeAccountPreimumVerify,
-  togglePrivateAccount, DeleteUser,
-  deleteAllUsers, getSuggestedUsers,
-  blockOrUnblockUser, getAllUsers, getUserById,
-  RegisterNewUser, LoginUser, verifyAccount,
-  uploadPhoto, uploadCoverPhoto, makeFollow, updatePassword,
-  updateProfile, pinPost, updateLinksSocial,
-  getRelationship,
-  updateRelationship,
-  toggleSongInPlaylist, acceptCookies, toggleBlockNotification, saveReel
-}
+
 
 
 
@@ -1154,5 +1141,13 @@ module.exports = {
   togglePrivateAccount,
   makeUserAdmin,
   getUserPoints,
-  getUserPointsHistory
+  getUserPointsHistory,
+  deleteAllUsers,
+  updateAccountStatus,
+  getRelationship,
+  updateRelationship,
+  toggleSongInPlaylist,
+  acceptCookies,
+  toggleBlockNotification,
+  saveReel
 }
