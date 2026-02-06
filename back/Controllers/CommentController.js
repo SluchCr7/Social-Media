@@ -6,6 +6,7 @@ const Reel = require('../Modules/Reel');
 const { sendNotificationHelper } = require('../utils/SendNotification');
 const { io } = require("../Config/socket");
 const { commentPopulate } = require('../Populates/Populate');
+const { updateUserPoints } = require("../utils/PointsEngine");
 
 // ================== Get Comments for a Target (Post, Reel, or Comment) ==================
 // ================== Get Comments for a Target (Paginated) ==================
@@ -191,11 +192,13 @@ const addNewComment = asyncHandler(async (req, res) => {
     rootType,
   });
 
-  const user = await User.findById(req.user._id);
-  user.userLevelPoints += 3;
-  user.updateLevelRank();
+  // const user = await User.findById(req.user._id);
+  // user.userLevelPoints += 3;
+  // user.updateLevelRank();
 
-  await Promise.all([user.save(), comment.save()]);
+  // await Promise.all([user.save(), comment.save()]);
+  await comment.save();
+  await updateUserPoints(req.user._id, 'COMMENT', comment._id);
 
   const populatedComment = await Comment.findById(comment._id).populate(commentPopulate);
 
@@ -251,6 +254,8 @@ const deleteComment = asyncHandler(async (req, res) => {
   await comment.remove();
 
   io.emit("comment:delete", req.params.id);
+
+  await updateUserPoints(comment.owner, 'DELETE_COMMENT', comment._id);
 
   res.status(200).json({ message: 'Comment and its replies deleted' });
 });

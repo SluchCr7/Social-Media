@@ -11,6 +11,7 @@ const { io } = require("../Config/socket");
 const { postPopulate } = require("../Populates/Populate");
 const streamifier = require("streamifier");
 const { checkImageSensitivity } = require('../utils/ImgShield');
+const { updateUserPoints } = require("../utils/PointsEngine");
 
 // ================== Get All Posts ==================
 const getAllPosts = asyncHandler(async (req, res) => {
@@ -161,10 +162,10 @@ const addPost = async (req, res) => {
       }
     }
 
-    const user = await User.findById(userId);
-    user.userLevelPoints += 7;
-    user.updateLevelRank();
-    await user.save();
+    // user.userLevelPoints += 7;
+    // user.updateLevelRank();
+    // await user.save();
+    await updateUserPoints(userId, 'CREATE_POST', post._id);
 
     await post.save();
     await post.populate(postPopulate);
@@ -204,6 +205,9 @@ const deletePost = asyncHandler(async (req, res) => {
 
   // 🔴 Emit Socket Event (Real-time Delete)
   io.emit("post:delete", req.params.id);
+
+  // Update Points (Deduct)
+  await updateUserPoints(post.owner, 'DELETE_POST', post._id);
 
   res.status(200).json({ message: "Post deleted" });
 });
@@ -275,6 +279,8 @@ const likePost = asyncHandler(async (req, res) => {
       req.params.id,
       { $pull: { likes: req.user._id } }
     );
+    // Points for Unliking
+    await updateUserPoints(req.user._id, 'REMOVE_LIKE', post._id);
   } else {
     // إضافة لايك
     await Post.findByIdAndUpdate(
@@ -298,7 +304,11 @@ const likePost = asyncHandler(async (req, res) => {
         actionModel: "Post",
       });
     }
+    // Points for Liking
+    await updateUserPoints(req.user._id, 'LIKE_POST', post._id);
   }
+
+
 
   // جلب البوست كامل بعد التعديل مع كل populate
   const updatedPost = await Post.findById(req.params.id)
@@ -383,6 +393,8 @@ const sharePost = asyncHandler(async (req, res) => {
   }
   await sharedPost.save();
   await sharedPost.populate(postPopulate);
+
+  await updateUserPoints(req.user._id, 'SHARE_POST', sharedPost._id);
 
   // ✅ رجع بوست كامل فقط
   res.status(201).json(sharedPost);

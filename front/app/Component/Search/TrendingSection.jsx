@@ -94,10 +94,12 @@ const TrendingSection = ({ topHashtags = [], suggestedUsers = [], t }) => {
                             className="group p-5 rounded-[2rem] bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-xl hover:bg-purple-500/5 transition-all duration-500 flex items-center gap-4"
                         >
                             <div className="relative w-14 h-14 flex-shrink-0 group-hover:scale-110 transition-transform duration-500">
-                                <img
+                                <Image
                                     src={user.profilePhoto?.url || '/default-user.png'}
                                     alt={user.username}
-                                    className="w-full h-full rounded-2xl object-cover shadow-lg border-2 border-transparent group-hover:border-purple-500/30 transition-all"
+                                    width={56}
+                                    height={56}
+                                    className="rounded-2xl object-cover shadow-lg border-2 border-transparent group-hover:border-purple-500/30 transition-all"
                                 />
                                 {user.isVerify && (
                                     <div className="absolute -top-1 -right-1 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center border-2 border-white dark:border-black shadow-lg">

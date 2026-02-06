@@ -23,7 +23,7 @@ export default function AnalyticsContainer() {
     fetchUserPosts(userData._id, 1, 200, true)
     if (userData.followers) setFollowers(userData.followers)
     if (userData.following) setFollowing(userData.following)
-  }, [userData])
+  }, [userData, fetchUserPosts])
 
   // Derived metrics
   const stats = useMemo(() => {

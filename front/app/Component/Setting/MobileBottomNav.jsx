@@ -12,7 +12,7 @@ import {
   HiBell,
   HiUserGroup,
   HiCog6Tooth,
-  HiSparkles
+  HiSparkles // Verified import
 } from 'react-icons/hi2';
 
 const TAB_ICONS = {

@@ -4,7 +4,7 @@ import { usePost } from '@/app/Context/PostContext'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FaHashtag, FaFire, FaClock, FaChartLine } from 'react-icons/fa'
-import { HiSparkles, HiTrendingUp, HiMagnifyingGlass } from 'react-icons/hi2'
+import { HiSparkles, HiMagnifyingGlass, HiArrowTrendingUp } from 'react-icons/hi2'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const Page = ({ params }) => {
@@ -106,7 +106,7 @@ const Page = ({ params }) => {
                           transition={{ duration: 2, repeat: Infinity }}
                           className="px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-black uppercase tracking-wider flex items-center gap-1"
                         >
-                          <HiTrendingUp className="w-3 h-3" />
+                          <HiArrowTrendingUp className="w-3 h-3" />
                           {t('Trending')}
                         </motion.div>
                       )}
@@ -161,7 +161,7 @@ const Page = ({ params }) => {
                 {[
                   { id: 'recent', label: t('Recent'), icon: FaClock },
                   { id: 'popular', label: t('Popular'), icon: FaFire },
-                  { id: 'trending', label: t('Trending'), icon: HiTrendingUp }
+                  { id: 'trending', label: t('Trending'), icon: HiArrowTrendingUp }
                 ].map(({ id, label, icon: Icon }) => (
                   <motion.button
                     key={id}
@@ -169,8 +169,8 @@ const Page = ({ params }) => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setSortBy(id)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${sortBy === id
-                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
-                        : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10'
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                      : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10'
                       }`}
                   >
                     <Icon className="w-3 h-3" />

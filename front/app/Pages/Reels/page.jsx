@@ -13,14 +13,14 @@ const ReelsPage = () => {
   const [scrolling, setScrolling] = useState(false);
   const [isMuted, setIsMuted] = useState(false); // الصوت يعمل افتراضياً
 
-  const goToReel = (index) => {
+  const goToReel = useCallback((index) => {
     if (index < 0 || index >= reels.length || scrolling) return;
     setScrolling(true);
     setCurrentIndex(index);
     reelRefs.current[index]?.scrollIntoView({ behavior: 'smooth' });
 
     setTimeout(() => setScrolling(false), 500);
-  };
+  }, [reels.length, scrolling]);
 
   // 🔽 التحكم بالأسهم (للكمبيوتر)
   useEffect(() => {
@@ -30,7 +30,7 @@ const ReelsPage = () => {
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [currentIndex, reels.length, scrolling , goToReel]);
+  }, [currentIndex, reels.length, scrolling, goToReel]);
 
   // 🖱️ التحكم بعجلة الماوس
   useEffect(() => {
@@ -42,7 +42,7 @@ const ReelsPage = () => {
     const container = containerRef.current;
     container.addEventListener('wheel', handleWheel, { passive: false });
     return () => container.removeEventListener('wheel', handleWheel);
-  }, [currentIndex, scrolling, reels.length , goToReel]);
+  }, [currentIndex, scrolling, reels.length, goToReel]);
 
   // 📱 التحكم بالسحب (Swipe) على الموبايل
   useEffect(() => {
@@ -84,7 +84,7 @@ const ReelsPage = () => {
         container.removeEventListener('touchend', handleTouchEnd);
       }
     };
-  }, [currentIndex, scrolling, reels.length,goToReel]);
+  }, [currentIndex, scrolling, reels.length, goToReel]);
 
   return (
     <DesignReels

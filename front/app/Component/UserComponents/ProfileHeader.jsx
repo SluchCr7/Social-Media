@@ -62,8 +62,15 @@ const ProfileHeader = ({
 
   const levelPercent = useMemo(() => {
     const points = profileUser?.userLevelPoints || 0;
-    const next = profileUser?.nextLevelPoints || 500;
-    return Math.min((points / next) * 100, 100);
+    const levels = [0, 100, 250, 500, 1000];
+    const userLevel = profileUser?.level || 1;
+
+    if (userLevel >= 5) return 100;
+
+    const min = levels[userLevel - 1] || 0;
+    const max = levels[userLevel] || 100;
+
+    return Math.max(0, Math.min(100, ((points - min) / (max - min)) * 100));
   }, [profileUser]);
 
   const handleFollowAction = useCallback(async () => {
@@ -215,7 +222,11 @@ const ProfileHeader = ({
                   </div>
                   <div>
                     <div className="text-[10px] font-black text-white/30 uppercase tracking-widest">{t("Growth Level")}</div>
-                    <div className="text-xl font-black text-white">{profileUser?.userLevelRank || "Apprentice"}</div>
+                    <div className="text-xl font-black text-white flex items-center gap-2">
+                      <span>Level {profileUser?.level || 1}</span>
+                      <span className="text-white/20">•</span>
+                      <span className="text-base text-indigo-400">{profileUser?.userLevelRank || "Apprentice"}</span>
+                    </div>
                   </div>
                 </div>
                 <div className="text-right">
@@ -231,7 +242,12 @@ const ProfileHeader = ({
               </div>
               <div className="mt-3 flex justify-between items-center text-[10px] font-bold text-white/20 uppercase tracking-widest">
                 <span>{t("Current Evolution")}</span>
-                <span>{Math.max((profileUser?.nextLevelPoints || 500) - (profileUser?.userLevelPoints || 0), 0)} {t("XP to Next Terminal")}</span>
+                <span>
+                  {profileUser?.level >= 5
+                    ? t("Max Level Reached")
+                    : `${Math.max((([0, 100, 250, 500, 1000][profileUser?.level || 1] || 1000) - (profileUser?.userLevelPoints || 0)), 0)} ${t("XP to Next Level")}`
+                  }
+                </span>
               </div>
             </div>
 

@@ -28,7 +28,9 @@ const {
   saveReel,
   // 🔹 Controllers الجدد
   getRelationship,
-  updateRelationship
+  updateRelationship,
+  getUserPoints,
+  getUserPointsHistory
 } = require('../Controllers/UserController');
 
 const photoUpload = require('../Middelwares/uploadPhoto');
@@ -64,5 +66,9 @@ route.route('/block/notify/:userId').post(verifyToken, toggleBlockNotification);
 // 🔹 Relationship routes
 route.route('/relationship/:userId').get(verifyToken, getRelationship); // جلب حالة العلاقة
 route.route('/relationship/:userId').put(verifyToken, updateRelationship); // تحديث العلاقة
+
+// 🔹 Points & Levels
+route.route('/:id/points').get(verifyToken, getUserPoints);
+route.route('/:id/points/history').get(verifyToken, getUserPointsHistory);
 
 module.exports = route;

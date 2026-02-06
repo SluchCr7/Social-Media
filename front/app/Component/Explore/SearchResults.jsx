@@ -179,7 +179,13 @@ const SearchResults = memo(({ searchResults, searchQuery, user, t, maxResults })
                   <div className="mt-4 flex gap-2">
                     {p.media.slice(0, 3).map((m, idx) => (
                       <div key={idx} className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-white/5 overflow-hidden">
-                        <img src={m.url} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                        <Image
+                          src={m.url}
+                          alt="media"
+                          width={48}
+                          height={48}
+                          className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                        />
                       </div>
                     ))}
                   </div>

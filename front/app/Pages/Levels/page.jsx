@@ -10,6 +10,9 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useGetData } from '@/app/Custome/useGetData'
 import { useAuth } from '@/app/Context/AuthContext'
+import { useUser } from '@/app/Context/UserContext'
+import { useEffect, useState } from 'react'
+import { format } from 'date-fns'
 
 /* ---------------- LEVELS & METHODS ---------------- */
 const LEVELS = [
@@ -22,12 +25,12 @@ const LEVELS = [
 ]
 
 const EARN_METHODS = [
-  { icon: FaThumbsUp, text: 'Like a post', points: 5 },
-  { icon: FaCommentDots, text: 'Comment on a post', points: 10 },
-  { icon: FaShareAlt, text: 'Share a post', points: 20 },
-  { icon: FaPenNib, text: 'Create a post', points: 50 },
-  { icon: FaUserPlus, text: 'Gain a follower', points: 15 },
-  { icon: FaCalendarCheck, text: 'Daily login', points: 25 },
+  { icon: FaThumbsUp, text: 'Like a post', points: 2 },
+  { icon: FaCommentDots, text: 'Comment on a post', points: 5 },
+  { icon: FaShareAlt, text: 'Share a post', points: 7 },
+  { icon: FaPenNib, text: 'Create a post', points: 10 },
+  { icon: FaUserPlus, text: 'Follow a user', points: 3 },
+  { icon: FaUserGraduate, text: 'Profile Completion', points: 20 },
 ]
 
 /* ---------------- HELPERS ---------------- */
@@ -142,6 +145,15 @@ export default function LevelsPage() {
     const range = Math.max(1, max - min)
     return Math.min(100, Math.round(((currentPoints - min) / range) * 100))
   }, [currentLevel, currentPoints, nextLevelPoints])
+
+  const { getPointsHistory } = useUser();
+  const [history, setHistory] = useState([]);
+
+  useEffect(() => {
+    if (user?._id) {
+      getPointsHistory(user._id).then(setHistory);
+    }
+  }, [user?._id, getPointsHistory]);
 
   const nextLevelIndex = LEVELS.findIndex((l) => l.name === currentLevel.name) + 1
   const nextLevel = nextLevelIndex < LEVELS.length ? LEVELS[nextLevelIndex] : null
@@ -321,6 +333,41 @@ export default function LevelsPage() {
             </div>
           </aside>
         </main>
+
+        {/* History Section */}
+        <section className="mt-16">
+          <h3 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-8">
+            {t('Recent Point Activity')}
+          </h3>
+          <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-3xl border border-white/20 dark:border-gray-700/30 p-6 shadow-2xl">
+            {history.length > 0 ? (
+              <div className="space-y-4">
+                {history.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-4 rounded-2xl bg-white/40 dark:bg-gray-700/40 border border-white/10">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${item.points > 0 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                        {item.points > 0 ? <FaCrown /> : <FaFireAlt />}
+                      </div>
+                      <div>
+                        <div className="font-bold text-gray-800 dark:text-gray-200 capitalize">
+                          {item.action.replace(/_/g, ' ').toLowerCase()}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {format(new Date(item.date), 'MMM dd, yyyy • HH:mm')}
+                        </div>
+                      </div>
+                    </div>
+                    <div className={`font-black text-lg ${item.points > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {item.points > 0 ? '+' : ''}{item.points} XP
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 text-gray-500">{t('No history available yet.')}</div>
+            )}
+          </div>
+        </section>
 
         {/* Footer CTA */}
         <motion.div

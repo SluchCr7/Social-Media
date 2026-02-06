@@ -246,7 +246,13 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
                     <div className="flex -space-x-2">
                       {post.comments.slice(0, 3).map((c, i) => (
                         <div key={i} className="w-6 h-6 rounded-full border-2 border-white dark:border-black overflow-hidden bg-gray-200 dark:bg-gray-800 shadow-sm">
-                          <img src={c?.owner?.profilePhoto?.url} alt="av" className="w-full h-full object-cover" />
+                          <Image
+                            src={c?.owner?.profilePhoto?.url || '/default-avatar.png'}
+                            alt="av"
+                            width={24}
+                            height={24}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                       ))}
                     </div>

@@ -217,6 +217,20 @@ const UserSchema = new mongoose.Schema({
             refId: { type: mongoose.Schema.Types.ObjectId }, // Optional reference to the searched item
             createdAt: { type: Date, default: Date.now }
         }
+    ],
+
+    // 🔹 New Gamification Fields
+    level: {
+        type: Number,
+        default: 1
+    },
+    pointsHistory: [
+        {
+            action: { type: String, required: true },
+            points: { type: Number, required: true },
+            targetId: { type: mongoose.Schema.Types.ObjectId },
+            date: { type: Date, default: Date.now }
+        }
     ]
 }, {
     timestamps: true,

@@ -346,6 +346,19 @@ export const UserContextProvider = ({ children }) => {
     }
   }, [user, updateLocalUser, showToast]);
 
+  /**
+   * Fetch Points History
+   */
+  const getPointsHistory = useCallback(async (userId) => {
+    try {
+      const res = await api.get(`/auth/${userId}/points/history`);
+      return res.data;
+    } catch (err) {
+      console.error('Fetch points history error:', err);
+      return [];
+    }
+  }, []);
+
   // --- Effects ---
 
   // Fetch suggested users
@@ -385,11 +398,39 @@ export const UserContextProvider = ({ children }) => {
 
     socket.on('user:update', handleUserUpdate);
 
+    // 🏆 Points & Level Real-time Updates
+    const handlePointsUpdate = (data) => {
+      const { points, level, levelChanged, pointsChange, action, progress, nextLevelPoints } = data;
+
+      if (user) {
+        // Update local user state
+        const updatedUser = {
+          ...user,
+          userLevelPoints: points,
+          level,
+          nextLevelPoints
+        };
+        updateLocalUser({ ...updatedUser, token: user.token });
+
+        // Show Toast Notification
+        if (levelChanged) {
+          showToast(`🎉 Level Up! You are now Level ${level}!`, 'success');
+        } else if (pointsChange > 0) {
+          // Optional: Only show for significant points or format nicely
+          const actionLabel = action.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+          showToast(`+${pointsChange} Points: ${actionLabel}`, 'success');
+        }
+      }
+    };
+
+    socket.on('pointsUpdate', handlePointsUpdate);
+
     return () => {
       socket.off('getOnlineUsers');
       socket.off('user:update', handleUserUpdate);
+      socket.off('pointsUpdate', handlePointsUpdate);
     };
-  }, [socket, user, setUsers, updateLocalUser]);
+  }, [socket, user, setUsers, updateLocalUser, showToast]);
 
   // --- Context Value ---
   const value = useMemo(() => ({
@@ -410,11 +451,12 @@ export const UserContextProvider = ({ children }) => {
     toggleSaveReel,
     pinPost,
     blockUser,
+    getPointsHistory,
   }), [
     suggestedUsers, onlineUsers, loading, updateProfileLoading,
     followUser, updatePhoto, updateProfile, updatePassword,
     togglePrivateAccount, toggleShowOnlineStatus, getUserById, updateCoverPhoto, saveMusicInPlayList,
-    toggleBlockNotification, toggleSaveReel, pinPost, blockUser
+    toggleBlockNotification, toggleSaveReel, pinPost, blockUser, getPointsHistory
   ]);
 
   return (

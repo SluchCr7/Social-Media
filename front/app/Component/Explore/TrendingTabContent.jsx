@@ -55,7 +55,13 @@ const TrendingPostCard = memo(({ post, idx, t }) => {
         <div className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-8 rounded-xl overflow-hidden border border-white/10 ring-4 ring-indigo-500/10">
-              <img src={post.owner?.profilePhoto?.url || '/default-avatar.png'} alt="av" className="w-full h-full object-cover" />
+              <Image
+                src={post.owner?.profilePhoto?.url || '/default-avatar.png'}
+                alt="av"
+                width={32}
+                height={32}
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-black text-white truncate tracking-tight">{post?.owner?.username}</p>
@@ -104,8 +110,8 @@ const TrendingTabContent = memo(({ trendingToShow, timeFilter, setTimeFilter, t 
             key={key}
             onClick={() => setTimeFilter(key)}
             className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${timeFilter === key
-                ? 'bg-white text-black shadow-lg'
-                : 'text-white/30 hover:text-white/60'
+              ? 'bg-white text-black shadow-lg'
+              : 'text-white/30 hover:text-white/60'
               }`}
           >
             {label}

@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useMemo, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  HiSparkles,
+  HiSparkles, // Verified import
   HiCommandLine,
   HiCog6Tooth,
   HiShieldCheck,

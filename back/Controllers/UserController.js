@@ -17,7 +17,10 @@ const { Story } = require("../Modules/Story");
 const { Music } = require('../Modules/Music')
 const { userOnePopulate } = require("../Populates/Populate")
 const { io } = require("../Config/socket"); // Import IO
+const { userOnePopulate } = require("../Populates/Populate")
+const { io } = require("../Config/socket"); // Import IO
 const Reel = require('../Modules/Reel')
+const { updateUserPoints } = require("../utils/PointsEngine");
 /**
  * @desc Register New User
  * @route POST /api/auth/register
@@ -415,6 +418,7 @@ const makeFollow = asyncHandler(async (req, res) => {
     // 🔴 Unfollow
     await User.findByIdAndUpdate(user._id, { $pull: { followers: req.user._id } });
     await User.findByIdAndUpdate(currentUser._id, { $pull: { following: user._id } });
+    await updateUserPoints(req.user._id, 'UNFOLLOW_USER', user._id);
   } else {
     // 🟢 Follow
     await User.findByIdAndUpdate(user._id, { $push: { followers: req.user._id } });
@@ -435,6 +439,7 @@ const makeFollow = asyncHandler(async (req, res) => {
         });
       }
     }
+    await updateUserPoints(req.user._id, 'FOLLOW_USER', user._id);
   }
 
   // Get updated user data with full population
@@ -535,6 +540,13 @@ const updateProfile = asyncHandler(async (req, res) => {
 
   // Socket Emit
   io.emit("user:update", updatedUser);
+
+  // Points: Profile Completion (Award once)
+  const fullUserCheck = await User.findById(currentUserId).select('pointsHistory profilePhoto description');
+  const hasAward = fullUserCheck.pointsHistory.some(h => h.action === 'PROFILE_COMPLETION');
+  if (!hasAward && fullUserCheck.profilePhoto && fullUserCheck.description) {
+    await updateUserPoints(currentUserId, 'PROFILE_COMPLETION', currentUserId);
+  }
 });
 
 const updatePassword = asyncHandler(async (req, res) => {
@@ -1087,3 +1099,73 @@ module.exports = {
   toggleSongInPlaylist, acceptCookies, toggleBlockNotification, saveReel
 }
 
+const makeUserAdmin = asyncHandler(async (req, res) => {
+  const userId = req.params.id;
+  const user = await User.findById(userId);
+  if (!user) { res.status(404); throw new Error('User not found'); }
+  if (user.isAdmin) { res.status(400); throw new Error('User is already an admin'); }
+  user.isAdmin = true;
+  await user.save();
+  res.status(200).json({ message: 'User is now an admin', user });
+});
+
+// ================== Get User Points ==================
+const getUserPoints = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id).select('level userLevelRank userLevelPoints nextLevelPoints');
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  // Calculate Progress dynamically or fetch from schema if stored
+  const POINTS_CONFIG = require('../utils/PointsEngine').POINTS_CONFIG; // Just to be safe or re-import if needed
+  // Using the helper logic from engine would be cleaner but passing logic here is fine
+  const minPointsForLevels = { 1: 0, 2: 100, 3: 250, 4: 500, 5: 1000 };
+  const currentMin = minPointsForLevels[user.level] || 1000;
+  const nextMin = minPointsForLevels[user.level + 1] || 100000;
+
+  // Re-use logic from Engine if exported, but for now calculate simple progress
+  const progress = user.level >= 5 ? 100 : Math.round(((user.userLevelPoints - currentMin) / (nextMin - currentMin)) * 100);
+
+  res.status(200).json({
+    level: user.level,
+    points: user.userLevelPoints,
+    rank: user.userLevelRank,
+    progress: Math.max(0, Math.min(100, progress))
+  });
+});
+
+// ================== Get User Points History ==================
+const getUserPointsHistory = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id).select('pointsHistory');
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  res.status(200).json(user.pointsHistory.reverse());
+});
+
+module.exports = {
+  User,
+  validateUserLinks,
+  LoginValidate,
+  validateEmail,
+  ValidateUser,
+  validateUserUpdate,
+  validatePasswordUpdate,
+  RegisterNewUser,
+  LoginUser,
+  getAllUsers,
+  getUserById,
+  DeleteUser,
+  verifyAccount,
+  uploadPhoto,
+  uploadCoverPhoto,
+  makeFollow,
+  updateProfile,
+  updatePassword,
+  pinPost,
+  blockOrUnblockUser,
+  updateLinksSocial,
+  getSuggestedUsers,
+  MakeAccountPreimumVerify,
+  togglePrivateAccount,
+  makeUserAdmin,
+  getUserPoints,
+  getUserPointsHistory
+}
