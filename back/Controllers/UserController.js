@@ -1132,7 +1132,6 @@ module.exports = {
   User,
   validateUserLinks,
   LoginValidate,
-  validateEmail,
   ValidateUser,
   validateUserUpdate,
   validatePasswordUpdate,
