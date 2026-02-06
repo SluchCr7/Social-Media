@@ -1,17 +1,5 @@
-// ملف جديد: ../Custome/useFeedLogic.js
 
 import { useMemo } from 'react';
-
-/**
- * Hook مخصص لإدارة منطق فرز وتصفية ودمج المنشورات والاقتراحات.
- * الهدف: فصل منطق التغذية عن المكون Sluchits لجعله أنظف وأسهل في الصيانة.
- * * @param {string} activeTab - التبويب النشط ('foryou' أو 'following').
- * @param {Array} posts - قائمة المنشورات الخام.
- * @param {Array} suggestedUsers - قائمة المستخدمين المقترحين.
- * @param {Array} communities - قائمة المجتمعات.
- * @param {object} userData - بيانات المستخدم الحالية (للاهتمامات والمتابعين).
- * @returns {Array} - قائمة مُدمجة جاهزة للعرض (منشورات واقتراحات).
- */
 export const useFeedLogic = (activeTab, posts, suggestedUsers, communities, userData) => {
     const following = Array.isArray(userData?.following) ? userData.following : [];
     const userId = userData?._id;

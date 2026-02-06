@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import { createContext,useEffect, useContext, useState, useCallback, useMemo } from 'react';
 import api from '../utils/api';
 import { useAuth } from './AuthContext';
 import { useFeedback } from './FeedbackContext';
