@@ -17,8 +17,6 @@ const { Story } = require("../Modules/Story");
 const { Music } = require('../Modules/Music')
 const { userOnePopulate } = require("../Populates/Populate")
 const { io } = require("../Config/socket"); // Import IO
-const { userOnePopulate } = require("../Populates/Populate")
-const { io } = require("../Config/socket"); // Import IO
 const Reel = require('../Modules/Reel')
 const { updateUserPoints } = require("../utils/PointsEngine");
 /**
@@ -795,9 +793,7 @@ const togglePrivateAccount = async (req, res) => {
 };
 
 
-// @desc    Make a user an Admin
-// @route   PUT /api/admin/users/:id/make-admin
-// @access  Admin only
+
 const makeUserAdmin = asyncHandler(async (req, res) => {
   const userId = req.params.id;
 
@@ -1099,15 +1095,7 @@ module.exports = {
   toggleSongInPlaylist, acceptCookies, toggleBlockNotification, saveReel
 }
 
-const makeUserAdmin = asyncHandler(async (req, res) => {
-  const userId = req.params.id;
-  const user = await User.findById(userId);
-  if (!user) { res.status(404); throw new Error('User not found'); }
-  if (user.isAdmin) { res.status(400); throw new Error('User is already an admin'); }
-  user.isAdmin = true;
-  await user.save();
-  res.status(200).json({ message: 'User is now an admin', user });
-});
+
 
 // ================== Get User Points ==================
 const getUserPoints = asyncHandler(async (req, res) => {
