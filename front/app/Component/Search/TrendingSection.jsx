@@ -3,7 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { HiHashtag, HiUserPlus, HiChartBar, HiChevronRight, HiSparkles } from 'react-icons/hi2';
-
+import Image from 'next/image';
 const TrendingSection = ({ topHashtags = [], suggestedUsers = [], t }) => {
     // topHashtags can be [ [tag, count], ... ] or [ {name, count}, ... ]
     const normalizedHashtags = topHashtags.map(h => Array.isArray(h) ? { name: h[0], count: h[1] } : h);
