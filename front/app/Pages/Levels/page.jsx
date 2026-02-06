@@ -1,7 +1,7 @@
 
 'use client'
 
-import React, { useMemo, Suspense, lazy } from 'react'
+import React, { useMemo, Suspense, lazy, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   FaUserGraduate, FaMedal, FaCrown, FaFireAlt, FaStar, FaTrophy,
@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { useGetData } from '@/app/Custome/useGetData'
 import { useAuth } from '@/app/Context/AuthContext'
 import { useUser } from '@/app/Context/UserContext'
-import { useEffect, useState } from 'react'
+
 import { format } from 'date-fns'
 
 /* ---------------- LEVELS & METHODS ---------------- */
