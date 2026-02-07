@@ -111,12 +111,12 @@ const SluchitEntry = forwardRef(({ post }, ref) => {
             <div className="flex gap-2">
               {post?.isPinned && (
                 <div className="px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-[9px] font-black uppercase tracking-widest text-yellow-600 dark:text-yellow-500">
-                  Pinned
+                  {t("Pinned")}
                 </div>
               )}
               {isShared && (
                 <div className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[9px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-500">
-                  Shared Vision
+                  {t("Shared Vision")}
                 </div>
               )}
             </div>
