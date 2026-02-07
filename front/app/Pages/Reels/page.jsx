@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect , useCallback } from 'react';
 import { useReels } from '../../Context/ReelsContext';
 import DesignReels from './Design';
 

@@ -276,7 +276,7 @@ const NewPostPresenter = (props) => {
                     type="button"
                     onClick={handlePost}
                     disabled={!canPost}
-                    className="w-full py-4.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-[1.5rem] shadow-xl shadow-indigo-600/20 transition-all text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-[1.5rem] shadow-xl shadow-indigo-600/20 transition-all text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2"
                   >
                     {loading ? (
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
