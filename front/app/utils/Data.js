@@ -14,6 +14,7 @@ import { FaHistory, FaLock, FaSun, FaUserCog, FaBookmark, FaBell, FaUsers, FaQue
 import { RiMemoriesFill } from "react-icons/ri";
 import { FaUserFriends } from "react-icons/fa";
 import { IoGameController } from "react-icons/io5";
+import { MdOutlineExplore } from "react-icons/md";
 
 import {
   FiMessageCircle,
@@ -63,7 +64,7 @@ export const navSections = [
     title: "Main",
     items: [
       { icon: <GoHome />, text: "Home", link: "/" },
-      { icon: <GoSearch />, text: "Explore", link: "/Pages/Explore" },
+      { icon: <MdOutlineExplore />, text: "Explore", link: "/Pages/Explore" },
       { icon: <FaBookmark />, text: "Saved", link: "/Pages/Saved" },
       { icon: <MdOutlineOndemandVideo />, text: "Videos", link: "/Pages/Videos" },
       { icon: <IoIosMusicalNotes />, text: "Music", link: "/Pages/Music" },

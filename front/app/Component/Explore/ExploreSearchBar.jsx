@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiMagnifyingGlass, HiXMark, HiSparkles } from 'react-icons/hi2';
 
-const ExploreSearchBar = ({ search, setSearch, placeholder }) => {
+const ExploreSearchBar = memo(({ search, setSearch, placeholder }) => {
     const inputRef = useRef(null);
 
     // Keyboard shortcut ⌘K or Ctrl+K to focus search
@@ -20,26 +20,23 @@ const ExploreSearchBar = ({ search, setSearch, placeholder }) => {
     }, []);
 
     return (
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-4xl mx-auto w-full">
             <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 className="relative group"
             >
-                {/* 🔮 Background Glow */}
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 blur-3xl rounded-[4rem] opacity-0 group-focus-within:opacity-100 transition-opacity duration-700 -z-10" />
+                {/* 🌈 Dynamic Outer Glow */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 rounded-[2.5rem] blur-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-1000 -z-10" />
 
-                {/* 🔍 Search Container */}
-                <div className="relative flex items-center bg-white/90 dark:bg-[#0A0A0A]/90 backdrop-blur-3xl rounded-[3rem] border border-gray-200 dark:border-white/10 shadow-2xl transition-all duration-500 group-focus-within:border-indigo-500/50 group-focus-within:shadow-indigo-500/20 group-focus-within:scale-[1.01]">
+                {/* 🛸 Search Vessel */}
+                <div className="relative flex items-center bg-white/70 dark:bg-[#0A0A0A]/60 backdrop-blur-3xl rounded-[2rem] border border-gray-200 dark:border-white/10 shadow-xl group-focus-within:border-indigo-500/30 group-focus-within:shadow-2xl transition-all duration-500 overflow-hidden">
 
-                    {/* Left Icon (Search Circle) */}
-                    <div className="pl-6 pr-2">
-                        <motion.div
-                            whileHover={{ rotate: 15 }}
-                            className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center shadow-xl shadow-indigo-500/30"
-                        >
-                            <HiMagnifyingGlass className="w-7 h-7 text-white" />
-                        </motion.div>
+                    {/* Leading Icon */}
+                    <div className="pl-6">
+                        <div className="w-10 h-10 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-black flex items-center justify-center shadow-lg group-focus-within:scale-110 transition-transform duration-500">
+                            <HiMagnifyingGlass className="w-5 h-5" />
+                        </div>
                     </div>
 
                     {/* Input Field */}
@@ -49,76 +46,61 @@ const ExploreSearchBar = ({ search, setSearch, placeholder }) => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder={placeholder}
-                        className="w-full h-24 bg-transparent text-xl font-bold outline-none placeholder-gray-400 dark:placeholder-gray-700 text-gray-900 dark:text-white px-6 transition-all"
+                        className="w-full h-16 sm:h-20 bg-transparent text-lg sm:text-xl font-bold outline-none placeholder-gray-400 dark:placeholder-white/10 text-gray-900 dark:text-white px-5 transition-all"
                     />
 
-                    {/* Right Actions */}
-                    <div className="pr-8 flex items-center gap-5">
-                        {/* Keyboard Shortcut Hint */}
-                        {!search && (
-                            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100/50 dark:bg-white/5 rounded-2xl text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-[0.2em] border border-gray-200 dark:border-white/10">
-                                <span className="text-sm">⌘</span>
-                                <span>K</span>
-                            </div>
-                        )}
-
+                    {/* Trailing Actions */}
+                    <div className="pr-6 flex items-center gap-4">
                         <AnimatePresence mode="wait">
                             {search ? (
                                 <motion.button
                                     key="clear"
-                                    initial={{ scale: 0, rotate: -45 }}
-                                    animate={{ scale: 1, rotate: 0 }}
-                                    exit={{ scale: 0, rotate: 45 }}
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.8 }}
                                     onClick={() => setSearch('')}
-                                    className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white hover:shadow-xl hover:shadow-rose-500/40 transition-all active:scale-95"
-                                    aria-label="Clear Search"
+                                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 text-gray-400 hover:text-rose-500 transition-colors"
+                                    aria-label="Clear"
                                 >
-                                    <HiXMark className="w-6 h-6" />
+                                    <HiXMark className="w-5 h-5" />
                                 </motion.button>
                             ) : (
                                 <motion.div
-                                    key="ai"
+                                    key="hint"
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
-                                    className="flex items-center gap-3 px-5 py-2.5 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-2xl border border-indigo-500/20"
+                                    className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02] text-[10px] font-black text-gray-400 dark:text-gray-500"
                                 >
-                                    <HiSparkles className="w-4 h-4 text-indigo-500 animate-pulse" />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500">INDEX</span>
+                                    <span>⌘</span>
+                                    <span>K</span>
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
                 </div>
 
-                {/* 🚀 Smart Suggestions */}
-                <AnimatePresence>
-                    {!search && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ delay: 0.2 }}
-                            className="mt-8 flex items-center justify-center gap-4 flex-wrap"
-                        >
-                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mr-2">Suggestions:</span>
-                            {['#trending', '@sluchit', 'web3 discovery', 'music gear'].map((suggestion, i) => (
-                                <motion.button
-                                    key={suggestion}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: 0.3 + (i * 0.05) }}
-                                    onClick={() => setSearch(suggestion)}
-                                    className="px-5 py-2.5 rounded-full bg-white dark:bg-white/[0.02] hover:bg-indigo-600 hover:text-white text-[11px] font-bold text-gray-600 dark:text-gray-400 transition-all border border-gray-100 dark:border-white/5 hover:border-indigo-600 shadow-sm"
-                                >
-                                    {suggestion}
-                                </motion.button>
-                            ))}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                {/* ✨ Quick Suggestions */}
+                {!search && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-6 flex flex-wrap items-center justify-center gap-2.5"
+                    >
+                        {['#vibe', '@trending', 'discover', 'hot'].map((s, i) => (
+                            <button
+                                key={s}
+                                onClick={() => setSearch(s)}
+                                className="px-4 py-2 rounded-full border border-gray-100 dark:border-white/5 bg-white/50 dark:bg-white/[0.02] text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 hover:border-indigo-500/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all hover:translate-y-[-2px] hover:shadow-lg"
+                            >
+                                {s}
+                            </button>
+                        ))}
+                    </motion.div>
+                )}
             </motion.div>
         </div>
     );
-};
+});
 
+ExploreSearchBar.displayName = 'ExploreSearchBar';
 export default ExploreSearchBar;

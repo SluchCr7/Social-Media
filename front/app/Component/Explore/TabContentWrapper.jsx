@@ -1,20 +1,21 @@
-// ملف: Explore/TabContentWrapper.jsx
 'use client';
-import React from 'react';
+
+import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 
 const TabContentWrapper = ({ children }) => {
     return (
         <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.28 }}
-            className="flex flex-col gap-3"
+            initial={{ opacity: 0, scale: 0.99, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.99, y: -10 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="flex flex-col gap-6"
         >
             {children}
         </motion.div>
     );
 }
 
-export default TabContentWrapper;
+TabContentWrapper.displayName = 'TabContentWrapper';
+export default memo(TabContentWrapper);

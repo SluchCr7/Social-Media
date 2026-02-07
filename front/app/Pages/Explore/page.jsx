@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useAuth } from '../../Context/AuthContext';
 import { useNews } from '@/app/Context/NewsContext';
 import { useExplore } from '@/app/Context/ExploreContext';
@@ -14,12 +14,10 @@ const ExplorePage = () => {
   const { user } = useAuth();
   const { suggestedUsers } = useUser();
   const { news } = useNews();
-
-  // Use new contexts
   const { explorePosts, trendingPosts, trendingHashtags, loading: exploreLoading } = useExplore();
   const { searchQuery, setSearchQuery, searchResults } = useSearch();
 
-  // User data from hook
+  // User data from hook - ensures we have refreshed user data
   const { userData, loading: userLoading } = useGetData(user?._id);
 
   // -------------------------------
@@ -27,23 +25,23 @@ const ExplorePage = () => {
   // -------------------------------
   const suggestedUsersArr = useMemo(() => {
     if (!Array.isArray(suggestedUsers)) return [];
-    return suggestedUsers.slice(0, 8);
+    return suggestedUsers.slice(0, 12); // Increased for better fill
   }, [suggestedUsers]);
 
   // -------------------------------
   // 🔹 Create Interest Tabs
   // -------------------------------
   const interestTabs = useMemo(() => {
-    if (!news?.length || !userData?.interests) return [];
+    if (!news?.length || !userData?.interests?.length) return [];
 
     const lowerTitles = news.map(item => ({
       ...item,
-      lowerTitle: item.title.toLowerCase(),
+      lowerTitle: item.title?.toLowerCase() || '',
     }));
 
     return userData.interests
       .filter(Boolean)
-      .slice(0, 2)
+      .slice(0, 3) // Show top 3 interests
       .map((interest) => {
         const interestLower = interest.toLowerCase();
         const relatedNews = lowerTitles.filter(item =>
@@ -58,31 +56,44 @@ const ExplorePage = () => {
   // 🔹 Final Tabs (News + Interests)
   // -------------------------------
   const finalTabs = useMemo(
-    () => [{ name: 'News', news }, ...interestTabs],
+    () => [
+      { name: 'News', news: news || [] },
+      ...interestTabs
+    ],
     [news, interestTabs]
   );
 
   // -------------------------------
   // 🔹 Active Tab State
   // -------------------------------
-  const [activeTab, setActiveTab] = useState('News');
+  const [activeTab, setActiveTab] = useState('Trending'); // Default to Trending for more engagement
 
-  // Update active tab when tabs change
+  // Update active tab when tabs change if current becomes invalid
   useEffect(() => {
-    if (finalTabs.length > 0 && !finalTabs.find(tab => tab.name === activeTab)) {
+    const defaultTabs = ['Trending', 'Hashtags', 'Photos'];
+    const currentTabExists = finalTabs.some(tab => tab.name === activeTab) || defaultTabs.includes(activeTab);
+
+    if (!currentTabExists && finalTabs.length > 0) {
       setActiveTab(finalTabs[0].name);
     }
   }, [finalTabs, activeTab]);
 
   // Convert trending hashtags to the format expected by components
   const formattedHashtags = useMemo(() => {
+    if (!Array.isArray(trendingHashtags)) return [];
     return trendingHashtags.map(h => [h.name, h.count]);
   }, [trendingHashtags]);
+
+  // Handle Search Change with better cleanup
+  const handleSearchChange = useCallback((val) => {
+    setSearchQuery(val);
+  }, [setSearchQuery]);
 
   // -------------------------------
   // 🧭 Loading State
   // -------------------------------
-  if (userLoading || !userData) {
+  // Only block the entire page if we don't have user data at all and it's loading
+  if (userLoading && !userData) {
     return <Loading />;
   }
 
@@ -91,9 +102,9 @@ const ExplorePage = () => {
   // -------------------------------
   return (
     <DesignExplore
-      user={userData}
+      user={userData || user} // Fallback to auth user if userData is still fetching
       search={searchQuery}
-      setSearch={setSearchQuery}
+      setSearch={handleSearchChange}
       searchResults={searchResults}
       activeTab={activeTab}
       setActiveTab={setActiveTab}
@@ -102,9 +113,10 @@ const ExplorePage = () => {
       trendingPosts={trendingPosts}
       suggestedUsersArr={suggestedUsersArr}
       posts={explorePosts}
-      loading={exploreLoading}
+      loading={exploreLoading || userLoading}
     />
   );
 };
 
 export default ExplorePage;
+
