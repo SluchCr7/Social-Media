@@ -2,7 +2,7 @@
 
 import React, { memo } from 'react';
 import Link from 'next/link';
-import { HiTrendingUp, HiTrendingDown, HiHashtag } from 'react-icons/hi2';
+import { HiArrowTrendingUp, HiArrowTrendingDown, HiHashtag } from 'react-icons/hi2';
 import { motion } from 'framer-motion';
 
 const HashtagCard = memo(({ tag, count, index, t }) => {
@@ -35,7 +35,7 @@ const HashtagCard = memo(({ tag, count, index, t }) => {
         </div>
 
         <div className={`p-2.5 rounded-xl ${isTrendingUp ? 'text-emerald-500 bg-emerald-500/10' : 'text-indigo-500 bg-indigo-500/10'}`}>
-          {isTrendingUp ? <HiTrendingUp className="w-5 h-5" /> : <HiTrendingUp className="w-5 h-5 opacity-50" />}
+          {isTrendingUp ? <HiArrowTrendingUp className="w-5 h-5" /> : <HiArrowTrendingDown className="w-5 h-5 opacity-50" />}
         </div>
       </Link>
     </motion.div>
@@ -71,4 +71,5 @@ const HashtagsTabContent = ({ topHashtags = [], t }) => {
 
 HashtagsTabContent.displayName = 'HashtagsTabContent';
 export default memo(HashtagsTabContent);
+
 
