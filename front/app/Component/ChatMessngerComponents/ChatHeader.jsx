@@ -2,11 +2,11 @@
 
 import React, { memo } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Phone, 
-  Video, 
-  MoreHorizontal, 
-  X, 
+import {
+  Phone,
+  Video,
+  MoreHorizontal,
+  X,
   ChevronLeft,
   Info
 } from 'lucide-react';
@@ -35,9 +35,9 @@ const ChatHeader = memo(({ onBack }) => {
         )}
 
         <div className="relative cursor-pointer group">
-          <Avatar 
-            src={selectedUser?.profilePhoto?.url} 
-            size="md" 
+          <Avatar
+            src={selectedUser?.profilePhoto?.url}
+            size="md"
             className="hover:scale-105 transition-transform"
           />
           {isOnline && (
@@ -65,7 +65,7 @@ const ChatHeader = memo(({ onBack }) => {
             <Video size={18} />
           </button>
         </div>
-        
+
         <button className="p-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-400 transition-colors">
           <Info size={18} />
         </button>
@@ -86,6 +86,5 @@ const ChatHeader = memo(({ onBack }) => {
 
 ChatHeader.displayName = 'ChatHeader';
 
-export default ChatHeader;
 
 export default ChatHeader;
