@@ -1,63 +1,86 @@
 'use client';
-import React, { useState, useEffect, useMemo, useCallback, useDeferredValue } from 'react';
-import { FiX, FiLoader, FiUser, FiCalendar, FiMapPin, FiHeart, FiGlobe, FiPhone } from 'react-icons/fi';
+
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { 
+  X, 
+  User, 
+  MapPin, 
+  Globe, 
+  Phone, 
+  Camera, 
+  Check, 
+  Plus, 
+  Calendar,
+  Languages,
+  Heart
+} from 'lucide-react';
 import {
-  FaGithub, FaLinkedin, FaTwitter, FaFacebook, FaGlobe, FaPlus, FaCheckCircle,
-  FaCamera,
+  FaGithub, FaLinkedin, FaTwitter, FaFacebook,
 } from 'react-icons/fa';
-import Image from 'next/image';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import { useUser } from '@/app/Context/UserContext';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { Avatar } from '../ui/Avatar';
+import { Button } from '../ui/Button';
 
-// --------------------------- Premium Input Styles ---------------------------
-const inputWrapperStyle = "relative group";
-const inputIconStyle = "absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-indigo-400 transition-colors z-10";
-const inputStyle =
-  'w-full py-4 pl-12 pr-4 text-sm text-gray-100 placeholder-gray-500 ' +
-  'bg-white/5 border border-white/10 rounded-xl ' +
-  'focus:outline-none focus:bg-white/10 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all font-medium';
-const labelStyle = "text-xs font-bold text-gray-400 uppercase tracking-wider ml-1 mb-2 block";
+const SectionHeader = ({ icon: Icon, title }) => (
+  <div className="flex items-center gap-2 mb-6 pt-4 border-t border-gray-100 dark:border-white/5 first:border-t-0 first:pt-0">
+    <Icon size={18} className="text-gray-400" />
+    <h3 className="text-[13px] font-bold uppercase tracking-widest text-gray-400">{title}</h3>
+  </div>
+);
 
-// --------------------------- Social Icons ---------------------------
-const socialFields = Object.freeze([
-  { name: 'github', label: 'GitHub', icon: <FaGithub /> },
-  { name: 'linkedin', label: 'LinkedIn', icon: <FaLinkedin className="text-blue-400" /> },
-  { name: 'twitter', label: 'Twitter', icon: <FaTwitter className="text-blue-500" /> },
-  { name: 'facebook', label: 'Facebook', icon: <FaFacebook className="text-blue-600" /> },
-  { name: 'website', label: 'Website', icon: <FaGlobe className="text-indigo-400" /> },
-]);
+const InputGroup = ({ label, name, value, onChange, placeholder, icon: Icon, type = "text" }) => (
+  <div className="flex flex-col gap-2">
+    <label className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 ml-1">{label}</label>
+    <div className="relative group">
+      {Icon && (
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors">
+          <Icon size={18} />
+        </span>
+      )}
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className={`w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-xl py-3 ${Icon ? 'pl-11' : 'pl-4'} pr-4 text-[15px] focus:outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/5 transition-all outline-none`}
+      />
+    </div>
+  </div>
+);
 
 const UpdateProfile = ({ user }) => {
   const { updateProfile, updateProfileLoading, updatePhoto, updateCoverPhoto } = useUser();
   const { t } = useTranslation();
 
-  // --------------------------- State ---------------------------
   const [formData, setFormData] = useState({
     username: '',
     profileName: '',
     description: '',
     country: '',
     phone: '',
-    interests: [],
-    newInterest: '',
-    dateOfBirth: '',
-    gender: '',
     city: '',
+    gender: '',
     relationshipStatus: '',
     partner: '',
+    dateOfBirth: '',
+    interests: [],
+    newInterest: '',
     preferedLanguage: '',
-    socialLinks: {},
+    socialLinks: {
+      github: '',
+      linkedin: '',
+      twitter: '',
+      facebook: '',
+      website: '',
+    },
   });
 
-  const deferredDescription = useDeferredValue(formData.description);
-
-  // --------------------------- Load User Data ---------------------------
   useEffect(() => {
     if (!user) return;
-    const initialPartner = user.partner?._id || user.partner || '';
-
     setFormData({
       username: user.username || '',
       profileName: user.profileName || '',
@@ -67,7 +90,7 @@ const UpdateProfile = ({ user }) => {
       city: user.city || '',
       gender: user.gender || '',
       relationshipStatus: user.relationshipStatus || '',
-      partner: initialPartner,
+      partner: user.partner?._id || user.partner || '',
       dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
       interests: user.interests || [],
       preferedLanguage: user.preferedLanguage || '',
@@ -82,429 +105,204 @@ const UpdateProfile = ({ user }) => {
     });
   }, [user]);
 
-  // --------------------------- Handlers ---------------------------
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
-    setFormData((prev) => {
-      if (name in prev.socialLinks) {
-        if (prev.socialLinks[name] === value) return prev;
-        return { ...prev, socialLinks: { ...prev.socialLinks, [name]: value } };
-      }
-      if (prev[name] === value) return prev;
-      return { ...prev, [name]: value };
-    });
+    if (['github', 'linkedin', 'twitter', 'facebook', 'website'].includes(name)) {
+      setFormData(prev => ({
+        ...prev,
+        socialLinks: { ...prev.socialLinks, [name]: value }
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   }, []);
 
-  const handleAddInterest = useCallback(() => {
-    setFormData((prev) => {
-      const interest = prev.newInterest.trim();
-      if (interest.length < 2) {
-        toast.error(t('Interest must be at least 2 characters long.'));
-        return prev;
-      }
-      if (prev.interests.includes(interest)) {
-        toast.warn(t('This interest is already added.'));
-        return prev;
-      }
-      return { ...prev, interests: [...prev.interests, interest], newInterest: '' };
-    });
-  }, [t]);
+  const handleAddInterest = () => {
+    const interest = formData.newInterest.trim();
+    if (interest && !formData.interests.includes(interest)) {
+      setFormData(prev => ({
+        ...prev,
+        interests: [...prev.interests, interest],
+        newInterest: ''
+      }));
+    }
+  };
 
-  const handleRemoveInterest = useCallback((interest) => {
-    setFormData((prev) => ({
+  const handleRemoveInterest = (interest) => {
+    setFormData(prev => ({
       ...prev,
-      interests: prev.interests.filter((i) => i !== interest),
+      interests: prev.interests.filter(i => i !== interest)
     }));
-  }, []);
+  };
 
-  const isValueChanged = useCallback((key, newValue) => {
-    const originalValue = user ? (user[key] ?? '') : '';
-    const currentNewValue = newValue ?? '';
-    return String(originalValue).trim() !== String(currentNewValue).trim();
-  }, [user]);
-
-  const handleSubmit = useCallback(
-    (e) => {
-      e.preventDefault();
-      if (updateProfileLoading) return;
-
-      const payload = {};
-      const fieldsToCompare = [
-        'username', 'profileName', 'description', 'country', 'phone', 'city',
-        'dateOfBirth', 'gender', 'relationshipStatus', 'preferedLanguage',
-      ];
-
-      fieldsToCompare.forEach((f) => {
-        const newValue = formData[f]?.trim?.() || formData[f];
-        if (isValueChanged(f, newValue)) payload[f] = newValue;
-      });
-
-      const partnerId = formData.partner;
-      const originalPartnerId = user?.partner?._id || user?.partner || '';
-      if (partnerId !== originalPartnerId) payload.partner = partnerId;
-      else if (formData.relationshipStatus && !partnerId && ['In a Relationship', 'Married'].includes(user?.relationshipStatus))
-        payload.partner = null;
-
-      const currentInterests = formData.interests.filter((i) => i.trim() !== '');
-      if (JSON.stringify(currentInterests.sort()) !== JSON.stringify((user?.interests || []).sort())) {
-        payload.interests = currentInterests;
-      }
-
-      const currentLinks = Object.fromEntries(
-        Object.entries(formData.socialLinks).filter(([_, v]) => v.trim() !== '')
-      );
-      const originalLinks = user?.socialLinks || {};
-      if (JSON.stringify(currentLinks) !== JSON.stringify(originalLinks)) payload.socialLinks = currentLinks;
-
-      if (Object.keys(payload).length === 0)
-        return toast.error(t('Please change at least one field before saving.'));
-
-      updateProfile(payload);
-    },
-    [formData, isValueChanged, t, updateProfile, updateProfileLoading, user]
-  );
-
-  const followingList = useMemo(() => user?.following || [], [user]);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const payload = { ...formData };
+    delete payload.newInterest;
+    await updateProfile(payload);
+  };
 
   return (
-    <div className="w-full">
+    <div className="max-w-5xl mx-auto py-8 px-4">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative w-full bg-[#0A0A0A] border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col md:flex-row"
+        className="bg-white dark:bg-black border border-gray-100 dark:border-threads-border rounded-[2rem] shadow-2xl overflow-hidden"
       >
-        {/* -------------------- Left Form -------------------- */}
-        <div className="w-full md:w-2/3 p-8 sm:p-10 space-y-8 bg-gradient-to-br from-[#0A0A0A] to-[#111]">
-          <div className="space-y-2">
-            <h2 className="text-3xl font-black text-white tracking-tight">
-              {t('Edit Profile')}
-            </h2>
-            <p className="text-sm text-gray-400 font-medium">
-              {t('Update your public profile and personal details.')}
-            </p>
-          </div>
+        <div className="flex flex-col md:flex-row">
+          {/* Main Form Area */}
+          <div className="flex-1 p-8 md:p-12 space-y-10 border-b md:border-b-0 md:border-r border-gray-100 dark:border-threads-border">
+            <header className="space-y-1">
+              <h1 className="text-3xl font-bold tracking-tight">{t('Edit Profile')}</h1>
+              <p className="text-gray-500">{t('Customize how you appear on the network.')}</p>
+            </header>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* ==================== Photos Section ==================== */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 pb-2 border-b border-white/5">
-                <span className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400"><FaCamera size={20} /></span>
-                <h3 className="text-lg font-bold text-white tracking-wide">{t('Profile & Cover')}</h3>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Profile Photo */}
-                <div className="relative group/photo overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-4 flex flex-col items-center gap-4 transition-all hover:bg-white/10">
-                  <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-indigo-500/50">
-                    <Image
-                      src={user?.profilePhoto?.url || '/default-avatar.png'}
-                      alt="Profile"
-                      fill
-                      className="object-cover"
-                    />
-                    <label className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover/photo:opacity-100 transition-opacity cursor-pointer">
-                      <FaPlus className="text-white text-xl" />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => updatePhoto(e.target.files[0])}
-                      />
+            <form onSubmit={handleSubmit} className="space-y-12">
+              {/* Media Section */}
+              <section>
+                <SectionHeader icon={Camera} title={t('Visuals')} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                  <div className="flex flex-col items-center gap-4 p-6 bg-gray-50 dark:bg-white/5 rounded-[2rem] group relative">
+                    <Avatar src={user?.profilePhoto?.url} size="xl" className="ring-4 ring-white dark:ring-black" />
+                    <label className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer bg-black/40 rounded-[2rem]">
+                      <Plus className="text-white" size={32} />
+                      <input type="file" className="hidden" onChange={(e) => updatePhoto(e.target.files[0])} />
                     </label>
-                  </div>
-                  <div className="text-center">
-                    <h4 className="text-sm font-bold text-white">{t('Profile Photo')}</h4>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">{t('Identity Avatar')}</p>
-                  </div>
-                </div>
-
-                {/* Cover Photo */}
-                <div className="relative group/cover overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-4 flex flex-col items-center gap-4 transition-all hover:bg-white/10">
-                  <div className="relative w-full h-24 rounded-xl overflow-hidden border-2 border-indigo-500/50">
-                    <Image
-                      src={user?.coverPhoto?.url || '/default-profile.png'}
-                      alt="Cover"
-                      fill
-                      className="object-cover"
-                    />
-                    <label className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover/cover:opacity-100 transition-opacity cursor-pointer">
-                      <FaPlus className="text-white text-xl" />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => updateCoverPhoto(e.target.files[0])}
-                      />
-                    </label>
-                  </div>
-                  <div className="text-center">
-                    <h4 className="text-sm font-bold text-white">{t('Cover Photo')}</h4>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-widest">{t('Terminal Banner')}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ==================== Basic Info ==================== */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 pb-2 border-b border-white/5">
-                <span className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400"><FiUser size={20} /></span>
-                <h3 className="text-lg font-bold text-white tracking-wide">{t('Basic Info')}</h3>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {[
-                  { label: t('Username'), name: 'username', placeholder: t('Enter username'), icon: <FiUser /> },
-                  { label: t('Profile Name'), name: 'profileName', placeholder: t('Display name'), icon: <FiUser /> },
-                  { label: t('Country'), name: 'country', placeholder: t('Your country'), icon: <FiGlobe /> },
-                  { label: t('City'), name: 'city', placeholder: t('Your city'), icon: <FiMapPin /> },
-                  { label: t('Phone'), name: 'phone', placeholder: '+20 10xxx', icon: <FiPhone /> },
-                  { label: t('Language'), name: 'preferedLanguage', placeholder: t('e.g., Arabic, English'), icon: <FiGlobe /> },
-                ].map(({ label, name, placeholder, icon }) => (
-                  <div key={name} className={inputWrapperStyle}>
-                    <label htmlFor={name} className={labelStyle}>{label}</label>
-                    <div className="relative group">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-indigo-400 transition-colors z-10 text-lg">
-                        {icon}
-                      </span>
-                      <input
-                        id={name}
-                        name={name}
-                        value={formData[name]}
-                        onChange={handleChange}
-                        className={inputStyle}
-                        placeholder={placeholder}
-                      />
+                    <div className="text-center">
+                      <p className="font-bold text-[15px]">{t('Profile Photo')}</p>
+                      <p className="text-[12px] text-gray-500 uppercase tracking-widest">{t('Click to change')}</p>
                     </div>
                   </div>
-                ))}
 
-                {/* Bio */}
-                <div className="sm:col-span-2">
-                  <label htmlFor="description" className={labelStyle}>{t('Bio')}</label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={deferredDescription}
-                    onChange={handleChange}
-                    className={`${inputStyle} h-32 resize-none pt-4`}
-                    placeholder={t('Short bio about yourself (max 150 characters)')}
-                    maxLength={150}
+                  <div className="flex flex-col items-center gap-4 p-6 bg-gray-50 dark:bg-white/5 rounded-[2rem] group relative">
+                    <div className="relative w-full h-32 rounded-2xl overflow-hidden bg-gray-200 dark:bg-threads-border">
+                      {user?.coverPhoto?.url && (
+                        <img src={user.coverPhoto.url} className="w-full h-full object-cover opacity-80" alt="Cover" />
+                      )}
+                      <label className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer bg-black/40">
+                        <Plus className="text-white" size={32} />
+                        <input type="file" className="hidden" onChange={(e) => updateCoverPhoto(e.target.files[0])} />
+                      </label>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-bold text-[15px]">{t('Cover Photo')}</p>
+                      <p className="text-[12px] text-gray-500 uppercase tracking-widest">{t('Click to change')}</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Basic Info */}
+              <section>
+                <SectionHeader icon={User} title={t('Identity')} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <InputGroup 
+                    label={t('Username')} 
+                    name="username" 
+                    value={formData.username} 
+                    onChange={handleChange} 
+                    icon={User} 
                   />
-                  <div className="text-right text-[10px] uppercase font-bold text-gray-600 mt-2">
-                    {formData.description.length}/150
+                  <InputGroup 
+                    label={t('Display Name')} 
+                    name="profileName" 
+                    value={formData.profileName} 
+                    onChange={handleChange} 
+                    icon={Check} 
+                  />
+                  <div className="sm:col-span-2 flex flex-col gap-2">
+                    <label className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 ml-1">{t('Bio')}</label>
+                    <textarea 
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-2xl p-4 text-[15px] focus:outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/5 h-32 resize-none transition-all outline-none"
+                      placeholder={t('Tell us about yourself...')}
+                    />
                   </div>
                 </div>
-              </div>
-            </div>
+              </section>
 
-            {/* ==================== Personal Details ==================== */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 pb-2 border-b border-white/5">
-                <span className="p-2 rounded-lg bg-rose-500/10 text-rose-400"><FiHeart size={20} /></span>
-                <h3 className="text-lg font-bold text-white tracking-wide">{t('Personal Details')}</h3>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div className={inputWrapperStyle}>
-                  <label htmlFor="dateOfBirth" className={labelStyle}>{t('Date of Birth')}</label>
-                  <div className="relative group">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-indigo-400 transition-colors z-10 text-lg">
-                      <FiCalendar />
-                    </span>
-                    <input id="dateOfBirth" type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputStyle} />
-                  </div>
-                </div>
-
-                <div className={inputWrapperStyle}>
-                  <label htmlFor="gender" className={labelStyle}>{t('Gender')}</label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 z-10 text-lg"><FiUser /></span>
-                    <select id="gender" name="gender" value={formData.gender} onChange={handleChange} className={`${inputStyle} appearance-none cursor-pointer`}>
-                      <option value="" className="bg-[#111]">{t('Select')}</option>
-                      <option value="Male" className="bg-[#111]">{t('Male')}</option>
-                      <option value="Female" className="bg-[#111]">{t('Female')}</option>
-                      <option value="Other" className="bg-[#111]">{t('Other')}</option>
+              {/* Personal Details */}
+              <section>
+                <SectionHeader icon={Heart} title={t('Personal')} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <InputGroup 
+                    label={t('Date of Birth')} 
+                    name="dateOfBirth" 
+                    type="date"
+                    value={formData.dateOfBirth} 
+                    onChange={handleChange} 
+                    icon={Calendar} 
+                  />
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 ml-1">{t('Gender')}</label>
+                    <select 
+                      name="gender" 
+                      value={formData.gender} 
+                      onChange={handleChange}
+                      className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-xl py-3 px-4 text-[15px] focus:outline-none transition-all outline-none appearance-none"
+                    >
+                      <option value="">{t('Select')}</option>
+                      <option value="Male">{t('Male')}</option>
+                      <option value="Female">{t('Female')}</option>
+                      <option value="Other">{t('Other')}</option>
                     </select>
                   </div>
                 </div>
-              </div>
+              </section>
 
-              {/* Relationship */}
-              <div className="space-y-3">
-                <label htmlFor="relationshipStatus" className={labelStyle}>{t('Relationship Status')}</label>
-                <select id="relationshipStatus" name="relationshipStatus" value={formData.relationshipStatus} onChange={handleChange} className={`${inputStyle} appearance-none cursor-pointer pl-4`}>
-                  <option value="" className="bg-[#111]">{t('Select Status')}</option>
-                  <option className="bg-[#111]">{t('Single')}</option>
-                  <option className="bg-[#111]">{t('In a Relationship')}</option>
-                  <option className="bg-[#111]">{t('Married')}</option>
-                  <option className="bg-[#111]">{t('Divorced')}</option>
-                </select>
-              </div>
-
-              {(formData.relationshipStatus === t('In a Relationship') || formData.relationshipStatus === t('Married')) && (
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/5 animate-fade-in">
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 block">{t('Choose Partner (Must be a follower)')}</label>
-                  <div className="max-h-44 overflow-y-auto custom-scrollbar pr-2 space-y-2">
-                    {followingList.length ? (
-                      followingList.map((f) => (
-                        <div
-                          key={f._id}
-                          onClick={() => setFormData((prev) => ({ ...prev, partner: f._id }))}
-                          className={`flex items-center gap-3 p-3 cursor-pointer rounded-xl transition-all border ${formData.partner === f._id
-                            ? 'bg-indigo-500/10 border-indigo-500/50'
-                            : 'bg-transparent border-transparent hover:bg-white/5'
-                            }`}
-                        >
-                          <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${formData.partner === f._id ? 'border-indigo-500 bg-indigo-500' : 'border-gray-600'}`}>
-                            {formData.partner === f._id && <FaCheckCircle className="text-white text-xs" />}
-                          </div>
-                          <Image
-                            width={40}
-                            height={40}
-                            src={f?.profilePhoto?.url || '/default-avatar.png'}
-                            alt={f?.username}
-                            className="w-8 h-8 rounded-full object-cover"
-                          />
-                          <div className="flex-1">
-                            <div className="text-sm font-bold text-white">{f?.profileName || f?.username}</div>
-                            <div className="text-xs text-gray-500">@{f?.username}</div>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-sm text-center text-gray-500 p-3 italic">{t('You must follow someone to choose a partner.')}</p>
-                    )}
-                  </div>
+              {/* Location & Language */}
+              <section>
+                <SectionHeader icon={MapPin} title={t('Location & Localization')} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <InputGroup label={t('Country')} name="country" value={formData.country} onChange={handleChange} icon={Globe} />
+                  <InputGroup label={t('City')} name="city" value={formData.city} onChange={handleChange} icon={MapPin} />
+                  <InputGroup label={t('Language')} name="preferedLanguage" value={formData.preferedLanguage} onChange={handleChange} icon={Languages} />
+                  <InputGroup label={t('Phone')} name="phone" value={formData.phone} onChange={handleChange} icon={Phone} />
                 </div>
-              )}
-            </div>
+              </section>
 
-            {/* ==================== Interests ==================== */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 pb-2 border-b border-white/5">
-                <span className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400"><FaPlus size={18} /></span>
-                <h3 className="text-lg font-bold text-white tracking-wide">{t('Interests')}</h3>
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-4 pt-8">
+                <Button 
+                  type="submit" 
+                  isLoading={updateProfileLoading}
+                  className="rounded-full px-12"
+                >
+                  {t('Save Changes')}
+                </Button>
               </div>
+            </form>
+          </div>
 
-              <div className="space-y-4">
-                <div className="flex flex-wrap gap-2 min-h-[50px]">
-                  {formData.interests.length > 0 ? (
-                    formData.interests.map((interest, i) => (
-                      <span key={i} className="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-full text-xs font-bold text-white border border-white/10">
-                        {interest}
-                        <button onClick={() => handleRemoveInterest(interest)} className="hover:text-red-400 transition-colors"><FiX /></button>
-                      </span>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-500 italic">{t('No interests added yet.')}</p>
-                  )}
-                </div>
-
-                <div className="flex gap-3">
-                  <input
-                    type="text"
-                    name="newInterest"
-                    placeholder={t('Add a new interest')}
-                    value={formData.newInterest}
-                    onChange={handleChange}
-                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 text-sm font-medium"
-                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddInterest())}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddInterest}
-                    className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm transition-all"
-                  >
-                    {t('Add')}
-                  </button>
-                </div>
+          {/* Preview Sidebar */}
+          <div className="md:w-80 bg-gray-50 dark:bg-[#080808] p-8 md:p-12 flex flex-col items-center space-y-8">
+            <h2 className="text-[13px] font-bold uppercase tracking-[0.2em] text-gray-400">{t('Live Preview')}</h2>
+            <div className="w-full space-y-6 flex flex-col items-center text-center">
+              <Avatar src={user?.profilePhoto?.url} size="xl" className="ring-8 ring-white dark:ring-black shadow-2xl" />
+              <div className="space-y-1">
+                <h3 className="text-2xl font-bold tracking-tight">{formData.profileName || user?.profileName}</h3>
+                <p className="text-gray-500 font-medium">@{formData.username || user?.username}</p>
               </div>
-            </div>
-
-            {/* ==================== Social Links ==================== */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 pb-2 border-b border-white/5">
-                <span className="p-2 rounded-lg bg-blue-500/10 text-blue-400"><FaGlobe size={18} /></span>
-                <h3 className="text-lg font-bold text-white tracking-wide">{t('Social Links')}</h3>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {socialFields.map(({ name, label, icon }) => (
-                  <div key={name} className="relative group">
-                    <label htmlFor={name} className={labelStyle}>{label}</label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg z-10">{icon}</span>
-                      <input
-                        id={name}
-                        name={name}
-                        value={formData.socialLinks[name] || ''}
-                        onChange={handleChange}
-                        placeholder={`https://${name}.com/...`}
-                        className={inputStyle}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ==================== Actions ==================== */}
-            <div className="pt-6 flex justify-end border-t border-white/5">
-              <button
-                type="submit"
-                disabled={updateProfileLoading}
-                className="flex items-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {updateProfileLoading ? (
-                  <>
-                    <FiLoader className="animate-spin" />
-                    {t('Saving...')}
-                  </>
-                ) : (
-                  <>
-                    <FaCheckCircle />
-                    {t('Save Changes')}
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* -------------------- Right Sidebar -------------------- */}
-        <div className="hidden md:flex flex-col justify-center items-center w-1/3 bg-[#0F0F0F] border-l border-white/5 p-12 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-indigo-900/10 to-transparent pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col items-center text-center space-y-6">
-            <div className="relative w-40 h-40">
-              <div className="absolute inset-0 rounded-full border-2 border-indigo-500 animate-pulse-slow" />
-              <Image
-                src={user?.profilePhoto?.url || '/default-avatar.png'}
-                alt={user?.username || 'User'}
-                fill
-                className="rounded-full object-cover border-4 border-[#0F0F0F]"
-              />
-              <div className="absolute bottom-2 right-2 w-8 h-8 bg-green-500 border-4 border-[#0F0F0F] rounded-full" />
-            </div>
-
-            <div>
-              <h3 className="text-2xl font-black text-white tracking-tight">
-                {user?.profileName || user?.username}
-              </h3>
-              <p className="text-indigo-400 text-sm font-bold uppercase tracking-widest mt-1">
-                @{user?.username}
+              <div className="w-full h-px bg-gray-200 dark:bg-white/5" />
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed italic">
+                &quot;{formData.description || t('No bio provided yet.')}&quot;
               </p>
+              
+              <div className="grid grid-cols-2 gap-4 w-full pt-4">
+                <div className="p-4 rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-threads-border shadow-sm">
+                  <p className="text-[11px] font-bold uppercase text-gray-400 mb-1">{t('Followers')}</p>
+                  <p className="text-lg font-bold">{user?.followers?.length || 0}</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-white dark:bg-white/5 border border-gray-100 dark:border-threads-border shadow-sm">
+                  <p className="text-[11px] font-bold uppercase text-gray-400 mb-1">{t('Following')}</p>
+                  <p className="text-lg font-bold">{user?.following?.length || 0}</p>
+                </div>
+              </div>
             </div>
-
-            <div className="w-full h-px bg-white/10" />
-
-            <p className="text-gray-400 text-sm italic leading-relaxed max-w-[250px]">
-              &quot;{user?.description || t('No bio available')}&quot;
-            </p>
           </div>
         </div>
-
       </motion.div>
     </div>
   );

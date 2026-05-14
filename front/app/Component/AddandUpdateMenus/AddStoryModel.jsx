@@ -1,17 +1,20 @@
 'use client';
+
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import {
-  IoClose,
-  IoImage,
-  IoTrash,
-  IoCamera,
-  IoCheckmarkCircleOutline,
-  IoCloudUploadOutline,
-  IoShareSocialOutline,
-  IoColorPaletteOutline,
-  IoSparklesOutline,
-  IoMusicalNotesOutline,
-} from 'react-icons/io5';
+  X,
+  Image as ImageIcon,
+  Trash2,
+  Camera,
+  CheckCircle2,
+  Share,
+  Palette,
+  Sparkles,
+  Music,
+  Link as LinkIcon,
+  Plus,
+  Loader2,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Select from 'react-select';
 import { useStory } from '../../Context/StoryContext';
@@ -20,41 +23,71 @@ import { useHighlights } from '@/app/Context/HighlightContext';
 import { useGetData } from '@/app/Custome/useGetData';
 import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
+import { Button } from '../ui/Button';
 
 const selectStyles = {
-  control: (base) => ({
+  control: (base, state) => ({
     ...base,
-    backgroundColor: 'rgba(255,255,255,0.02)',
-    border: '1px solid rgba(255,255,255,0.05)',
-    borderRadius: '1.5rem',
-    padding: '6px',
-    color: 'white',
-    '&:hover': { border: '1px solid rgba(255,255,255,0.1)' }
+    backgroundColor: 'transparent',
+    border: state.isFocused ? '1px solid rgba(0,0,0,0.1)' : '1px solid rgba(0,0,0,0.05)',
+    borderRadius: '1rem',
+    padding: '4px',
+    boxShadow: 'none',
+    '&:hover': { border: '1px solid rgba(0,0,0,0.1)' }
   }),
   menu: (base) => ({
     ...base,
-    backgroundColor: '#151515',
-    border: '1px solid rgba(255,255,255,0.1)',
+    backgroundColor: 'white',
+    border: '1px solid rgba(0,0,0,0.05)',
     borderRadius: '1rem',
     overflow: 'hidden',
+    boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
     zIndex: 100
+  }),
+  option: (base, state) => ({
+    ...base,
+    backgroundColor: state.isFocused ? 'rgba(0,0,0,0.02)' : 'transparent',
+    color: 'black',
+    cursor: 'pointer',
+    fontSize: '14px'
+  }),
+  multiValue: (base) => ({
+    ...base,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: '99px',
+  }),
+  multiValueLabel: (base) => ({ ...base, color: 'black', fontWeight: 'bold', fontSize: '12px' }),
+  placeholder: (base) => ({ ...base, color: 'rgba(0,0,0,0.3)', fontSize: '13px' }),
+};
+
+const darkSelectStyles = {
+  ...selectStyles,
+  control: (base, state) => ({
+    ...base,
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    border: state.isFocused ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.05)',
+    borderRadius: '1rem',
+    padding: '4px',
+    boxShadow: 'none',
+  }),
+  menu: (base) => ({
+    ...base,
+    backgroundColor: '#111',
+    border: '1px solid rgba(255,255,255,0.05)',
+    borderRadius: '1rem',
+    overflow: 'hidden',
+    boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
   }),
   option: (base, state) => ({
     ...base,
     backgroundColor: state.isFocused ? 'rgba(255,255,255,0.05)' : 'transparent',
     color: 'white',
-    cursor: 'pointer'
   }),
   multiValue: (base) => ({
     ...base,
-    backgroundColor: 'rgba(76,111,255,0.1)',
-    borderRadius: '99px',
-    paddingLeft: '4px'
+    backgroundColor: 'rgba(255,255,255,0.1)',
   }),
-  multiValueLabel: (base) => ({ ...base, color: '#818cf8', fontWeight: 'bold', fontSize: '10px' }),
-  input: (base) => ({ ...base, color: 'white' }),
-  placeholder: (base) => ({ ...base, color: 'rgba(255,255,255,0.2)', fontSize: '12px' }),
-  singleValue: (base) => ({ ...base, color: 'white' })
+  multiValueLabel: (base) => ({ ...base, color: 'white' }),
 };
 
 const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
@@ -62,16 +95,13 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
   const [storyImage, setStoryImage] = useState(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [success, setSuccess] = useState(false);
   const [collaborators, setCollaborators] = useState([]);
   const [mentions, setMentions] = useState([]);
   const [isCloseFriends, setIsCloseFriends] = useState(false);
-  const [music, setMusic] = useState(null); // { title, artist, url, cover }
+  const [music, setMusic] = useState(null);
   const [link, setLink] = useState({ url: '', text: '' });
-  const [showLinkInput, setShowLinkInput] = useState(false);
-  const [targetHighlight, setTargetHighlight] = useState(null); // { value: id, label: title }
+  const [targetHighlight, setTargetHighlight] = useState(null);
 
   const { addNewStory } = useStory();
   const { user } = useAuth();
@@ -79,46 +109,25 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
   const { userData } = useGetData(user?._id);
   const { t } = useTranslation();
 
-  useEffect(() => {
-    const saved = localStorage.getItem('storyDraft');
-    if (saved) setStoryText(saved);
-  }, []);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (storyText) localStorage.setItem('storyDraft', storyText);
-    }, 400);
-    return () => clearTimeout(timeout);
-  }, [storyText]);
-
   const followerOptions = useMemo(
-    () =>
-      (userData?.following || []).map((f) => ({
-        value: f._id,
-        label: `@${f.username}`,
-        avatar: f.profilePhoto?.url || '/default-avatar.png',
-      })),
+    () => (userData?.following || []).map((f) => ({
+      value: f._id,
+      label: `@${f.username}`,
+      avatar: f.profilePhoto?.url || '/default-avatar.png',
+    })),
     [userData?.following]
   );
 
-  const handleImageChange = useCallback(
-    (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      if (file.size > 10 * 1024 * 1024) { // Increased to 10MB
-        setError(t('Image size should not exceed 10MB.'));
-        return;
-      }
-      setStoryImage(file);
-      setError('');
-    },
-    [t]
-  );
-
-  const handleTextChange = useCallback((e) => {
-    setStoryText(e.target.value);
+  const handleImageChange = useCallback((e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      setError(t('Image size should not exceed 10MB.'));
+      return;
+    }
+    setStoryImage(file);
     setError('');
-  }, []);
+  }, [t]);
 
   const clearInput = useCallback(() => {
     setStoryImage(null);
@@ -129,41 +138,17 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
     setMusic(null);
     setLink({ url: '', text: '' });
     setIsCloseFriends(false);
-    localStorage.removeItem('storyDraft');
-  }, []);
-
-  const simulateUploadProgress = useCallback(() => {
-    setIsUploading(true);
-    setUploadProgress(0);
-    return new Promise((resolve) => {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 20;
-        if (progress >= 100) {
-          clearInterval(interval);
-          setUploadProgress(100);
-          setTimeout(() => {
-            setIsUploading(false);
-            resolve();
-          }, 400);
-        } else {
-          setUploadProgress(progress);
-        }
-      }, 200);
-    });
   }, []);
 
   const handleSubmit = useCallback(async () => {
     if (!storyText.trim() && !storyImage) {
-      setError(t('Please add text or an image to share your story'));
+      setError(t('Please add content to share your story'));
       return;
     }
 
     setIsLoading(true);
     setSuccess(false);
     setError('');
-
-    if (storyImage) await simulateUploadProgress();
 
     try {
       const newStory = await addNewStory({
@@ -181,28 +166,20 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
       }
 
       setSuccess(true);
-      localStorage.removeItem('storyDraft');
       setTimeout(() => {
         setIsStory(false);
         clearInput();
       }, 1500);
     } catch {
-      setError(t('Failed to publish story. Please try again.'));
+      setError(t('Failed to publish story.'));
     } finally {
       setIsLoading(false);
     }
-  }, [storyText, storyImage, collaborators, mentions, music, link, isCloseFriends, targetHighlight, simulateUploadProgress, addNewStory, addStoryToHighlight, clearInput, t, setIsStory]);
+  }, [storyText, storyImage, collaborators, mentions, music, link, isCloseFriends, targetHighlight, addNewStory, addStoryToHighlight, clearInput, t, setIsStory]);
 
-  const previewUrl = useMemo(() => {
-    if (!storyImage) return null;
-    return URL.createObjectURL(storyImage);
-  }, [storyImage]);
+  const previewUrl = useMemo(() => storyImage ? URL.createObjectURL(storyImage) : null, [storyImage]);
 
-  useEffect(() => {
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
+  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
 
   return (
     <AnimatePresence>
@@ -211,375 +188,162 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/95 backdrop-blur-2xl p-4 md:p-8"
-          onClick={(e) => e.target === e.currentTarget && setIsStory(false)}
+          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
         >
-          {/* Close Button Outside */}
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            onClick={() => setIsStory(false)}
-            className="fixed top-8 right-8 z-[10001] w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all"
-          >
-            <IoClose size={28} />
-          </motion.button>
-
           <motion.div
-            initial={{ y: 50, opacity: 0, scale: 0.95 }}
+            initial={{ y: 20, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 50, opacity: 0, scale: 0.95 }}
-            className="relative w-full max-w-6xl h-full max-h-[900px] flex flex-col md:flex-row bg-[#0A0A0A] rounded-[3rem] overflow-hidden border border-white/5 shadow-[0_0_80px_rgba(0,0,0,0.8)]"
+            exit={{ y: 20, opacity: 0, scale: 0.98 }}
+            className="w-full max-w-5xl h-[85vh] flex flex-col md:flex-row bg-white dark:bg-black rounded-[2.5rem] overflow-hidden shadow-2xl border border-gray-100 dark:border-threads-border"
           >
-            {/* LEFT: Live Story Preview (Portrait View) */}
-            <div className="w-full md:w-[420px] h-full bg-[#111] relative overflow-hidden flex items-center justify-center p-6 border-r border-white/5">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5" />
-
-              <div className="relative aspect-[9/16] w-full max-w-[340px] rounded-[2rem] overflow-hidden bg-black shadow-2xl border border-white/10 group">
+            {/* Story Canvas */}
+            <div className="w-full md:w-[400px] h-full bg-gray-50 dark:bg-white/[0.02] p-8 flex flex-col items-center justify-center border-r border-gray-100 dark:border-threads-border relative">
+              <div className="relative aspect-[9/16] w-full max-w-[300px] bg-black rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100/10 group">
                 <AnimatePresence mode="wait">
-                  {storyImage ? (
-                    <motion.div
-                      key="image-preview"
-                      initial={{ opacity: 0, scale: 1.1 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      className="absolute inset-0"
-                    >
-                      <Image
-                        src={previewUrl}
-                        alt="Preview"
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
+                  {previewUrl ? (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0">
+                      <Image src={previewUrl} alt="Preview" fill className="object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
                     </motion.div>
                   ) : (
-                    <motion.div
-                      key="no-image"
-                      className="absolute inset-0 flex flex-col items-center justify-center text-white/20 bg-[#151515]"
-                    >
-                      <IoImage size={80} className="mb-4 opacity-50" />
-                      <p className="text-xs font-bold tracking-widest uppercase">Visual Preview</p>
-                    </motion.div>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-800 dark:text-gray-200">
+                      <ImageIcon size={48} className="opacity-20 mb-2" />
+                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-30">{t('Canvas')}</p>
+                    </div>
                   )}
                 </AnimatePresence>
 
-                {/* Overlaid Content Mockup */}
+                {/* Canvas Overlay */}
                 <div className="absolute inset-0 p-6 flex flex-col pointer-events-none">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full border border-white/30 bg-white/10" />
-                      <div className="w-24 h-2 rounded-full bg-white/20" />
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/10" />
+                    <div className="flex flex-col gap-1">
+                       <div className="w-16 h-1.5 bg-white/30 rounded-full" />
+                       <div className="w-10 h-1 bg-white/10 rounded-full" />
                     </div>
-                    {isCloseFriends && (
-                      <div className="px-2 py-1 rounded-lg bg-green-500 text-[8px] font-black text-white uppercase tracking-tighter">
-                        {t('Close Friends')}
-                      </div>
-                    )}
                   </div>
-
-                  <div className="flex-1 flex flex-col items-center justify-center gap-6">
-                    {music && (
-                      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/20 flex items-center gap-3 max-w-[80%]">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden relative border border-white/20">
-                          {music.cover ? <Image src={music.cover} fill alt="art" /> : <IoMusicalNotesOutline className="m-auto text-white/40" />}
-                        </div>
-                        <div className="flex flex-col overflow-hidden">
-                          <span className="text-white text-[10px] font-bold truncate">{music.title}</span>
-                          <span className="text-white/40 text-[8px] truncate">{music.artist}</span>
-                        </div>
-                      </motion.div>
+                  
+                  <div className="flex-1 flex flex-col items-center justify-center gap-4">
+                    {storyText && (
+                      <p className="text-white text-lg font-bold text-center drop-shadow-lg leading-tight">
+                        {storyText}
+                      </p>
                     )}
-
-                    {link.url && (
-                      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="px-4 py-2 bg-white text-black rounded-full font-bold text-xs flex items-center gap-2 shadow-xl">
-                        <span>{link.text || t("Visit Link")}</span>
-                      </motion.div>
-                    )}
-
-                    {mentions.length > 0 && (
-                      <div className="flex flex-wrap gap-2 justify-center">
-                        {mentions.map(m => (
-                          <motion.span key={m.value} initial={{ scale: 0 }} animate={{ scale: 1 }} className="px-3 py-1 bg-indigo-500/80 backdrop-blur-sm text-white rounded-full text-[10px] font-bold">
-                            {m.label}
-                          </motion.span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-auto">
-                    <motion.p
-                      animate={{ y: storyText ? 0 : 20, opacity: storyText ? 1 : 0 }}
-                      className="text-white text-lg font-medium leading-tight whitespace-pre-wrap drop-shadow-lg"
-                    >
-                      {storyText}
-                    </motion.p>
                   </div>
                 </div>
+              </div>
 
-                {isUploading && (
-                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-8 text-center text-white">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                      className="w-16 h-16 rounded-full border-2 border-white/10 border-t-white mb-4"
-                    />
-                    <h3 className="text-xl font-bold mb-1">{t('Publishing...')}</h3>
-                    <p className="text-sm text-white/50">{Math.floor(uploadProgress)}% {t('uploaded')}</p>
-                  </div>
-                )}
+              <div className="absolute top-4 right-4 md:hidden">
+                <button onClick={() => setIsStory(false)} className="p-2 bg-white dark:bg-black rounded-full shadow-lg">
+                  <X size={20} />
+                </button>
               </div>
             </div>
 
-            {/* RIGHT: Control Studio */}
-            <div className="flex-1 h-full flex flex-col bg-[#0F0F0F] relative overflow-hidden">
-              {/* Top Menu Icons */}
-              <div className="p-8 pb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                  <h2 className="text-white font-bold tracking-tight text-xl">{t('Story Studio')}</h2>
+            {/* Studio Controls */}
+            <div className="flex-1 h-full flex flex-col p-8 md:p-12 overflow-y-auto no-scrollbar space-y-10">
+              <header className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-bold tracking-tight">{t('Story Studio')}</h2>
+                  <p className="text-sm text-gray-500">{t('Capture and share your moment.')}</p>
                 </div>
-                <div className="flex gap-4">
-                  <button className={`transition-colors ${isCloseFriends ? 'text-green-500' : 'text-white/20'}`} onClick={() => setIsCloseFriends(!isCloseFriends)}>
-                    <IoSparklesOutline size={22} />
-                  </button>
-                  <button className={`transition-colors ${music ? 'text-indigo-400' : 'text-white/20'}`} onClick={() => setMusic(music ? null : { title: 'Viral Track', artist: 'Trending Artist', cover: null, url: '#' })}>
-                    <IoMusicalNotesOutline size={22} />
-                  </button>
-                  <button className={`transition-colors ${showLinkInput ? 'text-purple-400' : 'text-white/20'}`} onClick={() => setShowLinkInput(!showLinkInput)}>
-                    <IoShareSocialOutline size={22} />
-                  </button>
-                </div>
+                <button 
+                  onClick={() => setIsStory(false)} 
+                  className="hidden md:flex p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-full transition-all text-gray-400 hover:text-black dark:hover:text-white"
+                >
+                  <X size={24} />
+                </button>
+              </header>
+
+              {/* Upload Section */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <label className="flex flex-col items-center justify-center py-10 rounded-3xl border-2 border-dashed border-gray-100 dark:border-white/5 hover:border-black dark:hover:border-white transition-all cursor-pointer group bg-gray-50 dark:bg-white/5">
+                  <Camera size={32} className="text-gray-300 group-hover:text-black dark:group-hover:text-white mb-2 transition-colors" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-gray-400">{t('Camera')}</span>
+                  <input type="file" accept="image/*" capture="camera" onChange={handleImageChange} className="hidden" />
+                </label>
+                <label className="flex flex-col items-center justify-center py-10 rounded-3xl border-2 border-dashed border-gray-100 dark:border-white/5 hover:border-black dark:hover:border-white transition-all cursor-pointer group bg-gray-50 dark:bg-white/5">
+                  <ImageIcon size={32} className="text-gray-300 group-hover:text-black dark:group-hover:text-white mb-2 transition-colors" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-gray-400">{t('Upload')}</span>
+                  <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                </label>
               </div>
 
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-8 pt-0 space-y-8">
-                {/* Visual Asset Section */}
-                <section>
-                  <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">{t('Capture Moment')}</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <label className="group flex flex-col items-center justify-center aspect-video rounded-3xl bg-white/[0.03] border-2 border-dashed border-white/5 hover:border-indigo-500/50 hover:bg-white/[0.05] transition-all cursor-pointer">
-                      <IoCamera size={32} className="text-white/20 group-hover:text-indigo-400 group-hover:scale-110 transition-all mb-2" />
-                      <span className="text-[10px] font-bold text-white/40 group-hover:text-white transition-colors uppercase">{t('Camera')}</span>
-                      <input type="file" accept="image/*" capture="camera" onChange={handleImageChange} className="hidden" />
-                    </label>
-                    <label className="group flex flex-col items-center justify-center aspect-video rounded-3xl bg-white/[0.03] border-2 border-dashed border-white/5 hover:border-purple-500/50 hover:bg-white/[0.05] transition-all cursor-pointer relative overflow-hidden">
-                      {storyImage ? (
-                        <>
-                          <Image src={previewUrl} alt="Preview" fill className="object-cover opacity-30 grayscale" />
-                          <div className="relative z-10 flex flex-col items-center">
-                            <IoImage size={24} className="text-white mb-2" />
-                            <span className="text-[10px] font-bold text-white uppercase">{t('Replace')}</span>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <IoImage size={32} className="text-white/20 group-hover:text-purple-400 group-hover:scale-110 transition-all mb-2" />
-                          <span className="text-[10px] font-bold text-white/40 group-hover:text-white transition-colors uppercase">{t('Gallery')}</span>
-                        </>
-                      )}
-                      <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-                    </label>
-                  </div>
-                </section>
+              {/* Input Area */}
+              <div className="space-y-4">
+                <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">{t('Caption')}</h3>
+                <textarea
+                  value={storyText}
+                  onChange={(e) => setStoryText(e.target.value)}
+                  placeholder={t("What's happening?")}
+                  className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-2xl p-6 text-[15px] focus:outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/5 h-32 resize-none transition-all outline-none"
+                />
+              </div>
 
-                {/* Caption & Stickers */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <section>
-                    <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">{t('Caption Script')}</h3>
-                    <div className="relative group">
-                      <textarea
-                        value={storyText}
-                        onChange={handleTextChange}
-                        placeholder={t("Start typing your story...")}
-                        maxLength={300}
-                        className="w-full min-h-[140px] bg-white/[0.02] rounded-3xl p-6 text-white placeholder:text-white/10 border border-white/5 focus:border-indigo-500/50 focus:bg-white/[0.04] focus:outline-none transition-all resize-none italic leading-relaxed"
-                      />
-                    </div>
-                  </section>
-
-                  {showLinkInput && (
-                    <section>
-                      <h3 className="text-[10px] font-black text-purple-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                        <IoShareSocialOutline size={14} /> {t('Link Sticker')}
-                      </h3>
-                      <div className="space-y-3">
-                        <input
-                          type="text"
-                          placeholder="https://example.com"
-                          value={link.url}
-                          onChange={(e) => setLink({ ...link, url: e.target.value })}
-                          className="w-full bg-white/[0.02] rounded-2xl p-4 text-xs text-white border border-white/5 focus:border-purple-500/50 outline-none"
-                        />
-                        <input
-                          type="text"
-                          placeholder={t("Sticker Label")}
-                          value={link.text}
-                          onChange={(e) => setLink({ ...link, text: e.target.value })}
-                          className="w-full bg-white/[0.02] rounded-2xl p-4 text-xs text-white border border-white/5 focus:border-purple-500/50 outline-none"
-                        />
-                      </div>
-                    </section>
-                  )}
+              {/* Mentions & Highlights */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">{t('Mention Friends')}</h3>
+                  <Select
+                    isMulti
+                    options={followerOptions}
+                    value={mentions}
+                    onChange={setMentions}
+                    placeholder={t("Tag someone...")}
+                    styles={darkSelectStyles}
+                  />
                 </div>
-
-                {/* Tags & Privacy */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <section>
-                    <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">{t('Tag People')}</h3>
-                    <Select
-                      isMulti
-                      options={followerOptions}
-                      value={mentions}
-                      onChange={setMentions}
-                      placeholder={t("Mention...")}
-                      styles={selectStyles}
-                    />
-                  </section>
-
-                  <section>
-                    <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4 font-bold">{t('Privacy Settings')}</h3>
-                    <div className={`p-4 rounded-3xl border transition-all cursor-pointer flex items-center justify-between ${isCloseFriends ? 'bg-green-500/10 border-green-500/20' : 'bg-white/[0.02] border-white/5'}`} onClick={() => setIsCloseFriends(!isCloseFriends)}>
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${isCloseFriends ? 'bg-green-500 text-white' : 'bg-white/5 text-white/20'}`}>
-                          <IoSparklesOutline size={20} />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-white uppercase tracking-wider">{isCloseFriends ? t("Close Friends Only") : t("Everyone")}</span>
-                          <span className="text-[10px] text-white/40 font-medium">{t("Toggle story visibility")}</span>
-                        </div>
-                      </div>
-                      <div className={`w-10 h-5 rounded-full p-1 transition-all ${isCloseFriends ? 'bg-green-500' : 'bg-white/10'}`}>
-                        <div className={`w-3 h-3 rounded-full bg-white transition-all ${isCloseFriends ? 'translate-x-5' : 'translate-x-0'}`} />
-                      </div>
-                    </div>
-                  </section>
-                </div>
-
-                {/* Add to Highlight */}
-                <section>
-                  <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4 flex items-center justify-between">
-                    {t('Add to Highlight')}
-                    <span className="text-purple-400 text-[8px] tracking-normal font-bold">{t('NEW')}</span>
-                  </h3>
+                <div className="space-y-4">
+                  <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">{t('Add to Highlight')}</h3>
                   <Select
                     options={(highlights || []).map(h => ({ value: h._id, label: h.title }))}
                     value={targetHighlight}
                     onChange={setTargetHighlight}
-                    placeholder={t("Choose a highlight...")}
-                    isClearable
-                    styles={selectStyles}
+                    placeholder={t("Choose highlight...")}
+                    styles={darkSelectStyles}
                   />
-                </section>
-
-                {/* Collaborators Section */}
-                <section>
-                  <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4 flex items-center justify-between">
-                    {t('Tag Collaborators')}
-                    <span className="text-indigo-400 text-[8px] tracking-normal font-bold">{t('OPTIONAL')}</span>
-                  </h3>
-                  {userData?.following?.length > 0 && (
-                    <div className="studio-select-wrapper">
-                      <Select
-                        isMulti
-                        options={followerOptions}
-                        value={collaborators}
-                        onChange={setCollaborators}
-                        placeholder={t("Search followers...")}
-                        styles={{
-                          control: (base) => ({
-                            ...base,
-                            backgroundColor: 'rgba(255,255,255,0.02)',
-                            border: '1px solid rgba(255,255,255,0.05)',
-                            borderRadius: '1.5rem',
-                            padding: '6px',
-                            '&:hover': { border: '1px solid rgba(255,255,255,0.1)' }
-                          }),
-                          menu: (base) => ({
-                            ...base,
-                            backgroundColor: '#151515',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '1rem',
-                            overflow: 'hidden'
-                          }),
-                          option: (base, state) => ({
-                            ...base,
-                            backgroundColor: state.isFocused ? 'rgba(255,255,255,0.05)' : 'transparent',
-                            color: 'white',
-                            cursor: 'pointer'
-                          }),
-                          multiValue: (base) => ({
-                            ...base,
-                            backgroundColor: 'rgba(76,111,255,0.1)',
-                            borderRadius: '99px',
-                            paddingLeft: '4px'
-                          }),
-                          multiValueLabel: (base) => ({ ...base, color: '#818cf8', fontWeight: 'bold', fontSize: '10px' }),
-                          input: (base) => ({ ...base, color: 'white' })
-                        }}
-                        formatOptionLabel={(option) => (
-                          <div className="flex items-center gap-3">
-                            <div className="relative w-8 h-8 rounded-full overflow-hidden">
-                              <Image src={option.avatar} alt="" fill className="object-cover" />
-                            </div>
-                            <span className="text-sm font-medium">{option.label}</span>
-                          </div>
-                        )}
-                        classNamePrefix="studio-select"
-                      />
-                    </div>
-                  )}
-                </section>
-
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-wider flex items-center gap-3"
-                  >
-                    <IoClose size={20} className="bg-red-500 text-white rounded-full p-0.5" />
-                    {error}
-                  </motion.div>
-                )}
+                </div>
               </div>
 
-              {/* Bottom Launch Bar */}
-              <div className="p-8 bg-[#0D0D0D] border-t border-white/5 flex items-center gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+              {/* Privacy Toggle */}
+              <div 
+                onClick={() => setIsCloseFriends(!isCloseFriends)}
+                className={`p-5 rounded-3xl border transition-all cursor-pointer flex items-center justify-between ${isCloseFriends ? 'bg-green-500/10 border-green-500/20' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-threads-border'}`}
+              >
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isCloseFriends ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-white/10 text-gray-400'}`}>
+                    <Sparkles size={24} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-[15px]">{isCloseFriends ? t("Close Friends") : t("Public")}</p>
+                    <p className="text-[12px] text-gray-500">{t("Who can see this story")}</p>
+                  </div>
+                </div>
+                <div className={`w-12 h-6 rounded-full p-1 transition-all ${isCloseFriends ? 'bg-green-500' : 'bg-gray-300 dark:bg-white/10'}`}>
+                  <div className={`w-4 h-4 rounded-full bg-white transition-all ${isCloseFriends ? 'translate-x-6' : 'translate-x-0'}`} />
+                </div>
+              </div>
+
+              {/* Action Bar */}
+              <div className="mt-auto pt-10 border-t border-gray-100 dark:border-white/5 flex gap-4">
+                <Button 
+                  variant="outline" 
+                  className="rounded-full flex-1" 
                   onClick={clearInput}
                   disabled={isLoading}
-                  className="w-14 h-14 rounded-2xl bg-white/[0.03] text-white/20 hover:text-white hover:bg-red-500/20 transition-all flex items-center justify-center flex-shrink-0"
                 >
-                  <IoTrash size={24} />
-                </motion.button>
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  <Trash2 size={18} className="mr-2" />
+                  {t('Clear')}
+                </Button>
+                <Button 
+                  className="rounded-full flex-[2]" 
                   onClick={handleSubmit}
-                  disabled={isLoading || (!storyText.trim() && !storyImage)}
-                  className={`flex-1 flex items-center justify-center gap-4 py-4 rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-2xl transition-all duration-500 ${isLoading || (!storyText.trim() && !storyImage)
-                    ? 'bg-white/5 text-white/10 cursor-not-allowed'
-                    : success
-                      ? 'bg-green-500 text-white shadow-green-500/20'
-                      : 'bg-white text-black hover:bg-indigo-500 hover:text-white shadow-white/5'
-                    }`}
+                  isLoading={isLoading}
+                  disabled={!storyText.trim() && !storyImage}
                 >
-                  {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                  ) : success ? (
-                    <>
-                      <IoCheckmarkCircleOutline size={22} />
-                      {t('Studio Live!')}
-                    </>
-                  ) : (
-                    <>
-                      <IoShareSocialOutline size={20} />
-                      {t('Launch Story')}
-                    </>
-                  )}
-                </motion.button>
+                  {success ? <CheckCircle2 size={18} className="mr-2" /> : <Share size={18} className="mr-2" />}
+                  {success ? t('Published!') : t('Share Story')}
+                </Button>
               </div>
             </div>
           </motion.div>
@@ -589,5 +353,5 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
   );
 });
 
-AddStoryModel.displayName = 'AddStoryModel'
+AddStoryModel.displayName = 'AddStoryModel';
 export default AddStoryModel;

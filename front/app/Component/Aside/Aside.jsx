@@ -1,8 +1,7 @@
 'use client'
 import React, { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiX } from "react-icons/fi"
-import 'react-tooltip/dist/react-tooltip.css'
+import { X } from 'lucide-react'
 import { useAuth } from '../../Context/AuthContext'
 import { useAside } from '../../Context/AsideContext'
 import SidebarContent from './SidebarContent'
@@ -34,7 +33,7 @@ const Aside = ({ isCollapsed, setIsCollapsed }) => {
       {/* ===== Desktop Sidebar ===== */}
       <motion.aside
         animate={{
-          width: isCollapsed ? 88 : 280,
+          width: isCollapsed ? 80 : 260,
           opacity: 1
         }}
         initial={{ opacity: 0 }}
@@ -42,8 +41,8 @@ const Aside = ({ isCollapsed, setIsCollapsed }) => {
         className={`
           hidden md:flex fixed top-0 ${isRTL ? 'right-0 border-l' : 'left-0 border-r'} 
           flex-col h-screen 
-          bg-white/80 dark:bg-[#0B0F1A]/80 backdrop-blur-xl
-          border-gray-100 dark:border-white/5 
+          bg-white dark:bg-black
+          border-gray-100 dark:border-threads-border
           p-4 z-50 transition-colors duration-500
         `}
       >
@@ -65,7 +64,7 @@ const Aside = ({ isCollapsed, setIsCollapsed }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 bg-black/40 backdrop-blur-[2px]"
               onClick={() => setIsMobileMenuOpen(false)}
             />
 
@@ -76,18 +75,18 @@ const Aside = ({ isCollapsed, setIsCollapsed }) => {
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className={`
                 relative w-[280px] h-full
-                bg-white dark:bg-[#0B0F1A]
+                bg-white dark:bg-black
                 p-6 flex flex-col shadow-2xl
                 ${isRTL ? 'mr-auto' : 'ml-0'}
               `}
             >
               <motion.button
-                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400"
+                className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400"
               >
-                <FiX className="text-xl" />
+                <X size={20} />
               </motion.button>
 
               <SidebarContent
