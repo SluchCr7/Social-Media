@@ -1,22 +1,44 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Heart, MessageSquare, Share2, Bookmark, Repeat, Eye } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Heart, 
+  MessageSquare, 
+  Share2, 
+  Bookmark, 
+  Repeat, 
+  Eye,
+  BarChart2
+} from 'lucide-react';
 
-const ActionButton = React.memo(({ onClick, icon: Icon, label, active, color, activeColor }) => (
+const ActionButton = memo(({ onClick, icon: Icon, label, active, color, activeColor }) => (
   <motion.button
     whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
+    whileTap={{ scale: 0.9 }}
     onClick={onClick}
-    className="group flex items-center gap-1.5 sm:gap-2 px-1.5 py-1.5 sm:px-2 sm:py-1.5 rounded-xl transition-all"
+    className={`
+      group flex items-center gap-2 p-2 rounded-full transition-all
+      ${active ? activeColor : 'text-gray-500 dark:text-white/40 hover:bg-gray-50 dark:hover:bg-white/5'}
+    `}
   >
-    <div className={`p-2 rounded-lg transition-all ${active ? activeColor : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/40 group-hover:bg-gray-200 dark:group-hover:bg-white/10 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
-      <Icon size={18} className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" fill={active ? "currentColor" : "none"} strokeWidth={active ? 2.5 : 2} />
+    <div className="relative">
+      <Icon 
+        size={20} 
+        className="transition-all duration-300"
+        fill={active ? "currentColor" : "none"} 
+        strokeWidth={active ? 2.5 : 2} 
+      />
+      {active && (
+        <motion.div
+          layoutId="action-pulse"
+          className="absolute inset-0 bg-current rounded-full blur-md opacity-20"
+        />
+      )}
     </div>
     {label !== undefined && (
-      <span className={`text-[11px] font-black uppercase tracking-widest ${active ? color : 'text-gray-400 dark:text-white/40 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
+      <span className={`text-[13px] font-bold ${active ? color : 'text-gray-500 dark:text-white/40 group-hover:text-black dark:group-hover:text-white'}`}>
         {label}
       </span>
     )}
@@ -25,38 +47,33 @@ const ActionButton = React.memo(({ onClick, icon: Icon, label, active, color, ac
 
 ActionButton.displayName = 'ActionButton';
 
-const PostActions = React.memo(({ post, user, likePost, hahaPost, sharePost, savePost, setOpenModel }) => {
-  const isInPostPage = useMemo(() => typeof window !== 'undefined' && window.location.pathname.startsWith('/Pages/Post/'), []);
+const PostActions = memo(({ post, user, likePost, hahaPost, sharePost, savePost, setOpenModel }) => {
   const userId = user?._id;
+  const isLiked = post?.likes?.includes(userId);
+  const isSaved = post?.saved?.includes(userId);
+  const isShared = post?.shares?.some(s => s.user === userId);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4">
-      <div className="flex items-center gap-2">
+    <div className="flex items-center justify-between w-full">
+      <div className="flex items-center gap-1 sm:gap-4">
         {/* Like Action */}
         <ActionButton
-          onClick={() => likePost(post?._id, post?.owner._id)}
+          onClick={() => likePost(post?._id, post?.owner?._id)}
           icon={Heart}
           label={post?.likes?.length || 0}
-          active={post?.likes?.includes(userId)}
-          color="text-red-500"
-          activeColor="bg-red-500/10 text-red-500"
+          active={isLiked}
+          color="text-rose-500"
+          activeColor="text-rose-500 bg-rose-500/10"
         />
 
         {/* Comment Action */}
         {!post?.isCommentOff && (
-          isInPostPage ? (
+          <Link href={`/Pages/Post/${post?._id}`}>
             <ActionButton
               icon={MessageSquare}
               label={post?.comments?.length || 0}
             />
-          ) : (
-            <Link href={`/Pages/Post/${post?._id}`}>
-              <ActionButton
-                icon={MessageSquare}
-                label={post?.comments?.length || 0}
-              />
-            </Link>
-          )
+          </Link>
         )}
 
         {/* Repost/Share internally */}
@@ -64,39 +81,40 @@ const PostActions = React.memo(({ post, user, likePost, hahaPost, sharePost, sav
           onClick={() => setOpenModel(true)}
           icon={Repeat}
           label={post?.shares?.length > 0 ? post.shares.length : undefined}
-          active={post?.shares?.some(s => s.user === userId)}
-          color="text-green-500"
-          activeColor="bg-green-500/10 text-green-500"
+          active={isShared}
+          color="text-emerald-500"
+          activeColor="text-emerald-500 bg-emerald-500/10"
         />
-      </div>
-
-      <div className="flex items-center gap-2">
+        
         {/* External Share */}
         <ActionButton
           onClick={() => sharePost(post?.originalPost ? post.originalPost._id : post._id, post?.owner?._id)}
           icon={Share2}
         />
+      </div>
+
+      <div className="flex items-center gap-1 sm:gap-4">
+        {/* Views / Stats */}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-transparent hover:border-gray-100 dark:hover:border-white/10 transition-all group">
+           <BarChart2 size={16} className="text-gray-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
+           <span className="text-[12px] font-bold text-gray-500 group-hover:text-black dark:group-hover:text-white transition-colors">
+             {post?.views?.length || 0}
+           </span>
+        </div>
 
         {/* Save Action */}
         <ActionButton
           onClick={() => savePost(post?._id)}
           icon={Bookmark}
-          active={post?.saved?.includes(userId)}
-          color="text-yellow-500"
-          activeColor="bg-yellow-500/10 text-yellow-500"
+          active={isSaved}
+          color="text-amber-500"
+          activeColor="text-amber-500 bg-amber-500/10"
         />
-
-        {/* Views (Owner Only) */}
-        {userId === post?.owner?._id && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-100 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5">
-            <Eye size={14} className="text-gray-400 dark:text-white/20" />
-            <span className="text-[10px] font-black text-gray-400 dark:text-white/40 uppercase tracking-widest">{post?.views?.length || 0}</span>
-          </div>
-        )}
       </div>
     </div>
   );
 });
 
 PostActions.displayName = 'PostActions';
+
 export default PostActions;

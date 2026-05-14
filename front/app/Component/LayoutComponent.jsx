@@ -25,6 +25,7 @@ import '@/styles/nprogress.css'
 import FloatingDock from './FloatingDock';
 import AddStoryModel from './AddandUpdateMenus/AddStoryModel';
 import { useStory } from '../Context/StoryContext';
+import CommandPalette from './ui/CommandPalette';
 const LayoutComponent = ({ children }) => {
   const [loading, setLoading] = useState(true); // للتحكم في الـ Loader
 
@@ -194,6 +195,7 @@ const LayoutComponent = ({ children }) => {
           {/* <CookieConsent/> */}
           <FloatingDock onOpenMusicPlayer={() => setViewMusicPlayer(!viewMusicPlayer)} />
           <ExpandedWindow />
+          <CommandPalette />
         </div>
       </div>
     </div>
