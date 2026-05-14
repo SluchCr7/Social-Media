@@ -1,7 +1,17 @@
 'use client';
 import React, { memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { HiShieldCheck, HiLockClosed, HiKey, HiFingerPrint, HiDevicePhoneMobile } from 'react-icons/hi2';
+import { 
+  ShieldCheck, 
+  Lock, 
+  Key, 
+  Fingerprint, 
+  Smartphone,
+  ShieldAlert,
+  Activity,
+  History,
+  Info
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import PasswordStrength from '@/app/Component/Setting/PasswordStrength';
 
@@ -39,237 +49,145 @@ const Security = memo(({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.3 }}
-      className="p-8 space-y-8"
+      transition={{ duration: 0.4 }}
+      className="space-y-12"
     >
-      {/* Header */}
-      <div className="flex items-center gap-4 pb-6 border-b border-gray-200/50 dark:border-white/5">
-        <div className="relative">
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-red-500 via-pink-500 to-rose-600 text-white shadow-xl">
-            <HiShieldCheck className="w-6 h-6" />
-          </div>
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900" />
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row items-center gap-8 pb-10 border-b border-gray-100 dark:border-threads-border">
+        <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center text-white shadow-xl shadow-rose-500/20">
+          <ShieldCheck size={40} />
         </div>
-        <div>
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">{t('Security')}</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-            {t('Manage password, two-factor and account safety.')}
+        <div className="text-center md:text-left space-y-2">
+          <h2 className="text-3xl font-black tracking-tighter uppercase">{t('Security Protocol')}</h2>
+          <p className="text-sm text-gray-400 font-bold uppercase tracking-[0.2em]">
+            {t('Manage password, 2FA & account safety')}
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        {/* Change Password Form - Takes 2 columns */}
-        <div className="lg:col-span-2 space-y-6">
-          <motion.div
-            whileHover={{ scale: 1.01 }}
-            className="relative rounded-2xl p-6 bg-gradient-to-br from-white to-gray-50 dark:from-white/5 dark:to-white/[0.02] border border-gray-200/50 dark:border-white/5 shadow-lg"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                <HiKey className="w-5 h-5" />
+        {/* Change Password Engine */}
+        <div className="lg:col-span-2 p-8 rounded-[2.5rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-threads-border space-y-8">
+          <div className="flex items-center gap-3">
+             <Key size={20} className="text-indigo-500" />
+             <h3 className="text-sm font-black uppercase tracking-widest">{t('Credential Update')}</h3>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-indigo-500" size={18} />
+                <input
+                  type="password"
+                  placeholder={t('Current password')}
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  className="w-full h-14 pl-12 pr-4 bg-white dark:bg-black border border-gray-100 dark:border-threads-border rounded-2xl text-[13px] font-bold outline-none focus:border-indigo-500/50 transition-all placeholder:text-gray-400"
+                  required
+                />
               </div>
-              <h3 className="font-black text-gray-900 dark:text-white uppercase text-sm tracking-wider">{t('Change Password')}</h3>
+
+              <div className="relative group">
+                <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-indigo-500" size={18} />
+                <input
+                  type="password"
+                  placeholder={t('New password')}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full h-14 pl-12 pr-4 bg-white dark:bg-black border border-gray-100 dark:border-threads-border rounded-2xl text-[13px] font-bold outline-none focus:border-indigo-500/50 transition-all placeholder:text-gray-400"
+                  required
+                />
+              </div>
+
+              <div className="relative group">
+                <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-indigo-500" size={18} />
+                <input
+                  type="password"
+                  placeholder={t('Confirm password')}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full h-14 pl-12 pr-4 bg-white dark:bg-black border border-gray-100 dark:border-threads-border rounded-2xl text-[13px] font-bold outline-none focus:border-indigo-500/50 transition-all placeholder:text-gray-400"
+                  required
+                />
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Current Password */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  {t('Current password')}
-                </label>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                    <HiLockClosed className="w-5 h-5" />
-                  </div>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    value={oldPassword}
-                    onChange={(e) => setOldPassword(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all"
-                    required
-                  />
-                </div>
+            <PasswordStrength password={newPassword} />
+
+            {passwordMessage && (
+              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-black uppercase tracking-widest text-center">
+                {passwordMessage}
               </div>
+            )}
 
-              {/* New Password */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  {t('New password')}
-                </label>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                    <HiKey className="w-5 h-5" />
-                  </div>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all"
-                    required
-                  />
-                </div>
-              </div>
+            <div className="flex gap-3">
+               <button 
+                 type="submit"
+                 className="flex-1 h-14 bg-indigo-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 transition-all"
+               >
+                 {t('Apply Changes')}
+               </button>
+               <button 
+                 type="button"
+                 onClick={handleReset}
+                 className="px-8 h-14 bg-gray-100 dark:bg-white/5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all"
+               >
+                 {t('Reset')}
+               </button>
+            </div>
+          </form>
 
-              {/* Confirm Password */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  {t('Confirm new password')}
-                </label>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                    <HiShieldCheck className="w-5 h-5" />
-                  </div>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Password Strength */}
-              <PasswordStrength password={newPassword} />
-
-              {/* Error Message */}
-              {passwordMessage && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm font-medium"
-                >
-                  {passwordMessage}
-                </motion.div>
-              )}
-
-              {/* Buttons */}
-              <div className="flex gap-3 pt-4">
-                <motion.button
-                  type="submit"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all"
-                >
-                  {t('Update password')}
-                </motion.button>
-
-                <motion.button
-                  type="button"
-                  onClick={handleReset}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-6 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                >
-                  {t('Reset')}
-                </motion.button>
-              </div>
-            </form>
-          </motion.div>
-
-          {/* Password Tips */}
-          <motion.div
-            whileHover={{ scale: 1.01 }}
-            className="relative rounded-2xl p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-500/5 dark:to-indigo-500/5 border border-blue-200/50 dark:border-blue-500/20"
-          >
-            <h4 className="font-black text-gray-900 dark:text-white text-sm uppercase tracking-wider mb-4">{t('Password Tips')}</h4>
-            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-              <li className="flex items-start gap-2">
-                <span className="text-blue-500 mt-0.5">•</span>
-                <span>{t('Use at least 8 characters')}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-500 mt-0.5">•</span>
-                <span>{t('Include uppercase and lowercase letters')}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-500 mt-0.5">•</span>
-                <span>{t('Add numbers and special characters')}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-500 mt-0.5">•</span>
-                <span>{t('Avoid common words and patterns')}</span>
-              </li>
-            </ul>
-          </motion.div>
+          <div className="p-6 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 space-y-4">
+             <div className="flex items-center gap-2 text-indigo-500">
+               <Info size={16} />
+               <span className="text-[10px] font-black uppercase tracking-widest">{t('Security Tips')}</span>
+             </div>
+             <p className="text-xs text-gray-400 font-medium leading-relaxed">
+               {t('Use at least 12 characters with a mix of letters, numbers and special symbols for maximum entropy.')}
+             </p>
+          </div>
         </div>
 
-        {/* Security Features - Right Column */}
+        {/* Security Modules */}
         <div className="space-y-6">
-
-          {/* Two-Factor Authentication */}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="relative rounded-2xl p-6 bg-gradient-to-br from-white to-gray-50 dark:from-white/5 dark:to-white/[0.02] border border-gray-200/50 dark:border-white/5 shadow-lg"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 rounded-xl bg-green-500/10 text-green-600 dark:text-green-400">
-                <HiFingerPrint className="w-6 h-6" />
+           {/* 2FA Card */}
+           <div className="p-8 rounded-[2.5rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-threads-border space-y-6">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                <Fingerprint size={28} />
               </div>
-            </div>
-            <h3 className="font-black text-gray-900 dark:text-white text-sm uppercase tracking-wider mb-2">
-              {t('Two-factor Authentication')}
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 font-medium">
-              {t('Add an extra layer of protection to your account.')}
-            </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-full px-4 py-2 rounded-xl bg-green-500/10 text-green-600 dark:text-green-400 font-bold text-sm hover:bg-green-500/20 transition-all"
-            >
-              {t('Enable 2FA')}
-            </motion.button>
-          </motion.div>
+              <h3 className="text-sm font-black uppercase tracking-widest">{t('Biometric/2FA')}</h3>
+              <p className="text-xs text-gray-400 font-medium">{t('Add an extra layer of protection using your hardware device.')}</p>
+              <button className="w-full py-3 rounded-xl bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition-all hover:text-white">
+                {t('Enable Protection')}
+              </button>
+           </div>
 
-          {/* Active Sessions */}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="relative rounded-2xl p-6 bg-gradient-to-br from-white to-gray-50 dark:from-white/5 dark:to-white/[0.02] border border-gray-200/50 dark:border-white/5 shadow-lg"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
-                <HiDevicePhoneMobile className="w-6 h-6" />
+           {/* Sessions Card */}
+           <div className="p-8 rounded-[2.5rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-threads-border space-y-6">
+              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
+                <Smartphone size={28} />
               </div>
-            </div>
-            <h3 className="font-black text-gray-900 dark:text-white text-sm uppercase tracking-wider mb-2">
-              {t('Active Sessions')}
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 font-medium">
-              {t('Manage devices where you\'re logged in.')}
-            </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-full px-4 py-2 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold text-sm hover:bg-purple-500/20 transition-all"
-            >
-              {t('View Sessions')}
-            </motion.button>
-          </motion.div>
+              <h3 className="text-sm font-black uppercase tracking-widest">{t('Device Matrix')}</h3>
+              <p className="text-xs text-gray-400 font-medium">{t('Manage all authenticated hardware currently accessing your data.')}</p>
+              <button className="w-full py-3 rounded-xl bg-purple-500/10 text-purple-500 text-[10px] font-black uppercase tracking-widest hover:bg-purple-500 transition-all hover:text-white">
+                {t('Scan Matrix')}
+              </button>
+           </div>
 
-          {/* Security Score */}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="relative rounded-2xl p-6 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-500/5 dark:to-orange-500/5 border border-yellow-200/50 dark:border-yellow-500/20"
-          >
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 text-white font-black text-2xl mb-3 shadow-lg">
-                85
+           {/* Integrity Score */}
+           <div className="p-8 rounded-[2.5rem] bg-black text-white space-y-6 text-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-transparent opacity-50" />
+              <div className="relative z-10">
+                <div className="w-20 h-20 rounded-full border-4 border-amber-500/20 border-t-amber-500 flex items-center justify-center mx-auto mb-6">
+                  <span className="text-2xl font-black">88%</span>
+                </div>
+                <h4 className="text-xs font-black uppercase tracking-widest text-amber-500 mb-2">{t('Integrity Score')}</h4>
+                <p className="text-[10px] text-gray-400 font-medium leading-relaxed">{t('Your digital signature is highly secure and properly encrypted.')}</p>
               </div>
-              <h4 className="font-black text-gray-900 dark:text-white text-sm uppercase tracking-wider mb-2">
-                {t('Security Score')}
-              </h4>
-              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                {t('Your account is well protected')}
-              </p>
-            </div>
-          </motion.div>
+           </div>
         </div>
+
       </div>
     </motion.section>
   );
