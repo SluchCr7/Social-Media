@@ -17,10 +17,10 @@ const UserHoverCard = ({ userSelected, children, side = 'bottom' }) => {
 
   // --- Logic & State ---
   const isMe = useMemo(() => user?._id === userSelected?._id, [user?._id, userSelected?._id]);
-  
+
   const isFollowing = useMemo(() => {
     if (!user || !userSelected) return false;
-    return user.following?.some(id => 
+    return user.following?.some(id =>
       (typeof id === 'string' ? id : id._id) === userSelected._id
     );
   }, [user?.following, userSelected?._id]);
@@ -78,8 +78,8 @@ const UserHoverCard = ({ userSelected, children, side = 'bottom' }) => {
             {/* Top: Avatar & Action */}
             <div className="flex items-start justify-between">
               <Link href={`/Pages/User/${userSelected?._id}`}>
-                <Avatar 
-                  src={userSelected?.profilePhoto?.url} 
+                <Avatar
+                  src={userSelected?.profilePhoto?.url}
                   alt={userSelected?.username}
                   size="lg"
                   className="ring-2 ring-transparent hover:ring-gray-100 dark:hover:ring-threads-border transition-all"
@@ -102,7 +102,7 @@ const UserHoverCard = ({ userSelected, children, side = 'bottom' }) => {
             {/* Info: Name & Bio */}
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-1">
-                <Link 
+                <Link
                   href={`/Pages/User/${userSelected?._id}`}
                   className="text-lg font-bold hover:underline decoration-2"
                 >
@@ -143,7 +143,7 @@ const UserHoverCard = ({ userSelected, children, side = 'bottom' }) => {
                   ))}
                 </div>
                 <p className="text-[12px] text-gray-500">
-                  Followed by {userSelected.mutualFollowers[0].username} 
+                  Followed by {userSelected.mutualFollowers[0].username}
                   {userSelected.mutualFollowers.length > 1 && ` and ${userSelected.mutualFollowers.length - 1} others`}
                 </p>
               </div>
