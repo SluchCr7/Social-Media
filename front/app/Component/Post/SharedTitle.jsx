@@ -4,24 +4,28 @@ import React, { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const SharedTitle = memo(({ user, post, original }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
+  
+  const getProfileLink = (ownerId) => 
+    user?._id === ownerId ? '/Pages/Profile' : `/Pages/User/${ownerId}`;
+
   return (
-    <div className="text-xs sm:text-sm text-gray-800 dark:text-gray-200 italic">
+    <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-medium text-gray-400 dark:text-white/20 mb-2 px-1">
       <Link
-        href={user?._id === post.owner?._id ? '/Pages/Profile' : `/Pages/User/${post.owner?._id}`}
-        className="font-semibold hover:underline"
+        href={getProfileLink(post?.owner?._id)}
+        className="font-bold text-gray-900 dark:text-white/60 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
       >
-        {post.owner.username}
-      </Link>{' '}
-      {t("shared a post from")}{' '}
+        {post?.owner?.username}
+      </Link>
+      <span>{t("shared a post from")}</span>
       <Link
-        href={user?._iسd === original?.owner?._id ? '/Pages/Profile' : `/Pages/User/${original?.owner?._id}`}
-        className="font-semibold hover:underline"
+        href={getProfileLink(original?.owner?._id)}
+        className="font-bold text-gray-900 dark:text-white/60 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
       >
         {original?.owner?.username}
       </Link>
     </div>
-  )
-})
+  );
+});
 SharedTitle.displayName = 'SharedTitle'
 export default SharedTitle
