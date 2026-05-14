@@ -1,220 +1,158 @@
 'use client'
 import * as HoverCard from '@radix-ui/react-hover-card'
-import Image from 'next/image'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useMemo } from 'react'
+import { CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../Context/AuthContext'
-import { useState, useEffect } from 'react'
-import { FaUserPlus, FaUserCheck } from 'react-icons/fa'
-import { HiCheckBadge, HiUsers, HiChatBubbleLeftRight } from 'react-icons/hi2'
 import { useUser } from '../Context/UserContext'
-import { useGetData } from '../Custome/useGetData'
 import { useTranslation } from 'react-i18next'
+import { Avatar } from './ui/Avatar'
+import { Button } from './ui/Button'
 
-const UserHoverCard = ({ userSelected, children, side = 'right' }) => {
+const UserHoverCard = ({ userSelected, children, side = 'bottom' }) => {
   const { user } = useAuth()
-  const [isHovered, setIsHovered] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const { followUser, loading } = useUser()
-  const { userData } = useGetData(user?._id)
   const { t } = useTranslation()
 
-  // Local state for real-time updates
-  const [localIsFollowing, setLocalIsFollowing] = useState(
-    userData?.following?.some(member => member._id === userSelected._id)
-  )
-  const [localFollowerCount, setLocalFollowerCount] = useState(userSelected?.followers?.length || 0)
+  // --- Logic & State ---
+  const isMe = useMemo(() => user?._id === userSelected?._id, [user?._id, userSelected?._id]);
+  
+  const isFollowing = useMemo(() => {
+    if (!user || !userSelected) return false;
+    return user.following?.some(id => 
+      (typeof id === 'string' ? id : id._id) === userSelected._id
+    );
+  }, [user?.following, userSelected?._id]);
 
-  // Check screen size to avoid showing card on mobile
+  const followerCount = useMemo(() => userSelected?.followers?.length || 0, [userSelected?.followers]);
+  const followingCount = useMemo(() => userSelected?.following?.length || 0, [userSelected?.following]);
+
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 640)
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768)
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Update local state when userData changes
-  useEffect(() => {
-    const isFollowing = userData?.following?.some(member => member._id === userSelected._id)
-    setLocalIsFollowing(isFollowing)
-  }, [userData?.following, userSelected._id])
-
-  const handleFollow = async () => {
-    // Optimistic update
-    const wasFollowing = localIsFollowing
-    setLocalIsFollowing(!wasFollowing)
-    setLocalFollowerCount(prev => wasFollowing ? prev - 1 : prev + 1)
-
-    const result = await followUser(userSelected._id)
-
-    // If failed, revert
-    if (!result?.success) {
-      setLocalIsFollowing(wasFollowing)
-      setLocalFollowerCount(userSelected?.followers?.length || 0)
-    }
+  const handleFollow = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await followUser(userSelected._id);
   }
 
-  if (isMobile) {
+  if (isMobile || !userSelected) {
     return (
       <Link
         href={`/Pages/User/${userSelected?._id}`}
-        className="font-semibold text-sm text-lightMode-fg dark:text-darkMode-fg hover:underline"
+        className="font-medium hover:underline inline-block"
       >
         {children || userSelected?.username}
       </Link>
     )
   }
 
-  if (!userSelected) return null
-
   return (
-    <HoverCard.Root openDelay={200} closeDelay={150}>
+    <HoverCard.Root openDelay={300} closeDelay={200}>
       <HoverCard.Trigger asChild>
-        {children || (
-          <Link
-            href={`/Pages/User/${userSelected?._id}`}
-            className="font-semibold text-sm text-lightMode-fg dark:text-darkMode-fg hover:underline"
-          >
-            {userSelected?.username}
-          </Link>
-        )}
+        <span className="cursor-pointer">
+          {children || (
+            <Link
+              href={`/Pages/User/${userSelected?._id}`}
+              className="font-semibold hover:underline"
+            >
+              {userSelected?.username}
+            </Link>
+          )}
+        </span>
       </HoverCard.Trigger>
 
       <HoverCard.Portal>
-        <AnimatePresence>
-          <HoverCard.Content
-            side={side}
-            sideOffset={10}
-            align="center"
-            avoidCollisions={true}
-            collisionPadding={8}
-            className="z-50 rounded-[1.5rem] border border-gray-200/50 dark:border-white/10 bg-white/95 dark:bg-[#0D1117]/95 backdrop-blur-2xl shadow-2xl overflow-hidden max-w-[90vw] sm:max-w-[320px]"
-            onPointerEnter={() => setIsHovered(true)}
-            onPointerLeave={() => setIsHovered(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {/* Gradient Header Background */}
-              <div className="relative h-20 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 overflow-hidden">
-                <motion.div
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 90, 0]
-                  }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"
+        <HoverCard.Content
+          side={side}
+          sideOffset={8}
+          align="start"
+          className="z-[9999] w-80 bg-white dark:bg-black rounded-2xl border border-gray-100 dark:border-threads-border shadow-2xl p-5 overflow-hidden outline-none animate-in fade-in zoom-in-95 duration-200"
+        >
+          <div className="flex flex-col gap-4">
+            {/* Top: Avatar & Action */}
+            <div className="flex items-start justify-between">
+              <Link href={`/Pages/User/${userSelected?._id}`}>
+                <Avatar 
+                  src={userSelected?.profilePhoto?.url} 
+                  alt={userSelected?.username}
+                  size="lg"
+                  className="ring-2 ring-transparent hover:ring-gray-100 dark:hover:ring-threads-border transition-all"
                 />
+              </Link>
+
+              {!isMe && (
+                <Button
+                  size="sm"
+                  variant={isFollowing ? "outline" : "default"}
+                  onClick={handleFollow}
+                  disabled={loading}
+                  className="rounded-full px-5 font-bold"
+                >
+                  {isFollowing ? t('Following') : t('Follow')}
+                </Button>
+              )}
+            </div>
+
+            {/* Info: Name & Bio */}
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-1">
+                <Link 
+                  href={`/Pages/User/${userSelected?._id}`}
+                  className="text-lg font-bold hover:underline decoration-2"
+                >
+                  {userSelected?.username}
+                </Link>
+                {userSelected?.isAccountWithPremiumVerify && (
+                  <CheckCircle2 size={16} className="text-blue-500 fill-blue-500 text-white" />
+                )}
               </div>
+              <p className="text-gray-500 text-[15px]">@{userSelected?.profileName || userSelected?.username}</p>
+            </div>
 
-              {/* Content */}
-              <div className="relative px-5 pb-5 -mt-10">
-                {/* Profile Image */}
-                <div className="flex items-start justify-between mb-4">
-                  <motion.div
-                    whileHover={{ scale: 1.05, rotate: 5 }}
-                    className="relative"
-                  >
-                    <div className="w-20 h-20 rounded-[1.5rem] overflow-hidden ring-4 ring-white dark:ring-[#0D1117] shadow-xl">
-                      <Image
-                        src={userSelected?.profilePhoto?.url || '/default-avatar.png'}
-                        alt="Profile"
-                        width={80}
-                        height={80}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    {userSelected?.isOnline && (
-                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-4 border-white dark:border-[#0D1117] shadow-lg" />
-                    )}
-                  </motion.div>
+            {/* Bio */}
+            {userSelected?.description && (
+              <p className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200 line-clamp-3">
+                {userSelected.description}
+              </p>
+            )}
 
-                  {/* Follow Button (Top Right) */}
-                  {user?._id !== userSelected._id && (
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleFollow}
-                      disabled={loading}
-                      className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg ${localIsFollowing
-                        ? 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20'
-                        : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-indigo-500/30 hover:shadow-xl'
-                        }`}
-                    >
-                      {localIsFollowing ? <FaUserCheck size={12} /> : <FaUserPlus size={12} />}
-                      {localIsFollowing ? t('Following') : t('Follow')}
-                    </motion.button>
-                  )}
+            {/* Stats */}
+            <div className="flex items-center gap-4 pt-1">
+              <Link href={`/Pages/User/${userSelected?._id}/followers`} className="flex items-center gap-1 group">
+                <span className="font-bold text-gray-900 dark:text-white group-hover:underline">{followerCount}</span>
+                <span className="text-gray-500 text-[14px]">{t("Followers")}</span>
+              </Link>
+              <Link href={`/Pages/User/${userSelected?._id}/following`} className="flex items-center gap-1 group">
+                <span className="font-bold text-gray-900 dark:text-white group-hover:underline">{followingCount}</span>
+                <span className="text-gray-500 text-[14px]">{t("Following")}</span>
+              </Link>
+            </div>
+
+            {/* Mutual Follows */}
+            {userSelected?.mutualFollowers?.length > 0 && (
+              <div className="flex items-center gap-2 mt-1">
+                <div className="flex -space-x-2">
+                  {userSelected.mutualFollowers.slice(0, 3).map((u, i) => (
+                    <Avatar key={i} src={u.profilePhoto?.url} size="xs" className="border-2 border-white dark:border-black" />
+                  ))}
                 </div>
-
-                {/* User Info */}
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-black text-lg text-gray-900 dark:text-white truncate">
-                        {userSelected?.username}
-                      </h3>
-                      {userSelected?.isAccountWithPremiumVerify && (
-                        <HiCheckBadge className="text-indigo-500 text-xl flex-shrink-0" title="Verified" />
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                      @{userSelected?.profileName}
-                    </p>
-                  </div>
-
-                  {/* Bio */}
-                  {userSelected?.description && (
-                    <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 leading-relaxed">
-                      {userSelected.description}
-                    </p>
-                  )}
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-200/50 dark:border-white/10">
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      className="p-3 rounded-xl bg-gradient-to-br from-indigo-500/10 to-indigo-500/5 dark:from-indigo-500/20 dark:to-indigo-500/10 border border-indigo-500/20"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <HiUsers className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">
-                          {t("Followers")}
-                        </span>
-                      </div>
-                      <div className="text-xl font-black text-gray-900 dark:text-white">
-                        {localFollowerCount}
-                      </div>
-                    </motion.div>
-
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      className="p-3 rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-500/5 dark:from-purple-500/20 dark:to-purple-500/10 border border-purple-500/20"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <HiChatBubbleLeftRight className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">
-                          {t("Following")}
-                        </span>
-                      </div>
-                      <div className="text-xl font-black text-gray-900 dark:text-white">
-                        {userSelected?.following?.length || 0}
-                      </div>
-                    </motion.div>
-                  </div>
-                </div>
+                <p className="text-[12px] text-gray-500">
+                  Followed by {userSelected.mutualFollowers[0].username} 
+                  {userSelected.mutualFollowers.length > 1 && ` and ${userSelected.mutualFollowers.length - 1} others`}
+                </p>
               </div>
-            </motion.div>
-
-            <HoverCard.Arrow className="fill-white dark:fill-[#0D1117]" />
-          </HoverCard.Content>
-        </AnimatePresence>
+            )}
+          </div>
+        </HoverCard.Content>
       </HoverCard.Portal>
     </HoverCard.Root>
   )
 }
 
-export default UserHoverCard
+export default UserHoverCard;
