@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
-import { 
-  Share, 
-  Loader2, 
-  X, 
-  Image as ImageIcon, 
+import {
+  Share,
+  Loader2,
+  X,
+  Image as ImageIcon,
   Hash,
   Send,
   User as UserIcon
@@ -29,8 +29,8 @@ const PostPreview = React.memo(({ post }) => {
   return (
     <div className="relative group rounded-3xl border border-gray-100 dark:border-threads-border bg-gray-50/50 dark:bg-white/[0.02] overflow-hidden p-6 transition-all hover:bg-gray-50 dark:hover:bg-white/[0.04]">
       <div className="flex items-center gap-3 mb-4">
-        <Avatar 
-          src={post?.owner?.profilePhoto?.url} 
+        <Avatar
+          src={post?.owner?.profilePhoto?.url}
           size="sm"
           className="border border-gray-100 dark:border-white/5"
         />
@@ -44,7 +44,7 @@ const PostPreview = React.memo(({ post }) => {
 
       {post?.text && (
         <p className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-relaxed mb-4 line-clamp-3 italic opacity-80">
-          "{post?.text}"
+          {post?.text}
         </p>
       )}
 
@@ -142,7 +142,7 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
 
           {/* Body */}
           <div className="flex-1 overflow-y-auto no-scrollbar p-8 space-y-8">
-            
+
             {/* Composition */}
             <div className="flex gap-4">
               <Avatar src={user?.profilePhoto?.url} size="md" />
@@ -156,7 +156,7 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
                   value={customText}
                   onChange={(e) => setCustomText(e.target.value)}
                 />
-                
+
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/5">
                   <div className="flex gap-2">
                     <button className="p-2 rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
@@ -199,7 +199,7 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
           {/* Loading Overlay */}
           <AnimatePresence>
             {isLoading && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="absolute inset-0 bg-white/60 dark:bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-50"
               >
