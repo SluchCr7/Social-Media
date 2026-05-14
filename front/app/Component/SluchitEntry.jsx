@@ -25,6 +25,7 @@ import ShowSensitiveContent from './Post/ShowSensitiveContent';
 import PostMusicPlayer from './Post/PostMusic';
 import Image from 'next/image';
 import Link from 'next/link'
+import { Avatar } from './ui/Avatar'
 
 const SluchitEntry = forwardRef(({ post }, ref) => {
   const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost();
