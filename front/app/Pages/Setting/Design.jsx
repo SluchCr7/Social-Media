@@ -26,7 +26,7 @@ import { TABS } from '@/app/utils/Data';
 import { Avatar } from '@/app/Component/ui/Avatar';
 
 // Lazy Loading
-const AppearanceTab = lazy(() => import('./Tabs/Apperance'));
+const AppearanceTab = lazy(() => import('./Tabs/Appearance'));
 const Security = lazy(() => import('./Tabs/Security'));
 const AccountTab = lazy(() => import('./Tabs/AccountTab'));
 const LanguageTab = lazy(() => import('./Tabs/LanguageTab'));
@@ -103,10 +103,10 @@ function SettingsView({
   }, [onDeleteAccount]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white flex flex-col md:flex-row overflow-hidden font-cairo">
+    <div className="h-screen bg-white dark:bg-black text-black dark:text-white flex flex-col md:flex-row overflow-hidden font-cairo">
       
       {/* --- Sidebar: Immersive Navigation --- */}
-      <aside className="hidden md:flex w-72 flex-col border-r border-gray-100 dark:border-threads-border bg-white dark:bg-black z-50">
+      <aside className="hidden md:flex w-72 flex-col border-r border-gray-100 dark:border-threads-border bg-white dark:bg-black z-50 h-full">
         <div className="p-8 pb-4">
           <div className="flex items-center gap-3 mb-10">
             <div className="w-10 h-10 rounded-2xl bg-indigo-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
@@ -176,12 +176,14 @@ function SettingsView({
       </aside>
 
       {/* --- Main Content: Dynamic Section --- */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col h-full overflow-hidden relative">
         {/* Top Header */}
-        <header className="h-20 flex items-center justify-between px-10 border-b border-gray-100 dark:border-threads-border bg-white/80 dark:bg-black/80 backdrop-blur-xl z-40">
+        <header className="h-20 flex items-center justify-between px-10 border-b border-gray-100 dark:border-threads-border bg-white/80 dark:bg-black/80 backdrop-blur-xl z-40 shrink-0">
           <div className="flex items-center gap-3">
-             <LayoutGrid className="text-indigo-500" size={20} />
-             <h1 className="text-lg font-black tracking-tighter uppercase">{activeTab}</h1>
+             <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500">
+               <LayoutGrid size={20} />
+             </div>
+             <h1 className="text-lg font-black tracking-tight uppercase">{t(activeTab)}</h1>
           </div>
           
           <div className="flex items-center gap-4">
@@ -190,13 +192,15 @@ function SettingsView({
                Live System
              </div>
              <div className="w-px h-6 bg-gray-100 dark:border-threads-border" />
-             <Sparkles className="text-amber-500" size={20} />
+             <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
+               <Sparkles size={20} />
+             </div>
           </div>
         </header>
 
         {/* Dynamic Area */}
-        <div className="flex-1 overflow-y-auto no-scrollbar p-6 md:p-12 lg:p-20">
-          <div className="max-w-4xl mx-auto">
+        <div className="flex-1 overflow-y-auto no-scrollbar relative">
+          <div className="max-w-6xl mx-auto p-6 md:p-12 lg:p-16 pb-32">
             <AnimatePresence mode="wait">
               <Suspense
                 fallback={
@@ -208,54 +212,52 @@ function SettingsView({
               >
                 <motion.div
                   key={activeTab}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
                 >
-                  <div className="rounded-[2.5rem] bg-white dark:bg-black border border-gray-100 dark:border-threads-border overflow-hidden">
-                    <div className="p-10">
-                      {activeTab === 'appearance' && <AppearanceTab user={user} darkMode={darkMode} toggleTheme={toggleTheme} />}
-                      {activeTab === 'security' && (
-                        <Security
-                          oldPassword={oldPassword}
-                          setOldPassword={setOldPassword}
-                          newPassword={newPassword}
-                          setNewPassword={setNewPassword}
-                          confirmPassword={confirmPassword}
-                          setConfirmPassword={setConfirmPassword}
-                          passwordMessage={passwordMessage}
-                          setPasswordMessage={setPasswordMessage}
-                          submitPassword={submitPassword}
-                        />
-                      )}
-                      {activeTab === 'profile' && <UpdateProfile user={user} />}
-                      {activeTab === 'language' && <LanguageTab language={language} handleLanguageChange={handleLanguageChange} />}
-                      {activeTab === 'history' && <HistoryTab loginHistory={loginHistory} />}
-                      {activeTab === 'notifications' && <NotificationTab user={user} onToggleNotificationBlock={onToggleNotificationBlock} />}
-                      {activeTab === 'communities' && <CommunityTab user={user} />}
-                      {activeTab === 'privacy' && (
-                        <PrivacyTab
-                          user={user}
-                          onTogglePrivate={onTogglePrivate}
-                          onToggleShowOnlineStatus={onToggleShowOnlineStatus}
-                        />
-                      )}
-                      {activeTab === 'help' && <HelpTab />}
-                      {activeTab === 'account' && (
-                        <AccountTab
-                          user={user}
-                          isVerified={isVerified}
-                          setIsVerified={setIsVerified}
-                          onMakePremiumVerify={onMakePremiumVerify}
-                          showConfirmDelete={showConfirmDelete}
-                          setShowConfirmDelete={setShowConfirmDelete}
-                          onTogglePrivate={onTogglePrivate}
-                          onToggleShowOnlineStatus={onToggleShowOnlineStatus}
-                          handleDelete={handleDelete}
-                        />
-                      )}
-                    </div>
+                  <div className="rounded-[2.5rem] bg-white dark:bg-black border border-gray-100 dark:border-threads-border shadow-2xl shadow-black/5 p-8 md:p-12">
+                    {activeTab === 'appearance' && <AppearanceTab user={user} darkMode={darkMode} toggleTheme={toggleTheme} />}
+                    {activeTab === 'security' && (
+                      <Security
+                        oldPassword={oldPassword}
+                        setOldPassword={setOldPassword}
+                        newPassword={newPassword}
+                        setNewPassword={setNewPassword}
+                        confirmPassword={confirmPassword}
+                        setConfirmPassword={setConfirmPassword}
+                        passwordMessage={passwordMessage}
+                        setPasswordMessage={setPasswordMessage}
+                        submitPassword={submitPassword}
+                      />
+                    )}
+                    {activeTab === 'profile' && <UpdateProfile user={user} />}
+                    {activeTab === 'language' && <LanguageTab language={language} handleLanguageChange={handleLanguageChange} />}
+                    {activeTab === 'history' && <HistoryTab loginHistory={loginHistory} />}
+                    {activeTab === 'notifications' && <NotificationTab user={user} onToggleNotificationBlock={onToggleNotificationBlock} />}
+                    {activeTab === 'communities' && <CommunityTab user={user} />}
+                    {activeTab === 'privacy' && (
+                      <PrivacyTab
+                        user={user}
+                        onTogglePrivate={onTogglePrivate}
+                        onToggleShowOnlineStatus={onToggleShowOnlineStatus}
+                      />
+                    )}
+                    {activeTab === 'help' && <HelpTab />}
+                    {activeTab === 'account' && (
+                      <AccountTab
+                        user={user}
+                        isVerified={isVerified}
+                        setIsVerified={setIsVerified}
+                        onMakePremiumVerify={onMakePremiumVerify}
+                        showConfirmDelete={showConfirmDelete}
+                        setShowConfirmDelete={setShowConfirmDelete}
+                        onTogglePrivate={onTogglePrivate}
+                        onToggleShowOnlineStatus={onToggleShowOnlineStatus}
+                        handleDelete={handleDelete}
+                      />
+                    )}
                   </div>
                 </motion.div>
               </Suspense>
