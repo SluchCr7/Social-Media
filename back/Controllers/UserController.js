@@ -52,7 +52,39 @@ const RegisterNewUser = async (req, res) => {
 
     await user.save();
 
-    return res.status(201).json({ message: "User registered successfully." });
+    // ✅ Create Verification Token & Send Email
+    let verificationToken = new Verification({
+      userId: user._id,
+      tokenVer: crypto.randomBytes(32).toString('hex'),
+    });
+    await verificationToken.save();
+
+    const link = `${process.env.DOMAIN_NAME}/Pages/UserVerify/${user._id}/verify/${verificationToken.tokenVer}`;
+    const htmlTemp = `
+      <div style="font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 40px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+          <tr>
+            <td style="padding: 30px;">
+              <h2 style="color: #333333;">Welcome to Sluchitt, ${user.username}!</h2>
+              <p style="font-size: 16px; color: #555555; line-height: 1.6;">
+                Thank you for signing up. To complete your registration, please verify your email address by clicking the button below.
+              </p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${link}" style="background-color: #4f46e5; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
+                  Verify My Email
+                </a>
+              </div>
+              <p style="font-size: 14px; color: #999999;">
+                If you didn’t sign up for this account, feel free to ignore this email. Your information will remain secure.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </div>
+    `;
+    await sendEmail(user.email, 'Verify your email address', htmlTemp);
+
+    return res.status(201).json({ message: "User registered successfully. Please check your email to verify your account." });
   } catch (err) {
     return res.status(500).json({ message: err.message || "Internal Server Error" });
   }
@@ -170,13 +202,60 @@ const LoginUser = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Email or Password are not correct" });
   }
 
+  // ✅ Check email verification
+  if (!user.isVerify) {
+      let verificationToken = await Verification.findOne({ userId: user._id });
+      if (!verificationToken) {
+          verificationToken = new Verification({
+              userId: user._id,
+              tokenVer: crypto.randomBytes(32).toString('hex'),
+          });
+          await verificationToken.save();
+      }
+
+      const link = `${process.env.DOMAIN_NAME}/Pages/UserVerify/${user._id}/verify/${verificationToken.tokenVer}`;
+      const htmlTemp = `
+      <div style="font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 40px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+          <tr>
+            <td style="padding: 30px;">
+              <h2 style="color: #333333;">Welcome back to Sluchitt!</h2>
+              <p style="font-size: 16px; color: #555555; line-height: 1.6;">
+                To continue, please verify your email address by clicking the button below.
+              </p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${link}" style="background-color: #4f46e5; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
+                  Verify My Email
+                </a>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+      `;
+      await sendEmail(user.email, 'Verify your email address', htmlTemp);
+
+      return res.status(401).json({
+          message: "Your email is not verified. A new verification email has been sent.",
+          emailSent: true
+      });
+  }
+
+  // ✅ Check Account Status
+  if (user.accountStatus === 'banned') {
+    return res.status(403).json({ message: "Your account has been banned due to violations." });
+  }
+  if (user.accountStatus === 'suspended' && user.suspendedUntil > new Date()) {
+    return res.status(403).json({ message: \`Your account is suspended until \${new Date(user.suspendedUntil).toLocaleString()}.\` });
+  }
+
   // ✅ تحديث آخر تسجيل دخول
   user.lastLogin = new Date();
 
   // ✅ إضافة سجل جديد إلى loginHistory
   user.loginHistory.push({
     date: new Date(),
-    ip: req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+    ip: req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress,
     device: req.headers['user-agent'],
   });
 
@@ -190,16 +269,39 @@ const LoginUser = asyncHandler(async (req, res) => {
   // ✅ إنشاء التوكن
   const token = jwt.sign(
     { _id: user._id, isAdmin: user.isAdmin },
-    process.env.TOKEN_SECRET
+    process.env.TOKEN_SECRET,
+    { expiresIn: '7d' } // Added expiration
   );
 
   const { password, ...others } = user._doc;
   others.token = token;
 
+  // Set HTTP-Only cookie for enhanced security
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  });
+
   return res.status(200).json({
     message: "Login successful",
     user: others,
   });
+});
+
+/**
+ * @desc Logout User
+ * @route POST /api/auth/logout
+ * @access Public
+ */
+const LogoutUser = asyncHandler(async (req, res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  });
+  return res.status(200).json({ message: "Logged out successfully" });
 });
 
 

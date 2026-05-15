@@ -1,7 +1,13 @@
-'use client';
 import React from 'react';
 import { motion } from 'framer-motion';
-import { HiQuestionMarkCircle, HiChatBubbleLeftRight, HiShieldExclamation, HiDocumentText, HiLifebuoy, HiChevronRight } from 'react-icons/hi2';
+import { 
+  LifeBuoy, 
+  MessageSquare, 
+  ShieldAlert, 
+  FileText, 
+  ChevronRight,
+  HelpCircle
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const HelpTab = React.memo(() => {
@@ -12,96 +18,122 @@ const HelpTab = React.memo(() => {
             id: 'support',
             title: t('Help Center'),
             desc: t('Get help with using our features and tools.'),
-            icon: HiLifebuoy,
-            color: 'bg-blue-500',
+            icon: LifeBuoy,
+            color: 'text-blue-500',
+            bg: 'bg-blue-500/10'
         },
         {
             id: 'report',
             title: t('Report a Problem'),
             desc: t('Something not working? Let us know.'),
-            icon: HiChatBubbleLeftRight,
-            color: 'bg-amber-500',
+            icon: MessageSquare,
+            color: 'text-amber-500',
+            bg: 'bg-amber-500/10'
         },
         {
             id: 'safety',
             title: t('Safety Center'),
             desc: t('Learn how we keep our community safe.'),
-            icon: HiShieldExclamation,
-            color: 'bg-green-500',
+            icon: ShieldAlert,
+            color: 'text-emerald-500',
+            bg: 'bg-emerald-500/10'
         },
         {
             id: 'terms',
             title: t('Legal & Terms'),
             desc: t('Review our Terms of Service and Privacy Policy.'),
-            icon: HiDocumentText,
-            color: 'bg-purple-500',
+            icon: FileText,
+            color: 'text-purple-500',
+            bg: 'bg-purple-500/10'
         },
     ];
 
     return (
-        <motion.div
+        <motion.section
             key="help"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="max-w-4xl mx-auto p-6 space-y-8"
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-12"
         >
-            <div className="flex flex-col gap-2 mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                    <HiLifebuoy className="text-indigo-500" />
-                    {t('Support & Help')}
-                </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {t('Need assistance? Find answers and connect with support.')}
-                </p>
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row items-center gap-8 pb-10 border-b border-gray-100 dark:border-threads-border">
+                <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
+                    <LifeBuoy size={40} />
+                </div>
+                <div className="text-center md:text-left space-y-2">
+                    <h2 className="text-3xl font-black tracking-tighter uppercase">{t('Support Core')}</h2>
+                    <p className="text-sm text-gray-400 font-bold uppercase tracking-[0.2em]">
+                        {t('Resources & assistance channels')}
+                    </p>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {helpLinks.map((link) => (
-                    <motion.button
-                        key={link.id}
-                        whileHover={{ scale: 1.02, y: -2 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="flex items-start gap-4 p-5 rounded-2xl bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/5 shadow-sm text-left group transition-all hover:bg-gray-50 dark:hover:bg-white/[0.04]"
-                    >
-                        <div className={`p-3 rounded-xl ${link.color} text-white shadow-lg`}>
-                            <link.icon className="w-6 h-6" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                {/* Links Grid */}
+                <div className="lg:col-span-2 p-8 rounded-[2.5rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-threads-border space-y-6">
+                   <div className="flex items-center gap-3 mb-2">
+                     <HelpCircle size={20} className="text-indigo-500" />
+                     <h3 className="text-sm font-black uppercase tracking-widest">{t('Directory')}</h3>
+                   </div>
+
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       {helpLinks.map((link) => (
+                           <motion.button
+                               key={link.id}
+                               whileHover={{ scale: 1.02 }}
+                               whileTap={{ scale: 0.98 }}
+                               className="flex flex-col items-start p-6 rounded-[2rem] bg-white dark:bg-black border border-gray-100 dark:border-threads-border shadow-sm group hover:border-indigo-500/30 transition-all text-left relative overflow-hidden"
+                           >
+                               <div className={`w-12 h-12 rounded-2xl ${link.bg} ${link.color} flex items-center justify-center mb-6 transition-transform group-hover:scale-110`}>
+                                   <link.icon size={20} />
+                               </div>
+                               <h3 className="text-[13px] font-black uppercase tracking-widest mb-1 group-hover:text-indigo-500 transition-colors">
+                                   {link.title}
+                               </h3>
+                               <p className="text-[10px] text-gray-400 font-medium leading-relaxed max-w-[200px]">
+                                   {link.desc}
+                               </p>
+                               <div className="absolute top-6 right-6 w-8 h-8 rounded-full bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+                                 <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                               </div>
+                           </motion.button>
+                       ))}
+                   </div>
+                </div>
+
+                {/* FAQ Promo */}
+                <div className="space-y-6">
+                    <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden flex flex-col h-full justify-between">
+                        <div className="absolute top-0 right-0 p-8 opacity-10">
+                            <HelpCircle size={120} className="-rotate-12" />
                         </div>
-                        <div className="flex-1">
-                            <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-1 group-hover:text-indigo-500 transition-colors">
-                                {link.title}
-                            </h3>
-                            <p className="text-xs text-gray-500 leading-relaxed">
-                                {link.desc}
+                        <div className="relative z-10 space-y-6">
+                            <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
+                                <MessageSquare size={24} />
+                            </div>
+                            <h4 className="text-lg font-black uppercase tracking-tighter">
+                                {t('Quick Resolution')}
+                            </h4>
+                            <p className="text-xs font-medium leading-relaxed opacity-90 max-w-[200px]">
+                                {t('Consult our comprehensive database of frequently asked questions for immediate answers.')}
                             </p>
                         </div>
-                        <HiChevronRight className="text-gray-300 group-hover:text-indigo-500 mt-1 transition-colors" />
-                    </motion.button>
-                ))}
-            </div>
+                        <button className="relative z-10 mt-8 w-full py-4 bg-white text-indigo-600 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-opacity-90 transition-all shadow-xl">
+                            {t('Access FAQ')}
+                        </button>
+                    </div>
 
-            {/* FAQ Quick Links or Version Info */}
-            <section className="mt-12 p-8 rounded-[2.5rem] bg-gradient-to-br from-indigo-500 to-purple-600 text-white relative overflow-hidden shadow-2xl">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                    <HiLifebuoy className="w-32 h-32" />
+                    <div className="text-center">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                            Threads V2 • Core 2.4.0
+                        </p>
+                    </div>
                 </div>
-                <div className="relative z-10">
-                    <h3 className="text-xl font-black mb-2 uppercase tracking-tight">{t('Quick Assistance')}</h3>
-                    <p className="text-sm opacity-80 mb-6 max-w-sm">
-                        {t('Check out our most frequently asked questions for instant answers.')}
-                    </p>
-                    <button className="px-6 py-2 bg-white text-indigo-600 rounded-full text-xs font-black uppercase tracking-widest hover:bg-opacity-90 transition-all shadow-xl">
-                        {t('Browse FAQ')}
-                    </button>
-                </div>
-            </section>
-
-            <div className="text-center pt-8">
-                <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">
-                    Threads V2 • Version 2.4.0 (Stable)
-                </p>
             </div>
-        </motion.div>
+        </motion.section>
     );
 });
 

@@ -1,11 +1,10 @@
 'use client';
 import React, { useState } from 'react';
 import { useAuth } from '@/app/Context/AuthContext';
-import { FiEye, FiEyeOff, FiMail, FiUser, FiLock, FiArrowRight, FiCheck } from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiMail, FiUser, FiLock, FiArrowRight, FiCheck, FiHexagon } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { useTranslation } from 'react-i18next';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
 const Register = () => {
@@ -45,176 +44,196 @@ const Register = () => {
   };
 
   return (
-    <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-gray-50 dark:bg-[#050505] overflow-hidden transition-colors duration-300">
-      {/* Dynamic Background Elements */}
-      <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-600/20 rounded-full blur-[120px]" />
-      <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/20 rounded-full blur-[120px]" />
-      <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 pointer-events-none" />
+    <div className="min-h-screen w-full flex items-center justify-center bg-[#0a0a0a] overflow-hidden relative font-sans selection:bg-indigo-500/30">
+      {/* 🌌 Dynamic Ambient Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1], rotate: [0, -90, 0] }} 
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-[30%] -right-[10%] w-[70vw] h-[70vw] rounded-full bg-gradient-to-bl from-indigo-600/10 to-transparent blur-[120px]" 
+        />
+        <motion.div 
+          animate={{ scale: [1, 1.5, 1], rotate: [0, 90, 0] }} 
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute -bottom-[30%] -left-[10%] w-[60vw] h-[60vw] rounded-full bg-gradient-to-tr from-violet-600/10 to-transparent blur-[100px]" 
+        />
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="relative z-10 w-full max-w-5xl grid md:grid-cols-2 bg-white dark:bg-white/5 backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden min-h-[650px]"
-      >
-        {/* Left Side: Visual/Branding */}
-        <div className="hidden md:flex flex-col items-center justify-center relative p-12 bg-gradient-to-br from-blue-900/50 to-indigo-900/50">
-          <div className="absolute inset-0 bg-black/20" />
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="relative z-10 text-center"
+      <div className="relative z-10 w-full max-w-[1200px] min-h-[750px] flex mx-4 lg:mx-8 rounded-[2.5rem] bg-[#111111]/80 backdrop-blur-2xl border border-white/[0.05] shadow-2xl overflow-hidden shadow-black/50">
+        
+        {/* ✨ Left Side: Abstract Visuals */}
+        <div className="hidden lg:flex w-[45%] relative items-center justify-center overflow-hidden bg-gradient-to-br from-[#1a1a24] to-[#0d0d14] border-r border-white/[0.05]">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop')] bg-cover bg-center opacity-30 mix-blend-luminosity" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d14] via-transparent to-transparent" />
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="relative z-10 p-12 text-left w-full"
           >
-            <div className="w-64 h-64 relative mx-auto mb-8">
-              <Image
-                src="/register2.svg"
-                alt="Register"
-                fill
-                className="object-contain drop-shadow-2xl"
-              />
+            <div className="mb-8 w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <FiHexagon className="text-white text-3xl" />
             </div>
-            <h2 className="text-3xl font-bold text-white mb-4 tracking-tight">{t('Join the Future')}</h2>
-            <p className="text-blue-200 text-lg max-w-sm mx-auto leading-relaxed">
-              {t('Create your account today and start your journey with thousands of others.')}
+            <h1 className="text-5xl font-bold text-white mb-6 leading-tight tracking-tight">
+              Join the <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Future</span>
+            </h1>
+            <p className="text-gray-400 text-lg max-w-sm leading-relaxed">
+              Create your account today and start your journey with thousands of others building the next generation community.
             </p>
           </motion.div>
         </div>
 
-        {/* Right Side: Form */}
-        <div className="flex flex-col justify-center p-10 md:p-14 bg-white dark:bg-black/20 overflow-y-auto custom-scrollbar">
-          <div className="md:hidden text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('Create Account')}</h2>
-            <p className="text-gray-500 dark:text-gray-400">{t('Join us securely')}</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-5 max-w-md mx-auto w-full">
-
-            {/* Username */}
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">{t('Username')}</label>
-              <div className="relative group">
-                <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 group-focus-within:text-blue-500 dark:group-focus-within:text-blue-400 transition-colors" size={20} />
-                <input
-                  type="text"
-                  name="username"
-                  placeholder={t('John Doe')}
-                  value={formData.username}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:border-blue-500/50 transition-all font-medium"
-                />
+        {/* 🔐 Right Side: Form */}
+        <div className="w-full lg:w-[55%] flex flex-col justify-center px-8 md:px-16 lg:px-24 py-12">
+          
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+            className="w-full max-w-md mx-auto"
+          >
+            {/* Mobile Logo */}
+            <div className="lg:hidden flex justify-center mb-8">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <FiHexagon className="text-white text-2xl" />
               </div>
             </div>
 
-            {/* Email */}
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">{t('Email Address')}</label>
-              <div className="relative group">
-                <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 group-focus-within:text-blue-500 dark:group-focus-within:text-blue-400 transition-colors" size={20} />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder={t('you@example.com')}
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:border-blue-500/50 transition-all font-medium"
-                />
-              </div>
+            <div className="mb-10 lg:text-left text-center">
+              <h2 className="text-3xl font-semibold text-white mb-2 tracking-tight">{t('Create Account')}</h2>
+              <p className="text-gray-400 text-sm">{t('Join us securely')}</p>
             </div>
 
-            {/* Password */}
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider ml-1">{t('Password')}</label>
-              <div className="relative group">
-                <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 group-focus-within:text-blue-500 dark:group-focus-within:text-blue-400 transition-colors" size={20} />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  placeholder={t('••••••••')}
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-12 pr-12 py-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:bg-white dark:focus:bg-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:border-blue-500/50 transition-all font-medium"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-white transition-colors"
-                >
-                  {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-                </button>
-              </div>
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              
+              <div className="space-y-4">
+                {/* Username */}
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <FiUser className="text-gray-500 group-focus-within:text-indigo-400 transition-colors" />
+                  </div>
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder={t('Username')}
+                    value={formData.username}
+                    onChange={handleChange}
+                    required
+                    className="w-full pl-11 pr-4 py-3.5 bg-[#1a1a1a] border border-white/[0.05] rounded-xl text-white placeholder-gray-500 outline-none focus:bg-[#202020] focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                  />
+                </div>
 
-            {/* Terms */}
-            <div className="flex items-start gap-3 mt-2 group cursor-pointer" onClick={() => setAgreeTerms(!agreeTerms)}>
-              <div className={`w-5 h-5 rounded border border-gray-300 dark:border-white/20 flex items-center justify-center transition-all mt-0.5 ${agreeTerms ? 'bg-blue-500 border-blue-500' : 'bg-transparent'}`}>
-                {agreeTerms && <FiCheck className="text-white text-xs" />}
-              </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug">
-                {t('I agree to the')}{' '}
-                <Link href="/Pages/Terms" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors underline decoration-blue-500/30 dark:decoration-blue-400/30 hover:decoration-blue-500 dark:hover:decoration-blue-300">
-                  {t('Terms and Conditions')}
-                </Link>
-              </p>
-            </div>
+                {/* Email */}
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <FiMail className="text-gray-500 group-focus-within:text-indigo-400 transition-colors" />
+                  </div>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder={t('Email address')}
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full pl-11 pr-4 py-3.5 bg-[#1a1a1a] border border-white/[0.05] rounded-xl text-white placeholder-gray-500 outline-none focus:bg-[#202020] focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                  />
+                </div>
 
-            {/* Error Message */}
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center font-medium"
+                {/* Password */}
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <FiLock className="text-gray-500 group-focus-within:text-indigo-400 transition-colors" />
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    placeholder={t('Password')}
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    className="w-full pl-11 pr-12 py-3.5 bg-[#1a1a1a] border border-white/[0.05] rounded-xl text-white placeholder-gray-500 outline-none focus:bg-[#202020] focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-300 transition-colors"
+                  >
+                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Terms */}
+              <div className="flex items-start gap-3 mt-4 group cursor-pointer" onClick={() => setAgreeTerms(!agreeTerms)}>
+                <div className={`w-5 h-5 rounded border flex flex-shrink-0 items-center justify-center transition-all mt-0.5 ${agreeTerms ? 'bg-indigo-500 border-indigo-500' : 'bg-[#1a1a1a] border-white/[0.1] group-hover:border-indigo-500/50'}`}>
+                  {agreeTerms && <FiCheck className="text-white text-xs" />}
+                </div>
+                <p className="text-sm text-gray-400 leading-snug select-none group-hover:text-gray-300 transition-colors">
+                  {t('I agree to the')}{' '}
+                  <Link href="/Pages/Terms" className="text-indigo-400 hover:text-indigo-300 transition-colors underline decoration-indigo-400/30 hover:decoration-indigo-300">
+                    {t('Terms and Conditions')}
+                  </Link>
+                </p>
+              </div>
+
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs text-center font-medium mt-2">
+                      {error}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                type="submit"
+                disabled={loading}
+                className="w-full mt-2 py-3.5 bg-white text-black font-semibold rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-all flex items-center justify-center gap-2 relative overflow-hidden group"
               >
-                {error}
-              </motion.div>
-            )}
+                <span className="relative z-10 flex items-center gap-2">
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                  ) : (
+                    <>{t('Create Account')} <FiArrowRight className="group-hover:translate-x-1 transition-transform" /></>
+                  )}
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-200 to-white opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.button>
+            </form>
 
-            {/* Submit Button */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={loading}
-              className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  {t('Create Account')} <FiArrowRight />
-                </>
-              )}
-            </motion.button>
-
-            {/* Divider */}
-            <div className="relative flex items-center py-2">
-              <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
-              <span className="flex-shrink-0 mx-4 text-gray-400 dark:text-gray-500 text-xs uppercase tracking-widest">{t('OR')}</span>
-              <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
+            <div className="mt-8">
+              <div className="relative flex items-center">
+                <div className="flex-grow border-t border-white/[0.05]" />
+                <span className="flex-shrink-0 mx-4 text-gray-500 text-xs uppercase tracking-widest">{t('OR')}</span>
+                <div className="flex-grow border-t border-white/[0.05]" />
+              </div>
+              
+              <button className="mt-6 w-full py-3 bg-[#1a1a1a] border border-white/[0.05] hover:bg-[#202020] hover:border-white/[0.1] rounded-xl flex items-center justify-center gap-3 transition-all text-sm text-gray-300 font-medium">
+                <FcGoogle size={20} />
+                {t('Sign up with Google')}
+              </button>
             </div>
 
-            {/* Social Register */}
-            <button
-              type="button"
-              className="w-full py-3.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all flex items-center justify-center gap-3 text-gray-700 dark:text-white font-medium group"
-            >
-              <FcGoogle className="text-xl group-hover:scale-110 transition-transform" />
-              <span>{t('Sign up with Google')}</span>
-            </button>
-
-            {/* Login Link */}
-            <p className="text-center text-gray-500 dark:text-gray-400 text-sm mt-6">
+            <p className="mt-8 text-center text-gray-500 text-sm">
               {t('Already have an account?')}{' '}
-              <Link href="/Pages/Login" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 font-bold transition-colors">
-                {t('Login')}
+              <Link href="/Pages/Login" className="text-white font-medium hover:text-indigo-300 transition-colors">
+                {t('Sign In')}
               </Link>
             </p>
-          </form>
+
+          </motion.div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

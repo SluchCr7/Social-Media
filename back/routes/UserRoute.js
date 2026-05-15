@@ -12,6 +12,7 @@ const {
   getUserById,
   RegisterNewUser,
   LoginUser,
+  LogoutUser,
   verifyAccount,
   uploadPhoto,
   uploadCoverPhoto,
@@ -34,6 +35,14 @@ const {
 
 const photoUpload = require('../Middelwares/uploadPhoto');
 const { verifyToken, verifyAdmin } = require('../Middelwares/verifyToken');
+const rateLimit = require('express-rate-limit');
+
+// Rate limiting for auth
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 requests per window for login/register
+  message: 'Too many authentication attempts from this IP, please try again after 15 minutes'
+});
 
 // User routes
 route.route('/').get(verifyAdmin, getAllUsers);
@@ -41,8 +50,9 @@ route.route('/suggested').get(verifyToken, getSuggestedUsers);
 route.route('/block/:id').put(verifyToken, blockOrUnblockUser);
 route.route('/:id').get(getUserById);
 route.route('/delete').delete(verifyToken, DeleteUser);
-route.route('/login').post(LoginUser);
-route.route('/register').post(RegisterNewUser);
+route.route('/login').post(authLimiter, LoginUser);
+route.route('/register').post(authLimiter, RegisterNewUser);
+route.route('/logout').post(LogoutUser);
 route.route('/admin/:id').put(verifyAdmin, makeUserAdmin);
 route.route('/:id/verify/:token').get(verifyAccount);
 route.route('/photo').post(verifyToken, photoUpload.single('image'), uploadPhoto);

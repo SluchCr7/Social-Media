@@ -1,9 +1,8 @@
-'use client';
-import LoginHistoryTimeline from '@/app/Component/Setting/LoginHistoryTimeline';
 import React, { memo } from 'react';
 import { motion } from 'framer-motion';
-import { HiClock, HiDevicePhoneMobile, HiMapPin } from 'react-icons/hi2';
+import { Clock, Smartphone, MapPin, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import LoginHistoryTimeline from '@/app/Component/Setting/LoginHistoryTimeline';
 
 const HistoryTab = memo(({ loginHistory }) => {
   const { t } = useTranslation();
@@ -14,95 +13,69 @@ const HistoryTab = memo(({ loginHistory }) => {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.3 }}
-      className="p-8 space-y-8"
+      transition={{ duration: 0.4 }}
+      className="space-y-12"
     >
-      {/* Header */}
-      <div className="flex items-center gap-4 pb-6 border-b border-gray-200/50 dark:border-white/5">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row items-center gap-8 pb-10 border-b border-gray-100 dark:border-threads-border">
         <div className="relative">
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 text-white shadow-xl">
-            <HiClock className="w-6 h-6" />
+          <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-slate-600 to-gray-800 flex items-center justify-center text-white shadow-xl shadow-slate-600/20">
+            <Clock size={40} />
           </div>
           {loginHistory?.length > 0 && (
-            <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center text-white text-xs font-black">
+            <div className="absolute -top-2 -right-2 w-8 h-8 bg-indigo-500 rounded-full border-4 border-white dark:border-black flex items-center justify-center text-white text-[10px] font-black shadow-lg">
               {loginHistory.length}
             </div>
           )}
         </div>
-        <div>
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">{t("Login History")}</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-            {t("Recent sign-ins and devices.")}
+        <div className="text-center md:text-left space-y-2">
+          <h2 className="text-3xl font-black tracking-tighter uppercase">{t('Access Logs')}</h2>
+          <p className="text-sm text-gray-400 font-bold uppercase tracking-[0.2em]">
+            {t('Monitor recent authentication events')}
           </p>
         </div>
       </div>
 
-      {/* Login History Timeline */}
-      <motion.div
-        whileHover={{ scale: 1.005 }}
-        className="relative rounded-2xl p-6 bg-gradient-to-br from-white to-gray-50 dark:from-white/5 dark:to-white/[0.02] border border-gray-200/50 dark:border-white/5 shadow-lg"
-      >
-        <LoginHistoryTimeline items={loginHistory} />
-      </motion.div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Timeline Log */}
+        <div className="lg:col-span-2 p-8 rounded-[2.5rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-threads-border space-y-6">
+           <div className="flex items-center gap-3">
+             <ShieldCheck size={20} className="text-indigo-500" />
+             <h3 className="text-sm font-black uppercase tracking-widest">{t('Session Timeline')}</h3>
+           </div>
+           
+           <div className="relative">
+             <LoginHistoryTimeline items={loginHistory} />
+           </div>
+        </div>
 
-      {/* Security Tips */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          className="relative rounded-xl p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-500/5 dark:to-indigo-500/5 border border-blue-200/50 dark:border-blue-500/20"
-        >
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex-shrink-0">
-              <HiDevicePhoneMobile className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-1">
-                {t('Recognize Devices')}
-              </h4>
-              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                {t('Check if all devices are familiar to you')}
-              </p>
-            </div>
+        {/* Security Modules */}
+        <div className="space-y-6">
+          <div className="p-6 rounded-[2rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-threads-border flex items-start gap-4 group hover:border-indigo-500/30 transition-all">
+             <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+               <Smartphone size={20} />
+             </div>
+             <div className="flex flex-col">
+               <h4 className="text-[13px] font-black uppercase tracking-widest">{t('Device Fingerprint')}</h4>
+               <p className="text-[10px] text-gray-400 font-medium leading-relaxed mt-1">
+                 {t('Ensure all listed devices are familiar and authorized.')}
+               </p>
+             </div>
           </div>
-        </motion.div>
 
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          className="relative rounded-xl p-5 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-500/5 dark:to-pink-500/5 border border-purple-200/50 dark:border-purple-500/20"
-        >
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex-shrink-0">
-              <HiMapPin className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-1">
-                {t('Verify Locations')}
-              </h4>
-              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                {t('Ensure login locations match your activity')}
-              </p>
-            </div>
+          <div className="p-6 rounded-[2rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-threads-border flex items-start gap-4 group hover:border-emerald-500/30 transition-all">
+             <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+               <MapPin size={20} />
+             </div>
+             <div className="flex flex-col">
+               <h4 className="text-[13px] font-black uppercase tracking-widest">{t('Geo-Location')}</h4>
+               <p className="text-[10px] text-gray-400 font-medium leading-relaxed mt-1">
+                 {t('Verify that login locations match your physical movements.')}
+               </p>
+             </div>
           </div>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          className="relative rounded-xl p-5 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-500/5 dark:to-emerald-500/5 border border-green-200/50 dark:border-green-500/20"
-        >
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 flex-shrink-0">
-              <HiClock className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-1">
-                {t('Monitor Activity')}
-              </h4>
-              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                {t('Review recent logins regularly for security')}
-              </p>
-            </div>
-          </div>
-        </motion.div>
+        </div>
       </div>
     </motion.section>
   );

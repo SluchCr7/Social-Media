@@ -342,17 +342,17 @@ const User = mongoose.model('User', UserSchema)
 // ================== Joi Validations ==================
 const LoginValidate = (user) => {
     const schema = joi.object({
-        email: joi.string().required(),
-        password: joi.string().required(),
+        email: joi.string().email().required(),
+        password: joi.string().min(6).required(),
     })
     return schema.validate(user)
 }
 
 const ValidateUser = (user) => {
     const schema = joi.object({
-        username: joi.string().required(),
-        email: joi.string().required(),
-        password: joi.string().required(),
+        username: joi.string().min(3).max(30).required(),
+        email: joi.string().email().required(),
+        password: joi.string().min(6).required(),
     })
     return schema.validate(user)
 }

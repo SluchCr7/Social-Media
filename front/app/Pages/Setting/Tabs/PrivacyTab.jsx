@@ -1,11 +1,20 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { HiLockClosed, HiEye, HiUserMinus, HiSpeakerXMark, HiChevronRight, HiCheckCircle } from 'react-icons/hi2';
+import React, { useState, memo } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  ShieldAlert, 
+  Lock, 
+  Eye, 
+  UserMinus, 
+  VolumeX,
+  ChevronRight,
+  ShieldCheck,
+  UserX
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import PrimaryToggle from '@/app/Component/Setting/PrimaryToggle'; // Assuming this component exists and works
-import Image from 'next/image';
+import PrimaryToggle from '@/app/Component/Setting/PrimaryToggle';
+import { Avatar } from '@/app/Component/ui/Avatar';
 
-const PrivacyTab = React.memo(({
+const PrivacyTab = memo(({
     user,
     onTogglePrivate,
     onToggleShowOnlineStatus,
@@ -18,132 +27,130 @@ const PrivacyTab = React.memo(({
         { id: 2, username: 'hater_dude', avatar: '/default-avatar.png' },
     ]);
 
-    const [mutedUsers, setMutedUsers] = useState([]);
-
     const unblockUser = (id) => {
         setBlockedUsers(blockedUsers.filter(u => u.id !== id));
     };
 
     return (
-        <motion.div
+        <motion.section
             key="privacy"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="max-w-4xl mx-auto p-6 space-y-8"
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-12"
         >
-            <div className="flex flex-col gap-2 mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                    <HiLockClosed className="text-indigo-500" />
-                    {t('Privacy & Visibility')}
-                </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {t('Manage who can see your content and how you interact with others.')}
-                </p>
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row items-center gap-8 pb-10 border-b border-gray-100 dark:border-threads-border">
+                <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white shadow-xl shadow-violet-500/20">
+                    <ShieldAlert size={40} />
+                </div>
+                <div className="text-center md:text-left space-y-2">
+                    <h2 className="text-3xl font-black tracking-tighter uppercase">{t('Privacy Control')}</h2>
+                    <p className="text-sm text-gray-400 font-bold uppercase tracking-[0.2em]">
+                        {t('Manage visibility & interactions')}
+                    </p>
+                </div>
             </div>
 
-            {/* Account Privacy Section */}
-            <section className="bg-white dark:bg-[#121212] rounded-2xl border border-gray-200 dark:border-white/5 overflow-hidden shadow-sm">
-                <div className="p-6 border-b border-gray-100 dark:border-white/5">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">{t('Account Privacy')}</h3>
-                    <p className="text-xs text-gray-500">{t('Control visibility of your profile and activity.')}</p>
-                </div>
-
-                <div className="divide-y divide-gray-100 dark:divide-white/5">
-                    <div className="p-6 flex items-center justify-between">
-                        <div className="pr-4">
-                            <div className="font-medium text-gray-900 dark:text-white text-sm mb-1">{t('Private Account')}</div>
-                            <p className="text-xs text-gray-500 leading-relaxed max-w-md">
-                                {t('When your account is private, only people you approve can see your photos and videos. Your existing followers won\'t be affected.')}
-                            </p>
-                        </div>
-                        <PrimaryToggle
-                            checked={user?.isPrivate || false}
-                            onChange={() => onTogglePrivate()}
-                        />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {/* Account Visibility Module */}
+                <div className="p-8 rounded-[2.5rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-threads-border space-y-8">
+                    <div className="flex items-center gap-3">
+                        <Eye size={20} className="text-indigo-500" />
+                        <h3 className="text-sm font-black uppercase tracking-widest">{t('Profile Visibility')}</h3>
                     </div>
 
-                    <div className="p-6 flex items-center justify-between">
-                        <div className="pr-4">
-                            <div className="font-medium text-gray-900 dark:text-white text-sm mb-1">{t('Status Indicator')}</div>
-                            <p className="text-xs text-gray-500 leading-relaxed max-w-md">
-                                {t('Allow accounts you follow and anyone you message to see when you were last active.')}
-                            </p>
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between p-5 rounded-3xl bg-white dark:bg-black border border-gray-100 dark:border-threads-border shadow-sm">
+                            <div className="flex flex-col">
+                                <span className="text-[13px] font-bold">{t('Private Account')}</span>
+                                <span className="text-[10px] text-gray-400 font-medium mt-1 leading-relaxed max-w-[200px]">
+                                    {t('Only approved followers can see your content')}
+                                </span>
+                            </div>
+                            <PrimaryToggle
+                                checked={user?.isPrivate || false}
+                                onChange={() => onTogglePrivate()}
+                            />
                         </div>
-                        <PrimaryToggle
-                            checked={user?.showOnlineStatus !== false}
-                            onChange={() => onToggleShowOnlineStatus()}
-                        />
+
+                        <div className="flex items-center justify-between p-5 rounded-3xl bg-white dark:bg-black border border-gray-100 dark:border-threads-border shadow-sm">
+                            <div className="flex flex-col">
+                                <span className="text-[13px] font-bold">{t('Activity Status')}</span>
+                                <span className="text-[10px] text-gray-400 font-medium mt-1 leading-relaxed max-w-[200px]">
+                                    {t('Allow others to see when you are online')}
+                                </span>
+                            </div>
+                            <PrimaryToggle
+                                checked={user?.showOnlineStatus !== false}
+                                onChange={() => onToggleShowOnlineStatus()}
+                            />
+                        </div>
                     </div>
                 </div>
-            </section>
 
-            {/* Interactions Section */}
-            <section className="bg-white dark:bg-[#121212] rounded-2xl border border-gray-200 dark:border-white/5 overflow-hidden shadow-sm">
-                <div className="p-6 border-b border-gray-100 dark:border-white/5">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">{t('Interactions')}</h3>
-                    <p className="text-xs text-gray-500">{t('Manage blocked and restricted accounts.')}</p>
-                </div>
+                {/* Restricted Entities Module */}
+                <div className="p-8 rounded-[2.5rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-threads-border space-y-8">
+                    <div className="flex items-center gap-3">
+                        <UserMinus size={20} className="text-rose-500" />
+                        <h3 className="text-sm font-black uppercase tracking-widest">{t('Restricted Entities')}</h3>
+                    </div>
 
-                <div className="divide-y divide-gray-100 dark:divide-white/5">
-                    {/* Blocked Accounts */}
-                    <div className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-red-50 dark:bg-red-500/10 rounded-lg text-red-500">
-                                    <HiUserMinus className="w-5 h-5" />
+                    <div className="space-y-4">
+                        <div className="group flex items-center justify-between p-5 rounded-3xl bg-white dark:bg-black border border-gray-100 dark:border-threads-border shadow-sm hover:border-rose-500/30 transition-all cursor-pointer">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
+                                    <UserX size={18} />
                                 </div>
-                                <div>
-                                    <div className="font-medium text-gray-900 dark:text-white text-sm">{t('Blocked Accounts')}</div>
-                                    <div className="text-xs text-gray-500">{blockedUsers.length} {t('accounts')}</div>
+                                <div className="flex flex-col">
+                                    <span className="text-[13px] font-bold">{t('Blocked Accounts')}</span>
+                                    <span className="text-[10px] text-gray-400 font-medium mt-0.5 uppercase tracking-widest">{blockedUsers.length} Entities</span>
                                 </div>
                             </div>
-                            <HiChevronRight className="text-gray-400" />
+                            <ChevronRight size={18} className="text-gray-400 group-hover:translate-x-1 transition-transform" />
                         </div>
 
-                        {/* List of blocked accounts (Expandable or inline) */}
-                        <div className="space-y-3 mt-4 pl-12">
-                            {blockedUsers.length > 0 ? (
-                                blockedUsers.map(u => (
-                                    <div key={u.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden relative">
-                                                <Image src={u.avatar} alt={u.username} fill className="object-cover" />
-                                            </div>
-                                            <span className="text-sm font-bold text-gray-700 dark:text-gray-300">@{u.username}</span>
-                                        </div>
-                                        <button
-                                            onClick={() => unblockUser(u.id)}
-                                            className="text-xs font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition-colors"
-                                        >
-                                            {t('Unblock')}
-                                        </button>
+                        <div className="group flex items-center justify-between p-5 rounded-3xl bg-white dark:bg-black border border-gray-100 dark:border-threads-border shadow-sm hover:border-amber-500/30 transition-all cursor-pointer">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                                    <VolumeX size={18} />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[13px] font-bold">{t('Muted Accounts')}</span>
+                                    <span className="text-[10px] text-gray-400 font-medium mt-0.5 uppercase tracking-widest">0 Entities</span>
+                                </div>
+                            </div>
+                            <ChevronRight size={18} className="text-gray-400 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Blocked List (Expanded View) */}
+                {blockedUsers.length > 0 && (
+                    <div className="lg:col-span-2 p-8 rounded-[2.5rem] bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-threads-border space-y-6">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-rose-500">{t('Active Blocks')}</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {blockedUsers.map(u => (
+                                <div key={u.id} className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-black border border-gray-100 dark:border-threads-border">
+                                    <div className="flex items-center gap-3">
+                                        <Avatar src={u.avatar} size="sm" />
+                                        <span className="text-xs font-bold tracking-wide">@{u.username}</span>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="text-xs text-gray-400 italic">{t('No blocked accounts')}</div>
-                            )}
+                                    <button
+                                        onClick={() => unblockUser(u.id)}
+                                        className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/5 text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all"
+                                    >
+                                        {t('Revoke')}
+                                    </button>
+                                </div>
+                            ))}
                         </div>
                     </div>
-
-                    {/* Muted Accounts */}
-                    <div className="p-6 hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer group">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-yellow-50 dark:bg-yellow-500/10 rounded-lg text-yellow-600 dark:text-yellow-500">
-                                    <HiSpeakerXMark className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <div className="font-medium text-gray-900 dark:text-white text-sm group-hover:text-indigo-500 transition-colors">{t('Muted Accounts')}</div>
-                                    <p className="text-xs text-gray-500">{t('See accounts you’ve muted from your feed and stories.')}</p>
-                                </div>
-                            </div>
-                            <HiChevronRight className="text-gray-400 group-hover:translate-x-1 transition-transform" />
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </motion.div>
+                )}
+            </div>
+        </motion.section>
     );
 });
 
