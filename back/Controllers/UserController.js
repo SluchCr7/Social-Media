@@ -246,7 +246,7 @@ const LoginUser = asyncHandler(async (req, res) => {
     return res.status(403).json({ message: "Your account has been banned due to violations." });
   }
   if (user.accountStatus === 'suspended' && user.suspendedUntil > new Date()) {
-    return res.status(403).json({ message: \`Your account is suspended until \${new Date(user.suspendedUntil).toLocaleString()}.\` });
+    return res.status(403).json({ message: `Your account is suspended until ${new Date(user.suspendedUntil).toLocaleString()}.` });
   }
 
   // ✅ تحديث آخر تسجيل دخول
@@ -1226,6 +1226,7 @@ module.exports = {
   validatePasswordUpdate,
   RegisterNewUser,
   LoginUser,
+  LogoutUser,
   getAllUsers,
   getUserById,
   DeleteUser,
