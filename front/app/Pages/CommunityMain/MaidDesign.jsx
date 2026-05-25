@@ -63,7 +63,7 @@ const MaidDesign = memo(({
   };
 
   return (
-    <div className="relative min-h-screen px-3 sm:px-8 py-6 sm:py-12 lg:px-16 space-y-8 sm:space-y-12 overflow-hidden">
+    <div className="relative min-h-screen px-3 sm:px-8 py-6 sm:py-12 lg:px-16 space-y-8 sm:space-y-12 overflow-hidden w-full">
       {/* 🎭 Animated Background */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-500/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
