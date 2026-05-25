@@ -82,9 +82,30 @@ const RegisterNewUser = async (req, res) => {
         </table>
       </div>
     `;
-    await sendEmail(user.email, 'Verify your email address', htmlTemp);
+    // await sendEmail(user.email, 'Verify your email address', htmlTemp);
 
-    return res.status(201).json({ message: "User registered successfully. Please check your email to verify your account." });
+    const token = jwt.sign(
+      { _id: user._id, isAdmin: user.isAdmin },
+      process.env.TOKEN_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    const { password, ...others } = user._doc;
+    others.token = token;
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    return res.status(201).json({
+      message: "User registered successfully. Please verify your account.",
+      user: others,
+      verificationCode: verificationToken.tokenVer,
+      verificationLink: link
+    });
   } catch (err) {
     return res.status(500).json({ message: err.message || "Internal Server Error" });
   }
@@ -202,7 +223,8 @@ const LoginUser = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Email or Password are not correct" });
   }
 
-  // ✅ Check email verification
+  let verificationInfo = null;
+
   if (!user.isVerify) {
       let verificationToken = await Verification.findOne({ userId: user._id });
       if (!verificationToken) {
@@ -233,12 +255,12 @@ const LoginUser = asyncHandler(async (req, res) => {
         </table>
       </div>
       `;
-      await sendEmail(user.email, 'Verify your email address', htmlTemp);
+      // await sendEmail(user.email, 'Verify your email address', htmlTemp);
 
-      return res.status(401).json({
-          message: "Your email is not verified. A new verification email has been sent.",
-          emailSent: true
-      });
+      verificationInfo = {
+          verificationCode: verificationToken.tokenVer,
+          verificationLink: link,
+      };
   }
 
   // ✅ Check Account Status
@@ -287,6 +309,7 @@ const LoginUser = asyncHandler(async (req, res) => {
   return res.status(200).json({
     message: "Login successful",
     user: others,
+    verificationInfo,
   });
 });
 

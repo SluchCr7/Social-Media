@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '../utils/api';
 import { useFeedback } from './FeedbackContext';
 import { MESSAGES } from '../utils/messages';
@@ -24,6 +25,7 @@ export const AuthContextProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { showToast, confirmAction } = useFeedback();
+  const router = useRouter();
 
   // --- Auth Actions ---
 
@@ -53,17 +55,18 @@ export const AuthContextProvider = ({ children }) => {
       setIsLogin(true);
 
       showToast(res.data.message || MESSAGES.AUTH.LOGIN_SUCCESS, 'success', { id: loadingToast });
+      if (res.data.verificationInfo?.verificationCode) {
+        showToast(`Verify code: ${res.data.verificationInfo.verificationCode}`, 'info');
+      }
 
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 1500);
+      router.replace('/');
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || MESSAGES.AUTH.LOGIN_ERROR;
       showToast(errorMessage, 'error', { id: loadingToast });
     } finally {
       setIsLoading(false);
     }
-  }, [showToast]);
+  }, [showToast, router]);
 
   /**
    * Logout current user with confirmation
@@ -99,19 +102,28 @@ export const AuthContextProvider = ({ children }) => {
 
     try {
       const res = await api.post('/auth/register', { username, email, password });
+      const userData = res.data.user;
+
+      if (userData && userData.token) {
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('loginState', 'true');
+        setIsLogin(true);
+      }
 
       showToast(res.data.message || MESSAGES.AUTH.REGISTRATION_SUCCESS, 'success', { id: loadingToast });
+      if (res.data.verificationCode) {
+        showToast(`Verify code: ${res.data.verificationCode}`, 'info');
+      }
 
-      setTimeout(() => {
-        window.location.href = '/Pages/Login';
-      }, 2000);
+      router.replace('/');
     } catch (err) {
       const errorMessage = err.response?.data?.message || MESSAGES.AUTH.REGISTRATION_ERROR;
       showToast(errorMessage, 'error', { id: loadingToast });
     } finally {
       setIsLoading(false);
     }
-  }, [showToast]);
+  }, [showToast, router]);
 
   /**
    * Fetch all users
