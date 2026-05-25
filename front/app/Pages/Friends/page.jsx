@@ -35,7 +35,7 @@ const SuggestedFriendsPage = () => {
   }, [users, userData, searchTerm]);
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-[#0A0A0A] dark:via-[#0F0F0F] dark:to-[#0A0A0A] transition-colors duration-300">
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-[#0A0A0A] dark:via-[#0F0F0F] dark:to-[#0A0A0A] transition-colors duration-300 w-full">
       {/* Ambient Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         <motion.div
