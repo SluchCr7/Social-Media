@@ -87,8 +87,8 @@ const archiveExpiredStories = async () => {
     try {
         const now = new Date();
 
-        // تحديث كل القصص التي انتهى وقتها ولم تؤرشف بعد
-        const result = await Story.updateMany(
+        // Archive all expired stories
+        const archiveResult = await Story.updateMany(
             {
                 expiresAt: { $lt: now },
                 isArchived: false,
@@ -97,8 +97,22 @@ const archiveExpiredStories = async () => {
             { $set: { isArchived: true } }
         );
 
-        if (result.modifiedCount > 0) {
-            console.log(`[Cron Job] Archived ${result.modifiedCount} expired stories.`);
+        // Fully delete non-highlighted expired stories from the active feed storage
+        const deleteResult = await Story.updateMany(
+            {
+                expiresAt: { $lt: now },
+                isArchived: true,
+                isDeleted: false,
+                $or: [{ highlightIds: { $exists: false } }, { highlightIds: [] }]
+            },
+            { $set: { isDeleted: true } }
+        );
+
+        if (archiveResult.modifiedCount > 0) {
+            console.log(`[Cron Job] Archived ${archiveResult.modifiedCount} expired stories.`);
+        }
+        if (deleteResult.modifiedCount > 0) {
+            console.log(`[Cron Job] Soft deleted ${deleteResult.modifiedCount} expired non-highlighted stories.`);
         }
     } catch (error) {
         console.error("Error in story archiving cron job:", error);

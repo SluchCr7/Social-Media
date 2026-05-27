@@ -141,18 +141,19 @@ const deleteStory = asyncHandler(async (req, res) => {
 
   const storyId = story._id;
 
-  // ✅ Soft delete instead of physical delete
   story.isDeleted = true;
+  story.isArchived = true;
+  story.isHighlighted = false;
+  story.preserveAfterExpiration = false;
+  story.highlightIds = [];
   await story.save();
 
-  // ✅ Also remove from all Highlights if manually deleted
   const { Highlight } = require("../Modules/Highlight");
   await Highlight.updateMany(
     { stories: storyId },
     { $pull: { stories: storyId } }
   );
 
-  // 🔔 Notify all about deletion
   io.emit("delete-story", storyId);
 
   res.status(200).json({ message: "Story deleted successfully" });
@@ -307,7 +308,13 @@ const getStoryViewers = asyncHandler(async (req, res) => {
 
 const getRecentStories = asyncHandler(async (req, res) => {
   const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  const stories = await Story.find({ createdAt: { $gte: yesterday } });
+  const now = new Date();
+  const stories = await Story.find({
+    createdAt: { $gte: yesterday },
+    isDeleted: false,
+    isArchived: false,
+    expiresAt: { $gt: now }
+  });
   res.status(200).json(stories);
 });
 

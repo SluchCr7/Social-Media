@@ -49,6 +49,12 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
     setHasReordered(false);
   }, [originalStories]);
 
+  useEffect(() => {
+    if (currentIndex >= localStories.length) {
+      setCurrentIndex(Math.max(0, localStories.length - 1));
+    }
+  }, [currentIndex, localStories.length]);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -75,7 +81,8 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
     };
   }, [editPreview]);
 
-  const isOwner = user?._id === highlight?.user;
+  const highlightOwnerId = highlight?.user?._id || highlight?.user;
+  const isOwner = String(user?._id) === String(highlightOwnerId);
 
   const getPhoto = useCallback((story) => {
     if (!story) return '/placeholder.jpg';

@@ -114,7 +114,7 @@ const DesignExplore = memo(({
     }), [posts?.length, trendingToShow?.length, topHashtags]);
 
     return (
-        <div className="relative w-full min-h-screen pt-4 pb-20 px-4 sm:px-10 lg:px-20 overflow-x-hidden">
+        <div className="relative w-full min-h-screen pt-4 pb-20 px-4 sm:px-10 lg:px-20 overflow-x-hidden w-full">
             {/* 🌌 Atmospheric Background */}
             <div className="fixed inset-0 pointer-events-none -z-10">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 dark:bg-indigo-500/20 blur-[120px] rounded-full" />

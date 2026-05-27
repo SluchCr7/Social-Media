@@ -96,6 +96,27 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
     }
   };
 
+  const handleToggleFitMode = useCallback(() => {
+    setFitMode((prev) => (prev === 'contain' ? 'cover' : 'contain'));
+  }, []);
+
+  const toggleActionsMenu = useCallback((e) => {
+    e?.stopPropagation();
+    setShowActionsMenu((prev) => !prev);
+  }, []);
+
+  const closeActionsMenu = useCallback(() => {
+    setShowActionsMenu(false);
+  }, []);
+
+  const handleCopyLink = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href);
+      showAlert?.(t("Link copied to clipboard"));
+    }
+    setShowActionsMenu(false);
+  }, [showAlert, t]);
+
   const handleShare = useCallback(async (e) => {
     e?.stopPropagation();
     if (!story?._id) return;
@@ -172,6 +193,7 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
   }, [story, deleteStory, onClose, t]);
 
   const handleClose = useCallback(() => {
+    setShowActionsMenu(false);
     onClose();
   }, [onClose]);
 
@@ -253,6 +275,9 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <button onClick={toggleActionsMenu} className="w-10 h-10 rounded-2xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white flex items-center justify-center transition-all">
+              <HiEllipsisVertical size={20} />
+            </button>
             {isOwner && (
               <button onClick={handleDelete} className="w-10 h-10 rounded-2xl bg-white/5 hover:bg-red-500/20 text-white/40 hover:text-red-500 flex items-center justify-center transition-all">
                 <HiTrash size={20} />
@@ -263,6 +288,36 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
             </button>
           </div>
         </div>
+
+        <AnimatePresence>
+          {showActionsMenu && (
+            <motion.div
+              initial={{ opacity: 0, y: -12, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="absolute top-24 right-6 z-50 w-52 rounded-3xl border border-white/10 bg-black/90 backdrop-blur-xl shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button onClick={handleToggleFitMode} className="w-full text-left px-4 py-3 hover:bg-white/5 text-white text-sm font-semibold">
+                {fitMode === 'contain' ? t('Stretch to fill') : t('Fit to screen')}
+              </button>
+              {story?.link?.url && (
+                <a href={story.link.url} target="_blank" rel="noreferrer" className="block px-4 py-3 hover:bg-white/5 text-white text-sm font-semibold">
+                  {t('Open link')}
+                </a>
+              )}
+              {isOwner && (
+                <button onClick={handleOpenViewers} className="w-full text-left px-4 py-3 hover:bg-white/5 text-white text-sm font-semibold">
+                  {isViewersLoading ? t('Loading viewers...') : t('Viewers')}
+                </button>
+              )}
+              <button onClick={handleCopyLink} className="w-full text-left px-4 py-3 hover:bg-white/5 text-white text-sm font-semibold">
+                {t('Copy link')}
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Interaction zones */}
         <div className="absolute inset-0 z-30 flex cursor-pointer" onClick={handleTap}>
@@ -392,6 +447,11 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
             )}
 
             <div className="flex items-center gap-2">
+              {photoUrl && (
+                <button onClick={handleToggleFitMode} className="w-12 h-12 rounded-2xl border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-all">
+                  {fitMode === 'contain' ? t('Cover') : t('Contain')}
+                </button>
+              )}
               {!isOwner ? (
                 <>
                   <button onClick={handleLove} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isLoved ? 'bg-rose-500/10 text-rose-500' : 'bg-white/5 text-white/40 hover:text-white'}`}>

@@ -2,7 +2,44 @@ const { Highlight, ValidateHighlight, ValidateHighlightUpdate } = require("../Mo
 const { cloudUpload, cloudRemove } = require("../Config/cloudUpload");
 const { Story } = require("../Modules/Story");
 const asyncHandler = require("express-async-handler");
-const { sendNotificationHelper } = require("../utils/SendNotification");
+
+const updateStoriesHighlightMetadata = async (storyIds, highlightId) => {
+  if (!Array.isArray(storyIds) || storyIds.length === 0) return;
+  await Story.updateMany(
+    { _id: { $in: storyIds }, isDeleted: false },
+    {
+      $addToSet: { highlightIds: highlightId },
+      $set: {
+        isHighlighted: true,
+        preserveAfterExpiration: true,
+      },
+    }
+  );
+};
+
+const removeHighlightMetadataFromStories = async (storyIds, highlightId) => {
+  if (!Array.isArray(storyIds) || storyIds.length === 0) return;
+
+  await Story.updateMany(
+    { _id: { $in: storyIds } },
+    { $pull: { highlightIds: highlightId } }
+  );
+
+  const expiredStories = await Story.find({
+    _id: { $in: storyIds },
+    expiresAt: { $lte: new Date() },
+    isDeleted: false,
+    $or: [{ highlightIds: { $exists: false } }, { highlightIds: [] }],
+  });
+
+  if (expiredStories.length > 0) {
+    const expiredIds = expiredStories.map((story) => story._id);
+    await Story.updateMany(
+      { _id: { $in: expiredIds } },
+      { $set: { isDeleted: true, isArchived: true, isHighlighted: false, preserveAfterExpiration: false } }
+    );
+  }
+};
 
 // ================== Create Highlight ==================
 const createHighlight = asyncHandler(async (req, res) => {
@@ -25,7 +62,13 @@ const createHighlight = asyncHandler(async (req, res) => {
   let finalStoryIds = [];
   if (storyIds) {
     finalStoryIds = Array.isArray(storyIds) ? storyIds : [storyIds];
+    finalStoryIds = [...new Set(finalStoryIds.map((id) => id.toString()))];
   }
+
+  const validStories = finalStoryIds.length
+    ? await Story.find({ _id: { $in: finalStoryIds }, owner: userId, isDeleted: false })
+    : [];
+  const validStoryIds = validStories.map((story) => story._id);
 
   // Create highlight
   const highlight = await Highlight.create({
@@ -33,12 +76,14 @@ const createHighlight = asyncHandler(async (req, res) => {
     title,
     description: description || '',
     coverImage: coverImageUrl,
-    stories: finalStoryIds,
+    stories: validStoryIds,
     isPublic: isPublic !== undefined ? isPublic : true,
     tags: tags || [],
     color: color || '#6366f1',
     order: order || 0
   });
+
+  await updateStoriesHighlightMetadata(validStoryIds, highlight._id);
 
   await highlight.populate({
     path: 'stories',
@@ -87,12 +132,10 @@ const deleteHighlight = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Highlight not found" });
   }
 
-  // Check ownership
   if (highlight.user.toString() !== req.user._id.toString()) {
     return res.status(403).json({ message: "Not authorized to delete this highlight" });
   }
 
-  // Delete cover image if exists
   if (highlight.coverImage) {
     try {
       await cloudRemove(highlight.coverImage);
@@ -101,6 +144,7 @@ const deleteHighlight = asyncHandler(async (req, res) => {
     }
   }
 
+  await removeHighlightMetadataFromStories(highlight.stories, highlight._id);
   await highlight.deleteOne();
   res.status(200).json({ message: "Highlight deleted successfully" });
 });
@@ -131,16 +175,18 @@ const addStoryToHighlight = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "All stories already in highlight" });
   }
 
-  // Verify ownership of stories
-  const validStories = await Story.find({ _id: { $in: newIds }, owner: userId });
+  // Verify ownership of stories and ignore deleted ones
+  const validStories = await Story.find({ _id: { $in: newIds }, owner: userId, isDeleted: false });
   if (validStories.length === 0) {
     return res.status(404).json({ message: "No valid stories found" });
   }
 
-  // Add validated IDs
   const validIds = validStories.map(s => s._id);
   highlight.stories.push(...validIds);
+  highlight.stories = [...new Set(highlight.stories.map((id) => id.toString()))];
   await highlight.save();
+
+  await updateStoriesHighlightMetadata(validIds, highlight._id);
 
   await highlight.populate({
     path: 'stories',
@@ -195,8 +241,15 @@ const removeStoryFromHighlight = asyncHandler(async (req, res) => {
   const highlight = await Highlight.findOne({ _id: highlightId, user: userId });
   if (!highlight) return res.status(404).json({ message: "Highlight not found" });
 
-  highlight.stories = highlight.stories.filter(s => s.toString() !== storyId);
+  const storyIndex = highlight.stories.findIndex((s) => s.toString() === storyId);
+  if (storyIndex === -1) {
+    return res.status(404).json({ message: "Story not part of highlight" });
+  }
+
+  highlight.stories = highlight.stories.filter((s) => s.toString() !== storyId);
   await highlight.save();
+  await removeHighlightMetadataFromStories([storyId], highlight._id);
+
   await highlight.populate({
     path: 'stories',
     match: { isDeleted: false }

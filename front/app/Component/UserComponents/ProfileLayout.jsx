@@ -23,6 +23,7 @@ import StickyProfileBar from "./StickyProfileBar"
 import AdultContentWarning from "../AdultAlert"
 import { useUser } from "@/app/Context/UserContext"
 import { useAuth } from "@/app/Context/AuthContext"
+import { useStory } from "@/app/Context/StoryContext"
 
 
 const ProfileLayout = ({
@@ -53,6 +54,8 @@ const ProfileLayout = ({
 }) => {
   const { updateCoverPhoto } = useUser();
   const { user: currentUser } = useAuth();
+  const { getUserStories } = useStory();
+  const [profileStories, setProfileStories] = useState([]);
   const { highlights, fetchHighlights, setOpenModal, selectedHighlight, setSelectedHighlight } = useHighlights();
 
   // Local state for optimistic updates
@@ -66,6 +69,19 @@ const ProfileLayout = ({
   useEffect(() => {
     setLocalIsFollowing(isFollowing);
   }, [isFollowing]);
+
+  useEffect(() => {
+    let active = true;
+    if (!user?._id) return;
+
+    const loadProfileStories = async () => {
+      const fetched = await getUserStories(user._id);
+      if (active) setProfileStories(fetched || []);
+    };
+
+    loadProfileStories();
+    return () => { active = false; };
+  }, [user?._id, getUserStories]);
 
   const handleOptimisticFollow = async () => {
     const wasFollowing = localIsFollowing;
@@ -196,13 +212,13 @@ const ProfileLayout = ({
         <HighlightViewerModal
           highlight={selectedHighlight}
           onClose={() => setSelectedHighlight(null)} // إغلاق الـ Viewer
-          allStories={user?.stories}
+          allStories={profileStories}
         />
       )}
 
       {/* ➕ قائمة إضافة Highlight (AddHighlightMenu) */}
       {/* تُدار حالة الفتح/الإغلاق بواسطة 'openModal' في الـ Context */}
-      <AddHighlightMenu stories={user?.stories || []} />
+      <AddHighlightMenu stories={profileStories || []} />
 
     </motion.div>
   )
