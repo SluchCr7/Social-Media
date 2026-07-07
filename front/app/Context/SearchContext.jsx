@@ -19,6 +19,20 @@ export const SearchProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    // Advanced search filters
+    const [sortBy, setSortBy] = useState('relevance'); // relevance, recent, popular
+    const [dateRange, setDateRange] = useState('all'); // all, day, week, month, year
+    const [hasMedia, setHasMedia] = useState(false);
+    const [verifiedOnly, setVerifiedOnly] = useState(false);
+
+    // Pagination state per type
+    const [pagination, setPagination] = useState({
+        users: { page: 1, totalPages: 0, totalCount: 0, hasMore: false },
+        posts: { page: 1, totalPages: 0, totalCount: 0, hasMore: false },
+        communities: { page: 1, totalPages: 0, totalCount: 0, hasMore: false },
+        hashtags: { page: 1, totalPages: 0, totalCount: 0, hasMore: false }
+    });
+
     const config = useMemo(() => ({
         headers: { Authorization: `Bearer ${user?.token}` }
     }), [user?.token]);
@@ -70,7 +84,7 @@ export const SearchProvider = ({ children }) => {
     }, [user?.token, config]);
 
     // Global Search Logic
-    const performSearch = useCallback(async (query) => {
+    const performSearch = useCallback(async (query, type = 'all', pageNum = 1) => {
         const trimmed = query.trim();
         if (!trimmed) {
             setSearchResults({ users: [], posts: [], communities: [], hashtags: [] });
@@ -80,17 +94,69 @@ export const SearchProvider = ({ children }) => {
         setLoading(true);
         setError(null);
         try {
-            const { data } = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/search?q=${encodeURIComponent(trimmed)}`, config);
-            setSearchResults(data);
+            const url = `${process.env.NEXT_PUBLIC_BACK_URL}/api/search?q=${encodeURIComponent(trimmed)}&type=${type}&sortBy=${sortBy}&dateRange=${dateRange}&hasMedia=${hasMedia}&verifiedOnly=${verifiedOnly}&page=${pageNum}&limit=12`;
+            const { data } = await axios.get(url, config);
+
+            // Update search results
+            setSearchResults(prev => {
+                if (pageNum === 1) {
+                    // For page 1, overwrite results for specified type or all
+                    if (type === 'all') {
+                        return {
+                            users: data.users || [],
+                            posts: data.posts || [],
+                            communities: data.communities || [],
+                            hashtags: data.hashtags || []
+                        };
+                    } else {
+                        return {
+                            ...prev,
+                            [type]: data[type] || []
+                        };
+                    }
+                } else {
+                    // For page > 1, append results for that type
+                    return {
+                        ...prev,
+                        [type]: [...(prev[type] || []), ...(data[type] || [])]
+                    };
+                }
+            });
+
+            // Update pagination state
+            setPagination(prev => {
+                const newPag = { ...prev };
+                if (type === 'all') {
+                    if (data.pagination) {
+                        Object.keys(data.pagination).forEach(key => {
+                            newPag[key] = data.pagination[key];
+                        });
+                    }
+                } else if (data.pagination && data.pagination[type]) {
+                    newPag[type] = data.pagination[type];
+                }
+                return newPag;
+            });
+
         } catch (err) {
             setError(err.response?.data?.message || "Something went wrong during search");
             console.error("Search API Error:", err);
         } finally {
             setLoading(false);
         }
-    }, [config]);
+    }, [config, sortBy, dateRange, hasMedia, verifiedOnly]);
 
-    // Debounced Search Effect
+    // Load More function for infinite scroll
+    const loadMore = useCallback(async (type) => {
+        if (loading) return;
+        const currentPagination = pagination[type];
+        if (currentPagination && currentPagination.hasMore) {
+            const nextPage = currentPagination.page + 1;
+            await performSearch(searchQuery, type, nextPage);
+        }
+    }, [pagination, loading, performSearch, searchQuery]);
+
+    // Debounced Search Effect for initial query or filter changes
     useEffect(() => {
         if (!searchQuery.trim()) {
             setSearchResults({ users: [], posts: [], communities: [], hashtags: [] });
@@ -98,13 +164,14 @@ export const SearchProvider = ({ children }) => {
         }
 
         const handler = setTimeout(() => {
-            performSearch(searchQuery);
-        }, 500);
+            // Reset pagination to page 1 and run search for all
+            performSearch(searchQuery, 'all', 1);
+        }, 400);
 
         return () => clearTimeout(handler);
-    }, [searchQuery, performSearch]);
+    }, [searchQuery, sortBy, dateRange, hasMedia, verifiedOnly, performSearch]);
 
-    // Initial Load
+    // Initial Load for search history
     useEffect(() => {
         if (user?.token) {
             fetchSearchHistory();
@@ -118,10 +185,20 @@ export const SearchProvider = ({ children }) => {
         searchHistory,
         loading,
         error,
+        sortBy,
+        setSortBy,
+        dateRange,
+        setDateRange,
+        hasMedia,
+        setHasMedia,
+        verifiedOnly,
+        setVerifiedOnly,
+        pagination,
         addToHistory,
         removeFromHistory,
         clearAllHistory,
-        performSearch
+        performSearch,
+        loadMore
     };
 
     return (

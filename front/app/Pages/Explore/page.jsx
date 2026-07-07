@@ -12,25 +12,32 @@ import Loading from '@/app/Component/Loading';
 
 const ExplorePage = () => {
   const { user } = useAuth();
-  const { suggestedUsers } = useUser();
+  const { suggestedUsers: defaultSuggestedUsers } = useUser();
   const { news } = useNews();
-  const { explorePosts, trendingPosts, trendingHashtags, loading: exploreLoading } = useExplore();
+  const {
+    explorePosts,
+    suggestedUsers: exploreSuggestedUsers,
+    trendingHashtags,
+    loading: exploreLoading,
+    exploreTab,
+    setExploreTab,
+    pagination,
+    loadMoreExplore
+  } = useExplore();
+
   const { searchQuery, setSearchQuery, searchResults } = useSearch();
 
   // User data from hook - ensures we have refreshed user data
   const { userData, loading: userLoading } = useGetData(user?._id);
 
-  // -------------------------------
-  // 🧩 Suggested Users (Memoized)
-  // -------------------------------
+  // Suggested Users
   const suggestedUsersArr = useMemo(() => {
-    if (!Array.isArray(suggestedUsers)) return [];
-    return suggestedUsers.slice(0, 12); // Increased for better fill
-  }, [suggestedUsers]);
+    const activeList = exploreSuggestedUsers?.length > 0 ? exploreSuggestedUsers : defaultSuggestedUsers;
+    if (!Array.isArray(activeList)) return [];
+    return activeList.slice(0, 12);
+  }, [exploreSuggestedUsers, defaultSuggestedUsers]);
 
-  // -------------------------------
-  // 🔹 Create Interest Tabs
-  // -------------------------------
+  // Create Interest Tabs
   const interestTabs = useMemo(() => {
     if (!news?.length || !userData?.interests?.length) return [];
 
@@ -52,9 +59,7 @@ const ExplorePage = () => {
       .filter(Boolean);
   }, [news, userData?.interests]);
 
-  // -------------------------------
-  // 🔹 Final Tabs (News + Interests)
-  // -------------------------------
+  // Final Tabs (News + Interests)
   const finalTabs = useMemo(
     () => [
       { name: 'News', news: news || [] },
@@ -63,14 +68,27 @@ const ExplorePage = () => {
     [news, interestTabs]
   );
 
-  // -------------------------------
-  // 🔹 Active Tab State
-  // -------------------------------
-  const [activeTab, setActiveTab] = useState('Trending'); // Default to Trending for more engagement
+  // Active Tab State (matches the UI tabs in DesignExplore)
+  const [activeTab, setActiveTab] = useState('Trending');
 
-  // Update active tab when tabs change if current becomes invalid
+  // Sync activeTab with exploreContext's exploreTab
   useEffect(() => {
-    const defaultTabs = ['Trending', 'Hashtags', 'Photos'];
+    const tabMapping = {
+      'Trending': 'trending',
+      'Photos': 'photos',
+      'Videos': 'videos',
+      'Hashtags': 'tags',
+      'Creators': 'users'
+    };
+    const mapped = tabMapping[activeTab];
+    if (mapped) {
+      setExploreTab(mapped);
+    }
+  }, [activeTab, setExploreTab]);
+
+  // Fallback check
+  useEffect(() => {
+    const defaultTabs = ['Trending', 'Hashtags', 'Photos', 'Videos', 'Creators'];
     const currentTabExists = finalTabs.some(tab => tab.name === activeTab) || defaultTabs.includes(activeTab);
 
     if (!currentTabExists && finalTabs.length > 0) {
@@ -78,31 +96,25 @@ const ExplorePage = () => {
     }
   }, [finalTabs, activeTab]);
 
-  // Convert trending hashtags to the format expected by components
+  // Format trending hashtags for child components
   const formattedHashtags = useMemo(() => {
     if (!Array.isArray(trendingHashtags)) return [];
     return trendingHashtags.map(h => [h.name, h.count]);
   }, [trendingHashtags]);
 
-  // Handle Search Change with better cleanup
+  // Handle Search Change
   const handleSearchChange = useCallback((val) => {
     setSearchQuery(val);
   }, [setSearchQuery]);
 
-  // -------------------------------
-  // 🧭 Loading State
-  // -------------------------------
-  // Only block the entire page if we don't have user data at all and it's loading
+  // Loading State
   if (userLoading && !userData) {
     return <Loading />;
   }
 
-  // -------------------------------
-  // 🎨 Main Render
-  // -------------------------------
   return (
     <DesignExplore
-      user={userData || user} // Fallback to auth user if userData is still fetching
+      user={userData || user}
       search={searchQuery}
       setSearch={handleSearchChange}
       searchResults={searchResults}
@@ -110,13 +122,13 @@ const ExplorePage = () => {
       setActiveTab={setActiveTab}
       finalTabs={finalTabs}
       topHashtags={formattedHashtags}
-      trendingPosts={trendingPosts}
       suggestedUsersArr={suggestedUsersArr}
       posts={explorePosts}
-      loading={exploreLoading || userLoading}
+      loading={exploreLoading}
+      hasMore={pagination.hasMore}
+      loadMore={loadMoreExplore}
     />
   );
 };
 
 export default ExplorePage;
-

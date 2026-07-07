@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { useAuth } from '../../Context/AuthContext';
 import { useSearch } from '@/app/Context/SearchContext';
 import { useUser } from '@/app/Context/UserContext';
+import { useExplore } from '@/app/Context/ExploreContext';
 import { useTranslation } from 'react-i18next';
 import {
   HiMagnifyingGlass,
@@ -12,9 +13,13 @@ import {
   HiXMark,
   HiAdjustmentsHorizontal,
   HiSparkles,
-  HiArrowTrendingUp
+  HiArrowTrendingUp,
+  HiCalendar,
+  HiPhoto,
+  HiShieldCheck,
+  HiArrowPath
 } from 'react-icons/hi2';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Component Imports
@@ -24,9 +29,9 @@ import TrendingSection from '../../Component/Search/TrendingSection';
 
 const FullSearchResults = () => {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const { user } = useAuth();
   const { suggestedUsers } = useUser();
+  const { trendingHashtags, suggestedUsers: exploreSuggestedUsers } = useExplore();
   const { t } = useTranslation();
 
   const {
@@ -37,11 +42,19 @@ const FullSearchResults = () => {
     loading,
     addToHistory,
     removeFromHistory,
-    clearHistory
+    clearAllHistory,
+    sortBy,
+    setSortBy,
+    dateRange,
+    setDateRange,
+    hasMedia,
+    setHasMedia,
+    verifiedOnly,
+    setVerifiedOnly,
+    pagination
   } = useSearch();
 
   const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState('relevance'); // relevance, recent, popular
 
   // Sync URL query with search state
   useEffect(() => {
@@ -81,181 +94,303 @@ const FullSearchResults = () => {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [searchQuery, setSearchQuery]);
 
-  // Mock top hashtags (will come from explore context later)
-  const topHashtags = useMemo(() => [
-    ['Technology', 245],
-    ['Design', 189],
-    ['AI', 167],
-    ['Web3', 142],
-    ['Startup', 128],
-    ['Coding', 115],
-    ['Creative', 98],
-    ['Innovation', 87]
-  ], []);
-
   // Calculate search stats
   const searchStats = useMemo(() => {
     if (!searchResults) return null;
-    const { users = [], hashtags = [], posts = [] } = searchResults;
+    const { users = [], hashtags = [], posts = [], communities = [] } = searchResults;
     return {
-      total: users.length + hashtags.length + posts.length,
+      total: users.length + hashtags.length + posts.length + communities.length,
       users: users.length,
       hashtags: hashtags.length,
-      posts: posts.length
+      posts: posts.length,
+      communities: communities.length
     };
   }, [searchResults]);
 
   const handleClearHistory = useCallback(() => {
     if (window.confirm(t('Are you sure you want to clear your search history?'))) {
-      clearHistory?.();
+      clearAllHistory?.();
     }
-  }, [clearHistory, t]);
+  }, [clearAllHistory, t]);
+
+  const resetFilters = useCallback(() => {
+    setSortBy('relevance');
+    setDateRange('all');
+    setHasMedia(false);
+    setVerifiedOnly(false);
+  }, [setSortBy, setDateRange, setHasMedia, setVerifiedOnly]);
 
   return (
-    <div className="relative w-full min-h-screen px-3 sm:px-8 py-6 sm:py-12 lg:px-16 overflow-hidden bg-[#fafafa] dark:bg-[#050505]">
-      {/* 🔮 Enhanced Background Elements */}
+    <div className="relative w-full min-h-screen px-4 sm:px-10 py-8 lg:px-20 overflow-hidden bg-slate-50/30 dark:bg-black text-gray-900 dark:text-white">
+      {/* 🌌 Ultra Premium Ambient Glows */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-500/10 blur-[150px] rounded-full translate-x-1/2 -translate-y-1/2 animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-500/10 blur-[150px] rounded-full -translate-x-1/2 translate-y-1/2 animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-pink-500/5 blur-[100px] rounded-full -translate-x-1/2 -translate-y-1/2 animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-gradient-to-br from-indigo-500/10 to-purple-500/10 blur-[130px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] left-[-15%] w-[500px] h-[500px] bg-gradient-to-tr from-pink-500/10 to-violet-500/5 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      <div className="w-full space-y-16">
-        {/* 🚀 Enhanced Dynamic Header */}
+      <div className="max-w-6xl mx-auto space-y-12">
+        {/* 🚀 Header Section */}
         <header className="space-y-6">
-          <div className="space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center justify-between flex-wrap gap-4"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em]"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 text-[10px] font-black uppercase tracking-[0.2em]">
-                <HiSignal className="w-3 h-3 animate-pulse" />
-                {t('Search Data Index')}
-              </div>
-
-              {/* Search Stats */}
-              {searchStats && searchQuery && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex items-center gap-4 text-[10px] font-black uppercase tracking-wider text-gray-500"
-                >
-                  <div className="flex items-center gap-2">
-                    <HiArrowTrendingUp className="w-3 h-3" />
-                    <span>{searchStats.total} {t('Results')}</span>
-                  </div>
-                </motion.div>
-              )}
+              <HiSignal className="w-3.5 h-3.5 animate-pulse" />
+              <span>{t('Search Index Operational')}</span>
             </motion.div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-3xl sm:text-5xl md:text-8xl font-black tracking-tighter text-gray-900 dark:text-white leading-[0.8] break-words"
-            >
-              {searchQuery ? (
-                <>
-                  {t('Results for')} <br />
-                  <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    &quot;{searchQuery}&quot;
-                  </span>
-                </>
-              ) : (
-                <>
-                  {t('Grid')} <br />
-                  <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    {t('Discovery')}
-                  </span>
-                </>
-              )}
-            </motion.h1>
-          </div>
-
-          {/* 🔍 Enhanced Search Bar with Filters */}
-          <div className="w-full pt-8 space-y-4">
-            <ExploreSearchBar
-              search={searchQuery}
-              setSearch={setSearchQuery}
-              placeholder={t('Synchronize with the network...')}
-            />
-
-            {/* Filter Toggle (shown when there are results) */}
-            {searchQuery && searchResults && (
+            {searchStats && searchQuery && (
               <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-3 flex-wrap"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-slate-200/50 dark:border-white/5"
               >
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${showFilters
-                      ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30'
-                      : 'bg-white/60 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:border-indigo-500/30'
-                    }`}
-                >
-                  <HiAdjustmentsHorizontal className="w-4 h-4" />
-                  {t('Filters')}
-                </button>
-
-                {/* Sort Options */}
-                <div className="flex items-center gap-2">
-                  {['relevance', 'recent', 'popular'].map((option) => (
-                    <button
-                      key={option}
-                      onClick={() => setSortBy(option)}
-                      className={`px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${sortBy === option
-                          ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg'
-                          : 'bg-white/40 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-white/10'
-                        }`}
-                    >
-                      {t(option)}
-                    </button>
-                  ))}
-                </div>
+                {searchStats.total} {t('Entities Found')}
               </motion.div>
             )}
           </div>
 
-          {/* 🕒 Enhanced Search History */}
-          {!searchQuery.trim() && searchHistory.length > 0 && (
-            <motion.div
+          <div className="space-y-3">
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="max-w-5xl mx-auto"
+              transition={{ delay: 0.1 }}
+              className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-none"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <HiClock className="w-5 h-5 text-gray-400" />
-                  <h3 className="text-sm font-black uppercase tracking-wider text-gray-600 dark:text-gray-400">
+              {searchQuery ? (
+                <>
+                  {t('Results for')} <br />
+                  <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                    &ldquo;{searchQuery}&rdquo;
+                  </span>
+                </>
+              ) : (
+                <>
+                  {t('Global')} <br />
+                  <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                    {t('Search Engine')}
+                  </span>
+                </>
+              )}
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium max-w-lg"
+            >
+              {t('Search posts, creators, communities, and trending hashtags with advanced intelligence network filters.')}
+            </motion.p>
+          </div>
+
+          {/* 🔍 Search Input & Action Center */}
+          <div className="space-y-6 pt-4">
+            <div className="flex gap-3 items-center">
+              <div className="flex-1">
+                <ExploreSearchBar
+                  search={searchQuery}
+                  setSearch={setSearchQuery}
+                  placeholder={t('Search users, posts, hashtags...')}
+                />
+              </div>
+
+              {/* Advanced Filters Button */}
+              {searchQuery.trim() && (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`h-16 px-6 rounded-[2rem] border transition-all duration-300 flex items-center gap-3 font-bold text-sm ${
+                    showFilters || sortBy !== 'relevance' || dateRange !== 'all' || hasMedia || verifiedOnly
+                      ? 'bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                      : 'bg-white dark:bg-white/[0.03] border-slate-200 dark:border-white/10 hover:border-indigo-500/30'
+                  }`}
+                >
+                  <HiAdjustmentsHorizontal className="w-5 h-5" />
+                  <span className="hidden sm:inline">{t('Filters')}</span>
+                </motion.button>
+              )}
+            </div>
+
+            {/* 🛠 Interactive Filters Drawer */}
+            <AnimatePresence>
+              {showFilters && searchQuery.trim() && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0, y: -10 }}
+                  animate={{ opacity: 1, height: 'auto', y: 0 }}
+                  exit={{ opacity: 0, height: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-6 sm:p-8 rounded-[2.5rem] bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 backdrop-blur-xl shadow-xl space-y-8">
+                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-4">
+                      <div className="flex items-center gap-2.5">
+                        <HiAdjustmentsHorizontal className="w-5 h-5 text-indigo-500" />
+                        <h3 className="font-extrabold uppercase text-xs tracking-widest text-slate-800 dark:text-white">
+                          {t('Search Filters')}
+                        </h3>
+                      </div>
+                      <button
+                        onClick={resetFilters}
+                        className="text-[10px] font-black uppercase tracking-wider text-slate-400 hover:text-indigo-500 transition-colors flex items-center gap-1"
+                      >
+                        <HiArrowPath className="w-3.5 h-3.5" />
+                        {t('Reset Filters')}
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      {/* Sort Order */}
+                      <div className="space-y-4">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">
+                          {t('Sort By')}
+                        </label>
+                        <div className="flex flex-col gap-2">
+                          {[
+                            { id: 'relevance', label: t('Relevance') },
+                            { id: 'recent', label: t('Most Recent') },
+                            { id: 'popular', label: t('Popularity') }
+                          ].map((opt) => (
+                            <button
+                              key={opt.id}
+                              onClick={() => setSortBy(opt.id)}
+                              className={`w-full text-left px-5 py-3 rounded-2xl text-xs font-bold transition-all border ${
+                                sortBy === opt.id
+                                  ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-600 dark:text-indigo-400 font-extrabold'
+                                  : 'bg-transparent border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'
+                              }`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Date Uploaded */}
+                      <div className="space-y-4">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block flex items-center gap-1.5">
+                          <HiCalendar className="w-3.5 h-3.5" />
+                          {t('Date Posted')}
+                        </label>
+                        <div className="flex flex-col gap-2">
+                          {[
+                            { id: 'all', label: t('All Time') },
+                            { id: 'day', label: t('Last 24 Hours') },
+                            { id: 'week', label: t('Last Week') },
+                            { id: 'month', label: t('Last Month') },
+                            { id: 'year', label: t('Last Year') }
+                          ].map((opt) => (
+                            <button
+                              key={opt.id}
+                              onClick={() => setDateRange(opt.id)}
+                              className={`w-full text-left px-5 py-3 rounded-2xl text-xs font-bold transition-all border ${
+                                dateRange === opt.id
+                                  ? 'bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400 font-extrabold'
+                                  : 'bg-transparent border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'
+                              }`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Content Type / Verification */}
+                      <div className="space-y-4">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">
+                          {t('Target Criteria')}
+                        </label>
+                        <div className="space-y-3">
+                          {/* Has Media Toggle */}
+                          <div
+                            onClick={() => setHasMedia(!hasMedia)}
+                            className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.01] border border-slate-100 dark:border-white/5 hover:border-slate-200 dark:hover:border-white/10 transition-all cursor-pointer"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 rounded-xl bg-pink-500/10 text-pink-500">
+                                <HiPhoto className="w-4 h-4" />
+                              </div>
+                              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                {t('Has Media Only')}
+                              </span>
+                            </div>
+                            <div className={`w-11 h-6 rounded-full transition-all duration-300 flex items-center px-1 ${
+                              hasMedia ? 'bg-pink-500' : 'bg-slate-300 dark:bg-white/15'
+                            }`}>
+                              <div className={`w-4 h-4 rounded-full bg-white transition-all transform duration-300 ${
+                                hasMedia ? 'translate-x-5' : 'translate-x-0'
+                              }`} />
+                            </div>
+                          </div>
+
+                          {/* Verified Users Toggle */}
+                          <div
+                            onClick={() => setVerifiedOnly(!verifiedOnly)}
+                            className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.01] border border-slate-100 dark:border-white/5 hover:border-slate-200 dark:hover:border-white/10 transition-all cursor-pointer"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500">
+                                <HiShieldCheck className="w-4 h-4" />
+                              </div>
+                              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                {t('Verified Accounts Only')}
+                              </span>
+                            </div>
+                            <div className={`w-11 h-6 rounded-full transition-all duration-300 flex items-center px-1 ${
+                              verifiedOnly ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-white/15'
+                            }`}>
+                              <div className={`w-4 h-4 rounded-full bg-white transition-all transform duration-300 ${
+                                verifiedOnly ? 'translate-x-5' : 'translate-x-0'
+                              }`} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* 🕒 Search History Section */}
+          {!searchQuery.trim() && searchHistory.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="max-w-5xl"
+            >
+              <div className="flex items-center justify-between mb-4 px-1">
+                <div className="flex items-center gap-2">
+                  <HiClock className="w-4.5 h-4.5 text-slate-400" />
+                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                     {t('Recent Searches')}
                   </h3>
                 </div>
-                {clearHistory && (
-                  <button
-                    onClick={handleClearHistory}
-                    className="text-[10px] font-black uppercase tracking-wider text-red-500 hover:text-red-600 transition-colors"
-                  >
-                    {t('Clear')}
-                  </button>
-                )}
+                <button
+                  onClick={handleClearHistory}
+                  className="text-[10px] font-black uppercase tracking-wider text-rose-500 hover:text-rose-600 transition-colors"
+                >
+                  {t('Clear All')}
+                </button>
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2.5">
                 {searchHistory.slice(0, 10).map((item, index) => (
                   <motion.button
                     key={item._id || index}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.4 + (index * 0.05) }}
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
+                    transition={{ delay: index * 0.04 }}
+                    whileHover={{ scale: 1.03, y: -1 }}
+                    whileTap={{ scale: 0.97 }}
                     onClick={() => setSearchQuery(item.query)}
-                    className="group relative px-4 py-2.5 rounded-2xl bg-white/60 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all flex items-center gap-2 shadow-sm hover:shadow-xl"
+                    className="group relative px-4 py-2.5 rounded-2xl bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 hover:border-indigo-500/40 hover:bg-indigo-500/5 transition-all flex items-center gap-2 shadow-sm hover:shadow-md"
                   >
-                    <HiMagnifyingGlass className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors" />
-                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    <HiMagnifyingGlass className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                       {item.query}
                     </span>
                     <button
@@ -263,9 +398,9 @@ const FullSearchResults = () => {
                         e.stopPropagation();
                         removeFromHistory(item._id);
                       }}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 p-1 rounded-full hover:bg-red-500/10"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity ml-1.5 p-1 rounded-full hover:bg-rose-500/10 text-rose-500"
                     >
-                      <HiXMark className="w-3 h-3 text-red-500" />
+                      <HiXMark className="w-3 h-3" />
                     </button>
                   </motion.button>
                 ))}
@@ -274,28 +409,26 @@ const FullSearchResults = () => {
           )}
         </header>
 
-        {/* 📊 Enhanced Unified Results Feed */}
+        {/* 📊 Unified Results Feed */}
         <section className="relative">
           <AnimatePresence mode="wait">
             {searchQuery.trim() ? (
               <motion.div
                 key="results"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.4 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
               >
-                {loading ? (
-                  <div className="flex items-center justify-center py-20">
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="relative">
-                        <div className="w-16 h-16 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
-                        <div className="absolute inset-0 w-16 h-16 border-4 border-purple-500/20 border-b-purple-500 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
-                      </div>
-                      <p className="text-sm font-black uppercase tracking-wider text-gray-400">
-                        {t('Searching...')}
-                      </p>
+                {loading && pagination[sortBy === 'relevance' ? 'posts' : 'posts']?.page === 1 ? (
+                  <div className="flex flex-col items-center justify-center py-24 gap-4">
+                    <div className="relative w-12 h-12">
+                      <div className="absolute inset-0 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin" />
+                      <div className="absolute inset-1 rounded-full border-4 border-purple-500/10 border-b-purple-500 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.2s' }} />
                     </div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      {t('Loading search matches...')}
+                    </p>
                   </div>
                 ) : (
                   <FullSearchTabs
@@ -310,15 +443,14 @@ const FullSearchResults = () => {
             ) : (
               <motion.div
                 key="discovery"
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -30 }}
-                transition={{ duration: 0.5 }}
-                className="space-y-16"
+                exit={{ opacity: 0, y: -15 }}
+                className="pt-4"
               >
                 <TrendingSection
-                  topHashtags={topHashtags}
-                  suggestedUsers={suggestedUsers}
+                  topHashtags={trendingHashtags || []}
+                  suggestedUsers={exploreSuggestedUsers?.length > 0 ? exploreSuggestedUsers : suggestedUsers}
                   t={t}
                 />
               </motion.div>
@@ -327,32 +459,31 @@ const FullSearchResults = () => {
         </section>
       </div>
 
-      {/* 🔮 Enhanced Support Indicator */}
+      {/* 🔮 Support Hint Indicators */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1 }}
-        className="fixed bottom-12 left-12 hidden lg:flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/70 dark:bg-black/40 backdrop-blur-xl border border-white/10 shadow-xl z-50"
+        transition={{ delay: 0.8 }}
+        className="fixed bottom-8 left-8 hidden lg:flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-slate-200/50 dark:border-white/5 shadow-lg z-40"
       >
         <div className="relative">
-          <HiMagnifyingGlass className="text-indigo-500 w-4 h-4" />
-          <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          <HiSparkles className="text-indigo-500 w-4 h-4" />
+          <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
         </div>
-        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">
-          {t('Index Operational')}
+        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+          {t('AI Network Synchronized')}
         </span>
       </motion.div>
 
-      {/* Keyboard Shortcut Hint */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.5 }}
-        className="fixed bottom-12 right-12 hidden lg:flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 dark:bg-black/40 backdrop-blur-xl border border-white/10 shadow-xl z-50"
+        transition={{ delay: 1 }}
+        className="fixed bottom-8 right-8 hidden lg:flex items-center gap-2 px-4.5 py-2.5 rounded-2xl bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-slate-200/50 dark:border-white/5 shadow-lg z-40"
       >
-        <kbd className="px-2 py-1 text-[9px] font-black bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded">⌘K</kbd>
-        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">
-          {t('Quick Search')}
+        <kbd className="px-1.5 py-0.5 text-[9px] font-black bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded select-none">⌘K</kbd>
+        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+          {t('Focus Search')}
         </span>
       </motion.div>
     </div>

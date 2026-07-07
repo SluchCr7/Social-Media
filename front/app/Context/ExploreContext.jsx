@@ -15,18 +15,37 @@ export const ExploreProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    // Active explore tab state (lowercase to match backend tab names: trending, photos, videos, tags, users)
+    const [exploreTab, setExploreTab] = useState('trending');
+    const [pagination, setPagination] = useState({ page: 1, hasMore: false });
+
     const config = useMemo(() => ({
         headers: { Authorization: `Bearer ${user?.token}` }
     }), [user?.token]);
 
-    const fetchExploreContent = useCallback(async () => {
+    const fetchExploreContent = useCallback(async (tabName = 'trending', pageNum = 1) => {
         if (!user?.token) return;
         setLoading(true);
+        setError(null);
         try {
-            const { data } = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/search/explore`, config);
-            setExplorePosts(data.posts || []);
-            setSuggestedUsers(data.suggestedUsers || []);
-            setTrendingHashtags(data.trendingHashtags || []);
+            const { data } = await axios.get(
+                `${process.env.NEXT_PUBLIC_BACK_URL}/api/search/explore?tab=${tabName}&page=${pageNum}&limit=12`, 
+                config
+            );
+            
+            if (pageNum === 1) {
+                setExplorePosts(data.posts || []);
+            } else {
+                setExplorePosts(prev => [...prev, ...(data.posts || [])]);
+            }
+
+            if (data.suggestedUsers) setSuggestedUsers(data.suggestedUsers);
+            if (data.trendingHashtags) setTrendingHashtags(data.trendingHashtags);
+            
+            setPagination({
+                page: pageNum,
+                hasMore: data.pagination?.hasMore || false
+            });
         } catch (err) {
             console.error("Error fetching explore content:", err);
             setError(err.response?.data?.message || "Failed to load explore content");
@@ -40,19 +59,32 @@ export const ExploreProvider = ({ children }) => {
         try {
             const { data } = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/search/trending`, config);
             setTrendingPosts(data.posts || []);
-            // Update hashtags if needed or just use from explore if they are the same
             if (data.hashtags) setTrendingHashtags(data.hashtags);
         } catch (err) {
             console.error("Error fetching trending content:", err);
         }
     }, [user?.token, config]);
 
+    // Load more for explore infinite scroll
+    const loadMoreExplore = useCallback(async () => {
+        if (loading || !pagination.hasMore) return;
+        const nextPage = pagination.page + 1;
+        await fetchExploreContent(exploreTab, nextPage);
+    }, [loading, pagination, exploreTab, fetchExploreContent]);
+
+    // Fetch tab-specific explore content when active tab changes
     useEffect(() => {
         if (user?.token) {
-            fetchExploreContent();
+            fetchExploreContent(exploreTab, 1);
+        }
+    }, [user?.token, exploreTab, fetchExploreContent]);
+
+    // Initial Load of trending static content
+    useEffect(() => {
+        if (user?.token) {
             fetchTrending();
         }
-    }, [user?.token, fetchExploreContent, fetchTrending]);
+    }, [user?.token, fetchTrending]);
 
     const value = {
         explorePosts,
@@ -61,8 +93,12 @@ export const ExploreProvider = ({ children }) => {
         trendingPosts,
         loading,
         error,
-        refreshExplore: fetchExploreContent,
-        refreshTrending: fetchTrending
+        exploreTab,
+        setExploreTab,
+        pagination,
+        refreshExplore: () => fetchExploreContent(exploreTab, 1),
+        refreshTrending: fetchTrending,
+        loadMoreExplore
     };
 
     return (
