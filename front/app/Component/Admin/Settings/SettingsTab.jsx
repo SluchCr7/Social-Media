@@ -9,8 +9,35 @@ import { useTheme } from '@/app/Context/ThemeContext';
 const SettingsTab = () => {
     const { t } = useTranslation();
     const { theme, toggleTheme } = useTheme();
-    const [maintenanceMode, setMaintenanceMode] = useState(false);
-    const [emailNotifs, setEmailNotifs] = useState(true);
+    const [maintenanceMode, setMaintenanceMode] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('admin_maintenanceMode') === 'true';
+        }
+        return false;
+    });
+    const [emailNotifs, setEmailNotifs] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('admin_emailNotifs');
+            return stored !== null ? stored === 'true' : true;
+        }
+        return true;
+    });
+
+    const handleMaintenanceChange = () => {
+        const newVal = !maintenanceMode;
+        setMaintenanceMode(newVal);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('admin_maintenanceMode', String(newVal));
+        }
+    };
+
+    const handleEmailNotifsChange = () => {
+        const newVal = !emailNotifs;
+        setEmailNotifs(newVal);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('admin_emailNotifs', String(newVal));
+        }
+    };
 
     const SettingToggle = ({ title, desc, icon, value, onChange }) => (
         <div className="flex items-center justify-between p-6 rounded-3xl bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 shadow-sm">
@@ -50,7 +77,7 @@ const SettingsTab = () => {
                     desc={t("Disable access for non-admin users")}
                     icon={<HiShieldCheck className="w-6 h-6" />}
                     value={maintenanceMode}
-                    onChange={() => setMaintenanceMode(!maintenanceMode)}
+                    onChange={handleMaintenanceChange}
                 />
 
                 <SettingToggle
@@ -66,7 +93,7 @@ const SettingsTab = () => {
                     desc={t("Receive emails for critical alerts")}
                     icon={<HiGlobeAlt className="w-6 h-6" />}
                     value={emailNotifs}
-                    onChange={() => setEmailNotifs(!emailNotifs)}
+                    onChange={handleEmailNotifsChange}
                 />
             </div>
 

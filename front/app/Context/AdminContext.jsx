@@ -14,7 +14,7 @@ export const AdminContextProvider = ({ children }) => {
     if (!token) return;
     setLoading(true);
     try {
-      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/admin/stats`, {
+      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/admin/stats`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setStats(data.stats);

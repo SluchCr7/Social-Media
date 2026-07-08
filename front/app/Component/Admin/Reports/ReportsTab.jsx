@@ -4,6 +4,7 @@ import { useReport } from '@/app/Context/ReportContext';
 import { useAuth } from '@/app/Context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import {
   FiTrash2,
   FiUserX,

@@ -6,6 +6,6 @@ const {
 const { verifyToken, verifyAdmin } = require('../Middelwares/verifyToken');
 
 // Get admin stats
-route.get('/stats', verifyToken, getAdminStats);
+route.get('/stats', verifyAdmin, getAdminStats);
 
 module.exports = route;

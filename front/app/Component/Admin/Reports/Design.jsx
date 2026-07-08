@@ -34,6 +34,7 @@ const DesignReports = React.memo(({
   modal,
   openModal,
   handleAction,
+  closeModal,
 }) => {
   const { t } = useTranslation();
 
@@ -120,10 +121,9 @@ const DesignReports = React.memo(({
         )}
       </motion.div>
 
-      {/* Confirm Modal */}
       <ConfirmModal
         open={modal.open}
-        onClose={() => modal.closeModal && modal.closeModal()} // Ensure safe call if passed prop varies
+        onClose={closeModal}
         onConfirm={handleAction}
         title={t("Are you sure?")}
         message={t("This action cannot be undone.")}
