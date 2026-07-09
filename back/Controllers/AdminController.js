@@ -3,7 +3,7 @@ const { User } = require("../Modules/User");
 const { Post } = require("../Modules/Post");
 const { Community } = require("../Modules/Community");
 const { Music } = require("../Modules/Music");
-const { Reel } = require("../Modules/Reel");
+const Reel = require("../Modules/Reel");
 const { Report } = require("../Modules/Report");
 const os = require("os");
 
