@@ -79,7 +79,7 @@ const SluchitEntry = memo(forwardRef(({ post }, ref) => {
   }, [post?.isContainWorst]);
 
   return (
-    <div className="relative w-full mb-10 md:mb-20">
+    <div className="relative w-full mb-6 md:mb-8">
       <ShareModal
         post={post}
         isOpen={openModel}
@@ -90,10 +90,10 @@ const SluchitEntry = memo(forwardRef(({ post }, ref) => {
       <motion.div
         ref={ref}
         id={post?._id}
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        className="group relative bg-white dark:bg-black border-b border-gray-100 dark:border-threads-border pb-10 md:pb-14"
+        viewport={{ once: true, margin: "-50px" }}
+        className="group relative bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-neutral-800/80 rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200"
       >
         <AnimatePresence>
           {showSensitive && (
@@ -101,46 +101,48 @@ const SluchitEntry = memo(forwardRef(({ post }, ref) => {
           )}
         </AnimatePresence>
 
-        <div className={`flex flex-col gap-6 transition-all ${showSensitive ? 'blur-3xl pointer-events-none' : ''}`}>
+        <div className={`flex flex-col gap-4 transition-all ${showSensitive ? 'blur-3xl pointer-events-none' : ''}`}>
           
-          {/* Top Metadata labels - Professional & Subtle */}
-          <div className="flex items-center justify-between px-2 h-6">
-            <div className="flex gap-2">
-              {post?.isPinned && (
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-500 text-[9px] font-black uppercase tracking-widest">
-                  <Pin size={10} />
-                  <span>{t("Pinned")}</span>
-                </div>
-              )}
-              {isShared && (
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[9px] font-black uppercase tracking-widest">
-                  <Share size={10} />
-                  <span>{t("Shared")}</span>
-                </div>
-              )}
+          {/* Top Metadata labels */}
+          {(post?.isPinned || isShared) && (
+            <div className="flex items-center justify-between pb-2 border-b border-gray-50 dark:border-neutral-900 text-xs">
+              <div className="flex items-center gap-2">
+                {post?.isPinned && (
+                  <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold tracking-wider text-[10px]">
+                    <Pin size={12} />
+                    <span>{t("Pinned")}</span>
+                  </div>
+                )}
+                {isShared && (
+                  <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold tracking-wider text-[10px]">
+                    <Share size={12} />
+                    <span>{t("Shared")}</span>
+                  </div>
+                )}
+              </div>
+              {isShared && <SharedTitle user={user} post={post} original={original} />}
             </div>
-            {isShared && <SharedTitle user={user} post={post} original={original} />}
-          </div>
+          )}
 
           {/* Main Content Layout */}
-          <div className="flex gap-5 px-1 sm:px-4">
-             {/* Profile Line (Threads Style) */}
+          <div className="flex gap-4">
+             {/* Profile Avatar & Thread Line */}
              <div className="flex flex-col items-center shrink-0">
-                <Link href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${post?.owner?._id}`}>
-                  <Avatar src={post?.owner?.profilePhoto?.url} size="md" className="ring-4 ring-white dark:ring-black" />
+                <Link href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${post?.owner?._id}`} className="transition-transform hover:scale-105">
+                  <Avatar src={post?.owner?.profilePhoto?.url} size="md" className="ring-2 ring-gray-100 dark:ring-neutral-800" />
                 </Link>
-                <div className="flex-1 w-px bg-gray-100 dark:bg-threads-border mt-4 mb-4 rounded-full opacity-30" />
-                <div className="relative h-10 flex -space-x-1.5 items-end pb-1">
+                <div className="flex-1 w-0.5 bg-gray-100 dark:bg-neutral-800 my-3 rounded-full" />
+                <div className="relative h-8 flex -space-x-1.5 items-end pb-0.5">
                    {post.comments?.slice(0, 3).map((c, i) => (
-                      <div key={i} className="w-4 h-4 rounded-full border border-white dark:border-black overflow-hidden ring-1 ring-gray-100 dark:ring-white/10 grayscale hover:grayscale-0 transition-all">
-                        <Image src={c?.owner?.profilePhoto?.url || '/default-avatar.png'} alt="av" width={16} height={16} className="object-cover w-full h-full" />
+                      <div key={i} className="w-3.5 h-3.5 rounded-full border border-white dark:border-black overflow-hidden shadow-xs">
+                        <Image src={c?.owner?.profilePhoto?.url || '/default-avatar.png'} alt="av" width={14} height={14} className="object-cover w-full h-full" />
                       </div>
                    ))}
                 </div>
              </div>
 
              {/* Content Area */}
-             <div className="flex-1 flex flex-col gap-4 min-w-0">
+             <div className="flex-1 flex flex-col gap-3 min-w-0">
                 <PostHeader
                   post={post}
                   user={user}
@@ -151,8 +153,8 @@ const SluchitEntry = memo(forwardRef(({ post }, ref) => {
                   hideAvatar={true}
                 />
 
-                <div className="flex flex-col gap-4">
-                  <div className="text-[16px] md:text-[18px] font-medium leading-relaxed text-black dark:text-white/90">
+                <div className="flex flex-col gap-3">
+                  <div className="text-[15px] md:text-[16px] leading-relaxed text-gray-900 dark:text-gray-100 font-normal break-words">
                     <RenderPostText
                       text={showOriginal && translated ? translated : post?.text}
                       mentions={post?.mentions}
@@ -166,16 +168,17 @@ const SluchitEntry = memo(forwardRef(({ post }, ref) => {
                     <button
                       onClick={handleTranslate}
                       disabled={loading}
-                      className="text-[10px] font-black uppercase tracking-widest text-indigo-500/60 hover:text-indigo-500 transition-all w-fit"
+                      className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline w-fit flex items-center gap-1 mt-1"
                     >
-                      {loading ? t("Translating...") : t("Translate Post")}
+                      <Languages size={14} />
+                      <span>{loading ? t("Translating...") : t("Translate Post")}</span>
                     </button>
                   )}
 
                   {post?.music && <PostMusicPlayer music={post.music} />}
 
                   {/* Media Frame */}
-                  <div className="rounded-[1.5rem] md:rounded-[2rem] overflow-hidden border border-gray-100 dark:border-white/5 bg-gray-50/30 dark:bg-white/[0.01]">
+                  <div className="rounded-xl overflow-hidden border border-gray-100 dark:border-neutral-800 bg-gray-50/50 dark:bg-neutral-900/50">
                     {!isShared && (post?.media?.length > 0 || post?.Photos?.length > 0) && (
                       <PostMedia media={post.media} photos={post.Photos} setImageView={setImageView} />
                     )}
@@ -190,7 +193,7 @@ const SluchitEntry = memo(forwardRef(({ post }, ref) => {
 
                 {/* Interaction Footer */}
                 {isLogin && (
-                  <div className="pt-2 border-t border-gray-50 dark:border-white/[0.02]">
+                  <div className="pt-3 mt-1 border-t border-gray-100 dark:border-neutral-800/60">
                     <PostActions
                       post={post}
                       user={user}
