@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useCallback, useState } from 'react';
+import React, { useEffect, useMemo, useCallback, useState, useRef } from 'react';
 import { useAuth } from '../../Context/AuthContext';
 import { useSearch } from '@/app/Context/SearchContext';
 import { useUser } from '@/app/Context/UserContext';
@@ -54,26 +54,32 @@ const FullSearchResults = () => {
 
   const [showFilters, setShowFilters] = useState(false);
   const debouncedQuery = useDebounce(searchQuery, 400);
+  const isInitialMount = useRef(true);
 
-  // Sync URL query with search state
+  // Sync URL query with search state on initial mount only
   useEffect(() => {
-    const urlQuery = searchParams.get('q') || '';
-    if (urlQuery && urlQuery !== searchQuery) {
-      setSearchQuery(urlQuery);
-    }
-  }, [searchParams, setSearchQuery, searchQuery]);
-
-  // Update URL & add to history (debounced)
-  useEffect(() => {
-    if (debouncedQuery.trim()) {
-      window.history.replaceState(null, '', `/Pages/Search?q=${encodeURIComponent(debouncedQuery)}`);
-      if (debouncedQuery.trim().length > 2) {
-        addToHistory(debouncedQuery, 'text');
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      const initialQuery = searchParams.get('q') || '';
+      if (initialQuery) {
+        setSearchQuery(initialQuery);
       }
-    } else if (!debouncedQuery.trim() && searchParams.get('q')) {
+    }
+  }, [searchParams, setSearchQuery]);
+
+  // Update URL & add to search history (debounced)
+  useEffect(() => {
+    if (isInitialMount.current) return;
+    const trimmed = debouncedQuery.trim();
+    if (trimmed) {
+      window.history.replaceState(null, '', `/Pages/Search?q=${encodeURIComponent(trimmed)}`);
+      if (trimmed.length > 2) {
+        addToHistory(trimmed, 'text');
+      }
+    } else {
       window.history.replaceState(null, '', `/Pages/Search`);
     }
-  }, [debouncedQuery, searchParams, addToHistory]);
+  }, [debouncedQuery, addToHistory]);
 
   // Keyboard shortcuts
   useEffect(() => {
