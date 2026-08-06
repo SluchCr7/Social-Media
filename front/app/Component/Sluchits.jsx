@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useState
 } from 'react';
+import Image from 'next/image'; // لاستخدام صورة Next.js بشكل مُحسّن
 import SluchitEntry from './SluchitEntry';
 import { usePost } from '../Context/PostContext';
 import { useAuth } from '../Context/AuthContext';
@@ -25,21 +26,19 @@ const Sluchits = ({ activeTab }) => {
   const { t } = useTranslation();
 
   // 📝 استخلاص قوائم المتابعة والعضوية
-  // نحول الـ following إلى Set لسرعة البحث
   const followingIds = useMemo(() => {
     if (!Array.isArray(userData?.following)) return new Set();
-    return new Set(userData.following.map(f => f?.toString())); // يجب التأكد من أنها سلاسل نصية للمقارنة
+    return new Set(userData.following.map(f => f?.toString()));
   }, [userData?.following]);
 
   const userId = userData?._id?.toString();
 
-  // 🎯 فلترة وترتيب المنشورات (المنطق لم يتغير هنا)
+  // 🎯 فلترة وترتيب المنشورات
   const filteredPosts = useMemo(() => {
     if (!Array.isArray(posts)) return [];
 
     // 🟢 Following feed
     if (activeTab === 'following') {
-      // نستخدم followingIds هنا للمقارنة
       return posts
         .slice()
         .sort((a, b) => {
@@ -59,7 +58,6 @@ const Sluchits = ({ activeTab }) => {
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       }
 
-      // تحسين: بدلاً من إخفاء المنشورات التي لا تطابق الاهتمامات، نقوم بترتيبها بحيث تظهر المطابقة أولاً
       return posts
         .map(post => {
           const text = `
@@ -76,9 +74,7 @@ const Sluchits = ({ activeTab }) => {
           return { post, score };
         })
         .sort((a, b) => {
-          // ترتيب حسب السكور (الأعلى أولاً)
           if (a.score !== b.score) return b.score - a.score;
-          // ثم حسب التاريخ (الأحدث أولاً)
           return new Date(b.post.createdAt) - new Date(a.post.createdAt);
         })
         .map(item => item.post);
@@ -88,29 +84,24 @@ const Sluchits = ({ activeTab }) => {
     return posts
       .slice()
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  }, [posts, followingIds, activeTab, userData?.interests]); // تم تحديث التبعية
+  }, [posts, followingIds, activeTab, userData?.interests]);
 
-  // 🔹 فلترة المستخدمين المقترحين (تحسين منطق الفلترة)
+  // 🔹 فلترة المستخدمين المقترحين
   const filteredUsers = useMemo(() => {
     if (!Array.isArray(users) || !userId) return [];
 
     return users.filter(u => {
-      // 1. لا تظهر المستخدم إذا كان هو المستخدم الحالي
       if (u?._id?.toString() === userId) return false;
-      // 2. لا تظهر المستخدم إذا كنت تتابعه بالفعل
       return !followingIds.has(u?._id?.toString());
     });
-  }, [users, followingIds, userId]); // تم تحديث التبعية
+  }, [users, followingIds, userId]);
 
-  // 🔹 فلترة المجتمعات المقترحة (تحسين منطق الفلترة)
+  // 🔹 فلترة المجتمعات المقترحة
   const filteredCommunities = useMemo(() => {
     if (!Array.isArray(communities) || !userId) return [];
 
     return communities.filter(c => {
-      // 1. لا تظهر المجتمع إذا كنت مالكه
       if (c?.owner?._id?.toString() === userId) return false;
-      // 2. لا تظهر المجتمع إذا كنت عضوًا فيه بالفعل
-      // يجب أن تتأكد من أن `c.members` تحتوي على معرفات المستخدمين (Strings/Objects)
       return !c.members?.some(member => {
         const memberId = member?._id?.toString() || member?.toString();
         return memberId === userId;
@@ -118,7 +109,7 @@ const Sluchits = ({ activeTab }) => {
     });
   }, [communities, userId]);
 
-  // 📦 دمج المنشورات مع الاقتراحات بشكل ديناميكي (منطق احترافي)
+  // 📦 دمج المنشورات مع الاقتراحات بشكل ديناميكي
   const combinedItems = useMemo(() => {
     if (!Array.isArray(filteredPosts)) return [];
 
@@ -130,36 +121,23 @@ const Sluchits = ({ activeTab }) => {
     const COMMUNITY_INTERVAL = 18;
 
     filteredPosts.forEach((post, index) => {
-      // إضافة المنشور
       if (post) items.push({ type: 'post', data: post });
 
-      // إضافة اقتراح مستخدم
       if ((index + 1) % USER_INTERVAL === 0 && userSuggestions.length > 0) {
-        // نأخذ 3 مستخدمين في كل مرة
         const suggestionsBatch = userSuggestions.splice(0, 3);
         items.push({ type: 'user', data: suggestionsBatch });
       }
 
-      // إضافة اقتراح مجتمع
       if ((index + 1) % COMMUNITY_INTERVAL === 0 && communitySuggestions.length > 0) {
-        // نأخذ 3 مجتمعات في كل مرة
         const suggestionsBatch = communitySuggestions.splice(0, 3);
         items.push({ type: 'community', data: suggestionsBatch });
       }
     });
 
-    // إذا تبقى اقتراحات بعد انتهاء المنشورات، نضيفها في النهاية (اختياري)
-    // if (userSuggestions.length > 0) {
-    //   items.push({ type: 'user', data: userSuggestions.slice(0, 3) });
-    // }
-    // if (communitySuggestions.length > 0) {
-    //   items.push({ type: 'community', data: communitySuggestions.slice(0, 3) });
-    // }
-
     return items;
   }, [filteredPosts, filteredUsers, filteredCommunities]);
 
-  // 🔁 Infinite Scroll محسّن (لم يتغير المنطق)
+  // 🔁 Infinite Scroll محسّن
   const observer = useRef();
   const lastItemRef = useCallback(
     node => {
@@ -174,11 +152,6 @@ const Sluchits = ({ activeTab }) => {
     },
     [isLoading, hasMore]
   );
-
-  // جلب البيانات عند تغير الصفحة (تم نقله إلى PostContext)
-  // useEffect(() => {
-  //   if (page > 1) fetchPosts(page);
-  // }, [page]);
 
   return (
     <div className="w-full flex flex-col gap-8">
@@ -217,17 +190,29 @@ const Sluchits = ({ activeTab }) => {
         })
       ) : (
         !isLoading && (
-          <div className="text-center py-16 text-gray-400">
-            <p className="text-lg font-medium">No posts yet 💤</p>
-            <p className="text-sm text-gray-500">
-              Start following people or join a community!
+          /* 🚫 حالة الفراغ الاحترافية (Empty State) باستخدام صورة الـ unDraw */
+          <div className="flex flex-col items-center justify-center text-center py-16 px-4 my-6 bg-[#121212] border border-gray-800 rounded-2xl shadow-lg">
+            <div className="relative w-64 h-64 mb-6">
+              <Image
+                src="/no_posts.svg" // استبدل هذا المسار باسم ومسار الصورة الفعلية في مجلد public لديك (مثال: /no-posts.svg)
+                alt="No posts found"
+                fill
+                className="object-contain opacity-85 hover:opacity-100 transition-opacity duration-300"
+                priority
+              />
+            </div>
+            <h3 className="text-xl font-bold text-gray-200 mb-2">
+              {t("No posts yet 💤")}
+            </h3>
+            <p className="text-sm text-gray-400 max-w-sm mb-6">
+              {t("It looks very quiet here! Start following new people or join some communities to fill your feed with exciting content.")}
             </p>
           </div>
         )
       )}
 
       {/* ⚡ مؤشر تحميل في الأسفل */}
-      {isLoading && hasMore && ( // تم إضافة hasMore هنا ليكون أدق
+      {isLoading && hasMore && (
         <div className="flex justify-center py-4">
           <span className="loader border-4 border-gray-300 border-t-blue-500 rounded-full w-6 h-6 animate-spin"></span>
         </div>

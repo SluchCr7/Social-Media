@@ -93,6 +93,17 @@ export const UserContextProvider = ({ children }) => {
   const updatePhoto = useCallback(async (photoFile, customText = '') => {
     if (!photoFile) return;
 
+    // 1. إنشاء رابط مؤقت للعرض الفوري (Optimistic Update)
+    const localPreviewUrl = URL.createObjectURL(photoFile);
+    const previousPhoto = user.profilePhoto; // الاحتفاظ بالقيمة القديمة للتراجع عنها عند الخطأ
+
+    // تحديث الحالة محلياً وفوراً لتظهر الصورة فور اختيارها
+    const optimisticUser = {
+      ...user,
+      profilePhoto: localPreviewUrl,
+    };
+    updateLocalUser(optimisticUser);
+
     const formData = new FormData();
     formData.append('image', photoFile);
     if (customText) formData.append('customText', customText);
@@ -103,24 +114,41 @@ export const UserContextProvider = ({ children }) => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
+      const serverPhotoUrl = res.data?.profilePhoto || res.data;
+
+      // 2. تحديث الحالة بالرابط الحقيقي القادم من السيرفر بعد نجاح الطلب
       const updatedUser = {
         ...user,
-        profilePhoto: res.data?.profilePhoto || res.data,
+        profilePhoto: serverPhotoUrl,
       };
 
       updateLocalUser(updatedUser);
       showToast(MESSAGES.USER.PHOTO_UPDATE_SUCCESS, 'success', { id: loadingToast });
     } catch (err) {
       console.error('Photo update error:', err);
+      
+      // 3. التراجع عن التحديث المؤقت في حالة حدوث خطأ وإرجاع الصورة القديمة
+      updateLocalUser({ ...user, profilePhoto: previousPhoto });
+      
       showToast(MESSAGES.USER.PHOTO_UPDATE_ERROR, 'error', { id: loadingToast });
     }
   }, [user, showToast, updateLocalUser]);
-
   /**
    * Update cover photo
    */
   const updateCoverPhoto = useCallback(async (photoFile, customText = '') => {
     if (!photoFile) return;
+
+    // 1. إنشاء رابط مؤقت للعرض الفوري
+    const localPreviewUrl = URL.createObjectURL(photoFile);
+    const previousCover = user.coverPhoto;
+
+    // تحديث الحالة محلياً وفوراً
+    const optimisticUser = {
+      ...user,
+      coverPhoto: localPreviewUrl,
+    };
+    updateLocalUser(optimisticUser);
 
     const formData = new FormData();
     formData.append('image', photoFile);
@@ -132,19 +160,25 @@ export const UserContextProvider = ({ children }) => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
+      const serverCoverUrl = res.data?.coverPhoto || res.data;
+
+      // 2. تحديث بالرابط الحقيقي من السيرفر
       const updatedUser = {
         ...user,
-        coverPhoto: res.data?.coverPhoto || res.data,
+        coverPhoto: serverCoverUrl,
       };
 
       updateLocalUser(updatedUser);
       showToast('Cover photo updated successfully.', 'success', { id: loadingToast });
     } catch (err) {
       console.error('Cover photo update error:', err);
+      
+      // 3. التراجع عند الخطأ
+      updateLocalUser({ ...user, coverPhoto: previousCover });
+      
       showToast('Failed to update cover photo.', 'error', { id: loadingToast });
     }
   }, [user, showToast, updateLocalUser]);
-
   /**
    * Update profile information
    */
