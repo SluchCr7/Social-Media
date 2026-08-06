@@ -4,86 +4,87 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import dayjs from "dayjs";
 import { useTranslation } from 'react-i18next';
-import { HiSignal, HiXMark } from 'react-icons/hi2';
+import { HiXMark } from 'react-icons/hi2';
 
 const ShowAllEvents = ({ setSelectedEvent, showDayEvents, setShowDayEvents, typeColors, typeIcons }) => {
   const { t } = useTranslation();
 
-  return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-[1000] p-4">
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.95, opacity: 0, y: 20 }}
-        className="bg-[#0A0A0A] border border-white/10 rounded-[3rem] p-10 w-full max-w-xl shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]"
-      >
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50" />
+  if (!Array.isArray(showDayEvents) || showDayEvents.length === 0) return null;
 
-        <div className="flex items-center justify-between mb-10 shrink-0">
-          <div className="space-y-1">
-            <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
-              {t("Temporal Matrix")}
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[1000] p-3 sm:p-4">
+      <motion.div
+        initial={{ scale: 0.96, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.96, opacity: 0 }}
+        className="bg-white dark:bg-[#0B0F1A] border border-slate-200/80 dark:border-white/10 rounded-2xl p-5 sm:p-6 w-full max-w-lg shadow-xl relative flex flex-col max-h-[85vh]"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between pb-4 border-b border-slate-200/80 dark:border-white/10 shrink-0">
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              {t("Events for")} {dayjs(showDayEvents[0]?.date).format("MMMM DD, YYYY")}
             </h3>
-            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-500">
-              <HiSignal className="w-3 h-3 animate-pulse" />
-              {showDayEvents?.length} {t("Signals Detected")}
-            </div>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+              {showDayEvents.length} {showDayEvents.length === 1 ? t("event scheduled") : t("events scheduled")}
+            </p>
           </div>
           <button
             onClick={() => setShowDayEvents(null)}
-            className="w-12 h-12 rounded-[1.25rem] bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all group"
+            className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
           >
-            <HiXMark className="w-6 h-6 text-gray-400 group-hover:text-white" />
+            <HiXMark className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
+        {/* Events List */}
+        <div className="flex-1 overflow-y-auto py-4 space-y-3">
           {showDayEvents.map((ev, i) => (
             <motion.div
-              key={ev._id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className={`group p-6 rounded-[2rem] border border-transparent hover:border-white/10 bg-white/[0.03] transition-all cursor-pointer relative overflow-hidden`}
+              key={ev._id || i}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              className="p-3.5 rounded-xl border border-slate-200/60 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] hover:bg-slate-100/80 dark:hover:bg-white/5 transition-all cursor-pointer flex items-start gap-3"
               onClick={() => {
                 setSelectedEvent(ev);
                 setShowDayEvents(null);
               }}
             >
-              <div className="flex items-start gap-5">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-lg ${typeColors?.[ev.type] || 'bg-indigo-500/20'}`}>
-                  {typeIcons?.[ev.type] || '✨'}
-                </div>
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors uppercase tracking-tight">
-                      {ev.title}
-                    </h4>
-                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                      {dayjs(ev.date).format("HH:mm")}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-400 line-clamp-2 leading-relaxed">
-                    {ev.description || t("No supplementary data available.")}
-                  </p>
-                </div>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 ${typeColors?.[ev.type] || 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600'}`}>
+                {typeIcons?.[ev.type] || '📅'}
               </div>
-
-              {ev.repeatYearly && (
-                <div className="absolute top-0 right-0 px-3 py-1 bg-amber-500/10 border-b border-l border-amber-500/20 rounded-bl-xl text-[8px] font-black text-amber-500 uppercase tracking-widest">
-                  Annual Resonance
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                    {ev.title}
+                  </h4>
+                  <span className="text-[11px] font-semibold text-slate-400 shrink-0">
+                    {ev.startTime || dayjs(ev.date).format("HH:mm")}
+                  </span>
                 </div>
-              )}
+                {ev.description && (
+                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5 font-medium">
+                    {ev.description}
+                  </p>
+                )}
+                {ev.repeatYearly && (
+                  <span className="inline-block mt-1.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded-md">
+                    {t("Repeats Yearly")}
+                  </span>
+                )}
+              </div>
             </motion.div>
           ))}
         </div>
 
-        <div className="mt-8 pt-8 border-t border-white/5 shrink-0">
+        {/* Footer */}
+        <div className="pt-3 border-t border-slate-200/80 dark:border-white/10 shrink-0 flex justify-end">
           <button
-            className="w-full py-4 rounded-2xl bg-white/5 text-gray-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition-all border border-transparent hover:border-white/10"
+            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold transition-colors"
             onClick={() => setShowDayEvents(null)}
           >
-            {t("Terminate Session")}
+            {t("Close")}
           </button>
         </div>
       </motion.div>

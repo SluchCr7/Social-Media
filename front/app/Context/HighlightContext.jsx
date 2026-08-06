@@ -24,7 +24,6 @@ export const HighlightContextProvider = ({ children }) => {
     if (!socket) return;
 
     const handleDeletedStory = (storyId) => {
-      // If a story is deleted globally, remove it from all highlights in the UI
       setHighlights((prev) =>
         prev.map((highlight) => ({
           ...highlight,
@@ -32,7 +31,6 @@ export const HighlightContextProvider = ({ children }) => {
         }))
       );
 
-      // Also update selected highlight if it has the deleted story
       setSelectedHighlight((prev) => {
         if (!prev) return null;
         return {
@@ -48,7 +46,7 @@ export const HighlightContextProvider = ({ children }) => {
     };
   }, [socket]);
 
-  // 🟢 جلب الهايلايتس الخاصة بالمستخدم
+  // Fetch Highlights
   const fetchHighlights = useCallback(async (targetUserId) => {
     const userIdToFetch = targetUserId || user?._id;
     if (!userIdToFetch) return;
@@ -60,20 +58,18 @@ export const HighlightContextProvider = ({ children }) => {
           headers: user?.token ? { Authorization: `Bearer ${user.token}` } : {},
         }
       );
-      // Sort by order field
       const sorted = (res.data || []).sort((a, b) => (a.order || 0) - (b.order || 0));
       setHighlights(sorted);
       setError(null);
     } catch (err) {
       const message = err.response?.data?.message || 'Failed to load highlights.';
       setError(message);
-      // showAlert(message); // Silent fail often better for highlights on profiles
     } finally {
       setLoading(false);
     }
-  }, [user, showAlert]);
+  }, [user]);
 
-  // 🟣 إنشاء Highlight جديد
+  // Create Highlight
   const createHighlight = useCallback(
     async ({ title, cover, storyIds }) => {
       if (!user?.token) return showAlert("You must be logged in first.");
@@ -82,7 +78,7 @@ export const HighlightContextProvider = ({ children }) => {
       try {
         const formData = new FormData();
         formData.append('title', title);
-        storyIds?.forEach((id) => formData.append('storyIds', id));
+        formData.append('storyIds', JSON.stringify(storyIds || []));
         if (cover) formData.append('image', cover);
 
         const res = await axios.post(
@@ -97,8 +93,6 @@ export const HighlightContextProvider = ({ children }) => {
         );
 
         const newHighlight = res.data;
-        // The backend now returns { ...highlight, stories: [...] } (mapped from archivedStories)
-        // We can directly add this to our state.
         setHighlights((prev) => [newHighlight, ...prev]);
         showAlert('✅ Highlight created successfully!');
         return newHighlight;
@@ -114,7 +108,7 @@ export const HighlightContextProvider = ({ children }) => {
     [user, showAlert]
   );
 
-  // 🔴 حذف Highlight
+  // Delete Highlight
   const deleteHighlight = useCallback(
     async (id) => {
       if (!user?.token) return showAlert("You must be logged in.");
@@ -124,7 +118,6 @@ export const HighlightContextProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${user.token}` },
         });
 
-        // ✅ حذف فوري من الواجهة
         setHighlights((prev) => prev.filter((h) => h._id !== id));
         showAlert('🗑️ Highlight deleted successfully.');
       } catch (err) {
@@ -136,7 +129,7 @@ export const HighlightContextProvider = ({ children }) => {
     [user, showAlert]
   );
 
-  // 🟠 إضافة ستوري (أو أكثر) إلى Highlight
+  // Add story to highlight
   const addStoryToHighlight = useCallback(
     async (highlightId, storyIdOrIds) => {
       if (!user?.token) return showAlert("You must be logged in.");
@@ -156,12 +149,10 @@ export const HighlightContextProvider = ({ children }) => {
 
         const updated = res.data?.highlight;
         if (updated) {
-          // ✅ تحديث فوري في الواجهة بدون Refresh
           setHighlights((prev) =>
             prev.map((h) => (h._id === updated._id ? updated : h))
           );
 
-          // ✅ في حال كانت الهايلايت مفتوحة في Modal — حدّثها أيضًا
           setSelectedHighlight((prev) =>
             prev && prev._id === updated._id ? updated : prev
           );
@@ -179,7 +170,7 @@ export const HighlightContextProvider = ({ children }) => {
     [user, showAlert]
   );
 
-  // 🟤 تحديث عنوان أو صورة الهايلايت
+  // Update Highlight
   const updateHighlight = useCallback(
     async (id, updates) => {
       if (!user?.token) return showAlert("You must be logged in.");
@@ -205,7 +196,6 @@ export const HighlightContextProvider = ({ children }) => {
 
         const updated = res.data;
 
-        // ✅ تحديث فوري في القائمة والـ Modal
         setHighlights((prev) =>
           prev.map((h) => (h._id === updated._id ? updated : h))
         );
@@ -225,7 +215,7 @@ export const HighlightContextProvider = ({ children }) => {
     [user, showAlert]
   );
 
-  // 🗑️ حذف ستوري من Highlight
+  // Remove story from highlight
   const removeStoryFromHighlight = useCallback(
     async (highlightId, storyId) => {
       if (!user?.token) return showAlert("You must be logged in.");
@@ -240,12 +230,10 @@ export const HighlightContextProvider = ({ children }) => {
 
         const updated = res.data?.highlight;
         if (updated) {
-          // ✅ تحديث فوري في الواجهة
           setHighlights((prev) =>
             prev.map((h) => (h._id === updated._id ? updated : h))
           );
 
-          // ✅ تحديث الهايلايت المفتوحة في Modal
           setSelectedHighlight((prev) =>
             prev && prev._id === updated._id ? updated : prev
           );
@@ -263,7 +251,7 @@ export const HighlightContextProvider = ({ children }) => {
     [user, showAlert]
   );
 
-  // ↕️ إعادة ترتيب الستوريز داخل الهايلايت
+  // Reorder stories inside highlight
   const reorderStoriesInHighlight = useCallback(
     async (highlightId, storyIds) => {
       if (!user?.token) return;
@@ -285,7 +273,7 @@ export const HighlightContextProvider = ({ children }) => {
     [user, showAlert]
   );
 
-  // ↕️ إعادة ترتيب الهايلايتس نفسها
+  // Reorder highlights
   const reorderHighlights = useCallback(
     async (highlightIds) => {
       if (!user?.token) return;
@@ -302,7 +290,6 @@ export const HighlightContextProvider = ({ children }) => {
     },
     [user, showAlert]
   );
-
 
   return (
     <HighlightContext.Provider

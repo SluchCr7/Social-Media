@@ -41,13 +41,13 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // 4. Data Sanitization & Body Parsing
-app.use(express.json({ limit: '50mb' })); // Increased limit for large uploads
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(xssProtection); // Custom XSS protection (Express v5 compatible)
+app.use(xssProtection);
 app.use(cookieParser());
 
 // 5. Performance
-app.use(compression()); // Compress all responses
+app.use(compression());
 
 // 6. CORS
 app.use(cors({
@@ -79,15 +79,14 @@ app.use('/api/search', require('./routes/SearchRoute'))
 app.use(notfound)
 app.use(errorhandler)
 
-
 // ================== Scheduled Posts System and Story Cleanup ==================
 
-// الدالة المسؤولة عن أرشفة القصص المنتهية
+// Function responsible for archiving expired stories after 24h
 const archiveExpiredStories = async () => {
     try {
         const now = new Date();
 
-        // Archive all expired stories
+        // Archive all expired stories without setting isDeleted: true
         const archiveResult = await Story.updateMany(
             {
                 expiresAt: { $lt: now },
@@ -97,41 +96,24 @@ const archiveExpiredStories = async () => {
             { $set: { isArchived: true } }
         );
 
-        // Fully delete non-highlighted expired stories from the active feed storage
-        const deleteResult = await Story.updateMany(
-            {
-                expiresAt: { $lt: now },
-                isArchived: true,
-                isDeleted: false,
-                $or: [{ highlightIds: { $exists: false } }, { highlightIds: [] }]
-            },
-            { $set: { isDeleted: true } }
-        );
-
         if (archiveResult.modifiedCount > 0) {
             console.log(`[Cron Job] Archived ${archiveResult.modifiedCount} expired stories.`);
-        }
-        if (deleteResult.modifiedCount > 0) {
-            console.log(`[Cron Job] Soft deleted ${deleteResult.modifiedCount} expired non-highlighted stories.`);
         }
     } catch (error) {
         console.error("Error in story archiving cron job:", error);
     }
 };
 
-// ✅ جدولة تشغيل دالة archiveExpiredStories كل ساعة للتأكد من تحديث الحالات أولاً بأول
 cron.schedule('0 * * * *', archiveExpiredStories, {
     scheduled: true,
     timezone: "Asia/Riyadh"
 });
 console.log("Story archiving job scheduled (Hourly).");
 
-// فحص المنشورات المجدولة كل دقيقة
 setInterval(() => {
-    processScheduledPosts(global.io); // global.io لو عندك socket.io
+    processScheduledPosts(global.io);
 }, 60 * 1000);
 
-// Listen on port
 server.listen(process.env.PORT, () => {
     console.log(`🚀 Server is running on port ${process.env.PORT}`)
 })

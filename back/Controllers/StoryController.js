@@ -9,11 +9,6 @@ const { sendNotificationHelper } = require("../utils/SendNotification");
 
 /**
  * @desc Add a new story (image, text, or both)
- * @route POST /api/stories
- * @access Private
- */
-/**
- * @desc Add a new story (image, text, or both)
  * @route POST /api/stories/add
  * @access Private
  */
@@ -29,24 +24,20 @@ const addNewStory = asyncHandler(async (req, res) => {
 
   let photoUrl = "";
 
-  // ✅ رفع الصورة إن وجدت
   if (req.file) {
     const result = await cloudUpload(req.file);
     photoUrl = result.secure_url;
   }
 
-  // ✅ التأكد من وجود نص أو صورة
   if (!text && !photoUrl) {
     return res.status(400).json({ message: "You must provide at least text or a photo." });
   }
 
-  // Parsing JSON if sent as strings (typical with FormData)
   const parsedCollaborators = typeof collaborators === "string" ? JSON.parse(collaborators) : collaborators;
   const parsedMentions = typeof mentions === "string" ? JSON.parse(mentions) : mentions;
   const parsedMusic = typeof music === "string" ? JSON.parse(music) : music;
   const parsedLink = typeof link === "string" ? JSON.parse(link) : link;
 
-  // ✅ إنشاء القصة الجديدة
   const story = new Story({
     text: text || "",
     Photo: photoUrl ? [photoUrl] : [],
@@ -61,13 +52,11 @@ const addNewStory = asyncHandler(async (req, res) => {
   await story.save();
   await story.populate(storyPopulate);
 
-  // ✅ إضافة نقاط لصاحب القصة
   const user = await User.findById(req.user._id);
   user.userLevelPoints += 5;
   user.updateLevelRank();
   await user.save();
 
-  // 🔔 Send notifications for mentions
   if (parsedMentions?.length > 0) {
     for (const mentionId of parsedMentions) {
       if (mentionId.toString() !== req.user._id.toString()) {
@@ -83,7 +72,6 @@ const addNewStory = asyncHandler(async (req, res) => {
     }
   }
 
-  // 🔔 إرسال تنبيه فوري عبر السوكيت
   io.emit("new-story", story);
 
   res.status(201).json({ message: "Story added successfully", story });
@@ -98,8 +86,6 @@ const getAllStories = asyncHandler(async (req, res) => {
   try {
     const now = new Date();
 
-    // 1. Filter out expired stories (for the feed only)
-    // 2. Stories must not be archived or deleted
     let query = {
       expiresAt: { $gt: now },
       isArchived: false,
@@ -110,7 +96,6 @@ const getAllStories = asyncHandler(async (req, res) => {
       .populate(storyPopulate)
       .sort({ createdAt: -1 });
 
-    // Filter Close Friends stories
     const filteredStories = stories.filter(story => {
       if (!story.isCloseFriends) return true;
       if (!req.user) return false;
@@ -159,19 +144,6 @@ const deleteStory = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "Story deleted successfully" });
 });
 
-/**
- * @desc Hard delete a story (Optional, if needed for admin or permanent removal)
- */
-const hardDeleteStory = asyncHandler(async (req, res) => {
-  const story = await Story.findById(req.params.id);
-  // ... rest of previous deletion logic if physical deletion is ever needed
-});
-
-/**
- * @desc Get story by ID
- * @route GET /api/stories/:id
- * @access Private
- */
 const getStoriesById = asyncHandler(async (req, res) => {
   const story = await Story.findById(req.params.id).populate(storyPopulate);
 
@@ -179,7 +151,6 @@ const getStoriesById = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Story Not Found" });
   }
 
-  // Add current user to views if not already present
   if (req.user) {
     await Story.findByIdAndUpdate(
       req.params.id,
@@ -192,12 +163,6 @@ const getStoriesById = asyncHandler(async (req, res) => {
   res.status(200).json(updatedStory);
 });
 
-
-/**
- * @desc Mark a story as viewed
- * @route POST /api/stories/view/:id
- * @access Private
- */
 const viewStory = asyncHandler(async (req, res) => {
   const storyId = req.params.id;
 
@@ -217,10 +182,6 @@ const viewStory = asyncHandler(async (req, res) => {
   res.status(200).json({ story: updatedStory });
 });
 
-
-/**
- * @desc Toggle love or React to a story
- */
 const toggleLoveStory = asyncHandler(async (req, res) => {
   const story = await Story.findById(req.params.id);
   if (!story) {
@@ -250,11 +211,6 @@ const toggleLoveStory = asyncHandler(async (req, res) => {
   res.status(200).json(updatedStory);
 });
 
-/**
- * @desc Add reaction to story
- * @route POST /api/stories/react/:id
- * @access Private
- */
 const reactToStory = asyncHandler(async (req, res) => {
   const { emoji } = req.body;
   if (!emoji) return res.status(400).json({ message: "Emoji is required" });
@@ -262,7 +218,6 @@ const reactToStory = asyncHandler(async (req, res) => {
   const story = await Story.findById(req.params.id);
   if (!story) return res.status(404).json({ message: "Story not found" });
 
-  // Update or Add reaction
   const reactionIndex = story.reactions.findIndex(r => r.user.toString() === req.user._id.toString());
   if (reactionIndex > -1) {
     story.reactions[reactionIndex].emoji = emoji;
@@ -274,7 +229,6 @@ const reactToStory = asyncHandler(async (req, res) => {
   await story.save();
   const updatedStory = await Story.findById(story._id).populate(storyPopulate);
 
-  // Notify owner
   if (!story.owner.equals(req.user._id)) {
     await sendNotificationHelper({
       sender: req.user._id,
@@ -290,11 +244,6 @@ const reactToStory = asyncHandler(async (req, res) => {
   res.status(200).json(updatedStory);
 });
 
-/**
- * @desc Get story viewers
- * @route GET /api/stories/viewers/:id
- * @access Private
- */
 const getStoryViewers = asyncHandler(async (req, res) => {
   const story = await Story.findById(req.params.id).populate("views", "username profileName profilePhoto");
   if (!story) return res.status(404).json({ message: "Story not found" });
@@ -318,9 +267,8 @@ const getRecentStories = asyncHandler(async (req, res) => {
   res.status(200).json(stories);
 });
 
-
 /**
- * @desc Get sub-stories for a user (Active only, for profile ring)
+ * @desc Get sub-stories for a user (Active 24h only)
  */
 const getUserStories = asyncHandler(async (req, res) => {
   const now = new Date();
@@ -329,6 +277,20 @@ const getUserStories = asyncHandler(async (req, res) => {
     isDeleted: false,
     isArchived: false,
     expiresAt: { $gt: now }
+  })
+    .populate("owner", "username profilePhoto")
+    .sort({ createdAt: -1 });
+
+  res.json(stories);
+});
+
+/**
+ * @desc Get all user stories including archived ones (for highlight selection)
+ */
+const getUserArchivedStories = asyncHandler(async (req, res) => {
+  const stories = await Story.find({
+    owner: req.params.id,
+    isDeleted: false
   })
     .populate("owner", "username profilePhoto")
     .sort({ createdAt: -1 });
@@ -375,6 +337,7 @@ module.exports = {
   viewStory,
   toggleLoveStory,
   getUserStories,
+  getUserArchivedStories,
   shareStory,
   reactToStory,
   getStoryViewers

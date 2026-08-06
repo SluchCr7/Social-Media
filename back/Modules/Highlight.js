@@ -63,12 +63,15 @@ function ValidateHighlight(obj) {
   const schema = Joi.object({
     title: Joi.string().trim().max(50).required(),
     description: Joi.string().trim().max(200).allow(''),
-    storyIds: Joi.array().items(Joi.string()),
+    storyIds: Joi.alternatives().try(
+      Joi.array().items(Joi.string()),
+      Joi.string()
+    ),
     isPublic: Joi.boolean(),
-    tags: Joi.array().items(Joi.string().max(20)),
+    tags: Joi.alternatives().try(Joi.array().items(Joi.string().max(20)), Joi.string()),
     color: Joi.string().pattern(/^#[0-9A-Fa-f]{6}$/),
     order: Joi.number().min(0),
-    stories: Joi.array().items(Joi.string()) // Allow direct stories array
+    stories: Joi.alternatives().try(Joi.array().items(Joi.string()), Joi.string())
   });
   return schema.validate(obj);
 }
@@ -78,7 +81,7 @@ function ValidateHighlightUpdate(obj) {
     title: Joi.string().trim().max(50),
     description: Joi.string().trim().max(200).allow(''),
     isPublic: Joi.boolean(),
-    tags: Joi.array().items(Joi.string().max(20)),
+    tags: Joi.alternatives().try(Joi.array().items(Joi.string().max(20)), Joi.string()),
     color: Joi.string().pattern(/^#[0-9A-Fa-f]{6}$/),
     order: Joi.number().min(0)
   });

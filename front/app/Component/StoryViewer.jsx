@@ -47,8 +47,6 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
 
   const timerRef = useRef(null);
   const durationRef = useRef(5000);
-  const containerRef = useRef(null);
-  const textareaRef = useRef(null);
 
   const story = useMemo(() => stories[currentIndex] || null, [stories, currentIndex]);
 
@@ -105,10 +103,6 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
     setShowActionsMenu((prev) => !prev);
   }, []);
 
-  const closeActionsMenu = useCallback(() => {
-    setShowActionsMenu(false);
-  }, []);
-
   const handleCopyLink = useCallback(() => {
     if (typeof window !== 'undefined') {
       navigator.clipboard.writeText(window.location.href);
@@ -133,7 +127,7 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
 
     const step = (timestamp) => {
       if (isPaused) {
-        start = null; // Reset start when unpaused to resume correctly
+        start = null;
         rafId = requestAnimationFrame(step);
         return;
       }
@@ -219,204 +213,208 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
   const isLoved = story?.loves?.some(u => (u?._id || u) === user?._id);
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black select-none" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/90 backdrop-blur-md select-none" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Background Blur */}
       <AnimatePresence mode="wait">
         <motion.div
           key={photoUrl}
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.4 }}
+          animate={{ opacity: 0.3 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 z-0"
+          className="absolute inset-0 z-0 pointer-events-none"
         >
-          {photoUrl && <Image src={photoUrl} fill alt="bg" className="object-cover blur-3xl opacity-30" />}
+          {photoUrl && <Image src={photoUrl} fill alt="bg" className="object-cover blur-3xl" />}
         </motion.div>
       </AnimatePresence>
 
       {/* Close Area */}
       <div className="absolute inset-0 z-10" onClick={handleClose} />
 
+      {/* Main Container */}
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="relative z-20 w-full max-w-[480px] h-[90vh] md:h-[85vh] aspect-[9/16] bg-[#111] rounded-[2.5rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-white/10"
+        className="relative z-20 w-full max-w-[440px] h-[92vh] md:h-[88vh] bg-[#0a0a0a] rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Progress Bars */}
-        <div className="absolute top-4 inset-x-4 z-50 flex gap-1.5 px-2">
-          {stories.map((_, idx) => (
-            <div key={idx} className="flex-1 h-1 rounded-full bg-white/20 overflow-hidden">
-              <div
-                className="h-full bg-white transition-all ease-linear"
-                style={{
-                  width: idx < currentIndex ? '100%' : idx === currentIndex ? `${progress}%` : '0%',
-                  transitionDuration: idx === currentIndex && !isPaused ? '100ms' : '0ms'
-                }}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Story Header */}
-        <div className="absolute top-8 inset-x-6 z-50 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href={`/Pages/User/${story?.owner?._id}`} className="relative w-10 h-10 rounded-2xl overflow-hidden border border-white/20">
-              <Image src={story?.owner?.profilePhoto?.url || '/default-profile.png'} fill alt="avatar" className="object-cover" />
-            </Link>
-            <div className="flex flex-col">
-              <span className="text-white text-sm font-bold flex items-center gap-1">
-                {story?.owner?.username}
-                {story?.collaborators?.length > 0 && <span className="text-[8px] px-1 bg-white/10 rounded uppercase">Collab</span>}
-              </span>
-              <span className="text-white/40 text-[10px] uppercase font-black tracking-widest">
-                {formatRelativeTime(story?.createdAt)}
-              </span>
-            </div>
+        {/* Top Bar: Progress & Header */}
+        <div className="relative z-50 pt-4 px-4 bg-gradient-to-b from-black/80 to-transparent pb-2 flex flex-col gap-3">
+          {/* Progress Bars */}
+          <div className="flex gap-1.5 w-full">
+            {stories.map((_, idx) => (
+              <div key={idx} className="flex-1 h-1 rounded-full bg-white/20 overflow-hidden">
+                <div
+                  className="h-full bg-white transition-all ease-linear"
+                  style={{
+                    width: idx < currentIndex ? '100%' : idx === currentIndex ? `${progress}%` : '0%',
+                    transitionDuration: idx === currentIndex && !isPaused ? '100ms' : '0ms'
+                  }}
+                />
+              </div>
+            ))}
           </div>
-          <div className="flex items-center gap-3">
-            <button onClick={toggleActionsMenu} className="w-10 h-10 rounded-2xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white flex items-center justify-center transition-all">
-              <HiEllipsisVertical size={20} />
-            </button>
-            {isOwner && (
-              <button onClick={handleDelete} className="w-10 h-10 rounded-2xl bg-white/5 hover:bg-red-500/20 text-white/40 hover:text-red-500 flex items-center justify-center transition-all">
-                <HiTrash size={20} />
+
+          {/* Header Info */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link href={`/Pages/User/${story?.owner?._id}`} className="relative w-9 h-9 rounded-xl overflow-hidden border border-white/20">
+                <Image src={story?.owner?.profilePhoto?.url || '/default-profile.png'} fill alt="avatar" className="object-cover" />
+              </Link>
+              <div className="flex flex-col">
+                <span className="text-white text-xs font-bold flex items-center gap-1">
+                  {story?.owner?.username}
+                  {story?.collaborators?.length > 0 && <span className="text-[8px] px-1 bg-white/10 rounded uppercase">Collab</span>}
+                </span>
+                <span className="text-white/40 text-[9px] uppercase font-semibold">
+                  {formatRelativeTime(story?.createdAt)}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button onClick={toggleActionsMenu} className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition-all">
+                <HiEllipsisVertical size={18} />
               </button>
-            )}
-            <button onClick={handleClose} className="w-10 h-10 rounded-2xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white flex items-center justify-center transition-all">
-              <HiXMark size={24} />
-            </button>
+              {isOwner && (
+                <button onClick={handleDelete} className="w-9 h-9 rounded-xl bg-white/5 hover:bg-red-500/20 text-white/60 hover:text-red-500 flex items-center justify-center transition-all">
+                  <HiTrash size={18} />
+                </button>
+              )}
+              <button onClick={handleClose} className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition-all">
+                <HiXMark size={20} />
+              </button>
+            </div>
           </div>
         </div>
 
+        {/* Actions Dropdown Menu */}
         <AnimatePresence>
           {showActionsMenu && (
             <motion.div
-              initial={{ opacity: 0, y: -12, scale: 0.95 }}
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-              className="absolute top-24 right-6 z-50 w-52 rounded-3xl border border-white/10 bg-black/90 backdrop-blur-xl shadow-2xl overflow-hidden"
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              className="absolute top-20 right-4 z-50 w-48 rounded-2xl border border-white/10 bg-neutral-900/95 backdrop-blur-xl shadow-xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              <button onClick={handleToggleFitMode} className="w-full text-left px-4 py-3 hover:bg-white/5 text-white text-sm font-semibold">
+              <button onClick={handleToggleFitMode} className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-white text-xs font-medium">
                 {fitMode === 'contain' ? t('Stretch to fill') : t('Fit to screen')}
               </button>
               {story?.link?.url && (
-                <a href={story.link.url} target="_blank" rel="noreferrer" className="block px-4 py-3 hover:bg-white/5 text-white text-sm font-semibold">
+                <a href={story.link.url} target="_blank" rel="noreferrer" className="block px-4 py-2.5 hover:bg-white/5 text-white text-xs font-medium">
                   {t('Open link')}
                 </a>
               )}
               {isOwner && (
-                <button onClick={handleOpenViewers} className="w-full text-left px-4 py-3 hover:bg-white/5 text-white text-sm font-semibold">
+                <button onClick={handleOpenViewers} className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-white text-xs font-medium">
                   {isViewersLoading ? t('Loading viewers...') : t('Viewers')}
                 </button>
               )}
-              <button onClick={handleCopyLink} className="w-full text-left px-4 py-3 hover:bg-white/5 text-white text-sm font-semibold">
+              <button onClick={handleCopyLink} className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-white text-xs font-medium">
                 {t('Copy link')}
               </button>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Interaction zones */}
-        <div className="absolute inset-0 z-30 flex cursor-pointer" onClick={handleTap}>
-          <div className="w-1/4 h-full" />
-          <div className="w-1/2 h-full" onContextMenu={(e) => e.preventDefault()} />
-          <div className="w-1/4 h-full" />
-        </div>
+        {/* Center Image / Media Area (Pure & Clean without clutter) */}
+        <main {...handlers} className="flex-1 relative flex items-center justify-center bg-black overflow-hidden my-1">
+          {/* Touch / Tap Zones */}
+          <div className="absolute inset-0 z-30 flex cursor-pointer" onClick={handleTap}>
+            <div className="w-1/4 h-full" />
+            <div className="w-1/2 h-full" onContextMenu={(e) => e.preventDefault()} />
+            <div className="w-1/4 h-full" />
+          </div>
 
-        {/* Content */}
-        <main {...handlers} className="w-full h-full relative flex items-center justify-center bg-black">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="w-full h-full relative"
+              className="w-full h-full relative flex items-center justify-center"
             >
               {photoUrl ? (
-                <div className="w-full h-full">
-                  <Image
-                    src={photoUrl}
-                    fill
-                    alt="story"
-                    className={`${fitMode === 'cover' ? 'object-cover' : 'object-contain'}`}
-                    onLoadingComplete={() => setIsImageLoaded(true)}
-                  />
-
-                  {/* Overlays */}
-                  <div className="absolute inset-0 z-40 p-10 flex flex-col items-center justify-center pointer-events-none">
-                    {story?.isCloseFriends && (
-                      <div className="absolute top-2 left-0 right-0 flex justify-center">
-                        <span className="bg-green-500 text-[10px] font-black text-white px-2 py-1 rounded-lg uppercase tracking-tighter">Close Friends</span>
-                      </div>
-                    )}
-
-                    <div className="space-y-6 flex flex-col items-center">
-                      {story?.music && (
-                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-white/20 flex items-center gap-3 pointer-events-auto cursor-pointer">
-                          <div className="w-10 h-10 rounded-lg overflow-hidden relative">
-                            {story.music.cover ? <Image src={story.music.cover} fill alt="art" /> : <HiPlay className="m-auto text-white/40" />}
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-white text-[10px] font-bold">{story.music.title}</span>
-                            <span className="text-white/40 text-[8px]">{story.music.artist}</span>
-                          </div>
-                        </motion.div>
-                      )}
-
-                      {story?.link?.url && (
-                        <motion.a
-                          href={story.link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          className="px-6 py-2 bg-white text-black rounded-full font-black text-xs shadow-2xl flex items-center gap-2 pointer-events-auto"
-                        >
-                          {story.link.text || t("Visit Link")}
-                          <HiShare size={14} />
-                        </motion.a>
-                      )}
-
-                      {story?.mentions?.length > 0 && (
-                        <div className="flex flex-wrap gap-2 justify-center">
-                          {story.mentions.map(m => (
-                            <Link key={m._id} href={`/Pages/User/${m._id}`} className="px-3 py-1 bg-indigo-500/80 backdrop-blur-sm text-white rounded-full text-[10px] font-bold pointer-events-auto">
-                              @{m.username}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {story?.text && (
-                    <div className="absolute bottom-32 inset-x-8 text-center bg-black/40 backdrop-blur-md p-4 rounded-3xl border border-white/5">
-                      <p className="text-white font-medium text-lg italic">{story.text}</p>
-                    </div>
-                  )}
-                </div>
+                <Image
+                  src={photoUrl}
+                  fill
+                  alt="story"
+                  className={`${fitMode === 'cover' ? 'object-cover' : 'object-contain'}`}
+                  onLoadingComplete={() => setIsImageLoaded(true)}
+                />
               ) : (
-                <div className="w-full h-full flex items-center justify-center px-8 text-center" style={{ background: 'linear-gradient(45deg, #111, #222)' }}>
-                  <h2 className="text-white text-3xl font-bold leading-tight">{story?.text}</h2>
+                <div className="w-full h-full flex items-center justify-center px-8 text-center bg-gradient-to-br from-neutral-900 to-black">
+                  <h2 className="text-white text-2xl font-bold leading-tight">{story?.text}</h2>
+                </div>
+              )}
+
+              {/* Badges inside Image (Close Friends tag only) */}
+              {story?.isCloseFriends && (
+                <div className="absolute top-3 left-0 right-0 flex justify-center z-40 pointer-events-none">
+                  <span className="bg-emerald-500/90 backdrop-blur-md text-[9px] font-black text-white px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-lg">
+                    Close Friends
+                  </span>
                 </div>
               )}
             </motion.div>
           </AnimatePresence>
         </main>
 
-        {/* Bottom Actions */}
-        <div className="absolute bottom-8 inset-x-6 z-50 flex flex-col gap-4">
+        {/* Dedicated Clean Bottom Area (Text, Music, Link & Actions outside the image) */}
+        <div className="relative z-40 bg-neutral-950 px-4 py-3 flex flex-col gap-2.5 border-t border-white/5">
+          {/* Text Description / Caption if available */}
+          {story?.text && photoUrl && (
+            <div className="text-center px-2">
+              <p className="text-white/90 text-xs font-normal line-clamp-2">{story.text}</p>
+            </div>
+          )}
+
+          {/* Extra Elements (Music / Links / Mentions) */}
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {story?.music && (
+              <div className="bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2">
+                <div className="w-6 h-6 rounded-md overflow-hidden relative">
+                  {story.music.cover ? <Image src={story.music.cover} fill alt="art" className="object-cover" /> : <HiPlay className="m-auto text-white/40" />}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-white text-[9px] font-bold leading-tight">{story.music.title}</span>
+                  <span className="text-white/40 text-[7px] leading-tight">{story.music.artist}</span>
+                </div>
+              </div>
+            )}
+
+            {story?.link?.url && (
+              <a
+                href={story.link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 bg-white text-black rounded-xl font-bold text-[10px] flex items-center gap-1.5 shadow-md hover:bg-neutral-200 transition-colors"
+              >
+                {story.link.text || t("Visit Link")}
+                <HiShare size={12} />
+              </a>
+            )}
+
+            {story?.mentions?.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 justify-center">
+                {story.mentions.map(m => (
+                  <Link key={m._id} href={`/Pages/User/${m._id}`} className="px-2.5 py-1 bg-indigo-600/80 text-white rounded-lg text-[9px] font-bold">
+                    @{m.username}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Quick Emojis Reactions (for viewers) */}
           {!isOwner && (
-            <div className="flex gap-2 justify-center mb-2">
+            <div className="flex items-center justify-between gap-1 px-1">
               {['🔥', '😂', '😮', '😢', '😍', '👏'].map(emoji => (
                 <button
                   key={emoji}
                   onClick={() => handleReaction(emoji)}
-                  className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-xl transition-all hover:scale-125"
+                  className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-base transition-all hover:scale-125"
                 >
                   {emoji}
                 </button>
@@ -424,13 +422,14 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
             </div>
           )}
 
-          <div className="flex items-center gap-4">
-            {!isOwner && (
-              <div className="flex-1 relative group">
+          {/* Reply input & Actions Bar */}
+          <div className="flex items-center gap-2">
+            {!isOwner ? (
+              <div className="flex-1 relative">
                 <input
                   type="text"
                   placeholder={t("Reply to story...")}
-                  className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-all font-medium"
+                  className="w-full h-10 bg-white/5 border border-white/10 rounded-xl px-4 text-white text-xs placeholder:text-white/30 focus:outline-none focus:border-white/30 transition-all"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   onFocus={() => setIsPaused(true)}
@@ -439,48 +438,42 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
                 />
                 <button
                   onClick={handleStoryReply}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
                 >
-                  <HiPaperAirplane size={20} />
+                  <HiPaperAirplane size={16} />
                 </button>
               </div>
-            )}
+            ) : null}
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 ms-auto">
               {photoUrl && (
-                <button onClick={handleToggleFitMode} className="w-12 h-12 rounded-2xl border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-all">
+                <button onClick={handleToggleFitMode} className="w-10 h-10 rounded-xl border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-[10px] font-medium transition-all flex items-center justify-center">
                   {fitMode === 'contain' ? t('Cover') : t('Contain')}
                 </button>
               )}
+
               {!isOwner ? (
                 <>
-                  <button onClick={handleLove} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isLoved ? 'bg-rose-500/10 text-rose-500' : 'bg-white/5 text-white/40 hover:text-white'}`}>
-                    <HiHeart size={24} className={isLoved ? 'fill-current' : ''} />
+                  <button onClick={handleLove} className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isLoved ? 'bg-rose-500/20 text-rose-500' : 'bg-white/5 text-white/60 hover:text-white'}`}>
+                    <HiHeart size={20} className={isLoved ? 'fill-current' : ''} />
                   </button>
-                  <button onClick={handleShare} className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all">
-                    <HiShare size={24} />
+                  <button onClick={handleShare} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/60 hover:text-white transition-all">
+                    <HiShare size={20} />
                   </button>
                 </>
               ) : (
                 <div
                   onClick={handleOpenViewers}
-                  className="flex items-center gap-4 bg-white/5 px-6 h-12 rounded-2xl border border-white/5 backdrop-blur-md cursor-pointer hover:bg-white/10 transition-all hover:scale-105"
+                  className="flex items-center gap-3 bg-white/5 px-4 h-10 rounded-xl border border-white/10 cursor-pointer hover:bg-white/10 transition-all w-full justify-center"
                 >
-                  <div className="flex items-center gap-2 text-white/60">
-                    <HiEye size={18} />
-                    <span className="text-xs font-black">{story?.views?.length || 0}</span>
+                  <div className="flex items-center gap-1.5 text-white/70">
+                    <HiEye size={16} />
+                    <span className="text-xs font-bold">{story?.views?.length || 0}</span>
                   </div>
-                  <div className="w-px h-4 bg-white/10" />
-                  <div className="flex flex-wrap gap-1 max-w-[40px] overflow-hidden">
-                    {story?.reactions?.slice(0, 3).map((r, i) => (
-                      <span key={i} className="text-[10px]">{r.emoji}</span>
-                    ))}
-                    {story?.reactions?.length > 3 && <span className="text-[8px] text-white/40">+{story.reactions.length - 3}</span>}
-                  </div>
-                  <div className="w-px h-4 bg-white/10" />
-                  <div className="flex items-center gap-2 text-rose-500/80">
-                    <HiHeart size={18} className="fill-current" />
-                    <span className="text-xs font-black">{story?.loves?.length || 0}</span>
+                  <div className="w-px h-3 bg-white/15" />
+                  <div className="flex items-center gap-1.5 text-rose-500">
+                    <HiHeart size={16} className="fill-current" />
+                    <span className="text-xs font-bold">{story?.loves?.length || 0}</span>
                   </div>
                 </div>
               )}
@@ -495,36 +488,36 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
               initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 100 }}
-              className="absolute inset-0 z-[60] bg-black/90 backdrop-blur-xl p-8 flex flex-col rounded-[2.5rem]"
+              className="absolute inset-0 z-[60] bg-neutral-950/95 backdrop-blur-xl p-6 flex flex-col rounded-[2.5rem]"
             >
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-white font-black uppercase tracking-widest text-sm">{t("Viewers")}</h3>
-                <button onClick={() => setShowViewers(false)} className="text-white/40 hover:text-white"><HiXMark size={24} /></button>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-white font-bold uppercase tracking-wider text-xs">{t("Viewers")}</h3>
+                <button onClick={() => setShowViewers(false)} className="text-white/40 hover:text-white"><HiXMark size={20} /></button>
               </div>
 
-              <div className="flex-1 overflow-y-auto space-y-4 custom-scrollbar pr-2">
+              <div className="flex-1 overflow-y-auto space-y-3 pr-1">
                 {isViewersLoading ? (
                   <div className="flex items-center justify-center h-full">
-                    <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                    <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : viewersList.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-white/20">
-                    <HiEye size={48} className="mb-4" />
-                    <p className="text-sm font-bold">{t("No views yet")}</p>
+                  <div className="flex flex-col items-center justify-center h-full text-white/30">
+                    <HiEye size={36} className="mb-2" />
+                    <p className="text-xs font-medium">{t("No views yet")}</p>
                   </div>
                 ) : (
                   viewersList.map(v => (
-                    <div key={v._id} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all">
+                    <div key={v._id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all">
                       <div className="flex items-center gap-3">
-                        <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-black/50">
+                        <div className="relative w-9 h-9 rounded-lg overflow-hidden">
                           <Image src={v.profilePhoto?.url || '/default-avatar.png'} fill alt="v" className="object-cover" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-white text-xs font-black">{v.username}</span>
-                          <span className="text-white/40 text-[10px] uppercase font-bold tracking-tighter">{v.profileName}</span>
+                          <span className="text-white text-xs font-bold">{v.username}</span>
+                          <span className="text-white/40 text-[9px] uppercase font-medium">{v.profileName}</span>
                         </div>
                       </div>
-                      <Link href={`/Pages/User/${v._id}`} className="px-4 py-1.5 rounded-xl bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all">
+                      <Link href={`/Pages/User/${v._id}`} className="px-3 py-1 rounded-lg bg-indigo-600 text-white text-[9px] font-bold uppercase tracking-wider hover:bg-indigo-700 transition-all">
                         {t("Profile")}
                       </Link>
                     </div>
@@ -537,12 +530,12 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
       </motion.div>
 
       {/* Side Desktop Controls */}
-      <div className="hidden lg:flex fixed right-12 top-1/2 -translate-y-1/2 flex-col gap-4 z-50">
-        <button onClick={handleNext} className="w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all">
-          <HiChevronRight size={32} />
+      <div className="hidden lg:flex fixed right-8 top-1/2 -translate-y-1/2 flex-col gap-4 z-50">
+        <button onClick={handleNext} className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all">
+          <HiChevronRight size={24} />
         </button>
-        <button onClick={handlePrev} className="w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all">
-          <HiChevronLeft size={32} />
+        <button onClick={handlePrev} className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all">
+          <HiChevronLeft size={24} />
         </button>
       </div>
     </div>

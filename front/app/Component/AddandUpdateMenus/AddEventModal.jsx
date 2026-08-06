@@ -9,18 +9,16 @@ import {
   Video, 
   Bell, 
   Tag, 
-  RotateCw,
   Calendar as CalendarIcon,
-  Check
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 
 const SectionHeader = ({ icon: Icon, title }) => (
-  <div className="flex items-center gap-2 mb-4">
-    {Icon && <Icon size={16} className="text-gray-400" />}
-    <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">{title}</h3>
+  <div className="flex items-center gap-2 mb-3">
+    {Icon && <Icon size={14} className="text-slate-400" />}
+    <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{title}</h3>
   </div>
 );
 
@@ -72,51 +70,55 @@ const AddEventModal = React.memo(({
   if (!selectedDate) return null;
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm">
       <motion.div
-        initial={{ opacity: 0, scale: 0.98, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.98, y: 10 }}
-        className="w-full max-w-2xl bg-white dark:bg-black border border-gray-100 dark:border-threads-border rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.96 }}
+        className="w-full max-w-xl bg-white dark:bg-[#0B0F1A] border border-slate-200/80 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
       >
-        {/* Header */}
-        <div className="px-8 py-6 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
-          <div className="space-y-1">
-            <h2 className="text-xl font-bold tracking-tight">{t("Create Event")}</h2>
-            <div className="flex items-center gap-2 text-indigo-500 font-semibold text-xs">
-              <CalendarIcon size={12} />
-              <span>{selectedDate.format("MMMM DD, YYYY")}</span>
+        {/* Modal Header */}
+        <div className="px-5 py-4 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+              <CalendarIcon size={16} />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">{t("Create New Event")}</h2>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                {selectedDate.format("MMMM DD, YYYY")}
+              </p>
             </div>
           </div>
           <button
             onClick={() => setSelectedDate(null)}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 text-gray-400 transition-all"
+            className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
           >
-            <X size={22} />
+            <X size={18} />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto no-scrollbar p-8 space-y-8">
+        {/* Scrollable Form Body */}
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
           
           {/* Title & Description */}
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">{t("Event Title")}</label>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">{t("Event Title")}</label>
               <input
                 type="text"
-                placeholder={t("What's the occasion?")}
-                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-2xl p-4 text-[15px] focus:outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/5 transition-all outline-none"
+                placeholder={t("What's the event name?")}
+                className="w-full bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium outline-none transition-all"
                 value={newEvent.title}
                 onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">{t("Description")}</label>
+            <div>
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">{t("Description")}</label>
               <textarea
-                placeholder={t("Add some details...")}
-                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-2xl p-4 text-[15px] focus:outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/5 h-28 resize-none transition-all outline-none"
+                placeholder={t("Add event details or notes...")}
+                className="w-full bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl p-3 text-xs sm:text-sm font-medium h-24 resize-none outline-none transition-all"
                 value={newEvent.description}
                 onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
               />
@@ -124,109 +126,116 @@ const AddEventModal = React.memo(({
           </div>
 
           {/* Time & Location */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-             <div className="space-y-4">
-               <SectionHeader icon={Clock} title={t("Schedule")} />
-               <div className="flex items-center gap-3">
-                 <input
-                   type="time"
-                   className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
-                   value={newEvent.startTime}
-                   onChange={(e) => setNewEvent({ ...newEvent, startTime: e.target.value })}
-                 />
-                 <span className="text-gray-400">→</span>
-                 <input
-                   type="time"
-                   className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
-                   value={newEvent.endTime}
-                   onChange={(e) => setNewEvent({ ...newEvent, endTime: e.target.value })}
-                 />
-               </div>
-             </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <SectionHeader icon={Clock} title={t("Time Range")} />
+              <div className="flex items-center gap-2">
+                <input
+                  type="time"
+                  className="flex-1 bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl p-2.5 text-xs font-medium outline-none transition-all"
+                  value={newEvent.startTime}
+                  onChange={(e) => setNewEvent({ ...newEvent, startTime: e.target.value })}
+                />
+                <span className="text-slate-400 text-xs">→</span>
+                <input
+                  type="time"
+                  className="flex-1 bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl p-2.5 text-xs font-medium outline-none transition-all"
+                  value={newEvent.endTime}
+                  onChange={(e) => setNewEvent({ ...newEvent, endTime: e.target.value })}
+                />
+              </div>
+            </div>
 
-             <div className="space-y-4">
-               <SectionHeader icon={MapPin} title={t("Location")} />
-               <input
-                 type="text"
-                 placeholder={t("Where's it happening?")}
-                 className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 transition-all outline-none"
-                 value={newEvent.location}
-                 onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
-               />
-             </div>
+            <div>
+              <SectionHeader icon={MapPin} title={t("Location")} />
+              <input
+                type="text"
+                placeholder={t("Add location...")}
+                className="w-full bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl p-2.5 text-xs font-medium outline-none transition-all"
+                value={newEvent.location}
+                onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
+              />
+            </div>
           </div>
 
-          {/* Settings Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
-            <div className="space-y-4">
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">{t("Category & Priority")}</h3>
-              <div className="flex gap-3">
+          {/* Category & Options */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">{t("Type & Priority")}</label>
+              <div className="flex gap-2">
                 <select
-                  className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
+                  className="flex-1 bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl p-2.5 text-xs font-semibold outline-none transition-all cursor-pointer"
                   value={newEvent.type}
                   onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })}
                 >
-                  <option value="birthday">🎂 {t("Birthday")}</option>
-                  <option value="meeting">👥 {t("Meeting")}</option>
-                  <option value="public">📅 {t("Public")}</option>
-                  <option value="reminder">🔔 {t("Reminder")}</option>
+                  <option value="birthday">{t("Birthday")}</option>
+                  <option value="meeting">{t("Meeting")}</option>
+                  <option value="public">{t("Public")}</option>
+                  <option value="custom">{t("Custom")}</option>
+                  <option value="reminder">{t("Reminder")}</option>
+                  <option value="deadline">{t("Deadline")}</option>
                 </select>
+
                 <select
-                  className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
+                  className="flex-1 bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl p-2.5 text-xs font-semibold outline-none transition-all cursor-pointer"
                   value={newEvent.priority}
                   onChange={(e) => setNewEvent({ ...newEvent, priority: e.target.value })}
                 >
                   <option value="low">{t("Low")}</option>
                   <option value="medium">{t("Medium")}</option>
                   <option value="high">{t("High")}</option>
+                  <option value="urgent">{t("Urgent")}</option>
                 </select>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">{t("Meeting Options")}</h3>
+            <div>
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">{t("Meeting Settings")}</label>
               <div 
                 onClick={() => setNewEvent({ ...newEvent, isVirtual: !newEvent.isVirtual })}
-                className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${newEvent.isVirtual ? 'bg-indigo-500/5 border-indigo-500/20' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-threads-border'}`}
+                className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                  newEvent.isVirtual 
+                    ? 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/30' 
+                    : 'bg-slate-100 dark:bg-white/5 border-transparent'
+                }`}
               >
-                <div className="flex items-center gap-3">
-                  <Video size={16} className={newEvent.isVirtual ? 'text-indigo-500' : 'text-gray-400'} />
-                  <span className="text-sm font-medium">{t("Virtual Meeting")}</span>
+                <div className="flex items-center gap-2">
+                  <Video size={15} className={newEvent.isVirtual ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'} />
+                  <span className="text-xs font-semibold">{t("Virtual Meeting Link")}</span>
                 </div>
-                <div className={`w-10 h-5 rounded-full p-1 transition-all ${newEvent.isVirtual ? 'bg-indigo-500' : 'bg-gray-200 dark:bg-white/10'}`}>
-                  <div className={`w-3 h-3 rounded-full bg-white transition-all ${newEvent.isVirtual ? 'translate-x-5' : 'translate-x-0'}`} />
+                <div className={`w-8 h-4.5 rounded-full p-0.5 transition-all ${newEvent.isVirtual ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-white/20'}`}>
+                  <div className={`w-3.5 h-3.5 rounded-full bg-white transition-transform ${newEvent.isVirtual ? 'translate-x-3.5' : 'translate-x-0'}`} />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Reminders & Tags */}
-          <div className="space-y-6 pt-4">
-            <div className="space-y-4">
+          <div className="space-y-4">
+            <div>
               <SectionHeader icon={Bell} title={t("Reminders")} />
-              <div className="flex flex-wrap gap-2">
-                {[5, 15, 30, 60].map(minutes => (
-                  <button
-                    key={minutes}
-                    onClick={() => {
-                      if (newEvent.reminders?.some(r => r.time === minutes)) {
-                        handleRemoveReminder(minutes);
-                      } else {
-                        handleAddReminder(minutes);
-                      }
-                    }}
-                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${newEvent.reminders?.some(r => r.time === minutes)
-                        ? 'bg-black text-white border-black dark:bg-white dark:text-black dark:border-white'
-                        : 'bg-transparent text-gray-400 border-gray-100 dark:border-white/5 hover:border-gray-300'
+              <div className="flex flex-wrap gap-1.5">
+                {[5, 15, 30, 60].map(minutes => {
+                  const active = newEvent.reminders?.some(r => r.time === minutes);
+                  return (
+                    <button
+                      key={minutes}
+                      type="button"
+                      onClick={() => active ? handleRemoveReminder(minutes) : handleAddReminder(minutes)}
+                      className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                        active
+                          ? 'bg-indigo-600 text-white border-indigo-600'
+                          : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border-transparent hover:border-slate-300'
                       }`}
-                  >
-                    {minutes}m
-                  </button>
-                ))}
+                    >
+                      {minutes}m
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div>
               <SectionHeader icon={Tag} title={t("Tags")} />
               <div className="flex gap-2">
                 <input
@@ -234,17 +243,23 @@ const AddEventModal = React.memo(({
                   placeholder={t("Add tag...")}
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
-                  className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 transition-all outline-none"
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                  className="flex-1 bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl px-3 py-2 text-xs font-medium outline-none transition-all"
                 />
-                <Button size="sm" onClick={handleAddTag} className="rounded-xl px-6">{t("Add")}</Button>
+                <button
+                  type="button"
+                  onClick={handleAddTag}
+                  className="px-4 py-2 bg-slate-200 dark:bg-white/10 hover:bg-slate-300 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all"
+                >
+                  {t("Add")}
+                </button>
               </div>
               {newEvent.tags?.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5 mt-2">
                   {newEvent.tags.map(tag => (
-                    <span key={tag} className="px-3 py-1 bg-gray-100 dark:bg-white/10 rounded-lg text-xs font-semibold flex items-center gap-2">
-                      {tag}
-                      <X size={12} className="cursor-pointer hover:text-red-500" onClick={() => handleRemoveTag(tag)} />
+                    <span key={tag} className="px-2.5 py-1 bg-slate-100 dark:bg-white/10 rounded-lg text-xs font-medium flex items-center gap-1.5">
+                      <span>#{tag}</span>
+                      <X size={12} className="cursor-pointer hover:text-rose-500" onClick={() => handleRemoveTag(tag)} />
                     </span>
                   ))}
                 </div>
@@ -253,23 +268,24 @@ const AddEventModal = React.memo(({
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="p-8 bg-gray-50/50 dark:bg-white/[0.02] border-t border-gray-100 dark:border-white/5 flex gap-4">
+        {/* Modal Footer */}
+        <div className="px-5 py-4 bg-slate-50/50 dark:bg-white/[0.02] border-t border-slate-200/80 dark:border-white/10 flex items-center justify-end gap-2">
           <button
-            className="px-8 py-3 rounded-full text-gray-500 hover:text-gray-900 dark:hover:text-white font-semibold text-sm transition-colors"
+            type="button"
+            className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
             onClick={() => setSelectedDate(null)}
             disabled={isCreating}
           >
             {t("Cancel")}
           </button>
           <Button
-            className="flex-1 rounded-full py-4 text-sm font-bold tracking-tight"
+            className="rounded-xl px-5 py-2 text-xs font-bold"
             isLoading={isCreating}
             disabled={!newEvent.title}
             onClick={handleAddEvent}
           >
-            <Plus size={18} className="mr-2" />
-            {t("Create Event")}
+            <Plus size={15} className="mr-1.5" />
+            {t("Save Event")}
           </Button>
         </div>
       </motion.div>

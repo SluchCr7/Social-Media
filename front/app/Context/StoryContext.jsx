@@ -17,9 +17,9 @@ export const StoryContextProvider = ({ children }) => {
 
   const [stories, setStories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isStory, setIsStory] = useState(false); // Modal toggle
+  const [isStory, setIsStory] = useState(false);
 
-  // 📥 Initial Fetch
+  // Initial Fetch
   useEffect(() => {
     const fetchStories = async () => {
       setIsLoading(true);
@@ -34,12 +34,11 @@ export const StoryContextProvider = ({ children }) => {
     fetchStories();
   }, []);
 
-  // 🔔 Real-time Socket Listener
+  // Real-time Socket Listener
   useEffect(() => {
     if (!socket) return;
 
     const handleNewStory = (newStory) => {
-      // Avoid duplicates from Optimistic UI
       const currentUserId = user?._id?.toString();
       const ownerId = newStory?.owner?._id?.toString() || newStory?.owner?.toString();
       if (currentUserId && ownerId === currentUserId) return;
@@ -57,7 +56,6 @@ export const StoryContextProvider = ({ children }) => {
     socket.on("new-story", handleNewStory);
     socket.on("delete-story", handleDeletedStory);
 
-    // Also listen for interactions if needed
     socket.on("update-story", (updatedStory) => {
       setStories(prev => prev.map(s => s._id === updatedStory._id ? updatedStory : s));
     });
@@ -68,8 +66,6 @@ export const StoryContextProvider = ({ children }) => {
       socket.off("update-story");
     };
   }, [socket, user]);
-
-  // 📤 Actions
 
   const addNewStory = useCallback(async (storyData) => {
     const formData = new FormData();
@@ -97,7 +93,6 @@ export const StoryContextProvider = ({ children }) => {
       formData.append('isCloseFriends', storyData.isCloseFriends);
     }
 
-    // Optimistic UI
     const tempId = `temp-${Date.now()}`;
     const tempStory = {
       _id: tempId,
@@ -170,7 +165,6 @@ export const StoryContextProvider = ({ children }) => {
   const toggleLove = useCallback(async (storyId) => {
     if (!user) return;
 
-    // Optimistic Update
     setStories(prev => prev.map(s => {
       if (s._id === storyId) {
         const isLoved = s.loves.includes(user._id);
@@ -192,17 +186,14 @@ export const StoryContextProvider = ({ children }) => {
     } catch (err) {
       console.error(err);
       showAlert("❌ Failed to toggle love.");
-      // Revert if needed
     }
   }, [user, showAlert]);
 
   const reactToStory = useCallback(async (storyId, emoji) => {
     if (!user) return;
 
-    // Optimistic Reaction
     setStories(prev => prev.map(s => {
       if (s._id === storyId) {
-        // Check if user already reacted
         const existingReactionIndex = s.reactions.findIndex(r => r.user === user._id || r.user?._id === user._id);
         let newReactions = [...s.reactions];
 
@@ -271,6 +262,20 @@ export const StoryContextProvider = ({ children }) => {
     }
   }, [user]);
 
+  const getArchivedStories = useCallback(async (userId) => {
+    if (!userId) return [];
+    try {
+      const { data } = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACK_URL}/api/story/user/${userId}/archive`,
+        { headers: { Authorization: `Bearer ${user?.token}` } }
+      );
+      return data;
+    } catch (err) {
+      console.error("Error fetching archived stories:", err);
+      return [];
+    }
+  }, [user?.token]);
+
   const value = useMemo(() => ({
     stories,
     isLoading,
@@ -283,8 +288,9 @@ export const StoryContextProvider = ({ children }) => {
     reactToStory,
     getStoryViewers,
     getUserStories,
+    getArchivedStories,
     shareStory
-  }), [stories, isLoading, isStory, addNewStory, deleteStory, viewStory, toggleLove, reactToStory, getStoryViewers, getUserStories, shareStory]);
+  }), [stories, isLoading, isStory, addNewStory, deleteStory, viewStory, toggleLove, reactToStory, getStoryViewers, getUserStories, getArchivedStories, shareStory]);
 
   return (
     <StoryContext.Provider value={value}>

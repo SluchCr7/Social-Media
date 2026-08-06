@@ -24,9 +24,9 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 
 const SectionHeader = ({ icon: Icon, title }) => (
-  <div className="flex items-center gap-2 mb-4">
-    {Icon && <Icon size={16} className="text-gray-400" />}
-    <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">{title}</h3>
+  <div className="flex items-center gap-2 mb-2">
+    {Icon && <Icon size={14} className="text-slate-400" />}
+    <h3 className="text-xs font-semibold text-slate-600 dark:text-slate-400">{title}</h3>
   </div>
 );
 
@@ -55,7 +55,7 @@ const EditCommunityMenu = memo(({ community, onClose }) => {
   }), [community]);
 
   const handleImageChange = useCallback(async (e, type) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file || !(file instanceof File)) return;
     const objectURL = URL.createObjectURL(file);
 
@@ -122,46 +122,46 @@ const EditCommunityMenu = memo(({ community, onClose }) => {
   }, [name, description, isPrivate, tags, rules, initialData, editCommunity, community?._id, showAlert, onClose, t]);
 
   return (
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
-      <div className="w-full max-w-2xl bg-white dark:bg-black border border-gray-100 dark:border-threads-border rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4">
+      <div className="w-full max-w-2xl bg-white dark:bg-[#0B0F1A] border border-slate-200/80 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="px-8 py-6 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
-          <div className="space-y-1">
-            <h2 className="text-xl font-bold tracking-tight">{t('Edit Community')}</h2>
-            <p className="text-xs text-gray-500 font-semibold">{t('Customize your space')}</p>
+        <div className="px-5 py-4 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">{t('Edit Community')}</h2>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t('Customize community details')}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 text-gray-400 transition-all"
+            className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
           >
-            <X size={22} />
+            <X size={18} />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto no-scrollbar">
+        {/* Scrollable Body */}
+        <div className="flex-1 overflow-y-auto">
           
-          {/* Visual Assets */}
-          <div className="relative group">
+          {/* Cover & Avatar Header */}
+          <div className="relative">
             {/* Cover */}
-            <div className="relative w-full h-48 bg-gray-50 dark:bg-white/5 overflow-hidden">
+            <div className="relative w-full h-36 bg-slate-100 dark:bg-white/5 overflow-hidden">
               <Image src={previewCover} alt="Cover" fill className="object-cover" />
-              <label className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-all">
-                <div className="bg-white/20 backdrop-blur-md p-3 rounded-full text-white">
-                  <Camera size={24} />
+              <label className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                <div className="bg-black/50 backdrop-blur-sm p-2 rounded-full text-white">
+                  <Camera size={18} />
                 </div>
                 <input type="file" accept="image/*" onChange={(e) => handleImageChange(e, 'cover')} className="hidden" />
               </label>
             </div>
 
-            {/* Profile Picture */}
-            <div className="absolute -bottom-12 left-8">
-              <div className="relative w-32 h-32 rounded-[2.5rem] border-4 border-white dark:border-black bg-gray-100 dark:bg-white/10 overflow-hidden shadow-xl group/avatar">
+            {/* Profile Avatar */}
+            <div className="absolute -bottom-8 left-5">
+              <div className="relative w-20 h-20 rounded-2xl border-4 border-white dark:border-[#0B0F1A] bg-slate-100 dark:bg-white/10 overflow-hidden shadow-md group">
                 <Image src={previewPicture} alt="Avatar" fill className="object-cover" />
-                <label className="absolute inset-0 bg-black/20 opacity-0 group-hover/avatar:opacity-100 flex items-center justify-center cursor-pointer transition-all">
-                  <div className="bg-white/20 backdrop-blur-md p-2 rounded-full text-white">
-                    <Camera size={20} />
+                <label className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                  <div className="bg-black/50 backdrop-blur-sm p-1.5 rounded-full text-white">
+                    <Camera size={16} />
                   </div>
                   <input type="file" accept="image/*" onChange={(e) => handleImageChange(e, 'picture')} className="hidden" />
                 </label>
@@ -169,26 +169,26 @@ const EditCommunityMenu = memo(({ community, onClose }) => {
             </div>
           </div>
 
-          <div className="mt-16 p-8 space-y-10">
-            {/* Basic Info */}
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">{t('Community Name')}</label>
+          <div className="mt-12 p-5 sm:p-6 space-y-5">
+            {/* Name & Description */}
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">{t('Community Name')}</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-2xl p-4 text-[15px] focus:outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/5 transition-all outline-none"
+                  className="w-full bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium outline-none transition-all"
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">{t('Description')}</label>
+              <div>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">{t('Description')}</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  rows={4}
-                  className="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-2xl p-4 text-[15px] focus:outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-white/5 transition-all resize-none outline-none"
+                  rows={3}
+                  className="w-full bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl p-3 text-xs sm:text-sm font-medium outline-none transition-all resize-none"
                 />
               </div>
             </div>
@@ -196,66 +196,70 @@ const EditCommunityMenu = memo(({ community, onClose }) => {
             {/* Privacy Setting */}
             <div 
               onClick={() => setIsPrivate(!isPrivate)}
-              className={`p-5 rounded-3xl border transition-all cursor-pointer flex items-center justify-between ${isPrivate ? 'bg-indigo-500/5 border-indigo-500/20' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-threads-border'}`}
+              className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                isPrivate 
+                  ? 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/30' 
+                  : 'bg-slate-100 dark:bg-white/5 border-transparent'
+              }`}
             >
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isPrivate ? 'bg-indigo-500 text-white' : 'bg-gray-200 dark:bg-white/10 text-gray-400'}`}>
-                  {isPrivate ? <Lock size={22} /> : <Globe size={22} />}
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isPrivate ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-white/10 text-slate-400'}`}>
+                  {isPrivate ? <Lock size={16} /> : <Globe size={16} />}
                 </div>
                 <div>
-                  <p className="font-bold text-[15px]">{isPrivate ? t('Private Community') : t('Public Community')}</p>
-                  <p className="text-[12px] text-gray-500">{isPrivate ? t('Only members can see content') : t('Anyone can see content')}</p>
+                  <p className="text-xs font-bold">{isPrivate ? t('Private Community') : t('Public Community')}</p>
+                  <p className="text-[11px] text-slate-500">{isPrivate ? t('Only members can see content') : t('Anyone can see content')}</p>
                 </div>
               </div>
-              <div className={`w-12 h-6 rounded-full p-1 transition-all ${isPrivate ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-white/10'}`}>
-                <div className={`w-4 h-4 rounded-full bg-white transition-all ${isPrivate ? 'translate-x-6' : 'translate-x-0'}`} />
+              <div className={`w-8 h-4.5 rounded-full p-0.5 transition-all ${isPrivate ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-white/20'}`}>
+                <div className={`w-3.5 h-3.5 rounded-full bg-white transition-transform ${isPrivate ? 'translate-x-3.5' : 'translate-x-0'}`} />
               </div>
             </div>
 
             {/* Tags & Rules */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              <div className="space-y-4">
-                <SectionHeader icon={TagIcon} title={t('Tags')} />
-                <div className="flex gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <SectionHeader icon={TagIcon} title={t('Community Tags')} />
+                <div className="flex gap-2 mb-2">
                   <input
                     type="text"
                     value={newTag}
                     onChange={(e) => setNewTag(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
                     placeholder={t('Add tag...')}
-                    className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-black/5 transition-all"
+                    className="flex-1 bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl px-3 py-2 text-xs font-medium outline-none transition-all"
                   />
-                  <Button size="sm" onClick={addTag} className="rounded-xl px-4"><Plus size={18} /></Button>
+                  <Button size="sm" onClick={addTag} className="rounded-xl px-3 py-2 text-xs"><Plus size={16} /></Button>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((t, idx) => (
-                    <span key={idx} className="px-3 py-1 bg-gray-100 dark:bg-white/10 rounded-lg text-xs font-semibold flex items-center gap-2">
-                      {t}
-                      <X size={12} className="cursor-pointer hover:text-red-500" onClick={() => removeTag(t)} />
+                <div className="flex flex-wrap gap-1.5">
+                  {tags.map((tItem, idx) => (
+                    <span key={idx} className="px-2.5 py-1 bg-slate-100 dark:bg-white/10 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+                      <span>#{tItem}</span>
+                      <X size={12} className="cursor-pointer hover:text-rose-500" onClick={() => removeTag(tItem)} />
                     </span>
                   ))}
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div>
                 <SectionHeader icon={Shield} title={t('Community Rules')} />
-                <div className="flex gap-2">
+                <div className="flex gap-2 mb-2">
                   <input
                     type="text"
                     value={newRule}
                     onChange={(e) => setNewRule(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addRule())}
                     placeholder={t('Add rule...')}
-                    className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-threads-border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-black/5 transition-all"
+                    className="flex-1 bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl px-3 py-2 text-xs font-medium outline-none transition-all"
                   />
-                  <Button size="sm" onClick={addRule} className="rounded-xl px-4"><Plus size={18} /></Button>
+                  <Button size="sm" onClick={addRule} className="rounded-xl px-3 py-2 text-xs"><Plus size={16} /></Button>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {rules.map((r, idx) => (
-                    <div key={idx} className="flex items-center justify-between bg-gray-50 dark:bg-white/5 p-3 rounded-xl border border-gray-100 dark:border-threads-border">
-                      <span className="text-xs font-medium">{r}</span>
-                      <button onClick={() => removeRule(r)} className="text-gray-400 hover:text-red-500">
-                        <Trash2 size={14} />
+                    <div key={idx} className="flex items-center justify-between bg-slate-100 dark:bg-white/5 p-2 rounded-xl text-xs font-medium">
+                      <span className="truncate pr-2">{r}</span>
+                      <button onClick={() => removeRule(r)} className="text-slate-400 hover:text-rose-500 shrink-0">
+                        <Trash2 size={13} />
                       </button>
                     </div>
                   ))}
@@ -266,19 +270,19 @@ const EditCommunityMenu = memo(({ community, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="p-8 bg-gray-50/50 dark:bg-white/[0.02] border-t border-gray-100 dark:border-white/5 flex gap-4">
+        <div className="px-5 py-4 bg-slate-50/50 dark:bg-white/[0.02] border-t border-slate-200/80 dark:border-white/10 flex items-center justify-end gap-2">
           <button
-            className="px-8 py-3 rounded-full text-gray-500 hover:text-gray-900 dark:hover:text-white font-semibold text-sm transition-colors"
+            className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 transition-colors"
             onClick={onClose}
           >
             {t('Cancel')}
           </button>
           <Button
-            className="flex-1 rounded-full py-4 text-sm font-bold tracking-tight"
+            className="rounded-xl px-5 py-2 text-xs font-bold"
             isLoading={isLoading}
             onClick={handleSubmit}
           >
-            <CheckCircle2 size={18} className="mr-2" />
+            <CheckCircle2 size={16} className="mr-1.5" />
             {t('Save Changes')}
           </Button>
         </div>

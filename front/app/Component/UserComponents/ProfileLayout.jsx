@@ -1,30 +1,22 @@
 'use client'
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import {
-  FaPlay, FaPause, FaStepForward, FaStepBackward
-} from "react-icons/fa"
-// ... (بقية الـ Imports)
 import ProfileHeader from "./ProfileHeader"
 import InfoAboutUser from "./InfoAboutUser"
 import Tabs from "./Tabs"
 import TabsContent from "./TabsContent"
 import FilterBar from "./FilterBar"
-import Image from "next/image"
 import PostSkeleton from "@/app/Skeletons/PostSkeleton"
-import HighlightsBar from "../Highlights" // تم جلب المكون
-import { useHighlights } from "@/app/Context/HighlightContext" // تم جلب الـ Context
+import HighlightsBar from "../Highlights"
+import { useHighlights } from "@/app/Context/HighlightContext"
 import { memo } from "react"
-// Imports للمكونات الجديدة (يجب عليك إنشاء هذه الملفات أو التأكد من مساراتها)
-// أنا أُضيفها هنا لتبسيط التنظيم، افترض أنها موجودة في نفس المسار أو مسار مُعَرَّف
-import HighlightViewerModal from '../HighlightView'; // جلب مُكون العرض
-import AddHighlightMenu from '../AddandUpdateMenus/AddHighlight'; // جلب مُكون الإضافة 
+import HighlightViewerModal from '../HighlightView';
+import AddHighlightMenu from '../AddandUpdateMenus/AddHighlight';
 import StickyProfileBar from "./StickyProfileBar"
 import AdultContentWarning from "../AdultAlert"
 import { useUser } from "@/app/Context/UserContext"
 import { useAuth } from "@/app/Context/AuthContext"
 import { useStory } from "@/app/Context/StoryContext"
-
 
 const ProfileLayout = ({
   user,
@@ -49,16 +41,14 @@ const ProfileLayout = ({
   onShowFollowing,
   onProfileClick,
   setOpenMenu,
-  openMenu,
-  onCoverChange
+  openMenu
 }) => {
   const { updateCoverPhoto } = useUser();
   const { user: currentUser } = useAuth();
-  const { getUserStories } = useStory();
+  const { getArchivedStories, getUserStories } = useStory();
   const [profileStories, setProfileStories] = useState([]);
   const { highlights, fetchHighlights, setOpenModal, selectedHighlight, setSelectedHighlight } = useHighlights();
 
-  // Local state for optimistic updates
   const [localUser, setLocalUser] = useState(user);
   const [localIsFollowing, setLocalIsFollowing] = useState(isFollowing);
 
@@ -75,44 +65,42 @@ const ProfileLayout = ({
     if (!user?._id) return;
 
     const loadProfileStories = async () => {
-      const fetched = await getUserStories(user._id);
+      // If profile owner, load full archive so all past stories can be added to highlights
+      const fetched = isOwner ? await getArchivedStories(user._id) : await getUserStories(user._id);
       if (active) setProfileStories(fetched || []);
     };
 
     loadProfileStories();
     return () => { active = false; };
-  }, [user?._id, getUserStories]);
+  }, [user?._id, isOwner, getArchivedStories, getUserStories]);
 
   const handleOptimisticFollow = async () => {
     const wasFollowing = localIsFollowing;
     const newIsFollowing = !wasFollowing;
     setLocalIsFollowing(newIsFollowing);
 
-    // Update localUser followers count optimistically
     if (localUser) {
       let newFollowers = localUser.followers || [];
       if (wasFollowing) {
-        // Remove current user
         newFollowers = newFollowers.filter(f => (f?._id || f) !== currentUser?._id);
       } else {
-        // Add current user (mock object)
         if (currentUser) newFollowers = [...newFollowers, currentUser];
       }
       setLocalUser({ ...localUser, followers: newFollowers });
     }
 
-    // Call original handlers
     if (wasFollowing) {
       if (onUnfollow) await onUnfollow();
     } else {
       if (onFollow) await onFollow();
     }
   };
+
   useEffect(() => {
     if (user?._id) fetchHighlights(user._id);
   }, [user?._id, fetchHighlights]);
+
   const handleAddHighlight = () => {
-    // لفتح قائمة إضافة هايلايت
     setOpenModal(true);
   };
 
@@ -124,7 +112,6 @@ const ProfileLayout = ({
       className="w-full min-h-screen bg-lightMode-bg dark:bg-darkMode-bg 
                   text-lightMode-text dark:text-darkMode-text px-3 sm:px-6 lg:px-8 py-6 grid grid-cols-1 gap-4 sm:gap-6"
     >
-      {/* ✅ الشريط الثابت */}
       <StickyProfileBar
         user={localUser}
         isOwner={isOwner}
@@ -132,7 +119,6 @@ const ProfileLayout = ({
         onFollow={handleOptimisticFollow}
         onUnfollow={handleOptimisticFollow}
       />
-      {/* 👤 رأس البروفايل */}
       <div id="profile-header">
         <ProfileHeader
           user={localUser}
@@ -160,18 +146,14 @@ const ProfileLayout = ({
         )
       }
       <div className="w-full max-w-7xl mx-auto flex flex-col gap-6 items-start">
-        {/* ⚡ Highlights Bar - تم إلغاء التعليق عنه */}
-
         <HighlightsBar
           highlights={highlights}
-          onAddHighlight={handleAddHighlight}   // لفتح قائمة الإضافة
-          isOwner={isOwner}                     // لتحديد إمكانية عرض زر 'New'
+          onAddHighlight={handleAddHighlight}
+          isOwner={isOwner}
         />
 
-        {/* 🧾 معلومات المستخدم */}
         <InfoAboutUser user={localUser} />
 
-        {/* 🧭 التبويبات والمحتوى */}
         <div className="flex flex-col gap-6 w-full">
           <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
@@ -207,17 +189,14 @@ const ProfileLayout = ({
         </div>
       </div>
 
-      {/* 👁️ عارض الـ Highlight (HighlightViewerModal) */}
       {selectedHighlight && (
         <HighlightViewerModal
           highlight={selectedHighlight}
-          onClose={() => setSelectedHighlight(null)} // إغلاق الـ Viewer
+          onClose={() => setSelectedHighlight(null)}
           allStories={profileStories}
         />
       )}
 
-      {/* ➕ قائمة إضافة Highlight (AddHighlightMenu) */}
-      {/* تُدار حالة الفتح/الإغلاق بواسطة 'openModal' في الـ Context */}
       <AddHighlightMenu stories={profileStories || []} />
 
     </motion.div>

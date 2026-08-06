@@ -36,19 +36,33 @@ const removeHighlightMetadataFromStories = async (storyIds, highlightId) => {
     const expiredIds = expiredStories.map((story) => story._id);
     await Story.updateMany(
       { _id: { $in: expiredIds } },
-      { $set: { isDeleted: true, isArchived: true, isHighlighted: false, preserveAfterExpiration: false } }
+      { $set: { isHighlighted: false, preserveAfterExpiration: false } }
     );
   }
 };
 
 // ================== Create Highlight ==================
 const createHighlight = asyncHandler(async (req, res) => {
+  let storyIdsInput = req.body.storyIds || req.body.stories;
+  if (typeof storyIdsInput === 'string') {
+    try {
+      const parsed = JSON.parse(storyIdsInput);
+      if (Array.isArray(parsed)) storyIdsInput = parsed;
+      else storyIdsInput = [storyIdsInput];
+    } catch (e) {
+      storyIdsInput = [storyIdsInput];
+    }
+  }
+  if (storyIdsInput) {
+    req.body.storyIds = storyIdsInput;
+  }
+
   const { error } = ValidateHighlight(req.body);
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
 
-  const { title, description, storyIds, isPublic, tags, color, order } = req.body;
+  const { title, description, isPublic, tags, color, order } = req.body;
   const userId = req.user._id;
 
   let coverImageUrl = null;
@@ -60,8 +74,8 @@ const createHighlight = asyncHandler(async (req, res) => {
   }
 
   let finalStoryIds = [];
-  if (storyIds) {
-    finalStoryIds = Array.isArray(storyIds) ? storyIds : [storyIds];
+  if (storyIdsInput) {
+    finalStoryIds = Array.isArray(storyIdsInput) ? storyIdsInput : [storyIdsInput];
     finalStoryIds = [...new Set(finalStoryIds.map((id) => id.toString()))];
   }
 
@@ -75,7 +89,7 @@ const createHighlight = asyncHandler(async (req, res) => {
     user: userId,
     title,
     description: description || '',
-    coverImage: coverImageUrl,
+    coverImage: coverImageUrl || (validStories[0]?.Photo?.[0] || null),
     stories: validStoryIds,
     isPublic: isPublic !== undefined ? isPublic : true,
     tags: tags || [],
@@ -157,7 +171,18 @@ const addStoryToHighlight = asyncHandler(async (req, res) => {
 
   let idsToProcess = [];
   if (storyId) idsToProcess.push(storyId);
-  if (storyIds && Array.isArray(storyIds)) idsToProcess = [...idsToProcess, ...storyIds];
+  if (storyIds) {
+    if (Array.isArray(storyIds)) idsToProcess = [...idsToProcess, ...storyIds];
+    else if (typeof storyIds === 'string') {
+      try {
+        const parsed = JSON.parse(storyIds);
+        if (Array.isArray(parsed)) idsToProcess = [...idsToProcess, ...parsed];
+        else idsToProcess.push(storyIds);
+      } catch (e) {
+        idsToProcess.push(storyIds);
+      }
+    }
+  }
 
   idsToProcess = [...new Set(idsToProcess)];
 
@@ -261,7 +286,7 @@ const removeStoryFromHighlight = asyncHandler(async (req, res) => {
 // ================== Reorder Highlight Stories ==================
 const updateStoriesOrder = asyncHandler(async (req, res) => {
   const { highlightId } = req.params;
-  const { storyIds } = req.body; // New order
+  const { storyIds } = req.body;
   const userId = req.user._id;
 
   if (!Array.isArray(storyIds)) return res.status(400).json({ message: "storyIds must be an array" });
@@ -269,8 +294,6 @@ const updateStoriesOrder = asyncHandler(async (req, res) => {
   const highlight = await Highlight.findOne({ _id: highlightId, user: userId });
   if (!highlight) return res.status(404).json({ message: "Highlight not found" });
 
-  // Ensure all storyIds in the request are already in the highlight
-  // (Security/Integrity check)
   const existingIds = highlight.stories.map(id => id.toString());
   const allExist = storyIds.every(id => existingIds.includes(id.toString()));
 
