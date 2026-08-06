@@ -43,18 +43,6 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
   const originalStories = useMemo(() => highlight?.stories || highlight?.archivedStories || [], [highlight]);
   const [localStories, setLocalStories] = useState(originalStories);
   const [hasReordered, setHasReordered] = useState(false);
-
-  useEffect(() => {
-    setLocalStories(originalStories);
-    setHasReordered(false);
-  }, [originalStories]);
-
-  useEffect(() => {
-    if (currentIndex >= localStories.length) {
-      setCurrentIndex(Math.max(0, localStories.length - 1));
-    }
-  }, [currentIndex, localStories.length]);
-
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -73,6 +61,17 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
   const rafRef = useRef(null);
   const lastTimeRef = useRef(null);
   const STORY_DURATION_MS = 5000;
+
+  useEffect(() => {
+    setLocalStories(originalStories);
+    setHasReordered(false);
+  }, [originalStories]);
+
+  useEffect(() => {
+    if (currentIndex >= localStories.length) {
+      setCurrentIndex(Math.max(0, localStories.length - 1));
+    }
+  }, [currentIndex, localStories.length]);
 
   // Cleanup preview
   useEffect(() => {
