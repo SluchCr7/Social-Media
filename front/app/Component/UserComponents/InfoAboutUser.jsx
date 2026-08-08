@@ -145,11 +145,11 @@ const InfoAboutUser = memo(({ user }) => {
                             </Link>
                           </>
                         ) : (
-                          t("Unknown Entity")
+                          <></>
                         )}
                       </>
                     ) : (
-                      t("Unknown Entity")
+                      <></>
                     )}
                   </p>
                 </div>
