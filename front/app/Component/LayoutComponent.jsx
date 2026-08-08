@@ -193,7 +193,7 @@ const LayoutComponent = ({ children }) => {
           }
           <AddStoryModel isStory={isStory} setIsStory={setIsStory} />
           {/* <CookieConsent/> */}
-          <FloatingDock onOpenMusicPlayer={() => setViewMusicPlayer(!viewMusicPlayer)} />
+          {/* <FloatingDock onOpenMusicPlayer={() => setViewMusicPlayer(!viewMusicPlayer)} /> */}
           <ExpandedWindow />
           <CommandPalette />
         </div>

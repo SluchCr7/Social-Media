@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import React from 'react';
-import { Bell, MessageCircle, Search, Menu } from 'lucide-react';
+import { Bell, MessageCircle, Search, Menu, PlusSquare } from 'lucide-react';
 import { useNotify } from '../Context/NotifyContext';
 import { useAuth } from '../Context/AuthContext';
 import { IoIosLogIn } from 'react-icons/io';
@@ -55,6 +55,14 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
 
           {isLogin ? (
             <>
+              <Link
+                href="/Pages/NewPost"
+                aria-label={t('Create New Post')}
+                className="inline-flex items-center justify-center rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-3 py-2 text-indigo-600 transition-all hover:bg-indigo-500/20 dark:text-indigo-400 dark:border-indigo-500/30 dark:hover:bg-indigo-500/30"
+              >
+                <PlusSquare className="w-5 h-5" />
+              </Link>
+
               <div className="relative">
                 <button
                   type="button"
