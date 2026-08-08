@@ -132,15 +132,24 @@ const InfoAboutUser = memo(({ user }) => {
                 <div className="flex flex-col">
                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-rose-500 mb-2">{t("Connection Status")}</span>
                   <p className="text-xl md:text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
-                    {user.relationshipStatus === "single" ? t("Independent Node") : (
+                    {user.relationshipStatus === "single" ? (
+                      t("single")
+                    ) : user.relationshipStatus ? (
                       <>
-                        {user.relationshipStatus} {t("with")}{" "}
+                        {user.relationshipStatus}{" "}
                         {user.partner ? (
-                          <Link href={`/Pages/User/${user.partner._id}`} className="text-rose-500 hover:underline">
-                            @{user.partner.username}
-                          </Link>
-                        ) : t("Unknown Entity")}
+                          <>
+                            {t("with")}{" "}
+                            <Link href={`/Pages/User/${user.partner._id}`} className="text-rose-500 hover:underline">
+                              @{user.partner.username}
+                            </Link>
+                          </>
+                        ) : (
+                          t("Unknown Entity")
+                        )}
                       </>
+                    ) : (
+                      t("Unknown Entity")
                     )}
                   </p>
                 </div>
