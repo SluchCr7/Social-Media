@@ -503,7 +503,7 @@ const DesignCommunitySelect = memo(({
                           {t('The feed is empty. Be the spark that ignites this community by sharing your first thought.')}
                         </p>
                         <button className="mt-8 px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-xl shadow-blue-600/20">
-                          {t('Create Post')}
+                          <Link href={'/Pages/NewPost'}>{t('Create Post')}</Link>
                         </button>
                       </GlassCard>
                     )

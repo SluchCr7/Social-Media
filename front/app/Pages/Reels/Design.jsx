@@ -1,13 +1,15 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import ReelCard from '../../Component/ReelCard';
 import ReelSkeleton from '../../Skeletons/ReelSkeleton';
 import { useTranslation } from 'react-i18next';
 import { useGetData } from '@/app/Custome/useGetData';
 import { useAuth } from '@/app/Context/AuthContext';
+import { useReels } from '@/app/Context/ReelsContext';
 import { motion } from 'framer-motion';
-import { HiSignal, HiOutlineFilm } from 'react-icons/hi2';
+import { HiOutlineFilm, HiPlus, HiHome } from 'react-icons/hi2';
 
 const DesignReels = ({
   containerRef,
@@ -22,6 +24,12 @@ const DesignReels = ({
   const { t } = useTranslation();
   const { user } = useAuth();
   const { userData } = useGetData(user?._id);
+  const { setShowModelAddReel } = useReels();
+
+  const visibleReels = reels.filter(Boolean);
+  const hasReels = visibleReels.length > 0;
+
+  const openCreateReel = () => setShowModelAddReel(true);
 
   return (
     <div
@@ -32,8 +40,17 @@ const DesignReels = ({
       {/* 🌀 Cinematic Background Gradient (Subtle Global Ambience) */}
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-900/10 via-black to-black opacity-50 z-0" />
 
-      {reels.filter(Boolean).map((reel, index) => {
-        const isLast = index === reels.filter(Boolean).length - 1;
+      <motion.button
+        whileTap={{ scale: 0.96 }}
+        onClick={openCreateReel}
+        className="fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[0_10px_30px_rgba(0,0,0,0.25)] transition hover:bg-indigo-500 hover:text-white"
+      >
+        <HiPlus size={18} />
+        <span>{t('New Reel')}</span>
+      </motion.button>
+
+      {visibleReels.map((reel, index) => {
+        const isLast = index === visibleReels.length - 1;
         return (
           <div
             key={reel._id}
@@ -61,41 +78,47 @@ const DesignReels = ({
         </div>
       )}
 
-      {reels.length === 0 && !isLoading && (
+      {!hasReels && !isLoading && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="snap-start w-full h-screen flex flex-col items-center justify-center bg-black text-white relative overflow-hidden z-20"
+          className="snap-start relative z-20 flex h-screen w-full flex-col items-center justify-center overflow-hidden bg-black px-4 text-white"
         >
-          {/* Abstract Background */}
           <div className="absolute inset-0 bg-black">
-            <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-indigo-600/10 rounded-full blur-[150px] animate-pulse" />
-            <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-blue-600/10 rounded-full blur-[150px] animate-pulse" />
+            <div className="absolute left-[-10%] top-[-10%] h-[45%] w-[45%] rounded-full bg-indigo-600/10 blur-[140px]" />
+            <div className="absolute bottom-[-10%] right-[-10%] h-[45%] w-[45%] rounded-full bg-blue-600/10 blur-[140px]" />
           </div>
 
-          <div className="relative z-10 p-12 bg-white/5 backdrop-blur-3xl rounded-[3rem] border border-white/10 text-center max-w-md shadow-2xl">
-            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-indigo-500 to-blue-600 rounded-3xl flex items-center justify-center mb-8 shadow-lg shadow-indigo-500/25">
-              <HiOutlineFilm className="text-4xl text-white" />
+          <div className="relative z-10 w-full max-w-md rounded-[2rem] border border-white/10 bg-white/8 p-8 text-center shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+            <div className="mb-6 flex justify-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-[1.5rem] bg-gradient-to-br from-indigo-500 to-blue-600 shadow-lg shadow-indigo-500/25">
+                <HiOutlineFilm className="text-3xl text-white" />
+              </div>
             </div>
 
-            <h2 className="text-3xl font-black uppercase tracking-tight mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-              {t("Zone Silence")}
+            <h2 className="mb-3 text-2xl font-semibold text-white">
+              {t('No reels yet')}
             </h2>
-            <p className="text-gray-400 text-sm font-medium leading-relaxed mb-8">
-              {t("The frequency is quiet. Be the first to broadcast a signal.")}
+            <p className="mb-8 text-sm leading-6 text-zinc-400">
+              {t('Start with a short video and share it with your audience in a clean, polished way.')}
             </p>
 
-            <div className="flex justify-center">
-              <div className="flex gap-1">
-                {[1, 2, 3].map(i => (
-                  <motion.div
-                    key={i}
-                    animate={{ scaleY: [1, 2, 1] }}
-                    transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-                    className="w-1 h-8 bg-indigo-500 rounded-full"
-                  />
-                ))}
-              </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <button
+                onClick={openCreateReel}
+                className="flex items-center justify-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-indigo-500 hover:text-white"
+              >
+                <HiPlus size={16} />
+                {t('Create reel')}
+              </button>
+
+              <Link
+                href="/"
+                className="flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/10"
+              >
+                <HiHome size={16} />
+                {t('Back home')}
+              </Link>
             </div>
           </div>
         </motion.div>

@@ -8,7 +8,7 @@ import { useSearch } from '@/app/Context/SearchContext';
 import DesignExplore from './DesignExplore';
 import { useUser } from '@/app/Context/UserContext';
 import { useGetData } from '@/app/Custome/useGetData';
-import Loading from '@/app/Component/Loading';
+import ExploreSkeleton from '@/app/Skeletons/ExploreSkeleton';
 
 const ExplorePage = () => {
   const { user } = useAuth();
@@ -109,7 +109,7 @@ const ExplorePage = () => {
 
   // Loading State
   if (userLoading && !userData) {
-    return <Loading />;
+    return <ExploreSkeleton />;
   }
 
   return (
