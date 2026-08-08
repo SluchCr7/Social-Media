@@ -14,7 +14,7 @@ const HistoryTab = memo(({ loginHistory }) => {
       title="Access Logs"
       description="Monitor recent authentication events"
     >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 select-none">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full select-none">
         
         {/* Timeline Log */}
         <div className="lg:col-span-2 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#090d16] shadow-sm space-y-6">
