@@ -57,36 +57,54 @@ function MusicPagePresentation(props) {
         ) : (
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.8fr)]">
             <div className="space-y-6">
-              <section className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/80 shadow-sm">
-                <NowPlaying
-                  current={current}
-                  playing={playing}
-                  togglePlay={togglePlay}
-                  next={next}
-                  prev={prev}
-                  isReady={isReady}
-                  shuffle={shuffle}
-                  setShuffle={setShuffle}
-                  repeatMode={repeatMode}
-                  setRepeatMode={setRepeatMode}
-                  progress={progress}
-                  setProgress={setProgress}
-                  duration={duration}
-                  volume={volume}
-                  setVolume={setVolume}
-                  muted={muted}
-                  setMuted={setMuted}
-                  expanded={expanded}
-                  setExpanded={setExpanded}
-                  likeMusic={likeMusic}
-                  shareMusicAsPost={shareMusicAsPost}
-                  saveMusicInPlayList={saveMusicInPlayList}
-                  userData={userData}
-                  myPlaylist={myPlaylist}
-                  setTrack={setTrack}
-                  songs={songs}
-                />
-              </section>
+              {hasMusic || current ? (
+                <section className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/80 shadow-sm">
+                  <NowPlaying
+                    current={current}
+                    playing={playing}
+                    togglePlay={togglePlay}
+                    next={next}
+                    prev={prev}
+                    isReady={isReady}
+                    shuffle={shuffle}
+                    setShuffle={setShuffle}
+                    repeatMode={repeatMode}
+                    setRepeatMode={setRepeatMode}
+                    progress={progress}
+                    setProgress={setProgress}
+                    duration={duration}
+                    volume={volume}
+                    setVolume={setVolume}
+                    muted={muted}
+                    setMuted={setMuted}
+                    expanded={expanded}
+                    setExpanded={setExpanded}
+                    likeMusic={likeMusic}
+                    shareMusicAsPost={shareMusicAsPost}
+                    saveMusicInPlayList={saveMusicInPlayList}
+                    userData={userData}
+                    myPlaylist={myPlaylist}
+                    setTrack={setTrack}
+                    songs={songs}
+                  />
+                </section>
+              ) : (
+                <section className="rounded-3xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 p-6 sm:p-8">
+                  <div className="flex items-center gap-3 text-indigo-400">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-500/10">
+                      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 18V5l12-2v13" />
+                        <circle cx="6" cy="18" r="3" />
+                        <circle cx="18" cy="16" r="3" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-white">Your music library is empty</p>
+                      <p className="text-sm text-zinc-500">Upload your first track to start building a polished collection.</p>
+                    </div>
+                  </div>
+                </section>
+              )}
 
               {topCharts.trending?.length > 0 && genre === 'All' && (
                 <section className="rounded-3xl border border-zinc-800 bg-zinc-900/70 p-4 sm:p-6">
@@ -143,9 +161,18 @@ function MusicPagePresentation(props) {
             </div>
 
             <aside className="space-y-4">
-              <SidebarNowPlaying current={current} />
-              <SidebarPlaylist myPlaylist={myPlaylist} setTrack={setTrack} />
-              <SidebarQueue queue={queue} setTrack={setTrack} />
+              {hasMusic ? (
+                <>
+                  <SidebarNowPlaying current={current} />
+                  <SidebarPlaylist myPlaylist={myPlaylist} setTrack={setTrack} />
+                  <SidebarQueue queue={queue} setTrack={setTrack} />
+                </>
+              ) : (
+                <section className="rounded-3xl border border-zinc-800 bg-zinc-900/70 p-5 text-sm text-zinc-500">
+                  <p className="font-semibold text-zinc-300">No active queue yet</p>
+                  <p className="mt-2">Once music is available, your listening queue and playlist will appear here.</p>
+                </section>
+              )}
             </aside>
           </div>
         )}
