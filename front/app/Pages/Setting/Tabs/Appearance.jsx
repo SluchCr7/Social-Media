@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT_COLORS } from '@/app/utils/Data';
 import { Avatar } from '@/app/Component/ui/Avatar';
-import { SettingsSection, SettingsCard } from '@/app/Component/Setting/SettingsComponents';
+import { SettingsSection } from '@/app/Component/Setting/SettingsComponents';
 
 const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = DEFAULT_COLORS[0].value }) => {
   const { t } = useTranslation();
@@ -43,7 +43,7 @@ const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = 
             <button
               onClick={() => !darkMode || toggleTheme()}
               className={clsx(
-                'group relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl border p-5 text-center transition-all duration-300',
+                'group relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl border p-5 text-center transition-all duration-300 cursor-pointer',
                 !darkMode
                   ? 'border-indigo-500 bg-indigo-50 shadow-sm dark:bg-slate-900'
                   : 'border-slate-200 bg-white/70 hover:border-indigo-500/50 dark:border-slate-800 dark:bg-transparent'
@@ -59,7 +59,7 @@ const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = 
             <button
               onClick={() => darkMode || toggleTheme()}
               className={clsx(
-                'group relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl border p-5 text-center transition-all duration-300',
+                'group relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl border p-5 text-center transition-all duration-300 cursor-pointer',
                 darkMode
                   ? 'border-indigo-500 bg-indigo-50 shadow-sm dark:bg-slate-900'
                   : 'border-slate-200 bg-white/70 hover:border-indigo-500/50 dark:border-slate-800 dark:bg-transparent'
@@ -70,6 +70,11 @@ const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = 
               </div>
               <span className="text-[11px] font-black uppercase tracking-[0.25em]">{t('Dark')}</span>
               {darkMode && <div className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-indigo-500" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Color Spectrum */}
         <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800 dark:bg-[#090d16]/90 space-y-6">
           <div className="flex items-center gap-3">
             <div className="rounded-2xl bg-amber-500/10 p-2.5 text-amber-500">
@@ -102,7 +107,7 @@ const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = 
                 )}
               </button>
             ))}
-            <label className="w-10 h-10 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center cursor-pointer hover:border-indigo-500 dark:hover:border-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all shrink-0">
+            <label className="relative w-10 h-10 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center cursor-pointer hover:border-indigo-500 dark:hover:border-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all shrink-0">
               <input
                 type="color"
                 value={customColor || '#6366f1'}
@@ -193,7 +198,6 @@ const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = 
             </div>
           </div>
         </div>
-
       </div>
     </SettingsSection>
   );
