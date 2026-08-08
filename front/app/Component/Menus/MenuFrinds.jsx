@@ -62,13 +62,13 @@ const FriendCard = memo(({ userData, index, user, userProfile, handleFollow, t }
         <div className="relative shrink-0">
           <motion.div
             whileHover={{ scale: 1.1 }}
-            className="w-12 h-12 rounded-[1.25rem] overflow-hidden bg-gray-100 dark:bg-gray-800 ring-2 ring-white dark:ring-gray-900 shadow-sm"
+            className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 ring-2 ring-white dark:ring-gray-900 shadow-sm"
           >
             <Image
               src={profilePhoto?.url || '/default-avatar.png'}
               alt={username}
               fill
-              className="object-cover"
+              className="object-cover rounded-full"
             />
           </motion.div>
           {isNew && (

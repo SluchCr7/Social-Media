@@ -1,53 +1,37 @@
 'use client';
 
-import { useState, useCallback, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  HiXMark,
-  HiPhoto,
-  HiMusicalNote,
-  HiCloudArrowUp,
-  HiInformationCircle,
-  HiRocketLaunch,
-  HiLanguage,
-  HiQueueList
-} from "react-icons/hi2";
-import Image from "next/image";
-import { useMusic } from "../../Context/MusicContext";
-import { useTranslation } from "react-i18next";
+import { useState, useCallback, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { HiXMark, HiMusicalNote, HiPhoto, HiCloudArrowUp, HiSparkles, HiQueueList } from 'react-icons/hi2';
+import Image from 'next/image';
+import { useMusic } from '../../Context/MusicContext';
 
-const genres = ["Pop", "Rock", "HipHop", "Jazz", "Classical", "Lo-Fi", "Electronic", "Ambient", "Trap"];
+const genres = ['Pop', 'Rock', 'HipHop', 'Jazz', 'Classical', 'Lo-Fi', 'Electronic', 'Ambient', 'Trap', 'Other'];
 
 const AddMusicModal = ({ isOpen, onClose }) => {
-  const [title, setTitle] = useState("");
-  const [artist, setArtist] = useState("");
-  const [album, setAlbum] = useState("");
-  const [genre, setGenre] = useState("Ambient");
+  const [title, setTitle] = useState('');
+  const [artist, setArtist] = useState('');
+  const [album, setAlbum] = useState('');
+  const [genre, setGenre] = useState('Ambient');
   const [audioFile, setAudioFile] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [language, setLanguage] = useState("English");
-  const [tags, setTags] = useState("");
+  const [language, setLanguage] = useState('English');
+  const [tags, setTags] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const { uploadMusic } = useMusic();
-  const { t } = useTranslation();
 
-  const handleCoverChange = useCallback((e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (imagePreview) URL.revokeObjectURL(imagePreview);
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  }, [imagePreview]);
-
-  const handleAudioChange = useCallback((e) => {
-    const file = e.target.files?.[0];
-    if (file) setAudioFile(file);
-  }, []);
-
-  const handleClearCover = useCallback(() => {
+  const resetState = useCallback(() => {
+    setTitle('');
+    setArtist('');
+    setAlbum('');
+    setGenre('Ambient');
+    setAudioFile(null);
     setImageFile(null);
+    setLanguage('English');
+    setTags('');
+    setError('');
     if (imagePreview) URL.revokeObjectURL(imagePreview);
     setImagePreview(null);
   }, [imagePreview]);
@@ -58,34 +42,79 @@ const AddMusicModal = ({ isOpen, onClose }) => {
     };
   }, [imagePreview]);
 
+  const handleCoverChange = useCallback((e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError('Please choose a valid image file.');
+      return;
+    }
+
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    setError('');
+  }, [imagePreview]);
+
+  const handleAudioChange = useCallback((e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('audio/')) {
+      setError('Please choose a valid audio file.');
+      return;
+    }
+
+    if (file.size > 25 * 1024 * 1024) {
+      setError('Audio file should be smaller than 25MB.');
+      return;
+    }
+
+    setAudioFile(file);
+    setError('');
+  }, []);
+
+  const handleClearCover = useCallback(() => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(null);
+  }, [imagePreview]);
+
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
-    if (!title || !artist || !audioFile) return;
+    if (!title.trim() || !artist.trim() || !audioFile) {
+      setError('Title, artist, and a valid audio file are required.');
+      return;
+    }
 
     setLoading(true);
+    setError('');
+
     const formData = new FormData();
-    formData.append("title", title);
-    formData.append("artist", artist);
-    formData.append("album", album);
-    formData.append("genre", genre);
-    formData.append("audio", audioFile);
-    if (imageFile) formData.append("image", imageFile);
-    formData.append("language", language);
+    formData.append('title', title.trim());
+    formData.append('artist', artist.trim());
+    formData.append('album', album.trim());
+    formData.append('genre', genre);
+    formData.append('audio', audioFile);
+    if (imageFile) formData.append('image', imageFile);
+    formData.append('language', language.trim() || 'English');
 
     if (tags.trim()) {
-      const tagsArray = tags.split(",").map(t => t.trim()).filter(Boolean);
-      tagsArray.forEach(tag => formData.append("tags[]", tag));
+      tags.split(',').map((item) => item.trim()).filter(Boolean).forEach((tag) => formData.append('tags[]', tag));
     }
 
     try {
       await uploadMusic(formData);
+      resetState();
       onClose();
     } catch (err) {
       console.error(err);
+      setError('Upload failed. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, [title, artist, album, genre, audioFile, imageFile, language, tags, uploadMusic, onClose]);
+  }, [album, artist, audioFile, genre, imageFile, language, onClose, resetState, tags, title, uploadMusic]);
 
   return (
     <AnimatePresence>
@@ -94,52 +123,53 @@ const AddMusicModal = ({ isOpen, onClose }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[1000] flex justify-center items-center p-4"
+          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/85 px-3 py-4 backdrop-blur-xl sm:px-4"
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 50, rotateX: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0, rotateX: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 50 }}
-            className="relative w-full max-w-6xl bg-[#080808] rounded-[3.5rem] border border-white/5 shadow-[0_0_120px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col md:flex-row h-full max-h-[900px] perspective-1000"
+            initial={{ opacity: 0, y: 24, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.98 }}
+            className="relative flex w-full max-w-5xl flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-950 shadow-[0_30px_80px_rgba(0,0,0,0.45)] md:flex-row"
           >
-            {/* 🛠️ Studio Sidebar */}
-            <div className="w-full md:w-96 bg-[#0B0B0B] p-10 border-r border-white/5 flex flex-col gap-10 shrink-0">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-indigo-500/20">
-                  <HiMusicalNote className="text-white" size={24} />
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/30 text-zinc-300 transition hover:bg-white/10 hover:text-white"
+            >
+              <HiXMark size={18} />
+            </button>
+
+            <div className="w-full bg-gradient-to-br from-indigo-600/20 via-zinc-900 to-zinc-950 p-6 sm:p-8 md:w-[38%] md:p-8">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-500/20 text-indigo-400">
+                  <HiMusicalNote size={22} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-white tracking-tighter uppercase leading-none">Studio <span className="text-indigo-500">Node</span></h2>
-                  <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mt-1">Asset Distribution v2.0</p>
+                  <p className="text-sm font-semibold text-white">Upload a new track</p>
+                  <p className="text-xs text-zinc-400">Make it available across the whole experience.</p>
                 </div>
               </div>
 
-              {/* Cover Art Dropzone */}
-              <div className="space-y-4">
-                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-2">Release Visuals</label>
-                <div className="relative aspect-square w-full rounded-[2.5rem] overflow-hidden bg-black shadow-2xl border border-white/5 group border-dashed flex flex-col items-center justify-center text-center p-4 cursor-pointer hover:border-indigo-500/50 transition-all">
+              <div className="mt-6 rounded-[1.5rem] border border-white/10 bg-black/20 p-4">
+                <div className="relative aspect-square overflow-hidden rounded-[1.25rem] border border-white/10 bg-zinc-900">
                   {imagePreview ? (
                     <>
-                      <Image src={imagePreview} alt="preview" fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                        <button type="button" onClick={handleClearCover} className="p-4 bg-red-500 text-white rounded-2xl shadow-xl">
-                          <HiXMark size={24} />
+                      <Image src={imagePreview} alt="Track cover preview" fill className="object-cover" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition hover:opacity-100">
+                        <button type="button" onClick={handleClearCover} className="rounded-full bg-red-500 px-3 py-2 text-sm font-semibold text-white">
+                          Remove
                         </button>
                       </div>
                     </>
                   ) : (
-                    <label className="cursor-pointer flex flex-col items-center gap-4">
-                      <motion.div
-                        animate={{ y: [0, -10, 0] }}
-                        transition={{ duration: 4, repeat: Infinity }}
-                        className="w-20 h-20 rounded-3xl bg-white/[0.03] flex items-center justify-center text-white/10 group-hover:text-indigo-500 group-hover:bg-indigo-500/10 transition-all"
-                      >
-                        <HiPhoto size={40} />
-                      </motion.div>
-                      <div className="space-y-1">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Inject Artwork</p>
-                        <p className="text-[8px] font-bold text-white/10 group-hover:text-white/20">SVG, PNG, JPG (800x800+)</p>
+                    <label className="flex h-full cursor-pointer flex-col items-center justify-center gap-3 text-center text-zinc-400">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-zinc-300">
+                        <HiPhoto size={24} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-zinc-200">Add artwork</p>
+                        <p className="text-xs text-zinc-500">PNG, JPG or WEBP</p>
                       </div>
                       <input type="file" accept="image/*" onChange={handleCoverChange} className="hidden" />
                     </label>
@@ -147,157 +177,99 @@ const AddMusicModal = ({ isOpen, onClose }) => {
                 </div>
               </div>
 
-              {/* Status Modules */}
-              <div className="mt-auto space-y-3">
-                <div className="p-5 rounded-3xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <div className="flex items-center justify-between text-[9px] font-black text-white/20 uppercase tracking-widest">
-                    <span>Signal Title</span>
-                    <HiInformationCircle />
-                  </div>
-                  <p className="text-xs font-black text-white truncate uppercase tracking-tight">{title || "Waiting for signal..."}</p>
+              <div className="mt-6 space-y-3 rounded-[1.25rem] border border-white/10 bg-black/20 p-4 text-sm text-zinc-400">
+                <div className="flex items-center justify-between">
+                  <span>Title</span>
+                  <span className="font-semibold text-zinc-200">{title.trim() || 'Untitled'}</span>
                 </div>
-
-                <div className="p-5 rounded-3xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <div className="flex items-center justify-between text-[9px] font-black text-white/20 uppercase tracking-widest">
-                    <span>Identity</span>
-                    <HiLanguage />
-                  </div>
-                  <p className="text-xs font-black text-indigo-400 truncate uppercase tracking-tight">{artist || "Unknown Entity"}</p>
+                <div className="flex items-center justify-between">
+                  <span>Artist</span>
+                  <span className="font-semibold text-indigo-400">{artist.trim() || 'Unknown artist'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Genre</span>
+                  <span className="font-semibold text-zinc-200">{genre}</span>
                 </div>
               </div>
-
-              <button
-                onClick={onClose}
-                className="py-4 text-[9px] font-black uppercase tracking-[0.4em] text-white/10 hover:text-red-500 transition-colors"
-              >
-                Terminate Process
-              </button>
             </div>
 
-            {/* 📝 Configuration Core */}
-            <div className="flex-1 flex flex-col h-full bg-[#050505]">
-              <div className="flex-1 overflow-y-auto no-scrollbar p-12 space-y-12">
-
-                {/* Section 1: Metadata */}
-                <section className="space-y-8">
-                  <div className="flex items-center gap-4">
-                    <div className="w-8 h-px bg-white/10" />
-                    <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Core Parameters</h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    <div className="space-y-3 px-2">
-                      <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Composition Title</label>
-                      <input
-                        value={title} onChange={e => setTitle(e.target.value)}
-                        placeholder="e.g. DARK MATTER"
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-white placeholder:text-white/10 focus:border-indigo-500/50 outline-none transition-all font-bold uppercase tracking-tighter"
-                      />
-                    </div>
-                    <div className="space-y-3 px-2">
-                      <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Creator / Artist</label>
-                      <input
-                        value={artist} onChange={e => setArtist(e.target.value)}
-                        placeholder="e.g. SECTOR-7"
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-white placeholder:text-white/10 focus:border-indigo-500/50 outline-none transition-all font-bold uppercase tracking-tighter"
-                      />
-                    </div>
-                    <div className="space-y-3 px-2">
-                      <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Collection / Tape</label>
-                      <input
-                        value={album} onChange={e => setAlbum(e.target.value)}
-                        placeholder="e.g. CHROME HORIZON"
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-white placeholder:text-white/10 focus:border-indigo-500/50 outline-none transition-all font-bold uppercase tracking-tighter"
-                      />
-                    </div>
-                    <div className="space-y-3 px-2">
-                      <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Audio Language</label>
-                      <input
-                        value={language} onChange={e => setLanguage(e.target.value)}
-                        placeholder="e.g. English"
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-white placeholder:text-white/10 focus:border-indigo-500/50 outline-none transition-all font-bold uppercase tracking-tighter"
-                      />
-                    </div>
-                  </div>
-                </section>
-
-                {/* Section 2: Frequency Categorization */}
-                <section className="space-y-8">
-                  <div className="flex items-center gap-4">
-                    <div className="w-8 h-px bg-white/10" />
-                    <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Signal Sector</h3>
-                  </div>
-                  <div className="flex flex-wrap gap-4">
-                    {genres.map(g => (
-                      <button
-                        key={g}
-                        onClick={() => setGenre(g)}
-                        className={`px-8 py-3 rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] border transition-all duration-500 ${genre === g ? 'bg-indigo-600 border-indigo-500 text-white shadow-[0_10px_20px_rgba(79,70,229,0.3)]' : 'bg-white/[0.02] border-white/5 text-white/30 hover:border-white/20'}`}
-                      >
-                        {g}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-
-                {/* Section 3: The Master File */}
-                <section className="space-y-8">
-                  <div className="flex items-center gap-4">
-                    <div className="w-8 h-px bg-white/10" />
-                    <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Audio Core</h3>
-                  </div>
-                  <label className={`block group relative w-full h-40 border-2 border-dashed rounded-[3rem] cursor-pointer transition-all flex flex-col items-center justify-center overflow-hidden ${audioFile ? 'border-green-500/40 bg-green-500/5' : 'border-white/5 hover:border-indigo-500/50'}`}>
-                    <div className={`transition-all duration-700 ${audioFile ? 'scale-75 opacity-50' : 'group-hover:scale-110'}`}>
-                      <HiCloudArrowUp size={48} className={`mb-3 ${audioFile ? 'text-green-500' : 'text-white/10 group-hover:text-indigo-500'}`} />
-                    </div>
-                    <div className="relative z-10 text-center space-y-1">
-                      <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${audioFile ? 'text-green-500' : 'text-white/20'}`}>
-                        {audioFile ? `Signal Captured: ${audioFile.name}` : "Upload Uncompressed Master"}
-                      </span>
-                      {!audioFile && <p className="text-[8px] font-bold text-white/5 group-hover:text-white/10 tracking-widest uppercase">Lossless .WAV / .MP3 Allowed</p>}
-                    </div>
-                    {audioFile && (
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: '100%' }}
-                        className="absolute bottom-0 left-0 h-1 bg-green-500"
-                      />
-                    )}
-                    <input type="file" accept="audio/*" onChange={handleAudioChange} className="hidden" />
-                  </label>
-                </section>
-              </div>
-
-              {/* 🚀 Launch Protocol Footer */}
-              <div className="p-10 bg-[#080808] border-t border-white/5 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-2xl bg-white/[0.03] flex items-center justify-center">
-                    <HiQueueList className="text-white/20" size={20} />
-                  </div>
-                  <div className="hidden sm:block">
-                    <p className="text-[10px] font-black text-white uppercase tracking-widest">Global Sync</p>
-                    <p className="text-[8px] font-bold text-indigo-500 uppercase tracking-widest">Available across all nodes</p>
-                  </div>
+            <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-5 bg-zinc-950/90 p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-400">Professional upload</p>
+                  <h3 className="mt-2 text-2xl font-semibold text-white">Share your next release</h3>
                 </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleSubmit}
-                  disabled={loading || !title || !artist || !audioFile}
-                  className={`flex items-center gap-6 px-12 py-5 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.3em] transition-all duration-500 ${loading || !title || !artist || !audioFile ? 'bg-white/5 text-white/10 cursor-not-allowed' : 'bg-white text-black hover:bg-indigo-600 hover:text-white shadow-[0_20px_40px_rgba(0,0,0,0.5)]'}`}
-                >
-                  {loading ? (
-                    <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <HiRocketLaunch size={20} />
-                      Transmit Frequency
-                    </>
-                  )}
-                </motion.button>
+                <div className="flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-300">
+                  <HiSparkles size={14} />
+                  Fast and clean
+                </div>
               </div>
-            </div>
+
+              {error ? (
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                  {error}
+                </div>
+              ) : null}
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="space-y-2 text-sm text-zinc-400">
+                  <span>Track title</span>
+                  <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Aurora Nights" className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none ring-0 transition focus:border-indigo-500" />
+                </label>
+                <label className="space-y-2 text-sm text-zinc-400">
+                  <span>Artist / creator</span>
+                  <input value={artist} onChange={(e) => setArtist(e.target.value)} placeholder="e.g. Lina Vale" className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none ring-0 transition focus:border-indigo-500" />
+                </label>
+                <label className="space-y-2 text-sm text-zinc-400">
+                  <span>Album / project</span>
+                  <input value={album} onChange={(e) => setAlbum(e.target.value)} placeholder="Optional" className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none ring-0 transition focus:border-indigo-500" />
+                </label>
+                <label className="space-y-2 text-sm text-zinc-400">
+                  <span>Language</span>
+                  <input value={language} onChange={(e) => setLanguage(e.target.value)} placeholder="English" className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none ring-0 transition focus:border-indigo-500" />
+                </label>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-sm font-semibold text-zinc-300">Choose a genre</p>
+                <div className="flex flex-wrap gap-2">
+                  {genres.map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => setGenre(item)}
+                      className={`rounded-full border px-3 py-2 text-sm transition ${genre === item ? 'border-indigo-500 bg-indigo-500 text-white' : 'border-white/10 bg-white/5 text-zinc-400 hover:border-indigo-400 hover:text-white'}`}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <label className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-[1.5rem] border border-dashed px-4 py-8 text-center transition ${audioFile ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300' : 'border-white/10 bg-white/5 text-zinc-400 hover:border-indigo-500/40 hover:text-white'}`}>
+                <HiCloudArrowUp size={24} />
+                <span className="text-sm font-semibold">
+                  {audioFile ? `Selected: ${audioFile.name}` : 'Upload your audio file'}
+                </span>
+                <span className="text-xs text-zinc-500">MP3, WAV, M4A up to 25MB</span>
+                <input type="file" accept="audio/*" onChange={handleAudioChange} className="hidden" />
+              </label>
+
+              <label className="space-y-2 text-sm text-zinc-400">
+                <span>Tags</span>
+                <input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="chill, vocal, deep" className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none ring-0 transition focus:border-indigo-500" />
+              </label>
+
+              <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-4">
+                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-zinc-400">
+                  <HiQueueList size={14} />
+                  Ready for discovery
+                </div>
+                <button type="submit" disabled={loading || !title.trim() || !artist.trim() || !audioFile} className={`flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition ${loading || !title.trim() || !artist.trim() || !audioFile ? 'cursor-not-allowed bg-white/10 text-zinc-500' : 'bg-indigo-500 text-white hover:bg-indigo-400'}`}>
+                  {loading ? 'Uploading…' : 'Publish track'}
+                </button>
+              </div>
+            </form>
           </motion.div>
         </motion.div>
       )}

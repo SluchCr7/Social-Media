@@ -78,6 +78,7 @@ const LayoutComponent = ({ children }) => {
     '/Pages/Challenge',
     '/Pages/Videos',
     '/Pages/Search',
+    '/Pages/Games',
   ];
 
   // Dynamic routes (starts with match)

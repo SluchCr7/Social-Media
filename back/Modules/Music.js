@@ -34,7 +34,7 @@ const MusicSchema = new mongoose.Schema({
     },
     genre: {
         type: String,
-        enum: ["Pop", "Rock", "HipHop", "Jazz", "Classical", "Other"],
+        enum: ["Pop", "Rock", "HipHop", "Jazz", "Classical", "Lo-Fi", "Electronic", "Ambient", "Trap", "Other"],
         default: "Other"
     },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
@@ -102,18 +102,18 @@ MusicSchema.methods.updatePopularity = async function ({ threshold = 50 } = {}) 
 
 // 🎯 Joi validation المحدثة
 const musicValidation = Joi.object({
-    title: Joi.string().trim().required().messages({
+    title: Joi.string().trim().optional().allow("").messages({
         'string.empty': 'Title is required'
     }),
-    artist: Joi.string().trim().required().messages({
+    artist: Joi.string().trim().optional().allow("").messages({
         'string.empty': 'Artist is required'
     }),
     album: Joi.string().trim().optional().allow(""),
-    url: Joi.string().uri().required().messages({
+    url: Joi.string().uri().optional().allow("").messages({
         'string.uri': 'Invalid URL format'
     }),
-    cover: Joi.string().uri(),
-    genre: Joi.string().valid("Pop", "Rock", "HipHop", "Jazz", "Classical", "Other").default("Other"),
+    cover: Joi.string().uri().optional().allow(""),
+    genre: Joi.string().valid("Pop", "Rock", "HipHop", "Jazz", "Classical", "Lo-Fi", "Electronic", "Ambient", "Trap", "Other").optional().default("Other"),
     tags: Joi.array().items(Joi.string().trim()),
     releaseDate: Joi.date(),
     language: Joi.string().trim().default("Unknown")

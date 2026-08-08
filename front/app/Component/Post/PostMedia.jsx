@@ -89,7 +89,7 @@ const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
                         onClick={() => !isSensitive && handlePreview(item)}
                     >
                         {isVideo ? (
-                            <div className="relative w-full h-full flex items-center justify-center">
+                            <div className="relative z-[999] w-full h-full flex items-center justify-center">
                                 <video
                                     src={item.url}
                                     poster={item.thumbnail}

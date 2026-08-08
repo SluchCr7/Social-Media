@@ -4,11 +4,35 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef, us
 import axios from "axios";
 import { useAuth } from "./AuthContext";
 import { useAlert } from "./AlertContext";
-import { useNotify } from "./NotifyContext";
 import { usePost } from "./PostContext";
 import { useSocket } from "./SocketContext";
 
 export const MusicContext = createContext();
+
+const normalizeMusicItem = (item) => {
+  if (!item || typeof item !== "object") return null;
+
+  const title = typeof item.title === "string" ? item.title.trim() : "";
+  const artist = typeof item.artist === "string" ? item.artist.trim() : "";
+  const url = typeof item.url === "string" ? item.url.trim() : "";
+
+  if (!title || !artist || !url) return null;
+
+  return {
+    ...item,
+    title,
+    artist,
+    album: typeof item.album === "string" && item.album.trim() ? item.album.trim() : "Single",
+    genre: typeof item.genre === "string" && item.genre.trim() ? item.genre : "Other",
+    cover: typeof item.cover === "string" && item.cover.trim() ? item.cover : "/default-music.jpg",
+    duration: Number(item.duration) || 0,
+  };
+};
+
+const normalizeMusicList = (items) => {
+  if (!Array.isArray(items)) return [];
+  return items.map(normalizeMusicItem).filter(Boolean);
+};
 
 export const MusicProvider = ({ children }) => {
   const { user } = useAuth();
@@ -18,6 +42,7 @@ export const MusicProvider = ({ children }) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [genre, setGenre] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [topCharts, setTopCharts] = useState({ trending: [], popular: [] });
@@ -26,83 +51,106 @@ export const MusicProvider = ({ children }) => {
 
   const { setPosts } = usePost();
 
-  // ✅ جلب الموسيقى مع التصفية والـ Pagination
   const fetchMusic = useCallback(async (pageNum = 1, currentGenre = "All") => {
-    setIsLoading(true);
+    if (pageNum === 1) {
+      setIsLoading(true);
+      setHasLoadedOnce(false);
+    } else {
+      setIsLoading(true);
+    }
+
     try {
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/music?page=${pageNum}&limit=12&genre=${currentGenre}`
       );
-      const newMusic = Array.isArray(res.data.music) ? res.data.music : [];
+      const nextMusic = normalizeMusicList(Array.isArray(res?.data?.music) ? res.data.music : []);
 
-      setMusic(prev => (pageNum === 1 ? newMusic : [...prev, ...newMusic]));
-      setHasMore(pageNum < res.data.totalPages);
+      setMusic((prev) => (pageNum === 1 ? nextMusic : [...prev, ...nextMusic]));
+      setHasMore(pageNum < (res?.data?.totalPages || 1));
     } catch (err) {
       console.error("Fetch Error:", err);
-      // showAlert("Failed to fetch music.");
+      if (pageNum === 1) {
+        setMusic([]);
+      }
     } finally {
       setIsLoading(false);
+      if (pageNum === 1) {
+        setHasLoadedOnce(true);
+      }
     }
   }, []);
 
-  // ✅ جلب التريند والأكثر شعبية
   const fetchTopCharts = useCallback(async () => {
     try {
       const { data } = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/music/top-charts`);
-      setTopCharts(data);
+      setTopCharts({
+        trending: normalizeMusicList(Array.isArray(data?.trending) ? data.trending : []),
+        popular: normalizeMusicList(Array.isArray(data?.popular) ? data.popular : []),
+      });
     } catch (err) {
       console.error("Top Charts Error:", err);
+      setTopCharts({ trending: [], popular: [] });
     }
   }, []);
 
-  // ✅ البحث عن الموسيقى (Server Side)
   const searchMusic = useCallback(async (query) => {
-    if (!query) {
+    const trimmedQuery = query?.trim() || "";
+
+    if (!trimmedQuery) {
+      setSearchQuery("");
       fetchMusic(1, genre);
       return;
     }
+
     setIsLoading(true);
     try {
-      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/music/search?q=${query}`);
-      setMusic(data);
-      setHasMore(false); // البحث يعيد نتائج ثابتة عادة
+      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/music/search?q=${trimmedQuery}`);
+      const nextMusic = normalizeMusicList(Array.isArray(data) ? data : []);
+      setMusic(nextMusic);
+      setHasMore(false);
+      setHasLoadedOnce(true);
     } catch (err) {
       console.error("Search Error:", err);
+      setMusic([]);
     } finally {
       setIsLoading(false);
     }
   }, [genre, fetchMusic]);
 
-  // ✅ تحميل البيانات عند تغيير النوع أو أول مرة
   useEffect(() => {
     setPage(1);
     fetchMusic(1, genre);
     fetchTopCharts();
   }, [genre, fetchMusic, fetchTopCharts]);
 
-  // 🔔 Socket Listeners
   useEffect(() => {
     if (!socket) return;
 
     const handleCreate = (newM) => {
+      const normalized = normalizeMusicItem(newM);
+      if (!normalized) return;
+
       const currentUserId = user?._id?.toString();
-      const ownerId = newM?.owner?._id?.toString() || newM?.owner?.toString();
+      const ownerId = normalized?.owner?._id?.toString() || normalized?.owner?.toString();
       if (currentUserId && ownerId === currentUserId) return;
-      setMusic(prev => [newM, ...prev]);
+      setMusic((prev) => [normalized, ...prev.filter((m) => m._id !== normalized._id)]);
     };
+
     const handleUpdate = (updated) => {
-      setMusic(prev => prev.map(m => m._id === updated._id ? updated : m));
-      // Update charts locally (though they might need re-fetch for precise ordering, but this updates data)
-      setTopCharts(prev => ({
-        trending: prev.trending.map(m => m._id === updated._id ? updated : m),
-        popular: prev.popular.map(m => m._id === updated._id ? updated : m)
+      const normalized = normalizeMusicItem(updated);
+      if (!normalized) return;
+      setMusic((prev) => prev.map((m) => (m._id === normalized._id ? normalized : m)));
+      setTopCharts((prev) => ({
+        trending: prev.trending.map((m) => (m._id === normalized._id ? normalized : m)),
+        popular: prev.popular.map((m) => (m._id === normalized._id ? normalized : m)),
       }));
     };
+
     const handleDelete = (id) => {
-      setMusic(prev => prev.filter(m => m._id !== id));
-      setTopCharts(prev => ({
-        trending: prev.trending.filter(m => m._id !== id),
-        popular: prev.popular.filter(m => m._id !== id)
+      setMusic((prev) => prev.filter((m) => m._id !== id));
+      setTopCharts((prev) => ({
+        trending: prev.trending.filter((m) => m._id !== id),
+        popular: prev.popular.filter((m) => m._id !== id),
       }));
     };
 
@@ -117,7 +165,6 @@ export const MusicProvider = ({ children }) => {
     };
   }, [socket, user]);
 
-  // 🎵 رفع موسيقى جديدة
   const uploadMusic = async (formData) => {
     try {
       const res = await axios.post(
@@ -130,7 +177,10 @@ export const MusicProvider = ({ children }) => {
         }
       );
 
-      setMusic(prev => [res.data, ...prev]);
+      const normalized = normalizeMusicItem(res?.data);
+      if (normalized) {
+        setMusic((prev) => [normalized, ...prev.filter((m) => m._id !== normalized._id)]);
+      }
       showAlert("Music uploaded successfully!");
       setShowModelAddMusic(false);
     } catch (err) {
@@ -139,7 +189,6 @@ export const MusicProvider = ({ children }) => {
     }
   };
 
-  // 🗑️ حذف موسيقى
   const deleteMusic = useCallback(async (id) => {
     if (!user?.token) return;
     try {
@@ -147,7 +196,7 @@ export const MusicProvider = ({ children }) => {
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/music/${id}`,
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
-      setMusic(prev => prev.filter(r => r._id !== id));
+      setMusic((prev) => prev.filter((r) => r._id !== id));
       showAlert(res.data.message);
     } catch (err) {
       console.error(err);
@@ -155,7 +204,6 @@ export const MusicProvider = ({ children }) => {
     }
   }, [user, showAlert]);
 
-  // ❤️ لايك / إلغاء لايك
   const likeMusic = useCallback(async (id) => {
     if (!user?.token) return showAlert("Please login to like music");
     try {
@@ -164,27 +212,26 @@ export const MusicProvider = ({ children }) => {
         {},
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
-      const { music: updatedMusic, message } = res.data;
-      setMusic(prev => prev.map(item => (item._id === updatedMusic._id ? updatedMusic : item)));
+      const updatedMusic = normalizeMusicItem(res?.data?.music);
+      if (!updatedMusic) return;
 
-      // تحديث التريند أيضاً لو كان فيها
-      setTopCharts(prev => ({
-        trending: prev.trending.map(m => m._id === updatedMusic._id ? updatedMusic : m),
-        popular: prev.popular.map(m => m._id === updatedMusic._id ? updatedMusic : m)
+      setMusic((prev) => prev.map((item) => (item._id === updatedMusic._id ? updatedMusic : item)));
+      setTopCharts((prev) => ({
+        trending: prev.trending.map((m) => (m._id === updatedMusic._id ? updatedMusic : m)),
+        popular: prev.popular.map((m) => (m._id === updatedMusic._id ? updatedMusic : m)),
       }));
-
     } catch (err) {
       console.error(err);
       showAlert("Failed to like music.");
     }
   }, [user, showAlert]);
 
-  // 👁️ زيادة المشاهدات
   const viewMusic = useCallback(async (id) => {
     try {
       const res = await axios.put(`${process.env.NEXT_PUBLIC_BACK_URL}/api/music/view/${id}`);
-      const updated = res.data;
-      setMusic(prev => prev.map(r => (r?._id === id ? updated : r)));
+      const updated = normalizeMusicItem(res?.data);
+      if (!updated) return;
+      setMusic((prev) => prev.map((r) => (r?._id === id ? updated : r)));
     } catch (err) { console.error(err); }
   }, []);
 
@@ -196,8 +243,10 @@ export const MusicProvider = ({ children }) => {
         {},
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
-      setMusic(prev => prev.map(m => (m._id === data._id ? data : m)));
-      return data;
+      const updated = normalizeMusicItem(data);
+      if (!updated) return data;
+      setMusic((prev) => prev.map((m) => (m._id === updated._id ? updated : m)));
+      return updated;
     } catch (error) { console.error('Error adding listen:', error); }
   }, [user]);
 
@@ -209,7 +258,7 @@ export const MusicProvider = ({ children }) => {
         { customText },
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
-      setPosts(prev => [data.post, ...prev]);
+      setPosts((prev) => [data.post, ...prev]);
       showAlert("Shared successfully as a post!");
       return data.post;
     } catch (error) {
@@ -218,7 +267,6 @@ export const MusicProvider = ({ children }) => {
     }
   }, [user, setPosts, showAlert]);
 
-  // 🔍 Infinite Scroll Logic
   const observer = useRef();
   const lastMusicRef = useCallback(
     (node) => {
@@ -226,7 +274,7 @@ export const MusicProvider = ({ children }) => {
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMore) {
-          setPage(prev => {
+          setPage((prev) => {
             const nextPage = prev + 1;
             fetchMusic(nextPage, genre);
             return nextPage;
@@ -243,6 +291,7 @@ export const MusicProvider = ({ children }) => {
     topCharts,
     isLoading,
     hasMore,
+    hasLoadedOnce,
     genre,
     setGenre,
     searchQuery,
@@ -260,7 +309,7 @@ export const MusicProvider = ({ children }) => {
     currentMusic,
     setCurrentMusic,
   }), [
-    music, topCharts, isLoading, hasMore, genre, searchQuery,
+    music, topCharts, isLoading, hasMore, hasLoadedOnce, genre, searchQuery,
     searchMusic, uploadMusic, deleteMusic, likeMusic, viewMusic,
     addListen, shareMusicAsPost, lastMusicRef, showModelAddMusic, currentMusic
   ]);

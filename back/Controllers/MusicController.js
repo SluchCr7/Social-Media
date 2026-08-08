@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const mongoose = require("mongoose");
-const { Music } = require("../Modules/Music");
+const { Music, musicValidation } = require("../Modules/Music");
 const { User } = require("../Modules/User");
 const { cloudUpload } = require("../Config/cloudUpload");
 const { cloudUploadMusic } = require("../Config/cloudUploadMusic");
@@ -8,6 +8,30 @@ const { sendNotificationHelper } = require("../utils/SendNotification");
 const { Post } = require("../Modules/Post");
 const { postPopulate } = require("../Populates/Populate");
 const { io } = require("../Config/socket");
+const normalizeGenre = (genre) => {
+  const supportedGenres = ["Pop", "Rock", "HipHop", "Jazz", "Classical", "Lo-Fi", "Electronic", "Ambient", "Trap", "Other"];
+  return supportedGenres.includes(genre) ? genre : "Other";
+};
+
+const normalizeMusicPayload = (item) => {
+  if (!item) return null;
+  const title = typeof item.title === "string" ? item.title.trim() : "";
+  const artist = typeof item.artist === "string" ? item.artist.trim() : "";
+  const url = typeof item.url === "string" ? item.url.trim() : "";
+
+  if (!title || !artist || !url) return null;
+
+  return {
+    ...item,
+    title,
+    artist,
+    album: typeof item.album === "string" && item.album.trim() ? item.album.trim() : "Single",
+    genre: normalizeGenre(item.genre),
+    cover: typeof item.cover === "string" && item.cover.trim() ? item.cover : "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200&q=80",
+    language: typeof item.language === "string" && item.language.trim() ? item.language : "Unknown",
+  };
+};
+
 const createMusic = asyncHandler(async (req, res) => {
   try {
     const audioFile = req.files?.audio?.[0];
@@ -45,7 +69,7 @@ const createMusic = asyncHandler(async (req, res) => {
       title: req.body.title,
       artist: req.body.artist,
       album: req.body.album || "Single",
-      genre: req.body.genre || "Other",
+      genre: normalizeGenre(req.body.genre),
       url: audioUpload.secure_url,
       cover: coverUrl,
       duration: durationInSeconds,
@@ -68,7 +92,8 @@ const createMusic = asyncHandler(async (req, res) => {
     // 🔔 Socket Emit
     io.emit("music:create", newMusic);
 
-    res.status(201).json(newMusic);
+    const responseMusic = normalizeMusicPayload(newMusic.toObject ? newMusic.toObject() : newMusic);
+    res.status(201).json(responseMusic || newMusic);
   } catch (error) {
     console.error("❌ Error creating music:", error);
     res.status(500).json({ message: error.message });
@@ -99,12 +124,14 @@ const getAllMusic = asyncHandler(async (req, res) => {
     Music.countDocuments(query)
   ]);
 
+  const normalizedMusic = (music || []).map(normalizeMusicPayload).filter(Boolean);
+
   res.status(200).json({
     page,
     limit,
     totalMusic: total,
     totalPages: Math.ceil(total / limit),
-    music,
+    music: normalizedMusic,
   });
 });
 
@@ -127,7 +154,8 @@ const searchMusic = asyncHandler(async (req, res) => {
     .limit(20)
     .lean();
 
-  res.status(200).json(music);
+  const normalizedMusic = (music || []).map(normalizeMusicPayload).filter(Boolean);
+  res.status(200).json(normalizedMusic);
 });
 
 // ✅ جلب التريند والأكثر شعبية
@@ -144,7 +172,10 @@ const getTopCharts = asyncHandler(async (req, res) => {
     .limit(10)
     .lean();
 
-  res.status(200).json({ trending, popular });
+  res.status(200).json({
+    trending: (trending || []).map(normalizeMusicPayload).filter(Boolean),
+    popular: (popular || []).map(normalizeMusicPayload).filter(Boolean),
+  });
 });
 
 // ✅ جلب موسيقى مشابهة (توصيات)
@@ -161,7 +192,7 @@ const getRecommendedMusic = asyncHandler(async (req, res) => {
     .limit(6)
     .lean();
 
-  res.status(200).json(recommendations);
+  res.status(200).json((recommendations || []).map(normalizeMusicPayload).filter(Boolean));
 });
 
 // ✅ جلب أغنية واحدة
@@ -191,11 +222,16 @@ const updateMusic = asyncHandler(async (req, res) => {
     return res.status(403).json({ message: "Access denied. You are not the owner." });
   }
 
-  const { error } = musicValidation.validate(req.body);
+  const { error } = musicValidation.validate(req.body, { abortEarly: false });
   if (error)
     return res.status(400).json({ message: error.details[0].message });
 
-  const updated = await Music.findByIdAndUpdate(id, req.body, { new: true })
+  const payload = {
+    ...req.body,
+    genre: req.body.genre ? normalizeGenre(req.body.genre) : undefined,
+  };
+
+  const updated = await Music.findByIdAndUpdate(id, payload, { new: true })
     .populate("owner", "username profilePhoto");
 
   // 🔔 Socket Emit

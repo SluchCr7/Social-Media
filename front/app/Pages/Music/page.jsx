@@ -15,6 +15,7 @@ export default function MusicPageContainer() {
     music: songs,
     topCharts,
     isLoading,
+    hasLoadedOnce,
     likeMusic,
     shareMusicAsPost,
     genre,
@@ -103,6 +104,7 @@ export default function MusicPageContainer() {
         setSearch={handleSetSearch}
         loading={loading}
         isLoading={isLoading}
+        hasLoadedOnce={hasLoadedOnce}
         openModel={openModel}
         setOpenModel={handleSetOpenModel}
         likeMusic={likeMusic}
