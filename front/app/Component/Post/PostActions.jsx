@@ -71,7 +71,7 @@ const PostActions = memo(({ post, user, likePost, hahaPost, sharePost, savePost,
           <Link href={`/Pages/Post/${post?._id}`}>
             <ActionButton
               icon={MessageSquare}
-              label={post?.comments?.length || 0}
+              
             />
           </Link>
         )}
