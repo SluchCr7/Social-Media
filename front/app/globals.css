@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   --background: #f8fafc;
   --surface: #ffffff;
   --surface-soft: #f8fafc;
@@ -20,19 +20,18 @@
   --focus-ring: rgba(99, 102, 241, 0.35);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #050505;
-    --surface: #080808;
-    --surface-soft: #0f172a;
-    --surface-strong: #111827;
-    --text: #f8fafc;
-    --text-muted: #94a3b8;
-    --border: #1f2937;
-    --border-strong: #374151;
-    --shadow-soft: 0 20px 55px rgba(0, 0, 0, 0.32);
-    --shadow-card: 0 24px 80px rgba(0, 0, 0, 0.32);
-  }
+.dark {
+  color-scheme: dark;
+  --background: #050505;
+  --surface: #080808;
+  --surface-soft: #0f172a;
+  --surface-strong: #111827;
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: #1f2937;
+  --border-strong: #374151;
+  --shadow-soft: 0 20px 55px rgba(0, 0, 0, 0.32);
+  --shadow-card: 0 24px 80px rgba(0, 0, 0, 0.32);
 }
 
 * {

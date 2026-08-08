@@ -27,54 +27,58 @@ const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = 
       description="Customize your interface themes & color palette"
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 select-none">
-        
         {/* Theme Engine */}
-        <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#090d16] shadow-sm space-y-6">
+        <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800 dark:bg-[#090d16]/90">
           <div className="flex items-center gap-3">
-            <Monitor size={18} className="text-indigo-500" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">{t('Theme Engine')}</h3>
+            <div className="rounded-2xl bg-indigo-500/10 p-2.5 text-indigo-500">
+              <Monitor size={18} />
+            </div>
+            <div>
+              <h3 className="text-xs font-black uppercase tracking-[0.25em] text-slate-800 dark:text-slate-200">{t('Theme Engine')}</h3>
+              <p className="mt-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">{t('Switch between refined light and dark surfaces')}</p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="mt-6 grid grid-cols-2 gap-4">
             <button
               onClick={() => !darkMode || toggleTheme()}
               className={clsx(
-                "group relative p-5 rounded-xl border transition-all duration-300 overflow-hidden flex flex-col items-center gap-3 cursor-pointer",
+                'group relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl border p-5 text-center transition-all duration-300',
                 !darkMode
-                  ? "bg-slate-50 dark:bg-slate-900 border-indigo-500 shadow-sm"
-                  : "bg-transparent border-slate-200 dark:border-slate-800 hover:border-indigo-500/50"
+                  ? 'border-indigo-500 bg-indigo-50 shadow-sm dark:bg-slate-900'
+                  : 'border-slate-200 bg-white/70 hover:border-indigo-500/50 dark:border-slate-800 dark:bg-transparent'
               )}
             >
-              <div className={clsx("p-2.5 rounded-lg transition-colors", !darkMode ? "bg-indigo-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400")}>
+              <div className={clsx('rounded-xl p-2.5 transition-colors', !darkMode ? 'bg-indigo-500 text-white' : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-400')}>
                 <Sun size={20} />
               </div>
-              <span className="text-[11px] font-black uppercase tracking-widest">{t('Light')}</span>
-              {!darkMode && <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-indigo-500" />}
+              <span className="text-[11px] font-black uppercase tracking-[0.25em]">{t('Light')}</span>
+              {!darkMode && <div className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-indigo-500" />}
             </button>
 
             <button
               onClick={() => darkMode || toggleTheme()}
               className={clsx(
-                "group relative p-5 rounded-xl border transition-all duration-300 overflow-hidden flex flex-col items-center gap-3 cursor-pointer",
+                'group relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl border p-5 text-center transition-all duration-300',
                 darkMode
-                  ? "bg-slate-50 dark:bg-slate-900 border-indigo-500 shadow-sm"
-                  : "bg-transparent border-slate-200 dark:border-slate-800 hover:border-indigo-500/50"
+                  ? 'border-indigo-500 bg-indigo-50 shadow-sm dark:bg-slate-900'
+                  : 'border-slate-200 bg-white/70 hover:border-indigo-500/50 dark:border-slate-800 dark:bg-transparent'
               )}
             >
-              <div className={clsx("p-2.5 rounded-lg transition-colors", darkMode ? "bg-indigo-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400")}>
+              <div className={clsx('rounded-xl p-2.5 transition-colors', darkMode ? 'bg-indigo-500 text-white' : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-400')}>
                 <Moon size={20} />
               </div>
-              <span className="text-[11px] font-black uppercase tracking-widest">{t('Dark')}</span>
-              {darkMode && <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-indigo-500" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Color Spectrum */}
-        <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#090d16] shadow-sm space-y-6">
+              <span className="text-[11px] font-black uppercase tracking-[0.25em]">{t('Dark')}</span>
+              {darkMode && <div className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-indigo-500" />}
+        <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800 dark:bg-[#090d16]/90 space-y-6">
           <div className="flex items-center gap-3">
-            <Sparkles size={18} className="text-amber-500" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">{t('Color Spectrum')}</h3>
+            <div className="rounded-2xl bg-amber-500/10 p-2.5 text-amber-500">
+              <Sparkles size={18} />
+            </div>
+            <div>
+              <h3 className="text-xs font-black uppercase tracking-[0.25em] text-slate-800 dark:text-slate-200">{t('Color Spectrum')}</h3>
+              <p className="mt-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">{t('Choose a brand accent for your experience')}</p>
+            </div>
           </div>
 
           <div className="grid grid-cols-4 sm:grid-cols-7 gap-3">
@@ -111,10 +115,15 @@ const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = 
         </div>
 
         {/* Layout Density */}
-        <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#090d16] shadow-sm space-y-4">
-          <div className="flex items-center gap-3 mb-2">
-            <Layers size={18} className="text-emerald-500" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">{t('Layout Spacing')}</h3>
+        <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800 dark:bg-[#090d16]/90 space-y-4">
+          <div className="mb-2 flex items-center gap-3">
+            <div className="rounded-2xl bg-emerald-500/10 p-2.5 text-emerald-500">
+              <Layers size={18} />
+            </div>
+            <div>
+              <h3 className="text-xs font-black uppercase tracking-[0.25em] text-slate-800 dark:text-slate-200">{t('Layout Spacing')}</h3>
+              <p className="mt-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">{t('Balanced spacing for a calmer feed')}</p>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -146,13 +155,18 @@ const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = 
         </div>
 
         {/* Live Preview - SaaS Mockup */}
-        <div className="p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#090d16] shadow-sm space-y-4 relative overflow-hidden flex flex-col justify-between">
+        <div className="relative flex flex-col justify-between overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800 dark:bg-[#090d16]/90">
           <div className="flex items-center gap-3">
-            <Eye size={18} className="text-indigo-500" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">{t('Live Mockup')}</h3>
+            <div className="rounded-2xl bg-indigo-500/10 p-2.5 text-indigo-500">
+              <Eye size={18} />
+            </div>
+            <div>
+              <h3 className="text-xs font-black uppercase tracking-[0.25em] text-slate-800 dark:text-slate-200">{t('Live Mockup')}</h3>
+              <p className="mt-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">{t('Preview your style in real time')}</p>
+            </div>
           </div>
 
-          <div className="bg-slate-50 dark:bg-[#040811] border border-slate-200/50 dark:border-slate-800/80 rounded-xl p-4 space-y-4">
+          <div className="mt-6 rounded-[1.25rem] border border-slate-200/60 bg-slate-50 p-4 dark:border-slate-800/80 dark:bg-[#040811] space-y-4">
             <div className="flex items-center gap-3">
               <Avatar src={user?.profilePhoto?.url} size="sm" className="ring-1 ring-slate-200 dark:ring-slate-800" />
               <div className="space-y-1.5">

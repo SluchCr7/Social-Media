@@ -17,11 +17,11 @@ export const SettingsLayout = React.memo(function SettingsLayout({
   activeTabLabel,
 }) {
   return (
-    <div className="flex h-screen w-full bg-[#f8fafc] dark:bg-[#030712] text-slate-900 dark:text-slate-100 overflow-hidden font-cairo transition-colors duration-300">
+    <div className="flex h-screen w-full overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.08),_transparent_35%),linear-gradient(135deg,_#f8fafc_0%,_#eef2ff_100%)] text-slate-900 transition-colors duration-300 dark:bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.12),_transparent_35%),linear-gradient(135deg,_#030712_0%,_#050816_100%)] dark:text-slate-100 font-cairo">
       {/* Sidebar - Visible on desktop, hidden on mobile subpage */}
       <aside
         className={clsx(
-          "w-full md:w-80 flex flex-col border-r border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-[#090d16] h-full shrink-0 transition-all duration-300",
+          "w-full md:w-80 flex flex-col border-r border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-[#090d16]/90 h-full shrink-0 transition-all duration-300 backdrop-blur-xl",
           isMobileSubpageActive ? "hidden md:flex" : "flex"
         )}
       >
@@ -51,7 +51,7 @@ export const SettingsLayout = React.memo(function SettingsLayout({
         )}
 
         {/* Dynamic Content Frame with slide-in animation on mobile */}
-        <div className="flex-1 overflow-y-auto no-scrollbar relative bg-[#f8fafc] dark:bg-[#030712]">
+        <div className="relative flex-1 overflow-y-auto no-scrollbar bg-transparent">
           <div className="max-w-4xl mx-auto p-4 sm:p-8 lg:p-12 pb-24">
             <AnimatePresence mode="wait">
               <motion.div
@@ -90,8 +90,8 @@ export const SettingsSidebar = React.memo(function SettingsSidebar({
     <div className="flex flex-col h-full select-none">
       {/* Console Header */}
       <div className="p-6 pb-4">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/10">
+        <div className="mb-6 flex items-center gap-3 rounded-[1.25rem] border border-slate-200/70 bg-white/70 p-3 shadow-sm backdrop-blur-xl dark:border-slate-800/70 dark:bg-slate-900/60">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 to-indigo-600 text-white shadow-md shadow-indigo-500/10">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h1.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-1.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.43l1.004-.827c.292-.24.437-.613.43-.991a6.936 6.936 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -111,7 +111,7 @@ export const SettingsSidebar = React.memo(function SettingsSidebar({
             placeholder={t('Search settings...')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl pl-9 pr-4 text-xs font-bold outline-none focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-400 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 text-slate-800 dark:text-slate-200"
+            className="h-10 w-full rounded-xl border border-slate-200/80 bg-slate-50/80 pl-9 pr-4 text-xs font-bold text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 dark:border-slate-800/80 dark:bg-slate-900/70 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:border-indigo-400"
           />
         </div>
       </div>
@@ -175,8 +175,8 @@ export const SettingsSidebar = React.memo(function SettingsSidebar({
       </nav>
 
       {/* Footer Profile Toggle */}
-      <div className="p-4 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/10">
-        <div className="flex items-center gap-3 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/50 bg-white dark:bg-[#0c1220] shadow-sm">
+      <div className="border-t border-slate-200/80 bg-slate-50/60 p-4 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/20">
+        <div className="flex items-center gap-3 rounded-[1.25rem] border border-slate-200/70 bg-white/80 p-3 shadow-sm dark:border-slate-800/60 dark:bg-[#0c1220]/90">
           {user?.profilePhoto?.url ? (
             <img
               src={user.profilePhoto.url}
@@ -198,7 +198,7 @@ export const SettingsSidebar = React.memo(function SettingsSidebar({
           </div>
           <button
             onClick={toggleTheme}
-            className="w-7 h-7 rounded-lg border border-slate-200/60 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 transition-all cursor-pointer shadow-sm active:scale-95"
+            className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200/60 bg-slate-50 text-slate-500 shadow-sm transition-all hover:border-indigo-200 hover:text-indigo-600 active:scale-95 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-indigo-400"
             title="Toggle Theme"
           >
             {darkMode ? (

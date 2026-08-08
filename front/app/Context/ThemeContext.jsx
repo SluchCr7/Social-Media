@@ -20,11 +20,13 @@ export const ThemeContextProvider = ({ children }) => {
 
   // ✅ كلما تغير الثيم، نطبّقه فورًا على الصفحة
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
+    const root = document.documentElement
+
+    root.classList.toggle('dark', theme === 'dark')
+    root.classList.toggle('light', theme === 'light')
+    root.style.colorScheme = theme
+    root.setAttribute('data-theme', theme)
+
     localStorage.setItem('theme', theme)
   }, [theme])
 
