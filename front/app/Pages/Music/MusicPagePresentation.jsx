@@ -24,7 +24,7 @@ function MusicPagePresentation(props) {
   } = props;
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="w-full min-h-screen bg-zinc-950 text-zinc-100">
       <AddMusicModal isOpen={openModel} onClose={() => setOpenModel(false)} />
 
       <HeaderMusic
