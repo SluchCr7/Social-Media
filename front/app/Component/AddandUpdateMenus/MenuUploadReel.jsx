@@ -12,8 +12,7 @@ import {
   Loader2,
   Trash2,
   Play,
-  Sparkles,
-  CheckCircle2
+  Sparkles
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
@@ -74,21 +73,23 @@ const ReelUploadModal = () => {
   return (
     <AnimatePresence>
       {showModelAddReel && (
-        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/70 px-3 py-4 backdrop-blur-sm sm:px-4">
+        <div className="fixed inset-0 z-[2000] flex items-end justify-center bg-black/80 backdrop-blur-md sm:items-center sm:p-4 md:p-6">
           <motion.div
-            initial={{ scale: 0.96, opacity: 0, y: 12 }}
+            initial={{ scale: 0.96, opacity: 0, y: 30 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.96, opacity: 0, y: 12 }}
-            className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-[1.75rem] border border-white/10 bg-zinc-950 shadow-[0_25px_80px_rgba(0,0,0,0.45)]"
+            exit={{ scale: 0.96, opacity: 0, y: 30 }}
+            transition={{ type: 'spring', duration: 0.4, bounce: 0.05 }}
+            className="relative flex h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-[2.5rem] border border-white/10 bg-zinc-950 shadow-[0_25px_80px_rgba(0,0,0,0.6)] sm:h-auto sm:max-h-[92vh] sm:rounded-[2rem]"
           >
+            {/* Header */}
             <div className="flex items-center justify-between border-b border-white/10 px-5 py-4 sm:px-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-400">
+              <div className="flex items-center gap-3 pr-8 sm:pr-0">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-400">
                   <Video size={18} />
                 </div>
                 <div>
-                  <h2 className="text-base font-semibold text-white">{t('Create Reel')}</h2>
-                  <p className="text-xs text-zinc-400">{t('Share a short video with a clean, professional look')}</p>
+                  <h2 className="text-sm font-semibold text-white sm:text-base">{t('Create Reel')}</h2>
+                  <p className="text-[11px] text-zinc-400 sm:text-xs">{t('Share a short video with a clean, professional look')}</p>
                 </div>
               </div>
               <button
@@ -99,10 +100,11 @@ const ReelUploadModal = () => {
               </button>
             </div>
 
-            <div className="p-5 sm:p-6">
-              <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Scrollable Body Container */}
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
                 <div className="rounded-[1.5rem] border border-dashed border-zinc-700 bg-zinc-900/80 p-3 transition hover:border-indigo-500/50">
-                  <div className="relative aspect-video overflow-hidden rounded-[1.25rem] bg-zinc-950">
+                  <div className="relative aspect-video w-full overflow-hidden rounded-[1.25rem] bg-zinc-950">
                     {previewUrl ? (
                       <div className="relative h-full w-full">
                         <video src={previewUrl} className="h-full w-full object-contain" controls />
@@ -120,16 +122,16 @@ const ReelUploadModal = () => {
                     ) : (
                       <label
                         htmlFor="reel-upload"
-                        className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-3 p-4 text-center text-zinc-400 transition hover:text-indigo-400"
+                        className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-2 p-4 text-center text-zinc-400 transition hover:text-indigo-400"
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={handleDrop}
                       >
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900 text-zinc-300">
-                          <CloudUpload size={24} />
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900 text-zinc-300 sm:h-14 sm:w-14">
+                          <CloudUpload size={22} />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-white">{t('Upload your video')}</p>
-                          <p className="mt-1 text-xs text-zinc-500">{t('MP4 or MOV • up to 60 seconds')}</p>
+                          <p className="text-xs font-semibold text-white sm:text-sm">{t('Upload your video')}</p>
+                          <p className="mt-0.5 text-[10px] text-zinc-500 sm:text-xs">{t('MP4 or MOV • up to 60 seconds')}</p>
                         </div>
                       </label>
                     )}
@@ -154,8 +156,8 @@ const ReelUploadModal = () => {
                   </div>
                 </div>
 
-                <div className="rounded-[1.25rem] border border-zinc-800 bg-zinc-900/70 p-4">
-                  <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-zinc-500">
+                <div className="rounded-[1.25rem] border border-zinc-800 bg-zinc-900/70 p-3.5 sm:p-4">
+                  <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-500 sm:text-xs">
                     <Sparkles size={14} className="text-indigo-400" />
                     {t('Caption')}
                   </div>
@@ -165,15 +167,15 @@ const ReelUploadModal = () => {
                     onChange={(e) => setCaption(e.target.value)}
                     minRows={3}
                     disabled={isUploading}
-                    className="w-full resize-none rounded-2xl border border-transparent bg-zinc-950 px-3 py-3 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-indigo-500/50"
+                    className="w-full resize-none rounded-xl border border-transparent bg-zinc-950 px-3.5 py-3 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-indigo-500/50"
                   />
                 </div>
 
-                <div className="flex flex-col-reverse gap-3 pt-1 sm:flex-row sm:justify-end">
+                <div className="flex flex-col-reverse gap-2.5 pt-2 sm:flex-row sm:justify-end">
                   <button
                     type="button"
                     onClick={() => setShowModelAddReel(false)}
-                    className="rounded-full border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-300 transition hover:border-zinc-500 hover:text-white"
+                    className="w-full rounded-xl border border-zinc-700 px-4 py-3 text-xs font-semibold text-zinc-300 transition hover:border-zinc-500 hover:text-white sm:w-auto sm:py-2.5"
                   >
                     {t('Cancel')}
                   </button>
@@ -181,15 +183,15 @@ const ReelUploadModal = () => {
                     type="submit"
                     isLoading={isUploading}
                     disabled={!videoFile}
-                    className="rounded-full px-5 py-2 text-sm font-semibold"
+                    className="w-full rounded-xl px-5 py-3 text-xs font-semibold sm:w-auto sm:py-2.5"
                   >
                     {isUploading ? (
-                      <span className="flex items-center gap-2">
+                      <span className="flex items-center justify-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin" />
                         {t('Sharing...')}
                       </span>
                     ) : (
-                      <span className="flex items-center gap-2">
+                      <span className="flex items-center justify-center gap-2">
                         <Play size={14} />
                         {t('Share Reel')}
                       </span>
@@ -205,4 +207,4 @@ const ReelUploadModal = () => {
   );
 };
 
-export default ReelUploadModal;
+export_default = ReelUploadModal;
