@@ -1,18 +1,24 @@
 const cloudinary = require('cloudinary').v2;
 const path = require('path');
 const DatauriParser = require('datauri/parser');
+const { getCloudinaryConfig } = require('./cloudinaryConfig');
 
 const parser = new DatauriParser();
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_NAME,
-  api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET_KEY,
-});
+const cloudinaryConfig = getCloudinaryConfig();
+cloudinary.config(cloudinaryConfig);
+
+const ensureCloudinaryConfig = () => {
+  if (!cloudinaryConfig.cloud_name || !cloudinaryConfig.api_key || !cloudinaryConfig.api_secret) {
+    throw new Error('Cloudinary is not configured. Please set CLOUDINARY_CLOUD_NAME/CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET or the legacy Cloudinary env vars.');
+  }
+};
 
 // ✅ Cloudinary upload from memory (buffer)
 const cloudUpload = async (file) => {
   try {
+    ensureCloudinaryConfig();
+
     const ext = path.extname(file.originalname);
     const dataUri = parser.format(ext, file.buffer);
 

@@ -167,12 +167,13 @@ export const MusicProvider = ({ children }) => {
 
   const uploadMusic = async (formData) => {
     try {
+      const token = user?.token || (typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}')?.token : null);
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACK_URL}/api/music`,
         formData,
         {
           headers: {
-            Authorization: `Bearer ${user?.token}`,
+            Authorization: token ? `Bearer ${token}` : undefined,
           },
         }
       );
@@ -185,7 +186,9 @@ export const MusicProvider = ({ children }) => {
       setShowModelAddMusic(false);
     } catch (err) {
       console.error(err);
-      showAlert(err?.response?.data?.message || "Failed to upload Music.");
+      const message = err?.response?.data?.message || err?.message || "Failed to upload Music.";
+      showAlert(message);
+      throw err;
     }
   };
 

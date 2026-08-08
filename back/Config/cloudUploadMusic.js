@@ -1,15 +1,26 @@
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
+const { getCloudinaryConfig } = require('./cloudinaryConfig');
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_NAME,
-  api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET_KEY,
-});
+const config = getCloudinaryConfig();
+
+cloudinary.config(config);
+
+const ensureCloudinaryConfig = () => {
+  if (!config.cloud_name || !config.api_key || !config.api_secret) {
+    throw new Error('Cloudinary is not configured. Please set CLOUDINARY_CLOUD_NAME/CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET or the legacy Cloudinary env vars.');
+  }
+};
 
 // ✅ رفع ملفات الصوت (audio) إلى Cloudinary
 const cloudUploadMusic = (file) => {
   return new Promise((resolve, reject) => {
+    try {
+      ensureCloudinaryConfig();
+    } catch (error) {
+      return reject(error);
+    }
+
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         resource_type: 'video', // Cloudinary بيعامل audio و video بنفس الـ resource

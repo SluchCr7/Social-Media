@@ -110,7 +110,8 @@ const AddMusicModal = ({ isOpen, onClose }) => {
       onClose();
     } catch (err) {
       console.error(err);
-      setError('Upload failed. Please check your connection and try again.');
+      const message = err?.response?.data?.message || err?.message || 'Upload failed. Please check your connection and try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }

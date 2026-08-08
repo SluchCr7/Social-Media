@@ -39,7 +39,10 @@ const createMusic = asyncHandler(async (req, res) => {
       return res.status(400).json({ message: "Audio file is required" });
     }
 
-    // ✅ استدعاء ديناميكي للمكتبة داخل الدالة
+    if (!req.user?._id) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
     const mm = await import("music-metadata");
 
     // 🎧 قراءة metadata من Buffer مباشرة
