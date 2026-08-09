@@ -4,88 +4,15 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   HiShieldCheck,
-  HiLockClosed,
-  HiEye,
-  HiServer,
-  HiShare,
-  HiCheckBadge,
-  HiArrowsRightLeft
 } from 'react-icons/hi2';
 
 import InfoHero from '@/app/Component/Management/InfoHero';
 import ContentSidebar from '@/app/Component/Management/ContentSidebar';
 import ManagementCard from '@/app/Component/Management/ManagementCard';
-
+import { sections } from '@/app/utils/Data';
 const PrivacyPage = () => {
   const { t } = useTranslation();
   const [activeId, setActiveId] = useState('collection');
-
-  const sections = [
-    {
-      id: 'collection',
-      label: t('Collection'),
-      title: t('1. Information We Collect'),
-      icon: <HiEye className="w-6 h-6" />,
-      content: (
-        <>
-          <p>{t('We may collect information you provide such as name, email, profile picture, etc.')}</p>
-          <p>{t('We also collect usage data, device information, and diagnostic signals to ensure network stability.')}</p>
-        </>
-      )
-    },
-    {
-      id: 'usage',
-      label: t('Usage'),
-      title: t('2. How We Use Your Information'),
-      icon: <HiServer className="w-6 h-6" />,
-      content: (
-        <>
-          <p>{t('We use your info to operate, personalize, and improve your experience.')}</p>
-          <ul className="list-disc pl-6 space-y-2">
-            <li>{t('Processing social signals and network resonance.')}</li>
-            <li>{t('Synchronizing cross-device experiences.')}</li>
-            <li>{t('Providing high-priority technical support.')}</li>
-          </ul>
-        </>
-      )
-    },
-    {
-      id: 'sharing',
-      label: t('Sharing'),
-      title: t('3. Sharing of Information'),
-      icon: <HiShare className="w-6 h-6" />,
-      content: (
-        <>
-          <p>{t('We don’t sell personal info; only share with trusted partners when needed.')}</p>
-          <p>{t('Data sharing is strictly governed by our privacy protocols and legal mandates.')}</p>
-        </>
-      )
-    },
-    {
-      id: 'security',
-      label: t('Security'),
-      title: t('4. Data Security'),
-      icon: <HiLockClosed className="w-6 h-6" />,
-      content: (
-        <>
-          <p>{t('We use reasonable security measures, but no system is 100% secure.')}</p>
-          <p>{t('Multi-layer encryption and real-time threat monitoring are active across the entire grid.')}</p>
-        </>
-      )
-    },
-    {
-      id: 'choices',
-      label: t('Your Choices'),
-      title: t('5. Your Choices'),
-      icon: <HiCheckBadge className="w-6 h-6" />,
-      content: (
-        <>
-          <p>{t('You can update, delete, or request data removal anytime.')}</p>
-          <p>{t('Privacy controls are integrated directly into your global settings panel.')}</p>
-        </>
-      )
-    }
-  ];
 
   const handleScrollTo = (id) => {
     const el = document.getElementById(id);
@@ -105,7 +32,7 @@ const PrivacyPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#050505]">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#050505] w-full">
       <InfoHero
         title={t('Privacy Protocols')}
         subtitle={t('Comprehensive documentation on how your digital footprint is analyzed and protected.')}

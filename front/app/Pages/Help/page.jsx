@@ -44,7 +44,7 @@ const HelpPage = () => {
   }, [query, selectedTopic]);
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#050505]">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#050505] w-full">
       <InfoHero
         title={t('Help Center')}
         subtitle={t('Access our global knowledge base for technical protocols and network guidance.')}
