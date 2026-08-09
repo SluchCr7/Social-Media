@@ -66,7 +66,7 @@ const PostHeader = memo(({ post, user, isLogin, showMenu, setShowMenu, isCommuni
 
             <div className="flex items-center gap-2 mt-0.5">
               <span className="text-[12px] font-medium text-gray-400 dark:text-white/30 truncate">
-                @{owner?.profileName || owner?.username}
+                {owner?.profileName || owner?.username}
               </span>
               
               {isCommunityPost && (

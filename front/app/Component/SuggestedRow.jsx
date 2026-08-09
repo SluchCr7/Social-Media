@@ -208,7 +208,7 @@ export const SuggestionRow = ({ type, data }) => {
 
   return (
     <div className="w-full px-4 md:px-0">
-      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 py-8">
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 py-8">
         {renderedContent}
       </div>
     </div>

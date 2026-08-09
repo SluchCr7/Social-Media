@@ -176,7 +176,7 @@ const ProfileHeader = ({
               )}
             </div>
             <div className="flex flex-wrap items-center justify-center gap-4 text-sm font-bold text-slate-500 md:justify-start dark:text-white/40">
-              <span className="text-xs font-black uppercase tracking-widest text-indigo-500">@{profileUser?.profileName || profileUser?.username || "user"}</span>
+              <span className="text-xs font-black uppercase tracking-widest text-indigo-500">{profileUser?.profileName || profileUser?.username || "user"}</span>
               <span className="flex items-center gap-1.5"><IoLocationSharp className="text-indigo-500" /> {profileUser?.country || "Earth"}</span>
               <span className="flex items-center gap-1.5">
                 <IoCalendarClearOutline className="text-indigo-500" />
