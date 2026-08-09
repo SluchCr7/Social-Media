@@ -1,5 +1,9 @@
 'use client'
-import { useState, useEffect } from "react"
+import dynamic from "next/dynamic";
+
+const HighlightViewerModal = dynamic(() => import('../HighlightView'), { ssr: false });
+const AddHighlightMenu = dynamic(() => import('../AddandUpdateMenus/AddHighlight'), { ssr: false });
+import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import ProfileHeader from "./ProfileHeader"
 import InfoAboutUser from "./InfoAboutUser"
@@ -10,8 +14,6 @@ import PostSkeleton from "@/app/Skeletons/PostSkeleton"
 import HighlightsBar from "../Highlights"
 import { useHighlights } from "@/app/Context/HighlightContext"
 import { memo } from "react"
-import HighlightViewerModal from '../HighlightView';
-import AddHighlightMenu from '../AddandUpdateMenus/AddHighlight';
 import StickyProfileBar from "./StickyProfileBar"
 import AdultContentWarning from "../AdultAlert"
 import { useUser } from "@/app/Context/UserContext"
@@ -74,7 +76,7 @@ const ProfileLayout = ({
     return () => { active = false; };
   }, [user?._id, isOwner, getArchivedStories, getUserStories]);
 
-  const handleOptimisticFollow = async () => {
+  const handleOptimisticFollow = useCallback(async () => {
     const wasFollowing = localIsFollowing;
     const newIsFollowing = !wasFollowing;
     setLocalIsFollowing(newIsFollowing);
@@ -86,7 +88,7 @@ const ProfileLayout = ({
       } else {
         if (currentUser) newFollowers = [...newFollowers, currentUser];
       }
-      setLocalUser({ ...localUser, followers: newFollowers });
+      setLocalUser(prev => ({ ...prev, followers: newFollowers }));
     }
 
     if (wasFollowing) {
@@ -94,15 +96,14 @@ const ProfileLayout = ({
     } else {
       if (onFollow) await onFollow();
     }
-  };
-
+  }, [localIsFollowing, localUser, currentUser, onUnfollow, onFollow]);
   useEffect(() => {
     if (user?._id) fetchHighlights(user._id);
   }, [user?._id, fetchHighlights]);
 
-  const handleAddHighlight = () => {
+  const handleAddHighlight = useCallback(() => {
     setOpenModal(true);
-  };
+  },[setOpenModal]);
 
   return (
     <motion.div

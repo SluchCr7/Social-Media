@@ -86,6 +86,7 @@ const ProfileHeader = ({
         <SensitiveImage
           src={profileUser?.coverPhoto?.url || profileUser?.profilePhoto?.url || "/default-profile.png"}
           fill
+          priority
           isSensitive={profileUser?.coverPhoto?.isSensitive}
           className="object-cover transition-transform duration-700 group-hover/cover:scale-110"
           alt="cover"
@@ -143,6 +144,7 @@ const ProfileHeader = ({
                   src={preview || profileUser?.profilePhoto?.url || "/default-profile.png"}
                   alt="profile"
                   fill
+                  priority
                   isSensitive={!preview && profileUser?.profilePhoto?.isSensitive}
                   className="w-full h-full object-cover"
                 />

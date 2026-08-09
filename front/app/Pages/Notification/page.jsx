@@ -26,25 +26,26 @@ dayjs.extend(relativeTime);
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
 
+const getIcon = (type) => {
+  switch (type) {
+    case 'comment': return <div className="p-2 bg-blue-500/10 text-blue-500 rounded-xl"><MessageSquare size={16} /></div>;
+    case 'like': return <div className="p-2 bg-rose-500/10 text-rose-500 rounded-xl"><Heart size={16} /></div>;
+    case 'follow': return <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl"><UserPlus size={16} /></div>;
+    default: return <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-xl"><Bell size={16} /></div>;
+  }
+};
+
+const getLink = (notif) => {
+  if (!notif) return '/';
+  if (notif.actionModel === 'Post') return `/Pages/Post/${notif.actionRef}`;
+  if (notif.actionModel === 'Comment') return `/Pages/Post/${notif.actionRef?.postId || notif.actionRef}#comment-${notif.actionRef}`;
+  if (notif.actionModel === 'Message') return `/Pages/Messanger?userId=${notif.actionRef}`;
+  if (notif.actionModel === 'User') return `/Pages/User/${notif.actionRef}`;
+  return '/';
+};
+
 const NotificationItem = memo(({ notif, isRead, onRead, onDelete }) => {
   const { t } = useTranslation();
-  
-  const getIcon = (type) => {
-    switch (type) {
-      case 'comment': return <div className="p-2 bg-blue-500/10 text-blue-500 rounded-xl"><MessageSquare size={16} /></div>;
-      case 'like': return <div className="p-2 bg-rose-500/10 text-rose-500 rounded-xl"><Heart size={16} /></div>;
-      case 'follow': return <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl"><UserPlus size={16} /></div>;
-      default: return <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-xl"><Bell size={16} /></div>;
-    }
-  };
-
-  const getLink = () => {
-    if (notif.actionModel === 'Post') return `/Pages/Post/${notif.actionRef}`;
-    if (notif.actionModel === 'Comment') return `/Pages/Post/${notif.actionRef.postId}#comment-${notif.actionRef}`;
-    if (notif.actionModel === 'Message') return `/Pages/Messanger?userId=${notif.actionRef}`;
-    if (notif.actionModel === 'User') return `/Pages/User/${notif.actionRef}`;
-    return '/';
-  };
 
   return (
     <motion.div
@@ -57,7 +58,7 @@ const NotificationItem = memo(({ notif, isRead, onRead, onDelete }) => {
         ${!isRead ? 'bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 shadow-sm' : 'hover:bg-gray-50 dark:hover:bg-white/[0.02] border border-transparent'}
       `}
     >
-      <Link href={getLink()} onClick={() => !isRead && onRead(notif._id)} className="flex-1 flex gap-4">
+      <Link href={getLink(notif)} onClick={() => !isRead && onRead(notif._id)} className="flex-1 flex gap-4">
         <div className="relative shrink-0">
           <Avatar src={notif?.sender?.profilePhoto?.url} size="md" />
           <div className="absolute -bottom-1 -right-1 ring-4 ring-white dark:ring-black rounded-xl overflow-hidden scale-75">

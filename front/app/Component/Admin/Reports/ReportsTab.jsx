@@ -94,9 +94,9 @@ const AdminReportsPage = () => {
   };
 
 
-  const usersReports = reports.filter((r) => r.reportedOnType === 'user');
-  const postsReports = reports.filter((r) => r.reportedOnType === 'post');
-  const commentsReports = reports.filter((r) => r.reportedOnType === 'comment');
+  const usersReports = useMemo(() => reports.filter((r) => r.reportedOnType === 'user'), [reports]);
+  const postsReports = useMemo(() => reports.filter((r) => r.reportedOnType === 'post'), [reports]);
+  const commentsReports = useMemo(() => reports.filter((r) => r.reportedOnType === 'comment'), [reports]);
 
   return (
     // <div className="min-h-screen bg-lightMode-bg dark:bg-darkMode-bg p-6 w-full">

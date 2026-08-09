@@ -30,7 +30,7 @@ const SectionHeader = ({ icon: Icon, title }) => (
   </div>
 );
 
-const EditCommunityMenu = memo(({ community, onClose }) => {
+const EditCommunityMenu = ({ community, onClose }) => {
   const { t } = useTranslation();
   const { showAlert } = useAlert();
   const { editCommunity, updateCommunityPicture, updateCommunityCover } = useCommunity();
@@ -54,7 +54,7 @@ const EditCommunityMenu = memo(({ community, onClose }) => {
     rules: community?.rules,
   }), [community]);
 
-  const handleImageChange = useCallback(async (e, type) => {
+  const handleImageChange = async (e, type) => {
     const file = e.target.files?.[0];
     if (!file || !(file instanceof File)) return;
     const objectURL = URL.createObjectURL(file);
@@ -73,29 +73,29 @@ const EditCommunityMenu = memo(({ community, onClose }) => {
       console.error('Image Upload Error:', err);
       showAlert(t('Error uploading image.'));
     }
-  }, [community?._id, showAlert, updateCommunityPicture, updateCommunityCover, t]);
+  };
 
-  const addTag = useCallback(() => {
+  const addTag = () => {
     const trimmed = newTag.trim();
     if (trimmed && !tags.includes(trimmed)) {
       setTags((prev) => [...prev, trimmed]);
       setNewTag('');
     }
-  }, [newTag, tags]);
+  };
 
-  const removeTag = useCallback((tag) => setTags((prev) => prev.filter((t) => t !== tag)), []);
+  const removeTag = (tag) => setTags((prev) => prev.filter((tItem) => tItem !== tag));
 
-  const addRule = useCallback(() => {
+  const addRule = () => {
     const trimmed = newRule.trim();
     if (trimmed && !rules.includes(trimmed)) {
       setRules((prev) => [...prev, trimmed]);
       setNewRule('');
     }
-  }, [newRule, rules]);
+  };
 
-  const removeRule = useCallback((rule) => setRules((prev) => prev.filter((r) => r !== rule)), []);
+  const removeRule = (rule) => setRules((prev) => prev.filter((r) => r !== rule));
 
-  const handleSubmit = useCallback(async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -119,7 +119,7 @@ const EditCommunityMenu = memo(({ community, onClose }) => {
     } else {
       onClose();
     }
-  }, [name, description, isPrivate, tags, rules, initialData, editCommunity, community?._id, showAlert, onClose, t]);
+  };
 
   return (
     <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4">
@@ -289,7 +289,6 @@ const EditCommunityMenu = memo(({ community, onClose }) => {
       </div>
     </div>
   );
-});
+};
 
-EditCommunityMenu.displayName = 'EditCommunityMenu';
 export default EditCommunityMenu;

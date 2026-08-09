@@ -214,8 +214,8 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
           {/* Top Control Bar */}
           <div className="absolute top-12 left-4 right-4 z-50 flex items-center justify-between">
             <div className="flex items-center gap-3 backdrop-blur-xl bg-black/40 px-4 py-2.5 rounded-2xl border border-white/10">
-              <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/20">
-                <Image src={highlight.coverImage || '/placeholder.jpg'} width={40} height={40} alt="Cover" className="object-cover" />
+              <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/20 relative">
+                <Image src={highlight.coverImage || '/placeholder.jpg'} fill alt="Cover" className="object-cover" />
               </div>
               <div className="text-white">
                 <h3 className="text-sm font-bold">{highlight.title}</h3>
@@ -346,7 +346,6 @@ const HighlightViewerModal = memo(function HighlightViewerModal({
                         </div>
                       </div>
 
-                      {/* We can add more metadata here like description, tags if needed */}
                       <div className="p-5 rounded-2xl bg-indigo-500/5 border border-indigo-500/20">
                         <div className="flex items-center justify-between text-indigo-300">
                           <span className="text-xs font-bold">{t("Stories")}</span>

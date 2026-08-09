@@ -1,20 +1,18 @@
 'use client';
 
 import React, { forwardRef, useEffect, useState, memo, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Pin, 
   Share, 
-  MessageCircle, 
   Languages, 
-  Eye, 
   MoreHorizontal,
   ChevronRight,
   ShieldAlert
 } from 'lucide-react';
 import { usePost } from '../Context/PostContext';
 import { useAuth } from '../Context/AuthContext';
-import { ShareModal } from './AddandUpdateMenus/SharePost';
 import PostHeader from './Post/PostHeader';
 import PostMedia from './Post/PostMedia';
 import PostLinks from './Post/PostLinks';
@@ -30,11 +28,14 @@ import { iso6391Map } from '../utils/Data';
 import { useTranslation } from 'react-i18next';
 import { getHighlightedComment } from '../utils/getHighlitedComment';
 import { usePathname } from 'next/navigation';
-import ShowSensitiveContent from './Post/ShowSensitiveContent';
-import PostMusicPlayer from './Post/PostMusic';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Avatar } from './ui/Avatar';
+
+// 🚀 Dynamic Imports للمكونات الفرعية لتخفيف العبء على التحميل الأولي
+const ShareModal = dynamic(() => import('./AddandUpdateMenus/SharePost').then(mod => mod.ShareModal), { ssr: false });
+const PostMusicPlayer = dynamic(() => import('./Post/PostMusic'), { ssr: false });
+const ShowSensitiveContent = dynamic(() => import('./Post/ShowSensitiveContent'), { ssr: false });
 
 const SluchitEntry = memo(forwardRef(({ post }, ref) => {
   const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost();
@@ -80,12 +81,14 @@ const SluchitEntry = memo(forwardRef(({ post }, ref) => {
 
   return (
     <div className="relative w-full mb-6 md:mb-8">
-      <ShareModal
-        post={post}
-        isOpen={openModel}
-        onClose={() => setOpenModel(false)}
-        onShare={(id, customText) => sharePost(id, post?.owner?._id, customText)}
-      />
+      {openModel && (
+        <ShareModal
+          post={post}
+          isOpen={openModel}
+          onClose={() => setOpenModel(false)}
+          onShare={(id, customText) => sharePost(id, post?.owner?._id, customText)}
+        />
+      )}
 
       <motion.div
         ref={ref}

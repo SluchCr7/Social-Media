@@ -6,7 +6,7 @@ import { AiOutlineLike, AiFillLike } from 'react-icons/ai';
 import { BsCopy, BsTrash, BsArrowReturnLeft, BsReply } from 'react-icons/bs';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const ReceiverMessage = ({ message, user }) => {
+const ReceiverMessage = React.memo(({ message, user }) => {
   const {
     toggleLikeMessage,
     copyMessageText,
@@ -131,6 +131,7 @@ const ReceiverMessage = ({ message, user }) => {
       </div>
     </div>
   );
-};
+});
 
+ReceiverMessage.displayName = 'ReceiverMessage';
 export default ReceiverMessage;

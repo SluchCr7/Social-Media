@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { IoAdd, IoEyeSharp } from 'react-icons/io5'
 import { HiLockClosed, HiLockOpen, HiLink } from 'react-icons/hi'
@@ -44,13 +44,11 @@ const ProfileMenu = ({
   const { t } = useTranslation()
   const { isRTL } = useTranslate()
 
-  const copyToClipboard = () => {
+  const copyToClipboard = useCallback(() => {
     navigator.clipboard.writeText(profileUrl)
-    // You might want to use a toast here instead of alert for a more premium feel, 
-    // but keeping alert as per original logic for now, or assume global toast exists.
     alert('✅ ' + t('Profile link copied!'))
     setOpen(false)
-  }
+  }, [profileUrl, t, setOpen])
 
   return (
     <div className={`relative inline-block text-left z-50 ${isRTL ? 'text-right' : 'text-left'}`}>

@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { useUser } from '@/app/Context/UserContext';
 import { useAuth } from '@/app/Context/AuthContext';
 
-const UserCard = ({ user: targetUser, t, isCompact = false }) => {
+const UserCard = React.memo(({ user: targetUser, t, isCompact = false }) => {
     const { followUser, loading } = useUser();
     const { user: currentUser } = useAuth();
 
@@ -172,6 +172,7 @@ const UserCard = ({ user: targetUser, t, isCompact = false }) => {
             )}
         </motion.div>
     );
-};
+});
 
+UserCard.displayName = 'UserCard';
 export default UserCard;

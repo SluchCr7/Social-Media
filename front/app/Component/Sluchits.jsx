@@ -3,10 +3,8 @@ import React, {
   useMemo,
   useRef,
   useCallback,
-  useEffect,
-  useState
 } from 'react';
-import Image from 'next/image'; // لاستخدام صورة Next.js بشكل مُحسّن
+import Image from 'next/image';
 import SluchitEntry from './SluchitEntry';
 import { usePost } from '../Context/PostContext';
 import { useAuth } from '../Context/AuthContext';
@@ -16,100 +14,153 @@ import { SuggestionRow } from './SuggestedRow';
 import { useUser } from '../Context/UserContext';
 import { useGetData } from '../Custome/useGetData';
 import { useTranslation } from 'react-i18next';
+import { UserPlus, Sparkles } from 'lucide-react';
 
-const Sluchits = ({ activeTab }) => {
-  const { posts, isLoading, fetchPosts, hasMore, setPage, page, isLoadingPostCreated } = usePost();
+const Sluchits = ({ activeTab = 'following' }) => {
+  const { posts, isLoading, hasMore, setPage } = usePost();
   const { user, users } = useAuth();
-  const { suggestedUsers } = useUser();
+  const { setShowAllSuggestedUsers } = useUser();
   const { communities } = useCommunity();
-  const { userData, loading } = useGetData(user?._id);
+  const { userData } = useGetData(user?._id);
   const { t } = useTranslation();
 
-  // 📝 استخلاص قوائم المتابعة والعضوية
+  // 📝 Comprehensive following IDs normalization (supports raw IDs and populated user objects)
   const followingIds = useMemo(() => {
-    if (!Array.isArray(userData?.following)) return new Set();
-    return new Set(userData.following.map(f => f?.toString()));
-  }, [userData?.following]);
+    const ids = new Set();
+    const currentFollowing = userData?.following || user?.following || [];
 
-  const userId = userData?._id?.toString();
+    if (Array.isArray(currentFollowing)) {
+      currentFollowing.forEach((f) => {
+        if (!f) return;
+        if (typeof f === 'string') ids.add(f);
+        else if (f._id) ids.add(f._id.toString());
+        else if (f.id) ids.add(f.id.toString());
+      });
+    }
+    return ids;
+  }, [userData?.following, user?.following]);
 
-  // 🎯 فلترة وترتيب المنشورات
+  const currentUserId = (user?._id || userData?._id)?.toString();
+
+  // 🎯 Pro Feed Filtering & Algorithmic Ranking (Twitter / Threads style)
   const filteredPosts = useMemo(() => {
-    if (!Array.isArray(posts)) return [];
+    if (!Array.isArray(posts) || posts.length === 0) return [];
 
-    // 🟢 Following feed
+    // 🟢 FOLLOWING FEED (Strict Twitter standard: ONLY accounts you follow + your own posts)
     if (activeTab === 'following') {
       return posts
-        .slice()
-        .sort((a, b) => {
-          const isAFollowed = followingIds.has(a?.owner?._id?.toString());
-          const isBFollowed = followingIds.has(b?.owner?._id?.toString());
-          if (isAFollowed && !isBFollowed) return -1;
-          if (!isAFollowed && isBFollowed) return 1;
-          return new Date(b?.createdAt) - new Date(a?.createdAt);
-        });
+        .filter((post) => {
+          if (!post || !post.owner) return false;
+          const ownerId = post.owner._id?.toString() || post.owner.toString();
+          if (!ownerId) return false;
+
+          // Strictly include ONLY followed users or self
+          return ownerId === currentUserId || followingIds.has(ownerId);
+        })
+        .sort((a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0));
     }
 
-    // 🟣 For You feed
+    // 🟣 FOR YOU FEED (Algorithmic recommendation engine)
     if (activeTab === 'forYou') {
-      if (!userData?.interests || userData.interests.length === 0) {
-        return posts
-          .slice()
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      }
+      const userInterests = Array.isArray(userData?.interests)
+        ? userData.interests.map((i) => i?.toLowerCase()).filter(Boolean)
+        : [];
+
+      const now = Date.now();
 
       return posts
-        .map(post => {
-          const text = `
-            ${post?.text || ''}
-            ${post?.Hashtags?.join(' ') || ''}
-            ${post?.owner?.description || ''}
+        .slice()
+        .map((post) => {
+          if (!post) return { post, score: 0 };
+
+          const ownerId = post.owner?._id?.toString() || post.owner?.toString();
+          const isFollowedOrSelf = ownerId === currentUserId || (ownerId && followingIds.has(ownerId));
+
+          // 1. Base affinity score (boost followed accounts & self)
+          let affinityScore = isFollowedOrSelf ? 40 : 10;
+
+          // 2. Interest / Keyword topic matching
+          const postText = `
+            ${post.text || ''}
+            ${Array.isArray(post.Hashtags) ? post.Hashtags.join(' ') : ''}
+            ${post.owner?.description || ''}
           `.toLowerCase();
 
-          let score = 0;
-          userData.interests.forEach(interest => {
-            if (interest && text.includes(interest.toLowerCase())) score += 1;
+          let interestScore = 0;
+          userInterests.forEach((interest) => {
+            if (interest && postText.includes(interest)) {
+              interestScore += 35;
+            }
           });
 
-          return { post, score };
+          // 3. Social engagement score (likes, hahas, comments, shares, views)
+          const likesCount = Array.isArray(post.likes) ? post.likes.length : 0;
+          const hahasCount = Array.isArray(post.hahas) ? post.hahas.length : 0;
+          const commentsCount = Array.isArray(post.comments) ? post.comments.length : 0;
+          const sharesCount = post.sharesCount || (post.isShared ? 1 : 0);
+          const viewsCount = Array.isArray(post.views) ? post.views.length : 0;
+
+          const engagementScore =
+            likesCount * 3 +
+            hahasCount * 2 +
+            commentsCount * 4 +
+            sharesCount * 5 +
+            viewsCount * 0.2;
+
+          // 4. Rich media bonus
+          const mediaBonus = (post.media?.length > 0 || post.Photos?.length > 0) ? 15 : 0;
+
+          // 5. Exponential recency decay (fresh posts get higher priority)
+          const postDate = post.createdAt ? new Date(post.createdAt).getTime() : now;
+          const hoursOld = Math.max(0, (now - postDate) / (1000 * 60 * 60));
+          const recencyDecay = 1 / Math.pow(1 + hoursOld / 12, 1.2);
+
+          const totalScore = (affinityScore + interestScore + engagementScore + mediaBonus) * recencyDecay;
+
+          return { post, score: totalScore };
         })
         .sort((a, b) => {
-          if (a.score !== b.score) return b.score - a.score;
-          return new Date(b.post.createdAt) - new Date(a.post.createdAt);
+          if (Math.abs(b.score - a.score) > 0.001) {
+            return b.score - a.score;
+          }
+          return new Date(b.post?.createdAt || 0) - new Date(a.post?.createdAt || 0);
         })
-        .map(item => item.post);
+        .map((item) => item.post);
     }
 
-    // 🟡 Default feed
+    // 🟡 Default Chronological Feed
     return posts
       .slice()
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  }, [posts, followingIds, activeTab, userData?.interests]);
+      .sort((a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0));
+  }, [posts, followingIds, activeTab, userData?.interests, currentUserId]);
 
-  // 🔹 فلترة المستخدمين المقترحين
+  // 🔹 Filter suggested users (exclude self & already followed)
   const filteredUsers = useMemo(() => {
-    if (!Array.isArray(users) || !userId) return [];
+    if (!Array.isArray(users) || !currentUserId) return [];
 
-    return users.filter(u => {
-      if (u?._id?.toString() === userId) return false;
-      return !followingIds.has(u?._id?.toString());
+    return users.filter((u) => {
+      if (!u || !u._id) return false;
+      const uId = u._id.toString();
+      if (uId === currentUserId) return false;
+      return !followingIds.has(uId);
     });
-  }, [users, followingIds, userId]);
+  }, [users, followingIds, currentUserId]);
 
-  // 🔹 فلترة المجتمعات المقترحة
+  // 🔹 Filter suggested communities
   const filteredCommunities = useMemo(() => {
-    if (!Array.isArray(communities) || !userId) return [];
+    if (!Array.isArray(communities) || !currentUserId) return [];
 
-    return communities.filter(c => {
-      if (c?.owner?._id?.toString() === userId) return false;
-      return !c.members?.some(member => {
+    return communities.filter((c) => {
+      if (!c) return false;
+      if (c?.owner?._id?.toString() === currentUserId) return false;
+      return !c.members?.some((member) => {
         const memberId = member?._id?.toString() || member?.toString();
-        return memberId === userId;
+        return memberId === currentUserId;
       });
     });
-  }, [communities, userId]);
+  }, [communities, currentUserId]);
 
-  // 📦 دمج المنشورات مع الاقتراحات بشكل ديناميكي
+  // 📦 Dynamic stream batching (injecting user & community recommendations at regular intervals)
   const combinedItems = useMemo(() => {
     if (!Array.isArray(filteredPosts)) return [];
 
@@ -117,8 +168,8 @@ const Sluchits = ({ activeTab }) => {
     let userSuggestions = [...filteredUsers];
     let communitySuggestions = [...filteredCommunities];
 
-    const USER_INTERVAL = 10;
-    const COMMUNITY_INTERVAL = 18;
+    const USER_INTERVAL = 8;
+    const COMMUNITY_INTERVAL = 16;
 
     filteredPosts.forEach((post, index) => {
       if (post) items.push({ type: 'post', data: post });
@@ -137,32 +188,32 @@ const Sluchits = ({ activeTab }) => {
     return items;
   }, [filteredPosts, filteredUsers, filteredCommunities]);
 
-  // 🔁 Infinite Scroll محسّن
+  // 🔁 Infinite Scroll observer
   const observer = useRef();
   const lastItemRef = useCallback(
-    node => {
+    (node) => {
       if (isLoading) return;
       if (observer.current) observer.current.disconnect();
-      observer.current = new IntersectionObserver(entries => {
+      observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMore) {
-          setPage(prev => prev + 1);
+          setPage((prev) => prev + 1);
         }
       });
       if (node) observer.current.observe(node);
     },
-    [isLoading, hasMore]
+    [isLoading, hasMore, setPage]
   );
 
   return (
     <div className="w-full flex flex-col gap-8">
-      {/* ⏳ حالة التحميل الأولية */}
+      {/* ⏳ Initial Loading State */}
       {combinedItems.length === 0 && isLoading && (
         Array.from({ length: 4 }).map((_, i) => (
           <PostSkeleton key={i} className="animate-pulse" />
         ))
       )}
 
-      {/* 📜 عرض المحتوى */}
+      {/* 📜 Content Feed */}
       {combinedItems.length > 0 ? (
         combinedItems.map((item, i) => {
           const isLastItem = i === combinedItems.length - 1;
@@ -176,7 +227,7 @@ const Sluchits = ({ activeTab }) => {
             );
           }
 
-          // عرض الاقتراحات
+          // Suggestion Batches
           return (
             <div key={`suggestion-${i}`} className="flex flex-col gap-3 px-1">
               <h2 className="text-base font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-1">
@@ -190,28 +241,52 @@ const Sluchits = ({ activeTab }) => {
         })
       ) : (
         !isLoading && (
-          /* 🚫 حالة الفراغ الاحترافية (Empty State) باستخدام صورة الـ unDraw */
-          <div className="flex flex-col items-center justify-center text-center py-16 px-4 my-6 bg-[#121212] border border-gray-800 rounded-2xl shadow-lg">
-            <div className="relative w-64 h-64 mb-6">
-              <Image
-                src="/no_posts.svg" // استبدل هذا المسار باسم ومسار الصورة الفعلية في مجلد public لديك (مثال: /no-posts.svg)
-                alt="No posts found"
-                fill
-                className="object-contain opacity-85 hover:opacity-100 transition-opacity duration-300"
-                priority
-              />
-            </div>
-            <h3 className="text-xl font-bold text-gray-200 mb-2">
-              {t("No posts yet 💤")}
-            </h3>
-            <p className="text-sm text-gray-400 max-w-sm mb-6">
-              {t("It looks very quiet here! Start following new people or join some communities to fill your feed with exciting content.")}
-            </p>
+          /* 🚫 Professional Empty States (Tab Specific) */
+          <div className="flex flex-col items-center justify-center text-center py-16 px-6 my-6 bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl border border-gray-100 dark:border-white/5 rounded-[2.5rem] shadow-xl">
+            {activeTab === 'following' ? (
+              <>
+                <div className="w-20 h-20 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-6">
+                  <UserPlus className="w-9 h-9 text-indigo-500" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  {t("No posts from following yet")}
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-6 leading-relaxed">
+                  {t("When you follow creators, their latest posts will appear right here. Start connecting with minds across the grid!")}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowAllSuggestedUsers(true)}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-indigo-500/20"
+                >
+                  <Sparkles size={16} />
+                  <span>{t("Discover Creators")}</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="relative w-64 h-64 mb-6">
+                  <Image
+                    src="/no_posts.svg"
+                    alt="No posts found"
+                    fill
+                    className="object-contain opacity-85 hover:opacity-100 transition-opacity duration-300"
+                    priority
+                  />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-200 mb-2">
+                  {t("No posts yet 💤")}
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-6">
+                  {t("It looks very quiet here! Start following new people or join some communities to fill your feed with exciting content.")}
+                </p>
+              </>
+            )}
           </div>
         )
       )}
 
-      {/* ⚡ مؤشر تحميل في الأسفل */}
+      {/* ⚡ Loading Spinner at bottom */}
       {isLoading && hasMore && (
         <div className="flex justify-center py-4">
           <span className="loader border-4 border-gray-300 border-t-blue-500 rounded-full w-6 h-6 animate-spin"></span>

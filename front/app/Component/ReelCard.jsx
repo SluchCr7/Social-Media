@@ -1,5 +1,5 @@
 'use client';
-
+import dynamic from 'next/dynamic';
 import React, { forwardRef, useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -7,10 +7,10 @@ import { useReels } from '../Context/ReelsContext';
 import { useUser } from '../Context/UserContext';
 import { useTranslation } from 'react-i18next';
 import { useTranslate } from '../Context/TranslateContext';
-import CommentsPopup from './CommentReelPopup';
 import ReelSkeleton from '../Skeletons/ReelSkeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const CommentsPopup = dynamic(() => import("./CommentReelPopup").then(mod => mod.CommentsPopup), { ssr: false });
 // Icons
 import {
   FaHeart,

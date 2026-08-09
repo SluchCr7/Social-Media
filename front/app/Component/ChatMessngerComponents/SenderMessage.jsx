@@ -7,7 +7,7 @@ import { AiOutlineLike, AiFillLike } from 'react-icons/ai';
 import { MdDeleteForever } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const SenderMessage = ({ message, user }) => {
+const SenderMessage = React.memo(({ message, user }) => {
   const {
     toggleLikeMessage,
     deleteMessage,
@@ -138,6 +138,7 @@ const SenderMessage = ({ message, user }) => {
       </div>
     </div>
   );
-};
+});
 
+SenderMessage.displayName = 'SenderMessage';
 export default SenderMessage;

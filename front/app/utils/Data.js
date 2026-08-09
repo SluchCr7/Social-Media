@@ -1,4 +1,5 @@
 import { GoHome, GoSearch } from "react-icons/go"
+import { HiCommandLine, HiUsers, HiGlobeAlt } from "react-icons/hi2";
 import { CgProfile } from "react-icons/cg";
 import { MdOutlinePaid } from "react-icons/md";
 import { CiUser, CiSettings, CiChat1 } from "react-icons/ci"
@@ -353,3 +354,13 @@ export const savedReels = [
   { id: 'r1', thumbnail: '/reels/thumb1.jpg', video: '/video1.mp4', title: 'Quick Tips for Productivity' },
   { id: 'r2', thumbnail: '/reels/thumb2.jpg', video: '/video2.mp4', title: 'Street Photography - 60s' },
 ]
+
+
+// قم بنقلها خارج المكونات لتجنب إعادة إنشائها في كل مرة يتم فيها تصيير الصفحة
+export const SOCIAL_GRIDS = [
+  { key: 'github', icon: <HiCommandLine className="w-6 h-6" />, gradient: "from-gray-700 to-gray-900", label: "GitHub" },
+  { key: 'linkedin', icon: <HiUsers className="w-6 h-6" />, gradient: "from-blue-600 to-blue-800", label: "LinkedIn" },
+  { key: 'twitter', icon: <HiGlobeAlt className="w-6 h-6" />, gradient: "from-sky-400 to-sky-600", label: "Twitter" },
+  { key: 'facebook', icon: <HiUsers className="w-6 h-6" />, gradient: "from-blue-700 to-blue-900", label: "Facebook" },
+  { key: 'website', icon: <HiGlobeAlt className="w-6 h-6" />, gradient: "from-indigo-500 to-purple-600", label: "Website" },
+];

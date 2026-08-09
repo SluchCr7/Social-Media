@@ -1,8 +1,12 @@
 'use client';
+import dynamic from "next/dynamic";
+
+const NotificationMenu = dynamic(() => import('./NotificationMenu'), {
+  ssr: false,
+});
 import React, { useState } from 'react';
 import Sluchits from './Sluchits';
 import Stories from './Stories';
-import NotificationMenu from './NotificationMenu';
 import { useNotify } from '../Context/NotifyContext';
 import { useMessage } from '../Context/MessageContext';
 import Header from './Header';

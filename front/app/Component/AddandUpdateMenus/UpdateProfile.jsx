@@ -100,7 +100,7 @@ const UpdateProfile = ({ user }) => {
     });
   }, [user]);
 
-  const handleChange = useCallback((e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     if (['github', 'linkedin', 'twitter', 'facebook', 'website'].includes(name)) {
       setFormData(prev => ({
@@ -110,7 +110,7 @@ const UpdateProfile = ({ user }) => {
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
-  }, []);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -281,4 +281,4 @@ const UpdateProfile = ({ user }) => {
   );
 };
 
-export default React.memo(UpdateProfile);
+export default UpdateProfile;

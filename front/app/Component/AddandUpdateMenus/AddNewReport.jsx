@@ -8,7 +8,7 @@ import { reasons } from '@/app/utils/Data';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 
-const AddNewReport = React.memo(function AddNewReport({
+const AddNewReport = function AddNewReport({
   targetId,
   reportedOnType = "post",
   onClose,
@@ -21,44 +21,32 @@ const AddNewReport = React.memo(function AddNewReport({
   const [errorMsg, setErrorMsg] = useState('');
   const { t } = useTranslation();
 
-  const reasonOptions = useMemo(
-    () => reasons.map((r, idx) => (
-      <option key={idx} value={r.value} className="bg-white dark:bg-[#0B0F1A] text-slate-900 dark:text-white">
-        {t(r.label)}
-      </option>
-    )),
-    [t]
-  );
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!reason) {
+      setErrorMsg(t('Please select a reason for the report.'));
+      return;
+    }
 
-  const handleSubmit = useCallback(
-    async (e) => {
-      e.preventDefault();
-      if (!reason) {
-        setErrorMsg(t('Please select a reason for the report.'));
-        return;
-      }
+    setLoading(true);
+    setErrorMsg('');
 
-      setLoading(true);
-      setErrorMsg('');
-
-      try {
-        await addReport({
-          reportedOnType,
-          targetId,
-          text: details || reason,
-          reason,
-        });
-        setReason('');
-        setDetails('');
-        onClose?.();
-      } catch (err) {
-        setErrorMsg(err?.response?.data?.message || t('Failed to send report.'));
-      } finally {
-        setLoading(false);
-      }
-    },
-    [reason, details, addReport, reportedOnType, targetId, onClose, t]
-  );
+    try {
+      await addReport({
+        reportedOnType,
+        targetId,
+        text: details || reason,
+        reason,
+      });
+      setReason('');
+      setDetails('');
+      onClose?.();
+    } catch (err) {
+      setErrorMsg(err?.response?.data?.message || t('Failed to send report.'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -108,7 +96,11 @@ const AddNewReport = React.memo(function AddNewReport({
                 onChange={(e) => setReason(e.target.value)}
               >
                 <option value="">{t("Select a reason...")}</option>
-                {reasonOptions}
+                {reasons.map((r, idx) => (
+                  <option key={idx} value={r.value} className="bg-white dark:bg-[#0B0F1A] text-slate-900 dark:text-white">
+                    {t(r.label)}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -155,7 +147,6 @@ const AddNewReport = React.memo(function AddNewReport({
       </div>
     </AnimatePresence>
   );
-});
+};
 
-AddNewReport.displayName = 'AddNewReport';
 export default AddNewReport;

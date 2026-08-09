@@ -6,7 +6,7 @@ import { FiMessageSquare, FiHeart, FiShare2 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import SensitiveImage from './Post/SensitiveImage';
 
-const PostFeedItem = ({ post, t, isPreview = false }) => {
+const PostFeedItem = React.memo(({ post, t, isPreview = false }) => {
     // isPreview تُستخدم في تبويب "Top" لتصغير العرض قليلاً
     const linkPath = `/Pages/Post/${post._id}`;
 
@@ -80,6 +80,7 @@ const PostFeedItem = ({ post, t, isPreview = false }) => {
             </div>
         </motion.div>
     );
-}
+});
 
+PostFeedItem.displayName = 'PostFeedItem';
 export default PostFeedItem;

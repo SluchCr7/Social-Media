@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronLeft, Search, AlertTriangle } from 'lucide-react';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
+import Image from 'next/image';
 
 // ==========================================
 // 1. SettingsLayout
@@ -178,9 +179,11 @@ export const SettingsSidebar = React.memo(function SettingsSidebar({
       <div className="border-t border-slate-200/80 bg-slate-50/60 p-4 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/20">
         <div className="flex items-center gap-3 rounded-[1.25rem] border border-slate-200/70 bg-white/80 p-3 shadow-sm dark:border-slate-800/60 dark:bg-[#0c1220]/90">
           {user?.profilePhoto?.url ? (
-            <img
+            <Image
               src={user.profilePhoto.url}
               alt="Avatar"
+              width={36}
+              height={36}
               className="w-9 h-9 rounded-xl object-cover ring-1 ring-slate-200 dark:ring-slate-800/80"
             />
           ) : (

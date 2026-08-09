@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import dayjs from "dayjs";
 import { useTranslation } from 'react-i18next';
 
-const EventDetailsModal = React.memo(({
+const EventDetailsModal = ({
   handleUpdateEvent,
   handleDeleteEvent,
   selectedEvent,
@@ -118,7 +118,6 @@ const EventDetailsModal = React.memo(({
       </motion.div>
     </div>
   );
-});
+};
 
-EventDetailsModal.displayName = 'EventDetailsModal';
 export default EventDetailsModal;

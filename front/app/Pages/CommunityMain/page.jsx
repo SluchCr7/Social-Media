@@ -99,8 +99,8 @@ const CommunityPage = () => {
   }, [loadMore])
 
   // ✅ تثبيت دالة الإنشاء عبر useCallback
-  const handleCreate = useCallback(async (e) => {
-    e.preventDefault()
+  const handleCreate = async (e) => {
+    e?.preventDefault?.()
     if (!form.Name.trim() || !form.description.trim()) return
 
     try {
@@ -129,7 +129,7 @@ const CommunityPage = () => {
     } finally {
       setIsCreating(false)
     }
-  }, [form, addCommunity])
+  }
 
   return (
     <MaidDesign
@@ -153,4 +153,4 @@ const CommunityPage = () => {
   )
 }
 
-export default React.memo(CommunityPage)
+export default CommunityPage

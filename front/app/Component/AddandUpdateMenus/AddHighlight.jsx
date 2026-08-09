@@ -14,7 +14,20 @@ import { useAlert } from '@/app/Context/AlertContext';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 
-const StoryCard = memo(({ story, isSelected, onToggle, getStoryPhoto }) => {
+const getStoryPhoto = (story) => {
+  if (!story) return '/placeholder.jpg';
+  if (story.Photo) {
+    if (Array.isArray(story.Photo) && story.Photo.length > 0) return story.Photo[0];
+    if (typeof story.Photo === 'string') return story.Photo;
+  }
+  if (story.photo) {
+    if (Array.isArray(story.photo) && story.photo.length > 0) return story.photo[0];
+    if (typeof story.photo === 'string') return story.photo;
+  }
+  return '/placeholder.jpg';
+};
+
+const StoryCard = memo(({ story, isSelected, onToggle }) => {
   return (
     <div
       onClick={() => onToggle(story._id)}
@@ -53,7 +66,7 @@ const StoryCard = memo(({ story, isSelected, onToggle, getStoryPhoto }) => {
 
 StoryCard.displayName = 'StoryCard';
 
-const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
+const AddHighlightMenu = function AddHighlightMenu({ stories = [] }) {
   const [title, setTitle] = useState('');
   const [coverFile, setCoverFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -64,19 +77,6 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
   const { t } = useTranslation();
 
   const fileInputRef = useRef(null);
-
-  const getStoryPhoto = useCallback((story) => {
-    if (!story) return '/placeholder.jpg';
-    if (story.Photo) {
-      if (Array.isArray(story.Photo) && story.Photo.length > 0) return story.Photo[0];
-      if (typeof story.Photo === 'string') return story.Photo;
-    }
-    if (story.photo) {
-      if (Array.isArray(story.photo) && story.photo.length > 0) return story.photo[0];
-      if (typeof story.photo === 'string') return story.photo;
-    }
-    return '/placeholder.jpg';
-  }, []);
 
   useEffect(() => {
     return () => { if (preview) URL.revokeObjectURL(preview); };
@@ -243,7 +243,6 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
                         story={story}
                         isSelected={selectedStories.includes(story._id)}
                         onToggle={handleSelectStory}
-                        getStoryPhoto={getStoryPhoto}
                       />
                     ))}
                   </div>
@@ -255,7 +254,6 @@ const AddHighlightMenu = memo(function AddHighlightMenu({ stories = [] }) {
       )}
     </AnimatePresence>
   );
-});
+};
 
-AddHighlightMenu.displayName = 'AddHighlightMenu';
 export default AddHighlightMenu;

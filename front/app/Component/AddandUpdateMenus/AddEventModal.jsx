@@ -22,7 +22,7 @@ const SectionHeader = ({ icon: Icon, title }) => (
   </div>
 );
 
-const AddEventModal = React.memo(({
+const AddEventModal = ({
   newEvent,
   setNewEvent,
   setSelectedDate,
@@ -291,7 +291,6 @@ const AddEventModal = React.memo(({
       </motion.div>
     </div>
   );
-});
+};
 
-AddEventModal.displayName = 'AddEventModal';
 export default AddEventModal;

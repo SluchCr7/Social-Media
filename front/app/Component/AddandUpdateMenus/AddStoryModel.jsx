@@ -76,7 +76,7 @@ const darkSelectStyles = {
   multiValueLabel: (base) => ({ ...base, color: 'white', fontSize: '11px' }),
 };
 
-const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
+const AddStoryModel = ({ setIsStory, isStory }) => {
   const [storyText, setStoryText] = useState('');
   const [storyImage, setStoryImage] = useState(null);
   const [error, setError] = useState('');
@@ -104,7 +104,7 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
     [userData?.following]
   );
 
-  const handleImageChange = useCallback((e) => {
+  const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
@@ -113,9 +113,9 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
     }
     setStoryImage(file);
     setError('');
-  }, [t]);
+  };
 
-  const clearInput = useCallback(() => {
+  const clearInput = () => {
     setStoryImage(null);
     setStoryText('');
     setError('');
@@ -124,9 +124,9 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
     setMusic(null);
     setLink({ url: '', text: '' });
     setIsCloseFriends(false);
-  }, []);
+  };
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = async () => {
     if (!storyText.trim() && !storyImage) {
       setError(t('Please add content to share your story'));
       return;
@@ -161,7 +161,7 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [storyText, storyImage, collaborators, mentions, music, link, isCloseFriends, targetHighlight, addNewStory, addStoryToHighlight, clearInput, t, setIsStory]);
+  };
 
   const previewUrl = useMemo(() => storyImage ? URL.createObjectURL(storyImage) : null, [storyImage]);
 
@@ -326,7 +326,6 @@ const AddStoryModel = React.memo(({ setIsStory, isStory }) => {
       )}
     </AnimatePresence>
   );
-});
+};
 
-AddStoryModel.displayName = 'AddStoryModel';
 export default AddStoryModel;

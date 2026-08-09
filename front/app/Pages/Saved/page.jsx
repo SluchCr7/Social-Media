@@ -102,6 +102,11 @@ export default function SavedPage() {
     }
   }, [active, filteredMusic, setSongs, current, setTrack])
 
+  const savedFilteredPosts = useMemo(() => {
+    if (!filteredPosts?.length || !userData?._id) return []
+    return filteredPosts.filter(p => p?.saved?.includes(userData._id))
+  }, [filteredPosts, userData?._id])
+
   if (isLoading) return <SavedPageSkeleton activeTab={active} />
 
   return (
@@ -128,12 +133,10 @@ export default function SavedPage() {
                 className="bg-transparent"
               >
                 <div className="grid grid-cols-1 gap-8">
-                  {filteredPosts?.filter(p => p?.saved?.includes(userData?._id))?.length === 0 ? (
+                  {savedFilteredPosts.length === 0 ? (
                     <EmptyState />
                   ) : (
-                    filteredPosts
-                      ?.filter(p => p?.saved?.includes(userData?._id))
-                      ?.map(post => <SluchitEntry key={post?._id} post={post} />)
+                    savedFilteredPosts.map(post => <SluchitEntry key={post?._id} post={post} />)
                   )}
                 </div>
               </motion.div>

@@ -1,10 +1,14 @@
 'use client';
+import dynamic from 'next/dynamic';
 
-import React, { useState, useMemo, useEffect } from 'react';
+// استيراد كسول (Lazy) لمكون العرض
+const StoryViewer = dynamic(() => import('./StoryViewer'), {
+  ssr: false,
+});
+import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import { useStory } from '../Context/StoryContext';
-import StoryViewer from './StoryViewer';
 import StorySkeleton from '../Skeletons/StoriesSkeleton';
 import { useAuth } from '../Context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';

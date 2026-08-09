@@ -78,24 +78,24 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
   const { isLoading } = usePost();
   const { t } = useTranslation();
 
-  const handleKey = useCallback(
-    (e) => {
-      if (e.key === "Escape" && !isLoading) onClose();
-    },
-    [onClose, isLoading]
-  );
+  const handleKey = (e) => {
+    if (e.key === "Escape" && !isLoading) onClose();
+  };
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = () => {
     if (!post?._id || isLoading) return;
     const targetId = post?.originalPost ? post?.originalPost?._id : post?._id;
     onShare(targetId, customText);
-  }, [post, customText, isLoading, onShare]);
+  };
 
   useEffect(() => {
     if (!isOpen) return;
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [handleKey, isOpen]);
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && !isLoading) onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, isLoading, onClose]);
 
   if (!isOpen) return null;
 

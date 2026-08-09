@@ -18,7 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 
-const EditPostModal = memo(({ post, onClose }) => {
+const EditPostModal = ({ post, onClose }) => {
   const { editPost, isLoading } = usePost();
   const { communities } = useCommunity();
   const { user } = useAuth();
@@ -56,35 +56,32 @@ const EditPostModal = memo(({ post, onClose }) => {
     [newPhotos]
   );
 
-  const removePhoto = useCallback(
-    (public_id) => setExistingPhotos(prev => prev.filter(photo => photo.public_id !== public_id)),
-    []
-  );
+  const removePhoto = (public_id) => setExistingPhotos(prev => prev.filter(photo => photo.public_id !== public_id));
 
-  const handleNewPhotos = useCallback((e) => {
+  const handleNewPhotos = (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length) setNewPhotos(prev => [...prev, ...files]);
-  }, []);
+  };
 
-  const handleAddLink = useCallback(() => {
+  const handleAddLink = () => {
     const trimmed = linkInput.trim();
     if (trimmed) {
       setLinks(prev => [...prev, trimmed]);
       setLinkInput('');
       setShowLinkInput(false);
     }
-  }, [linkInput]);
+  };
 
-  const handleRemoveLink = useCallback((idx) => {
+  const handleRemoveLink = (idx) => {
     setLinks(prev => prev.filter((_, i) => i !== idx));
-  }, []);
+  };
 
-  const handleEmojiClick = useCallback((emojiData) => {
+  const handleEmojiClick = (emojiData) => {
     setText(prev => prev + emojiData.emoji);
     setShowEmojiPicker(false);
-  }, []);
+  };
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = async () => {
     if (!post) return;
     await editPost(post._id, {
       text,
@@ -95,7 +92,7 @@ const EditPostModal = memo(({ post, onClose }) => {
       links,
     });
     onClose();
-  }, [post, text, selectedCommunity, existingPhotos, newPhotos, selectedMentions, links, editPost, onClose]);
+  };
 
   if (!post) return null;
 
@@ -269,7 +266,6 @@ const EditPostModal = memo(({ post, onClose }) => {
       </motion.div>
     </div>
   );
-});
+};
 
-EditPostModal.displayName = 'EditPostModal';
 export default EditPostModal;

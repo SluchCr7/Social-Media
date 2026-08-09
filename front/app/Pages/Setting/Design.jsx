@@ -257,4 +257,4 @@ function SettingsView({
   );
 }
 
-export default React.memo(SettingsView);
+export default SettingsView;

@@ -17,7 +17,7 @@ import {
   HiInboxStack,
 } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
-
+import { SOCIAL_GRIDS } from '@/app/utils/Data';
 // 💎 Modern Prism Card for Info Items
 const InfoItem = memo(({ icon, label, value, colorClass }) => (
   <motion.div
@@ -33,7 +33,7 @@ const InfoItem = memo(({ icon, label, value, colorClass }) => (
       <div className="flex flex-col min-w-0">
         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">{label}</span>
         <p className="text-base font-bold text-gray-900 dark:text-white truncate">
-          {value || t("—")}
+          {value || "—"}
         </p>
       </div>
     </div>
@@ -59,14 +59,6 @@ SocialIcon.displayName = 'SocialIcon';
 
 const InfoAboutUser = memo(({ user }) => {
   const { t } = useTranslation();
-
-  const socialGrids = useMemo(() => [
-    { key: 'github', icon: <HiCommandLine className="w-6 h-6" />, gradient: "from-gray-700 to-gray-900", label: "GitHub" },
-    { key: 'linkedin', icon: <HiUsers className="w-6 h-6" />, gradient: "from-blue-600 to-blue-800", label: "LinkedIn" },
-    { key: 'twitter', icon: <HiGlobeAlt className="w-6 h-6" />, gradient: "from-sky-400 to-sky-600", label: "Twitter" },
-    { key: 'facebook', icon: <HiUsers className="w-6 h-6" />, gradient: "from-blue-700 to-blue-900", label: "Facebook" },
-    { key: 'website', icon: <HiGlobeAlt className="w-6 h-6" />, gradient: "from-indigo-500 to-purple-600", label: "Website" },
-  ], []);
 
   const dateOfBirth = useMemo(() => user?.dateOfBirth ? dayjs(user.dateOfBirth).format("MMMM D, YYYY") : null, [user?.dateOfBirth]);
   const createdAt = useMemo(() => user?.createdAt ? dayjs(user.createdAt).format("MMMM D, YYYY") : null, [user?.createdAt]);

@@ -1,31 +1,33 @@
 'use client';
 import '../i18n';
+import dynamic from 'next/dynamic';
+
+const EditPostModal = dynamic(() => import('./AddandUpdateMenus/EditPostModel'), { ssr: false });
+const AddNewReport = dynamic(() => import('./AddandUpdateMenus/AddNewReport'), { ssr: false });
+const ViewImage = dynamic(() => import('./ViewImage'), { ssr: false });
+const ReelUploadModal = dynamic(() => import('./AddandUpdateMenus/MenuUploadReel'), { ssr: false });
+const AddStoryModel = dynamic(() => import('./AddandUpdateMenus/AddStoryModel'), { ssr: false });
+const CommandPalette = dynamic(() => import('./ui/CommandPalette'), { ssr: false });
+const MenuAllSuggestedFriends = dynamic(() => import('./Menus/MenuAllSuggestedFreinds'), { ssr: false });
+const SongPlayer = dynamic(() => import('./MusicPage/SongPlayer'), { ssr: false });
+const ExpandedWindow = dynamic(() => import('./MusicPage/ExpandedWindow'), { ssr: false });
 import React, { useEffect, useState } from 'react';
+import Loader from './Loader';
 import Aside from './Aside/Aside';
 import Menu from './Menus/Menu';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../Context/AuthContext';
 import Alert from './Alert';
 import { usePost } from '../Context/PostContext';
-import EditPostModal from './AddandUpdateMenus/EditPostModel';
 import { useReport } from '../Context/ReportContext';
-import AddNewReport from './AddandUpdateMenus/AddNewReport';
-import ViewImage from './ViewImage';
-import Loader from './Loader';
-import MenuAllSuggestedFriends from './Menus/MenuAllSuggestedFreinds';
 import Link from 'next/link';
-import ReelUploadModal from './AddandUpdateMenus/MenuUploadReel';
 import { useMusicPlayer } from '../Context/MusicPlayerContext';
-import SongPlayer from './MusicPage/SongPlayer';
-import ExpandedWindow from './MusicPage/ExpandedWindow';
 import { useTranslate } from '../Context/TranslateContext';
 import CookieConsent from './CookieConsent';
 import NProgress from 'nprogress'
 import '@/styles/nprogress.css'
 import FloatingDock from './FloatingDock';
-import AddStoryModel from './AddandUpdateMenus/AddStoryModel';
 import { useStory } from '../Context/StoryContext';
-import CommandPalette from './ui/CommandPalette';
 const LayoutComponent = ({ children }) => {
   const [loading, setLoading] = useState(true); // للتحكم في الـ Loader
 
