@@ -49,6 +49,7 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
   const { isRTL } = useTranslate();
 
   const menuRef = useRef();
+  const confirmModalRef = useRef(null);
   const [confirmAction, setConfirmAction] = useState(null);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
@@ -64,14 +65,21 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
         left: isRTL ? rect.left : rect.right - menuWidth
       });
 
-      const handleScroll = () => setShowMenu(false);
+      const handleScroll = () => {
+        if (!confirmAction) {
+          setShowMenu(false);
+        }
+      };
       window.addEventListener('scroll', handleScroll, { once: true });
       return () => window.removeEventListener('scroll', handleScroll);
     }
-  }, [showMenu, isRTL, triggerRef, setShowMenu]);
+  }, [showMenu, isRTL, triggerRef, setShowMenu, confirmAction]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
+      if (confirmModalRef.current && confirmModalRef.current.contains(e.target)) {
+        return;
+      }
       if (menuRef.current && !menuRef.current.contains(e.target) && !triggerRef?.current?.contains(e.target)) {
         setShowMenu(false);
       }
@@ -117,8 +125,11 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
       action: () => {
         setConfirmAction(() => async () => {
           setLoadingBtn(true);
-          await deletePost(post?._id);
-          setLoadingBtn(false);
+          try {
+            await deletePost(post?._id);
+          } finally {
+            setLoadingBtn(false);
+          }
         });
       },
       className: 'text-red-500 hover:bg-red-500/10 border-red-500/10 hover:border-red-500/20',
@@ -158,8 +169,11 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
       action: () => {
         setConfirmAction(() => async () => {
           setLoadingBtn(true);
-          await blockOrUnblockUser(post?.owner?._id);
-          setLoadingBtn(false);
+          try {
+            await blockOrUnblockUser(post?.owner?._id);
+          } finally {
+            setLoadingBtn(false);
+          }
         });
       },
       className: 'text-red-500 hover:bg-red-500/10 border-red-500/10 hover:border-red-500/20',
@@ -220,6 +234,7 @@ const PostMenu = ({ showMenu, setShowMenu, post, triggerRef }) => {
           <AnimatePresence>
             {confirmAction && (
               <motion.div
+                ref={confirmModalRef}
                 className="fixed inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-xl flex items-center justify-center z-[10000] p-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

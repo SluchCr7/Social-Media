@@ -27,7 +27,11 @@ const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
     const displayItems = items.slice(0, 5);
     const remaining = count - 5;
 
-    const handlePreview = (item) => {
+    const handlePreview = (item, e) => {
+        if (e && e.currentTarget) {
+            const vid = e.currentTarget.querySelector('video');
+            if (vid) vid.pause();
+        }
         if (setImageView) {
             setImageView({
                 url: item.url,
@@ -49,11 +53,8 @@ const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
             return `${base} col-span-1 aspect-square`;
         }
 
-        if (count === 4) {
-            return `${base} aspect-square`;
-        }
-
-        if (count >= 5) {
+        if (count >= 4) {
+            if (count === 4) return `${base} aspect-square`;
             if (index === 0 || index === 1) return `${base} col-span-3 aspect-[4/3]`;
             return `${base} col-span-2 aspect-square`;
         }
@@ -81,10 +82,10 @@ const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
                     <div
                         key={index}
                         className={getItemClassName(index)}
-                        onClick={() => !isSensitive && handlePreview(item)}
+                        onClick={(e) => !isSensitive && handlePreview(item, e)}
                     >
                         {isVideo ? (
-                            <div className="relative z-[999] w-full h-full flex items-center justify-center">
+                            <div className="relative w-full h-full flex items-center justify-center">
                                 <video
                                     src={item.url}
                                     poster={item.thumbnail}
