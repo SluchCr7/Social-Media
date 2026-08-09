@@ -15,6 +15,7 @@ import {
   HiChevronRight,
   HiPaperAirplane
 } from 'react-icons/hi2';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSwipeable } from 'react-swipeable';
@@ -447,8 +448,16 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
 
             <div className="flex items-center gap-1.5 ms-auto">
               {photoUrl && (
-                <button onClick={handleToggleFitMode} className="w-10 h-10 rounded-xl border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-[10px] font-medium transition-all flex items-center justify-center">
-                  {fitMode === 'contain' ? t('Cover') : t('Contain')}
+                <button 
+                  onClick={handleToggleFitMode} 
+                  className="w-10 h-10 rounded-xl border border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-all flex items-center justify-center"
+                  title={fitMode === 'contain' ? t('Cover') : t('Contain')} // إضافة Tooltip توضيحية عند الوقوف على الزر
+                >
+                  {fitMode === 'contain' ? (
+                    <Maximize2 className="w-4 h-4" /> // أيقونة تعبر عن ملء/احتواء الحيز (Cover)
+                  ) : (
+                    <Minimize2 className="w-4 h-4" /> // أيقونة تعبر عن التصغير داخل الإطار (Contain)
+                  )}
                 </button>
               )}
 
