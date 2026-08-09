@@ -43,7 +43,7 @@ const DesignReels = ({
       <motion.button
         whileTap={{ scale: 0.96 }}
         onClick={openCreateReel}
-        className="fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[0_10px_30px_rgba(0,0,0,0.25)] transition hover:bg-indigo-500 hover:text-white"
+        className="fixed bottom-5 right-5 z-[70] flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[0_10px_30px_rgba(0,0,0,0.25)] transition hover:bg-indigo-500 hover:text-white"
       >
         <HiPlus size={18} />
         <span>{t('New Reel')}</span>
@@ -58,7 +58,7 @@ const DesignReels = ({
               reelRefs.current[index] = el;
               if (isLast && lastReelRef) lastReelRef(el);
             }}
-            className="snap-start w-full h-screen relative z-10"
+            className="snap-start w-full h-screen relative z-40"
           >
             <ReelCard
               key={reel._id}
@@ -82,7 +82,7 @@ const DesignReels = ({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="snap-start relative z-20 flex h-screen w-full flex-col items-center justify-center overflow-hidden bg-black px-4 text-white"
+          className="snap-start relative z-50 flex h-screen w-full flex-col items-center justify-center overflow-hidden bg-black px-4 text-white"
         >
           <div className="absolute inset-0 bg-black">
             <div className="absolute left-[-10%] top-[-10%] h-[45%] w-[45%] rounded-full bg-indigo-600/10 blur-[140px]" />

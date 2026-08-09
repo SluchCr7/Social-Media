@@ -149,7 +149,7 @@ const ReelCard = forwardRef(({ userData, reel, isActive, isMuted, toggleMute }, 
     <div
       id={reel?._id}
       ref={ref}
-      className="relative w-full h-screen bg-black overflow-hidden select-none"
+      className="relative z-50 w-full h-screen bg-black overflow-hidden select-none"
     >
       {/* Loading State */}
       {!videoLoaded && (
