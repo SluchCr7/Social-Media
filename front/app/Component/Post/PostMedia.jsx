@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
     const { t } = useTranslation();
-    // Consolidate media sources
+    
     const items = React.useMemo(() => {
         if (media && media.length > 0) return media;
         if (photos && photos.length > 0) {
@@ -37,13 +37,11 @@ const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
         }
     };
 
-    /**
-     * Get specific class names for grid items based on count and index
-     */
     const getItemClassName = (index) => {
         let base = "relative overflow-hidden cursor-pointer group bg-black/5 dark:bg-white/5";
 
-        if (count === 1) return `${base} aspect-auto max-h-[650px] rounded-2xl`;
+        // تعديل هنا: جعل الصورة الفردية تأخذ العرض والارتفاع الكاملين للحاضن
+        if (count === 1) return `${base} w-full h-full min-h-[400px] max-h-[650px] rounded-2xl`;
         if (count === 2) return `${base} aspect-[3/4] sm:aspect-square`;
 
         if (count === 3) {
@@ -63,12 +61,9 @@ const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
         return base;
     };
 
-    /**
-     * Get grid container classes
-     */
     const getGridClassName = () => {
-        let base = "grid gap-1.5 sm:gap-2 w-full";
-        if (count === 1) return "block"; // Single item doesn't need grid
+        let base = "grid gap-1.5 sm:gap-2 w-full h-full";
+        if (count === 1) return "w-full h-full"; // الحاضن يأخذ المساحة كاملة
         if (count === 2) return `${base} grid-cols-2`;
         if (count === 3) return `${base} grid-cols-2`;
         if (count === 4) return `${base} grid-cols-2 grid-rows-2`;
@@ -120,15 +115,12 @@ const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
                             <SensitiveImage
                                 src={item.url}
                                 alt={`media-${index}`}
-                                fill={count > 1}
-                                width={count === 1 ? 1200 : undefined}
-                                height={count === 1 ? 800 : undefined}
+                                fill={true} // جعلها تأخذ الـ fill لتغطية المساحة بالكامل
                                 isSensitive={isSensitive}
-                                className={`object-cover transition-all duration-1000 group-hover:scale-110 ${count === 1 ? 'w-full h-auto rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10' : ''}`}
+                                className={`object-cover transition-all duration-1000 group-hover:scale-110 ${count === 1 ? 'rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10' : ''}`}
                             />
                         )}
 
-                        {/* Overlay for +N on the last visible item */}
                         {index === 4 && remaining > 0 && (
                             <div className="absolute inset-0 bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center text-white z-20 pointer-events-none select-none transition-all group-hover:bg-black/60">
                                 <span className="text-4xl font-black tracking-tighter mb-1">+{remaining}</span>
@@ -136,7 +128,6 @@ const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
                             </div>
                         )}
 
-                        {/* Hover Overlay Gradient */}
                         {!isSensitive && (
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                         )}
