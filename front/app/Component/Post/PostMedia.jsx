@@ -40,8 +40,8 @@ const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
     const getItemClassName = (index) => {
         let base = "relative overflow-hidden cursor-pointer group bg-black/5 dark:bg-white/5";
 
-        // تعديل هنا: جعل الصورة الفردية تأخذ العرض والارتفاع الكاملين للحاضن
-        if (count === 1) return `${base} w-full h-full min-h-[400px] max-h-[650px] rounded-2xl`;
+        // تعديل الصورة الفردية لتأخذ المساحة الكاملة بشكل مرن ومتناسق دون قص
+        if (count === 1) return `${base} w-full h-auto max-h-[600px] flex items-center justify-center rounded-2xl`;
         if (count === 2) return `${base} aspect-[3/4] sm:aspect-square`;
 
         if (count === 3) {
@@ -63,7 +63,7 @@ const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
 
     const getGridClassName = () => {
         let base = "grid gap-1.5 sm:gap-2 w-full h-full";
-        if (count === 1) return "w-full h-full"; // الحاضن يأخذ المساحة كاملة
+        if (count === 1) return "w-full flex justify-center";
         if (count === 2) return `${base} grid-cols-2`;
         if (count === 3) return `${base} grid-cols-2`;
         if (count === 4) return `${base} grid-cols-2 grid-rows-2`;
@@ -115,9 +115,13 @@ const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
                             <SensitiveImage
                                 src={item.url}
                                 alt={`media-${index}`}
-                                fill={true} // جعلها تأخذ الـ fill لتغطية المساحة بالكامل
+                                fill={count !== 1} // إذا كانت صورة واحدة نلغي الـ fill لكي لا تفرض قصاً إجبارياً على الحاضن
                                 isSensitive={isSensitive}
-                                className={`object-cover transition-all duration-1000 group-hover:scale-110 ${count === 1 ? 'rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10' : ''}`}
+                                className={`transition-all duration-1000 ${
+                                    count === 1 
+                                        ? 'w-full h-auto max-h-[600px] object-contain rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.15)]' 
+                                        : 'w-full h-full object-cover group-hover:scale-110'
+                                }`}
                             />
                         )}
 
@@ -128,7 +132,7 @@ const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
                             </div>
                         )}
 
-                        {!isSensitive && (
+                        {!isSensitive && count !== 1 && (
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                         )}
                     </div>
