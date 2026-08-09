@@ -207,4 +207,4 @@ const ReelUploadModal = () => {
   );
 };
 
-export_default = ReelUploadModal;
+export default ReelUploadModal;
