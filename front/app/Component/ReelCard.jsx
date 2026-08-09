@@ -10,8 +10,7 @@ import { useTranslate } from '../Context/TranslateContext';
 import ReelSkeleton from '../Skeletons/ReelSkeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CommentsPopup = dynamic(() => import("./CommentReelPopup").then(mod => mod.CommentsPopup), { ssr: false });
-// Icons
+const CommentsPopup = dynamic(() => import("./CommentReelPopup"), { ssr: false });// Icons
 import {
   FaHeart,
   FaRegHeart,
