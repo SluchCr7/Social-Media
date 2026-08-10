@@ -1,7 +1,8 @@
 'use client';
 import React, { memo, useState, useMemo, useCallback } from 'react';
 import Image from 'next/image';
-import { HiUserPlus, HiUserCheck, HiSparkles } from 'react-icons/hi2';
+import { HiUserPlus, HiSparkles } from 'react-icons/hi2';
+import { FaUserCheck } from "react-icons/fa";
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../Context/AuthContext';
 import { useUser } from '@/app/Context/UserContext';
@@ -69,7 +70,7 @@ const FriendCard = memo(({ userData, statusMessage, isFollowing, onFollowToggle 
             : 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-500 dark:hover:text-white'
         }`}
       >
-        {isFollowing ? <HiUserCheck size={18} /> : <HiUserPlus size={18} />}
+        {isFollowing ? <FaUserCheck size={18} /> : <HiUserPlus size={18} />}
       </motion.button>
     </motion.div>
   );

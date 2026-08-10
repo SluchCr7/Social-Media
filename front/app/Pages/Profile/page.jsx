@@ -1,4 +1,5 @@
 'use client'
+import dynamic from "next/dynamic";
 import ProfileLayout from "@/app/Component/UserComponents/ProfileLayout"
 import ProfileMenu from "@/app/Component/UserComponents/ProfileMenu"
 import UpdateProfile from "@/app/Component/AddandUpdateMenus/UpdateProfile"
