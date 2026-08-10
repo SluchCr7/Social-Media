@@ -1,8 +1,13 @@
 'use client'
+import dynamic from "next/dynamic"
 import ProfileLayout from "@/app/Component/UserComponents/ProfileLayout"
 import ProfileMenu from "@/app/Component/UserComponents/ProfileMenu"
-import FollowModal from "@/app/Component/UserComponents/FollowModal"
-import StoryViewer from "@/app/Component/StoryViewer"
+const StoryViewer = dynamic(() => import('@/app/Component/StoryViewer'), {
+  ssr: false,
+});
+const FollowModal = dynamic(() => import("@/app/Component/UserComponents/FollowModal"), {
+  ssr: false,
+});
 import ProfileSkeleton from "@/app/Skeletons/ProfileSkeleton"
 import { useAuth } from "@/app/Context/AuthContext"
 import { useStory } from "@/app/Context/StoryContext"

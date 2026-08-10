@@ -14,12 +14,13 @@ import {
 } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import InfoHero from '@/app/Component/Management/InfoHero';
+import { getContactMethods } from '@/app/utils/Data';
 
 const SupportPage = () => {
     const { t } = useTranslation();
     const [sent, setSent] = useState(false);
     const [loading, setLoading] = useState(false);
-
+    const contactMethods = getContactMethods(t)
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
@@ -30,29 +31,7 @@ const SupportPage = () => {
         }, 1500);
     };
 
-    const contactMethods = [
-        {
-            title: t('Direct Mail'),
-            desc: t('Official correspondence'),
-            info: 'support@sluchitt.net',
-            icon: <HiEnvelope className="w-6 h-6" />,
-            color: 'text-blue-500'
-        },
-        {
-            title: t('Global Pulse'),
-            desc: t('Live network status'),
-            info: 'status.sluchitt.net',
-            icon: <HiGlobeAlt className="w-6 h-6" />,
-            color: 'text-indigo-500'
-        },
-        {
-            title: t('Emergency Uplink'),
-            desc: t('High priority only'),
-            info: '+1 (800) SLUCHIT',
-            icon: <HiPhone className="w-6 h-6" />,
-            color: 'text-purple-500'
-        }
-    ];
+    
 
     return (
         <div className="min-h-screen w-full bg-[#fafafa] dark:bg-[#050505]">

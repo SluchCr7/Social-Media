@@ -1,10 +1,13 @@
 'use client'
-import Head from "next/head"
 import ProfileLayout from "@/app/Component/UserComponents/ProfileLayout"
 import ProfileMenu from "@/app/Component/UserComponents/ProfileMenu"
 import UpdateProfile from "@/app/Component/AddandUpdateMenus/UpdateProfile"
-import AddStoryModel from "@/app/Component/AddandUpdateMenus/AddStoryModel"
-import FollowModal from "@/app/Component/UserComponents/FollowModal"
+const AddStoryModel = dynamic(() => import('@/app/Component/AddandUpdateMenus/AddStoryModel'), {
+  ssr: false,
+});
+const FollowModal = dynamic(() => import("@/app/Component/UserComponents/FollowModal"), {
+  ssr: false,
+});
 import { useAuth } from "@/app/Context/AuthContext"
 import { useProfilePosts } from "@/app/Custome/useProfilePosts"
 import ProfileSkeleton from "@/app/Skeletons/ProfileSkeleton"
@@ -33,9 +36,6 @@ const ProfilePage = () => {
 
   return (
     <div className="w-full min-h-screen bg-lightMode-bg dark:bg-darkMode-bg">
-      <Head>
-        <title>{userData?.username || "Profile"} | Social App</title>
-      </Head>
 
       <ProfileLayout
         user={userData}

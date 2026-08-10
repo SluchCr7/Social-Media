@@ -1,5 +1,5 @@
 import { GoHome, GoSearch } from "react-icons/go"
-import { HiCommandLine, HiUsers, HiGlobeAlt } from "react-icons/hi2";
+import { HiCommandLine, HiUsers, HiGlobeAlt, HiEnvelope , HiPhone } from "react-icons/hi2";
 import { CgProfile } from "react-icons/cg";
 import { MdOutlinePaid } from "react-icons/md";
 import { CiUser, CiSettings, CiChat1 } from "react-icons/ci"
@@ -16,7 +16,6 @@ import { RiMemoriesFill } from "react-icons/ri";
 import { FaUserFriends } from "react-icons/fa";
 import { IoGameController } from "react-icons/io5";
 import { MdOutlineExplore } from "react-icons/md";
-
 import {
   FiMessageCircle,
   FiShield,
@@ -490,4 +489,28 @@ export const getSections = (t) => [
     ),
   },
 ];
+
+export const getContactMethods = (t) => [
+        {
+            title: t('Direct Mail'),
+            desc: t('Official correspondence'),
+            info: 'support@sluchitt.net',
+            icon: <HiEnvelope className="w-6 h-6" />,
+            color: 'text-blue-500'
+        },
+        {
+            title: t('Global Pulse'),
+            desc: t('Live network status'),
+            info: 'status.sluchitt.net',
+            icon: <HiGlobeAlt className="w-6 h-6" />,
+            color: 'text-indigo-500'
+        },
+        {
+            title: t('Emergency Uplink'),
+            desc: t('High priority only'),
+            info: '+1 (800) SLUCHIT',
+            icon: <HiPhone className="w-6 h-6" />,
+            color: 'text-purple-500'
+        }
+    ];
 
