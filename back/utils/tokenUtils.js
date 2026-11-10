@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+require("dotenv").config()
 
 // Enforce mandatory independent environment variables
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
