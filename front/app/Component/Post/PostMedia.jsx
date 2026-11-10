@@ -117,6 +117,8 @@ const PostMedia = memo(({ media = [], photos = [], setImageView }) => {
                                 src={item.url}
                                 alt={`media-${index}`}
                                 fill={count !== 1} // إذا كانت صورة واحدة نلغي الـ fill لكي لا تفرض قصاً إجبارياً على الحاضن
+                                width={count === 1 ? 1200 : undefined}
+                                height={count === 1 ? 800 : undefined}
                                 isSensitive={isSensitive}
                                 className={`transition-all duration-1000 ${
                                     count === 1 

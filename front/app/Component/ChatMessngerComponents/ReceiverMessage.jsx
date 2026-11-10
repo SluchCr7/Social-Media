@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import React, { useState } from 'react';
-import { useMessage } from '../../Context/MessageContext';
+import { useMessage } from '@/app/redux/hooks';
 import { AiOutlineLike, AiFillLike } from 'react-icons/ai';
 import { BsCopy, BsTrash, BsArrowReturnLeft, BsReply } from 'react-icons/bs';
 import { motion, AnimatePresence } from 'framer-motion';

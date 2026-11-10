@@ -4,7 +4,7 @@ import React, { useMemo, useCallback, memo } from 'react'
 import CommentCard from './CommentCard'
 import SluchitEntry from '../SluchitEntry'
 import { motion, AnimatePresence } from 'framer-motion'
-import { usePost } from '@/app/Context/PostContext'
+import { usePost } from '@/app/redux/hooks';
 import PostSkeleton from '@/app/Skeletons/PostSkeleton'
 import MusicCard from './MusicCard'
 import { useTranslation } from 'react-i18next'

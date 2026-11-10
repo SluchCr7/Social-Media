@@ -5,9 +5,9 @@ import { CiHeart } from 'react-icons/ci';
 import { FaRegCommentDots, FaRegEdit, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { IoIosHeart, IoIosSend } from 'react-icons/io';
 import { MdOutlineContentCopy, MdOutlineDelete, MdOutlineReport } from 'react-icons/md';
-import { useComment } from '../Context/CommentContext';
-import { useAuth } from '../Context/AuthContext';
-import { useReport } from '@/app/Context/ReportContext';
+import { useComment } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
+import { useReport } from '@/app/redux/hooks';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiBadgeCheck } from 'react-icons/hi';
 import { useTranslation } from 'react-i18next';
@@ -58,7 +58,7 @@ const Comment = ({ comment }) => {
     if (!replyText.trim()) return;
     setLoadingReply(true);
     try {
-      await AddComment(replyText, comment._id, 'Comment');
+      await AddComment({ text: replyText, targetId: comment._id, targetType: 'Comment' });
       setReplyText('');
       setIsReplying(false);
       setExpanded(true); // Open replies to show the new one

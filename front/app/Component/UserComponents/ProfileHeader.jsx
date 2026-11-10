@@ -9,8 +9,8 @@ import { IoEllipsisHorizontal, IoAdd, IoLocationSharp, IoCalendarClearOutline } 
 import { SiGoogleanalytics } from "react-icons/si";
 import Image from "next/image";
 import Link from "next/link";
-import { useAuth } from "@/app/Context/AuthContext";
-import { useUser } from "@/app/Context/UserContext";
+import { useAuth } from '@/app/redux/hooks';
+import { useUser } from '@/app/redux/hooks';
 import { useTranslation } from "react-i18next";
 import { MdInfo } from "react-icons/md";
 import SensitiveImage from "@/app/Component/Post/SensitiveImage";

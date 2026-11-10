@@ -22,7 +22,7 @@ import Image from 'next/image';
 import ExploreTabs from './Explore/ExploreTabs';
 import UserCard from './UserCard';
 import SluchitEntry from './SluchitEntry';
-import { useSearch } from '../Context/SearchContext';
+import { useSearch } from '@/app/redux/hooks';
 
 const TABS = (t) => [
     { name: t("Top"), key: 'top', icon: HiSparkles },

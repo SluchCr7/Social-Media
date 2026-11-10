@@ -11,23 +11,20 @@ const CommandPalette = dynamic(() => import('./ui/CommandPalette'), { ssr: false
 const MenuAllSuggestedFriends = dynamic(() => import('./Menus/MenuAllSuggestedFreinds'), { ssr: false });
 const SongPlayer = dynamic(() => import('./MusicPage/SongPlayer'), { ssr: false });
 const ExpandedWindow = dynamic(() => import('./MusicPage/ExpandedWindow'), { ssr: false });
+const Menu = dynamic(() => import('./Menus/Menu'), { ssr: false });
 import React, { useEffect, useState } from 'react';
 import Loader from './Loader';
 import Aside from './Aside/Aside';
-import Menu from './Menus/Menu';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '../Context/AuthContext';
+import { useAuth } from '@/app/redux/hooks';
 import Alert from './Alert';
-import { usePost } from '../Context/PostContext';
-import { useReport } from '../Context/ReportContext';
-import Link from 'next/link';
-import { useMusicPlayer } from '../Context/MusicPlayerContext';
-import { useTranslate } from '../Context/TranslateContext';
-import CookieConsent from './CookieConsent';
+import { usePost } from '@/app/redux/hooks';
+import { useReport } from '@/app/redux/hooks';
+import { useMusicPlayer } from '@/app/redux/hooks';
+import { useTranslate } from '@/app/redux/hooks';
 import NProgress from 'nprogress'
 import '@/styles/nprogress.css'
-import FloatingDock from './FloatingDock';
-import { useStory } from '../Context/StoryContext';
+import { useStory } from '@/app/redux/hooks';
 const LayoutComponent = ({ children }) => {
   const [loading, setLoading] = useState(true); // للتحكم في الـ Loader
 

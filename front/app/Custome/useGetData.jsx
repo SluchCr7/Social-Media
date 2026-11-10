@@ -1,8 +1,8 @@
 'use client'
 import { useState, useEffect, useMemo, useRef, useCallback } from "react"
-import { usePost } from "@/app/Context/PostContext"
-import { useAuth } from "@/app/Context/AuthContext"
-import { useUser } from "../Context/UserContext"
+import { usePost } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
+import { useUser } from '@/app/redux/hooks';
 
 export const useGetData = (userId) => {
   const { getUserById } = useUser()
@@ -16,7 +16,7 @@ export const useGetData = (userId) => {
       .then(res => setUserData(res))
       .catch(err => console.log(err))
       .finally(() => setLoading(false))
-  }, [userId])
+  }, [userId, getUserById])
 
 
   return {

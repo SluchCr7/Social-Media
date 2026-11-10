@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FaCheckCircle } from 'react-icons/fa';
 import { IoCloseCircle } from 'react-icons/io5';
-import { useVerify } from '@/app/Context/VerifyContext';
+import { useVerify } from '@/app/redux/hooks';
 import { FiHome } from 'react-icons/fi';
 
 const Page = ({ params }) => {

@@ -9,13 +9,13 @@ const FollowModal = dynamic(() => import("@/app/Component/UserComponents/FollowM
   ssr: false,
 });
 import ProfileSkeleton from "@/app/Skeletons/ProfileSkeleton"
-import { useAuth } from "@/app/Context/AuthContext"
-import { useStory } from "@/app/Context/StoryContext"
-import { useReport } from "@/app/Context/ReportContext"
+import { useAuth } from '@/app/redux/hooks';
+import { useStory } from '@/app/redux/hooks';
+import { useReport } from '@/app/redux/hooks';
 import { useProfilePosts } from "@/app/Custome/useProfilePosts"
 import { useState } from "react"
-import { useAdmin } from "@/app/Context/UserAdminContext"
-import { useUser } from "@/app/Context/UserContext"
+import { useAdmin } from '@/app/redux/hooks';
+import { useUser } from '@/app/redux/hooks';
 
 const UserProfilePage = ({ params }) => {
   const id = params.id

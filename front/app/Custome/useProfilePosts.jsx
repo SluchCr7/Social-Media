@@ -1,8 +1,8 @@
 'use client'
 import { useState, useEffect, useMemo, useRef, useCallback } from "react"
-import { usePost } from "@/app/Context/PostContext"
-import { useAuth } from "@/app/Context/AuthContext"
-import { useUser } from "../Context/UserContext"
+import { usePost } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
+import { useUser } from '@/app/redux/hooks';
 
 export const useProfilePosts = (userId, pinsPosts = []) => {
   const { fetchUserPosts, userPosts, userHasMore, userIsLoading } = usePost()
@@ -23,7 +23,7 @@ export const useProfilePosts = (userId, pinsPosts = []) => {
       .then(res => setUserData(res))
       .catch(err => console.log(err))
       .finally(() => setLoading(false))
-  }, [userId])
+  }, [userId, getUserById])
 
   // أول تحميل للبوستات
   useEffect(() => {
@@ -31,7 +31,7 @@ export const useProfilePosts = (userId, pinsPosts = []) => {
       setPage(1)
       fetchUserPosts(userData._id, 1, 10, true) // reset = true
     }
-  }, [userData?._id])
+  }, [userData?._id, fetchUserPosts])
 
   // Infinite Scroll
   const handleObserver = useCallback((entries) => {
@@ -44,12 +44,13 @@ export const useProfilePosts = (userId, pinsPosts = []) => {
   }, [page, userHasMore, userData?._id, fetchUserPosts, userIsLoading])
 
   useEffect(() => {
-    if (!loaderRef?.current) return
+    const currentLoader = loaderRef?.current;
+    if (!currentLoader) return
     const options = { root: null, rootMargin: "20px", threshold: 1.0 }
     const observer = new IntersectionObserver(handleObserver, options)
-    observer.observe(loaderRef.current)
+    observer.observe(currentLoader)
     return () => {
-      if (loaderRef.current) observer.unobserve(loaderRef.current)
+      observer.unobserve(currentLoader)
     }
   }, [handleObserver])
 

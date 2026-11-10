@@ -19,12 +19,12 @@ import { Maximize2, Minimize2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSwipeable } from 'react-swipeable';
-import { useStory } from '../Context/StoryContext';
-import { useAuth } from '../Context/AuthContext';
-import { useMessage } from '../Context/MessageContext';
-import { useAlert } from '../Context/AlertContext';
+import { useStory } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
+import { useMessage } from '@/app/redux/hooks';
+import { useAlert } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
-import { useTranslate } from '../Context/TranslateContext';
+import { useTranslate } from '@/app/redux/hooks';
 import { formatRelativeTime } from '../utils/FormatDataCreatedAt';
 
 const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain' }) => {
@@ -48,6 +48,7 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
 
   const timerRef = useRef(null);
   const durationRef = useRef(5000);
+  const progressRef = useRef(0);
 
   const story = useMemo(() => stories[currentIndex] || null, [stories, currentIndex]);
 
@@ -63,6 +64,7 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
       viewStory(story._id);
       setSelectedUser(story?.owner);
     }
+    progressRef.current = 0;
     setProgress(0);
     setIsImageLoaded(false);
     setShowViewers(false);
@@ -132,16 +134,18 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
         rafId = requestAnimationFrame(step);
         return;
       }
-      if (!start) start = timestamp - (progress / 100) * duration;
+      if (!start) start = timestamp - (progressRef.current / 100) * duration;
       const elapsed = timestamp - start;
       const percent = (elapsed / duration) * 100;
 
       if (percent >= 100) {
+        progressRef.current = 100;
         setProgress(100);
         cancelAnimationFrame(rafId);
         setTimeout(() => {
           if (currentIndex < stories.length - 1) {
             setCurrentIndex(idx => idx + 1);
+            progressRef.current = 0;
             setProgress(0);
           } else {
             onClose();
@@ -149,6 +153,7 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
         }, 100);
         return;
       } else {
+        progressRef.current = percent;
         setProgress(percent);
         rafId = requestAnimationFrame(step);
       }
@@ -163,12 +168,16 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
   }, [currentIndex, isPaused, story, stories.length, onClose]);
 
   const handleNext = useCallback(() => {
+    progressRef.current = 0;
+    progressRef.current = 0;
     setProgress(0);
     if (currentIndex < stories.length - 1) setCurrentIndex(idx => idx + 1);
     else onClose();
   }, [currentIndex, stories.length, onClose]);
 
   const handlePrev = useCallback(() => {
+    progressRef.current = 0;
+    progressRef.current = 0;
     setProgress(0);
     if (currentIndex > 0) setCurrentIndex(idx => idx - 1);
   }, [currentIndex]);

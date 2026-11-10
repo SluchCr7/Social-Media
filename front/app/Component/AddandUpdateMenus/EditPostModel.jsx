@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef, useMemo, useCallback, memo } from 'react';
 import Image from 'next/image';
-import { usePost } from '../../Context/PostContext';
+import { usePost } from '@/app/redux/hooks';
 import { 
   X, 
   Image as ImageIcon, 
@@ -12,8 +12,8 @@ import {
   Users
 } from 'lucide-react';
 import EmojiPicker from 'emoji-picker-react';
-import { useCommunity } from '@/app/Context/CommunityContext';
-import { useAuth } from '@/app/Context/AuthContext';
+import { useCommunity } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';

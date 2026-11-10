@@ -8,7 +8,7 @@ import PostLinks from './PostLinks'
 import Link from 'next/link'
 import Image from 'next/image'
 import { formatRelativeTime } from '@/app/utils/FormatDataCreatedAt'
-import { useTranslate } from '../../Context/TranslateContext'
+import { useTranslate } from '@/app/redux/hooks';
 import { motion, AnimatePresence } from 'framer-motion'
 
 const SharedPost = memo(({

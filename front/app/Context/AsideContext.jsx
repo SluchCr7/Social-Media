@@ -1,20 +1,19 @@
 'use client';
-import { createContext, useContext, useEffect, useState } from "react";
 
-export const AsideContext = createContext();
+/**
+ * @deprecated
+ * LEGACY INACTIVE CONTEXT
+ *
+ * This file is preserved for historical architecture records only.
+ * It has ZERO active responsibilities in the application.
+ *
+ * All state management and server communication are unified under
+ * Redux Toolkit and RTK Query via direct hooks in `@/app/redux/hooks`.
+ */
 
-export const AsideContextProvider = ({ children }) => {
-  const [isMobile, setIsMobile] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  return (
-    <AsideContext.Provider
-        value={{
-            isMobile,setIsMobile,isMobileMenuOpen,setIsMobileMenuOpen
-        }}
-    >
-        {children}
-    </AsideContext.Provider>
-  );
-};
+export const AsideContextProvider = ({ children }) => <>{children}</>;
+export const AsideContext = null;
 
-export const useAside = () => useContext(AsideContext);
+export default function DeprecatedAsideContext() {
+  return null;
+}

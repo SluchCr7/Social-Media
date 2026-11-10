@@ -3,8 +3,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
 import { FaTimes, FaPaperPlane } from 'react-icons/fa';
-import { useAuth } from '../Context/AuthContext';
-import { useComment } from '../Context/CommentContext';
+import { useAuth } from '@/app/redux/hooks';
+import { useComment } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
 import { HiChatBubbleLeftRight } from 'react-icons/hi2';
@@ -25,24 +25,25 @@ const CommentsPopup = ({ reelId, isOpen, onClose }) => {
 
   // 🔄 Fetch Reel Comments
   useEffect(() => {
-    if (isOpen && reelId) {
-      const load = async () => {
-        const res = await fetchCommentsByTarget(reelId, 'Reel');
-        if (res) {
+    if (!isOpen) {
+      setComments([]);
+      setNextCursor(null);
+      setHasMore(false);
+      return;
+    }
+
+    if (reelId) {
+      let isMounted = true;
+      fetchCommentsByTarget(reelId, 'Reel').then((res) => {
+        if (isMounted && res) {
           setNextCursor(res.nextCursor);
           setHasMore(res.hasMore);
         }
+      });
+      return () => {
+        isMounted = false;
       };
-      load();
     }
-    // Cleanup comments when closing to avoid flicker
-    return () => {
-      if (!isOpen) {
-        setComments([]);
-        setNextCursor(null);
-        setHasMore(false);
-      }
-    };
   }, [isOpen, reelId, fetchCommentsByTarget, setComments]);
 
   const handleLoadMore = useCallback(async () => {
@@ -61,7 +62,7 @@ const CommentsPopup = ({ reelId, isOpen, onClose }) => {
 
     setLoading(true);
     try {
-      await AddComment(newComment, reelId, 'Reel');
+      await AddComment({ text: newComment, targetId: reelId, targetType: 'Reel' });
       setNewComment('');
     } catch (err) {
       console.error("Failed to add reel comment:", err);

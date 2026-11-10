@@ -5,33 +5,8 @@ import LayoutComponent from "./Component/LayoutComponent";
 import { JetBrains_Mono } from "next/font/google";
 import { Cairo } from "next/font/google";
 
-import { AuthContextProvider } from "./Context/AuthContext";
-import { PostContextProvider } from "./Context/PostContext";
-import { CommentContextProvider } from "./Context/CommentContext";
-import { MessageContextProvider } from "./Context/MessageContext";
-import { NotifyContextProvider } from "./Context/NotifyContext";
-import { NewsContextProvider } from "./Context/NewsContext";
-import { CommunityContextProvider } from "./Context/CommunityContext";
-import { StoryContextProvider } from "./Context/StoryContext";
-import { FeedbackProvider } from "./Context/FeedbackContext";
-import { ReportContextProvider } from "./Context/ReportContext";
-import { SocketProvider } from "./Context/SocketContext";
-import { EventProvider } from "./Context/EventContext";
-import { AsideContextProvider } from "./Context/AsideContext";
-import { ReelsProvider } from "./Context/ReelsContext";
-import { MusicProvider } from "./Context/MusicContext";
-import { TranslateContextProvider } from "./Context/TranslateContext";
-import { ThemeContextProvider } from "./Context/ThemeContext";
-import { MusicPlayerProvider } from "./Context/MusicPlayerContext";
-import { UserContextProvider } from "./Context/UserContext";
-import { UserAdminContextProvider } from "./Context/UserAdminContext";
-import { VerifyContextProvider } from "./Context/VerifyContext";
-import { AdminContextProvider } from "./Context/AdminContext";
+import ReduxProvider from "./redux/ReduxProvider";
 import I18nProvider from "./providers/I18nProvider.jsx";
-import { HighlightContextProvider } from "./Context/HighlightContext";
-import { SearchProvider } from "./Context/SearchContext";
-import { ExploreProvider } from "./Context/ExploreContext";
-
 
 // 🟢 استيراد الخط الإنجليزي
 const jetBrainsMono = JetBrains_Mono({
@@ -49,7 +24,7 @@ const cairo = Cairo({
 });
 
 export const metadata = {
-  title: `${process.env.NEXT_PUBLIC_WEBSITE_NAME} - Home`,
+  title: `${process.env.NEXT_PUBLIC_WEBSITE_NAME || 'Zociel'} - Home`,
   description: "Share your thoughts with the world and connect with others",
 };
 
@@ -63,59 +38,11 @@ export default function RootLayout({ children }) {
         className={`antialiased bg-lightMode-bg dark:bg-darkMode-bg transition-all duration-500`}
       >
         <I18nProvider>
-          <FeedbackProvider>
-            <AuthContextProvider>
-              <SocketProvider>
-                <UserContextProvider>
-                  <VerifyContextProvider>
-                    <UserAdminContextProvider>
-                      <NotifyContextProvider>
-                        <MessageContextProvider>
-                          <PostContextProvider>
-                            <SearchProvider>
-                              <ExploreProvider>
-                                <CommentContextProvider>
-                                  <CommunityContextProvider>
-                                    <StoryContextProvider>
-                                      <HighlightContextProvider>
-                                        <NewsContextProvider>
-                                          <ReportContextProvider>
-                                            <ReelsProvider>
-                                              <EventProvider>
-                                                <MusicProvider>
-                                                  <MusicPlayerProvider>
-                                                    <ThemeContextProvider>
-                                                      <TranslateContextProvider>
-                                                        <AsideContextProvider>
-                                                          <AdminContextProvider>
-                                                            <LayoutComponent>
-                                                              {children}
-                                                            </LayoutComponent>
-                                                          </AdminContextProvider>
-                                                        </AsideContextProvider>
-                                                      </TranslateContextProvider>
-                                                    </ThemeContextProvider>
-                                                  </MusicPlayerProvider>
-                                                </MusicProvider>
-                                              </EventProvider>
-                                            </ReelsProvider>
-                                          </ReportContextProvider>
-                                        </NewsContextProvider>
-                                      </HighlightContextProvider>
-                                    </StoryContextProvider>
-                                  </CommunityContextProvider>
-                                </CommentContextProvider>
-                              </ExploreProvider>
-                            </SearchProvider>
-                          </PostContextProvider>
-                        </MessageContextProvider>
-                      </NotifyContextProvider>
-                    </UserAdminContextProvider>
-                  </VerifyContextProvider>
-                </UserContextProvider>
-              </SocketProvider>
-            </AuthContextProvider>
-          </FeedbackProvider>
+          <ReduxProvider>
+            <LayoutComponent>
+              {children}
+            </LayoutComponent>
+          </ReduxProvider>
         </I18nProvider>
       </body>
     </html>

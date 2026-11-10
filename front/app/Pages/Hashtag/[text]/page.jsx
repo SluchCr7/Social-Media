@@ -1,6 +1,6 @@
 'use client'
 import SluchitEntry from '@/app/Component/SluchitEntry'
-import { usePost } from '@/app/Context/PostContext'
+import { usePost } from '@/app/redux/hooks';
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FaHashtag, FaFire, FaClock, FaChartLine } from 'react-icons/fa'

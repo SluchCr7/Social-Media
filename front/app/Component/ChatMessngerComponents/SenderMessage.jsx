@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import React, { useState } from 'react';
-import { useMessage } from '../../Context/MessageContext';
+import { useMessage } from '@/app/redux/hooks';
 import { BsCheck, BsCheckAll, BsTrash, BsCopy, BsArrowReturnLeft } from 'react-icons/bs';
 import { AiOutlineLike, AiFillLike } from 'react-icons/ai';
 import { MdDeleteForever } from 'react-icons/md';

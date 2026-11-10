@@ -1,157 +1,58 @@
 const asyncHandler = require("express-async-handler");
-const { Notification } = require("../Modules/Notification");
-const { sendNotification, io, getReceiverSocketId } = require("../Config/socket");
+const notificationService = require("../Services/notificationService");
 
-// ================== Add Notification ==================
+const sendResult = (res, result) => res.status(result.status).json(result.body);
+
 const addNewNotify = asyncHandler(async (req, res) => {
-  const receiver = req.params.id;
-  const sender = req.user._id;
-  const { content, type, actionRef, actionModel } = req.body;
-
-  // منع إشعار لنفس المستخدم
-  if (receiver.toString() === sender.toString()) {
-    return res.status(400).json({ message: "Cannot notify yourself" });
-  }
-
-  const newNotify = new Notification({
-    content,
-    type,
-    sender,
-    receiver,
-    actionRef,
-    actionModel,
-  });
-
-  await newNotify.save();
-
-  const populatedNotify = await newNotify.populate("sender", "username profilePhoto");
-
-  // إرسال عبر socket
-  sendNotification(receiver, populatedNotify);
-
-  res.status(201).json(populatedNotify);
+  const result = await notificationService.addNewNotify(
+    req.params.id,
+    req.user._id,
+    req.body
+  );
+  sendResult(res, result);
 });
 
-// ================== Get Notifications ==================
 const getAllNotificationsByUser = asyncHandler(async (req, res) => {
-  const notifications = await Notification.find({ receiver: req.user._id })
-    .populate("sender", "username profilePhoto")
-    .sort({ createdAt: -1 });
-
+  const notifications = await notificationService.getAllNotificationsByUser(req.user._id);
   res.status(200).json(notifications);
 });
 
-// ================== Get Unread Count ==================
 const getUnreadCount = asyncHandler(async (req, res) => {
-  const count = await Notification.countDocuments({
-    receiver: req.user._id,
-    isRead: false,
-  });
+  const count = await notificationService.getUnreadCount(req.user._id);
   res.status(200).json({ unreadCount: count });
 });
 
-// ================== Mark One As Read ==================
 const markAsRead = asyncHandler(async (req, res) => {
-  const notify = await Notification.findOne({
-    _id: req.params.id,
-    receiver: req.user._id,
-  });
-
-  if (!notify) {
-    return res.status(404).json({ message: "Notification not found" });
-  }
-
-  notify.isRead = true;
-  await notify.save();
-
-  notify.isRead = true;
-  await notify.save();
-
-  // 🔔 Socket Emit (Sync across devices)
-  const receiverSocketId = getReceiverSocketId(req.user._id);
-  // Send to ALL devices of this user?
-  // getReceiverSocketId likely returns one. 
-  // Ideally room = user._id. 
-  if (receiverSocketId) {
-    io.to(receiverSocketId).emit("notification:update", notify);
-  }
-
-  res.status(200).json({ message: "Marked as read", notification: notify });
+  const result = await notificationService.markAsRead(req.params.id, req.user._id);
+  sendResult(res, result);
 });
 
-// ================== Mark All As Read ==================
 const markAllAsRead = asyncHandler(async (req, res) => {
-  await Notification.updateMany(
-    { receiver: req.user._id, isRead: false },
-    { $set: { isRead: true } }
-  );
-
-  const updated = await Notification.find({ receiver: req.user._id })
-    .populate("sender", "username profilePhoto")
-    .sort({ createdAt: -1 });
-
-  // 🔔 Socket Emit
-  const receiverSocketId = getReceiverSocketId(req.user._id);
-  if (receiverSocketId) {
-    io.to(receiverSocketId).emit("notification:read-all");
-  }
-
-  res.status(200).json({ message: "All notifications marked as read", notifications: updated });
+  const result = await notificationService.markAllAsRead(req.user._id);
+  sendResult(res, result);
 });
 
-// ================== Delete One ==================
 const deleteNotify = asyncHandler(async (req, res) => {
-  const notify = await Notification.findOne({
-    _id: req.params.id,
-    receiver: req.user._id,
-  });
-
-  if (!notify) {
-    return res.status(404).json({ message: "Notification not found" });
-  }
-
-  await notify.deleteOne();
-
-  // 🔔 Socket Emit
-  const receiverSocketId = getReceiverSocketId(req.user._id);
-  if (receiverSocketId) {
-    io.to(receiverSocketId).emit("notification:delete", req.params.id);
-  }
-
-  res.status(200).json({ message: "Notification deleted" });
+  const result = await notificationService.deleteNotify(req.params.id, req.user._id);
+  sendResult(res, result);
 });
 
-// ================== Delete All ==================
 const clearAllNotifications = asyncHandler(async (req, res) => {
-  await Notification.deleteMany({ receiver: req.user._id });
-
-  // 🔔 Socket Emit
-  const receiverSocketId = getReceiverSocketId(req.user._id);
-  if (receiverSocketId) {
-    io.to(receiverSocketId).emit("notification:clear-all");
-  }
-
-  res.status(200).json({ message: "All notifications deleted" });
+  const result = await notificationService.clearAllNotifications(req.user._id);
+  sendResult(res, result);
 });
 
-// ================== Admin Get All ==================
 const getAllNotify = asyncHandler(async (req, res) => {
-  const notifications = await Notification.find()
-    .populate("sender", "name")
-    .populate("receiver", "name")
-    .sort({ createdAt: -1 });
-
+  const notifications = await notificationService.getAllNotify();
   res.status(200).json(notifications);
 });
-
-
 
 module.exports = {
   addNewNotify,
   getAllNotify,
   getAllNotificationsByUser,
   deleteNotify,
-  clearAllNotifications, // جديد
+  clearAllNotifications,
   markAsRead,
   markAllAsRead,
   getUnreadCount,

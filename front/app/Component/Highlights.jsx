@@ -3,7 +3,7 @@ import React from 'react';
 import Image from 'next/image';
 import { motion, Reorder } from 'framer-motion';
 import { FaPlus } from 'react-icons/fa';
-import { useHighlights } from '../Context/HighlightContext';
+import { useHighlights } from '@/app/redux/hooks';
 
 export default function HighlightsBar({
   highlights = [],

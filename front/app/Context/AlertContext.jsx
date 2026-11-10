@@ -1,17 +1,19 @@
 'use client';
 
 /**
- * DEPRECATED: This context is deprecated.
- * Please use FeedbackContext or useFeedback hook instead.
- * 
- * This file is kept for backward compatibility and points to the new Feedback system.
+ * @deprecated
+ * LEGACY INACTIVE CONTEXT
+ *
+ * This file is preserved for historical architecture records only.
+ * It has ZERO active responsibilities in the application.
+ *
+ * All state management and server communication are unified under
+ * Redux Toolkit and RTK Query via direct hooks in `@/app/redux/hooks`.
  */
 
-import { useFeedback } from './FeedbackContext';
+export const AlertContextProvider = ({ children }) => <>{children}</>;
+export const AlertContext = null;
 
-export { FeedbackProvider as AlertContextProvider } from './FeedbackContext';
-export const useAlert = () => {
-  const { showAlert } = useFeedback();
-  return { showAlert };
-};
-export default useAlert;
+export default function DeprecatedAlertContext() {
+  return null;
+}

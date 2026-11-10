@@ -1,9 +1,9 @@
 'use client';
 import React, { memo, useMemo } from 'react';
-import { useCommunity } from '../../Context/CommunityContext';
+import { useCommunity } from '@/app/redux/hooks';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAuth } from '../../Context/AuthContext';
+import { useAuth } from '@/app/redux/hooks';
 import { HiCheckBadge, HiUsers } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import { useGetData } from '@/app/Custome/useGetData';

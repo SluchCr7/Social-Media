@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useEffect, useMemo, useCallback, useState, useRef } from 'react';
-import { useAuth } from '../../Context/AuthContext';
-import { useSearch } from '@/app/Context/SearchContext';
-import { useUser } from '@/app/Context/UserContext';
-import { useExplore } from '@/app/Context/ExploreContext';
+import { useAuth } from '@/app/redux/hooks';
+import { useSearch } from '@/app/redux/hooks';
+import { useUser } from '@/app/redux/hooks';
+import { useExplore } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 import {
   HiMagnifyingGlass,

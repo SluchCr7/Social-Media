@@ -1,9 +1,9 @@
 'use client';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../../Context/AuthContext';
+import { useAuth } from '@/app/redux/hooks';
 import Link from 'next/link';
-import { useUser } from '@/app/Context/UserContext';
+import { useUser } from '@/app/redux/hooks';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiUserGroup, HiChevronRight } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';

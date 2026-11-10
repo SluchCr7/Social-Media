@@ -1,37 +1,19 @@
 'use client';
-import axios from "axios";
-import { createContext, useContext, useEffect, useState } from "react";
 
-export const NewsContext = createContext();
+/**
+ * @deprecated
+ * LEGACY INACTIVE CONTEXT
+ *
+ * This file is preserved for historical architecture records only.
+ * It has ZERO active responsibilities in the application.
+ *
+ * All state management and server communication are unified under
+ * Redux Toolkit and RTK Query via direct hooks in `@/app/redux/hooks`.
+ */
 
-export const NewsContextProvider = ({ children }) => {
-  const [news, setNews] = useState([]);
-  const [loading, setLoading] = useState(true); // إضافة حالة تحميل
-  const [error, setError] = useState(null);     // إضافة حالة خطأ
+export const NewsContextProvider = ({ children }) => <>{children}</>;
+export const NewsContext = null;
 
-  const fetchAllNews = async (params = {}) => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACK_URL}/api/news`, { params });
-      setNews(response.data.articles || []);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching news:', err);
-      setError('Failed to load news');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAllNews(); // أول تحميل
-  }, []);
-
-  return (
-    <NewsContext.Provider value={{ news, loading, error, fetchAllNews }}>
-      {children}
-    </NewsContext.Provider>
-  );
-};
-
-export const useNews = () => useContext(NewsContext);
+export default function DeprecatedNewsContext() {
+  return null;
+}

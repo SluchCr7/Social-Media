@@ -231,6 +231,17 @@ const UserSchema = new mongoose.Schema({
             targetId: { type: mongoose.Schema.Types.ObjectId },
             date: { type: Date, default: Date.now }
         }
+    ],
+    // 🔹 Secure Refresh Token Sessions
+    refreshTokens: [
+        {
+            tokenHash: { type: String, required: true },
+            createdAt: { type: Date, default: Date.now },
+            expiresAt: { type: Date, required: true },
+            userAgent: { type: String, default: "" },
+            ip: { type: String, default: "" },
+            family: { type: String, default: "" }
+        }
     ]
 }, {
     timestamps: true,

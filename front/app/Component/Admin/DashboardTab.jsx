@@ -1,8 +1,17 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 import {
   HiUsers,
   HiDocumentText,
@@ -16,12 +25,20 @@ import {
   HiServer,
   HiClock,
   HiSquare3Stack3D,
+  HiMegaphone,
+  HiShieldCheck,
+  HiArrowTrendingUp,
 } from 'react-icons/hi2';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 
-const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
+const DashboardTab = React.memo(({ stats, loading, getAdminStats, onNavigateTab }) => {
   const { t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Helper to format seconds into readable uptime (e.g. 2h 45m)
   const formatUptime = (seconds) => {
@@ -34,15 +51,17 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
 
   // Safe fallback for chart data
   const chartData = useMemo(() => {
-    return stats?.chartData || [
-      { name: 'Mon', posts: 0, users: 0, reels: 0 },
-      { name: 'Tue', posts: 0, users: 0, reels: 0 },
-      { name: 'Wed', posts: 0, users: 0, reels: 0 },
-      { name: 'Thu', posts: 0, users: 0, reels: 0 },
-      { name: 'Fri', posts: 0, users: 0, reels: 0 },
-      { name: 'Sat', posts: 0, users: 0, reels: 0 },
-      { name: 'Sun', posts: 0, users: 0, reels: 0 },
-    ];
+    return (
+      stats?.chartData || [
+        { name: 'Mon', posts: 0, users: 0, reels: 0 },
+        { name: 'Tue', posts: 0, users: 0, reels: 0 },
+        { name: 'Wed', posts: 0, users: 0, reels: 0 },
+        { name: 'Thu', posts: 0, users: 0, reels: 0 },
+        { name: 'Fri', posts: 0, users: 0, reels: 0 },
+        { name: 'Sat', posts: 0, users: 0, reels: 0 },
+        { name: 'Sun', posts: 0, users: 0, reels: 0 },
+      ]
+    );
   }, [stats?.chartData]);
 
   return (
@@ -58,7 +77,7 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
             {t('System')} <span className="text-indigo-500">{t('Overview')}</span>
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-            {t("Real-time database analytics and server telemetry")}
+            {t('Real-time database analytics and server telemetry')}
           </p>
         </div>
         <motion.button
@@ -73,6 +92,63 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
         </motion.button>
       </div>
 
+      {/* 🚀 Quick Actions Bar */}
+      {onNavigateTab && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <button
+            onClick={() => onNavigateTab('Users')}
+            className="p-4 rounded-2xl bg-white dark:bg-[#0A0A0A] border border-gray-100 dark:border-white/5 hover:border-indigo-500/30 shadow-md flex items-center gap-3 transition-all group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <HiUsers className="w-5 h-5" />
+            </div>
+            <div className="text-left">
+              <p className="text-xs font-black text-gray-900 dark:text-white">{t('Manage Users')}</p>
+              <p className="text-[10px] text-gray-400 font-semibold">{stats?.totalUsers || 0} {t('members')}</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigateTab('Content')}
+            className="p-4 rounded-2xl bg-white dark:bg-[#0A0A0A] border border-gray-100 dark:border-white/5 hover:border-emerald-500/30 shadow-md flex items-center gap-3 transition-all group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <HiDocumentText className="w-5 h-5" />
+            </div>
+            <div className="text-left">
+              <p className="text-xs font-black text-gray-900 dark:text-white">{t('Moderate Content')}</p>
+              <p className="text-[10px] text-gray-400 font-semibold">{stats?.totalPosts || 0} {t('posts')}</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigateTab('Reports')}
+            className="p-4 rounded-2xl bg-white dark:bg-[#0A0A0A] border border-gray-100 dark:border-white/5 hover:border-rose-500/30 shadow-md flex items-center gap-3 transition-all group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <HiExclamationTriangle className="w-5 h-5" />
+            </div>
+            <div className="text-left">
+              <p className="text-xs font-black text-gray-900 dark:text-white">{t('Resolve Reports')}</p>
+              <p className="text-[10px] text-gray-400 font-semibold">{stats?.pendingReports || 0} {t('pending')}</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigateTab('Broadcast')}
+            className="p-4 rounded-2xl bg-white dark:bg-[#0A0A0A] border border-gray-100 dark:border-white/5 hover:border-purple-500/30 shadow-md flex items-center gap-3 transition-all group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <HiMegaphone className="w-5 h-5" />
+            </div>
+            <div className="text-left">
+              <p className="text-xs font-black text-gray-900 dark:text-white">{t('Network Broadcast')}</p>
+              <p className="text-[10px] text-gray-400 font-semibold">{t('Push alerts')}</p>
+            </div>
+          </button>
+        </div>
+      )}
+
       {/* 📊 Stats Grid */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -80,18 +156,54 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
         transition={{ duration: 0.5 }}
         className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-5"
       >
-        <StatCard icon={<HiUsers />} title="Users" value={stats?.totalUsers} gradient="from-blue-500 to-indigo-600" />
-        <StatCard icon={<HiDocumentText />} title="Posts" value={stats?.totalPosts} gradient="from-emerald-500 to-teal-600" />
-        <StatCard icon={<HiExclamationTriangle />} title="Reports" value={stats?.pendingReports} gradient="from-rose-500 to-red-600" />
-        <StatCard icon={<HiGlobeAlt />} title="Communities" value={stats?.totalCommunities} gradient="from-fuchsia-500 to-purple-600" />
-        <StatCard icon={<HiMusicalNote />} title="Music" value={stats?.totalMusic} gradient="from-pink-500 to-rose-600" />
-        <StatCard icon={<HiFilm />} title="Reels" value={stats?.totalReels} gradient="from-violet-500 to-indigo-600" />
-        <StatCard icon={<HiSignal />} title="Today's Posts" value={stats?.todayPosts} gradient="from-amber-500 to-orange-600" />
+        <StatCard
+          icon={<HiUsers />}
+          title="Users"
+          value={stats?.totalUsers}
+          gradient="from-blue-500 to-indigo-600"
+          subtitle={stats?.userGrowthRate ? `+${stats.userGrowthRate}%` : null}
+        />
+        <StatCard
+          icon={<HiDocumentText />}
+          title="Posts"
+          value={stats?.totalPosts}
+          gradient="from-emerald-500 to-teal-600"
+          subtitle={stats?.todayPosts ? `+${stats.todayPosts} today` : null}
+        />
+        <StatCard
+          icon={<HiExclamationTriangle />}
+          title="Reports"
+          value={stats?.pendingReports}
+          gradient="from-rose-500 to-red-600"
+        />
+        <StatCard
+          icon={<HiGlobeAlt />}
+          title="Communities"
+          value={stats?.totalCommunities}
+          gradient="from-fuchsia-500 to-purple-600"
+        />
+        <StatCard
+          icon={<HiMusicalNote />}
+          title="Music"
+          value={stats?.totalMusic}
+          gradient="from-pink-500 to-rose-600"
+        />
+        <StatCard
+          icon={<HiFilm />}
+          title="Reels"
+          value={stats?.totalReels}
+          gradient="from-violet-500 to-indigo-600"
+        />
+        <StatCard
+          icon={<HiSignal />}
+          title="Today's Posts"
+          value={stats?.todayPosts}
+          gradient="from-amber-500 to-orange-600"
+        />
       </motion.div>
 
       {/* 📈 Charts & System Health Row */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        
         {/* Weekly Activity Area Chart */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -100,7 +212,7 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
           className="xl:col-span-2 bg-white dark:bg-[#0A0A0A] p-8 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl relative overflow-hidden group"
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          
+
           <div className="relative flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
@@ -117,77 +229,86 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
             </div>
           </div>
 
-          <div className="h-80 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorPosts" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366F1" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorReels" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(156,163,175,0.07)" />
-                <XAxis
-                  dataKey="name"
-                  stroke="rgba(156,163,175,0.5)"
-                  style={{ fontSize: '11px', fontWeight: 'bold' }}
-                  tickLine={false}
-                />
-                <YAxis
-                  stroke="rgba(156,163,175,0.5)"
-                  style={{ fontSize: '11px', fontWeight: 'bold' }}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'rgba(10, 10, 10, 0.95)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: '16px',
-                    fontWeight: 'bold',
-                    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)'
-                  }}
-                  itemStyle={{ fontSize: '12px' }}
-                  labelStyle={{ color: '#fff', fontSize: '12px', marginBottom: '4px' }}
-                />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '15px', fontSize: '11px', fontWeight: 'bold' }} />
-                <Area
-                  name={t("Posts")}
-                  type="monotone"
-                  dataKey="posts"
-                  stroke="#10B981"
-                  strokeWidth={3}
-                  fillOpacity={1}
-                  fill="url(#colorPosts)"
-                />
-                <Area
-                  name={t("Users")}
-                  type="monotone"
-                  dataKey="users"
-                  stroke="#6366F1"
-                  strokeWidth={3}
-                  fillOpacity={1}
-                  fill="url(#colorUsers)"
-                />
-                <Area
-                  name={t("Reels")}
-                  type="monotone"
-                  dataKey="reels"
-                  stroke="#8B5CF6"
-                  strokeWidth={3}
-                  fillOpacity={1}
-                  fill="url(#colorReels)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+          <div className="h-80 w-full min-h-[300px]">
+            {mounted ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="colorPosts" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366F1" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="colorReels" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(156,163,175,0.07)" />
+                  <XAxis
+                    dataKey="name"
+                    stroke="rgba(156,163,175,0.5)"
+                    style={{ fontSize: '11px', fontWeight: 'bold' }}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    stroke="rgba(156,163,175,0.5)"
+                    style={{ fontSize: '11px', fontWeight: 'bold' }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'rgba(10, 10, 10, 0.95)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: '16px',
+                      fontWeight: 'bold',
+                      boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+                    }}
+                    itemStyle={{ fontSize: '12px' }}
+                    labelStyle={{ color: '#fff', fontSize: '12px', marginBottom: '4px' }}
+                  />
+                  <Legend
+                    iconType="circle"
+                    wrapperStyle={{ paddingTop: '15px', fontSize: '11px', fontWeight: 'bold' }}
+                  />
+                  <Area
+                    name={t('Posts')}
+                    type="monotone"
+                    dataKey="posts"
+                    stroke="#10B981"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorPosts)"
+                  />
+                  <Area
+                    name={t('Users')}
+                    type="monotone"
+                    dataKey="users"
+                    stroke="#6366F1"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorUsers)"
+                  />
+                  <Area
+                    name={t('Reels')}
+                    type="monotone"
+                    dataKey="reels"
+                    stroke="#8B5CF6"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorReels)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                {t('Rendering chart telemetry...')}
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -199,7 +320,7 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
           className="bg-white dark:bg-[#0A0A0A] p-8 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl relative overflow-hidden flex flex-col justify-between"
         >
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-          
+
           <div>
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
@@ -218,14 +339,16 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
             {/* RAM Progress Indicator */}
             <div className="space-y-3 mb-8">
               <div className="flex justify-between items-center text-xs font-black uppercase tracking-wider text-gray-500">
-                <span>{t("Memory Load")}</span>
-                <span className="text-indigo-500 font-extrabold">{stats?.system?.memoryUsage || '0.0'}%</span>
+                <span>{t('Memory Load')}</span>
+                <span className="text-indigo-500 font-extrabold">
+                  {stats?.system?.memoryUsage || '0.0'}%
+                </span>
               </div>
               <div className="w-full h-4 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden p-0.5 border border-gray-200 dark:border-white/10">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${stats?.system?.memoryUsage || 0}%` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
+                  transition={{ duration: 1, ease: 'easeOut' }}
                   className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full"
                 />
               </div>
@@ -238,7 +361,9 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
                   <HiCpuChip className="w-4 h-4 text-indigo-500" />
                   <span>CPU Cores</span>
                 </div>
-                <p className="text-lg font-black text-gray-900 dark:text-white">{stats?.system?.cpuCores || '--'}</p>
+                <p className="text-lg font-black text-gray-900 dark:text-white">
+                  {stats?.system?.cpuCores || '--'}
+                </p>
               </div>
 
               <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5">
@@ -246,7 +371,9 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
                   <HiSquare3Stack3D className="w-4 h-4 text-purple-500" />
                   <span>Platform</span>
                 </div>
-                <p className="text-lg font-black text-gray-900 dark:text-white capitalize">{stats?.system?.platform || '--'}</p>
+                <p className="text-lg font-black text-gray-900 dark:text-white capitalize">
+                  {stats?.system?.platform || '--'}
+                </p>
               </div>
 
               <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5">
@@ -254,7 +381,9 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
                   <HiClock className="w-4 h-4 text-emerald-500" />
                   <span>Host Uptime</span>
                 </div>
-                <p className="text-lg font-black text-gray-900 dark:text-white">{formatUptime(stats?.system?.osUptime)}</p>
+                <p className="text-lg font-black text-gray-900 dark:text-white">
+                  {formatUptime(stats?.system?.osUptime)}
+                </p>
               </div>
 
               <div className="p-4 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5">
@@ -262,7 +391,9 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
                   <HiClock className="w-4 h-4 text-pink-500" />
                   <span>Node Uptime</span>
                 </div>
-                <p className="text-lg font-black text-gray-900 dark:text-white">{formatUptime(stats?.system?.processUptime)}</p>
+                <p className="text-lg font-black text-gray-900 dark:text-white">
+                  {formatUptime(stats?.system?.processUptime)}
+                </p>
               </div>
             </div>
           </div>
@@ -271,7 +402,6 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
 
       {/* 📋 Recent Activity Feed & Audits */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
         {/* Recent Registrations */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -279,24 +409,37 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="bg-white dark:bg-[#0A0A0A] p-8 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl relative overflow-hidden"
         >
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-              <HiUsers className="w-6 h-6" />
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                <HiUsers className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-black uppercase tracking-tighter text-gray-900 dark:text-white">
+                  {t('Recent Registrations')}
+                </h2>
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                  {t('Latest joined community members')}
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl font-black uppercase tracking-tighter text-gray-900 dark:text-white">
-                {t('Recent Registrations')}
-              </h2>
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                {t('Latest joined community members')}
-              </p>
-            </div>
+            {onNavigateTab && (
+              <button
+                onClick={() => onNavigateTab('Users')}
+                className="text-xs font-black uppercase tracking-wider text-indigo-500 hover:text-indigo-400 transition-colors"
+              >
+                {t('View All')} →
+              </button>
+            )}
           </div>
 
           <div className="space-y-4">
             {stats?.recentUsers?.length > 0 ? (
               stats.recentUsers.map((user) => (
-                <div key={user._id} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 hover:border-blue-500/20 transition-all text-xs md:text-sm">
+                <div
+                  key={user._id}
+                  className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 hover:border-blue-500/20 transition-all text-xs md:text-sm"
+                >
                   <div className="flex items-center gap-4 min-w-0">
                     <div className="w-11 h-11 rounded-xl overflow-hidden relative border-2 border-gray-200 dark:border-white/10 flex-shrink-0">
                       <Image
@@ -307,46 +450,66 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
                       />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-bold text-gray-900 dark:text-white truncate">{user.username}</p>
+                      <p className="font-bold text-gray-900 dark:text-white truncate">
+                        {user.username}
+                      </p>
                       <p className="text-xs text-gray-400 truncate">{user.email}</p>
                     </div>
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 whitespace-nowrap">
-                    {new Date(user.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    {new Date(user.createdAt).toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                    })}
                   </span>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-gray-400 text-center py-10 font-medium">{t("No users found")}</p>
+              <p className="text-sm text-gray-400 text-center py-10 font-medium">
+                {t('No users found')}
+              </p>
             )}
           </div>
         </motion.div>
 
-        {/* Recent Audit/Reports */}
+        {/* Recent Pending Reports */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
           className="bg-white dark:bg-[#0A0A0A] p-8 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-xl relative overflow-hidden"
         >
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500">
-              <HiExclamationTriangle className="w-6 h-6" />
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500">
+                <HiExclamationTriangle className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-black uppercase tracking-tighter text-gray-900 dark:text-white">
+                  {t('Pending Audits')}
+                </h2>
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                  {t('Latest reported items requiring attention')}
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl font-black uppercase tracking-tighter text-gray-900 dark:text-white">
-                {t('Pending Audits')}
-              </h2>
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                {t('Latest reported items requiring attention')}
-              </p>
-            </div>
+            {onNavigateTab && (
+              <button
+                onClick={() => onNavigateTab('Reports')}
+                className="text-xs font-black uppercase tracking-wider text-rose-500 hover:text-rose-400 transition-colors"
+              >
+                {t('View All')} →
+              </button>
+            )}
           </div>
 
           <div className="space-y-4">
             {stats?.recentReports?.length > 0 ? (
               stats.recentReports.map((report) => (
-                <div key={report._id} className="p-4 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 flex flex-col gap-2 hover:border-rose-500/20 transition-all">
+                <div
+                  key={report._id}
+                  className="p-4 rounded-2xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 flex flex-col gap-2 hover:border-rose-500/20 transition-all"
+                >
                   <div className="flex justify-between items-start gap-4 text-xs md:text-sm">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg overflow-hidden relative border border-gray-200 dark:border-white/10 flex-shrink-0">
@@ -366,15 +529,17 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
                         </p>
                       </div>
                     </div>
-                    
+
                     {/* Severity Badge */}
-                    <span className={`px-2 py-0.5 rounded text-[8px] uppercase font-black tracking-widest border ${
-                      report.severity === 'critical' || report.severity === 'high'
-                        ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
-                        : report.severity === 'medium'
-                        ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                        : 'bg-blue-500/10 text-blue-500 border-blue-500/20'
-                    }`}>
+                    <span
+                      className={`px-2 py-0.5 rounded text-[8px] uppercase font-black tracking-widest border ${
+                        report.severity === 'critical' || report.severity === 'high'
+                          ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                          : report.severity === 'medium'
+                          ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                          : 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                      }`}
+                    >
                       {report.severity || 'low'}
                     </span>
                   </div>
@@ -384,11 +549,12 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-gray-400 text-center py-10 font-medium">{t("No pending reviews")}</p>
+              <p className="text-sm text-gray-400 text-center py-10 font-medium">
+                {t('No pending reviews')}
+              </p>
             )}
           </div>
         </motion.div>
-
       </div>
     </motion.div>
   );
@@ -396,7 +562,7 @@ const DashboardTab = React.memo(({ stats, loading, getAdminStats }) => {
 
 DashboardTab.displayName = 'DashboardTab';
 
-const StatCard = React.memo(({ icon, title, value, gradient }) => {
+const StatCard = React.memo(({ icon, title, value, gradient, subtitle }) => {
   const { t } = useTranslation();
 
   return (
@@ -404,10 +570,14 @@ const StatCard = React.memo(({ icon, title, value, gradient }) => {
       whileHover={{ scale: 1.02, y: -4 }}
       className="relative group bg-white dark:bg-[#0A0A0A] p-5 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-xl transition-all overflow-hidden"
     >
-      <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${gradient} opacity-5 blur-2xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:opacity-10 transition-opacity`} />
+      <div
+        className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${gradient} opacity-5 blur-2xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:opacity-10 transition-opacity`}
+      />
 
-      <div className="relative flex flex-col items-center justify-center text-center space-y-3">
-        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-lg`}>
+      <div className="relative flex flex-col items-center justify-center text-center space-y-2">
+        <div
+          className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-lg`}
+        >
           {React.cloneElement(icon, { className: 'w-6 h-6' })}
         </div>
         <p className="text-2xl font-black text-gray-900 dark:text-white tabular-nums">
@@ -416,6 +586,12 @@ const StatCard = React.memo(({ icon, title, value, gradient }) => {
         <p className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">
           {t(title)}
         </p>
+        {subtitle && (
+          <span className="text-[8px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+            <HiArrowTrendingUp className="w-2.5 h-2.5" />
+            {subtitle}
+          </span>
+        )}
       </div>
     </motion.div>
   );

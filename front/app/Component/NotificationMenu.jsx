@@ -12,7 +12,7 @@ import {
   HiCheckCircle,
   HiInboxStack
 } from 'react-icons/hi2';
-import { useNotify } from '../Context/NotifyContext';
+import { useNotify } from '@/app/redux/hooks';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';

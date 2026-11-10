@@ -1,10 +1,10 @@
 'use client';
 import React, { memo, useMemo } from 'react';
-import { useMessage } from '../../Context/MessageContext';
+import { useMessage } from '@/app/redux/hooks';
 import Image from 'next/image';
 import dayjs from 'dayjs';
 import Link from 'next/link';
-import { useAuth } from '../../Context/AuthContext';
+import { useAuth } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 

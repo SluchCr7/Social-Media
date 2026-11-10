@@ -6,12 +6,12 @@ import React, {
 } from 'react';
 import Image from 'next/image';
 import SluchitEntry from './SluchitEntry';
-import { usePost } from '../Context/PostContext';
-import { useAuth } from '../Context/AuthContext';
+import { usePost } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
 import PostSkeleton from '../Skeletons/PostSkeleton';
-import { useCommunity } from '../Context/CommunityContext';
+import { useCommunity } from '@/app/redux/hooks';
 import { SuggestionRow } from './SuggestedRow';
-import { useUser } from '../Context/UserContext';
+import { useUser } from '@/app/redux/hooks';
 import { useGetData } from '../Custome/useGetData';
 import { useTranslation } from 'react-i18next';
 import { UserPlus, Sparkles } from 'lucide-react';

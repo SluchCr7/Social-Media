@@ -11,7 +11,12 @@ const withPWA = require('next-pwa')({
 
 module.exports = withPWA({
   reactStrictMode: true,
+  compress: true,
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'react-icons', 'dayjs', 'framer-motion'],
+  },
   images: {
+    formats: ['image/avif', 'image/webp'],
     domains: [
       'res.cloudinary.com',
       'cdn.pixabay.com',

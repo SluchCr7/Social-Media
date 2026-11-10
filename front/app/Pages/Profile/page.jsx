@@ -9,12 +9,12 @@ const AddStoryModel = dynamic(() => import('@/app/Component/AddandUpdateMenus/Ad
 const FollowModal = dynamic(() => import("@/app/Component/UserComponents/FollowModal"), {
   ssr: false,
 });
-import { useAuth } from "@/app/Context/AuthContext"
+import { useAuth } from '@/app/redux/hooks';
 import { useProfilePosts } from "@/app/Custome/useProfilePosts"
 import ProfileSkeleton from "@/app/Skeletons/ProfileSkeleton"
 import { useState } from "react"
-import { useUser } from "@/app/Context/UserContext"
-import { useStory } from "@/app/Context/StoryContext"
+import { useUser } from '@/app/redux/hooks';
+import { useStory } from '@/app/redux/hooks';
 import { FiX } from "react-icons/fi"
 import { useEffect } from "react"
 

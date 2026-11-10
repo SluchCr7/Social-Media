@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { HiXMark, HiMusicalNote, HiPhoto, HiCloudArrowUp, HiSparkles, HiQueueList, HiCheckCircle } from 'react-icons/hi2';
 import Image from 'next/image';
-import { useMusic } from '../../Context/MusicContext';
+import { useMusic } from '@/app/redux/hooks';
 
 const genres = ['Pop', 'Rock', 'HipHop', 'Jazz', 'Classical', 'Lo-Fi', 'Electronic', 'Ambient', 'Trap', 'Other'];
 

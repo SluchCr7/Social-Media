@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { useVerify } from '@/app/Context/VerifyContext';
+import { useVerify } from '@/app/redux/hooks';
 
 
 const Login = () => {

@@ -4,29 +4,129 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sluchitte API</title>
+    <meta name="theme-color" content="#0b0b12" />
+    <title>Zocial API | Server</title>
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: #0b0b12;
+            color: #f5f5f7;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            text-align: center;
+            padding: 55px 35px;
+            background: #12121c;
+            border: 1px solid #292638;
+            border-radius: 20px;
+            box-shadow: 0 20px 70px rgba(0, 0, 0, 0.35);
+        }
+
+        .logo {
+            width: 58px;
+            height: 58px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 25px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            font-size: 27px;
+            font-weight: 800;
         }
 
         h1 {
-            color: #333;
-            text-transform: capitalize;
-            font-weight: 700;
-            font-style: italic;
+            font-size: clamp(30px, 6vw, 42px);
+            letter-spacing: -1.5px;
+            margin-bottom: 14px;
+        }
+
+        h1 span {
+            color: #a78bfa;
+        }
+
+        .description {
+            color: #9996a8;
+            font-size: 15px;
+            line-height: 1.7;
+            max-width: 430px;
+            margin: 0 auto 30px;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 10px 16px;
+            border: 1px solid #28563e;
+            border-radius: 30px;
+            background: #14251c;
+            color: #86efac;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 10px #4ade80;
+        }
+
+        .footer {
+            margin-top: 45px;
+            padding-top: 22px;
+            border-top: 1px solid #292638;
+            color: #696779;
+            font-size: 12px;
+        }
+
+        .footer span {
+            color: #a78bfa;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 45px 22px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <h1>HomePage for Zocial API</h1>
+    <main class="container">
+        <div class="logo">Z</div>
+
+        <h1>Welcome to <span>Zocial</span></h1>
+
+        <p class="description">
+            The backend service powering the Zocial platform.
+            Providing secure APIs and services for a connected social experience.
+        </p>
+
+        <div class="status">
+            <span class="dot"></span>
+            Server is running
+        </div>
+
+        <div class="footer">
+            <p> Zocial API &nbsp;·&nbsp; Built with <span>Node.js</span> &amp; Express</p>
+        </div>
+    </main>
 </body>
 
 </html>

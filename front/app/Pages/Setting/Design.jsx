@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useCallback, useMemo, Suspense, lazy } from 'react';
+import React, { useState, useCallback, useMemo, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import {
   User,
   Settings,
@@ -16,17 +17,17 @@ import {
 import { useTranslation } from 'react-i18next';
 import { SettingsLayout, SettingsSidebar } from '@/app/Component/Setting/SettingsComponents';
 
-// Lazy loaded Tab Panels
-const AppearanceTab = lazy(() => import('./Tabs/Appearance'));
-const Security = lazy(() => import('./Tabs/Security'));
-const AccountTab = lazy(() => import('./Tabs/AccountTab'));
-const LanguageTab = lazy(() => import('./Tabs/LanguageTab'));
-const HistoryTab = lazy(() => import('./Tabs/HistoryTab'));
-const UpdateProfile = lazy(() => import('@/app/Component/AddandUpdateMenus/UpdateProfile'));
-const NotificationTab = lazy(() => import('./Tabs/NotificationTab'));
-const CommunityTab = lazy(() => import('./Tabs/CommunityTab'));
-const PrivacyTab = lazy(() => import('./Tabs/PrivacyTab'));
-const HelpTab = lazy(() => import('./Tabs/HelpTab'));
+// Lazy loaded Tab Panels with true client code-splitting
+const AppearanceTab = dynamic(() => import('./Tabs/Appearance'), { ssr: false });
+const Security = dynamic(() => import('./Tabs/Security'), { ssr: false });
+const AccountTab = dynamic(() => import('./Tabs/AccountTab'), { ssr: false });
+const LanguageTab = dynamic(() => import('./Tabs/LanguageTab'), { ssr: false });
+const HistoryTab = dynamic(() => import('./Tabs/HistoryTab'), { ssr: false });
+const UpdateProfile = dynamic(() => import('@/app/Component/AddandUpdateMenus/UpdateProfile'), { ssr: false });
+const NotificationTab = dynamic(() => import('./Tabs/NotificationTab'), { ssr: false });
+const CommunityTab = dynamic(() => import('./Tabs/CommunityTab'), { ssr: false });
+const PrivacyTab = dynamic(() => import('./Tabs/PrivacyTab'), { ssr: false });
+const HelpTab = dynamic(() => import('./Tabs/HelpTab'), { ssr: false });
 
 // Define the 5 logical settings sections
 const SECTIONS = [

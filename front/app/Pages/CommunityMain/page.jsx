@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react'
-import { useCommunity } from '@/app/Context/CommunityContext'
-import { useAuth } from '@/app/Context/AuthContext'
+import { useCommunity } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
 import MaidDesign from './MaidDesign'
 import { useGetData } from '@/app/Custome/useGetData'
 

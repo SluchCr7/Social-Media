@@ -5,9 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { IoAdd, IoEyeSharp } from 'react-icons/io5'
 import { HiLockClosed, HiLockOpen, HiLink } from 'react-icons/hi'
 import Link from 'next/link'
-import { useAuth } from '../../Context/AuthContext'
+import { useAuth } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next'
-import { useTranslate } from '@/app/Context/TranslateContext'
+import { useTranslate } from '@/app/redux/hooks';
 
 const MenuItem = ({ icon, children, onClick, danger }) => (
   <button

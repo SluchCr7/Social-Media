@@ -12,9 +12,9 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Select from 'react-select';
-import { useStory } from '../../Context/StoryContext';
-import { useAuth } from '../../Context/AuthContext';
-import { useHighlights } from '@/app/Context/HighlightContext';
+import { useStory } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
+import { useHighlights } from '@/app/redux/hooks';
 import { useGetData } from '@/app/Custome/useGetData';
 import { useTranslation } from 'react-i18next';
 import Image from 'next/image';

@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useEffect, useMemo, useState, useCallback, Suspense, useRef } from 'react'
-import { useMusic } from '../../Context/MusicContext'
-import { useMusicPlayer } from '../../Context/MusicPlayerContext'
-import { useAuth } from '@/app/Context/AuthContext'
-import { useUser } from '@/app/Context/UserContext'
+import { useMusic } from '@/app/redux/hooks';
+import { useMusicPlayer } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
+import { useUser } from '@/app/redux/hooks';
 import { useGetData } from '@/app/Custome/useGetData'
 import Loading from '@/app/Component/Loading'
 

@@ -1,107 +1,167 @@
-// const { Server } = require("socket.io");
-// const http = require("http");
-// const express = require("express");
-// const cors = require('cors');
-// const app = express();
-// const server = http.createServer(app);
-
-// // Setup socket.io with CORS
-// const io = new Server(server, {
-//     cors: {
-//         origin: process.env.DOMAIN_NAME,
-//     },
-// });
-// function getReceiverSocketId(userId) {
-//   return userSocketMap[userId];
-// }
-
-
-
-// // used to store online users
-// const userSocketMap = {}; // {userId: socketId}
-
-// io.on("connection", (socket) => {
-//   console.log("A user connected", socket.id);
-
-//   const userId = socket.handshake.query.userId;
-//   if (userId) userSocketMap[userId] = socket.id;
-
-//   // io.emit() is used to send events to all the connected clients
-//   io.emit("getOnlineUsers", Object.keys(userSocketMap));
-
-//   socket.on("disconnect", () => {
-//     console.log("A user disconnected", socket.id);
-//     delete userSocketMap[userId];
-//     io.emit("getOnlineUsers", Object.keys(userSocketMap));
-//   });
-// });
-
-// module.exports ={ io, app, server , getReceiverSocketId };
 
 const { Server } = require("socket.io");
 const http = require("http");
 const express = require("express");
-const cors = require("cors");
+
+const { verifyAccessToken } = require("../utils/tokenUtils");
+const { User } = require("../Modules/User");
 
 const app = express();
 const server = http.createServer(app);
 
-// Setup socket.io with CORS
+const allowedOrigin =
+    process.env.DOMAIN_NAME || "http://localhost:3000";
+
 const io = new Server(server, {
-  cors: {
-    origin: process.env.DOMAIN_NAME,
-  },
+    cors: {
+        origin: allowedOrigin,
+        credentials: true,
+    },
 });
 
-// used to store online users
-const userSocketMap = {}; // {userId: socketId}
+// userId => Set of socketIds
+const userSocketMap = new Map();
 
-// 🔹 دالة لإرجاع socketId للمستلم
+function parseCookieHeader(cookieHeader) {
+    const cookies = {};
+
+    if (!cookieHeader) return cookies;
+
+    for (const pair of cookieHeader.split(";")) {
+        const idx = pair.indexOf("=");
+
+        if (idx === -1) continue;
+
+        const key = pair.slice(0, idx).trim();
+        const value = pair.slice(idx + 1).trim();
+
+        try {
+            cookies[key] = decodeURIComponent(value);
+        } catch {
+            cookies[key] = value;
+        }
+    }
+
+    return cookies;
+}
+
 function getReceiverSocketId(userId) {
-  return userSocketMap[userId];
+    const socketIds = userSocketMap.get(String(userId));
+
+    return socketIds ? [...socketIds] : [];
 }
 
-io.on("connection", (socket) => {
-  console.log("🟢 A user connected:", socket.id);
+function getOnlineUsers() {
+    return [...userSocketMap.keys()];
+}
 
-  const userId = socket.handshake.query.userId;
-  if (userId) userSocketMap[userId] = socket.id;
+// Authentication
+io.use(async (socket, next) => {
+    try {
+        const cookies = parseCookieHeader(
+            socket.request?.headers?.cookie
+        );
 
-  // 🔹 إرسال قائمة الأونلاين
-  io.emit("getOnlineUsers", Object.keys(userSocketMap));
+        const token = cookies.accessToken;
 
-  // لما يفصل المستخدم
-  socket.on("disconnect", () => {
-    console.log("🔴 A user disconnected:", socket.id);
-    delete userSocketMap[userId];
-    io.emit("getOnlineUsers", Object.keys(userSocketMap));
-  });
+        if (!token) {
+            return next(new Error("Authentication required"));
+        }
+
+        const { payload, expired, error } = verifyAccessToken(token);
+
+        if (expired || error || !payload?._id) {
+            return next(new Error("Invalid or expired authentication"));
+        }
+
+        const user = await User.findById(payload._id)
+            .select("_id accountStatus suspendedUntil isAdmin username");
+
+        if (!user) {
+            return next(new Error("Authentication failed"));
+        }
+
+        if (
+            user.accountStatus === "banned" ||
+            (
+                user.accountStatus === "suspended" &&
+                user.suspendedUntil &&
+                new Date(user.suspendedUntil) > new Date()
+            )
+        ) {
+            return next(new Error("Account access denied"));
+        }
+
+        socket.userId = String(user._id);
+
+        socket.user = {
+            _id: String(user._id),
+            isAdmin: Boolean(user.isAdmin),
+            username: user.username,
+        };
+
+        next();
+    } catch (error) {
+        console.error("[Socket Authentication]", error.message);
+
+        next(new Error("Socket authentication failed"));
+    }
 });
 
-/**
- * 🔹 دالة إرسال إشعار فوري
- * @param {string} receiverId - آي دي المستلم
- * @param {object} notification - بيانات الإشعار
- */
+// Connections
+io.on("connection", (socket) => {
+    const userId = socket.userId;
+
+    if (!userSocketMap.has(userId)) {
+        userSocketMap.set(userId, new Set());
+    }
+
+    userSocketMap.get(userId).add(socket.id);
+
+    console.log(`Socket connected: ${userId}`);
+
+    io.emit("getOnlineUsers", getOnlineUsers());
+
+    socket.on("disconnect", () => {
+        const socketIds = userSocketMap.get(userId);
+
+        if (socketIds) {
+            socketIds.delete(socket.id);
+
+            if (socketIds.size === 0) {
+                userSocketMap.delete(userId);
+            }
+        }
+
+        io.emit("getOnlineUsers", getOnlineUsers());
+
+        console.log(`Socket disconnected: ${userId}`);
+    });
+});
+
+// Notifications
 function sendNotification(receiverId, notification) {
-  const receiverSocketId = getReceiverSocketId(receiverId);
-  if (receiverSocketId) {
-    io.to(receiverSocketId).emit("notification", notification);
-    console.log("📩 Sent notification to:", receiverId);
-  }
+    const socketIds = getReceiverSocketId(receiverId);
+
+    socketIds.forEach((socketId) => {
+        io.to(socketId).emit("notification", notification);
+    });
 }
 
-/**
- * 🔹 دالة إرسال رسالة فورية
- * @param {string} receiverId - آي دي المستلم
- * @param {object} message - بيانات الرسالة
- */
+// Messages
 function sendMessage(receiverId, message) {
-  const receiverSocketId = getReceiverSocketId(receiverId);
-  if (receiverSocketId) {
-    io.to(receiverSocketId).emit("newMessage", message);
-    console.log("💬 Sent message to:", receiverId);
-  }
+    const socketIds = getReceiverSocketId(receiverId);
+
+    socketIds.forEach((socketId) => {
+        io.to(socketId).emit("newMessage", message);
+    });
 }
 
-module.exports = { io, app, server, getReceiverSocketId, sendNotification, sendMessage };
+module.exports = {
+    io,
+    app,
+    server,
+    getReceiverSocketId,
+    sendNotification,
+    sendMessage,
+};

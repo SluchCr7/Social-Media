@@ -13,9 +13,9 @@ import {
   MessageSquareOff,
   Zap
 } from 'lucide-react';
-import { useMessage } from '../../Context/MessageContext';
-import { useAuth } from '../../Context/AuthContext';
-import { useUser } from '@/app/Context/UserContext';
+import { useMessage } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
+import { useUser } from '@/app/redux/hooks';
 import SidebarSkeleton from '@/app/Skeletons/SidebarSkeleton';
 import MenuUser from './MenuUser';
 import { Avatar } from '../ui/Avatar';

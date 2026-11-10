@@ -12,8 +12,8 @@ import {
   User as UserIcon
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "../../Context/AuthContext";
-import { usePost } from "@/app/Context/PostContext";
+import { useAuth } from '@/app/redux/hooks';
+import { usePost } from '@/app/redux/hooks';
 import { useTranslation } from "react-i18next";
 import React from "react";
 import { Button } from "../ui/Button";

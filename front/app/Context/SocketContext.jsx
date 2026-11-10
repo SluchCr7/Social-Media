@@ -1,44 +1,19 @@
-'use client'
-import { createContext, useContext, useEffect, useState } from "react";
-import { io } from "socket.io-client";
-import { useAuth } from "./AuthContext";
+'use client';
 
-export const SocketContext = createContext();
+/**
+ * @deprecated
+ * LEGACY INACTIVE CONTEXT
+ *
+ * This file is preserved for historical architecture records only.
+ * It has ZERO active responsibilities in the application.
+ *
+ * All state management and server communication are unified under
+ * Redux Toolkit and RTK Query via direct hooks in `@/app/redux/hooks`.
+ */
 
-export const SocketProvider = ({ children }) => {
-  const { user } = useAuth();
-  const [socket, setSocket] = useState(null);
+export const SocketContextProvider = ({ children }) => <>{children}</>;
+export const SocketContext = null;
 
-  useEffect(() => {
-    if (user?._id) {
-      // ✅ Connect socket with userId
-      const newSocket = io(process.env.NEXT_PUBLIC_BACK_URL, {
-        query: { userId: user._id },
-        transports: ["websocket"],
-      });
-
-      setSocket(newSocket);
-
-      // Debug
-      newSocket.on("connect", () => {
-        console.log("🟢 Socket connected:", newSocket.id);
-      });
-
-      newSocket.on("disconnect", () => {
-        console.log("🔴 Socket disconnected");
-      });
-
-      return () => {
-        newSocket.disconnect();
-      };
-    }
-  }, [user?._id]);
-
-  return (
-    <SocketContext.Provider value={{ socket }}>
-      {children}
-    </SocketContext.Provider>
-  );
-};
-
-export const useSocket = () => useContext(SocketContext);
+export default function DeprecatedSocketContext() {
+  return null;
+}

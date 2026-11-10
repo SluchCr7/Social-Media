@@ -16,9 +16,9 @@ import {
   HiQueueList,
   HiHeart
 } from 'react-icons/hi2'
-import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
-import { useMusic } from '@/app/Context/MusicContext'
-import { useAuth } from '@/app/Context/AuthContext'
+import { useMusicPlayer } from '@/app/redux/hooks';
+import { useMusic } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next'
 import ColorThief from 'colorthief'
 import Slider from 'rc-slider'

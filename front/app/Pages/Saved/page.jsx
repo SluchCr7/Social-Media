@@ -4,11 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FaBookmark, FaSearch, FaPlay, FaPause, FaTimes } from 'react-icons/fa'
 import { useProfilePosts } from '@/app/Custome/useProfilePosts'
 import SluchitEntry from '@/app/Component/SluchitEntry'
-import { useAuth } from '@/app/Context/AuthContext'
+import { useAuth } from '@/app/redux/hooks';
 import { useGetData } from '@/app/Custome/useGetData'
-import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
+import { useMusicPlayer } from '@/app/redux/hooks';
 import Image from 'next/image'
-import { usePost } from '@/app/Context/PostContext'
+import { usePost } from '@/app/redux/hooks';
 import SavedPageSkeleton from '@/app/Skeletons/SavedSkeleton'
 import { useTranslation } from 'react-i18next'
 import { Disc3, Layers, Film, Grid } from 'lucide-react'

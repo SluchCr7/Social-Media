@@ -1,8 +1,8 @@
 'use client';
 import React, { useState } from 'react';
-import { useAuth } from '@/app/Context/AuthContext';
+import { useAuth } from '@/app/redux/hooks';
 import { FiEye, FiEyeOff, FiLock, FiArrowRight } from 'react-icons/fi';
-import { useVerify } from '@/app/Context/VerifyContext';
+import { useVerify } from '@/app/redux/hooks';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';

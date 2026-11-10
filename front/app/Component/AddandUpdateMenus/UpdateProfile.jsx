@@ -13,7 +13,7 @@ import {
   Languages,
   Heart
 } from 'lucide-react';
-import { useUser } from '@/app/Context/UserContext';
+import { useUser } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
 import { Avatar } from '../ui/Avatar';

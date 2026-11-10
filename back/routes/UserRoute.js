@@ -13,6 +13,9 @@ const {
   RegisterNewUser,
   LoginUser,
   LogoutUser,
+  LogoutAllSessions,
+  RefreshToken,
+  GetCurrentUser,
   verifyAccount,
   uploadPhoto,
   uploadCoverPhoto,
@@ -45,14 +48,19 @@ const authLimiter = rateLimit({
 });
 
 // User routes
-route.route('/').get(verifyAdmin, getAllUsers);
+route.route('/').get(getAllUsers);
 route.route('/suggested').get(verifyToken, getSuggestedUsers);
 route.route('/block/:id').put(verifyToken, blockOrUnblockUser);
+// Auth verification & session endpoints
+route.route('/me').get(verifyToken, GetCurrentUser);
+route.route('/refresh').post(RefreshToken);
+
 route.route('/:id').get(getUserById);
 route.route('/delete').delete(verifyToken, DeleteUser);
 route.route('/login').post(authLimiter, LoginUser);
 route.route('/register').post(authLimiter, RegisterNewUser);
 route.route('/logout').post(LogoutUser);
+route.route('/logout-all').post(verifyToken, LogoutAllSessions);
 route.route('/admin/:id').put(verifyAdmin, makeUserAdmin);
 route.route('/:id/verify/:token').get(verifyAccount);
 route.route('/photo').post(verifyToken, photoUpload.single('image'), uploadPhoto);
@@ -62,7 +70,7 @@ route.route('/update').put(verifyToken, updateProfile);
 route.route('/update/pass').put(verifyToken, updatePassword);
 route.route('/pin/:id').put(verifyToken, pinPost);
 route.route('/social').put(verifyToken, updateLinksSocial);
-route.route('/deleteAll').delete(deleteAllUsers);
+route.route('/deleteAll').delete(verifyAdmin, deleteAllUsers);
 route.route('/verify').put(verifyToken, MakeAccountPreimumVerify);
 route.route('/account/private').put(verifyToken, togglePrivateAccount);
 route.route('/save/music/:songId').put(verifyToken, toggleSongInPlaylist);

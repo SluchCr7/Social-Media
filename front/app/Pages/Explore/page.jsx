@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { useAuth } from '../../Context/AuthContext';
-import { useNews } from '@/app/Context/NewsContext';
-import { useExplore } from '@/app/Context/ExploreContext';
-import { useSearch } from '@/app/Context/SearchContext';
+import { useAuth } from '@/app/redux/hooks';
+import { useNews } from '@/app/redux/hooks';
+import { useExplore } from '@/app/redux/hooks';
+import { useSearch } from '@/app/redux/hooks';
 import DesignExplore from './DesignExplore';
-import { useUser } from '@/app/Context/UserContext';
+import { useUser } from '@/app/redux/hooks';
 import { useGetData } from '@/app/Custome/useGetData';
 import ExploreSkeleton from '@/app/Skeletons/ExploreSkeleton';
 

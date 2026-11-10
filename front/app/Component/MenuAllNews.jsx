@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { useNews } from '../Context/NewsContext';
+import { useNews } from '@/app/redux/hooks';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FiX } from 'react-icons/fi';
@@ -22,7 +22,7 @@ const MenuAllNews = ({ showAllNews, setShowAllNews }) => {
   // استدعاء الأخبار كل ما الفلاتر تتغير
   useEffect(() => {
     fetchAllNews(filters);
-  }, [filters]);
+  }, [filters, fetchAllNews]);
 
   // تحديث AllNews لما news يتغير
   const AllNews = news || [];

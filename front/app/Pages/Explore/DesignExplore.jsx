@@ -14,7 +14,7 @@ import {
 } from "react-icons/hi2";
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { usePost } from '@/app/Context/PostContext';
+import { usePost } from '@/app/redux/hooks';
 import ExploreSearchBar from '../../Component/Explore/ExploreSearchBar';
 import SearchResults from '../../Component/Explore/SearchResults';
 import ExploreTabs from '../../Component/Explore/ExploreTabs';

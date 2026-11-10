@@ -1,6 +1,6 @@
 'use client'
 import React, { memo, useMemo } from 'react'
-import { useEvent } from '../../Context/EventContext'
+import { useEvent } from '@/app/redux/hooks';
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   HiCake,

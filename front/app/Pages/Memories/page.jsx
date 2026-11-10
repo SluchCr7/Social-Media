@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect } from 'react';
-import { usePost } from '@/app/Context/PostContext';
+import { usePost } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 import MemoriesDesign from './Design';
 import Loading from '@/app/Component/Loading';

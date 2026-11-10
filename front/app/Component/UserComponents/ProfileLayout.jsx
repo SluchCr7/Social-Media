@@ -12,13 +12,13 @@ import TabsContent from "./TabsContent"
 import FilterBar from "./FilterBar"
 import PostSkeleton from "@/app/Skeletons/PostSkeleton"
 import HighlightsBar from "../Highlights"
-import { useHighlights } from "@/app/Context/HighlightContext"
+import { useHighlights } from '@/app/redux/hooks';
 import { memo } from "react"
 import StickyProfileBar from "./StickyProfileBar"
 import AdultContentWarning from "../AdultAlert"
-import { useUser } from "@/app/Context/UserContext"
-import { useAuth } from "@/app/Context/AuthContext"
-import { useStory } from "@/app/Context/StoryContext"
+import { useUser } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
+import { useStory } from '@/app/redux/hooks';
 
 const ProfileLayout = ({
   user,

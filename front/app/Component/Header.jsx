@@ -3,10 +3,10 @@
 import Link from 'next/link';
 import React from 'react';
 import { Bell, MessageCircle, Search, Menu, PlusSquare , ShieldCheck } from 'lucide-react';
-import { useNotify } from '../Context/NotifyContext';
-import { useAuth } from '../Context/AuthContext';
+import { useNotify } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
 import { IoIosLogIn } from 'react-icons/io';
-import { useAside } from '../Context/AsideContext';
+import { useAside } from '@/app/redux/hooks';
 import { motion } from 'framer-motion';
 import { tabsHeader } from '../utils/Data';
 import { useTranslation } from 'react-i18next';

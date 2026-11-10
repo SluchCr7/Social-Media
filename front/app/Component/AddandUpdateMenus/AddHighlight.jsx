@@ -9,8 +9,8 @@ import {
   Check,
 } from 'lucide-react';
 import Image from 'next/image';
-import { useHighlights } from '@/app/Context/HighlightContext';
-import { useAlert } from '@/app/Context/AlertContext';
+import { useHighlights } from '@/app/redux/hooks';
+import { useAlert } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 

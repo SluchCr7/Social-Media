@@ -9,8 +9,8 @@ import {
 } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
 import { useGetData } from '@/app/Custome/useGetData'
-import { useAuth } from '@/app/Context/AuthContext'
-import { useUser } from '@/app/Context/UserContext'
+import { useAuth } from '@/app/redux/hooks';
+import { useUser } from '@/app/redux/hooks';
 
 import { format } from 'date-fns'
 

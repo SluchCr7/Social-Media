@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldAlert, Eye, EyeOff } from 'lucide-react';
-import { useAlert } from '../Context/AlertContext';
+import { useAlert } from '@/app/redux/hooks';
 
 const AdultContentWarning = () => {
   const [showContent, setShowContent] = useState(false);

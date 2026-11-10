@@ -1,331 +1,80 @@
-const { Story } = require("../Modules/Story");
 const asyncHandler = require("express-async-handler");
-// 🔔 Socket.io & Notifications
-const { io } = require("../Config/socket");
-const { cloudUpload } = require("../Config/cloudUpload");
-const { User } = require('../Modules/User');
-const { storyPopulate } = require("../Populates/Populate");
-const { sendNotificationHelper } = require("../utils/SendNotification");
+const storyService = require("../Services/storyService");
 
-/**
- * @desc Add a new story (image, text, or both)
- * @route POST /api/stories/add
- * @access Private
- */
+const send = (res, result) => res.status(result.status).json(result.body);
+
 const addNewStory = asyncHandler(async (req, res) => {
-  const {
-    text,
-    collaborators = [],
-    mentions = [],
-    music,
-    link,
-    isCloseFriends = false
-  } = req.body;
-
-  let photoUrl = "";
-
-  if (req.file) {
-    const result = await cloudUpload(req.file);
-    photoUrl = result.secure_url;
-  }
-
-  if (!text && !photoUrl) {
-    return res.status(400).json({ message: "You must provide at least text or a photo." });
-  }
-
-  const parsedCollaborators = typeof collaborators === "string" ? JSON.parse(collaborators) : collaborators;
-  const parsedMentions = typeof mentions === "string" ? JSON.parse(mentions) : mentions;
-  const parsedMusic = typeof music === "string" ? JSON.parse(music) : music;
-  const parsedLink = typeof link === "string" ? JSON.parse(link) : link;
-
-  const story = new Story({
-    text: text || "",
-    Photo: photoUrl ? [photoUrl] : [],
-    owner: req.user._id,
-    collaborators: parsedCollaborators,
-    mentions: parsedMentions,
-    music: parsedMusic,
-    link: parsedLink,
-    isCloseFriends: isCloseFriends === "true" || isCloseFriends === true,
-  });
-
-  await story.save();
-  await story.populate(storyPopulate);
-
-  const user = await User.findById(req.user._id);
-  user.userLevelPoints += 5;
-  user.updateLevelRank();
-  await user.save();
-
-  if (parsedMentions?.length > 0) {
-    for (const mentionId of parsedMentions) {
-      if (mentionId.toString() !== req.user._id.toString()) {
-        await sendNotificationHelper({
-          sender: req.user._id,
-          receiver: mentionId,
-          content: `🏷 Mentioned you in a Story`,
-          type: "mention",
-          actionRef: story._id,
-          actionModel: "Story",
-        });
-      }
-    }
-  }
-
-  io.emit("new-story", story);
-
-  res.status(201).json({ message: "Story added successfully", story });
+  return send(res, await storyService.addNewStory({
+    body: req.body,
+    file: req.file,
+    userId: req.user._id
+  }));
 });
 
-/**
- * @desc Get all active stories
- * @route GET /api/stories
- * @access Public/Private
- */
 const getAllStories = asyncHandler(async (req, res) => {
-  try {
-    const now = new Date();
-
-    let query = {
-      expiresAt: { $gt: now },
-      isArchived: false,
-      isDeleted: false
-    };
-
-    const stories = await Story.find(query)
-      .populate(storyPopulate)
-      .sort({ createdAt: -1 });
-
-    const filteredStories = stories.filter(story => {
-      if (!story.isCloseFriends) return true;
-      if (!req.user) return false;
-      return story.owner._id.toString() === req.user._id.toString();
-    });
-
-    res.status(200).json(filteredStories);
-  } catch (error) {
-    console.error("❌ Error fetching stories:", error);
-    res.status(500).json({ message: "Error fetching stories" });
-  }
+  return send(res, await storyService.getAllStories(req.user));
 });
 
-/**
- * @desc Delete a story
- * @route DELETE /api/story/delete/:id
- * @access Private
- */
 const deleteStory = asyncHandler(async (req, res) => {
-  const story = await Story.findById(req.params.id);
-  if (!story) {
-    return res.status(404).json({ message: "Story not found" });
-  }
-
-  if (story.owner.toString() !== req.user._id.toString()) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  const storyId = story._id;
-
-  story.isDeleted = true;
-  story.isArchived = true;
-  story.isHighlighted = false;
-  story.preserveAfterExpiration = false;
-  story.highlightIds = [];
-  await story.save();
-
-  const { Highlight } = require("../Modules/Highlight");
-  await Highlight.updateMany(
-    { stories: storyId },
-    { $pull: { stories: storyId } }
-  );
-
-  io.emit("delete-story", storyId);
-
-  res.status(200).json({ message: "Story deleted successfully" });
+  return send(res, await storyService.deleteStory({
+    id: req.params.id,
+    userId: req.user._id
+  }));
 });
 
 const getStoriesById = asyncHandler(async (req, res) => {
-  const story = await Story.findById(req.params.id).populate(storyPopulate);
-
-  if (!story || story.isDeleted) {
-    return res.status(404).json({ message: "Story Not Found" });
-  }
-
-  if (req.user) {
-    await Story.findByIdAndUpdate(
-      req.params.id,
-      { $addToSet: { views: req.user._id } },
-      { new: true }
-    );
-  }
-
-  const updatedStory = await Story.findById(req.params.id).populate(storyPopulate);
-  res.status(200).json(updatedStory);
+  return send(res, await storyService.getStoriesById({
+    id: req.params.id,
+    user: req.user
+  }));
 });
 
 const viewStory = asyncHandler(async (req, res) => {
-  const storyId = req.params.id;
-
-  const story = await Story.findById(storyId);
-  if (!story) {
-    return res.status(404).json({ message: "Story not found" });
-  }
-
-  const updatedStory = await Story.findByIdAndUpdate(
-    storyId,
-    { $addToSet: { views: req.user._id } },
-    { new: true }
-  ).populate(storyPopulate);
-
-  io.emit("update-story", updatedStory);
-
-  res.status(200).json({ story: updatedStory });
+  return send(res, await storyService.viewStory({
+    id: req.params.id,
+    userId: req.user._id
+  }));
 });
 
 const toggleLoveStory = asyncHandler(async (req, res) => {
-  const story = await Story.findById(req.params.id);
-  if (!story) {
-    return res.status(404).json({ message: "Story not found" });
-  }
-
-  const isLoved = story.loves.includes(req.user._id);
-  const update = isLoved ? { $pull: { loves: req.user._id } } : { $addToSet: { loves: req.user._id } };
-
-  const updatedStory = await Story.findByIdAndUpdate(req.params.id, update, { new: true }).populate(storyPopulate);
-
-  if (!isLoved && !story.owner.equals(req.user._id)) {
-    const owner = await User.findById(story.owner);
-    if (!owner.BlockedNotificationFromUsers.includes(req.user._id)) {
-      await sendNotificationHelper({
-        sender: req.user._id,
-        receiver: story.owner,
-        content: "❤️ Liked your Story",
-        type: "like",
-        actionRef: story._id,
-        actionModel: "Story",
-      });
-    }
-  }
-
-  io.emit("update-story", updatedStory);
-  res.status(200).json(updatedStory);
+  return send(res, await storyService.toggleLoveStory({
+    id: req.params.id,
+    userId: req.user._id
+  }));
 });
 
 const reactToStory = asyncHandler(async (req, res) => {
-  const { emoji } = req.body;
-  if (!emoji) return res.status(400).json({ message: "Emoji is required" });
-
-  const story = await Story.findById(req.params.id);
-  if (!story) return res.status(404).json({ message: "Story not found" });
-
-  const reactionIndex = story.reactions.findIndex(r => r.user.toString() === req.user._id.toString());
-  if (reactionIndex > -1) {
-    story.reactions[reactionIndex].emoji = emoji;
-    story.reactions[reactionIndex].createdAt = new Date();
-  } else {
-    story.reactions.push({ user: req.user._id, emoji });
-  }
-
-  await story.save();
-  const updatedStory = await Story.findById(story._id).populate(storyPopulate);
-
-  if (!story.owner.equals(req.user._id)) {
-    await sendNotificationHelper({
-      sender: req.user._id,
-      receiver: story.owner,
-      content: `${emoji} Reacted to your Story`,
-      type: "reaction",
-      actionRef: story._id,
-      actionModel: "Story",
-    });
-  }
-
-  io.emit("update-story", updatedStory);
-  res.status(200).json(updatedStory);
+  return send(res, await storyService.reactToStory({
+    id: req.params.id,
+    userId: req.user._id,
+    emoji: req.body.emoji
+  }));
 });
 
 const getStoryViewers = asyncHandler(async (req, res) => {
-  const story = await Story.findById(req.params.id).populate("views", "username profileName profilePhoto");
-  if (!story) return res.status(404).json({ message: "Story not found" });
-
-  if (story.owner.toString() !== req.user._id.toString()) {
-    return res.status(401).json({ message: "Only owner can see viewers list" });
-  }
-
-  res.status(200).json(story.views);
+  return send(res, await storyService.getStoryViewers({
+    id: req.params.id,
+    userId: req.user._id
+  }));
 });
 
 const getRecentStories = asyncHandler(async (req, res) => {
-  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  const now = new Date();
-  const stories = await Story.find({
-    createdAt: { $gte: yesterday },
-    isDeleted: false,
-    isArchived: false,
-    expiresAt: { $gt: now }
-  });
-  res.status(200).json(stories);
+  return send(res, await storyService.getRecentStories());
 });
 
-/**
- * @desc Get sub-stories for a user (Active 24h only)
- */
 const getUserStories = asyncHandler(async (req, res) => {
-  const now = new Date();
-  const stories = await Story.find({
-    owner: req.params.id,
-    isDeleted: false,
-    isArchived: false,
-    expiresAt: { $gt: now }
-  })
-    .populate("owner", "username profilePhoto")
-    .sort({ createdAt: -1 });
-
-  res.json(stories);
+  return send(res, await storyService.getUserStories(req.params.id));
 });
 
-/**
- * @desc Get all user stories including archived ones (for highlight selection)
- */
 const getUserArchivedStories = asyncHandler(async (req, res) => {
-  const stories = await Story.find({
-    owner: req.params.id,
-    isDeleted: false
-  })
-    .populate("owner", "username profilePhoto")
-    .sort({ createdAt: -1 });
-
-  res.json(stories);
+  return send(res, await storyService.getUserArchivedStories(req.params.id));
 });
 
 const shareStory = asyncHandler(async (req, res) => {
-  const originalStory = await Story.findById(req.params.id);
-  if (!originalStory) return res.status(404).json({ message: "Story not found" });
-
-  const sharedStory = new Story({
-    text: originalStory.text,
-    Photo: originalStory.Photo,
-    originalStory: originalStory._id,
-    owner: req.user._id,
-    isShared: true
-  });
-
-  await sharedStory.save();
-  await sharedStory.populate(storyPopulate);
-
-  if (!originalStory.owner.equals(req.user._id)) {
-    await sendNotificationHelper({
-      sender: req.user._id,
-      receiver: originalStory.owner,
-      content: "🔁 Shared your Story",
-      type: "share",
-      actionRef: sharedStory._id,
-      actionModel: "Story",
-    });
-  }
-
-  io.emit("new-story", sharedStory);
-  res.status(201).json(sharedStory);
+  return send(res, await storyService.shareStory({
+    id: req.params.id,
+    userId: req.user._id
+  }));
 });
 
 module.exports = {

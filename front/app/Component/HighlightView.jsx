@@ -24,11 +24,11 @@ import {
   HiBars3,
 } from 'react-icons/hi2';
 import Image from 'next/image';
-import { useHighlights } from '@/app/Context/HighlightContext';
-import { useTranslate } from '../Context/TranslateContext';
+import { useHighlights } from '@/app/redux/hooks';
+import { useTranslate } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
-import { useAuth } from '../Context/AuthContext';
+import { useAuth } from '@/app/redux/hooks';
 
 const HighlightViewerModal = memo(function HighlightViewerModal({
   highlight,

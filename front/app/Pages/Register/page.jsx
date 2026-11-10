@@ -1,10 +1,11 @@
 'use client';
+
 import React, { useState } from 'react';
-import { useAuth } from '@/app/Context/AuthContext';
-import { FiEye, FiEyeOff, FiMail, FiUser, FiLock, FiArrowRight, FiCheck, FiHexagon } from 'react-icons/fi';
-import { FcGoogle } from 'react-icons/fc';
+import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
-// تم إزالة Framer Motion نهائياً لتحسين الأداء
+import { useAuth } from '@/app/redux/hooks';
+import { FiArrowRight, FiCheck, FiEye, FiEyeOff, FiLock, FiMail, FiUser } from 'react-icons/fi';
+import AuthShell from '@/app/Component/Auth/AuthShell';
 
 const Register = () => {
   const { t } = useTranslation();
@@ -15,204 +16,170 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { registerNewUser } = useAuth();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleChange = (event) => {
+    setFormData((previous) => ({ ...previous, [event.target.name]: event.target.value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError('');
 
-    // تم تقليل وقت الانتظار الوهمي لتسريع الاستجابة
-    setTimeout(() => {
+    if (!agreeTerms) {
+      setError(t('You must agree to the Terms and Conditions to register.'));
+      return;
+    }
+
+    const { email, password, username } = formData;
+    if (!email.trim() || !password || !username.trim()) {
+      setError(t('Please fill all required fields correctly.'));
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await registerNewUser(username.trim(), email.trim(), password);
+    } finally {
       setLoading(false);
-      const { email, password, username } = formData;
-
-      if (!agreeTerms) {
-        setError(t('You must agree to the Terms and Conditions to register.'));
-        return;
-      }
-
-      if (email && password && username) {
-        registerNewUser(username, email, password);
-      } else {
-        setError(t('Please fill all required fields correctly.'));
-      }
-    }, 800);
+    }
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#0a0a0a] overflow-hidden relative font-sans selection:bg-indigo-500/30">
-      
-      {/* 🌌 Static Ambient Background - بدون أنيميشن مستمرة لتوفير الموارد */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[40%] -right-[20%] w-[80vw] h-[80vw] rounded-full bg-indigo-950/20 blur-[150px]" />
-        <div className="absolute -bottom-[40%] -left-[20%] w-[70vw] h-[70vw] rounded-full bg-violet-950/20 blur-[120px]" />
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.02] mix-blend-overlay" />
-      </div>
+    <AuthShell
+      eyebrow="Get started"
+      title={t('Create Account')}
+      description="Set up your profile and find your people."
+      storyTitle={<>Your next<br />chapter starts <span className="text-indigo-300">here.</span></>}
+      storyDescription="Make a little room for new ideas, familiar faces, and the things you love to share."
+      footer={
+        <p className="mt-7 text-center text-sm text-slate-500">
+          {t('Already have an account?')}{' '}
+          <Link href="/Pages/Login" className="font-semibold text-indigo-700 transition hover:text-indigo-500">
+            {t('Sign In')}
+          </Link>
+        </p>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="register-username" className="mb-2 block text-sm font-medium text-slate-700">
+            {t('Username')}
+          </label>
+          <div className="relative">
+            <FiUser className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
+              id="register-username"
+              type="text"
+              name="username"
+              autoComplete="username"
+              placeholder={t('Choose a username')}
+              value={formData.username}
+              onChange={handleChange}
+              required
+              className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+            />
+          </div>
+        </div>
 
-      <div className="relative z-10 w-full max-w-[1200px] min-h-[750px] flex mx-4 lg:mx-8 rounded-[2.5rem] bg-[#111111] border border-white/[0.05] shadow-2xl overflow-hidden shadow-black/50">
-        
-        {/* ✨ Left Side: Abstract Visuals */}
-        <div className="hidden lg:flex w-[45%] relative items-center justify-center overflow-hidden bg-gradient-to-br from-[#1a1a24] to-[#0d0d14] border-r border-white/[0.05]">
-          <div 
-            className="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-luminosity"
-            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1000&auto=format&fit=crop')" }}
+        <div>
+          <label htmlFor="register-email" className="mb-2 block text-sm font-medium text-slate-700">
+            {t('Email address')}
+          </label>
+          <div className="relative">
+            <FiMail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
+              id="register-email"
+              type="email"
+              name="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="register-password" className="mb-2 block text-sm font-medium text-slate-700">
+            {t('Password')}
+          </label>
+          <div className="relative">
+            <FiLock className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
+              id="register-password"
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              autoComplete="new-password"
+              placeholder={t('Create a password')}
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-12 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+            />
+            <button
+              type="button"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              onClick={() => setShowPassword((visible) => !visible)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            >
+              {showPassword ? <FiEyeOff size={17} /> : <FiEye size={17} />}
+            </button>
+          </div>
+        </div>
+
+        <label className="flex cursor-pointer items-start gap-3 pt-1 text-sm leading-5 text-slate-600">
+          <input
+            type="checkbox"
+            checked={agreeTerms}
+            onChange={(event) => setAgreeTerms(event.target.checked)}
+            className="peer sr-only"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d14] via-transparent to-transparent" />
-          
-          <div className="relative z-10 p-12 text-left w-full">
-            <div className="mb-8 w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <FiHexagon className="text-white text-3xl" />
-            </div>
-            <h1 className="text-5xl font-bold text-white mb-6 leading-tight tracking-tight">
-              Join the <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Future</span>
-            </h1>
-            <p className="text-gray-400 text-lg max-w-sm leading-relaxed">
-              Create your account today and start your journey with thousands of others building the next generation community.
-            </p>
-          </div>
-        </div>
+          <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition ${agreeTerms ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-300 bg-white text-transparent peer-focus-visible:ring-4 peer-focus-visible:ring-indigo-500/20'}`}>
+            <FiCheck size={13} strokeWidth={3} />
+          </span>
+          <span>
+            {t('I agree to the')}{' '}
+            <Link
+              href="/Pages/Terms"
+              onClick={(event) => event.stopPropagation()}
+              className="font-medium text-indigo-700 underline decoration-indigo-200 underline-offset-2 hover:text-indigo-500"
+            >
+              {t('Terms and Conditions')}
+            </Link>
+          </span>
+        </label>
 
-        {/* 🔐 Right Side: Form */}
-        <div className="w-full lg:w-[55%] flex flex-col justify-center px-8 md:px-16 lg:px-24 py-12 bg-[#111111]">
-          
-          <div className="w-full max-w-md mx-auto">
-            {/* Mobile Logo */}
-            <div className="lg:hidden flex justify-center mb-8">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                <FiHexagon className="text-white text-2xl" />
-              </div>
-            </div>
+        {error && (
+          <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {error}
+          </p>
+        )}
 
-            <div className="mb-10 lg:text-left text-center">
-              <h2 className="text-3xl font-semibold text-white mb-2 tracking-tight">{t('Create Account')}</h2>
-              <p className="text-gray-400 text-sm">{t('Join us securely')}</p>
-            </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {loading ? (
+            <>
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+              {t('Creating account...')}
+            </>
+          ) : (
+            <>
+              {t('Create Account')}
+              <FiArrowRight className="transition-transform group-hover:translate-x-1" size={17} />
+            </>
+          )}
+        </button>
+      </form>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              
-              <div className="space-y-4">
-                {/* Username */}
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <FiUser className="text-gray-500 group-focus-within:text-indigo-400 transition-colors duration-200" />
-                  </div>
-                  <input
-                    type="text"
-                    name="username"
-                    placeholder={t('Username')}
-                    value={formData.username}
-                    onChange={handleChange}
-                    required
-                    className="w-full pl-11 pr-4 py-3.5 bg-[#1a1a1a] border border-white/[0.05] rounded-xl text-white placeholder-gray-500 outline-none focus:bg-[#202020] focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all duration-200"
-                  />
-                </div>
-
-                {/* Email */}
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <FiMail className="text-gray-500 group-focus-within:text-indigo-400 transition-colors duration-200" />
-                  </div>
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder={t('Email address')}
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="w-full pl-11 pr-4 py-3.5 bg-[#1a1a1a] border border-white/[0.05] rounded-xl text-white placeholder-gray-500 outline-none focus:bg-[#202020] focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all duration-200"
-                  />
-                </div>
-
-                {/* Password */}
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <FiLock className="text-gray-500 group-focus-within:text-indigo-400 transition-colors duration-200" />
-                  </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    placeholder={t('Password')}
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    className="w-full pl-11 pr-12 py-3.5 bg-[#1a1a1a] border border-white/[0.05] rounded-xl text-white placeholder-gray-500 outline-none focus:bg-[#202020] focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all duration-200"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-300 transition-colors duration-200"
-                  >
-                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Terms */}
-              <div className="flex items-start gap-3 mt-4 group cursor-pointer" onClick={() => setAgreeTerms(!agreeTerms)}>
-                <div className={`w-5 h-5 rounded border flex flex-shrink-0 items-center justify-center transition-all duration-200 mt-0.5 ${agreeTerms ? 'bg-indigo-500 border-indigo-500' : 'bg-[#1a1a1a] border-white/[0.1] group-hover:border-indigo-500/50'}`}>
-                  {agreeTerms && <FiCheck className="text-white text-xs" />}
-                </div>
-                <p className="text-sm text-gray-400 leading-snug select-none group-hover:text-gray-300 transition-colors duration-200">
-                  {t('I agree to the')}{' '}
-                  <a href="/Pages/Terms" className="text-indigo-400 hover:text-indigo-300 transition-colors duration-200 underline decoration-indigo-400/30 hover:decoration-indigo-300">
-                    {t('Terms and Conditions')}
-                  </a>
-                </p>
-              </div>
-
-              {/* Error Message - بدون Framer Motion */}
-              {error && (
-                <div className="transition-all duration-300 ease-in-out">
-                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs text-center font-medium mt-2">
-                    {error}
-                  </div>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full mt-2 py-3.5 bg-white text-black font-semibold rounded-xl shadow-md hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 relative overflow-hidden group active:scale-[0.99]"
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  {loading ? (
-                    <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                  ) : (
-                    <>{t('Create Account')} <FiArrowRight className="group-hover:translate-x-1 transition-transform duration-200" /></>
-                  )}
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-200 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-              </button>
-            </form>
-
-            <div className="mt-8">
-              <div className="relative flex items-center">
-                <div className="flex-grow border-t border-white/[0.05]" />
-                <span className="flex-shrink-0 mx-4 text-gray-500 text-xs uppercase tracking-widest">{t('OR')}</span>
-                <div className="flex-grow border-t border-white/[0.05]" />
-              </div>
-              
-              <button className="mt-6 w-full py-3 bg-[#1a1a1a] border border-white/[0.05] hover:bg-[#202020] hover:border-white/[0.1] rounded-xl flex items-center justify-center gap-3 transition-all duration-200 text-sm text-gray-300 font-medium">
-                <FcGoogle size={20} />
-                {t('Sign up with Google')}
-              </button>
-            </div>
-
-            <p className="mt-8 text-center text-gray-500 text-sm">
-              {t('Already have an account?')}{' '}
-              <a href="/Pages/Login" className="text-white font-medium hover:text-indigo-300 transition-colors duration-200">
-                {t('Sign In')}
-              </a>
-            </p>
-
-          </div>
-        </div>
+      <div className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-400">
+        <FiLock size={13} />
+        <span>{t('Your information stays private and secure')}</span>
       </div>
-    </div>
+    </AuthShell>
   );
 };
 

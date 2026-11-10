@@ -1,8 +1,8 @@
 'use client';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { useAuth } from '@/app/Context/AuthContext';
-import { useCommunity } from '@/app/Context/CommunityContext';
-import { usePost } from '@/app/Context/PostContext';
+import { useAuth } from '@/app/redux/hooks';
+import { useCommunity } from '@/app/redux/hooks';
+import { usePost } from '@/app/redux/hooks';
 import Loading from '@/app/Component/Loading';
 import DesignCommunitySelect from './Design';
 

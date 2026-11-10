@@ -11,8 +11,8 @@ import {
   ChevronRight,
   ShieldAlert
 } from 'lucide-react';
-import { usePost } from '../Context/PostContext';
-import { useAuth } from '../Context/AuthContext';
+import { usePost } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
 import PostHeader from './Post/PostHeader';
 import PostMedia from './Post/PostMedia';
 import PostLinks from './Post/PostLinks';
@@ -22,8 +22,7 @@ import PostActions from './Post/PostActions';
 import SharedPost from './Post/SharedPost';
 import SharedTitle from './Post/SharedTitle';
 import HighlightedComment from './Post/highlightedComment';
-import { useTranslate } from '../Context/TranslateContext';
-import { franc } from 'franc';
+import { useTranslate } from '@/app/redux/hooks';
 import { iso6391Map } from '../utils/Data';
 import { useTranslation } from 'react-i18next';
 import { getHighlightedComment } from '../utils/getHighlitedComment';
@@ -59,10 +58,21 @@ const SluchitEntry = memo(forwardRef(({ post }, ref) => {
   useEffect(() => {
     if (!post?.text || !language) return;
     if (post.text.length < 3) return setShowTranslateButton(false);
-    const langCode3 = franc(post.text, { minLength: 3 });
-    if (langCode3 === 'und') return setShowTranslateButton(false);
-    const textLang = iso6391Map[langCode3] || 'en';
-    setShowTranslateButton(textLang !== language);
+    let isMounted = true;
+    import('franc')
+      .then(({ franc }) => {
+        if (!isMounted) return;
+        const langCode3 = franc(post.text, { minLength: 3 });
+        if (langCode3 === 'und') return setShowTranslateButton(false);
+        const textLang = iso6391Map[langCode3] || 'en';
+        setShowTranslateButton(textLang !== language);
+      })
+      .catch(() => {
+        if (isMounted) setShowTranslateButton(false);
+      });
+    return () => {
+      isMounted = false;
+    };
   }, [post?.text, language]);
 
   const handleTranslate = async () => {

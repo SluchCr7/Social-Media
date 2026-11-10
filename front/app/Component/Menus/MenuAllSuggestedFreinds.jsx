@@ -1,10 +1,10 @@
 'use client';
 import React, { memo, useMemo } from 'react';
 import Image from 'next/image';
-import { useAuth } from '../../Context/AuthContext';
+import { useAuth } from '@/app/redux/hooks';
 import { HiXMark, HiUserPlus, HiCheckBadge } from 'react-icons/hi2';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useUser } from '@/app/Context/UserContext';
+import { useUser } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 
 const MenuAllSuggestedFriends = memo(() => {

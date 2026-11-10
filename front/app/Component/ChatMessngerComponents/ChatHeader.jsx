@@ -10,8 +10,8 @@ import {
   ChevronLeft,
   Info
 } from 'lucide-react';
-import { useMessage } from '../../Context/MessageContext';
-import { useUser } from '@/app/Context/UserContext';
+import { useMessage } from '@/app/redux/hooks';
+import { useUser } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '../ui/Avatar';
 

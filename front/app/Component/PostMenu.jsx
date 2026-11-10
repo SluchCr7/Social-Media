@@ -6,18 +6,18 @@ import { CiEdit, CiMapPin } from 'react-icons/ci';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { MdOutlineReport, MdContentCopy } from "react-icons/md";
 import { FaRegCommentDots } from 'react-icons/fa';
-import { useAuth } from '../Context/AuthContext';
-import { usePost } from '../Context/PostContext';
-import { useReport } from '../Context/ReportContext';
+import { useAuth } from '@/app/redux/hooks';
+import { usePost } from '@/app/redux/hooks';
+import { useReport } from '@/app/redux/hooks';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useUser } from '../Context/UserContext';
-import { useAdmin } from '../Context/UserAdminContext';
-import { useAlert } from '../Context/AlertContext';
+import { useUser } from '@/app/redux/hooks';
+import { useAdmin } from '@/app/redux/hooks';
+import { useAlert } from '@/app/redux/hooks';
 import { useGetData } from '../Custome/useGetData';
 import { useTranslation } from 'react-i18next';
 import { IoVolumeMute } from "react-icons/io5";
 import { GoUnmute } from "react-icons/go";
-import { useTranslate } from '../Context/TranslateContext';
+import { useTranslate } from '@/app/redux/hooks';
 
 const MenuOption = ({ icon, text, action, className, loading }) => {
   const { t } = useTranslation();

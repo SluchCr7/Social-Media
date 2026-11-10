@@ -3,8 +3,8 @@ import * as HoverCard from '@radix-ui/react-hover-card'
 import Link from 'next/link'
 import { useState, useEffect, useMemo } from 'react'
 import { CheckCircle2 } from 'lucide-react'
-import { useAuth } from '../Context/AuthContext'
-import { useUser } from '../Context/UserContext'
+import { useAuth } from '@/app/redux/hooks';
+import { useUser } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next'
 import { Avatar } from './ui/Avatar'
 import { Button } from './ui/Button'
@@ -23,7 +23,7 @@ const UserHoverCard = ({ userSelected, children, side = 'bottom' }) => {
     return user.following?.some(id =>
       (typeof id === 'string' ? id : id._id) === userSelected._id
     );
-  }, [user?.following, userSelected?._id]);
+  }, [user, userSelected]);
 
   const followerCount = useMemo(() => userSelected?.followers?.length || 0, [userSelected?.followers]);
   const followingCount = useMemo(() => userSelected?.following?.length || 0, [userSelected?.following]);

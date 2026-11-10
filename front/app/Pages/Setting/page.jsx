@@ -1,12 +1,12 @@
 'use client';
 import React, { useState, useCallback, useMemo } from 'react';
-import { useTheme } from '@/app/Context/ThemeContext';
-import { useAuth } from '@/app/Context/AuthContext';
-import { useUser } from '@/app/Context/UserContext';
-import { useAdmin } from '@/app/Context/UserAdminContext';
+import { useTheme } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
+import { useUser } from '@/app/redux/hooks';
+import { useAdmin } from '@/app/redux/hooks';
 import { getPasswordStrength } from '@/app/utils/getPasswordStrength';
 import { useGetData } from '@/app/Custome/useGetData';
-import { useTranslate } from '@/app/Context/TranslateContext';
+import { useTranslate } from '@/app/redux/hooks';
 import SettingsView from './Design';
 import i18n from '@/app/i18n'; // ✅ تأكد من صحة المسار
 

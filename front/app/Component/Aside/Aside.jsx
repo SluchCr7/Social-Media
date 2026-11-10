@@ -2,11 +2,11 @@
 import React, { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
-import { useAuth } from '../../Context/AuthContext'
-import { useAside } from '../../Context/AsideContext'
+import { useAuth } from '@/app/redux/hooks';
+import { useAside } from '@/app/redux/hooks';
 import SidebarContent from './SidebarContent'
-import { useUser } from '@/app/Context/UserContext'
-import { useTranslate } from '@/app/Context/TranslateContext'
+import { useUser } from '@/app/redux/hooks';
+import { useTranslate } from '@/app/redux/hooks';
 
 const Aside = ({ isCollapsed, setIsCollapsed }) => {
   const { user, logout } = useAuth()
@@ -21,12 +21,14 @@ const Aside = ({ isCollapsed, setIsCollapsed }) => {
     handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
-  }, [])
+  }, [setIsMobile])
 
   useEffect(() => {
     setIsCollapsed(isMobile)
     if (!isMobile) setIsMobileMenuOpen(false)
-  }, [isMobile, setIsMobileMenuOpen])
+  }, [isMobile, setIsCollapsed, setIsMobileMenuOpen])
+
+  const userWithLogout = React.useMemo(() => ({ ...user, logout }), [user, logout]);
 
   return (
     <>
@@ -51,7 +53,7 @@ const Aside = ({ isCollapsed, setIsCollapsed }) => {
           isMobile={false}
           setIsCollapsed={setIsCollapsed}
           setIsMobileMenuOpen={setIsMobileMenuOpen}
-          user={{ ...user, logout }}
+          user={userWithLogout}
           onlineUsers={onlineUsers}
         />
       </motion.aside>
@@ -93,7 +95,7 @@ const Aside = ({ isCollapsed, setIsCollapsed }) => {
                 isCollapsed={false}
                 isMobile={true}
                 setIsMobileMenuOpen={setIsMobileMenuOpen}
-                user={{ ...user, logout }}
+                user={userWithLogout}
                 onlineUsers={onlineUsers}
               />
             </motion.aside>

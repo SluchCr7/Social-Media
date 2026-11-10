@@ -8,10 +8,10 @@ import {
   FaRandom, FaRedo, FaTimes, FaHeart, FaShareAlt,
   FaVolumeUp, FaVolumeMute, FaListUl, FaMagic
 } from 'react-icons/fa'
-import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
-import { useMusic } from '@/app/Context/MusicContext'
+import { useMusicPlayer } from '@/app/redux/hooks';
+import { useMusic } from '@/app/redux/hooks';
 import { formatTime } from '@/app/utils/formatTime'
-import { useAuth } from '@/app/Context/AuthContext'
+import { useAuth } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next'
 import ColorThief from 'colorthief'
 import Slider from 'rc-slider'

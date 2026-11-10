@@ -58,41 +58,33 @@ const UnifiedModal = ({
                         <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
                             {title}
                         </h3>
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 leading-relaxed mb-8">
-                            {text}
-                        </p>
 
-                        <div className="flex flex-col w-full gap-3">
-                            <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={onConfirm}
-                                disabled={isLoading}
-                                className={`w-full py-4 rounded-2xl text-white font-bold text-sm shadow-xl transition-all flex items-center justify-center gap-2 ${buttonStyles[type]}`}
-                            >
-                                {isLoading ? (
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                ) : confirmText}
-                            </motion.button>
+                        {text && (
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+                                {text}
+                            </p>
+                        )}
 
-                            <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
+                        <div className="flex items-center gap-3 w-full">
+                            {onConfirm && (
+                                <button
+                                    onClick={onConfirm}
+                                    disabled={isLoading}
+                                    className={`flex-1 py-3.5 px-6 rounded-2xl text-white text-xs font-black tracking-widest uppercase transition-all duration-300 shadow-lg ${buttonStyles[type]} disabled:opacity-50`}
+                                >
+                                    {isLoading ? '...' : confirmText}
+                                </button>
+                            )}
+
+                            <button
                                 onClick={onClose}
                                 disabled={isLoading}
-                                className="w-full py-4 text-gray-500 dark:text-gray-400 font-bold text-sm hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl transition-all"
+                                className="flex-1 py-3.5 px-6 rounded-2xl bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 text-xs font-black tracking-widest uppercase transition-all duration-300"
                             >
                                 {cancelText}
-                            </motion.button>
+                            </button>
                         </div>
                     </div>
-
-                    <button
-                        onClick={onClose}
-                        className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
-                    >
-                        <HiXMark size={20} />
-                    </button>
                 </motion.div>
             </div>
         </AnimatePresence>

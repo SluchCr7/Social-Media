@@ -8,11 +8,11 @@ import React, {
   useMemo,
   Suspense,
 } from 'react'
-import { useAuth } from '@/app/Context/AuthContext'
-import { usePost } from '@/app/Context/PostContext'
-import { useCommunity } from '@/app/Context/CommunityContext'
-import { useMusic } from '@/app/Context/MusicContext'
-import { useFeedback } from '@/app/Context/FeedbackContext'
+import { useAuth } from '@/app/redux/hooks';
+import { usePost } from '@/app/redux/hooks';
+import { useCommunity } from '@/app/redux/hooks';
+import { useMusic } from '@/app/redux/hooks';
+import { useFeedback } from '@/app/redux/hooks';
 import api from '@/app/utils/api'
 import Loading from '@/app/Component/Loading'
 

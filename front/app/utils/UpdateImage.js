@@ -1,34 +1,35 @@
-import axios from "axios";
+import api from './api';
 
 /**
  * دالة عامة لرفع الصور أو تحديث الـ cover أو الـ avatar لأي كيان.
- * @param {string} endpoint - الرابط الكامل للـ API endpoint.
+ * @param {string} endpoint - الرابط النسبي للـ API endpoint.
  * @param {File} file - ملف الصورة المرفوعة.
- * @param {string} token - توكن المستخدم للمصادقة.
+ * @param {string} token - اختياري للتوافق مع الإصدارات السابقة.
+ * @param {function} showAlert - دالة إشعار المستخدم.
  * @returns {Promise<object|null>} - البيانات المرجعة أو null عند الفشل.
  */
-export const uploadImageHandler = async (endpoint, file, token,showAlert) => {
+export const uploadImageHandler = async (endpoint, file, token, showAlert) => {
   if (!endpoint || !file) {
-    console.error("uploadImageHandler: endpoint or file missing.");
+    console.error('uploadImageHandler: endpoint or file missing.');
     return null;
   }
 
   try {
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append('image', file);
 
-    const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACK_URL}/api/${endpoint}`,
-        formData, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-        },
+    const url = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const res = await api.post(url, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
-    showAlert(res.data.message || "Image uploaded successfully.");
+    if (typeof showAlert === 'function') {
+      showAlert(res.data?.message || 'Image uploaded successfully.');
+    }
     return res.data;
   } catch (err) {
-    console.error("Image upload error:", err);
-    throw err; // نخلي اللي بيستدعيها يتعامل مع الخطأ لو حابب
+    console.error('Image upload error:', err);
+    throw err;
   }
 };

@@ -17,9 +17,9 @@ import {
   Tag as TagIcon,
   CheckCircle2
 } from 'lucide-react';
-import { useCommunity } from '../../Context/CommunityContext';
+import { useCommunity } from '@/app/redux/hooks';
 import Image from 'next/image';
-import { useAlert } from '../../Context/AlertContext';
+import { useAlert } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 

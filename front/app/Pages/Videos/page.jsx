@@ -2,7 +2,7 @@
 import React, { useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { usePost } from '@/app/Context/PostContext'
+import { usePost } from '@/app/redux/hooks';
 import SluchitEntry from '@/app/Component/SluchitEntry'
 import { HiVideoCamera, HiSparkles } from 'react-icons/hi2'
 import Loading from '@/app/Component/Loading'

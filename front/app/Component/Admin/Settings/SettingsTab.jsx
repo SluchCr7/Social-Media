@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { HiCog, HiShieldCheck, HiMoon, HiGlobeAlt } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@/app/Context/ThemeContext';
+import { useTheme } from '@/app/redux/hooks';
 
 const SettingsTab = () => {
     const { t } = useTranslation();

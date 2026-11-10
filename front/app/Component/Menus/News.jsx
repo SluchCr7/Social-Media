@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { HiArrowTopRightOnSquare } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
-import { useNews } from '../../Context/NewsContext';
+import { useNews } from '@/app/redux/hooks';
 import MenuSkeleton from '@/app/Skeletons/MenuSkeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 

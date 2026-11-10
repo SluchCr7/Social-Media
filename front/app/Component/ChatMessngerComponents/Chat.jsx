@@ -3,8 +3,8 @@
 import React, { useEffect, useRef, memo, useMemo } from 'react';
 import ChatInput from './ChatInput';
 import ChatHeader from './ChatHeader';
-import { useAuth } from '../../Context/AuthContext';
-import { useMessage } from '../../Context/MessageContext';
+import { useAuth } from '@/app/redux/hooks';
+import { useMessage } from '@/app/redux/hooks';
 import SenderMessage from './SenderMessage';
 import ReceiverMessage from './ReceiverMessage';
 import { isToday, isYesterday, format } from 'date-fns';

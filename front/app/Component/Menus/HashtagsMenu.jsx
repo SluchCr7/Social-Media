@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { usePost } from '../../Context/PostContext';
+import { usePost } from '@/app/redux/hooks';
 import { HiArrowTrendingUp, HiArrowTrendingDown } from 'react-icons/hi2';
 import Link from 'next/link';
 import { filterHashtags } from '../../utils/filterHashtags';

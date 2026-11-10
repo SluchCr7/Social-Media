@@ -6,8 +6,8 @@ import ReelCard from '../../Component/ReelCard';
 import ReelSkeleton from '../../Skeletons/ReelSkeleton';
 import { useTranslation } from 'react-i18next';
 import { useGetData } from '@/app/Custome/useGetData';
-import { useAuth } from '@/app/Context/AuthContext';
-import { useReels } from '@/app/Context/ReelsContext';
+import { useAuth } from '@/app/redux/hooks';
+import { useReels } from '@/app/redux/hooks';
 import { motion } from 'framer-motion';
 import { HiOutlineFilm, HiPlus, HiHome } from 'react-icons/hi2';
 

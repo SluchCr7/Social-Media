@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import MenuFollowers from './MenuFollowers';
 import MenuMessagesFromMe from './MenuMessagesFromMe';
-import { useAuth } from '../../Context/AuthContext';
+import { useAuth } from '@/app/redux/hooks';
 import HashtagsMenu from './HashtagsMenu';
 import Communities from './Communities';
 import Link from 'next/link';

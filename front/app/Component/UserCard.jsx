@@ -4,32 +4,33 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { HiCheckBadge, HiMapPin, HiUserPlus, HiUserMinus } from 'react-icons/hi2';
 import { motion } from 'framer-motion';
-import { useUser } from '@/app/Context/UserContext';
-import { useAuth } from '@/app/Context/AuthContext';
+import { useUser } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
 
 const UserCard = React.memo(({ user: targetUser, t, isCompact = false }) => {
     const { followUser, loading } = useUser();
     const { user: currentUser } = useAuth();
 
     // Local state for real-time updates
-    const [localIsFollowing, setLocalIsFollowing] = React.useState(
+    const [localIsFollowing, setLocalIsFollowing] = React.useState(() =>
         currentUser?.following?.some(u =>
-            (typeof u === 'string' ? u : u._id) === targetUser._id
-        )
+            (typeof u === 'string' ? u : u?._id) === targetUser?._id
+        ) || false
     );
-    const [localFollowerCount, setLocalFollowerCount] = React.useState(targetUser.followers?.length || 0);
+    const [localFollowerCount, setLocalFollowerCount] = React.useState(targetUser?.followers?.length || 0);
 
     // Update local state when currentUser changes
     React.useEffect(() => {
         const isFollowing = currentUser?.following?.some(u =>
-            (typeof u === 'string' ? u : u._id) === targetUser._id
-        );
+            (typeof u === 'string' ? u : u?._id) === targetUser?._id
+        ) || false;
         setLocalIsFollowing(isFollowing);
-    }, [currentUser?.following, targetUser._id]);
+    }, [currentUser?.following, targetUser?._id]);
 
-    const handleFollow = async (e) => {
+    const handleFollow = React.useCallback(async (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (!targetUser?._id) return;
 
         // Optimistic update
         const wasFollowing = localIsFollowing;
@@ -41,9 +42,9 @@ const UserCard = React.memo(({ user: targetUser, t, isCompact = false }) => {
         // If failed, revert
         if (!result?.success) {
             setLocalIsFollowing(wasFollowing);
-            setLocalFollowerCount(targetUser.followers?.length || 0);
+            setLocalFollowerCount(targetUser?.followers?.length || 0);
         }
-    };
+    }, [followUser, localIsFollowing, targetUser?._id, targetUser?.followers?.length]);
 
     if (isCompact) {
         return (

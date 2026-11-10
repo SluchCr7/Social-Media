@@ -20,7 +20,7 @@ import {
   X
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/app/Context/AuthContext';
+import { useAuth } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 
 const CommandPalette = () => {

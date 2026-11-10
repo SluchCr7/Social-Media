@@ -1,11 +1,11 @@
 'use client'
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react'
-import { useAuth } from '@/app/Context/AuthContext'
-import { usePost } from '@/app/Context/PostContext'
+import { useAuth } from '@/app/redux/hooks';
+import { usePost } from '@/app/redux/hooks';
 import AnalyticsPresentation from './AnalyticsPresentation'
 import AnalyticsSkeleton from '../../Skeletons/AnalyticsSkeleton'
-import { useUser } from '@/app/Context/UserContext'
+import { useUser } from '@/app/redux/hooks';
 import { useGetData } from '@/app/Custome/useGetData'
 
 export default function AnalyticsContainer() {

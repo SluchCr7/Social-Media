@@ -10,7 +10,7 @@ import {
   FaBell,
   FaFlag,
 } from "react-icons/fa";
-import { useEvent } from "@/app/Context/EventContext";
+import { useEvent } from '@/app/redux/hooks';
 import DesignCalender from "./DesignCalender";
 import CalendarSkeleton from "@/app/Skeletons/CalenderSkeleton";
 

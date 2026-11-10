@@ -3,7 +3,7 @@
 import React, { memo, useCallback } from 'react'
 import Image from 'next/image'
 import { FaPlay, FaPause } from 'react-icons/fa'
-import { useMusicPlayer } from '@/app/Context/MusicPlayerContext'
+import { useMusicPlayer } from '@/app/redux/hooks';
 
 const PostMusicPlayer = memo(({ music }) => {
   const { current, playing, togglePlay, setTrack } = useMusicPlayer()

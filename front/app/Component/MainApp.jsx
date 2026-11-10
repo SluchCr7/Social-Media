@@ -7,12 +7,12 @@ const NotificationMenu = dynamic(() => import('./NotificationMenu'), {
 import React, { useState } from 'react';
 import Sluchits from './Sluchits';
 import Stories from './Stories';
-import { useNotify } from '../Context/NotifyContext';
-import { useMessage } from '../Context/MessageContext';
+import { useNotify } from '@/app/redux/hooks';
+import { useMessage } from '@/app/redux/hooks';
 import Header from './Header';
-import { useAuth } from '../Context/AuthContext';
+import { useAuth } from '@/app/redux/hooks';
 import LoadingOverlay from './Post/LoadingOverlay';
-import { usePost } from '../Context/PostContext';
+import { usePost } from '@/app/redux/hooks';
 
 
 const MainApp = () => {

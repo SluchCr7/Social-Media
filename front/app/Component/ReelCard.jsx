@@ -1,12 +1,12 @@
 'use client';
 import dynamic from 'next/dynamic';
-import React, { forwardRef, useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { memo, forwardRef, useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useReels } from '../Context/ReelsContext';
-import { useUser } from '../Context/UserContext';
+import { useReels } from '@/app/redux/hooks';
+import { useUser } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
-import { useTranslate } from '../Context/TranslateContext';
+import { useTranslate } from '@/app/redux/hooks';
 import ReelSkeleton from '../Skeletons/ReelSkeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -45,7 +45,7 @@ const ActionButton = ({ icon: Icon, label, onClick, isActive, colorClass = "text
   </div>
 );
 
-const ReelCard = forwardRef(({ userData, reel, isActive, isMuted, toggleMute }, ref) => {
+const ReelCard = memo(forwardRef(function ReelCard({ userData, reel, isActive, isMuted, toggleMute }, ref) {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const { toggleSaveReel } = useUser();
@@ -367,7 +367,7 @@ const ReelCard = forwardRef(({ userData, reel, isActive, isMuted, toggleMute }, 
       />
     </div>
   );
-});
+}));
 
 ReelCard.displayName = "ReelCard";
 export default ReelCard;

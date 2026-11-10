@@ -8,9 +8,9 @@ const StoryViewer = dynamic(() => import('./StoryViewer'), {
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
-import { useStory } from '../Context/StoryContext';
+import { useStory } from '@/app/redux/hooks';
 import StorySkeleton from '../Skeletons/StoriesSkeleton';
-import { useAuth } from '../Context/AuthContext';
+import { useAuth } from '@/app/redux/hooks';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiPlus } from 'react-icons/fi';
 

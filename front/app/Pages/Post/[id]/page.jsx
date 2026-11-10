@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { usePost } from '@/app/Context/PostContext';
-import { useAuth } from '@/app/Context/AuthContext';
-import { useComment } from '@/app/Context/CommentContext';
+import { usePost } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
+import { useComment } from '@/app/redux/hooks';
 import Loading from '@/app/Component/Loading';
 import { renderTextWithMentionsHashtagsAndLinks } from '@/app/utils/CheckText';
 import DesignPostSelect from './Design';
@@ -57,7 +57,7 @@ const PostPage = ({ params }) => {
     if (!commentText.trim() || !post?._id) return;
 
     try {
-      await AddComment(commentText, post._id, 'Post');
+      await AddComment({ text: commentText, targetId: post._id, targetType: 'Post' });
       setCommentText('');
     } catch (err) {
       console.error(err);

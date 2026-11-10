@@ -13,7 +13,7 @@ import {
   Inbox,
   Lock
 } from 'lucide-react';
-import { useNotify } from '@/app/Context/NotifyContext';
+import { useNotify } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/Component/ui/Avatar';
 import dayjs from 'dayjs';

@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState, useMemo } from 'react';
-import { useReport } from '@/app/Context/ReportContext';
-import { useAuth } from '@/app/Context/AuthContext';
+import { useReport } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
@@ -13,10 +13,10 @@ import {
   FiMoreVertical,
 } from 'react-icons/fi';
 import Image from 'next/image';
-import { usePost } from '@/app/Context/PostContext';
-import { useComment } from '@/app/Context/CommentContext';
+import { usePost } from '@/app/redux/hooks';
+import { useComment } from '@/app/redux/hooks';
 import DesignReports from './Design';
-import { useAdmin } from '@/app/Context/UserAdminContext';
+import { useAdmin } from '@/app/redux/hooks';
 
 
 
@@ -35,7 +35,7 @@ const AdminReportsPage = () => {
   const openModal = (action, report) => setModal({ open: true, action, report });
   useEffect(() => {
     getAllReports();
-  }, []);
+  }, [getAllReports]);
 
   // const openModal = (action, id) => setModal({ open: true, action, id });
 

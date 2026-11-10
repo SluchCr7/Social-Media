@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect , useCallback } from 'react';
-import { useReels } from '../../Context/ReelsContext';
+import { useReels } from '@/app/redux/hooks';
 import DesignReels from './Design';
 
 const ReelsPage = () => {

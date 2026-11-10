@@ -1,10 +1,10 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useMessage } from '@/app/Context/MessageContext';
+import { useMessage } from '@/app/redux/hooks';
 import { useSearchParams } from 'next/navigation';
-import { useAuth } from '@/app/Context/AuthContext';
+import { useAuth } from '@/app/redux/hooks';
 import MessangerPresentation from './MessangerPresentation';
-import { useUser } from '@/app/Context/UserContext';
+import { useUser } from '@/app/redux/hooks';
 
 const MessangerSluchit = () => {
   const { selectedUser, setSelectedUser } = useMessage();
@@ -33,7 +33,7 @@ const MessangerSluchit = () => {
         setShowSidebar(false);
       })
       .catch((err) => console.error('Failed to fetch user for chat:', err));
-  }, [searchParams, selectedUser, getUserById]);
+  }, [searchParams, selectedUser, getUserById, setSelectedUser]);
 
   return (
     <MessangerPresentation

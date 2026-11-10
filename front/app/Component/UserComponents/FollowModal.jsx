@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
-import { useTranslate } from '@/app/Context/TranslateContext'
+import { useTranslate } from '@/app/redux/hooks';
 
 const FollowModal = memo(({ visible, onClose, type, list }) => {
   const { t } = useTranslation()

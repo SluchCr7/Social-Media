@@ -1,29 +1,75 @@
-const jwt = require("jsonwebtoken");
+const { verifyAccessToken } = require('../utils/tokenUtils');
+const { User } = require('../Modules/User');
 
-// Verify token middleware
-const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (authHeader) {
-    const token = authHeader.split(' ')[1];
-    try {
-      const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
-      req.user = decoded;
-      next();
-    } catch (error) {
-      return res.status(401).json({ message: "Invalid token" });
+/**
+ * Verify access token from HTTP-only cookie or Authorization header.
+ */
+const verifyToken = async (req, res, next) => {
+  let token = null;
+
+  // 1. Primary: HTTP-Only cookie
+  if (req.cookies && (req.cookies.accessToken || req.cookies.token)) {
+    token = req.cookies.accessToken || req.cookies.token;
+  }
+  // 2. Secondary: Bearer authorization header
+  else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.headers.authorization) {
+    token = req.headers.authorization;
+  }
+
+  if (!token) {
+    return res.status(401).json({ message: 'No authentication token provided', code: 'NO_TOKEN' });
+  }
+
+  const { payload, expired, error } = verifyAccessToken(token);
+
+  if (expired) {
+    return res.status(401).json({ message: 'Access token expired', code: 'TOKEN_EXPIRED' });
+  }
+
+  if (!payload || error) {
+    return res.status(401).json({ message: 'Invalid authentication token', code: 'INVALID_TOKEN' });
+  }
+
+  try {
+    // Check account status in DB
+    const user = await User.findById(payload._id).select('accountStatus suspendedUntil isAdmin');
+    if (!user) {
+      return res.status(401).json({ message: 'User account not found', code: 'USER_NOT_FOUND' });
     }
-  } else {
-    return res.status(401).json({ message: "No token provided" });
+
+    if (user.accountStatus === 'banned') {
+      return res.status(403).json({ message: 'Account has been permanently banned', code: 'ACCOUNT_BANNED' });
+    }
+
+    if (user.accountStatus === 'suspended' && user.suspendedUntil && new Date(user.suspendedUntil) > new Date()) {
+      return res.status(403).json({
+        message: `Account is suspended until ${new Date(user.suspendedUntil).toLocaleString()}`,
+        code: 'ACCOUNT_SUSPENDED',
+      });
+    }
+
+    req.user = {
+      _id: String(user._id),
+      id: String(user._id),
+      isAdmin: Boolean(user.isAdmin),
+      email: payload.email,
+    };
+
+    next();
+  } catch (dbErr) {
+    return res.status(500).json({ message: 'Authentication verification failure', error: dbErr.message });
   }
 };
 
 // Verify admin
 const verifyAdmin = (req, res, next) => {
   verifyToken(req, res, () => {
-    if (req.user.isAdmin) {
+    if (req.user && req.user.isAdmin) {
       next();
     } else {
-      return res.status(403).json({ message: "You are not an administrator!" });
+      return res.status(403).json({ message: 'Access denied: administrator privileges required' });
     }
   });
 };
@@ -31,10 +77,11 @@ const verifyAdmin = (req, res, next) => {
 // Verify same user
 const verifyUser = (req, res, next) => {
   verifyToken(req, res, () => {
-    if (req.user._id === req.params.id) {
+    const userId = req.user?._id || req.user?.id;
+    if (String(userId) === String(req.params.id)) {
       next();
     } else {
-      return res.status(403).json({ message: "You are not this user!" });
+      return res.status(403).json({ message: 'Access denied: unauthorized resource access' });
     }
   });
 };
@@ -42,10 +89,11 @@ const verifyUser = (req, res, next) => {
 // Verify admin or same user
 const verifyAdminOrUser = (req, res, next) => {
   verifyToken(req, res, () => {
-    if (req.user.isAdmin || req.user._id === req.params.id) {
+    const userId = req.user?._id || req.user?.id;
+    if (req.user?.isAdmin || String(userId) === String(req.params.id)) {
       next();
     } else {
-      return res.status(403).json({ message: "You are not authorized!" });
+      return res.status(403).json({ message: 'Access denied: unauthorized' });
     }
   });
 };
