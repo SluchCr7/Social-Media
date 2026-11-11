@@ -1,15 +1,11 @@
 'use client'
 
-import React, { useEffect, useMemo, useState, useCallback } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useCommunity } from '@/app/redux/hooks';
-import { useAuth } from '@/app/redux/hooks';
 import MaidDesign from './MaidDesign'
-import { useGetData } from '@/app/Custome/useGetData'
 
 const CommunityPage = () => {
-  const { communities, addCommunity } = useCommunity()
-  const { user } = useAuth()
-  const { userData } = useGetData(user?._id)
+  const { communities, isLoading, error, fetchCommunities, addCommunity } = useCommunity()
 
   // ✅ استخدم useState فقط للحالات التفاعلية
   const [activeCategory, setActiveCategory] = useState('All')
@@ -18,22 +14,17 @@ const CommunityPage = () => {
   const [sortBy, setSortBy] = useState('Newest')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
-  const [visibleCount, setVisibleCount] = useState(6)
-
   const [form, setForm] = useState({
     Name: '',
     description: '',
     Category: 'Technology',
-    cover: null,
-    avatar: null,
+    isPrivate: false,
+    isForAdults: false,
     tags: [],
     newTag: '',
     rules: [],
     newRule: '',
   })
-
-  // ✅ دالة ثابتة لزيادة العناصر المعروضة
-  const loadMore = useCallback(() => setVisibleCount(v => v + 6), [])
 
   // ✅ Debounce Search - يقلل re-render الناتج عن الكتابة
   useEffect(() => {
@@ -55,7 +46,7 @@ const CommunityPage = () => {
     const s = debouncedSearch.toLowerCase()
 
     const results = communities
-      .filter(c => activeCategory === 'All' || (c.Category || c.category) === activeCategory)
+      .filter(c => !activeCategory || activeCategory === 'All' || (c.Category || c.category) === activeCategory)
       .filter(c => {
         if (!s) return true
         const name = (c.Name || c.name || '').toLowerCase()
@@ -63,7 +54,7 @@ const CommunityPage = () => {
         const cat = ((c.Category || c.category) || '').toLowerCase()
         return name.includes(s) || desc.includes(s) || cat.includes(s)
       })
-      .map(c => ({ ...c, _membersCount: (c.members || []).length }))
+      .map(c => ({ ...c, _membersCount: c.membersCount ?? c.members?.length ?? 0 }))
 
     // ✅ استخدم switch بدل ifs
     switch (sortBy) {
@@ -86,18 +77,6 @@ const CommunityPage = () => {
     return results
   }, [communities, activeCategory, debouncedSearch, sortBy])
 
-  // ✅ Scroll handler محسن ومُزال بعد التفكيك
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
-        loadMore()
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [loadMore])
-
   // ✅ تثبيت دالة الإنشاء عبر useCallback
   const handleCreate = async (e) => {
     e?.preventDefault?.()
@@ -111,13 +90,15 @@ const CommunityPage = () => {
         description: form.description.trim(),
         tags: form.tags,
         rules: form.rules,
+        isPrivate: form.isPrivate,
+        isForAdults: form.isForAdults,
       })
       setForm({
         Name: '',
         description: '',
         Category: 'Technology',
-        cover: null,
-        avatar: null,
+        isPrivate: false,
+        isForAdults: false,
         tags: [],
         newTag: '',
         rules: [],
@@ -133,7 +114,6 @@ const CommunityPage = () => {
 
   return (
     <MaidDesign
-      user={userData}
       categories={categories}
       activeCategory={activeCategory}
       setActiveCategory={setActiveCategory}
@@ -142,7 +122,9 @@ const CommunityPage = () => {
       sortBy={sortBy}
       setSortBy={setSortBy}
       filtered={filtered}
-      visibleCount={visibleCount}
+      isLoading={isLoading}
+      error={error}
+      onRetry={() => fetchCommunities({ force: true })}
       showCreateModal={showCreateModal}
       setShowCreateModal={setShowCreateModal}
       form={form}

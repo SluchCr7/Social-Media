@@ -11,16 +11,13 @@ import {
   HiChevronDown,
   HiUsers,
   HiGlobeAlt,
-  HiMapPin,
   HiSignal,
 } from 'react-icons/hi2';
 import CommunityCard from '@/app/Component/Community/CommunityCard';
 import CreateCommunityModal from '@/app/Component/Community/CreateCommunityModal';
-import CommunityFilter from '@/app/Component/Community/CommunityFilter';
 import { useTranslation } from 'react-i18next';
 
 const MaidDesign = memo(({
-  user,
   categories = [],
   activeCategory,
   setActiveCategory,
@@ -29,7 +26,9 @@ const MaidDesign = memo(({
   sortBy,
   setSortBy,
   filtered = [],
-  visibleCount = 6,
+  isLoading,
+  error,
+  onRetry,
   setShowCreateModal,
   showCreateModal,
   form,
@@ -44,22 +43,30 @@ const MaidDesign = memo(({
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [activeTags, setActiveTags] = useState([]);
   const [minMembers, setMinMembers] = useState(0);
-  const [showCount, setShowCount] = useState(visibleCount);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [showCount, setShowCount] = useState(6);
 
-  const displayed = useMemo(() => filtered.slice(0, showCount), [filtered, showCount]);
-  const hasMore = filtered.length > showCount;
+  const refined = useMemo(
+    () => filtered.filter((community) => {
+      const tags = (community.tags || []).map((tag) => tag.toLowerCase());
+      const memberCount = community._membersCount || 0;
+      return memberCount >= minMembers && activeTags.every((tag) => tags.includes(tag));
+    }),
+    [filtered, activeTags, minMembers]
+  );
+  const displayed = useMemo(() => refined.slice(0, showCount), [refined, showCount]);
+  const hasMore = refined.length > showCount;
+
+  React.useEffect(() => {
+    setShowCount(6);
+  }, [refined]);
 
   const toggleTag = useCallback((tag) => {
     setActiveTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
   }, []);
 
-  const handleLoadMore = async () => {
-    if (!hasMore || isLoadingMore) return;
-    setIsLoadingMore(true);
-    await new Promise(r => setTimeout(r, 600)); // Subtle delay for feel
+  const handleLoadMore = () => {
+    if (!hasMore) return;
     setShowCount(c => c + 6);
-    setIsLoadingMore(false);
   };
 
   return (
@@ -76,14 +83,14 @@ const MaidDesign = memo(({
           <div className="space-y-4 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 text-[10px] font-black uppercase tracking-[0.2em]">
               <HiSignal className="w-3 h-3 animate-pulse" />
-              {t('Neural Networks Online')}
+              {t('Find your people')}
             </div>
             <h1 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter text-gray-900 dark:text-white leading-[0.9]">
-              {t('Community')} <br />
-              <span className="text-indigo-500">{t('Hub')}</span>
+              {t('Communities')} <br />
+              <span className="text-indigo-500">{t('that feel like home')}</span>
             </h1>
             <p className="text-lg text-gray-500 dark:text-gray-400 font-medium">
-              {t('Connect with nodes of similar resonance across the global grid.')}
+              {t('Discover groups built around your interests, join the conversation, and create a space of your own.')}
             </p>
           </div>
 
@@ -93,7 +100,8 @@ const MaidDesign = memo(({
               <input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder={t('Search Nodes...')}
+                placeholder={t('Search communities...')}
+                aria-label={t('Search communities')}
                 className="w-full pl-12 pr-6 py-3 sm:py-4 rounded-[1.5rem] bg-white dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 focus:border-indigo-500/50 outline-none transition-all shadow-xl shadow-gray-200/20 dark:shadow-none font-medium"
               />
             </div>
@@ -104,7 +112,7 @@ const MaidDesign = memo(({
               className="w-full sm:w-auto flex items-center justify-center gap-3 bg-indigo-600 px-6 py-3 sm:px-8 sm:py-4 rounded-[1.5rem] text-white font-black text-[11px] uppercase tracking-widest shadow-xl shadow-indigo-500/30 active:bg-indigo-700"
             >
               <HiPlus className="w-5 h-5" />
-              {t('Initialize Node')}
+              {t('Create a community')}
             </motion.button>
           </div>
         </header>
@@ -113,15 +121,17 @@ const MaidDesign = memo(({
         <div className="flex flex-wrap items-center justify-between gap-6">
           <div className="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar no-scrollbar">
             <button
-              onClick={() => setActiveCategory(null)}
-              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${!activeCategory ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10'}`}
+              onClick={() => setActiveCategory('All')}
+              aria-pressed={!activeCategory || activeCategory === 'All'}
+              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${!activeCategory || activeCategory === 'All' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10'}`}
             >
               {t('All Streams')}
             </button>
-            {categories.map(cat => (
+            {categories.filter((cat) => cat !== 'All').map(cat => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
+                aria-pressed={activeCategory === cat}
                 className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeCategory === cat ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10'}`}
               >
                 {t(cat)}
@@ -130,6 +140,17 @@ const MaidDesign = memo(({
           </div>
 
           <div className="flex items-center gap-3">
+            <label className="sr-only" htmlFor="community-sort">{t('Sort communities')}</label>
+            <select
+              id="community-sort"
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value)}
+              className="px-4 py-3 rounded-2xl bg-white/70 dark:bg-white/5 border border-gray-100 dark:border-white/10 text-sm outline-none"
+            >
+              <option value="Newest">{t('Newest')}</option>
+              <option value="Most Members">{t('Most members')}</option>
+              <option value="A-Z">{t('A-Z')}</option>
+            </select>
             <div className="flex items-center bg-white/50 dark:bg-white/5 p-1 rounded-2xl border border-gray-100 dark:border-white/5">
               <button
                 onClick={() => setViewMode('grid')}
@@ -195,16 +216,10 @@ const MaidDesign = memo(({
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">{t('Signal Range')}</h4>
-                  <div className="flex gap-4">
-                    <div className="flex-1 p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 flex items-center gap-3">
-                      <HiGlobeAlt className="w-5 h-5 text-indigo-500" />
-                      <span className="text-[10px] font-black uppercase text-gray-500">{t('Global')}</span>
-                    </div>
-                    <div className="flex-1 p-4 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-3 grayscale opacity-40">
-                      <HiMapPin className="w-5 h-5 text-gray-400" />
-                      <span className="text-[10px] font-black uppercase text-gray-400">{t('Local')}</span>
-                    </div>
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">{t('Visibility')}</h4>
+                  <div className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 flex items-center gap-3 text-sm text-gray-500 dark:text-gray-300">
+                    <HiGlobeAlt className="w-5 h-5 text-indigo-500" />
+                    {t('Public and private groups')}
                   </div>
                 </div>
               </div>
@@ -214,6 +229,18 @@ const MaidDesign = memo(({
       </section>
 
       {/* 🔮 Communities Transmission Feed */}
+      {isLoading ? (
+        <section aria-label={t('Loading communities')} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }, (_, index) => (
+            <div key={index} className="h-72 rounded-3xl bg-white/50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 animate-pulse" />
+          ))}
+        </section>
+      ) : error && filtered.length === 0 ? (
+        <section role="alert" className="py-20 text-center rounded-3xl border border-red-500/20 bg-red-500/5">
+          <p className="text-gray-700 dark:text-gray-200 mb-5">{error}</p>
+          <button onClick={onRetry} className="px-5 py-3 rounded-xl bg-indigo-600 text-white font-semibold">{t('Try again')}</button>
+        </section>
+      ) : (
       <section className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8' : 'flex flex-col gap-6'}`}>
         <AnimatePresence mode="popLayout">
           {displayed.length === 0 ? (
@@ -226,14 +253,14 @@ const MaidDesign = memo(({
                 <HiSignal className="w-10 h-10 text-indigo-500 animate-pulse" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">{t('No Connection Found')}</h3>
-                <p className="text-gray-500 max-w-sm">{t('Adjust your tuning or initialize a new node to start a resonance.')}</p>
+                <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{t('No communities found')}</h3>
+                <p className="text-gray-500 max-w-sm">{t('Try another search or category, or create a community to get started.')}</p>
               </div>
               <button
                 onClick={() => setShowCreateModal(true)}
                 className="px-8 py-3 rounded-2xl bg-indigo-600 text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-indigo-500/20"
               >
-                {t('Initialize New Node')}
+                {t('Create a community')}
               </button>
             </motion.div>
           ) : (
@@ -252,6 +279,7 @@ const MaidDesign = memo(({
           )}
         </AnimatePresence>
       </section>
+      )}
 
       {/* 🔄 Telemetry (Load More) */}
       {hasMore && (
@@ -260,17 +288,9 @@ const MaidDesign = memo(({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleLoadMore}
-            disabled={isLoadingMore}
-            className={`flex items-center gap-3 px-10 py-4 rounded-[2rem] bg-indigo-600 text-white font-black text-[11px] uppercase tracking-widest shadow-2xl shadow-indigo-500/30 transition-all ${isLoadingMore ? 'opacity-50' : ''}`}
+            className="flex items-center gap-3 px-10 py-4 rounded-[2rem] bg-indigo-600 text-white font-black text-[11px] uppercase tracking-widest shadow-2xl shadow-indigo-500/30 transition-all"
           >
-            {isLoadingMore ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                {t('Syncing...')}
-              </>
-            ) : (
-              t('Expand Grid')
-            )}
+            {t('Load more communities')}
           </motion.button>
         </div>
       )}
@@ -292,7 +312,7 @@ const MaidDesign = memo(({
       <div className="fixed bottom-8 left-8 hidden lg:flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/70 dark:bg-black/40 backdrop-blur-xl border border-white/10 shadow-xl">
         <HiUsers className="text-indigo-500 w-4 h-4" />
         <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">
-          {filtered.length} {t('Active Nodes')}
+          {refined.length} {t('communities')}
         </span>
       </div>
     </div>

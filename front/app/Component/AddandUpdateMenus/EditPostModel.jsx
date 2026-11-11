@@ -40,15 +40,19 @@ const EditPostModal = ({ post, onClose }) => {
     if (post) {
       setText(post.text || '');
       setExistingPhotos(post.Photos || []);
-      setSelectedCommunity(post.community || '');
+      setSelectedCommunity(post.community?._id || post.community || '');
       setSelectedMentions(post.mentions || []);
       setLinks(post.links || []);
     }
   }, [post]);
 
   const userCommunities = useMemo(
-    () => communities.filter(com => com?.members?.some(m => m._id === user._id)),
-    [communities, user._id]
+    () => communities.filter(com =>
+      com?.isMember || com?.members?.some((member) =>
+        (member?._id || member)?.toString() === user?._id?.toString()
+      )
+    ),
+    [communities, user?._id]
   );
 
   const newPhotosPreview = useMemo(

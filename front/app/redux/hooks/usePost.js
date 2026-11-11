@@ -268,8 +268,14 @@ export const usePost = () => {
       if (data.mentions) formData.append('mentions', JSON.stringify(data.mentions));
       if (data.links) formData.append('links', JSON.stringify(data.links));
       if (data.music) formData.append('music', data.music);
+      if (data.community?._id || data.community) {
+        formData.append('community', data.community?._id || data.community);
+      }
+      if (data.existingPhotos) {
+        formData.append('existingPhotos', JSON.stringify(data.existingPhotos));
+      }
 
-      mediaFiles.forEach((file) => formData.append('newMedia', file));
+      (data.newPhotos || mediaFiles).forEach((file) => formData.append('newMedia', file));
       if (deletedMedia.length > 0) {
         formData.append('deletedMedia', JSON.stringify(deletedMedia));
       }

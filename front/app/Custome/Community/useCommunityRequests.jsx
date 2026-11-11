@@ -1,60 +1,43 @@
 'use client';
 import api from '@/app/utils/api';
 import { useCallback } from 'react';
+
+const mergeCommunity = (previous, communityId, updatedCommunity) =>
+  previous.map((community) =>
+    community._id === communityId ? { ...community, ...updatedCommunity } : community
+  );
+
 export const useCommunityRequests = ({
-    user,
     setCommunities,
     showAlert
 }) => {
-  const sendJoinRequest = useCallback(async (id) => {
-    try {
-      const res = await api.post(`/community/join-request/${id}`);
-      showAlert(res.data.message);
-      setCommunities((prev) =>
-        prev.map((community) => {
-          if (community._id !== id) return community;
-          const requests = community.joinRequests || [];
-          const hasRequest = requests.some(
-            (requestId) => (requestId?._id || requestId).toString() === user._id
-          );
-          return hasRequest
-            ? community
-            : { ...community, joinRequests: [...requests, user._id] };
-        })
-      );
-    } catch (err) {
-      console.error(err);
-      showAlert('Failed to send join request.');
-    }
-  }, [user, setCommunities, showAlert]);
+    const sendJoinRequest = useCallback(async (id) => {
+      try {
+        const res = await api.post(`/community/join-request/${id}`);
+        showAlert(res.data.message);
+        if (res.data.community) {
+          setCommunities((previous) => mergeCommunity(previous, id, res.data.community));
+        }
+        return true;
+      } catch (err) {
+        console.error(err);
+        showAlert(err?.response?.data?.message || 'Failed to send join request.');
+        return false;
+      }
+    }, [setCommunities, showAlert]);
 
   const approveJoinRequest = useCallback(async (communityId, userId) => {
     try {
       const res = await api.put(`/community/join-request/approve/${communityId}/${userId}`);
       showAlert(res.data.message);
-
-      // تحديث الـ members محليًا
-      setCommunities((prev) =>
-        prev.map((c) =>
-          c._id === communityId
-            ? {
-                ...c,
-                members: (c.members || []).some(
-                  (member) => (member?._id || member).toString() === userId
-                )
-                  ? c.members
-                  : [...(c.members || []), userId],
-                joinRequests: (c.joinRequests || []).filter(
-                  (requestId) => (requestId?._id || requestId).toString() !== userId
-                ),
-              }
-            : c
-        )
-      );
-
+      if (res.data.community) {
+        setCommunities((previous) => mergeCommunity(previous, communityId, res.data.community));
+      }
+      return true;
     } catch (err) {
       console.error(err);
-      showAlert('Failed to approve join request.');
+      showAlert(err?.response?.data?.message || 'Failed to approve join request.');
+      return false;
     }
   }, [setCommunities, showAlert]);
 
@@ -63,21 +46,14 @@ export const useCommunityRequests = ({
     try {
       const res = await api.put(`/community/join-request/reject/${communityId}/${userId}`);
       showAlert(res.data.message);
-      setCommunities((prev) =>
-        prev.map((community) =>
-          community._id === communityId
-            ? {
-                ...community,
-                joinRequests: (community.joinRequests || []).filter(
-                  (requestId) => (requestId?._id || requestId).toString() !== userId
-                ),
-              }
-            : community
-        )
-      );
+      if (res.data.community) {
+        setCommunities((previous) => mergeCommunity(previous, communityId, res.data.community));
+      }
+      return true;
     } catch (err) {
       console.error(err);
-      showAlert('Failed to reject join request.');
+      showAlert(err?.response?.data?.message || 'Failed to reject join request.');
+      return false;
     }
   }, [setCommunities, showAlert]);
 
@@ -87,25 +63,16 @@ export const useCommunityRequests = ({
     try {
       const res = await api.put(`/community/join/${id}`);
       showAlert(res.data.message);
-
-      setCommunities((prev) =>
-        prev.map((c) =>
-          c._id === id
-            ? {
-                ...c,
-                members:
-                  res.data.message === 'Community Joined'
-                  ? [...(c.members || []), user._id]
-                  : (c.members || []).filter((member) => (member?._id || member).toString() !== user._id),
-              }
-            : c
-        )
-      );
+      if (res.data.community) {
+        setCommunities((previous) => mergeCommunity(previous, id, res.data.community));
+      }
+      return true;
     } catch (err) {
       console.error(err);
-      showAlert('Error joining community.');
+      showAlert(err?.response?.data?.message || 'Error updating community membership.');
+      return false;
     }
-  }, [user, setCommunities, showAlert]);
+  }, [setCommunities, showAlert]);
     return {
         sendJoinRequest,
         approveJoinRequest,

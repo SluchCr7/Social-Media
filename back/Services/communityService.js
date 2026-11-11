@@ -1,5 +1,6 @@
 const { Community, ValidateCommunity, ValidateCommunityUpdate } = require("../Modules/Community");
 const { User } = require("../Modules/User");
+const mongoose = require("mongoose");
 const { cloudUpload, cloudRemove } = require("../Config/cloudUpload");
 const { sendNotificationHelper } = require("../utils/SendNotification");
 const { communityPopulate } = require("../Populates/Populate");
@@ -7,21 +8,83 @@ const { io } = require("../Config/socket");
 
 const result = (status, body) => ({ status, body });
 
-async function getAllCommunities() {
-  return Community.find({}).populate(communityPopulate);
+const idOf = (value) => String(value?._id ?? value ?? "");
+const includesId = (list, id) => Array.isArray(list) && list.some((item) => idOf(item) === idOf(id));
+const isManager = (community, userId) =>
+  idOf(community.owner) === idOf(userId) || includesId(community.Admins, userId);
+const communitySummary = (community) => {
+  const data = typeof community?.toObject === "function" ? community.toObject() : community;
+  const members = data?.members || [];
+  const {
+    members: _members,
+    Admins: _admins,
+    joinRequests: _joinRequests,
+    ...summary
+  } = data || {};
+  return { ...summary, membersCount: members.length };
+};
+
+async function getAllCommunities(userId, category) {
+  const communities = await Community.find(category ? { Category: category } : {})
+    .select("Name Picture Cover description members owner Category tags isPrivate isForAdults createdAt updatedAt")
+    .sort({ createdAt: -1 })
+    .populate({ path: "owner", select: "username profileName profilePhoto" })
+    .lean();
+  return communities.map(({ members = [], ...community }) => ({
+    ...community,
+    membersCount: members.length,
+    isMember: idOf(community.owner) === idOf(userId) || includesId(members, userId),
+  }));
 }
 
-async function getCommunityById(id) {
-  const community = await Community.findById(id).populate(communityPopulate);
-  return community ? result(200, community) : result(404, { message: "Community Not Found" });
+async function getCommunityById(id, userId) {
+  if (!mongoose.isValidObjectId(id)) return result(400, { message: "Invalid community ID" });
+  const community = await Community.findById(id);
+  if (!community) return result(404, { message: "Community not found" });
+  const isMember = idOf(community.owner) === idOf(userId) || includesId(community.members, userId);
+  const canManage = userId && isManager(community, userId);
+  const hasPendingRequest = includesId(community.joinRequests, userId);
+  if (community.isPrivate && !isMember) {
+    await community.populate({ path: "owner", select: "username profileName profilePhoto" });
+    return result(200, {
+      _id: community._id,
+      Name: community.Name,
+      Picture: community.Picture,
+      Cover: community.Cover,
+      description: community.description,
+      owner: community.owner,
+      Category: community.Category,
+      tags: community.tags,
+      rules: community.rules,
+      isPrivate: true,
+      isForAdults: community.isForAdults,
+      createdAt: community.createdAt,
+      updatedAt: community.updatedAt,
+      membersCount: community.members.length,
+      isMember: false,
+      hasPendingRequest,
+    });
+  }
+
+  const populate = communityPopulate.filter(({ path }) => path !== "joinRequests");
+  if (canManage) populate.push({ path: "joinRequests", select: "username profileName profilePhoto" });
+  await community.populate(populate);
+  const communityData = community.toObject();
+  if (!canManage) delete communityData.joinRequests;
+  return result(200, {
+    ...communityData,
+    membersCount: community.members.length,
+    isMember,
+    hasPendingRequest,
+  });
 }
 
-async function getCommunityByCategory(category) {
-  return Community.find({ Category: category }).populate(communityPopulate);
+async function getCommunityByCategory(category, userId) {
+  return getAllCommunities(userId, category);
 }
 
 async function addNewCommunity(body, userId) {
-  const { error } = ValidateCommunity(body);
+  const { error, value } = ValidateCommunity(body);
   if (error) return result(400, { message: error.details[0].message });
 
   const {
@@ -32,7 +95,7 @@ async function addNewCommunity(body, userId) {
     rules = [],
     isPrivate = false,
     isForAdults = false,
-  } = body;
+  } = value;
 
   const community = new Community({
     Name,
@@ -56,7 +119,7 @@ async function addNewCommunity(body, userId) {
     { path: "owner", select: "username profileName profilePhoto" },
     { path: "members", select: "username profileName profilePhoto" },
   ]);
-  io.emit("community:create", community);
+  io.emit("community:create", communitySummary(community));
 
   return result(201, {
     message: "Community created successfully",
@@ -64,11 +127,14 @@ async function addNewCommunity(body, userId) {
   });
 }
 
-async function deleteCommunity(id) {
+async function deleteCommunity(id, requesterId, isPlatformAdmin = false) {
   const community = await Community.findById(id);
-  if (!community) return { error: "Community not found" };
+  if (!community) return result(404, { message: "Community not found" });
+  if (!isPlatformAdmin && idOf(community.owner) !== idOf(requesterId)) {
+    return result(403, { message: "Only the community owner can delete this community" });
+  }
 
-  await community.remove();
+  await community.deleteOne();
   io.emit("community:delete", id);
   return result(200, { message: "Community removed" });
 }
@@ -77,35 +143,59 @@ async function joinTheCommunity(id, userId) {
   let community = await Community.findById(id);
   if (!community) return result(404, { message: "Community not found" });
 
-  if (community.owner.toString() === userId.toString()) {
+  if (idOf(community.owner) === idOf(userId)) {
     return result(400, { message: "Owner can't join or leave their own community" });
   }
 
-  const leaving = community.members.includes(userId);
-  community = await Community.findByIdAndUpdate(
-    id,
-    leaving ? { $pull: { members: userId } } : { $push: { members: userId } },
-    { new: true }
-  ).populate(communityPopulate);
-  io.emit("community:update", community);
+  const leaving = includesId(community.members, userId);
+  if (!leaving && community.isPrivate) {
+    return result(403, { message: "Request to join this private community instead" });
+  }
+  if (leaving) {
+    community.members.pull(userId);
+    community.Admins.pull(userId);
+  } else {
+    community.members.addToSet(userId);
+  }
+  await community.save();
+  const canManage = isManager(community, userId);
+  const populate = communityPopulate.filter(({ path }) => path !== "joinRequests");
+  if (canManage) populate.push({ path: "joinRequests", select: "username profileName profilePhoto" });
+  await community.populate(populate);
+  const communityData = community.toObject();
+  if (!canManage) delete communityData.joinRequests;
+  const updatedCommunity = {
+    ...communityData,
+    membersCount: community.members.length,
+    isMember: !leaving,
+  };
+  io.emit("community:update", communitySummary(community));
   return result(200, {
     message: leaving ? "Community Left" : "Community Joined",
-    community,
+    community: community.isPrivate && !canManage
+      ? communitySummary(community)
+      : updatedCommunity,
   });
 }
 
-async function editCommunity(id, body) {
-  const { error } = ValidateCommunityUpdate(body);
+async function editCommunity(id, body, requesterId) {
+  const { error, value } = ValidateCommunityUpdate(body);
   if (error) return result(400, { message: error.details[0].message });
 
+  const existing = await Community.findById(id);
+  if (!existing) return result(404, { message: "Community not found" });
+  if (!isManager(existing, requesterId)) {
+    return result(403, { message: "Only community owners and admins can edit this community" });
+  }
+
   const updateData = {
-    ...(body.Name && { Name: body.Name }),
-    ...(body.Category && { Category: body.Category }),
-    ...(body.description && { description: body.description }),
-    ...(typeof body.isPrivate === "boolean" && { isPrivate: body.isPrivate }),
-    ...(typeof body.isForAdults === "boolean" && { isForAdults: body.isForAdults }),
-    ...(body.tags && { tags: body.tags }),
-    ...(body.rules && { rules: body.rules }),
+    ...(typeof value.Name === "string" && { Name: value.Name }),
+    ...(typeof value.Category === "string" && { Category: value.Category }),
+    ...(typeof value.description === "string" && { description: value.description }),
+    ...(typeof value.isPrivate === "boolean" && { isPrivate: value.isPrivate }),
+    ...(typeof value.isForAdults === "boolean" && { isForAdults: value.isForAdults }),
+    ...(value.tags && { tags: value.tags }),
+    ...(value.rules && { rules: value.rules }),
   };
   const community = await Community.findByIdAndUpdate(
     id,
@@ -114,13 +204,16 @@ async function editCommunity(id, body) {
   ).populate(communityPopulate);
   if (!community) return result(404, { message: "Community not found" });
 
-  io.emit("community:update", community);
+  io.emit("community:update", communitySummary(community));
   return result(200, { message: "Community updated successfully", community });
 }
 
-async function updateCommunityPicture(id, file) {
+async function updateCommunityPicture(id, file, requesterId) {
   const community = await Community.findById(id);
   if (!community) return result(404, { message: "Community not found" });
+  if (!isManager(community, requesterId)) {
+    return result(403, { message: "Only community owners and admins can update its picture" });
+  }
   if (!file) return result(400, { message: "No file uploaded" });
 
   const uploaded = await cloudUpload(file);
@@ -128,7 +221,7 @@ async function updateCommunityPicture(id, file) {
   community.Picture = { url: uploaded.secure_url, publicId: uploaded.public_id };
   await community.save();
   const updatedCommunity = await Community.findById(id).populate(communityPopulate);
-  io.emit("community:update", updatedCommunity);
+  io.emit("community:update", communitySummary(updatedCommunity));
 
   return result(200, {
     message: "Community picture updated successfully",
@@ -137,9 +230,12 @@ async function updateCommunityPicture(id, file) {
   });
 }
 
-async function updateCommunityCover(id, file) {
+async function updateCommunityCover(id, file, requesterId) {
   const community = await Community.findById(id);
   if (!community) return result(404, { message: "Community not found" });
+  if (!isManager(community, requesterId)) {
+    return result(403, { message: "Only community owners and admins can update its cover" });
+  }
   if (!file) return result(400, { message: "No file uploaded" });
 
   const uploaded = await cloudUpload(file);
@@ -147,7 +243,7 @@ async function updateCommunityCover(id, file) {
   community.Cover = { url: uploaded.secure_url, publicId: uploaded.public_id };
   await community.save();
   const updatedCommunity = await Community.findById(id).populate(communityPopulate);
-  io.emit("community:update", updatedCommunity);
+  io.emit("community:update", communitySummary(updatedCommunity));
 
   return result(200, {
     message: "Community cover updated successfully",
@@ -159,96 +255,110 @@ async function updateCommunityCover(id, file) {
 async function removeMember(communityId, userId, requester) {
   const community = await Community.findById(communityId);
   if (!community) return result(404, { message: "Community not found" });
-  if (community.owner.toString() !== requester._id.toString()) {
-    return result(403, { message: "Only the community owner can remove members" });
+  if (!isManager(community, requester._id)) {
+    return result(403, { message: "Only community owners and admins can remove members" });
   }
-  if (!community.members.includes(userId)) {
+  if (idOf(community.owner) === idOf(userId)) {
+    return result(400, { message: "The community owner cannot be removed" });
+  }
+  if (!includesId(community.members, userId)) {
     return result(400, { message: "User is not a member of the community" });
   }
 
-  await Community.findByIdAndUpdate(communityId, { $pull: { members: userId } });
+  community.members.pull(userId);
+  community.Admins.pull(userId);
+  await community.save();
+  await community.populate(communityPopulate);
   await sendNotificationHelper({
-    sender: userId,
-    receiver: requester._id,
-    content: `You have been removed from the community "${community.name}"`,
+    sender: requester._id,
+    receiver: userId,
+    content: `You have been removed from the community "${community.Name}"`,
     type: "remove",
     actionRef: communityId,
     actionModel: "Community",
   });
-  return result(200, { message: "Member removed successfully" });
+  io.emit("community:update", communitySummary(community));
+  return result(200, { message: "Member removed successfully", community });
 }
 
 async function makeAdmin(id, userIdToMakeAdmin, requesterId) {
   const community = await Community.findById(id);
   if (!community) return result(404, { message: "Community not found" });
-  const isRequesterOwner = community.owner.equals(requesterId);
-  const isRequesterAdmin = community.Admins.includes(requesterId);
-  if (!isRequesterOwner && !isRequesterAdmin) {
-    return result(403, { message: "Only community owner or admins can manage admins" });
+  if (idOf(community.owner) !== idOf(requesterId)) {
+    return result(403, { message: "Only the community owner can manage admin roles" });
   }
-  if (!community.members.includes(userIdToMakeAdmin)) {
+  if (idOf(community.owner) === idOf(userIdToMakeAdmin)) {
+    return result(400, { message: "The community owner is already an administrator" });
+  }
+  if (!includesId(community.members, userIdToMakeAdmin)) {
     return result(400, { message: "User is not a member of the community" });
   }
 
-  const isAlreadyAdmin = community.Admins.includes(userIdToMakeAdmin);
+  const isAlreadyAdmin = includesId(community.Admins, userIdToMakeAdmin);
   if (isAlreadyAdmin) {
     community.Admins.pull(userIdToMakeAdmin);
     await community.save();
-    return result(200, { message: "Admin removed successfully" });
+  } else {
+    community.Admins.addToSet(userIdToMakeAdmin);
+    await community.save();
   }
-  community.Admins.push(userIdToMakeAdmin);
-  await community.save();
-  return result(200, { message: "Admin added successfully" });
+  await community.populate(communityPopulate);
+  io.emit("community:update", communitySummary(community));
+  return result(200, {
+    message: isAlreadyAdmin ? "Admin removed successfully" : "Admin added successfully",
+    community,
+  });
 }
 
 async function sendJoinRequest(id, userId) {
   const community = await Community.findById(id);
   if (!community) return result(404, { message: "Community not found" });
   if (!community.isPrivate) return result(400, { message: "Community is public, join directly" });
-  if (community.members.includes(userId)) {
+  if (includesId(community.members, userId)) {
     return result(400, { message: "You are already a member of this community" });
   }
-  if (community.joinRequests.includes(userId)) {
+  if (includesId(community.joinRequests, userId)) {
     return result(400, { message: "You have already requested to join" });
   }
-  community.joinRequests.push(userId);
+  community.joinRequests.addToSet(userId);
   await community.save();
-  return result(200, { message: "Join request sent successfully" });
+  io.emit("community:update", communitySummary(community));
+  return result(200, { message: "Join request sent successfully", hasPendingRequest: true });
 }
 
 async function approveJoinRequest(communityId, userId, requesterId) {
   const community = await Community.findById(communityId);
   if (!community) return result(404, { message: "Community not found" });
-  if (!community.owner.equals(requesterId) && !community.Admins.includes(requesterId)) {
+  if (!isManager(community, requesterId)) {
     return result(403, { message: "Not authorized" });
   }
-  if (!community.joinRequests.includes(userId)) {
+  if (!includesId(community.joinRequests, userId)) {
     return result(400, { message: "This user has not requested to join" });
   }
 
   community.joinRequests.pull(userId);
-  community.members.push(userId);
+  community.members.addToSet(userId);
   await community.save();
   await community.populate(communityPopulate);
   await sendNotificationHelper({
     sender: requesterId,
     receiver: userId,
-    content: `Your request to join the community "${community.name}" has been approved.`,
+    content: `Your request to join the community "${community.Name}" has been approved.`,
     type: "approve",
     actionRef: communityId,
     actionModel: "Community",
   });
-  io.emit("community:update", community);
+  io.emit("community:update", communitySummary(community));
   return result(200, { message: "User added to community", community });
 }
 
 async function rejectJoinRequest(communityId, userId, requesterId) {
   const community = await Community.findById(communityId);
   if (!community) return result(404, { message: "Community not found" });
-  if (!community.owner.equals(requesterId) && !community.Admins.includes(requesterId)) {
+  if (!isManager(community, requesterId)) {
     return result(403, { message: "Not authorized" });
   }
-  if (!community.joinRequests.includes(userId)) {
+  if (!includesId(community.joinRequests, userId)) {
     return result(400, { message: "This user has not requested to join" });
   }
 
@@ -258,23 +368,33 @@ async function rejectJoinRequest(communityId, userId, requesterId) {
   await sendNotificationHelper({
     sender: requesterId,
     receiver: userId,
-    content: `Your request to join the community "${community.name}" has been rejected.`,
+    content: `Your request to join the community "${community.Name}" has been rejected.`,
     type: "reject",
     actionRef: communityId,
     actionModel: "Community",
   });
+  io.emit("community:update", communitySummary(community));
   return result(200, { message: "Join request rejected", community });
 }
 
 async function updateCommunityRules(id, rules, requesterId) {
   const community = await Community.findById(id);
   if (!community) return result(404, { message: "Community not found" });
-  if (!community.owner.equals(requesterId) && !community.Admins.includes(requesterId)) {
+  if (!isManager(community, requesterId)) {
     return result(403, { message: "Not authorized" });
   }
-  community.rules = rules || [];
+  if (
+    !Array.isArray(rules) ||
+    rules.length > 20 ||
+    rules.some((rule) => typeof rule !== "string" || !rule.trim() || rule.trim().length > 200)
+  ) {
+    return result(400, { message: "Rules must be an array of non-empty text" });
+  }
+  community.rules = rules.map((rule) => rule.trim());
   await community.save();
-  return result(200, { message: "Community rules updated", rules: community.rules });
+  await community.populate(communityPopulate);
+  io.emit("community:update", communitySummary(community));
+  return result(200, { message: "Community rules updated", rules: community.rules, community });
 }
 
 module.exports = {

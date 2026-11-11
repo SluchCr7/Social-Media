@@ -17,21 +17,21 @@ const {
 } = require('../Controllers/CommunityController');
 
 const route = require('express').Router();
-const { verifyToken } = require('../Middelwares/verifyToken');
+const { verifyToken, optionalVerifyToken } = require('../Middelwares/verifyToken');
 const photoUpload = require('../Middelwares/uploadPhoto');
 
 route.route('/')
-  .get(getAllCommunities);
+  .get(optionalVerifyToken, getAllCommunities);
 
-route.route('/:Category')
-  .get(getCommunityByCategory);
+route.route('/category/:Category')
+  .get(optionalVerifyToken, getCommunityByCategory);
 
 route.route('/add')
   .post(verifyToken, addNewCommunity);
 
 route.route('/:id')
   .delete(verifyToken, deleteCommunity)
-  .get(getCommunityById);
+  .get(optionalVerifyToken, getCommunityById);
 
 route.route('/join/:id')
   .put(verifyToken, joinTheCommunity);

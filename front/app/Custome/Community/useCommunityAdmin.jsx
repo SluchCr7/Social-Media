@@ -12,7 +12,7 @@ export const useCommunityAdmin = ({ setCommunities, showAlert }) => {
       const res = await api.put(`/community/edit/${id}`, updatedData);
       setCommunities((previous) =>
         previous.map((community) =>
-          community._id === id ? { ...community, ...res.data.community } : community
+          community._id === id ? { ...community, ...(res.data.community || {}) } : community
         )
       );
       showAlert(res.data.message || "Community updated successfully.");
@@ -20,7 +20,7 @@ export const useCommunityAdmin = ({ setCommunities, showAlert }) => {
     } catch (err) {
       console.error("editCommunity error:", err);
       showAlert(err.response?.data?.message || "Failed to update community.");
-      return null;
+      throw err;
     }
   }, [setCommunities, showAlert]);
 
@@ -76,18 +76,13 @@ export const useCommunityAdmin = ({ setCommunities, showAlert }) => {
     try {
       const res = await api.put(`/community/remove/${communityId}/${userId}`);
       showAlert(res.data.message || "Member removed successfully.");
-      setCommunities((previous) =>
-        previous.map((community) =>
-          community._id === communityId
-            ? {
-                ...community,
-                members: (community.members || []).filter(
-                  (member) => (member?._id || member).toString() !== userId
-                ),
-              }
-            : community
-        )
-      );
+      if (res.data.community) {
+        setCommunities((previous) =>
+          previous.map((community) =>
+            community._id === communityId ? { ...community, ...res.data.community } : community
+          )
+        );
+      }
     } catch (err) {
       console.error("removeMember error:", err);
       showAlert(err.response?.data?.message || "Failed to remove member.");
@@ -97,22 +92,15 @@ export const useCommunityAdmin = ({ setCommunities, showAlert }) => {
   const makeAdmin = useCallback(async (communityId, userIdToMakeAdmin) => {
     try {
       const res = await api.put(`/community/admin/${communityId}`, { userIdToMakeAdmin });
-      const message = res.data.message;
+      const { message, community: updatedCommunity } = res.data;
       showAlert(message);
-
-      setCommunities((previous) =>
-        previous.map((community) => {
-          if (community._id !== communityId) return community;
-          const isAdding = message?.toLowerCase().includes("added");
-          const admins = community.Admins || [];
-          const updatedAdmins = isAdding
-            ? [...admins, userIdToMakeAdmin]
-            : admins.filter(
-                (adminId) => (adminId?._id || adminId).toString() !== userIdToMakeAdmin
-              );
-          return { ...community, Admins: updatedAdmins };
-        })
-      );
+      if (updatedCommunity) {
+        setCommunities((previous) =>
+          previous.map((community) =>
+            community._id === communityId ? { ...community, ...updatedCommunity } : community
+          )
+        );
+      }
     } catch (err) {
       console.error("makeAdmin error:", err);
       showAlert(err.response?.data?.message || "Failed to update admin role.");
@@ -125,7 +113,7 @@ export const useCommunityAdmin = ({ setCommunities, showAlert }) => {
       showAlert(res.data.message);
       setCommunities((previous) =>
         previous.map((community) =>
-          community._id === id ? { ...community, rules: res.data.rules } : community
+          community._id === id ? { ...community, ...(res.data.community || { rules: res.data.rules }) } : community
         )
       );
     } catch (err) {

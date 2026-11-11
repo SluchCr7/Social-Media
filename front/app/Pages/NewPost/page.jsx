@@ -389,6 +389,7 @@ const NewPostContainer = () => {
           handlePost,
           handleSaveDraft,
           communities,
+          communityMemberId: user?._id,
           showMentionBox,
           filteredUsers,
           activeMentionIndex,

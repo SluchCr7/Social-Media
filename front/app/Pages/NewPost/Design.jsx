@@ -193,7 +193,7 @@ const NewPostPresenter = (props) => {
     media = [], handleMediaChange, removeMedia,
     links = [], linkInput, setLinkInput, handleAddLink, handleRemoveLink,
     scheduleEnabled, setScheduleEnabled, scheduleDate, setScheduleDate,
-    selectedUser, privacy, setPrivacy, communities = [], selectedCommunity, setSelectedCommunity,
+    selectedUser, privacy, setPrivacy, communities = [], communityMemberId, selectedCommunity, setSelectedCommunity,
     filteredUsers = [], handleSelectMention, showMentionBox, activeMentionIndex, mentionBoxPos = {}, textareaRef,
     handleKeyDown, selectedMusic, setSelectedMusic, musicList = [], isMusicLoading, isSearchingUsers
   } = props
@@ -252,7 +252,9 @@ const NewPostPresenter = (props) => {
                       className="w-full pl-11 pr-10 py-3 bg-transparent border-none text-[13px] font-bold text-gray-700 dark:text-gray-300 outline-none appearance-none cursor-pointer"
                     >
                       <option value="">{t("Global Network")}</option>
-                      {communities?.filter(com => com.members.some(m => m._id === selectedUser?._id)).map(com => (
+                      {communities?.filter(com => com.isMember || com.members?.some((member) =>
+                        (member?._id || member)?.toString() === communityMemberId?.toString()
+                      )).map(com => (
                         <option key={com._id} value={com._id}>{com.Name}</option>
                       ))}
                     </select>
@@ -318,7 +320,9 @@ const NewPostPresenter = (props) => {
                       className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider text-gray-700 dark:text-gray-300 outline-none appearance-none pr-8"
                     >
                       <option value="">{t("Network")}</option>
-                      {communities?.filter(com => com.members.some(m => m._id === selectedUser?._id)).map(com => (
+                      {communities?.filter(com => com.isMember || com.members?.some((member) =>
+                        (member?._id || member)?.toString() === communityMemberId?.toString()
+                      )).map(com => (
                         <option key={com._id} value={com._id}>{com.Name}</option>
                       ))}
                     </select>

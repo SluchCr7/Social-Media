@@ -51,6 +51,7 @@ const PostSchema = new mongoose.Schema({
 // ✅ Indexes
 PostSchema.index({ createdAt: -1 });
 PostSchema.index({ owner: 1, createdAt: -1 });
+PostSchema.index({ community: 1, status: 1, createdAt: -1 });
 
 // ✅ Virtuals
 PostSchema.virtual("comments", {

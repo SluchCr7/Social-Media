@@ -153,6 +153,7 @@ const Sluchits = ({ activeTab = 'following' }) => {
     return communities.filter((c) => {
       if (!c) return false;
       if (c?.owner?._id?.toString() === currentUserId) return false;
+      if (c.isMember) return false;
       return !c.members?.some((member) => {
         const memberId = member?._id?.toString() || member?.toString();
         return memberId === currentUserId;

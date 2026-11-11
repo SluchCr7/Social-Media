@@ -22,6 +22,7 @@ import Image from 'next/image';
 import { useAlert } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
+import { CATEGORY_OPTIONS } from '@/app/utils/Data';
 
 const SectionHeader = ({ icon: Icon, title }) => (
   <div className="flex items-center gap-2 mb-2">
@@ -36,8 +37,10 @@ const EditCommunityMenu = ({ community, onClose }) => {
   const { editCommunity, updateCommunityPicture, updateCommunityCover } = useCommunity();
 
   const [name, setName] = useState(community?.Name || '');
+  const [category, setCategory] = useState(community?.Category || '');
   const [description, setDescription] = useState(community?.description || '');
   const [isPrivate, setIsPrivate] = useState(community?.isPrivate || false);
+  const [isForAdults, setIsForAdults] = useState(community?.isForAdults || false);
   const [tags, setTags] = useState(community?.tags || []);
   const [newTag, setNewTag] = useState('');
   const [rules, setRules] = useState(community?.rules || []);
@@ -47,12 +50,19 @@ const EditCommunityMenu = ({ community, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const initialData = useMemo(() => ({
-    name: community?.Name,
+    Name: community?.Name,
+    Category: community?.Category,
     description: community?.description,
     isPrivate: community?.isPrivate,
+    isForAdults: community?.isForAdults,
     tags: community?.tags,
     rules: community?.rules,
   }), [community]);
+
+  React.useEffect(() => () => {
+    if (previewPicture.startsWith('blob:')) URL.revokeObjectURL(previewPicture);
+    if (previewCover.startsWith('blob:')) URL.revokeObjectURL(previewCover);
+  }, [previewPicture, previewCover]);
 
   const handleImageChange = async (e, type) => {
     const file = e.target.files?.[0];
@@ -64,14 +74,18 @@ const EditCommunityMenu = ({ community, onClose }) => {
         setPreviewPicture(objectURL);
         const result = await updateCommunityPicture(community._id, file);
         if (result?.url) setPreviewPicture(result.url);
+        else setPreviewPicture(community?.Picture?.url || '/default-avatar.png');
       } else if (type === 'cover') {
         setPreviewCover(objectURL);
         const result = await updateCommunityCover(community._id, file);
         if (result?.url) setPreviewCover(result.url);
+        else setPreviewCover(community?.Cover?.url || '/default-cover.png');
       }
     } catch (err) {
       console.error('Image Upload Error:', err);
       showAlert(t('Error uploading image.'));
+      if (type === 'picture') setPreviewPicture(community?.Picture?.url || '/default-avatar.png');
+      else setPreviewCover(community?.Cover?.url || '/default-cover.png');
     }
   };
 
@@ -100,19 +114,20 @@ const EditCommunityMenu = ({ community, onClose }) => {
     setIsLoading(true);
 
     const updatedData = {};
-    if (name !== initialData.name) updatedData.Name = name;
+    if (name !== initialData.Name) updatedData.Name = name.trim();
+    if (category !== initialData.Category) updatedData.Category = category;
     if (description !== initialData.description) updatedData.description = description;
     if (isPrivate !== initialData.isPrivate) updatedData.isPrivate = isPrivate;
+    if (isForAdults !== initialData.isForAdults) updatedData.isForAdults = isForAdults;
     if (JSON.stringify(tags) !== JSON.stringify(initialData.tags)) updatedData.tags = tags;
     if (JSON.stringify(rules) !== JSON.stringify(initialData.rules)) updatedData.rules = rules;
 
     if (Object.keys(updatedData).length > 0) {
       try {
         await editCommunity(community._id, updatedData);
-        showAlert(t('Community updated successfully.'));
         onClose();
       } catch (err) {
-        showAlert(t('Failed to update community.'));
+        console.error('Could not save community changes:', err);
       } finally {
         setIsLoading(false);
       }
@@ -183,6 +198,19 @@ const EditCommunityMenu = ({ community, onClose }) => {
               </div>
 
               <div>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">{t('Category')}</label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium outline-none transition-all"
+                >
+                  {CATEGORY_OPTIONS.filter(Boolean).map(({ name: label, value }) => (
+                    <option key={value} value={value}>{t(label)}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">{t('Description')}</label>
                 <textarea
                   value={description}
@@ -206,6 +234,15 @@ const EditCommunityMenu = ({ community, onClose }) => {
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isPrivate ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-white/10 text-slate-400'}`}>
                   {isPrivate ? <Lock size={16} /> : <Globe size={16} />}
                 </div>
+                <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-semibold cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isForAdults}
+                    onChange={(event) => setIsForAdults(event.target.checked)}
+                    className="accent-indigo-600"
+                  />
+                  {t('Adults only')}
+                </label>
                 <div>
                   <p className="text-xs font-bold">{isPrivate ? t('Private Community') : t('Public Community')}</p>
                   <p className="text-[11px] text-slate-500">{isPrivate ? t('Only members can see content') : t('Anyone can see content')}</p>

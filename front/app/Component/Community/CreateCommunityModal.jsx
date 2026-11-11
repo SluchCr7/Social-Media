@@ -84,6 +84,7 @@ const CreateCommunityModal = React.memo(({ show, onClose, form, setForm, handleC
                 <input
                   value={form.Name}
                   onChange={(e) => handleChange("Name", e.target.value)}
+                  maxLength={80}
                   required
                   className="w-full mt-1 p-3 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text"
                   placeholder="e.g. Frontend Devs"
@@ -111,10 +112,39 @@ const CreateCommunityModal = React.memo(({ show, onClose, form, setForm, handleC
                   value={form.description}
                   onChange={(e) => handleChange("description", e.target.value)}
                   required
+                  maxLength={500}
                   rows={4}
                   className="w-full mt-1 p-3 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text"
                   placeholder={t("Short description about what the community is for")}
                 />
+                <p className="mt-1 text-end text-xs text-gray-400">{form.description.length}/500</p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 p-4 dark:border-white/10">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(form.isPrivate)}
+                    onChange={(e) => handleChange("isPrivate", e.target.checked)}
+                    className="mt-1 accent-indigo-600"
+                  />
+                  <span>
+                    <span className="block text-sm font-semibold">{t("Private community")}</span>
+                    <span className="mt-1 block text-xs text-gray-500">{t("People must request approval to join.")}</span>
+                  </span>
+                </label>
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 p-4 dark:border-white/10">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(form.isForAdults)}
+                    onChange={(e) => handleChange("isForAdults", e.target.checked)}
+                    className="mt-1 accent-indigo-600"
+                  />
+                  <span>
+                    <span className="block text-sm font-semibold">{t("Adults only")}</span>
+                    <span className="mt-1 block text-xs text-gray-500">{t("Mark this community as intended for adults.")}</span>
+                  </span>
+                </label>
               </div>
 
               {/* Tags */}
@@ -135,6 +165,7 @@ const CreateCommunityModal = React.memo(({ show, onClose, form, setForm, handleC
                   <input
                     value={form.newTag || ''}
                     onChange={(e) => handleChange("newTag", e.target.value)}
+                    maxLength={30}
                     placeholder={t("Add a tag")}
                     className="flex-1 p-2 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text"
                   />
@@ -157,6 +188,7 @@ const CreateCommunityModal = React.memo(({ show, onClose, form, setForm, handleC
                   <input
                     value={form.newRule || ''}
                     onChange={(e) => handleChange("newRule", e.target.value)}
+                    maxLength={200}
                     placeholder={t("Add a rule")}
                     className="flex-1 p-2 rounded-lg border bg-lightMode-menu dark:bg-darkMode-menu text-lightMode-text dark:text-darkMode-text"
                   />

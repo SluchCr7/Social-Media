@@ -10,11 +10,19 @@ const sendResult = (res, result) => {
 };
 
 const getAllPosts = asyncHandler(async (req, res) =>
-  sendResult(res, await postService.getAllPosts({ query: req.query }))
+  sendResult(res, await postService.getAllPosts({ query: req.query, userId: req.user?._id }))
+);
+
+const getCommunityPosts = asyncHandler(async (req, res) =>
+  sendResult(res, await postService.getCommunityPosts({
+    communityId: req.params.communityId,
+    userId: req.user?._id,
+    query: req.query,
+  }))
 );
 
 const getVideoPosts = asyncHandler(async (req, res) =>
-  sendResult(res, await postService.getVideoPosts({ query: req.query }))
+  sendResult(res, await postService.getVideoPosts({ query: req.query, userId: req.user?._id }))
 );
 
 const addPost = async (req, res) =>
@@ -53,11 +61,12 @@ const editPost = asyncHandler(async (req, res) =>
     id: req.params.id,
     body: req.body,
     files: req.files,
+    userId: req.user._id,
   }))
 );
 
 const makeCommentsOff = asyncHandler(async (req, res) =>
-  sendResult(res, await postService.makeCommentsOff({ id: req.params.id }))
+  sendResult(res, await postService.makeCommentsOff({ id: req.params.id, userId: req.user._id }))
 );
 
 const viewPost = asyncHandler(async (req, res) =>
@@ -67,6 +76,7 @@ const viewPost = asyncHandler(async (req, res) =>
 const getPostsByUser = asyncHandler(async (req, res) =>
   sendResult(res, await postService.getPostsByUser({
     userId: req.params.userId,
+    viewerId: req.user?._id,
     query: req.query,
   }))
 );
@@ -76,12 +86,13 @@ const getMemories = asyncHandler(async (req, res) =>
 );
 
 const getPostById = asyncHandler(async (req, res) =>
-  sendResult(res, await postService.getPostById({ id: req.params.id }))
+  sendResult(res, await postService.getPostById({ id: req.params.id, userId: req.user?._id }))
 );
 
 module.exports = {
   getAllPosts,
   getVideoPosts,
+  getCommunityPosts,
   makeCommentsOff,
   addPost,
   deletePost,

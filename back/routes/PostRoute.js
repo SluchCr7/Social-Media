@@ -1,6 +1,7 @@
 const {
   getAllPosts,
   getVideoPosts,
+  getCommunityPosts,
   makeCommentsOff,
   addPost,
   deletePost,
@@ -16,15 +17,16 @@ const {
 } = require('../Controllers/PostController');
 
 const route = require('express').Router();
-const { verifyToken } = require('../Middelwares/verifyToken');
+const { verifyToken, optionalVerifyToken } = require('../Middelwares/verifyToken');
 const mediaUpload = require('../Middelwares/uploadMedia');
 
 // Get all posts
-route.route('/').get(getAllPosts);
-route.route('/videos').get(getVideoPosts);
+route.route('/').get(optionalVerifyToken, getAllPosts);
+route.route('/videos').get(optionalVerifyToken, getVideoPosts);
+route.route('/community/:communityId').get(optionalVerifyToken, getCommunityPosts);
 
 // Get posts by specific user (pagination)
-route.route('/user/:userId').get(getPostsByUser);
+route.route('/user/:userId').get(optionalVerifyToken, getPostsByUser);
 
 // Get memories (On this day)
 route.route('/memories').get(verifyToken, getMemories);
@@ -35,7 +37,7 @@ route.route('/add')
 
 // Get, delete, or view a specific post
 route.route('/:id')
-  .get(getPostById)
+  .get(optionalVerifyToken, getPostById)
   .delete(verifyToken, deletePost);
 
 // Like and haha a post

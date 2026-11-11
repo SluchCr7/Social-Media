@@ -1,5 +1,5 @@
 'use client';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -141,13 +141,15 @@ const MemberRow = memo(({ member, currentUserId, handleMakeAdmin, handleRemoveMe
 
       {canManage && (
         <div className="flex gap-3 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-500">
-          <button
-            onClick={() => handleMakeAdmin(communityId, member?._id)}
-            className={`p-3 rounded-xl transition-all duration-300 ${userIsAdmin ? 'bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-white' : 'bg-white/5 text-gray-400 hover:bg-blue-600 hover:text-white border border-white/5'}`}
-            title={userIsAdmin ? t('Remove Admin') : t('Make Admin')}
-          >
-            <FaCrown size={16} />
-          </button>
+          {isOwner(currentUserId) && (
+            <button
+              onClick={() => handleMakeAdmin(communityId, member?._id)}
+              className={`p-3 rounded-xl transition-all duration-300 ${userIsAdmin ? 'bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-white' : 'bg-white/5 text-gray-400 hover:bg-blue-600 hover:text-white border border-white/5'}`}
+              title={userIsAdmin ? t('Remove Admin') : t('Make Admin')}
+            >
+              <FaCrown size={16} />
+            </button>
+          )}
           <button
             onClick={() => handleRemoveMember(communityId, member?._id)}
             className="p-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-600 hover:text-white border border-red-500/10 transition-all duration-300"
@@ -187,10 +189,16 @@ const DesignCommunitySelect = memo(({
   handleApprove,
   handleReject,
   postsFiltered,
+  postsLoading,
+  postsError,
+  postsTotal,
+  hasMorePosts,
+  loadMorePosts,
+  retryPosts,
+  onShare,
   filteredMembers,
   isOwner,
   isAdmin,
-  posts,
   user
 }) => {
   const { t } = useTranslation();
@@ -198,9 +206,13 @@ const DesignCommunitySelect = memo(({
 
   const canEdit = isOwner(user?._id) || isAdmin(user?._id);
 
+  useEffect(() => {
+    if (CommunitySelected?.isPrivate && !isJoined) setActiveTab('feed');
+  }, [CommunitySelected?.isPrivate, isJoined]);
+
   const stats = [
-    { label: t('Members'), value: CommunitySelected?.members?.length, icon: FaUsers, color: 'blue' },
-    { label: t('Posts'), value: postsFiltered?.length, icon: FaFeatherAlt, color: 'indigo' },
+    { label: t('Members'), value: CommunitySelected?.membersCount ?? CommunitySelected?.members?.length ?? 0, icon: FaUsers, color: 'blue' },
+    { label: t('Posts'), value: postsTotal ?? postsFiltered?.length ?? 0, icon: FaFeatherAlt, color: 'indigo' },
   ];
 
   return (
@@ -264,12 +276,17 @@ const DesignCommunitySelect = memo(({
                   transition={{ delay: 0.3 }}
                   className="flex flex-wrap justify-center md:justify-start items-center gap-3"
                 >
-                  <span className="px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-black uppercase tracking-widest">
+                  <span className="px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold tracking-wide">
                     {CommunitySelected?.Category || 'General'}
                   </span>
+                  {CommunitySelected?.isForAdults && (
+                    <span className="px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold tracking-wide">
+                      {t('Adults only')}
+                    </span>
+                  )}
                   {CommunitySelected?.isPrivate && (
-                    <span className="px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-black uppercase tracking-widest">
-                      {t('Invitation Only')}
+                    <span className="px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold tracking-wide">
+                      {t('Private community')}
                     </span>
                   )}
                 </motion.div>
@@ -278,7 +295,7 @@ const DesignCommunitySelect = memo(({
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.4 }}
-                  className="text-5xl lg:text-7xl font-black uppercase tracking-tighter leading-none"
+                  className="text-4xl lg:text-6xl font-black tracking-tight leading-none"
                 >
                   {CommunitySelected?.Name}
                 </motion.h1>
@@ -293,13 +310,13 @@ const DesignCommunitySelect = memo(({
                     <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
                       <FaUsers size={14} />
                     </div>
-                    {CommunitySelected?.members?.length.toLocaleString()} {t('Members')}
+                    {(CommunitySelected?.membersCount ?? CommunitySelected?.members?.length ?? 0).toLocaleString()} {t('Members')}
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500">
                       <FaFeatherAlt size={14} />
                     </div>
-                    {postsFiltered?.length.toLocaleString()} {t('Posts')}
+                    {(postsTotal ?? postsFiltered?.length ?? 0).toLocaleString()} {t('Posts')}
                   </div>
                 </motion.div>
               </div>
@@ -332,7 +349,9 @@ const DesignCommunitySelect = memo(({
                   {t('Manage')}
                 </ActionButton>
               )}
-              <ActionButton variant="outline" className="!px-4" Icon={FaShareAlt} />
+              <ActionButton onClick={onShare} variant="outline" className="!px-4" Icon={FaShareAlt}>
+                {t('Share')}
+              </ActionButton>
             </motion.div>
           </div>
         </div>
@@ -386,7 +405,7 @@ const DesignCommunitySelect = memo(({
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/5">
-                  <span className="text-sm font-black text-gray-500 uppercase tracking-tighter">{t('Curator')}</span>
+                  <span className="text-sm font-black text-gray-500 uppercase tracking-tighter">{t('Created by')}</span>
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-bold text-white">{CommunitySelected?.owner?.username}</span>
                     <div className="w-8 h-8 rounded-full border-2 border-blue-500/30 overflow-hidden">
@@ -398,7 +417,7 @@ const DesignCommunitySelect = memo(({
                   </div>
                 </div>
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/5">
-                  <span className="text-sm font-black text-gray-500 uppercase tracking-tighter">{t('Launched')}</span>
+                  <span className="text-sm font-black text-gray-500 uppercase tracking-tighter">{t('Created')}</span>
                   <span className="text-sm font-bold text-gray-300">{dayjs(CommunitySelected?.createdAt).format('MMMM YYYY')}</span>
                 </div>
               </div>
@@ -443,7 +462,7 @@ const DesignCommunitySelect = memo(({
                         </span>
                       )}
                     </div>
-                    <span className="font-black uppercase tracking-widest text-xs">{t('Incoming Base')}</span>
+                    <span className="font-black uppercase tracking-widest text-xs">{t('Join requests')}</span>
                   </div>
                   <div className="text-gray-500 group-hover:translate-x-1 transition-transform">→</div>
                 </button>
@@ -457,8 +476,10 @@ const DesignCommunitySelect = memo(({
             {/* Tab Navigation (Glassy) */}
             <div className="flex p-2 bg-white/[0.03] border border-white/10 rounded-[2.5rem] backdrop-blur-3xl overflow-x-auto no-scrollbar">
               <div className="flex gap-2 w-full">
-                <TabButton active={activeTab === 'feed'} onClick={() => setActiveTab('feed')} icon={FaFeatherAlt}>{t('Pulse')}</TabButton>
-                <TabButton active={activeTab === 'members'} onClick={() => setActiveTab('members')} icon={FaUsers}>{t('Society')}</TabButton>
+                <TabButton active={activeTab === 'feed'} onClick={() => setActiveTab('feed')} icon={FaFeatherAlt}>{t('Posts')}</TabButton>
+                {(isJoined || !CommunitySelected?.isPrivate) && (
+                  <TabButton active={activeTab === 'members'} onClick={() => setActiveTab('members')} icon={FaUsers}>{t('Members')}</TabButton>
+                )}
               </div>
             </div>
 
@@ -473,7 +494,18 @@ const DesignCommunitySelect = memo(({
                   className="space-y-8"
                 >
                   {(isJoined || !CommunitySelected?.isPrivate) ? (
-                    postsFiltered?.length > 0 ? (
+                    postsError && postsFiltered.length === 0 ? (
+                      <GlassCard className="py-16 text-center" role="alert">
+                        <p className="mb-5 text-gray-300">{t(postsError)}</p>
+                        <button onClick={retryPosts} className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white">
+                          {t('Try again')}
+                        </button>
+                      </GlassCard>
+                    ) : postsLoading && postsFiltered.length === 0 ? (
+                      <div className="space-y-5" aria-label={t('Loading community posts')}>
+                        {[1, 2, 3].map((item) => <div key={item} className="h-56 animate-pulse rounded-3xl bg-white/5" />)}
+                      </div>
+                    ) : postsFiltered?.length > 0 ? (
                       <div className="grid grid-cols-1 gap-8">
                         {postsFiltered.map((post, idx) => (
                           <motion.div
@@ -498,13 +530,13 @@ const DesignCommunitySelect = memo(({
                             📭
                           </div>
                         </div>
-                        <h3 className="text-2xl font-black uppercase tracking-tighter mb-4">{t('Silence is Gold')}</h3>
+                        <h3 className="text-2xl font-black tracking-tight mb-4">{t('No posts yet')}</h3>
                         <p className="text-gray-500 max-w-sm mx-auto font-medium">
-                          {t('The feed is empty. Be the spark that ignites this community by sharing your first thought.')}
+                          {t('Start the conversation by sharing the first post in this community.')}
                         </p>
-                        <button className="mt-8 px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-xl shadow-blue-600/20">
-                          <Link href={'/Pages/NewPost'}>{t('Create Post')}</Link>
-                        </button>
+                        <Link href="/Pages/NewPost" className="mt-8 inline-flex px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-2xl font-bold text-sm transition-all shadow-xl shadow-blue-600/20">
+                          {t('Create post')}
+                        </Link>
                       </GlassCard>
                     )
                   ) : (
@@ -512,19 +544,37 @@ const DesignCommunitySelect = memo(({
                       <div className="w-24 h-24 rounded-full bg-red-500/10 flex items-center justify-center text-4xl text-red-500 mx-auto mb-8 border border-red-500/20">
                         <FaLock />
                       </div>
-                      <h3 className="text-3xl font-black uppercase tracking-tighter text-red-500 mb-4">{t('Restricted Hub')}</h3>
+                      <h3 className="text-3xl font-black tracking-tight text-red-500 mb-4">{t('Private community')}</h3>
                       <p className="text-gray-400 max-w-sm mx-auto font-medium leading-relaxed">
-                        {t('This sanctuary is private. Join the community to unlock access to all the discussions and updates.')}
+                        {t('Request to join this community to see its posts and member discussions.')}
                       </p>
                       {!hasPendingRequest && (
-                        <button
-                          onClick={handleJoinToggle}
-                          className="mt-10 px-10 py-4 bg-red-600 hover:bg-red-500 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-xl shadow-red-600/20"
-                        >
-                          {t('Request Membership')}
-                        </button>
+                        user ? (
+                          <button
+                            onClick={handleJoinToggle}
+                            className="mt-10 px-8 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/20"
+                          >
+                            {t('Request to join')}
+                          </button>
+                        ) : (
+                          <Link href="/Pages/Login" className="mt-10 inline-flex px-8 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm text-white transition-all">
+                            {t('Sign in to request access')}
+                          </Link>
+                        )
                       )}
+                      {hasPendingRequest && <p className="mt-8 font-semibold text-amber-300">{t('Your request is waiting for approval.')}</p>}
                     </GlassCard>
+                  )}
+                  {hasMorePosts && (isJoined || !CommunitySelected?.isPrivate) && (
+                    <div className="text-center">
+                      <button
+                        onClick={loadMorePosts}
+                        disabled={postsLoading}
+                        className="rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10 disabled:opacity-50"
+                      >
+                        {postsLoading ? t('Loading...') : t('Load more posts')}
+                      </button>
+                    </div>
                   )}
                 </motion.div>
               )}
@@ -643,7 +693,7 @@ const DesignCommunitySelect = memo(({
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 rounded-2xl overflow-hidden ring-2 ring-white/5 group-hover:ring-blue-500/30 transition-all duration-500">
-                        <Image src={req.profilePhoto.url} width={56} height={56} className="w-full h-full object-cover" alt="req" />
+                        <Image src={req.profilePhoto?.url || '/default-avatar.png'} width={56} height={56} className="w-full h-full object-cover" alt="req" />
                       </div>
                       <div>
                         <div className="font-black text-white group-hover:text-blue-400 transition-colors uppercase tracking-tight">{req.username}</div>

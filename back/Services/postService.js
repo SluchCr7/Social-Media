@@ -13,6 +13,50 @@ const { updateUserPoints } = require("../utils/PointsEngine");
 
 const result = (status, body) => ({ status, body });
 const errorResult = (status, error) => ({ status, error });
+const hasId = (values, id) =>
+  Array.isArray(values) && values.some((value) => String(value?._id ?? value) === String(id));
+
+const canViewPost = async (post, userId) => {
+  if (!post.community) return true;
+  const communityId = post.community?._id ?? post.community;
+  const community = await Community.findById(communityId)
+    .select("members owner isPrivate")
+    .lean();
+  if (!community || !community.isPrivate) return true;
+  return Boolean(
+    userId &&
+    (String(community.owner) === String(userId) || hasId(community.members, userId))
+  );
+};
+
+const emitPostEvent = async (event, post, payload = post) => {
+  if (post.community) {
+    const communityId = post.community?._id ?? post.community;
+    const community = await Community.findById(communityId).select("isPrivate").lean();
+    if (community?.isPrivate) return;
+  }
+  io.emit(event, payload);
+};
+
+const communityVisibilityFilter = async (userId) => {
+  const [publicCommunityIds, memberCommunityIds] = await Promise.all([
+    Community.distinct("_id", {
+      $or: [{ isPrivate: false }, { isPrivate: { $exists: false } }],
+    }),
+    userId
+      ? Community.distinct("_id", {
+        isPrivate: true,
+        $or: [{ members: userId }, { owner: userId }],
+      })
+      : [],
+  ]);
+  return {
+    $or: [
+      { community: null },
+      { community: { $in: [...publicCommunityIds, ...memberCommunityIds] } },
+    ],
+  };
+};
 
 const uploadToCloudinary = (buffer) => new Promise((resolve, reject) => {
   const stream = cloudinary.uploader.upload_stream(
@@ -25,21 +69,25 @@ const uploadToCloudinary = (buffer) => new Promise((resolve, reject) => {
   streamifier.createReadStream(buffer).pipe(stream);
 });
 
-const getAllPosts = async ({ query }) => {
+const getAllPosts = async ({ query, userId }) => {
   const page = parseInt(query.page) || 1;
   const limit = parseInt(query.limit) || 10;
   const skip = (page - 1) * limit;
-  const posts = await Post.find({})
+  const filter = {
+    status: "published",
+    ...(await communityVisibilityFilter(userId)),
+  };
+  const posts = await Post.find(filter)
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
     .populate(postPopulate)
     .lean();
-  const total = await Post.countDocuments();
+  const total = await Post.countDocuments(filter);
   return result(200, { posts, total, page, pages: Math.ceil(total / limit) });
 };
 
-const getVideoPosts = async ({ query }) => {
+const getVideoPosts = async ({ query, userId }) => {
   const parsedPage = Number.parseInt(query.page, 10);
   const parsedLimit = Number.parseInt(query.limit, 10);
   const page = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
@@ -47,11 +95,48 @@ const getVideoPosts = async ({ query }) => {
     ? Math.min(parsedLimit, 30)
     : 10;
   const filter = {
+    status: "published",
+    ...(await communityVisibilityFilter(userId)),
+    $and: [{
     $or: [
       { "media.type": "video" },
       { "Videos.0": { $exists: true } }
     ]
+    }]
   };
+  const [posts, total] = await Promise.all([
+    Post.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate(postPopulate)
+      .lean(),
+    Post.countDocuments(filter)
+  ]);
+  return result(200, { posts, total, page, pages: Math.ceil(total / limit) });
+};
+
+const getCommunityPosts = async ({ communityId, userId, query }) => {
+  if (!mongoose.isValidObjectId(communityId)) {
+    return result(400, { message: "Invalid community ID" });
+  }
+  const community = await Community.findById(communityId).select("members owner isPrivate").lean();
+  if (!community) return result(404, { message: "Community not found" });
+  if (
+    community.isPrivate &&
+    String(community.owner) !== String(userId) &&
+    !hasId(community.members, userId)
+  ) {
+    return result(403, { message: "Join this private community to view its posts" });
+  }
+
+  const parsedPage = Number.parseInt(query.page, 10);
+  const parsedLimit = Number.parseInt(query.limit, 10);
+  const page = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const limit = Number.isInteger(parsedLimit) && parsedLimit > 0
+    ? Math.min(parsedLimit, 30)
+    : 10;
+  const filter = { community: community._id, status: "published" };
   const [posts, total] = await Promise.all([
     Post.find(filter)
       .sort({ createdAt: -1 })
@@ -98,7 +183,7 @@ const addPost = async ({ body, userId, files }) => {
     if (community) {
       communityDoc = await Community.findById(community);
       if (!communityDoc) return result(404, { message: "Community not found." });
-      if (!communityDoc.members.includes(userId)) {
+      if (String(communityDoc.owner) !== String(userId) && !hasId(communityDoc.members, userId)) {
         return result(403, { message: "Not a member of this community." });
       }
     }
@@ -168,7 +253,7 @@ const addPost = async ({ body, userId, files }) => {
     await updateUserPoints(userId, "CREATE_POST", post._id);
     await post.save();
     await post.populate(postPopulate);
-    io.emit("post:create", post);
+    await emitPostEvent("post:create", post);
     return result(201, post);
   } catch (err) {
     return result(500, { message: err.message || "Internal Server Error" });
@@ -178,7 +263,10 @@ const addPost = async ({ body, userId, files }) => {
 const deletePost = async ({ id, user }) => {
   const post = await Post.findById(id);
   if (!post) return errorResult(404, "Post not found");
-  if (post.owner.toString() !== user._id && !user.isAdmin) {
+  if (!(await canViewPost(post, user._id))) {
+    return result(404, { message: "Post not found" });
+  }
+  if (String(post.owner) !== String(user._id) && !user.isAdmin) {
     return result(403, { message: "You are not authorized to delete this post" });
   }
 
@@ -190,7 +278,7 @@ const deletePost = async ({ id, user }) => {
   }
 
   await Post.findByIdAndDelete(id);
-  io.emit("post:delete", id);
+  await emitPostEvent("post:delete", post, id);
   await updateUserPoints(post.owner, "DELETE_POST", post._id);
   return result(200, { message: "Post deleted" });
 };
@@ -198,6 +286,7 @@ const deletePost = async ({ id, user }) => {
 const hahaPost = async ({ id, userId }) => {
   const post = await Post.findById(id);
   if (!post) return errorResult(404, "Post not found");
+  if (!(await canViewPost(post, userId))) return result(404, { message: "Post not found" });
   if (post.likes.includes(userId)) {
     return result(400, { message: "You can't hahed a post that has been liked" });
   }
@@ -223,13 +312,14 @@ const hahaPost = async ({ id, userId }) => {
     }
   }
   const updatedPost = await Post.findById(id).populate(postPopulate);
-  io.emit("post:update", updatedPost);
+  await emitPostEvent("post:update", post, updatedPost);
   return result(200, updatedPost);
 };
 
 const likePost = async ({ id, userId }) => {
   const post = await Post.findById(id);
   if (!post) return errorResult(404, "Post not found");
+  if (!(await canViewPost(post, userId))) return result(404, { message: "Post not found" });
   if (post.hahas.includes(userId)) {
     return result(400, { message: "You can't like a post that has been hahed" });
   }
@@ -259,32 +349,33 @@ const likePost = async ({ id, userId }) => {
   }
 
   const updatedPost = await Post.findById(id).populate(postPopulate);
-  io.emit("post:update", updatedPost);
+  await emitPostEvent("post:update", post, updatedPost);
   return result(200, updatedPost);
 };
 
 const savePost = async ({ id, userId }) => {
   const post = await Post.findById(id);
   if (!post) return errorResult(404, "Post not found");
+  if (!(await canViewPost(post, userId))) return result(404, { message: "Post not found" });
   if (post.saved.includes(userId)) {
     await Post.findByIdAndUpdate(id, { $pull: { saved: userId } });
   } else {
     await Post.findByIdAndUpdate(id, { $push: { saved: userId } });
   }
   const updatedPost = await Post.findById(id).populate(postPopulate);
-  io.emit("post:update", updatedPost);
+  await emitPostEvent("post:update", post, updatedPost);
   return result(200, updatedPost);
 };
 
 const sharePost = async ({ id, userId, body }) => {
-  const originalPost = await Post.findById(id).populate(
-    "owner",
-    "username profileName profilePhoto"
-  );
+  const originalPost = await Post.findById(id);
   if (!originalPost) return result(404, { message: "Post not found" });
+  if (!(await canViewPost(originalPost, userId))) return result(404, { message: "Post not found" });
+  await originalPost.populate("owner", "username profileName profilePhoto");
   const sharedPost = new Post({
     text: body.customText || "",
     owner: userId,
+    community: originalPost.community,
     Photos: originalPost.Photos,
     media: originalPost.media,
     links: originalPost.links,
@@ -313,7 +404,7 @@ const sharePost = async ({ id, userId, body }) => {
   return result(201, sharedPost);
 };
 
-const editPost = async ({ id, body, files }) => {
+const editPost = async ({ id, body, files, userId }) => {
   let { text, community, Hashtags, existingMedia, existingPhotos, mentions, links } = body;
   try {
     existingMedia = existingMedia ? JSON.parse(existingMedia) : [];
@@ -334,6 +425,24 @@ const editPost = async ({ id, body, files }) => {
 
   const post = await Post.findById(id);
   if (!post) return result(404, { message: "Post not found" });
+  if (!(await canViewPost(post, userId))) return result(404, { message: "Post not found" });
+  if (String(post.owner) !== String(userId)) {
+    return result(403, { message: "You are not authorized to edit this post" });
+  }
+  let targetCommunity = null;
+  if (community && String(community) !== String(post.community)) {
+    if (!mongoose.isValidObjectId(community)) {
+      return result(400, { message: "Invalid community ID" });
+    }
+    targetCommunity = await Community.findById(community);
+    if (!targetCommunity) return result(404, { message: "Community not found" });
+    if (
+      String(targetCommunity.owner) !== String(userId) &&
+      !hasId(targetCommunity.members, userId)
+    ) {
+      return result(403, { message: "Not a member of this community." });
+    }
+  }
 
   let newFiles = [];
   if (files?.newMedia) {
@@ -378,7 +487,7 @@ const editPost = async ({ id, body, files }) => {
     isSensitive: media.isSensitive
   }));
   post.text = text ?? post.text;
-  post.community = community || post.community;
+  if (targetCommunity) post.community = targetCommunity._id;
   post.Hashtags = Hashtags;
   post.media = finalMedia;
   post.Photos = finalPhotos;
@@ -387,28 +496,33 @@ const editPost = async ({ id, body, files }) => {
   post.music = body.music || post.music;
   await post.save();
   await post.populate(postPopulate);
-  io.emit("post:update", post);
+  await emitPostEvent("post:update", post);
   return result(200, post);
 };
 
-const makeCommentsOff = async ({ id }) => {
+const makeCommentsOff = async ({ id, userId }) => {
   const post = await Post.findById(id);
   if (!post) return errorResult(404, "Post not found");
+  if (!(await canViewPost(post, userId))) return result(404, { message: "Post not found" });
+  if (String(post.owner) !== String(userId)) {
+    return result(403, { message: "You are not authorized to update this post" });
+  }
   post.isCommentOff = !post.isCommentOff;
   await post.save();
   const message = post.isCommentOff
     ? "Comments are now off for this post."
     : "Comments are now on for this post";
   const updatedPost = await Post.findById(id).populate(postPopulate);
-  io.emit("post:update", updatedPost);
+  await emitPostEvent("post:update", post, updatedPost);
   return result(200, { message, post: updatedPost });
 };
 
 const viewPost = async ({ id, userId }) => {
   if (!mongoose.isValidObjectId(id)) return result(400, { message: "Invalid post ID" });
 
-  const post = await Post.findById(id).select("owner").lean();
+  const post = await Post.findById(id).select("owner community").lean();
   if (!post) return result(404, { message: "Post not found" });
+  if (!(await canViewPost(post, userId))) return result(404, { message: "Post not found" });
 
   let counted = false;
   if (post.owner.toString() !== userId.toString()) {
@@ -428,17 +542,22 @@ const viewPost = async ({ id, userId }) => {
   return result(200, { _id: view._id, viewsCount: view.viewsCount, counted });
 };
 
-const getPostsByUser = async ({ userId, query }) => {
+const getPostsByUser = async ({ userId, viewerId, query }) => {
   const page = parseInt(query.page) || 1;
   const limit = parseInt(query.limit) || 10;
   const skip = (page - 1) * limit;
-  const posts = await Post.find({ owner: userId })
+  const filter = {
+    owner: userId,
+    status: "published",
+    ...(await communityVisibilityFilter(viewerId)),
+  };
+  const posts = await Post.find(filter)
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
     .populate(postPopulate)
     .lean();
-  const total = await Post.countDocuments({ owner: userId });
+  const total = await Post.countDocuments(filter);
   return result(200, { posts, total, page, pages: Math.ceil(total / limit) });
 };
 
@@ -464,7 +583,16 @@ const getMemories = async ({ userId }) => {
   return result(200, memories);
 };
 
-const getPostById = async ({ id }) => {
+const getPostById = async ({ id, userId }) => {
+  if (!mongoose.isValidObjectId(id)) return result(400, { message: "Invalid post ID" });
+  const existingPost = await Post.findById(id).select("owner community status").lean();
+  if (!existingPost) return result(404, { message: "Post not found" });
+  if (existingPost.status !== "published" && String(existingPost.owner) !== String(userId)) {
+    return result(404, { message: "Post not found" });
+  }
+  if (!(await canViewPost(existingPost, userId))) {
+    return result(404, { message: "Post not found" });
+  }
   const post = await Post.findById(id).populate(postPopulate);
   if (!post) return result(404, { message: "Post not found" });
   return result(200, post);
@@ -473,6 +601,7 @@ const getPostById = async ({ id }) => {
 module.exports = {
   getAllPosts,
   getVideoPosts,
+  getCommunityPosts,
   makeCommentsOff,
   addPost,
   deletePost,

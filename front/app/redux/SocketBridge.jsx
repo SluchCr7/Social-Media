@@ -18,7 +18,7 @@ import {
   clearAllNotificationsState,
   incrementUnreadCount,
 } from './features/notifications/notificationsSlice';
-import { addCommunityToState, updateCommunityInState, removeCommunityFromState } from './features/communities/communitiesSlice';
+import { addCommunityToState, updateCommunityInState, removeCommunityFromState, invalidateCommunities } from './features/communities/communitiesSlice';
 import { addStoryToState, updateStoryInState, removeStoryFromState } from './features/stories/storiesSlice';
 import { removeStoryFromAllHighlights } from './features/highlights/highlightsSlice';
 import { addReelToState, updateReelInState, removeReelFromState } from './features/reels/reelsSlice';
@@ -161,9 +161,16 @@ export default function SocketBridge() {
       const ownerId = newCom?.owner?._id?.toString() || newCom?.owner?.toString();
       if (currentUserId && ownerId === currentUserId) return;
       dispatch(addCommunityToState(newCom));
+      dispatch(invalidateCommunities());
     };
-    const handleCommunityUpdate = (updated) => dispatch(updateCommunityInState(updated));
-    const handleCommunityDelete = (id) => dispatch(removeCommunityFromState(id));
+    const handleCommunityUpdate = (updated) => {
+      dispatch(updateCommunityInState(updated));
+      dispatch(invalidateCommunities());
+    };
+    const handleCommunityDelete = (id) => {
+      dispatch(removeCommunityFromState(id));
+      dispatch(invalidateCommunities());
+    };
 
     socket.on('community:create', handleCommunityCreate);
     socket.on('community:update', handleCommunityUpdate);

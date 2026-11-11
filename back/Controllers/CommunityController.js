@@ -4,17 +4,17 @@ const communityService = require("../Services/communityService");
 const sendResult = (res, result) => res.status(result.status).json(result.body);
 
 const getAllCommunities = asyncHandler(async (req, res) => {
-  const communities = await communityService.getAllCommunities();
+  const communities = await communityService.getAllCommunities(req.user?._id);
   res.status(200).json(communities);
 });
 
 const getCommunityById = asyncHandler(async (req, res) => {
-  const result = await communityService.getCommunityById(req.params.id);
+  const result = await communityService.getCommunityById(req.params.id, req.user?._id);
   sendResult(res, result);
 });
 
 const getCommunityByCategory = asyncHandler(async (req, res) => {
-  const communities = await communityService.getCommunityByCategory(req.params.Category);
+  const communities = await communityService.getCommunityByCategory(req.params.Category, req.user?._id);
   res.status(200).json(communities);
 });
 
@@ -24,11 +24,11 @@ const addNewCommunity = asyncHandler(async (req, res) => {
 });
 
 const deleteCommunity = asyncHandler(async (req, res) => {
-  const result = await communityService.deleteCommunity(req.params.id);
-  if (result.error) {
-    res.status(404);
-    throw new Error(result.error);
-  }
+  const result = await communityService.deleteCommunity(
+    req.params.id,
+    req.user._id,
+    req.user.isAdmin
+  );
   sendResult(res, result);
 });
 
@@ -38,13 +38,13 @@ const joinTheCommunity = asyncHandler(async (req, res) => {
 });
 
 const editCommunity = asyncHandler(async (req, res) => {
-  const result = await communityService.editCommunity(req.params.id, req.body);
+  const result = await communityService.editCommunity(req.params.id, req.body, req.user._id);
   sendResult(res, result);
 });
 
 const updateCommunityPicture = asyncHandler(async (req, res) => {
   try {
-    const result = await communityService.updateCommunityPicture(req.params.id, req.file);
+    const result = await communityService.updateCommunityPicture(req.params.id, req.file, req.user._id);
     return sendResult(res, result);
   } catch (error) {
     console.error("❌ Server Error:", error.message, error.stack);
@@ -57,7 +57,7 @@ const updateCommunityPicture = asyncHandler(async (req, res) => {
 
 const updateCommunityCover = asyncHandler(async (req, res) => {
   try {
-    const result = await communityService.updateCommunityCover(req.params.id, req.file);
+    const result = await communityService.updateCommunityCover(req.params.id, req.file, req.user._id);
     return sendResult(res, result);
   } catch (error) {
     console.error("❌ Server Error:", error.message, error.stack);

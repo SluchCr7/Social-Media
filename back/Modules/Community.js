@@ -58,18 +58,21 @@ const communitySchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
+communitySchema.index({ Category: 1 });
+communitySchema.index({ members: 1 });
+communitySchema.index({ isPrivate: 1 });
 
 const Community = mongoose.model('Community', communitySchema);
 
 // Joi Validation
 const ValidateCommunity = (obj) => {
     const schema = joi.object({
-        Name: joi.string().required(),
-        description: joi.string(),
+        Name: joi.string().trim().min(2).max(80).required(),
+        description: joi.string().trim().max(500),
         isPrivate: joi.boolean(),
-        Category: joi.string().required(),
-        tags: joi.array().items(joi.string()),
-        rules: joi.array().items(joi.string()),
+        Category: joi.string().trim().min(1).max(40).required(),
+        tags: joi.array().max(12).items(joi.string().trim().min(1).max(30)),
+        rules: joi.array().max(20).items(joi.string().trim().min(1).max(200)),
         isForAdults: joi.boolean()
     });
     return schema.validate(obj, { abortEarly: false });
@@ -77,11 +80,12 @@ const ValidateCommunity = (obj) => {
 
 const ValidateCommunityUpdate = (obj) => {
     const schema = joi.object({
-        Name: joi.string(),
-        description: joi.string(),
+        Name: joi.string().trim().min(2).max(80),
+        Category: joi.string().trim().min(1).max(40),
+        description: joi.string().trim().max(500),
         isPrivate: joi.boolean(),
-        tags: joi.array().items(joi.string()),
-        rules: joi.array().items(joi.string()),
+        tags: joi.array().max(12).items(joi.string().trim().min(1).max(30)),
+        rules: joi.array().max(20).items(joi.string().trim().min(1).max(200)),
         isForAdults: joi.boolean()
     });
     return schema.validate(obj, { abortEarly: false });

@@ -1,10 +1,13 @@
 'use client';
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/app/redux/hooks';
 import { useCommunity } from '@/app/redux/hooks';
-import { usePost } from '@/app/redux/hooks';
+import { useFeedback } from '@/app/redux/hooks';
 import Loading from '@/app/Component/Loading';
 import DesignCommunitySelect from './Design';
+import api from '@/app/utils/api';
+import Link from 'next/link';
 
 // ✅ مكون الهيكل العظمي منفصل ومذكّر (memo)
 // ✅ Premium Skeleton Loader for Community Page
@@ -31,6 +34,7 @@ const Page = ({ params }) => {
   const id = params?.id;
   const {
     communities,
+    fetchCommunityById,
     joinToCommunity,
     sendJoinRequest,
     approveJoinRequest,
@@ -39,32 +43,113 @@ const Page = ({ params }) => {
     makeAdmin,
   } = useCommunity();
   const { user } = useAuth();
-  const { posts } = usePost();
+  const { showAlert } = useFeedback();
+  const { t } = useTranslation();
 
-  // 🧠 استخدم useState للحالة المحلية فقط
   const [CommunitySelected, setCommunitySelected] = useState(null);
+  const [communityLoading, setCommunityLoading] = useState(true);
+  const [communityError, setCommunityError] = useState(null);
+  const [postsFiltered, setPostsFiltered] = useState([]);
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [postsError, setPostsError] = useState(null);
+  const [postsPage, setPostsPage] = useState(1);
+  const [postsTotalPages, setPostsTotalPages] = useState(1);
+  const [postsTotal, setPostsTotal] = useState(0);
   const [showEdit, setShowEdit] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
   const [showRequests, setShowRequests] = useState(false);
   const [showRules, setShowRules] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeMemberTab, setActiveMemberTab] = useState('all');
+  const postsRequest = useRef(null);
 
-  // 🧩 تحديد المجتمع المطلوب فقط عند تغيّر id أو القائمة
   useEffect(() => {
-    if (communities?.length && id) {
-      const matched = communities.find((c) => c?._id === id);
-      setCommunitySelected(matched || null);
-    }
+    let active = true;
+    setCommunitySelected(null);
+    setCommunityError(null);
+    setCommunityLoading(true);
+    fetchCommunityById(id)
+      .then((community) => {
+        if (active) setCommunitySelected(community);
+      })
+      .catch((error) => {
+        console.error('Could not load community:', error);
+        if (active) setCommunityError(error?.response?.data?.message || 'Could not load this community.');
+      })
+      .finally(() => {
+        if (active) setCommunityLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [fetchCommunityById, id]);
+
+  useEffect(() => {
+    const updated = communities.find((community) =>
+      community?._id === id && Array.isArray(community.members)
+    );
+    if (updated) setCommunitySelected(updated);
   }, [communities, id]);
 
-  // 🧩 فلترة المنشورات بالمجتمع المحدد فقط
-  const postsFiltered = useMemo(() => {
-    if (!posts?.length || !id) return [];
-    return posts.filter((post) => post?.community?._id === id);
-  }, [posts, id]);
+  const communityUpdatedAt = communities.find((community) => community?._id === id)?.updatedAt;
+  useEffect(() => {
+    if (!CommunitySelected || !communityUpdatedAt || communityUpdatedAt === CommunitySelected.updatedAt) return;
+    fetchCommunityById(id)
+      .then(setCommunitySelected)
+      .catch((error) => console.error('Could not refresh community details:', error));
+  }, [CommunitySelected, communityUpdatedAt, fetchCommunityById, id]);
 
-  // 🧩 تثبيت حسابات الـ owner/admins باستخدام useMemo
+  const isJoined = useMemo(() => {
+    const currentUserId = user?._id?.toString();
+    return Boolean(currentUserId && (
+      CommunitySelected?.isMember ||
+      CommunitySelected?.members?.some((member) =>
+        (member?._id || member)?.toString() === currentUserId
+      )
+    ));
+  }, [CommunitySelected, user?._id]);
+
+  const loadCommunityPosts = useCallback(async (pageNum = 1) => {
+    postsRequest.current?.abort();
+    const controller = new AbortController();
+    postsRequest.current = controller;
+    setPostsLoading(true);
+    setPostsError(null);
+    try {
+      const { data } = await api.get(`/post/community/${id}`, {
+        params: { page: pageNum, limit: 10 },
+        signal: controller.signal,
+      });
+      if (postsRequest.current !== controller) return;
+      setPostsFiltered((current) => pageNum === 1 ? data.posts || [] : [...current, ...(data.posts || [])]);
+      setPostsPage(Number(data.page) || pageNum);
+      setPostsTotalPages(Number(data.pages) || 0);
+      setPostsTotal(Number(data.total) || 0);
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      console.error('Could not load community posts:', error);
+      setPostsError(error?.response?.data?.message || 'Could not load community posts.');
+    } finally {
+      if (postsRequest.current === controller) {
+        postsRequest.current = null;
+        setPostsLoading(false);
+      }
+    }
+  }, [id]);
+
+  const hasCommunity = Boolean(CommunitySelected);
+  useEffect(() => {
+    if (hasCommunity && (!CommunitySelected.isPrivate || isJoined)) {
+      loadCommunityPosts(1);
+    } else {
+      setPostsFiltered([]);
+      setPostsTotal(0);
+    }
+    return () => postsRequest.current?.abort();
+  }, [hasCommunity, CommunitySelected?.isPrivate, isJoined, loadCommunityPosts]);
+
+  useEffect(() => () => postsRequest.current?.abort(), []);
+
   const ownerId = useMemo(
     () => CommunitySelected?.owner?._id || CommunitySelected?.owner,
     [CommunitySelected]
@@ -109,13 +194,29 @@ const Page = ({ params }) => {
   const handleJoinToggle = useCallback(() => {
     if (!CommunitySelected || !user) return;
 
-    if (CommunitySelected.members?.some((m) => m?._id === user?._id)) {
-      joinToCommunity(CommunitySelected._id); // leave
-    } else {
-      if (CommunitySelected.isPrivate) sendJoinRequest(CommunitySelected._id);
-      else joinToCommunity(CommunitySelected._id);
-    }
-  }, [CommunitySelected, user, joinToCommunity, sendJoinRequest]);
+    const action = isJoined
+      ? joinToCommunity(CommunitySelected._id)
+      : CommunitySelected.isPrivate
+        ? sendJoinRequest(CommunitySelected._id)
+        : joinToCommunity(CommunitySelected._id);
+    return action
+      .then((succeeded) => {
+        if (!succeeded) return;
+        if (!isJoined && CommunitySelected.isPrivate) {
+          setCommunitySelected((current) => ({ ...current, hasPendingRequest: true }));
+        } else if (isJoined && CommunitySelected.isPrivate) {
+          setCommunitySelected((current) => ({
+            ...current,
+            isMember: false,
+            hasPendingRequest: false,
+            members: undefined,
+            Admins: undefined,
+            joinRequests: undefined,
+          }));
+        }
+      })
+      .catch(() => {});
+  }, [CommunitySelected, user, isJoined, joinToCommunity, sendJoinRequest]);
 
   const handleMakeAdmin = useCallback(
     (communityId, memberId) => makeAdmin(communityId, memberId),
@@ -137,18 +238,34 @@ const Page = ({ params }) => {
     [rejectJoinRequest]
   );
 
-  const isJoined = useMemo(
-    () => CommunitySelected?.members?.some((m) => m?._id === user?._id),
-    [CommunitySelected, user]
-  );
+  const handleShare = useCallback(async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: CommunitySelected.Name,
+          text: CommunitySelected.description,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        showAlert(t('Community link copied.'));
+      }
+    } catch (error) {
+      if (error?.name !== 'AbortError') {
+        console.error('Could not share community:', error);
+        showAlert(t('Could not share this community.'));
+      }
+    }
+  }, [CommunitySelected, showAlert, t]);
 
   const hasPendingRequest = useMemo(
-    () => CommunitySelected?.joinRequests?.some((r) => r?._id === user?._id),
+    () => CommunitySelected?.hasPendingRequest || CommunitySelected?.joinRequests?.some(
+      (request) => (request?._id || request)?.toString() === user?._id?.toString()
+    ),
     [CommunitySelected, user]
   );
 
-  // ✅ أثناء التحميل
-  if (!CommunitySelected) {
+  if (communityLoading || (!CommunitySelected && !communityError)) {
     return (
       <div className="min-h-screen bg-[#050505] text-white">
         <SkeletonCover />
@@ -159,16 +276,33 @@ const Page = ({ params }) => {
     );
   }
 
+  if (communityError || !CommunitySelected) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-gray-50 px-6 text-center dark:bg-[#080808]">
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t(communityError || 'Community not found')}</h1>
+        <Link href="/Pages/CommunityMain" className="rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white">
+          {t('Explore communities')}
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <DesignCommunitySelect
       user={user}
       id={id}
       isAdmin={isAdmin}
       isOwner={isOwner}
-      posts={posts}
       CommunitySelected={CommunitySelected}
       setCommunitySelected={setCommunitySelected}
       postsFiltered={postsFiltered}
+      postsLoading={postsLoading}
+      postsError={postsError}
+      postsTotal={postsTotal}
+      hasMorePosts={postsPage < postsTotalPages}
+      loadMorePosts={() => loadCommunityPosts(postsPage + 1)}
+      retryPosts={() => loadCommunityPosts(1)}
+      onShare={handleShare}
       showEdit={showEdit}
       setShowEdit={setShowEdit}
       showMembers={showMembers}
