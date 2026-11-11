@@ -12,24 +12,28 @@
   --text-muted: #475569;
   --border: #e2e8f0;
   --border-strong: #cbd5e1;
+  --brand-primary: #2f5de8;
+  --brand-accent: #5144e5;
   --shadow-soft: 0 20px 55px rgba(15, 23, 42, 0.08);
   --shadow-card: 0 24px 80px rgba(15, 23, 42, 0.08);
   --radius: 1.75rem;
   --radius-sm: 1rem;
   --radius-pill: 9999px;
-  --focus-ring: rgba(99, 102, 241, 0.35);
+  --focus-ring: rgba(81, 68, 229, 0.4);
 }
 
 .dark {
   color-scheme: dark;
   --background: #050505;
-  --surface: #080808;
-  --surface-soft: #0f172a;
-  --surface-strong: #111827;
+  --surface: #0b0b0d;
+  --surface-soft: #111114;
+  --surface-strong: #18181c;
   --text: #f8fafc;
-  --text-muted: #94a3b8;
-  --border: #1f2937;
-  --border-strong: #374151;
+  --text-muted: #a1a1aa;
+  --border: #27272c;
+  --border-strong: #3f3f46;
+  --brand-primary: #6094ff;
+  --brand-accent: #8580ff;
   --shadow-soft: 0 20px 55px rgba(0, 0, 0, 0.32);
   --shadow-card: 0 24px 80px rgba(0, 0, 0, 0.32);
 }
@@ -37,7 +41,7 @@
 * {
   box-sizing: border-box;
   scrollbar-width: thin;
-  scrollbar-color: rgb(99 102 241 / 0.9) transparent;
+  scrollbar-color: var(--brand-accent) transparent;
 }
 
 html {
@@ -78,7 +82,8 @@ a {
 }
 
 ::selection {
-  @apply bg-white text-black;
+  background: rgb(81 68 229 / 0.2);
+  color: var(--text);
 }
 
 :focus-visible {
@@ -98,6 +103,12 @@ a {
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.62);
   box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
+}
+
+.dark .glass-card {
+  background: rgb(17 17 20 / 0.78);
+  border-color: rgb(255 255 255 / 0.08);
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.28);
 }
 
 .card-border {
@@ -272,12 +283,12 @@ a {
 }
 
 .aside_scroll::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #6366F1, #10B981);
+  background: linear-gradient(180deg, var(--brand-primary), var(--brand-accent));
   border-radius: 9999px;
 }
 
 .aside_scroll::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #4F46E5, #059669);
+  background: linear-gradient(180deg, #284acb, #4336ca);
 }
 
 @media (max-width: 640px) {
@@ -293,7 +304,7 @@ a {
 }
 
 .mentions__mention {
-  color: #4F46E5;
+  color: var(--brand-accent);
   font-weight: 600;
 }
 
@@ -348,5 +359,5 @@ html[lang="ar"] {
 }
 
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.5);
+  background: color-mix(in srgb, var(--brand-accent) 50%, transparent);
 }
