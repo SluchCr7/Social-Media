@@ -79,28 +79,22 @@ export default function SavedPage() {
           pause()
           setExpanded(false)
         } else {
-          play(true)
+          play()
           setExpanded(true)
         }
         return
       }
 
-      pause()
-      const trackIndex = filteredMusic.findIndex(m => m?.id === track.id)
-      setTrack(track, trackIndex, filteredMusic)
+      setTrack(track)
       setExpanded(true)
-      setTimeout(() => play(true), 100)
     },
-    [current, playing, pause, play, setExpanded, setTrack, filteredMusic]
+    [current, playing, pause, play, setExpanded, setTrack]
   )
 
   useEffect(() => {
     if (active !== 'music' || !filteredMusic.length) return
     setSongs(filteredMusic)
-    if (current && !filteredMusic.some(m => m.id === current.id)) {
-      setTrack(filteredMusic[0], 0, filteredMusic)
-    }
-  }, [active, filteredMusic, setSongs, current, setTrack])
+  }, [active, filteredMusic, setSongs])
 
   const savedFilteredPosts = useMemo(() => {
     if (!filteredPosts?.length || !userData?._id) return []

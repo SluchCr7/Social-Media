@@ -14,7 +14,8 @@ import {
   HiArrowsRightLeft,
   HiArrowPath,
   HiQueueList,
-  HiHeart
+  HiHeart,
+  HiXMark
 } from 'react-icons/hi2'
 import { useMusicPlayer } from '@/app/redux/hooks';
 import { useMusic } from '@/app/redux/hooks';
@@ -34,15 +35,16 @@ const SongPlayer = React.memo(() => {
     next,
     prev,
     setExpanded,
+    setViewMusicPlayer,
     volume,
     setVolume,
     toggleMute,
-    isMuted,
+    muted,
     shuffle,
     toggleShuffle,
-    loop,
-    toggleLoop,
-    seekTo
+    repeatMode,
+    toggleRepeat,
+    seek
   } = useMusicPlayer()
 
   const { likeMusic } = useMusic()
@@ -84,8 +86,8 @@ const SongPlayer = React.memo(() => {
   }, [])
 
   const handleSeek = useCallback((value) => {
-    seekTo((value / 100) * duration)
-  }, [seekTo, duration])
+    seek((value / 100) * duration)
+  }, [seek, duration])
 
   if (!current) return null
 
@@ -175,8 +177,8 @@ const SongPlayer = React.memo(() => {
                 </button>
 
                 <button
-                  onClick={toggleLoop}
-                  className={`transition-all duration-300 ${loop ? 'text-indigo-500 scale-110' : 'text-gray-400 hover:text-gray-700 dark:hover:text-white'}`}
+                  onClick={toggleRepeat}
+                  className={`transition-all duration-300 ${repeatMode !== 'off' ? 'text-indigo-500 scale-110' : 'text-gray-400 hover:text-gray-700 dark:hover:text-white'}`}
                 >
                   <HiArrowPath className="w-[18px] h-[18px]" />
                 </button>
@@ -216,7 +218,7 @@ const SongPlayer = React.memo(() => {
                   className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
                   onClick={toggleMute}
                 >
-                  {isMuted || volume === 0 ? <HiSpeakerXMark className="w-5 h-5" /> : <HiSpeakerWave className="w-5 h-5" />}
+                  {muted || volume === 0 ? <HiSpeakerXMark className="w-5 h-5" /> : <HiSpeakerWave className="w-5 h-5" />}
                 </button>
 
                 <AnimatePresence>
@@ -233,7 +235,7 @@ const SongPlayer = React.memo(() => {
                           vertical
                           min={0}
                           max={100}
-                          value={isMuted ? 0 : volume * 100}
+                          value={muted ? 0 : volume * 100}
                           onChange={(val) => setVolume(val / 100)}
                           trackStyle={{ background: '#6366f1', width: 6 }}
                           railStyle={{ backgroundColor: 'rgba(156,163,175,0.2)', width: 6 }}
@@ -256,6 +258,14 @@ const SongPlayer = React.memo(() => {
 
               <button className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
                 <HiQueueList className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMusicPlayer(false)}
+                aria-label={t('Hide music player')}
+                className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-white/5 dark:hover:text-white"
+              >
+                <HiXMark className="h-5 w-5" />
               </button>
             </div>
 

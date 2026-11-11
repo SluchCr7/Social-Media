@@ -1,12 +1,12 @@
 'use client'
 
-import React, { useCallback, useMemo, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 import {
   FaPlay, FaPause, FaStepForward, FaStepBackward,
-  FaRandom, FaRedo, FaTimes, FaHeart, FaShareAlt,
-  FaVolumeUp, FaVolumeMute, FaListUl, FaMagic
+  FaRandom, FaRedo, FaTimes, FaHeart,
+  FaVolumeUp, FaVolumeMute
 } from 'react-icons/fa'
 import { useMusicPlayer } from '@/app/redux/hooks';
 import { useMusic } from '@/app/redux/hooks';
@@ -22,7 +22,7 @@ const ExpandedWindow = () => {
   const {
     current, playing, togglePlay, progress, duration, next, prev,
     shuffle, setShuffle, repeatMode, setRepeatMode, expanded, setExpanded, isReady,
-    volume, setVolume, isMuted
+    volume, setVolume, muted, setMuted, setProgress
   } = useMusicPlayer()
 
   const { likeMusic } = useMusic()
@@ -46,8 +46,6 @@ const ExpandedWindow = () => {
       }
     }
   }, [current, expanded])
-
-  const progressPercent = useMemo(() => (progress / (duration || 1)) * 100, [progress, duration])
 
   const handleClose = useCallback(() => setExpanded(false), [setExpanded])
   const handleTogglePlay = useCallback(() => {
@@ -158,13 +156,16 @@ const ExpandedWindow = () => {
 
                 {/* Progress Bar Container */}
                 <div className="w-full space-y-4">
-                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden relative">
-                    <motion.div
-                      className="absolute h-full bg-white shadow-[0_0_20px_white]"
-                      animate={{ width: `${progressPercent}%` }}
-                      transition={{ type: 'spring', damping: 20 }}
-                    />
-                  </div>
+                  <input
+                    type="range"
+                    aria-label={t('Track progress')}
+                    min="0"
+                    max={duration || 0}
+                    value={Math.min(progress, duration || 0)}
+                    onChange={(event) => setProgress(Number(event.target.value))}
+                    disabled={!duration}
+                    className="h-1.5 w-full cursor-pointer accent-indigo-300 disabled:cursor-not-allowed"
+                  />
                   <div className="flex justify-between text-xs font-bold text-white/40 tracking-widest font-mono">
                     <span>{formatTime(progress)}</span>
                     <span>{formatTime(duration)}</span>
@@ -209,8 +210,8 @@ const ExpandedWindow = () => {
 
                 {/* Volume & Utility */}
                 <div className="w-full lg:max-w-md pt-8 flex items-center gap-6 opacity-60 hover:opacity-100 transition-opacity">
-                  <button className="text-white" onClick={() => setVolume(volume === 0 ? 0.7 : 0)}>
-                    {isMuted || volume === 0 ? <FaVolumeMute size={18} /> : <FaVolumeUp size={18} />}
+                  <button className="text-white" onClick={() => setMuted(!muted)} aria-label={muted ? t('Unmute') : t('Mute')}>
+                    {muted || volume === 0 ? <FaVolumeMute size={18} /> : <FaVolumeUp size={18} />}
                   </button>
                   <div className="flex-1">
                     <Slider
@@ -221,29 +222,21 @@ const ExpandedWindow = () => {
                       handleStyle={{ display: 'none' }}
                     />
                   </div>
-                  <div className="flex gap-4">
-                    <FaMagic className="text-white/40 hover:text-indigo-400 cursor-pointer" />
-                    <FaListUl className="text-white/40 hover:text-indigo-400 cursor-pointer" />
-                  </div>
                 </div>
               </div>
 
             </div>
           </div>
 
-          {/* Bottom Deck - Track Visualizer Placeholder */}
-          <div className="relative z-10 h-32 w-full flex items-end justify-center px-8 pb-8">
-            <div className="flex items-end gap-1.5 h-full opacity-20">
-              {[...Array(60)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  animate={{ height: playing ? [10, Math.random() * 60 + 10, 10] : 10 }}
-                  transition={{ repeat: Infinity, duration: 0.5 + Math.random(), ease: "easeInOut" }}
-                  className="w-1.5 bg-white rounded-full"
-                />
-              ))}
+          <div aria-hidden="true" className="relative z-10 flex h-16 w-full items-end justify-center gap-1 px-8 pb-5 opacity-20">
+            {Array.from({ length: 28 }, (_, index) => (
+              <span
+                key={index}
+                className="w-1 rounded-full bg-white"
+                style={{ height: `${8 + ((index * 17 + 13) % 40)}px` }}
+              />
+            ))}
             </div>
-          </div>
 
         </motion.div>
       )}

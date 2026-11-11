@@ -271,13 +271,16 @@ export const useUser = () => {
       try {
         const res = await api.put(`/auth/save/music/${musicId}`, {});
         showToast(res.data.message || MESSAGES.COMMON.SAVED, 'success');
+        if (user && Array.isArray(res.data.playlist)) {
+          updateLocalUser({ ...user, myMusicPlaylist: res.data.playlist });
+        }
         return res.data;
       } catch (err) {
         showToast('Failed to save music.', 'error');
         return null;
       }
     },
-    [showToast]
+    [user, updateLocalUser, showToast]
   );
 
   const toggleBlockNotification = useCallback(

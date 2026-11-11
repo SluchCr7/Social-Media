@@ -15,12 +15,14 @@ export default function MusicPageContainer() {
     music: songs,
     topCharts,
     isLoading,
+    error,
     hasLoadedOnce,
     likeMusic,
     shareMusicAsPost,
     genre,
     setGenre,
     searchMusic,
+    retryMusic,
     searchQuery,
     setSearchQuery,
     lastMusicRef
@@ -30,6 +32,7 @@ export default function MusicPageContainer() {
   const { saveMusicInPlayList } = useUser()
   const {
     current, playing, togglePlay, next, prev,
+    setSongs,
     shuffle, setShuffle, repeatMode, setRepeatMode,
     progress, duration, volume, setVolume, muted, setMuted,
     setTrack, currentIndex, setCurrentIndex,
@@ -38,32 +41,50 @@ export default function MusicPageContainer() {
 
   const { loading, userData } = useGetData(user?._id)
   const [openModel, setOpenModel] = useState(false)
+  const [playlistOverride, setPlaylistOverride] = useState(null)
   const searchTimeout = useRef(null)
 
-  /* ---------------- 🔍 تحسين البحث الـ Server Side ---------------- */
+  useEffect(() => {
+    setSongs(songs)
+  }, [songs, setSongs])
+
+  useEffect(() => {
+    setPlaylistOverride(null)
+  }, [user?._id])
+
+  useEffect(() => () => {
+    if (searchTimeout.current) clearTimeout(searchTimeout.current)
+  }, [])
+
   const handleSetSearch = useCallback((value) => {
     setSearchQuery(value)
 
-    // Debounce search
     if (searchTimeout.current) clearTimeout(searchTimeout.current)
     searchTimeout.current = setTimeout(() => {
       searchMusic(value)
     }, 500)
   }, [searchMusic, setSearchQuery])
 
-  /* ---------------- 🎵 تحسين قائمة الانتظار ---------------- */
   const queue = useMemo(() => {
     if (!songs?.length) return []
+    if (currentIndex < 0) return songs
     return [...songs.slice(currentIndex + 1), ...songs.slice(0, currentIndex)]
   }, [songs, currentIndex])
 
-  /* ---------------- 🎶 قائمة المستخدم ---------------- */
   const myPlaylist = useMemo(() => {
-    return userData?.myMusicPlaylist?.length ? userData.myMusicPlaylist : []
-  }, [userData])
+    return playlistOverride ?? userData?.myMusicPlaylist ?? []
+  }, [playlistOverride, userData])
 
-  /* ---------------- ⚡ تحسين الأداء عبر useCallback ---------------- */
-  const handleSetGenre = useCallback((g) => setGenre(g), [setGenre])
+  const handleSaveMusicInPlayList = useCallback(async (musicId) => {
+    const result = await saveMusicInPlayList(musicId)
+    if (Array.isArray(result?.playlist)) setPlaylistOverride(result.playlist)
+    return result
+  }, [saveMusicInPlayList])
+
+  const handleSetGenre = useCallback((g) => {
+    if (searchTimeout.current) clearTimeout(searchTimeout.current)
+    setGenre(g)
+  }, [setGenre])
   const handleSetOpenModel = useCallback((state) => setOpenModel(state), [])
   const handleSetVolume = useCallback((v) => setVolume(v), [setVolume])
   const handleSetMuted = useCallback((v) => setMuted(v), [setMuted])
@@ -105,11 +126,13 @@ export default function MusicPageContainer() {
         loading={loading}
         isLoading={isLoading}
         hasLoadedOnce={hasLoadedOnce}
+        error={error}
+        retryMusic={retryMusic}
         openModel={openModel}
         setOpenModel={handleSetOpenModel}
         likeMusic={likeMusic}
         shareMusicAsPost={shareMusicAsPost}
-        saveMusicInPlayList={saveMusicInPlayList}
+        saveMusicInPlayList={handleSaveMusicInPlayList}
         queue={queue}
         myPlaylist={myPlaylist}
         isReady={isReady}

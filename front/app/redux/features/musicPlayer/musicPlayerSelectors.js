@@ -5,6 +5,7 @@ export const selectSongs = createSelector([selectMusicPlayerState], (p) => p?.so
 export const selectCurrentTrack = createSelector([selectMusicPlayerState], (p) => p?.current);
 export const selectCurrentTrackIndex = createSelector([selectMusicPlayerState], (p) => p?.currentIndex || 0);
 export const selectIsPlaying = createSelector([selectMusicPlayerState], (p) => Boolean(p?.playing));
+export const selectIsReady = createSelector([selectMusicPlayerState], (p) => Boolean(p?.isReady));
 export const selectTrackProgress = createSelector([selectMusicPlayerState], (p) => p?.progress || 0);
 export const selectTrackDuration = createSelector([selectMusicPlayerState], (p) => p?.duration || 0);
 export const selectTrackVolume = createSelector([selectMusicPlayerState], (p) => p?.volume ?? 0.9);

@@ -568,17 +568,62 @@ const deleteAllUsers = async () => {
 };
 
 const toggleSongInPlaylist = async ({ userId, songId }) => {
-  const user = await User.findById(userId);
-  if (!user) return errorResult(404, 'User not found');
+  if (!mongoose.Types.ObjectId.isValid(songId)) return errorResult(400, 'Invalid song ID');
   if (!await Music.findById(songId)) return errorResult(404, 'Song not found');
-  const exists = user.myMusicPlaylist.includes(songId);
-  user.myMusicPlaylist = exists
-    ? user.myMusicPlaylist.filter((id) => id.toString() !== songId)
-    : [...user.myMusicPlaylist, songId];
-  await user.save();
+  const songObjectId = new mongoose.Types.ObjectId(songId);
+  const currentPlaylist = {
+    $filter: {
+      input: {
+        $map: {
+          input: { $ifNull: ['$myMusicPlaylist', []] },
+          as: 'savedSong',
+          in: {
+            $convert: {
+              input: '$$savedSong',
+              to: 'objectId',
+              onError: null,
+              onNull: null,
+            },
+          },
+        },
+      },
+      as: 'savedSong',
+      cond: { $ne: ['$$savedSong', null] },
+    },
+  };
+  const nextPlaylist = {
+    $cond: [
+      { $in: [songObjectId, currentPlaylist] },
+      {
+        $filter: {
+          input: currentPlaylist,
+          as: 'savedSong',
+          cond: { $ne: ['$$savedSong', songObjectId] },
+        },
+      },
+      { $setUnion: [currentPlaylist, [songObjectId]] },
+    ],
+  };
+  const previous = await User.findOneAndUpdate(
+    { _id: userId },
+    [{ $set: { myMusicPlaylist: nextPlaylist } }],
+    { new: false }
+  ).select('myMusicPlaylist');
+  if (!previous) return errorResult(404, 'User not found');
+  const exists = (previous.myMusicPlaylist || []).some((savedId) => savedId.toString() === songId);
+  const updatedUser = await User.findById(userId).select('myMusicPlaylist').lean();
+  if (!updatedUser) return errorResult(404, 'User not found');
+  const savedIds = updatedUser.myMusicPlaylist || [];
+  const savedSongs = await Music.find({ _id: { $in: savedIds } })
+    .populate('owner', 'username profilePhoto')
+    .lean();
+  const songsById = new Map(savedSongs.map((song) => [song._id.toString(), song]));
+  const playlist = savedIds
+    .map((savedId) => songsById.get(savedId.toString()))
+    .filter(Boolean);
   return result(200, {
     message: exists ? 'Song removed from playlist' : 'Song added to playlist',
-    playlist: user.myMusicPlaylist,
+    playlist,
   });
 };
 

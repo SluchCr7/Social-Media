@@ -41,7 +41,7 @@ const LayoutComponent = ({ children }) => {
   const { showMenuReport, setShowMenuReport, isPostId, isTargetId, reportedOnType } = useReport();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const { viewMusicPlayer, setViewMusicPlayer } = useMusicPlayer()
+  const { viewMusicPlayer } = useMusicPlayer()
   const { language } = useTranslate();
   const { isStory, setIsStory } = useStory()
   const isRTL = ['ar', 'fa', 'he', 'ur'].includes(language); // true لو RTL
@@ -186,11 +186,7 @@ const LayoutComponent = ({ children }) => {
           )}
           <MenuAllSuggestedFriends />
           <ReelUploadModal />
-          {
-            viewMusicPlayer && (
-              <SongPlayer />
-            )
-          }
+          {viewMusicPlayer && pathname !== '/Pages/Music' && <SongPlayer />}
           <AddStoryModel isStory={isStory} setIsStory={setIsStory} />
           {/* <CookieConsent/> */}
           {/* <FloatingDock onOpenMusicPlayer={() => setViewMusicPlayer(!viewMusicPlayer)} /> */}

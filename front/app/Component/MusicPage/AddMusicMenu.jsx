@@ -7,6 +7,8 @@ import Image from 'next/image';
 import { useMusic } from '@/app/redux/hooks';
 
 const genres = ['Pop', 'Rock', 'HipHop', 'Jazz', 'Classical', 'Lo-Fi', 'Electronic', 'Ambient', 'Trap', 'Other'];
+const MAX_AUDIO_SIZE = 25 * 1024 * 1024;
+const MAX_ARTWORK_SIZE = 8 * 1024 * 1024;
 
 const AddMusicModal = ({ isOpen, onClose }) => {
   const [title, setTitle] = useState('');
@@ -50,6 +52,10 @@ const AddMusicModal = ({ isOpen, onClose }) => {
       setError('Please choose a valid image file (PNG, JPG, WEBP).');
       return;
     }
+    if (file.size > MAX_ARTWORK_SIZE) {
+      setError('Artwork must be 8 MB or smaller.');
+      return;
+    }
 
     if (imagePreview) URL.revokeObjectURL(imagePreview);
     setImageFile(file);
@@ -66,8 +72,8 @@ const AddMusicModal = ({ isOpen, onClose }) => {
       return;
     }
 
-    if (file.size > 25 * 1024 * 1024) {
-      setError('Audio file size must be less than 25MB.');
+    if (file.size > MAX_AUDIO_SIZE) {
+      setError('Audio file must be 25 MB or smaller.');
       return;
     }
 
@@ -101,7 +107,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
     formData.append('language', language.trim() || 'English');
 
     if (tags.trim()) {
-      tags.split(',').map((item) => item.trim()).filter(Boolean).forEach((tag) => formData.append('tags[]', tag));
+      tags.split(',').map((item) => item.trim()).filter(Boolean).forEach((tag) => formData.append('tags', tag));
     }
 
     try {
@@ -125,7 +131,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 p-3 backdrop-blur-md sm:p-6 md:p-8"
-          onClick={(e) => e.target === e.currentTarget && onClose()}
+          onClick={(e) => !loading && e.target === e.currentTarget && onClose()}
         >
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.98 }}
@@ -138,6 +144,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
             <button
               type="button"
               onClick={onClose}
+              disabled={loading}
               className="absolute right-4 top-4 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/50 text-zinc-300 backdrop-blur-md transition hover:bg-white/20 hover:text-white"
             >
               <HiXMark size={18} />

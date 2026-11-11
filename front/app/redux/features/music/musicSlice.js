@@ -31,6 +31,7 @@ const initialState = {
   hasLoadedOnce: false,
   genre: 'All',
   searchQuery: '',
+  error: null,
   topCharts: { trending: [], popular: [] },
   showModelAddMusic: false,
   currentMusic: null,
@@ -47,7 +48,12 @@ export const musicSlice = createSlice({
     appendMusic: (state, action) => {
       const normalized = normalizeMusicList(action.payload);
       const currentIds = new Set(state.music.map((item) => item._id));
-      state.music.push(...normalized.filter((item) => !currentIds.has(item._id)));
+      for (const item of normalized) {
+        if (!currentIds.has(item._id)) {
+          state.music.push(item);
+          currentIds.add(item._id);
+        }
+      }
     },
     addMusicToState: (state, action) => {
       const normalized = normalizeMusicItem(action.payload);
@@ -91,6 +97,9 @@ export const musicSlice = createSlice({
     setHasLoadedOnce: (state, action) => {
       state.hasLoadedOnce = action.payload;
     },
+    setMusicError: (state, action) => {
+      state.error = action.payload;
+    },
     setGenre: (state, action) => {
       state.genre = action.payload;
     },
@@ -117,6 +126,7 @@ export const {
   setHasMore,
   setIsLoading,
   setHasLoadedOnce,
+  setMusicError,
   setGenre,
   setSearchQuery,
   setShowModelAddMusic,

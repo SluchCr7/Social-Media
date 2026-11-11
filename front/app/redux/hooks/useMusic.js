@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useEffect, useCallback, useRef, useMemo } from 'react';
 import api from '@/app/utils/api';
 import { useAuth } from './useAuth';
 import { useFeedback } from './useFeedback';
@@ -13,6 +13,7 @@ import {
   selectMusicHasMore,
   selectMusicLoading,
   selectMusicHasLoadedOnce,
+  selectMusicError,
   selectMusicGenre,
   selectMusicSearchQuery,
   selectShowModelAddMusic,
@@ -29,6 +30,7 @@ import {
   setHasMore,
   setIsLoading,
   setHasLoadedOnce,
+  setMusicError,
   setGenre as setReduxGenre,
   setSearchQuery as setReduxSearchQuery,
   setShowModelAddMusic as setReduxShowModelAddMusic,
@@ -51,10 +53,15 @@ export const useMusic = () => {
   const hasMore = useAppSelector(selectMusicHasMore);
   const isLoading = useAppSelector(selectMusicLoading);
   const hasLoadedOnce = useAppSelector(selectMusicHasLoadedOnce);
+  const error = useAppSelector(selectMusicError);
   const genre = useAppSelector(selectMusicGenre);
   const searchQuery = useAppSelector(selectMusicSearchQuery);
   const showModelAddMusic = useAppSelector(selectShowModelAddMusic);
   const currentMusic = useAppSelector(selectCurrentMusic);
+  const observer = useRef();
+  const requestId = useRef(0);
+  const loadingMore = useRef(false);
+  const controller = useRef(null);
 
   const setGenre = useCallback(
     (newGenre) => {
@@ -86,27 +93,33 @@ export const useMusic = () => {
 
   const fetchMusic = useCallback(
     async (pageNum = 1, currentGenre = 'All') => {
+      controller.current?.abort();
+      const requestController = new AbortController();
+      controller.current = requestController;
+      const currentRequestId = ++requestId.current;
       dispatch(setIsLoading(true));
-      if (pageNum === 1) {
-        dispatch(setHasLoadedOnce(false));
-      }
+      dispatch(setMusicError(null));
 
       try {
-        const res = await api.get(
-          `/music?page=${pageNum}&limit=12&genre=${encodeURIComponent(currentGenre)}`
-        );
+        const res = await api.get('/music', {
+          params: { page: pageNum, limit: 12, genre: currentGenre },
+          signal: requestController.signal,
+        });
+        if (currentRequestId !== requestId.current) return;
         const nextMusic = normalizeMusicList(Array.isArray(res?.data?.music) ? res.data.music : []);
 
         dispatch(pageNum === 1 ? setReduxMusic(nextMusic) : appendMusic(nextMusic));
-        dispatch(setHasMore(pageNum < (res?.data?.totalPages || 1)));
+        dispatch(setHasMore(pageNum < (Number(res?.data?.totalPages) || 0)));
       } catch (err) {
-        console.error('Fetch Error:', err);
-        if (pageNum === 1) {
-          dispatch(setReduxMusic([]));
+        if (currentRequestId === requestId.current) {
+          console.error('Music library request failed:', err);
+          dispatch(setMusicError(err.response?.data?.message || 'Could not load music right now.'));
         }
       } finally {
-        dispatch(setIsLoading(false));
-        if (pageNum === 1) {
+        if (currentRequestId === requestId.current) {
+          loadingMore.current = false;
+          controller.current = null;
+          dispatch(setIsLoading(false));
           dispatch(setHasLoadedOnce(true));
         }
       }
@@ -135,32 +148,62 @@ export const useMusic = () => {
 
       if (!trimmedQuery) {
         dispatch(setReduxSearchQuery(''));
+        dispatch(setReduxPage(1));
         fetchMusic(1, genre);
         return;
       }
 
+      const currentRequestId = ++requestId.current;
+      controller.current?.abort();
+      const requestController = new AbortController();
+      controller.current = requestController;
       dispatch(setIsLoading(true));
+      dispatch(setMusicError(null));
       try {
-        const { data } = await api.get(`/music/search?q=${encodeURIComponent(trimmedQuery)}`);
+        const { data } = await api.get(`/music/search?q=${encodeURIComponent(trimmedQuery)}`, {
+          signal: requestController.signal,
+        });
+        if (currentRequestId !== requestId.current) return;
         const nextMusic = normalizeMusicList(Array.isArray(data) ? data : []);
         dispatch(setReduxMusic(nextMusic));
         dispatch(setHasMore(false));
         dispatch(setHasLoadedOnce(true));
       } catch (err) {
-        console.error('Search Error:', err);
-        dispatch(setReduxMusic([]));
+        if (currentRequestId === requestId.current) {
+          console.error('Music search failed:', err);
+          dispatch(setMusicError(err.response?.data?.message || 'Music search failed. Try again.'));
+        }
       } finally {
-        dispatch(setIsLoading(false));
+        if (currentRequestId === requestId.current) {
+          loadingMore.current = false;
+          controller.current = null;
+          dispatch(setIsLoading(false));
+        }
       }
     },
     [genre, fetchMusic, dispatch]
   );
 
+  const retryMusic = useCallback(() => {
+    if (searchQuery.trim()) return searchMusic(searchQuery);
+    return fetchMusic(1, genre);
+  }, [searchQuery, searchMusic, fetchMusic, genre]);
+
   useEffect(() => {
     dispatch(setReduxPage(1));
+    dispatch(setReduxSearchQuery(''));
     fetchMusic(1, genre);
+  }, [genre, fetchMusic, dispatch]);
+
+  useEffect(() => {
     fetchTopCharts();
-  }, [genre, fetchMusic, fetchTopCharts, dispatch]);
+  }, [fetchTopCharts]);
+
+  useEffect(() => () => {
+    requestId.current += 1;
+    controller.current?.abort();
+    observer.current?.disconnect();
+  }, []);
 
   const uploadMusic = useCallback(
     async (formData) => {
@@ -260,19 +303,19 @@ export const useMusic = () => {
     [user, setPosts, showAlert]
   );
 
-  const observer = useRef();
   const lastMusicRef = useCallback(
     (node) => {
-      if (isLoading) return;
       if (observer.current) observer.current.disconnect();
+      if (!node || isLoading || !hasMore || typeof IntersectionObserver === 'undefined') return;
       observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
+        if (entries[0]?.isIntersecting && !loadingMore.current) {
+          loadingMore.current = true;
           const nextPage = page + 1;
           dispatch(setReduxPage(nextPage));
           fetchMusic(nextPage, genre);
         }
-      });
-      if (node) observer.current.observe(node);
+      }, { rootMargin: '240px' });
+      observer.current.observe(node);
     },
     [isLoading, hasMore, page, fetchMusic, genre, dispatch]
   );
@@ -284,11 +327,13 @@ export const useMusic = () => {
       isLoading,
       hasMore,
       hasLoadedOnce,
+      error,
       genre,
       setGenre,
       searchQuery,
       setSearchQuery,
       searchMusic,
+      retryMusic,
       uploadMusic,
       deleteMusic,
       likeMusic,
@@ -307,11 +352,13 @@ export const useMusic = () => {
       isLoading,
       hasMore,
       hasLoadedOnce,
+      error,
       genre,
       setGenre,
       searchQuery,
       setSearchQuery,
       searchMusic,
+      retryMusic,
       uploadMusic,
       deleteMusic,
       likeMusic,

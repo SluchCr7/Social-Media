@@ -1,13 +1,17 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { audioEngine } from '../../services/audioEngine';
+import api from '@/app/utils/api';
+import { updateMusicInState } from '../music/musicSlice';
+import { selectCurrentUser } from '../auth/authSelectors';
 import {
   selectSongs,
   selectCurrentTrack,
   selectCurrentTrackIndex,
   selectIsPlaying,
+  selectIsReady,
   selectTrackProgress,
   selectTrackDuration,
   selectTrackVolume,
@@ -22,7 +26,6 @@ import {
   setCurrentTrack,
   setCurrentIndex,
   setPlaying,
-  setProgress,
   setDuration,
   setVolume,
   setMuted,
@@ -36,11 +39,14 @@ import {
 
 export const useMusicPlayer = () => {
   const dispatch = useAppDispatch();
+  const user = useAppSelector(selectCurrentUser);
+  const viewedTracks = useRef(new Set());
 
   const songs = useAppSelector(selectSongs);
   const current = useAppSelector(selectCurrentTrack);
   const currentIndex = useAppSelector(selectCurrentTrackIndex);
   const playing = useAppSelector(selectIsPlaying);
+  const isReady = useAppSelector(selectIsReady);
   const progress = useAppSelector(selectTrackProgress);
   const duration = useAppSelector(selectTrackDuration);
   const volume = useAppSelector(selectTrackVolume);
@@ -50,19 +56,29 @@ export const useMusicPlayer = () => {
   const expanded = useAppSelector(selectIsPlayerExpanded);
   const viewMusicPlayer = useAppSelector(selectViewMusicPlayer);
 
-  const play = useCallback(
-    (track) => {
-      if (track) {
-        dispatch(setCurrentTrack(track));
-        const idx = songs.findIndex((s) => s._id === track._id);
-        if (idx !== -1) dispatch(setCurrentIndex(idx));
-        audioEngine.load(track.url, true);
-      } else {
-        audioEngine.play();
-      }
-    },
-    [songs, dispatch]
-  );
+  const selectTrack = useCallback((track) => {
+    if (!track?._id || !track.url) return;
+    dispatch(setCurrentTrack(track));
+    let index = songs.findIndex((song) => song._id === track._id);
+    if (index < 0) {
+      index = songs.length;
+      dispatch(setSongs([...songs, track]));
+    }
+    dispatch(setCurrentIndex(index));
+    dispatch(setViewMusicPlayer(true));
+    audioEngine.load(track.url, true, track._id);
+    if (user?._id && !viewedTracks.current.has(track._id)) {
+      viewedTracks.current.add(track._id);
+      api.put(`/music/view/${track._id}`)
+        .then(({ data }) => dispatch(updateMusicInState(data)))
+        .catch((error) => console.error('Could not record music view:', error));
+    }
+  }, [songs, user?._id, dispatch]);
+
+  const play = useCallback((track) => {
+    if (track) selectTrack(track);
+    else audioEngine.play();
+  }, [selectTrack]);
 
   const pause = useCallback(() => {
     audioEngine.pause();
@@ -87,14 +103,11 @@ export const useMusicPlayer = () => {
     dispatch(prevTrack());
   }, [dispatch]);
 
-  const setTrack = useCallback(
-    (track) => {
-      dispatch(setCurrentTrack(track));
-      const idx = songs.findIndex((s) => s._id === track._id);
-      if (idx !== -1) dispatch(setCurrentIndex(idx));
-      audioEngine.load(track.url, playing);
-    },
-    [songs, playing, dispatch]
+  const setTrack = selectTrack;
+
+  const setSongsList = useCallback(
+    (nextSongs) => dispatch(setSongs(nextSongs)),
+    [dispatch]
   );
 
   const toggleMute = useCallback(() => {
@@ -113,7 +126,7 @@ export const useMusicPlayer = () => {
   return useMemo(
     () => ({
       songs,
-      setSongs: (s) => dispatch(setSongs(s)),
+      setSongs: setSongsList,
       current,
       setCurrentTrack: (t) => dispatch(setCurrentTrack(t)),
       currentIndex,
@@ -121,7 +134,7 @@ export const useMusicPlayer = () => {
       playing,
       setPlaying: (p) => dispatch(setPlaying(p)),
       progress,
-      setProgress: (pr) => dispatch(setProgress(pr)),
+      setProgress: seek,
       duration,
       setDuration: (d) => dispatch(setDuration(d)),
       volume,
@@ -143,16 +156,18 @@ export const useMusicPlayer = () => {
       next,
       prev,
       setTrack,
+      selectTrack,
       toggleMute,
       toggleShuffle,
       toggleRepeat,
-      isReady: true,
+      isReady,
     }),
     [
       songs,
       current,
       currentIndex,
       playing,
+      isReady,
       progress,
       duration,
       volume,
@@ -168,9 +183,11 @@ export const useMusicPlayer = () => {
       next,
       prev,
       setTrack,
+      selectTrack,
       toggleMute,
       toggleShuffle,
       toggleRepeat,
+      setSongsList,
       dispatch,
     ]
   );

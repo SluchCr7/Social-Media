@@ -3,6 +3,9 @@
 import { useEffect, useRef } from 'react';
 import { useAppDispatch, useAppSelector, useAppStore } from '../../hooks';
 import { audioEngine } from '../../services/audioEngine';
+import api from '@/app/utils/api';
+import { updateMusicInState } from '../music/musicSlice';
+import { selectCurrentUser } from '../auth/authSelectors';
 import {
   selectCurrentTrack,
   selectIsPlaying,
@@ -25,13 +28,33 @@ export default function AudioBridge() {
     audioEngine.init(dispatch, store.getState);
   }, [dispatch, store]);
 
+  useEffect(() => {
+    const audio = audioEngine.getAudioElement();
+    if (!audio) return undefined;
+    const handleTrackEnded = () => {
+      const trackId = audioEngine.currentTrackId || selectCurrentTrack(store.getState())?._id;
+      if (!trackId || !selectCurrentUser(store.getState())?._id) return;
+      api.post(`/music/listen/${trackId}`)
+        .then(({ data }) => dispatch(updateMusicInState(data)))
+        .catch((error) => console.error('Could not record completed music playback:', error));
+    };
+    audio.addEventListener('ended', handleTrackEnded);
+    return () => audio.removeEventListener('ended', handleTrackEnded);
+  }, [dispatch, store]);
+
   // Sync track changes
   useEffect(() => {
-    if (!current?.url) return;
+    if (!current?.url) {
+      if (prevTrackId.current) {
+        audioEngine.pause();
+        prevTrackId.current = null;
+      }
+      return;
+    }
 
     if (prevTrackId.current !== current._id) {
       prevTrackId.current = current._id;
-      audioEngine.load(current.url, playing);
+      audioEngine.load(current.url, playing, current._id);
     }
   }, [current, playing]);
 

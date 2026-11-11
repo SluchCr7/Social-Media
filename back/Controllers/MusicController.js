@@ -4,16 +4,11 @@ const musicService = require("../Services/musicService");
 const send = (res, result) => res.status(result.status).json(result.body);
 
 const createMusic = asyncHandler(async (req, res) => {
-  try {
-    return send(res, await musicService.createMusic({
-      files: req.files,
-      body: req.body,
-      userId: req.user?._id
-    }));
-  } catch (error) {
-    console.error("❌ Error creating music:", error);
-    return res.status(500).json({ message: error.message });
-  }
+  return send(res, await musicService.createMusic({
+    files: req.files,
+    body: req.body,
+    userId: req.user?._id
+  }));
 });
 
 const getAllMusic = asyncHandler(async (req, res) => {

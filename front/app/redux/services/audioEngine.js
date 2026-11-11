@@ -5,6 +5,7 @@
 
 import {
   setPlaying,
+  setReady,
   setProgress,
   setDuration,
   nextTrack,
@@ -33,7 +34,23 @@ class AudioEngine {
         this.isReady = true;
         if (this.dispatch && this.audio) {
           this.dispatch(setDuration(this.audio.duration || 0));
+          this.dispatch(setReady(true));
         }
+      });
+
+      this.audio.addEventListener('canplay', () => {
+        this.isReady = true;
+        if (this.dispatch) this.dispatch(setReady(true));
+      });
+
+      this.audio.addEventListener('waiting', () => {
+        this.isReady = false;
+        if (this.dispatch) this.dispatch(setReady(false));
+      });
+
+      this.audio.addEventListener('loadstart', () => {
+        this.isReady = false;
+        if (this.dispatch) this.dispatch(setReady(false));
       });
 
       this.audio.addEventListener('timeupdate', () => {
@@ -67,14 +84,24 @@ class AudioEngine {
 
       this.audio.addEventListener('error', (e) => {
         console.error('Audio playback error:', e);
-        if (this.dispatch) this.dispatch(setPlaying(false));
+        if (this.dispatch) {
+          this.dispatch(setPlaying(false));
+          this.dispatch(setReady(false));
+        }
       });
     }
   }
 
-  load(url, autoPlay = false) {
+  load(url, autoPlay = false, trackId = null) {
     if (!this.audio || !url) return;
-    if (this.audio.src !== url) {
+    this.currentTrackId = trackId;
+    if (this.audio.src !== new URL(url, window.location.href).href) {
+      this.isReady = false;
+      if (this.dispatch) {
+        this.dispatch(setReady(false));
+        this.dispatch(setDuration(0));
+        this.dispatch(setProgress(0));
+      }
       this.audio.src = url;
       this.audio.load();
     }
@@ -125,6 +152,10 @@ class AudioEngine {
   setMuted(muted) {
     if (!this.audio) return;
     this.audio.muted = Boolean(muted);
+  }
+
+  getAudioElement() {
+    return this.audio;
   }
 }
 

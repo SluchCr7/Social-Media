@@ -3,8 +3,10 @@ import { baseApi } from '../../api/baseApi';
 export const musicApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getMusicList: builder.query({
-      query: ({ page = 1, limit = 12, genre = 'All' } = {}) =>
-        `/music?page=${page}&limit=${limit}&genre=${genre}`,
+      query: ({ page = 1, limit = 12, genre = 'All' } = {}) => ({
+        url: '/music',
+        params: { page, limit, genre },
+      }),
       providesTags: (result) =>
         result?.music && Array.isArray(result.music)
           ? [...result.music.map(({ _id }) => ({ type: 'Music', id: _id })), { type: 'Music', id: 'LIST' }]
@@ -49,6 +51,7 @@ export const musicApi = baseApi.injectEndpoints({
         url: `/music/view/${id}`,
         method: 'PUT',
       }),
+      invalidatesTags: (result, error, id) => [{ type: 'Music', id }],
     }),
     addListen: builder.mutation({
       query: (musicId) => ({

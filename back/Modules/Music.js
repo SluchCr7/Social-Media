@@ -25,9 +25,17 @@ const MusicSchema = new mongoose.Schema({
             message: 'Invalid URL'
         }
     },
+    publicId: {
+        type: String,
+        trim: true,
+    },
     cover: {
         type: String,
         default: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200&q=80"
+    },
+    coverPublicId: {
+        type: String,
+        trim: true,
     },
     duration: {
         type: Number, // بالثواني
@@ -85,6 +93,8 @@ MusicSchema.index({
     genre: 'text',
     tags: 'text'
 });
+MusicSchema.index({ genre: 1, createdAt: -1 });
+MusicSchema.index({ isTrending: 1, listenCount: -1 });
 
 MusicSchema.methods.updatePopularity = async function ({ threshold = 50 } = {}) {
     if (!this.likes) this.likes = [];
@@ -102,22 +112,18 @@ MusicSchema.methods.updatePopularity = async function ({ threshold = 50 } = {}) 
 
 // 🎯 Joi validation المحدثة
 const musicValidation = Joi.object({
-    title: Joi.string().trim().optional().allow("").messages({
-        'string.empty': 'Title is required'
-    }),
-    artist: Joi.string().trim().optional().allow("").messages({
-        'string.empty': 'Artist is required'
-    }),
-    album: Joi.string().trim().optional().allow(""),
+    title: Joi.string().trim().max(120),
+    artist: Joi.string().trim().max(120),
+    album: Joi.string().trim().max(120),
     url: Joi.string().uri().optional().allow("").messages({
         'string.uri': 'Invalid URL format'
     }),
-    cover: Joi.string().uri().optional().allow(""),
-    genre: Joi.string().valid("Pop", "Rock", "HipHop", "Jazz", "Classical", "Lo-Fi", "Electronic", "Ambient", "Trap", "Other").optional().default("Other"),
-    tags: Joi.array().items(Joi.string().trim()),
+    cover: Joi.string().uri(),
+    genre: Joi.string().valid("Pop", "Rock", "HipHop", "Jazz", "Classical", "Lo-Fi", "Electronic", "Ambient", "Trap", "Other"),
+    tags: Joi.array().items(Joi.string().trim().max(40)).max(20),
     releaseDate: Joi.date(),
-    language: Joi.string().trim().default("Unknown")
-});
+    language: Joi.string().trim().max(40)
+}).min(1);
 
 const Music = mongoose.model('Music', MusicSchema);
 

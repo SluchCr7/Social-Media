@@ -1,10 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { removeMusicFromState, updateMusicInState } from '../music/musicSlice';
 
 const initialState = {
   songs: [],
   current: null,
   currentIndex: 0,
   playing: false,
+  isReady: false,
   progress: 0,
   duration: 0,
   volume: 0.9,
@@ -21,9 +23,17 @@ export const musicPlayerSlice = createSlice({
   reducers: {
     setSongs: (state, action) => {
       state.songs = Array.isArray(action.payload) ? action.payload : [];
-      if (!state.current || !state.songs.some((m) => m._id === state.current._id)) {
+      const currentIndex = state.current
+        ? state.songs.findIndex((song) => song._id === state.current._id)
+        : -1;
+      if (currentIndex >= 0) {
+        state.current = state.songs[currentIndex];
+        state.currentIndex = currentIndex;
+      } else if (!state.current) {
         state.current = state.songs[0] || null;
         state.currentIndex = 0;
+      } else {
+        state.currentIndex = -1;
       }
     },
     setCurrentTrack: (state, action) => {
@@ -34,6 +44,9 @@ export const musicPlayerSlice = createSlice({
     },
     setPlaying: (state, action) => {
       state.playing = action.payload;
+    },
+    setReady: (state, action) => {
+      state.isReady = action.payload;
     },
     setProgress: (state, action) => {
       state.progress = action.payload;
@@ -63,18 +76,43 @@ export const musicPlayerSlice = createSlice({
       if (!state.songs.length) return;
       if (state.shuffle) {
         state.currentIndex = Math.floor(Math.random() * state.songs.length);
+      } else if (state.currentIndex < 0) {
+        state.currentIndex = 0;
       } else {
         state.currentIndex = (state.currentIndex + 1) % state.songs.length;
       }
       state.current = state.songs[state.currentIndex];
       state.progress = 0;
+      state.isReady = false;
     },
     prevTrack: (state) => {
       if (!state.songs.length) return;
-      state.currentIndex = (state.currentIndex - 1 + state.songs.length) % state.songs.length;
+      state.currentIndex = state.currentIndex < 0
+        ? state.songs.length - 1
+        : (state.currentIndex - 1 + state.songs.length) % state.songs.length;
       state.current = state.songs[state.currentIndex];
       state.progress = 0;
+      state.isReady = false;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(updateMusicInState, (state, action) => {
+        if (state.current?._id === action.payload?._id) state.current = action.payload;
+        state.songs = state.songs.map((song) =>
+          song._id === action.payload?._id ? action.payload : song
+        );
+      })
+      .addCase(removeMusicFromState, (state, action) => {
+        state.songs = state.songs.filter((song) => song._id !== action.payload);
+        if (state.current?._id === action.payload) {
+          state.current = null;
+          state.currentIndex = 0;
+          state.playing = false;
+        } else if (state.current) {
+          state.currentIndex = state.songs.findIndex((song) => song._id === state.current._id);
+        }
+      });
   },
 });
 
@@ -83,6 +121,7 @@ export const {
   setCurrentTrack,
   setCurrentIndex,
   setPlaying,
+  setReady,
   setProgress,
   setDuration,
   setVolume,

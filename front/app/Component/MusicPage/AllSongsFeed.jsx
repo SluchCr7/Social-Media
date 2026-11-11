@@ -4,24 +4,26 @@ import React from 'react';
 import SongItem from './SongItem';
 import { HiMusicalNote } from 'react-icons/hi2';
 
-const AllSongsFeed = ({ filtered, current, setTrack, songs }) => {
+const AllSongsFeed = ({ filtered = [], current, playing, setTrack }) => {
   return (
-    <div className="rounded-2xl border border-zinc-800/70 bg-zinc-950/70 p-3 sm:p-4">
-      <div className="mb-3 flex items-center gap-2 text-sm text-zinc-400">
-        <HiMusicalNote size={16} className="text-indigo-400" />
-        <span>Recent releases</span>
+    <div className="rounded-2xl border border-white/[0.06] bg-[#0c0c11] p-3 sm:p-4">
+      <div className="mb-3 flex items-center justify-between px-1">
+        <div className="flex items-center gap-2 text-sm font-medium text-zinc-300">
+          <HiMusicalNote size={16} className="text-indigo-300" />
+          <span>Recent releases</span>
+        </div>
+        <span className="text-[11px] text-zinc-600">Tap a track to play</span>
       </div>
 
       <div className="space-y-2">
         {filtered.length > 0 ? (
-          filtered.map((s, i) => (
+          filtered.map((s) => (
             <SongItem
               key={s._id}
               song={s}
-              index={i}
               setTrack={setTrack}
               current={current}
-              songs={songs}
+              playing={playing}
             />
           ))
         ) : (

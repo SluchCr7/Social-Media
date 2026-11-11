@@ -24,6 +24,8 @@ const PlayerControls = memo(({
         <div className="flex items-center gap-6">
           <button
             onClick={() => setShuffle(!shuffle)}
+            aria-label={shuffle ? 'Disable shuffle' : 'Enable shuffle'}
+            aria-pressed={shuffle}
             className={`p-3 rounded-xl transition-all ${shuffle ? 'text-indigo-500 bg-indigo-500/10' : 'text-white/20 hover:text-white'}`}
             title="Shuffle"
           >
@@ -32,6 +34,7 @@ const PlayerControls = memo(({
 
           <button
             onClick={prev}
+            aria-label="Previous track"
             className="p-3 text-white/40 hover:text-white transition-all transform hover:-translate-x-1"
             title="Previous Track"
           >
@@ -43,6 +46,7 @@ const PlayerControls = memo(({
             whileTap={{ scale: 0.9 }}
             onClick={!isBuffering ? togglePlay : undefined}
             disabled={isBuffering}
+            aria-label={playing ? 'Pause' : 'Play'}
             className={`relative w-16 h-16 rounded-[1.5rem] flex items-center justify-center transition-all ${isBuffering
               ? 'bg-white/5 cursor-not-allowed'
               : 'bg-white text-black shadow-[0_15px_30px_-5px_rgba(255,255,255,0.2)]'
@@ -71,6 +75,7 @@ const PlayerControls = memo(({
 
           <button
             onClick={next}
+            aria-label="Next track"
             className="p-3 text-white/40 hover:text-white transition-all transform hover:translate-x-1"
             title="Next Track"
           >
@@ -79,6 +84,8 @@ const PlayerControls = memo(({
 
           <button
             onClick={() => setRepeatMode(repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off')}
+            aria-label={`Repeat ${repeatMode}`}
+            aria-pressed={repeatMode !== 'off'}
             className={`p-3 rounded-xl transition-all ${repeatMode !== 'off' ? 'text-indigo-500 bg-indigo-500/10' : 'text-white/20 hover:text-white'}`}
             title={`Repeat: ${repeatMode}`}
           >
@@ -90,6 +97,8 @@ const PlayerControls = memo(({
         <div className="hidden lg:flex items-center gap-4 pl-8 border-l border-white/5 flex-1 max-w-[200px]">
           <button
             onClick={() => setMuted(!muted)}
+            aria-label={muted ? 'Unmute' : 'Mute'}
+            aria-pressed={muted}
             className="p-2 text-white/40 hover:text-white transition-all"
           >
             {muted ? <HiSpeakerXMark size={20} /> : <HiSpeakerWave size={20} />}

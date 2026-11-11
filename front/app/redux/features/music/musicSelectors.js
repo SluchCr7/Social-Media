@@ -7,6 +7,7 @@ export const selectMusicPage = createSelector([selectMusicState], (m) => m?.page
 export const selectMusicHasMore = createSelector([selectMusicState], (m) => Boolean(m?.hasMore));
 export const selectMusicLoading = createSelector([selectMusicState], (m) => Boolean(m?.isLoading));
 export const selectMusicHasLoadedOnce = createSelector([selectMusicState], (m) => Boolean(m?.hasLoadedOnce));
+export const selectMusicError = createSelector([selectMusicState], (m) => m?.error || null);
 export const selectMusicGenre = createSelector([selectMusicState], (m) => m?.genre || 'All');
 export const selectMusicSearchQuery = createSelector([selectMusicState], (m) => m?.searchQuery || '');
 export const selectShowModelAddMusic = createSelector([selectMusicState], (m) => Boolean(m?.showModelAddMusic));
