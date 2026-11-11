@@ -32,6 +32,7 @@ import {
   setPostIsEdit as setReduxPostIsEdit,
   setPage as setReduxPage,
   setHasMore,
+  setLoadedPage,
   setUserHasMore,
   setUserIsLoading,
   setIsLoading,
@@ -107,6 +108,11 @@ export const usePost = () => {
   const fetchPosts = useCallback(
     async (pageNum = 1) => {
       if (pageNum !== 1 && !hasMore) return;
+      const currentPostsState = store.getState().posts;
+      if (
+        currentPostsState?.isLoading ||
+        currentPostsState?.loadedPage >= pageNum
+      ) return;
 
       dispatch(setIsLoading(true));
       try {
@@ -115,13 +121,14 @@ export const usePost = () => {
 
         dispatch(pageNum === 1 ? setReduxPosts(fetchedPosts) : appendPosts(fetchedPosts));
         dispatch(setHasMore(pageNum < res.data.pages));
+        dispatch(setLoadedPage(pageNum));
       } catch (err) {
         console.error('Error fetching feed posts:', err.message);
       } finally {
         dispatch(setIsLoading(false));
       }
     },
-    [hasMore, dispatch]
+    [hasMore, dispatch, store]
   );
 
   const fetchUserPosts = useCallback(

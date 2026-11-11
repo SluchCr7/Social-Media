@@ -1,5 +1,6 @@
 const {
   getAllPosts,
+  getVideoPosts,
   makeCommentsOff,
   addPost,
   deletePost,
@@ -20,6 +21,7 @@ const mediaUpload = require('../Middelwares/uploadMedia');
 
 // Get all posts
 route.route('/').get(getAllPosts);
+route.route('/videos').get(getVideoPosts);
 
 // Get posts by specific user (pagination)
 route.route('/user/:userId').get(getPostsByUser);

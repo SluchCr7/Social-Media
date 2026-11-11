@@ -10,6 +10,7 @@ const initialState = {
   postIsEdit: null,
   page: 1,
   hasMore: true,
+  loadedPage: 0,
   userHasMore: true,
   userIsLoading: false,
   isLoading: false,
@@ -70,6 +71,9 @@ export const postsSlice = createSlice({
     },
     setHasMore: (state, action) => {
       state.hasMore = action.payload;
+    },
+    setLoadedPage: (state, action) => {
+      state.loadedPage = Math.max(state.loadedPage, action.payload);
     },
     setUserHasMore: (state, action) => {
       state.userHasMore = action.payload;
@@ -145,6 +149,7 @@ export const {
   setPostIsEdit,
   setPage,
   setHasMore,
+  setLoadedPage,
   setUserHasMore,
   setUserIsLoading,
   setIsLoading,

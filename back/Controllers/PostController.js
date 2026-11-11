@@ -13,6 +13,10 @@ const getAllPosts = asyncHandler(async (req, res) =>
   sendResult(res, await postService.getAllPosts({ query: req.query }))
 );
 
+const getVideoPosts = asyncHandler(async (req, res) =>
+  sendResult(res, await postService.getVideoPosts({ query: req.query }))
+);
+
 const addPost = async (req, res) =>
   sendResult(res, await postService.addPost({
     body: req.body,
@@ -77,6 +81,7 @@ const getPostById = asyncHandler(async (req, res) =>
 
 module.exports = {
   getAllPosts,
+  getVideoPosts,
   makeCommentsOff,
   addPost,
   deletePost,

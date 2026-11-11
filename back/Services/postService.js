@@ -39,6 +39,31 @@ const getAllPosts = async ({ query }) => {
   return result(200, { posts, total, page, pages: Math.ceil(total / limit) });
 };
 
+const getVideoPosts = async ({ query }) => {
+  const parsedPage = Number.parseInt(query.page, 10);
+  const parsedLimit = Number.parseInt(query.limit, 10);
+  const page = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const limit = Number.isInteger(parsedLimit) && parsedLimit > 0
+    ? Math.min(parsedLimit, 30)
+    : 10;
+  const filter = {
+    $or: [
+      { "media.type": "video" },
+      { "Videos.0": { $exists: true } }
+    ]
+  };
+  const [posts, total] = await Promise.all([
+    Post.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate(postPopulate)
+      .lean(),
+    Post.countDocuments(filter)
+  ]);
+  return result(200, { posts, total, page, pages: Math.ceil(total / limit) });
+};
+
 const addPost = async ({ body, userId, files }) => {
   try {
     let { text, Hashtags, community, mentions, scheduledAt, links, privacy } = body;
@@ -447,6 +472,7 @@ const getPostById = async ({ id }) => {
 
 module.exports = {
   getAllPosts,
+  getVideoPosts,
   makeCommentsOff,
   addPost,
   deletePost,
