@@ -63,6 +63,19 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
+const optionalVerifyToken = (req, res, next) => {
+  const hasToken = Boolean(
+    (req.cookies && (req.cookies.accessToken || req.cookies.token)) ||
+    req.headers.authorization
+  );
+
+  if (!hasToken) {
+    return next();
+  }
+
+  return verifyToken(req, res, next);
+};
+
 // Verify admin
 const verifyAdmin = (req, res, next) => {
   verifyToken(req, res, () => {
@@ -98,4 +111,4 @@ const verifyAdminOrUser = (req, res, next) => {
   });
 };
 
-module.exports = { verifyToken, verifyAdmin, verifyUser, verifyAdminOrUser };
+module.exports = { verifyToken, optionalVerifyToken, verifyAdmin, verifyUser, verifyAdminOrUser };

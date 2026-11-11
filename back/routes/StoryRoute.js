@@ -13,11 +13,11 @@ const {
     reactToStory, 
     getStoryViewers
 } = require('../Controllers/StoryController');
-const { verifyToken } = require('../Middelwares/verifyToken');
+const { verifyToken, optionalVerifyToken } = require('../Middelwares/verifyToken');
 const photoUpload = require('../Middelwares/uploadPhoto');
 
 route.route('/')
-    .get(getAllStories);
+    .get(optionalVerifyToken, getAllStories);
 
 route.route('/add')
     .post(verifyToken, photoUpload.single("image"), addNewStory);
@@ -30,6 +30,9 @@ route.route('/user/:id/archive')
 
 route.route('/user/:id')
     .get(getUserStories);
+
+route.route('/recent')
+    .get(getRecentStories);
 
 route.route('/:id')
     .get(getStoriesById);
@@ -48,8 +51,5 @@ route.route('/react/:id')
 
 route.route('/viewers/:id')
     .get(verifyToken, getStoryViewers);
-
-route.route('/recent')
-    .get(getRecentStories);
 
 module.exports = route;

@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useCallback, useMemo } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../utils/backendUrl';
+import api from '../../utils/api';
 import { useAuth } from './useAuth';
 import { useFeedback } from './useFeedback';
 import { useAppDispatch, useAppSelector } from '../hooks';
@@ -22,7 +21,7 @@ import {
   optimisticReactStory,
 } from '../features/stories/storiesSlice';
 
-
+let storiesFetchGeneration = 0;
 
 export const useStory = () => {
   const dispatch = useAppDispatch();
@@ -41,10 +40,13 @@ export const useStory = () => {
   );
 
   const fetchStories = useCallback(async () => {
+    const fetchGeneration = ++storiesFetchGeneration;
     dispatch(setIsLoading(true));
     try {
-      const res = await axios.get(`${API_BASE_URL}/story`);
-      dispatch(setReduxStories(Array.isArray(res.data) ? res.data : []));
+      const { data } = await api.get('/story');
+      if (fetchGeneration === storiesFetchGeneration) {
+        dispatch(setReduxStories(Array.isArray(data) ? data : []));
+      }
     } catch (err) {
       console.error('Error fetching stories:', err);
     } finally {
@@ -87,19 +89,20 @@ export const useStory = () => {
         isOptimistic: true,
       };
 
+      storiesFetchGeneration += 1;
       dispatch(addStoryToState(tempStory));
       dispatch(setReduxIsStory(false));
       showAlert('Posting story...', 'loading');
 
       try {
-        const res = await axios.post(`${API_BASE_URL}/story/add`, formData, {
+        const res = await api.post('/story/add', formData, {
           headers: {
-            Authorization: `Bearer ${user?.token}`,
             'Content-Type': 'multipart/form-data',
           },
         });
 
         const newStory = res.data?.story || res.data;
+        storiesFetchGeneration += 1;
         dispatch(removeStoryFromState(tempId));
         dispatch(addStoryToState(newStory));
         showAlert('✅ Story published successfully.', 'success');
@@ -117,27 +120,21 @@ export const useStory = () => {
   const deleteStory = useCallback(
     async (storyId) => {
       try {
-        await axios.delete(`${API_BASE_URL}/story/delete/${storyId}`, {
-          headers: { Authorization: `Bearer ${user?.token}` },
-        });
+        await api.delete(`/story/delete/${storyId}`);
         dispatch(removeStoryFromState(storyId));
         showAlert('Story deleted successfully.');
       } catch (err) {
         showAlert('Failed to delete story.');
       }
     },
-    [user, showAlert, dispatch]
+    [showAlert, dispatch]
   );
 
   const viewStory = useCallback(
     async (storyId) => {
       if (!user) return;
       try {
-        const { data } = await axios.post(
-          `${API_BASE_URL}/story/view/${storyId}`,
-          {},
-          { headers: { Authorization: `Bearer ${user.token}` } }
-        );
+        const { data } = await api.post(`/story/view/${storyId}`, {});
         const updatedStory = data?.story || data;
         dispatch(updateStoryInState(updatedStory));
       } catch (err) {
@@ -154,11 +151,7 @@ export const useStory = () => {
       dispatch(optimisticLoveStory({ storyId, userId: user._id }));
 
       try {
-        const { data } = await axios.post(
-          `${API_BASE_URL}/story/love/${storyId}`,
-          {},
-          { headers: { Authorization: `Bearer ${user.token}` } }
-        );
+        const { data } = await api.post(`/story/love/${storyId}`, {});
         dispatch(updateStoryInState(data));
       } catch (err) {
         console.error(err);
@@ -175,11 +168,7 @@ export const useStory = () => {
       dispatch(optimisticReactStory({ storyId, userId: user._id, emoji }));
 
       try {
-        const { data } = await axios.post(
-          `${API_BASE_URL}/story/react/${storyId}`,
-          { emoji },
-          { headers: { Authorization: `Bearer ${user.token}` } }
-        );
+        const { data } = await api.post(`/story/react/${storyId}`, { emoji });
         dispatch(updateStoryInState(data));
       } catch (err) {
         console.error(err);
@@ -193,10 +182,7 @@ export const useStory = () => {
     async (storyId) => {
       if (!user) return [];
       try {
-        const { data } = await axios.get(
-          `${API_BASE_URL}/story/viewers/${storyId}`,
-          { headers: { Authorization: `Bearer ${user.token}` } }
-        );
+        const { data } = await api.get(`/story/viewers/${storyId}`);
         return data;
       } catch (err) {
         console.error(err);
@@ -208,13 +194,9 @@ export const useStory = () => {
 
   const shareStory = useCallback(
     async (id) => {
-      if (!user?.token) return showAlert('You must be logged in.');
+      if (!user) return showAlert('You must be logged in.');
       try {
-        const res = await axios.post(
-          `${API_BASE_URL}/story/share/${id}`,
-          {},
-          { headers: { Authorization: `Bearer ${user.token}` } }
-        );
+        const res = await api.post(`/story/share/${id}`, {});
         dispatch(addStoryToState(res.data));
         showAlert('✅ Story shared successfully!');
       } catch (err) {
@@ -228,33 +210,27 @@ export const useStory = () => {
     async (userId) => {
       if (!userId) return [];
       try {
-        const { data } = await axios.get(
-          `${API_BASE_URL}/story/user/${userId}`,
-          { headers: { Authorization: `Bearer ${user?.token}` } }
-        );
+        const { data } = await api.get(`/story/user/${userId}`);
         return data;
       } catch (err) {
         return [];
       }
     },
-    [user]
+    []
   );
 
   const getArchivedStories = useCallback(
     async (userId) => {
       if (!userId) return [];
       try {
-        const { data } = await axios.get(
-          `${API_BASE_URL}/story/user/${userId}/archive`,
-          { headers: { Authorization: `Bearer ${user?.token}` } }
-        );
+        const { data } = await api.get(`/story/user/${userId}/archive`);
         return data;
       } catch (err) {
         console.error('Error fetching archived stories:', err);
         return [];
       }
     },
-    [user?.token]
+    []
   );
 
   return useMemo(

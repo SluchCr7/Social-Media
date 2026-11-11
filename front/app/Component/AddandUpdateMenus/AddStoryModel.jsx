@@ -107,8 +107,8 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      setError(t('Image size should not exceed 10MB.'));
+    if (file.size > 5 * 1024 * 1024) {
+      setError(t('Image size should not exceed 5MB.'));
       return;
     }
     setStoryImage(file);
@@ -146,6 +146,11 @@ const AddStoryModel = ({ setIsStory, isStory }) => {
         link: link.url ? link : null,
         isCloseFriends,
       });
+
+      if (!newStory) {
+        setError(t('Failed to publish story.'));
+        return;
+      }
 
       if (newStory && targetHighlight) {
         await addStoryToHighlight(targetHighlight.value, newStory._id);
