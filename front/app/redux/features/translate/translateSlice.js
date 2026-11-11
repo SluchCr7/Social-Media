@@ -1,10 +1,19 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const isRTLCode = (code) => ['ar', 'fa', 'he', 'ur'].includes(code);
+const normalizeLanguageCode = (code) => {
+  const normalized = code?.split('-')[0].toLowerCase();
+  const languageNames = { arabic: 'ar', persian: 'fa', urdu: 'ur' };
+  return languageNames[normalized] || normalized || 'en';
+};
+const isRTLCode = (code) => ['ar', 'fa', 'he', 'ur'].includes(normalizeLanguageCode(code));
 
 const getInitialLang = () => {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('language') || 'en';
+    return normalizeLanguageCode(
+      localStorage.getItem('language') ||
+      localStorage.getItem('i18nextLng') ||
+      'en'
+    );
   }
   return 'en';
 };
@@ -22,7 +31,7 @@ export const translateSlice = createSlice({
   initialState,
   reducers: {
     setLanguage: (state, action) => {
-      const lang = action.payload;
+      const lang = normalizeLanguageCode(action.payload);
       state.language = lang;
       state.isRTL = isRTLCode(lang);
       if (typeof window !== 'undefined') {

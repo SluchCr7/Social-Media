@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import api from '@/app/utils/api';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from './useAuth';
@@ -16,7 +16,12 @@ import {
   setTranslateLoading,
 } from '../features/translate/translateSlice';
 
-
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+const normalizeLanguageCode = (code) => {
+  if (!code) return 'en';
+  const languageName = code[0].toUpperCase() + code.slice(1).toLowerCase();
+  return languageMap[code] || languageMap[languageName] || code.split('-')[0].toLowerCase();
+};
 
 export const useTranslate = () => {
   const dispatch = useAppDispatch();
@@ -41,25 +46,27 @@ export const useTranslate = () => {
   const handleLanguageChange = useCallback(
     (langCode) => {
       if (!langCode) return;
-      i18n.changeLanguage(langCode);
-      dispatch(setReduxLanguage(langCode));
-      applyDirection(langCode);
+      const normalizedLang = normalizeLanguageCode(langCode);
+      i18n.changeLanguage(normalizedLang);
+      dispatch(setReduxLanguage(normalizedLang));
+      applyDirection(normalizedLang);
     },
     [i18n, applyDirection, dispatch]
   );
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const savedLang = typeof window !== 'undefined' ? localStorage.getItem('language') : null;
     const userLangName = user?.preferedLanguage;
-    const userLangCode = userLangName ? languageMap[userLangName] || userLangName : null;
+    const userLangCode = userLangName ? normalizeLanguageCode(userLangName) : null;
     const currentI18n = i18n.language;
 
-    const initialLang = savedLang || userLangCode || currentI18n || 'en';
+    const detectedLang = currentI18n ? normalizeLanguageCode(currentI18n) : null;
+    const initialLang = normalizeLanguageCode(savedLang || userLangCode || detectedLang || 'en');
 
-    if (initialLang !== language) {
+    applyDirection(initialLang);
+    if (initialLang !== language || initialLang !== detectedLang) {
       i18n.changeLanguage(initialLang);
       dispatch(setReduxLanguage(initialLang));
-      applyDirection(initialLang);
     }
   }, [user?.preferedLanguage, i18n.language, language, applyDirection, i18n, dispatch]);
 

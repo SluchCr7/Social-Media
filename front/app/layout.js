@@ -4,6 +4,7 @@ import Header from "./Component/Header";
 import LayoutComponent from "./Component/LayoutComponent";
 import { JetBrains_Mono } from "next/font/google";
 import { Cairo } from "next/font/google";
+import Script from "next/script";
 
 import ReduxProvider from "./redux/ReduxProvider";
 import I18nProvider from "./providers/I18nProvider.jsx";
@@ -32,8 +33,14 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${jetBrainsMono.variable} ${cairo.variable}`}
     >
+      <head>
+        <Script id="language-direction-bootstrap" strategy="beforeInteractive">
+          {`(function(){try{var language=localStorage.getItem('language')||localStorage.getItem('i18nextLng')||navigator.language||'en';var code=language.toLowerCase().split('-')[0];if(code==='arabic')code='ar';if(code==='persian')code='fa';if(code==='urdu')code='ur';document.documentElement.lang=code;document.documentElement.dir=['ar','fa','he','ur'].includes(code)?'rtl':'ltr';}catch(_){}})();`}
+        </Script>
+      </head>
       <body
         className={`antialiased bg-lightMode-bg dark:bg-darkMode-bg transition-all duration-500`}
       >

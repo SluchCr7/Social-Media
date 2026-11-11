@@ -34,6 +34,7 @@ i18n
     detection: {
       order: ['localStorage', 'htmlTag', 'navigator'],
       caches: ['localStorage'],
+      lookupLocalStorage: 'language',
     },
   });
 
