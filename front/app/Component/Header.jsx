@@ -24,19 +24,27 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
           aria-label={t('Feed tabs')}
           className="hidden items-center gap-2 rounded-2xl border border-slate-200/80 bg-slate-100/90 p-1 shadow-sm shadow-slate-200/60 backdrop-blur-md md:flex dark:border-white/10 dark:bg-white/[0.04] dark:shadow-none"
         >
-          {tabsHeader.map((tab) => (
+        {tabsHeader.map((tab) => {
+          // التحقق مما إذا كان الزر هو التابع لـ following ويجب تعطيله
+          const isDisabled = tab.key === "following" && !isLogin;
+
+          return (
             <button
               key={tab.key}
               type="button"
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => !isDisabled && setActiveTab(tab.key)}
               aria-current={activeTab === tab.key ? 'page' : undefined}
-              className={`relative overflow-hidden rounded-xl px-5 py-2 text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-300 ${activeTab === tab.key
-                ? 'text-indigo-600 dark:text-white'
-                : 'text-slate-500 hover:text-slate-700 hover:bg-white/70 dark:text-white/50 dark:hover:text-white dark:hover:bg-white/10'
+              disabled={isDisabled}
+              className={`relative overflow-hidden rounded-xl px-5 py-2 text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-300 ${
+                isDisabled
+                  ? 'opacity-40 cursor-not-allowed text-slate-400 dark:text-white/30'
+                  : activeTab === tab.key
+                  ? 'text-indigo-600 dark:text-white'
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-white/70 dark:text-white/50 dark:hover:text-white dark:hover:bg-white/10'
               }`}
             >
               <span className="relative z-10">{t(tab.label)}</span>
-              {activeTab === tab.key && (
+              {activeTab === tab.key && !isDisabled && (
                 <motion.span
                   layoutId="headerTabPill"
                   className="absolute inset-0 rounded-xl bg-white/95 shadow-sm shadow-slate-200/70 dark:bg-white/10 dark:shadow-none"
@@ -44,26 +52,29 @@ const Header = ({ unReadedMessage, setShowNotifications, activeTab, setActiveTab
                 />
               )}
             </button>
-          ))}
+          );
+        })}
         </nav>
 
         <div className="flex items-center gap-2 md:gap-3">
           {user?.isAdmin && (
-            <Link
-              href="/Admin"
-              aria-label={t('Admin')}
-              className="inline-flex items-center justify-center rounded-xl border border-slate-200/80 bg-slate-100/95 px-3 py-2 text-slate-600 transition-all hover:border-indigo-300 hover:bg-white hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:text-white dark:hover:bg-white/10"
-            >
-              <ShieldCheck className="h-5 w-5" />
-            </Link>
+            <>
+              <Link
+                href="/Admin"
+                aria-label={t('Admin')}
+                className="inline-flex items-center justify-center rounded-xl border border-slate-200/80 bg-slate-100/95 px-3 py-2 text-slate-600 transition-all hover:border-indigo-300 hover:bg-white hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:text-white dark:hover:bg-white/10"
+              >
+                <ShieldCheck className="h-5 w-5" />
+              </Link>
+              <Link
+                href="/Pages/Search"
+                aria-label={t('Search')}
+                className="inline-flex items-center justify-center rounded-xl border border-slate-200/80 bg-slate-100/95 px-3 py-2 text-slate-600 transition-all hover:border-indigo-300 hover:bg-white hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:text-white dark:hover:bg-white/10"
+              >
+                <Search className="h-5 w-5" />
+              </Link>
+            </>
           )}
-          <Link
-            href="/Pages/Search"
-            aria-label={t('Search')}
-            className="inline-flex items-center justify-center rounded-xl border border-slate-200/80 bg-slate-100/95 px-3 py-2 text-slate-600 transition-all hover:border-indigo-300 hover:bg-white hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:text-white dark:hover:bg-white/10"
-          >
-            <Search className="h-5 w-5" />
-          </Link>
 
           {isLogin ? (
             <>

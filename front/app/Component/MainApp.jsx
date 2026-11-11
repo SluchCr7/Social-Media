@@ -32,7 +32,7 @@ const MainApp = () => {
           setShowNotifications={setShowNotifications}
           unreadCount={unreadCount}
           markAllAsRead={markAllAsRead}
-          activeTab={activeTab}
+          activeTab={isLogin ? activeTab : "forYou"} 
           setActiveTab={setActiveTab}
         />
 
