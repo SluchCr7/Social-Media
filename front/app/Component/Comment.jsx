@@ -113,7 +113,7 @@ const Comment = ({ comment }) => {
               {/* Header */}
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center gap-2 flex-wrap min-w-0">
-                  <span className="font-black text-sm uppercase tracking-wider text-white truncate">
+                  <span className="font-black text-sm uppercase tracking-wider text-gray-500 truncate">
                     {comment.owner.username}
                   </span>
                   {comment.owner.isAccountWithPremiumVerify && (

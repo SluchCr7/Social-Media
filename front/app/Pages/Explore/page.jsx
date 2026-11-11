@@ -2,18 +2,12 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/app/redux/hooks';
-import { useNews } from '@/app/redux/hooks';
 import { useExplore } from '@/app/redux/hooks';
 import { useSearch } from '@/app/redux/hooks';
 import DesignExplore from './DesignExplore';
-import { useUser } from '@/app/redux/hooks';
-import { useGetData } from '@/app/Custome/useGetData';
-import ExploreSkeleton from '@/app/Skeletons/ExploreSkeleton';
 
 const ExplorePage = () => {
   const { user } = useAuth();
-  const { suggestedUsers: defaultSuggestedUsers } = useUser();
-  const { news } = useNews();
   const {
     explorePosts,
     suggestedUsers: exploreSuggestedUsers,
@@ -22,51 +16,22 @@ const ExplorePage = () => {
     exploreTab,
     setExploreTab,
     pagination,
-    loadMoreExplore
+    loadMoreExplore,
+    error: exploreError,
+    refreshExplore,
   } = useExplore();
 
-  const { searchQuery, setSearchQuery, searchResults } = useSearch();
-
-  // User data from hook - ensures we have refreshed user data
-  const { userData, loading: userLoading } = useGetData(user?._id);
-
-  // Suggested Users
-  const suggestedUsersArr = useMemo(() => {
-    const activeList = exploreSuggestedUsers?.length > 0 ? exploreSuggestedUsers : defaultSuggestedUsers;
-    if (!Array.isArray(activeList)) return [];
-    return activeList.slice(0, 12);
-  }, [exploreSuggestedUsers, defaultSuggestedUsers]);
-
-  // Create Interest Tabs
-  const interestTabs = useMemo(() => {
-    if (!news?.length || !userData?.interests?.length) return [];
-
-    const lowerTitles = news.map(item => ({
-      ...item,
-      lowerTitle: item.title?.toLowerCase() || '',
-    }));
-
-    return userData.interests
-      .filter(Boolean)
-      .slice(0, 3) // Show top 3 interests
-      .map((interest) => {
-        const interestLower = interest.toLowerCase();
-        const relatedNews = lowerTitles.filter(item =>
-          item.lowerTitle.includes(interestLower)
-        );
-        return relatedNews.length > 0 ? { name: interest, news: relatedNews } : null;
-      })
-      .filter(Boolean);
-  }, [news, userData?.interests]);
-
-  // Final Tabs (News + Interests)
-  const finalTabs = useMemo(
-    () => [
-      { name: 'News', news: news || [] },
-      ...interestTabs
-    ],
-    [news, interestTabs]
+  const suggestedUsersArr = useMemo(
+    () => (Array.isArray(exploreSuggestedUsers) ? exploreSuggestedUsers.slice(0, 12) : []),
+    [exploreSuggestedUsers]
   );
+
+  const {
+    searchQuery,
+    setSearchQuery,
+    searchResults,
+    loading: searchLoading,
+  } = useSearch();
 
   // Active Tab State (matches the UI tabs in DesignExplore)
   const [activeTab, setActiveTab] = useState('Trending');
@@ -86,16 +51,6 @@ const ExplorePage = () => {
     }
   }, [activeTab, setExploreTab]);
 
-  // Fallback check
-  useEffect(() => {
-    const defaultTabs = ['Trending', 'Hashtags', 'Photos', 'Videos', 'Creators'];
-    const currentTabExists = finalTabs.some(tab => tab.name === activeTab) || defaultTabs.includes(activeTab);
-
-    if (!currentTabExists && finalTabs.length > 0) {
-      setActiveTab(finalTabs[0].name);
-    }
-  }, [finalTabs, activeTab]);
-
   // Format trending hashtags for child components
   const formattedHashtags = useMemo(() => {
     if (!Array.isArray(trendingHashtags)) return [];
@@ -107,26 +62,23 @@ const ExplorePage = () => {
     setSearchQuery(val);
   }, [setSearchQuery]);
 
-  // Loading State
-  if (userLoading && !userData) {
-    return <ExploreSkeleton />;
-  }
-
   return (
     <DesignExplore
-      user={userData || user}
+      user={user}
       search={searchQuery}
       setSearch={handleSearchChange}
       searchResults={searchResults}
+      searchLoading={searchLoading}
       activeTab={activeTab}
       setActiveTab={setActiveTab}
-      finalTabs={finalTabs}
       topHashtags={formattedHashtags}
       suggestedUsersArr={suggestedUsersArr}
       posts={explorePosts}
       loading={exploreLoading}
+      error={exploreError}
       hasMore={pagination.hasMore}
       loadMore={loadMoreExplore}
+      refreshExplore={refreshExplore}
     />
   );
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { usePost } from '@/app/redux/hooks';
 import { useAuth } from '@/app/redux/hooks';
 import { useComment } from '@/app/redux/hooks';
@@ -11,7 +11,7 @@ import DesignPostSelect from './Design';
 const PostPage = ({ params }) => {
   const id = params.id;
   const { user, isLogin } = useAuth();
-  const { posts, likePost, savePost, sharePost, setImageView, viewPost, hahaPost } = usePost();
+  const { posts, likePost, savePost, sharePost, setImageView, viewPost, hahaPost, getPostById } = usePost();
   const { comments, AddComment, isLoading, fetchCommentsByTarget } = useComment();
   const [openModel, setOpenModel] = useState(false);
   const [post, setPost] = useState(null);
@@ -22,11 +22,41 @@ const PostPage = ({ params }) => {
   const [nextCursor, setNextCursor] = useState(null);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const viewRequests = useRef(new Set());
 
   useEffect(() => {
-    const matchedPost = posts.find(p => p?._id === id);
+    let active = true;
+    setPost(null);
+
+    getPostById(id).then((fetchedPost) => {
+      if (active && fetchedPost?._id === id) setPost(fetchedPost);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [id, getPostById]);
+
+  useEffect(() => {
+    const matchedPost = posts.find((item) => item?._id === id);
     if (matchedPost) setPost(matchedPost);
   }, [id, posts]);
+
+  useEffect(() => {
+    if (!user?._id || post?._id !== id || post.owner?._id === user._id) return;
+
+    const requestKey = `${id}:${user._id}`;
+    if (viewRequests.current.has(requestKey)) return;
+    viewRequests.current.add(requestKey);
+
+    viewPost(id).then((viewResult) => {
+      if (viewResult && viewResult._id === id) {
+        setPost((currentPost) =>
+          currentPost?._id === id ? { ...currentPost, viewsCount: viewResult.viewsCount } : currentPost
+        );
+      }
+    });
+  }, [id, post, user?._id, viewPost]);
 
   // Initial Fetch
   useEffect(() => {

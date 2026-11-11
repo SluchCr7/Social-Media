@@ -4,7 +4,10 @@ export const searchApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     search: builder.query({
       query: ({ q, type = 'all', sortBy = 'relevance', dateRange = 'all', hasMedia = false, verifiedOnly = false, page = 1, limit = 12 }) =>
-        `/search?q=${encodeURIComponent(q)}&type=${type}&sortBy=${sortBy}&dateRange=${dateRange}&hasMedia=${hasMedia}&verifiedOnly=${verifiedOnly}&page=${page}&limit=${limit}`,
+        ({
+          url: '/search',
+          params: { q, type, sortBy, dateRange, hasMedia, verifiedOnly, page, limit },
+        }),
       providesTags: ['Search'],
     }),
     getSearchHistory: builder.query({
@@ -21,8 +24,9 @@ export const searchApi = baseApi.injectEndpoints({
     }),
     removeFromSearchHistory: builder.mutation({
       query: (id) => ({
-        url: `/search/history?id=${id}`,
+        url: '/search/history',
         method: 'DELETE',
+        params: { id },
       }),
       invalidatesTags: [{ type: 'Search', id: 'HISTORY' }],
     }),

@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useEffect, useCallback, useMemo } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../utils/backendUrl';
+import { useEffect, useCallback, useMemo } from 'react';
+import api from '../../utils/api';
 import { useAuth } from './useAuth';
 import { useAppDispatch, useAppSelector, useAppStore } from '../hooks';
 import {
@@ -31,9 +30,10 @@ import {
   resetSearch,
 } from '../features/search/searchSlice';
 
+let latestSearchRequest = 0;
+let activeSearchController;
 
-
-export const useSearch = () => {
+export const useSearch = ({ autoSearch = true } = {}) => {
   const dispatch = useAppDispatch();
   const store = useAppStore();
   const { user } = useAuth();
@@ -49,170 +49,166 @@ export const useSearch = () => {
   const verifiedOnly = useAppSelector(selectSearchVerifiedOnly);
   const pagination = useAppSelector(selectSearchPagination);
 
-  const setSearchQuery = useCallback((q) => dispatch(setReduxSearchQuery(q)), [dispatch]);
-  const setSortBy = useCallback((s) => dispatch(setReduxSortBy(s)), [dispatch]);
-  const setDateRange = useCallback((d) => dispatch(setReduxDateRange(d)), [dispatch]);
-  const setHasMedia = useCallback((m) => dispatch(setReduxHasMedia(m)), [dispatch]);
-  const setVerifiedOnly = useCallback((v) => dispatch(setReduxVerifiedOnly(v)), [dispatch]);
-
-  const config = useMemo(
-    () => ({
-      headers: { Authorization: `Bearer ${user?.token}` },
-    }),
-    [user?.token]
-  );
+  const setSearchQuery = useCallback((query) => dispatch(setReduxSearchQuery(query)), [dispatch]);
+  const setSortBy = useCallback((value) => dispatch(setReduxSortBy(value)), [dispatch]);
+  const setDateRange = useCallback((value) => dispatch(setReduxDateRange(value)), [dispatch]);
+  const setHasMedia = useCallback((value) => dispatch(setReduxHasMedia(value)), [dispatch]);
+  const setVerifiedOnly = useCallback((value) => dispatch(setReduxVerifiedOnly(value)), [dispatch]);
 
   const fetchSearchHistory = useCallback(async () => {
-    if (!user?.token) return;
+    if (!user) return;
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/search/history`, config);
+      const { data } = await api.get('/search/history');
       dispatch(setReduxSearchHistory(data));
     } catch (err) {
       console.error('Error fetching search history:', err);
     }
-  }, [user?.token, config, dispatch]);
+  }, [user, dispatch]);
 
   const addToHistory = useCallback(
     async (query, searchType = 'text', refId = null) => {
-      if (!user?.token || !query.trim()) return;
+      if (!user || !query?.trim()) return;
       try {
-        const { data } = await axios.post(
-          `${API_BASE_URL}/search/history`,
-          { query, searchType, refId },
-          config
-        );
+        const { data } = await api.post('/search/history', {
+          query: query.trim(),
+          searchType,
+          refId,
+        });
         dispatch(setReduxSearchHistory(data));
       } catch (err) {
-        console.error('Error adding to history:', err);
+        console.error('Error adding to search history:', err);
       }
     },
-    [user?.token, config, dispatch]
+    [user, dispatch]
   );
 
   const removeFromHistory = useCallback(
     async (id) => {
-      if (!user?.token) return;
+      if (!user || !id) return;
       try {
-        const { data } = await axios.delete(
-          `${API_BASE_URL}/search/history?id=${id}`,
-          config
-        );
+        const { data } = await api.delete('/search/history', { params: { id } });
         dispatch(setReduxSearchHistory(data.searchHistory));
       } catch (err) {
-        console.error('Error removing from history:', err);
+        console.error('Error removing search history item:', err);
       }
     },
-    [user?.token, config, dispatch]
+    [user, dispatch]
   );
 
   const clearAllHistory = useCallback(async () => {
-    if (!user?.token) return;
+    if (!user) return;
     try {
-      await axios.delete(`${API_BASE_URL}/search/history`, config);
+      await api.delete('/search/history');
       dispatch(setReduxSearchHistory([]));
     } catch (err) {
-      console.error('Error clearing history:', err);
+      console.error('Error clearing search history:', err);
     }
-  }, [user?.token, config, dispatch]);
+  }, [user, dispatch]);
 
   const performSearch = useCallback(
     async (query, type = 'all', pageNum = 1) => {
       const trimmed = query.trim();
-      if (!trimmed) {
+      if (trimmed.length < 2) {
+        latestSearchRequest += 1;
+        activeSearchController?.abort();
         dispatch(resetSearch());
+        dispatch(setReduxLoading(false));
         return;
       }
 
+      const requestId = ++latestSearchRequest;
+      activeSearchController?.abort();
+      const controller = new AbortController();
+      activeSearchController = controller;
       dispatch(setReduxLoading(true));
       dispatch(setReduxError(null));
+
       try {
-        const url = `${API_BASE_URL}/search?q=${encodeURIComponent(
-          trimmed
-        )}&type=${type}&sortBy=${sortBy}&dateRange=${dateRange}&hasMedia=${hasMedia}&verifiedOnly=${verifiedOnly}&page=${pageNum}&limit=12`;
-        const { data } = await axios.get(url, config);
+        const { data } = await api.get('/search', {
+          params: {
+            q: trimmed,
+            type,
+            sortBy,
+            dateRange,
+            hasMedia,
+            verifiedOnly,
+            page: pageNum,
+            limit: 12,
+          },
+          signal: controller.signal,
+        });
+
+        if (requestId !== latestSearchRequest) return;
 
         const currentResults = selectSearchResults(store.getState());
-        dispatch(
-          setReduxSearchResults(((prev) => {
-            if (pageNum === 1) {
-              if (type === 'all') {
-                return {
-                  users: data.users || [],
-                  posts: data.posts || [],
-                  communities: data.communities || [],
-                  hashtags: data.hashtags || [],
-                };
-              } else {
-                return {
-                  ...prev,
-                  [type]: data[type] || [],
-                };
-              }
-            } else {
-              return {
-                ...prev,
-                [type]: [...(prev[type] || []), ...(data[type] || [])],
-              };
-            }
-          })(currentResults))
-        );
+        const nextResults = { ...currentResults };
+        const resultTypes = type === 'all' ? ['users', 'posts', 'communities', 'hashtags'] : [type];
+
+        for (const resultType of resultTypes) {
+          const incoming = Array.isArray(data[resultType]) ? data[resultType] : [];
+          nextResults[resultType] =
+            pageNum === 1 ? incoming : [...(currentResults[resultType] || []), ...incoming];
+        }
+
+        dispatch(setReduxSearchResults(nextResults));
 
         const currentPagination = selectSearchPagination(store.getState());
         dispatch(
-          setReduxPagination(((prev) => {
-            const newPag = { ...prev };
-            if (type === 'all') {
-              if (data.pagination) {
-                Object.keys(data.pagination).forEach((key) => {
-                  newPag[key] = data.pagination[key];
-                });
-              }
-            } else if (data.pagination && data.pagination[type]) {
-              newPag[type] = data.pagination[type];
-            }
-            return newPag;
-          })(currentPagination))
+          setReduxPagination({
+            ...currentPagination,
+            ...Object.fromEntries(
+              resultTypes
+                .filter((resultType) => data.pagination?.[resultType])
+                .map((resultType) => [resultType, data.pagination[resultType]])
+            ),
+          })
         );
       } catch (err) {
-        dispatch(setReduxError(err.response?.data?.message || 'Something went wrong during search'));
-        console.error('Search API Error:', err);
+        if (err.name !== 'CanceledError' && err.name !== 'AbortError' && requestId === latestSearchRequest) {
+          dispatch(setReduxError(err.response?.data?.message || 'Search is temporarily unavailable.'));
+          console.error('Search API Error:', err);
+        }
       } finally {
-        dispatch(setReduxLoading(false));
+        if (requestId === latestSearchRequest) {
+          dispatch(setReduxLoading(false));
+          activeSearchController = undefined;
+        }
       }
     },
-    [config, sortBy, dateRange, hasMedia, verifiedOnly, dispatch, store]
+    [sortBy, dateRange, hasMedia, verifiedOnly, dispatch, store]
   );
 
   const loadMore = useCallback(
     async (type) => {
       if (loading) return;
       const currentPagination = pagination[type];
-      if (currentPagination && currentPagination.hasMore) {
-        const nextPage = currentPagination.page + 1;
-        await performSearch(searchQuery, type, nextPage);
+      if (currentPagination?.hasMore) {
+        await performSearch(searchQuery, type, currentPagination.page + 1);
       }
     },
     [pagination, loading, performSearch, searchQuery]
   );
 
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      dispatch(resetSearch());
-      return;
+    if (autoSearch) {
+      if (searchQuery.trim().length < 2) {
+        latestSearchRequest += 1;
+        activeSearchController?.abort();
+        activeSearchController = undefined;
+        dispatch(resetSearch());
+        dispatch(setReduxLoading(false));
+        return undefined;
+      }
+
+      const handler = setTimeout(() => performSearch(searchQuery, 'all', 1), 300);
+      return () => clearTimeout(handler);
     }
-
-    const handler = setTimeout(() => {
-      performSearch(searchQuery, 'all', 1);
-    }, 400);
-
-    return () => clearTimeout(handler);
-  }, [searchQuery, sortBy, dateRange, hasMedia, verifiedOnly, performSearch, dispatch]);
+    return undefined;
+  }, [autoSearch, searchQuery, sortBy, dateRange, hasMedia, verifiedOnly, performSearch, dispatch]);
 
   useEffect(() => {
-    if (user?.token) {
-      fetchSearchHistory();
-    }
-  }, [user?.token, fetchSearchHistory]);
+    if (autoSearch && user) fetchSearchHistory();
+  }, [autoSearch, user, fetchSearchHistory]);
 
   return useMemo(
     () => ({

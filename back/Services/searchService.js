@@ -1,15 +1,22 @@
 const { User } = require("../Modules/User");
 const { Post } = require("../Modules/Post");
+const { Comment } = require("../Modules/Comment");
 const { Community } = require("../Modules/Community");
 const { postPopulate } = require("../Populates/Populate");
 
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const parseBoundedInteger = (value, fallback, min, max) => {
+    const parsed = Number.parseInt(value, 10);
+    return Number.isInteger(parsed) ? Math.min(Math.max(parsed, min), max) : fallback;
+};
+
 const searchGlobal = async (query) => {
     const { q, type = 'all', sortBy = 'relevance', dateRange = 'all', hasMedia = 'false', verifiedOnly = 'false' } = query;
-    const page = parseInt(query.page) || 1;
-    const limit = parseInt(query.limit) || 10;
+    const page = parseBoundedInteger(query.page, 1, 1, 10000);
+    const limit = parseBoundedInteger(query.limit, 10, 1, 30);
     const skip = (page - 1) * limit;
 
-    if (!q || q.trim() === "") {
+    if (typeof q !== "string" || q.trim() === "") {
         return {
             users: [],
             posts: [],
@@ -24,7 +31,7 @@ const searchGlobal = async (query) => {
         };
     }
 
-    const searchRegex = new RegExp(q.trim(), "i");
+    const searchRegex = new RegExp(escapeRegex(q.trim()), "i");
     const results = {
         users: [],
         posts: [],
@@ -89,38 +96,79 @@ const searchGlobal = async (query) => {
         }
 
         if (hasMedia === 'true') {
-            postQuery.$or = [
-                { "media.0": { $exists: true } },
-                { "Photos.0": { $exists: true } },
-                { "Videos.0": { $exists: true } }
+            postQuery.$and = [
+                { $or: postQuery.$or },
+                {
+                    $or: [
+                        { "media.0": { $exists: true } },
+                        { "Photos.0": { $exists: true } },
+                        { "Videos.0": { $exists: true } }
+                    ]
+                }
             ];
+            delete postQuery.$or;
         }
 
         if (verifiedOnly === 'true') {
             searchPromises.push(
                 (async () => {
-                    const verifiedUsers = await User.find({ isVerify: true }).select('_id');
-                    const verifiedIds = verifiedUsers.map(u => u._id);
-                    postQuery.owner = { $in: verifiedIds };
-
-                    const totalCount = await Post.countDocuments(postQuery);
-                    let queryBuilder = Post.find(postQuery).populate(postPopulate);
-
-                    if (sortBy === 'recent') {
-                        queryBuilder = queryBuilder.sort({ createdAt: -1 });
-                    } else if (sortBy === 'popular') {
-                        queryBuilder = queryBuilder.sort({ "likes.length": -1, "views.length": -1 });
-                    } else {
-                        queryBuilder = queryBuilder.sort({ createdAt: -1 });
-                    }
-
-                    const data = await queryBuilder.skip(skip).limit(limit);
-                    results.posts = data;
+                    const verifiedOwnerStages = [
+                        {
+                            $lookup: {
+                                from: User.collection.name,
+                                localField: "owner",
+                                foreignField: "_id",
+                                pipeline: [{ $match: { isVerify: true } }, { $project: { _id: 1 } }],
+                                as: "verifiedOwner"
+                            }
+                        },
+                        { $match: { "verifiedOwner.0": { $exists: true } } }
+                    ];
+                    const matchStages = [{ $match: postQuery }, ...verifiedOwnerStages];
+                    const totalResult = await Post.aggregate([...matchStages, { $count: "total" }]);
+                    const totalCount = totalResult[0]?.total || 0;
+                    const sortStages = sortBy === 'popular'
+                        ? [
+                            {
+                                $lookup: {
+                                    from: Comment.collection.name,
+                                    localField: "_id",
+                                    foreignField: "targetId",
+                                    pipeline: [
+                                        { $match: { targetType: "Post" } },
+                                        { $project: { _id: 1 } }
+                                    ],
+                                    as: "commentRows"
+                                }
+                            },
+                            {
+                                $addFields: {
+                                    score: {
+                                        $add: [
+                                            { $size: { $ifNull: ["$likes", []] } },
+                                            { $multiply: [{ $size: "$commentRows" }, 2] },
+                                            { $multiply: [{ $size: { $ifNull: ["$shares", []] } }, 3] },
+                                            { $multiply: [{ $size: { $ifNull: ["$views", []] } }, 0.1] }
+                                        ]
+                                    }
+                                }
+                            },
+                            { $sort: { score: -1, createdAt: -1 } }
+                        ]
+                        : [{ $sort: { createdAt: -1 } }];
+                    const data = await Post.aggregate([
+                        ...matchStages,
+                        ...sortStages,
+                        { $skip: skip },
+                        { $limit: limit },
+                        { $unset: ["verifiedOwner", "commentRows"] }
+                    ]);
+                    results.posts = await Post.populate(data, postPopulate);
                     results.pagination.posts = {
                         page,
                         totalPages: Math.ceil(totalCount / limit),
                         totalCount,
-                        hasMore: skip + data.length < totalCount
+                        hasMore: skip + results.posts.length < totalCount
                     };
                 })()
             );
@@ -136,9 +184,21 @@ const searchGlobal = async (query) => {
                         const postsAgg = await Post.aggregate([
                             { $match: postQuery },
                             {
+                                $lookup: {
+                                    from: Comment.collection.name,
+                                    localField: "_id",
+                                    foreignField: "targetId",
+                                    pipeline: [
+                                        { $match: { targetType: "Post" } },
+                                        { $project: { _id: 1 } }
+                                    ],
+                                    as: "commentRows"
+                                }
+                            },
+                            {
                                 $addFields: {
                                     likesCount: { $size: { $ifNull: ["$likes", []] } },
-                                    commentsCount: { $size: { $ifNull: ["$comments", []] } },
+                                    commentsCount: { $size: "$commentRows" },
                                     viewsCount: { $size: { $ifNull: ["$views", []] } },
                                     sharesCount: { $size: { $ifNull: ["$shares", []] } }
                                 }
@@ -157,7 +217,8 @@ const searchGlobal = async (query) => {
                             },
                             { $sort: { score: -1, createdAt: -1 } },
                             { $skip: skip },
-                            { $limit: limit }
+                            { $limit: limit },
+                            { $unset: ["likesCount", "commentsCount", "viewsCount", "sharesCount", "commentRows"] }
                         ]);
                         const populatedPosts = await Post.populate(postsAgg, postPopulate);
                         results.posts = populatedPosts;
@@ -186,18 +247,19 @@ const searchGlobal = async (query) => {
     }
 
     if (type === 'all' || type === 'communities') {
-        const communityQuery = { Name: searchRegex };
-        let commSort = { membersCount: -1 };
-        if (sortBy === 'recent') commSort = { createdAt: -1 };
+        const communityQuery = { Name: searchRegex, isPrivate: false };
 
         searchPromises.push(
             (async () => {
                 const totalCount = await Community.countDocuments(communityQuery);
-                const data = await Community.find(communityQuery)
-                    .select("Name CoverPhoto description membersCount Picture")
-                    .sort(commSort)
-                    .skip(skip)
-                    .limit(limit);
+                const data = await Community.aggregate([
+                    { $match: communityQuery },
+                    { $addFields: { membersCount: { $size: { $ifNull: ["$members", []] } } } },
+                    { $sort: sortBy === 'recent' ? { createdAt: -1 } : { membersCount: -1, createdAt: -1 } },
+                    { $skip: skip },
+                    { $limit: limit },
+                    { $project: { Name: 1, CoverPhoto: 1, description: 1, membersCount: 1, Picture: 1 } }
+                ]);
 
                 results.communities = data;
                 results.pagination.communities = {
@@ -261,22 +323,49 @@ const getTrending = async () => {
             { $sort: { count: -1 } },
             { $limit: 15 }
         ]),
-        Post.find({ createdAt: { $gte: lastWeek }, status: "published", privacy: "public" })
-            .populate(postPopulate)
-            .lean()
+        Post.aggregate([
+            { $match: { createdAt: { $gte: lastWeek }, status: "published", privacy: "public" } },
+            {
+                $lookup: {
+                    from: Comment.collection.name,
+                    localField: "_id",
+                    foreignField: "targetId",
+                    pipeline: [
+                        { $match: { targetType: "Post" } },
+                        { $project: { _id: 1 } }
+                    ],
+                    as: "commentRows"
+                }
+            },
+            {
+                $addFields: {
+                    likesCount: { $size: { $ifNull: ["$likes", []] } },
+                    hahaCount: { $size: { $ifNull: ["$hahas", []] } },
+                    shareCount: { $size: { $ifNull: ["$shares", []] } },
+                    viewsCount: { $size: { $ifNull: ["$views", []] } },
+                    commentsCount: { $size: "$commentRows" }
+                }
+            },
+            {
+                $addFields: {
+                    score: {
+                        $add: [
+                            { $multiply: ["$likesCount", 2] },
+                            { $multiply: ["$hahaCount", 2] },
+                            { $multiply: ["$commentsCount", 3] },
+                            { $multiply: ["$shareCount", 5] },
+                            { $multiply: ["$viewsCount", 0.2] }
+                        ]
+                    }
+                }
+            },
+            { $sort: { score: -1, createdAt: -1 } },
+            { $limit: 20 },
+            { $unset: ["likesCount", "hahaCount", "shareCount", "viewsCount", "commentsCount", "commentRows"] }
+        ])
     ]);
 
-    const rankedPosts = posts.map(post => {
-        const likes = post.likes ? post.likes.length : 0;
-        const hahas = post.hahas ? post.hahas.length : 0;
-        const shares = post.shares ? post.shares.length : 0;
-        const views = post.views ? post.views.length : 0;
-        const comments = post.comments ? post.comments.length : 0;
-        const score = likes * 2 + hahas * 2 + comments * 3 + shares * 5 + views * 0.2;
-        return { ...post, score };
-    })
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 20);
+    const rankedPosts = await Post.populate(posts, postPopulate);
 
     return {
         hashtags: hashtags.map(h => ({ name: h._id, count: h.count })),
@@ -336,22 +425,30 @@ const clearSearchHistory = async (id, userId) => {
 
 const getExploreContent = async (query, userId) => {
     const tab = query.tab || 'trending';
-    const page = parseInt(query.page) || 1;
-    const limit = parseInt(query.limit) || 12;
+    const page = parseBoundedInteger(query.page, 1, 1, 10000);
+    const limit = parseBoundedInteger(query.limit, 12, 1, 30);
     const skip = (page - 1) * limit;
+    const recentCutoff = new Date();
+    recentCutoff.setDate(recentCutoff.getDate() - 7);
 
     const [suggestedUsers, trendingHashtags] = await Promise.all([
-        User.find({ _id: { $ne: userId }, isPrivate: false })
-            .sort({ followersCount: -1 })
-            .limit(10)
-            .select("username profileName profilePhoto isVerify followersCount description"),
-        Post.aggregate([
-            { $match: { status: "published", privacy: "public" } },
-            { $unwind: "$Hashtags" },
-            { $group: { _id: "$Hashtags", count: { $sum: 1 } } },
-            { $sort: { count: -1 } },
-            { $limit: 15 }
-        ])
+        tab === 'users'
+            ? User.find({ _id: { $ne: userId }, isPrivate: false })
+                .sort({ followersCount: -1, _id: 1 })
+                .skip(skip)
+                .limit(limit)
+                .select("username profileName profilePhoto isVerify followersCount description")
+                .lean()
+            : Promise.resolve([]),
+        tab === 'tags'
+            ? Post.aggregate([
+                { $match: { status: "published", privacy: "public", createdAt: { $gte: recentCutoff } } },
+                { $unwind: "$Hashtags" },
+                { $group: { _id: "$Hashtags", count: { $sum: 1 } } },
+                { $sort: { count: -1, _id: 1 } },
+                { $limit: 15 }
+            ])
+            : Promise.resolve([])
     ]);
 
     const hashtagsFormatted = trendingHashtags.map(h => ({ name: h._id, count: h.count }));
@@ -359,6 +456,9 @@ const getExploreContent = async (query, userId) => {
 
     if (tab === 'trending' || tab === 'photos' || tab === 'videos') {
         let postQuery = { ...baseQuery };
+        if (tab === 'trending') {
+            postQuery.createdAt = { $gte: recentCutoff };
+        }
 
         if (tab === 'photos') {
             postQuery.$or = [
@@ -372,67 +472,83 @@ const getExploreContent = async (query, userId) => {
             ];
         }
 
-        const rawPosts = await Post.find(postQuery)
-            .sort({ createdAt: -1 })
-            .limit(150)
-            .populate(postPopulate)
-            .lean();
+        const totalCount = await Post.countDocuments(postQuery);
+        const rankingStages = tab === 'trending'
+            ? [
+                {
+                    $lookup: {
+                        from: Comment.collection.name,
+                        localField: "_id",
+                        foreignField: "targetId",
+                        pipeline: [
+                            { $match: { targetType: "Post" } },
+                            { $project: { _id: 1 } }
+                        ],
+                        as: "commentRows"
+                    }
+                },
+                {
+                    $addFields: {
+                        engagement: {
+                            $add: [
+                                { $multiply: [{ $size: { $ifNull: ["$likes", []] } }, 2] },
+                                { $multiply: [{ $size: { $ifNull: ["$hahas", []] } }, 2] },
+                                { $multiply: [{ $size: "$commentRows" }, 3] },
+                                { $multiply: [{ $size: { $ifNull: ["$shares", []] } }, 5] },
+                                { $multiply: [{ $size: { $ifNull: ["$views", []] } }, 0.2] }
+                            ]
+                        },
+                        ageInHours: {
+                            $divide: [{ $subtract: [new Date(), "$createdAt"] }, 3600000]
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        score: {
+                            $divide: ["$engagement", { $pow: [{ $add: ["$ageInHours", 2] }, 1.8] }]
+                        }
+                    }
+                },
+                { $sort: { score: -1, createdAt: -1 } },
+                { $unset: "commentRows" }
+            ]
+            : [{ $sort: { createdAt: -1 } }];
 
-        const scoredPosts = rawPosts.map(post => {
-            const likesCount = post.likes ? post.likes.length : 0;
-            const commentsCount = post.comments ? post.comments.length : 0;
-            const sharesCount = post.shares ? post.shares.length : 0;
-            const viewsCount = post.views ? post.views.length : 0;
-
-            const engagement = likesCount * 2 + commentsCount * 3 + sharesCount * 5 + viewsCount * 0.2;
-            const ageInHours = (Date.now() - new Date(post.createdAt).getTime()) / 3600000;
-            const score = (engagement) / Math.pow(ageInHours + 2, 1.8);
-            return { ...post, score };
-        });
-
-        scoredPosts.sort((a, b) => b.score - a.score);
-        const paginatedPosts = scoredPosts.slice(skip, skip + limit);
-        const hasMore = skip + paginatedPosts.length < scoredPosts.length;
+        const postRows = await Post.aggregate([
+            { $match: postQuery },
+            ...rankingStages,
+            { $skip: skip },
+            { $limit: limit }
+        ]);
+        const paginatedPosts = await Post.populate(postRows, postPopulate);
 
         return {
             posts: paginatedPosts,
             suggestedUsers,
-            trendingHashtags: hashtagsFormatted,
-            pagination: { page, limit, hasMore }
+            pagination: { page, limit, hasMore: skip + paginatedPosts.length < totalCount }
         };
     }
 
     if (tab === 'tags') {
-        const totalCount = hashtagsFormatted.length;
-        const paginatedTags = hashtagsFormatted.slice(skip, skip + limit);
         return {
             posts: [],
             suggestedUsers,
             trendingHashtags: hashtagsFormatted,
-            pagination: {
-                page,
-                limit,
-                hasMore: skip + paginatedTags.length < totalCount
-            }
+            pagination: { page, limit, hasMore: false }
         };
     }
 
     if (tab === 'users') {
         const totalCount = await User.countDocuments({ _id: { $ne: userId }, isPrivate: false });
-        const users = await User.find({ _id: { $ne: userId }, isPrivate: false })
-            .sort({ followersCount: -1 })
-            .skip(skip)
-            .limit(limit)
-            .select("username profileName profilePhoto isVerify followersCount description");
 
         return {
             posts: [],
-            suggestedUsers: users,
-            trendingHashtags: hashtagsFormatted,
+            suggestedUsers,
             pagination: {
                 page,
                 limit,
-                hasMore: skip + users.length < totalCount
+                hasMore: skip + suggestedUsers.length < totalCount
             }
         };
     }

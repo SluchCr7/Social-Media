@@ -132,7 +132,7 @@ CommunityCard.displayName = 'CommunityCard';
 
 const FullSearchTabs = ({ searchResults, searchQuery, user, t, sortBy = 'relevance' }) => {
     const [activeTab, setActiveTab] = useState('top');
-    const { addToHistory, pagination, loadMore, loading } = useSearch();
+    const { addToHistory, pagination, loadMore, loading } = useSearch({ autoSearch: false });
 
     const { users = [], hashtags = [], posts = [], communities = [] } = searchResults || {};
 

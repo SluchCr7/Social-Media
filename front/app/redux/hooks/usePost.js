@@ -358,12 +358,15 @@ export const usePost = () => {
   const viewPost = useCallback(
     async (id) => {
       try {
-        await api.put(`/post/view/${id}`, {});
+        const res = await api.put(`/post/view/${id}`, {});
+        if (res.data?._id) dispatch(updatePostInState(res.data));
+        return res.data;
       } catch (err) {
-        console.error(err);
+        console.error('Error recording post view:', err);
+        return null;
       }
     },
-    []
+    [dispatch]
   );
 
   useEffect(() => {

@@ -56,7 +56,8 @@ PostSchema.index({ owner: 1, createdAt: -1 });
 PostSchema.virtual("comments", {
   ref: "Comment",
   localField: "_id",
-  foreignField: "postId"
+  foreignField: "targetId",
+  match: { targetType: "Post" }
 });
 
 PostSchema.virtual("reports", {

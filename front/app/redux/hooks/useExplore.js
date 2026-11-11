@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useEffect, useCallback, useMemo } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../utils/backendUrl';
+import { useEffect, useCallback, useMemo, useRef } from 'react';
+import api from '../../utils/api';
 import { useAuth } from './useAuth';
 import { useAppDispatch, useAppSelector } from '../hooks';
 import {
@@ -27,11 +26,11 @@ import {
   setPagination,
 } from '../features/explore/exploreSlice';
 
-
-
-export const useExplore = () => {
+export const useExplore = ({ fetchContent = true } = {}) => {
   const dispatch = useAppDispatch();
   const { user } = useAuth();
+  const requestId = useRef(0);
+  const controller = useRef();
 
   const explorePosts = useAppSelector(selectExplorePosts);
   const suggestedUsers = useAppSelector(selectSuggestedExploreUsers);
@@ -43,83 +42,88 @@ export const useExplore = () => {
   const pagination = useAppSelector(selectExplorePagination);
 
   const setExploreTab = useCallback(
-    (tab) => {
-      dispatch(setReduxExploreTab(tab));
-    },
+    (tab) => dispatch(setReduxExploreTab(tab)),
     [dispatch]
-  );
-
-  const config = useMemo(
-    () => ({
-      headers: { Authorization: `Bearer ${user?.token}` },
-    }),
-    [user?.token]
   );
 
   const fetchExploreContent = useCallback(
     async (tabName = 'trending', pageNum = 1) => {
-      if (!user?.token) return;
+      if (!user) return;
+
+      const currentRequestId = ++requestId.current;
+      controller.current?.abort();
+      const currentController = new AbortController();
+      controller.current = currentController;
       dispatch(setLoading(true));
       dispatch(setError(null));
+
       try {
-        const { data } = await axios.get(
-          `${API_BASE_URL}/search/explore?tab=${tabName}&page=${pageNum}&limit=12`,
-          config
-        );
+        const { data } = await api.get('/search/explore', {
+          params: { tab: tabName, page: pageNum, limit: 12 },
+          signal: currentController.signal,
+        });
+
+        if (currentRequestId !== requestId.current) return;
 
         if (pageNum === 1) {
           dispatch(setExplorePosts(data.posts || []));
         } else {
-          dispatch(appendExplorePosts(data.posts));
+          dispatch(appendExplorePosts(data.posts || []));
         }
 
         if (data.suggestedUsers) dispatch(setSuggestedUsers(data.suggestedUsers));
         if (data.trendingHashtags) dispatch(setTrendingHashtags(data.trendingHashtags));
-
-        dispatch(
-          setPagination({
-            page: pageNum,
-            hasMore: data.pagination?.hasMore || false,
-          })
-        );
+        dispatch(setPagination(data.pagination || { page: pageNum, hasMore: false }));
       } catch (err) {
-        console.error('Error fetching explore content:', err);
-        dispatch(setError(err.response?.data?.message || 'Failed to load explore content'));
+        if (
+          err.name !== 'CanceledError' &&
+          err.name !== 'AbortError' &&
+          currentRequestId === requestId.current
+        ) {
+          dispatch(setError(err.response?.data?.message || 'Could not load Explore right now.'));
+          console.error('Error fetching explore content:', err);
+        }
       } finally {
-        dispatch(setLoading(false));
+        if (currentRequestId === requestId.current) {
+          dispatch(setLoading(false));
+          controller.current = undefined;
+        }
       }
     },
-    [user?.token, config, dispatch]
+    [user, dispatch]
   );
 
   const fetchTrending = useCallback(async () => {
-    if (!user?.token) return;
+    if (!user) return;
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/search/trending`, config);
+      const { data } = await api.get('/search/trending');
       dispatch(setTrendingPosts(data.posts || []));
       if (data.hashtags) dispatch(setTrendingHashtags(data.hashtags));
     } catch (err) {
       console.error('Error fetching trending content:', err);
     }
-  }, [user?.token, config, dispatch]);
+  }, [user, dispatch]);
 
   const loadMoreExplore = useCallback(async () => {
     if (loading || !pagination.hasMore) return;
-    const nextPage = pagination.page + 1;
-    await fetchExploreContent(exploreTab, nextPage);
+    await fetchExploreContent(exploreTab, pagination.page + 1);
   }, [loading, pagination, exploreTab, fetchExploreContent]);
 
   useEffect(() => {
-    if (user?.token) {
-      fetchExploreContent(exploreTab, 1);
-    }
-  }, [user?.token, exploreTab, fetchExploreContent]);
+    if (fetchContent && user) fetchExploreContent(exploreTab, 1);
+  }, [fetchContent, user, exploreTab, fetchExploreContent]);
 
   useEffect(() => {
-    if (user?.token) {
-      fetchTrending();
-    }
-  }, [user?.token, fetchTrending]);
+    if (user) fetchTrending();
+  }, [user, fetchTrending]);
+
+  useEffect(
+    () => () => {
+      requestId.current += 1;
+      controller.current?.abort();
+    },
+    []
+  );
 
   return useMemo(
     () => ({

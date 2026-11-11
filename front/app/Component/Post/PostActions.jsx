@@ -98,7 +98,7 @@ const PostActions = memo(({ post, user, likePost, hahaPost, sharePost, savePost,
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-transparent hover:border-gray-100 dark:hover:border-white/10 transition-all group">
            <BarChart2 size={16} className="text-gray-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
            <span className="text-[12px] font-bold text-gray-500 group-hover:text-black dark:group-hover:text-white transition-colors">
-             {post?.views?.length || 0}
+             {post?.viewsCount ?? post?.views?.length ?? 0}
            </span>
         </div>
 

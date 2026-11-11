@@ -300,7 +300,7 @@ const DesignPostSelect = memo(({
           {/* Feed of Comments */}
           <div className="space-y-4">
             {post.isCommentOff ? (
-              <div className="py-20 text-center text-gray-400 font-black uppercase text-[10px] tracking-widest bg-gray-50 dark:bg-white/[0.02] rounded-[3rem] border border-gray-100 dark:border-white/5 border-dashed">
+              <div className="py-20 text-center text-gray-600 font-black uppercase text-[10px] tracking-widest bg-gray-50 dark:bg-white/[0.02] rounded-[3rem] border border-gray-100 dark:border-white/5 border-dashed">
                 Discourse Disabled for this Entity
               </div>
             ) : isLoading ? (

@@ -62,6 +62,8 @@ export const searchSlice = createSlice({
     resetSearch: (state) => {
       state.searchResults = { users: [], posts: [], communities: [], hashtags: [] };
       state.pagination = initialPagination;
+      state.loading = false;
+      state.error = null;
     },
   },
 });

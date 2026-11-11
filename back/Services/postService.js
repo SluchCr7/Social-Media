@@ -1,4 +1,5 @@
 const { Post, ValidatePost } = require("../Modules/Post");
+const mongoose = require("mongoose");
 const { User } = require("../Modules/User");
 const { Community } = require("../Modules/Community");
 const cloudinary = require("cloudinary").v2;
@@ -379,14 +380,27 @@ const makeCommentsOff = async ({ id }) => {
 };
 
 const viewPost = async ({ id, userId }) => {
-  const post = await Post.findById(id);
+  if (!mongoose.isValidObjectId(id)) return result(400, { message: "Invalid post ID" });
+
+  const post = await Post.findById(id).select("owner").lean();
   if (!post) return result(404, { message: "Post not found" });
-  const updatedPost = await Post.findByIdAndUpdate(
-    id,
-    { $addToSet: { views: userId } },
-    { new: true }
-  ).populate(postPopulate);
-  return result(200, { post: updatedPost });
+
+  let counted = false;
+  if (post.owner.toString() !== userId.toString()) {
+    const update = await Post.updateOne(
+      { _id: post._id, views: { $ne: userId } },
+      { $addToSet: { views: userId } }
+    );
+    counted = update.modifiedCount === 1;
+  }
+
+  const [view] = await Post.aggregate([
+    { $match: { _id: post._id } },
+    { $project: { _id: 1, viewsCount: { $size: { $ifNull: ["$views", []] } } } }
+  ]);
+  if (!view) return result(404, { message: "Post not found" });
+
+  return result(200, { _id: view._id, viewsCount: view.viewsCount, counted });
 };
 
 const getPostsByUser = async ({ userId, query }) => {

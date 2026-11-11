@@ -29,7 +29,7 @@ const FullSearchResults = () => {
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const { suggestedUsers } = useUser();
-  const { trendingHashtags, suggestedUsers: exploreSuggestedUsers } = useExplore();
+  const { trendingHashtags, suggestedUsers: exploreSuggestedUsers } = useExplore({ fetchContent: false });
   const { t } = useTranslation();
 
   const {
