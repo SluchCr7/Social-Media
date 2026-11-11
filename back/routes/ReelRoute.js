@@ -4,16 +4,12 @@ const { createReel, deleteReel, getAllReels ,likeReel,viewReel,shareReel} = requ
 const videoUpload = require('../Middelwares/uploadVideo'); // المسار حسب مشروعك
 const { verifyToken } = require('../Middelwares/verifyToken');
 
-// 🚀 Create Reel
+// Public feed; mutations require a verified cookie session.
 router.post('/', verifyToken, videoUpload.single('video'), createReel);
-
-// 🚀 Delete Reel
 router.delete('/:id', verifyToken, deleteReel);
-
-// 🚀 Get all Reels
 router.get('/', getAllReels);
-router.put('/like/:id',verifyToken, likeReel);
-router.put('/view/:id',verifyToken, viewReel);
-router.post('/share/:id',verifyToken, shareReel);
+router.put('/like/:id', verifyToken, likeReel);
+router.put('/view/:id', verifyToken, viewReel);
+router.post('/share/:id', verifyToken, shareReel);
 
 module.exports = router;

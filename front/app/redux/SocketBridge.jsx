@@ -194,10 +194,12 @@ export default function SocketBridge() {
       dispatch(addReelToState(newReel));
     };
     const handleReelUpdate = (updated) => dispatch(updateReelInState(updated));
+    const handleReelView = (viewResult) => dispatch(updateReelInState(viewResult));
     const handleReelDelete = (id) => dispatch(removeReelFromState(id));
 
     socket.on('reel:create', handleReelCreate);
     socket.on('reel:update', handleReelUpdate);
+    socket.on('reel:view', handleReelView);
     socket.on('reel:delete', handleReelDelete);
 
     // Music events
@@ -256,6 +258,7 @@ export default function SocketBridge() {
       socket.off('update-story', handleUpdatedStory);
       socket.off('reel:create', handleReelCreate);
       socket.off('reel:update', handleReelUpdate);
+      socket.off('reel:view', handleReelView);
       socket.off('reel:delete', handleReelDelete);
       socket.off('music:create', handleMusicCreate);
       socket.off('music:update', handleMusicUpdate);

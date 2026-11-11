@@ -1,17 +1,17 @@
 'use client';
 
-import React, { useRef, useState, useEffect , useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useReels } from '@/app/redux/hooks';
 import DesignReels from './Design';
 
 const ReelsPage = () => {
-  const { reels, isLoading, lastReelRef } = useReels();
+  const { reels, isLoading, error, lastReelRef, fetchReels, setPage, page } = useReels();
 
   const containerRef = useRef(null);
   const reelRefs = useRef([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [scrolling, setScrolling] = useState(false);
-  const [isMuted, setIsMuted] = useState(false); // الصوت يعمل افتراضياً
+  const [isMuted, setIsMuted] = useState(true);
 
   const goToReel = useCallback((index) => {
     if (index < 0 || index >= reels.length || scrolling) return;
@@ -22,69 +22,41 @@ const ReelsPage = () => {
     setTimeout(() => setScrolling(false), 500);
   }, [reels.length, scrolling]);
 
-  // 🔽 التحكم بالأسهم (للكمبيوتر)
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === 'ArrowDown') goToReel(currentIndex + 1);
-      if (e.key === 'ArrowUp') goToReel(currentIndex - 1);
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [currentIndex, reels.length, scrolling, goToReel]);
-
-  // 🖱️ التحكم بعجلة الماوس
-  useEffect(() => {
-    const handleWheel = (e) => {
-      if (scrolling) return;
-      if (e.deltaY > 0) goToReel(currentIndex + 1);
-      if (e.deltaY < 0) goToReel(currentIndex - 1);
-    };
-    const container = containerRef.current;
-    container.addEventListener('wheel', handleWheel, { passive: false });
-    return () => container.removeEventListener('wheel', handleWheel);
-  }, [currentIndex, scrolling, reels.length, goToReel]);
-
-  // 📱 التحكم بالسحب (Swipe) على الموبايل
-  useEffect(() => {
-    let startY = 0;
-    let endY = 0;
-
-    const handleTouchStart = (e) => {
-      startY = e.touches[0].clientY;
-    };
-
-    const handleTouchMove = (e) => {
-      endY = e.touches[0].clientY;
-    };
-
-    const handleTouchEnd = () => {
-      const diff = startY - endY;
-      if (Math.abs(diff) < 50 || scrolling) return; // تجاهل السحب الخفيف
-
-      if (diff > 0) {
-        // سحب لأعلى → الريل التالي
+      if (e.target instanceof HTMLElement && (
+        e.target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)
+      )) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
         goToReel(currentIndex + 1);
-      } else {
-        // سحب لأسفل → الريل السابق
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
         goToReel(currentIndex - 1);
       }
     };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [currentIndex, goToReel]);
 
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('touchstart', handleTouchStart);
-      container.addEventListener('touchmove', handleTouchMove);
-      container.addEventListener('touchend', handleTouchEnd);
-    }
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root || !reels.length) return undefined;
+    const intersectionObserver = new IntersectionObserver((entries) => {
+      const activeEntry = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((first, second) => second.intersectionRatio - first.intersectionRatio)[0];
+      if (!activeEntry) return;
+      const index = reelRefs.current.indexOf(activeEntry.target);
+      if (index >= 0) setCurrentIndex(index);
+    }, { root, threshold: [0.6, 0.8] });
 
-    return () => {
-      if (container) {
-        container.removeEventListener('touchstart', handleTouchStart);
-        container.removeEventListener('touchmove', handleTouchMove);
-        container.removeEventListener('touchend', handleTouchEnd);
-      }
-    };
-  }, [currentIndex, scrolling, reels.length, goToReel]);
+    reelRefs.current.forEach((element) => {
+      if (element) intersectionObserver.observe(element);
+    });
+    return () => intersectionObserver.disconnect();
+  }, [reels]);
 
   return (
     <DesignReels
@@ -93,6 +65,8 @@ const ReelsPage = () => {
       currentIndex={currentIndex}
       reelRefs={reelRefs}
       isLoading={isLoading}
+      error={error}
+      retry={() => (error ? fetchReels(page) : null)}
       lastReelRef={lastReelRef}
       isMuted={isMuted}
       setIsMuted={setIsMuted}

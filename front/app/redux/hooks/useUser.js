@@ -300,16 +300,25 @@ export const useUser = () => {
 
   const toggleSaveReel = useCallback(
     async (reelId) => {
+      if (!user?._id) {
+        showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+        return null;
+      }
       try {
         const res = await api.put(`/auth/save/reel/${reelId}`, {});
         showToast(res.data.message || MESSAGES.COMMON.SAVED, 'success');
+        if (Array.isArray(res.data.savedReels)) {
+          updateLocalUser((currentUser) => currentUser
+            ? { ...currentUser, savedReels: res.data.savedReels }
+            : currentUser);
+        }
         return res.data;
       } catch (err) {
-        showToast('Failed to update reel status.', 'error');
+        showToast(err.response?.data?.message || 'Failed to update reel status.', 'error');
         return null;
       }
     },
-    [showToast]
+    [user, updateLocalUser, showToast]
   );
 
   const pinPost = useCallback(

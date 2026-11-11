@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
 const Verification = require('../Modules/VerificationToken');
 const {
   User,
@@ -614,17 +615,37 @@ const toggleBlockNotification = async ({ userId, targetUserId }) => {
 };
 
 const saveReel = async ({ userId, reelId }) => {
-  const user = await User.findById(userId);
-  if (!user) return errorResult(404, 'User not found');
-  if (!await Reel.findById(reelId)) return errorResult(404, 'Reel not found');
-  const exists = user.savedReels.includes(reelId);
-  user.savedReels = exists
-    ? user.savedReels.filter((id) => id.toString() !== reelId)
-    : [...user.savedReels, reelId];
-  await user.save();
+  if (!mongoose.isValidObjectId(reelId)) return errorResult(400, 'Invalid reel ID');
+  if (!await User.exists({ _id: userId })) return errorResult(404, 'User not found');
+  if (!await Reel.exists({ _id: reelId })) return errorResult(404, 'Reel not found');
+
+  const reelObjectId = new mongoose.Types.ObjectId(reelId);
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    [{
+      $set: {
+        savedReels: {
+          $cond: [
+            { $in: [reelObjectId, { $ifNull: ['$savedReels', []] }] },
+            {
+              $filter: {
+                input: { $ifNull: ['$savedReels', []] },
+                as: 'savedReel',
+                cond: { $ne: ['$$savedReel', reelObjectId] },
+              },
+            },
+            { $concatArrays: [{ $ifNull: ['$savedReels', []] }, [reelObjectId]] },
+          ],
+        },
+      },
+    }],
+    { new: true, select: 'savedReels' }
+  );
+  if (!updatedUser) return errorResult(404, 'User not found');
+  const isSaved = updatedUser.savedReels.some((savedId) => savedId.toString() === reelId.toString());
   return result(200, {
-    message: exists ? 'Reel removed from playlist' : 'Reel added to playlist',
-    playlist: user.myMusicPlaylist,
+    message: isSaved ? 'Reel added to saved reels' : 'Reel removed from saved reels',
+    savedReels: updatedUser.savedReels,
   });
 };
 

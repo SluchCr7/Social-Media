@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useReels } from '@/app/redux/hooks';
 import { useUser } from '@/app/redux/hooks';
+import { useAuth } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 import { useTranslate } from '@/app/redux/hooks';
 import ReelSkeleton from '../Skeletons/ReelSkeleton';
@@ -14,24 +15,26 @@ const CommentsPopup = dynamic(() => import("./CommentReelPopup"), { ssr: false }
 import {
   FaHeart,
   FaRegHeart,
-  FaCommentDots,
   FaRegCommentDots,
-  FaShare,
   FaTrashAlt,
   FaVolumeMute,
   FaVolumeUp,
   FaBookmark,
   FaRegBookmark,
-  FaEllipsisH,
   FaPlay,
-  FaPause
+  FaEye,
 } from "react-icons/fa";
 import { RiShareForwardFill } from "react-icons/ri";
 import { IoCopyOutline } from "react-icons/io5";
 import { MdVerified } from 'react-icons/md';
 
 const ActionButton = ({ icon: Icon, label, onClick, isActive, colorClass = "text-rose-500", customClass = "" }) => (
-  <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={onClick}>
+  <button
+    type="button"
+    aria-label={typeof label === 'string' ? label : undefined}
+    className="flex flex-col items-center gap-1 group cursor-pointer"
+    onClick={onClick}
+  >
     <div className={`
             w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300
             ${isActive
@@ -42,14 +45,14 @@ const ActionButton = ({ icon: Icon, label, onClick, isActive, colorClass = "text
       <Icon size={22} className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
     </div>
     {label && <span className="text-[10px] font-bold text-white/90 drop-shadow-md tracking-wide">{label}</span>}
-  </div>
+  </button>
 );
 
 const ReelCard = memo(forwardRef(function ReelCard({ userData, reel, isActive, isMuted, toggleMute }, ref) {
   const videoRef = useRef(null);
-  const containerRef = useRef(null);
   const { toggleSaveReel } = useUser();
-  const { deleteReel, likeReel, viewReel, shareReel, setShowModelAddReel } = useReels();
+  const { deleteReel, likeReel, viewReel, shareReel } = useReels({ autoFetch: false });
+  const { user } = useAuth();
   const { t } = useTranslation();
   const { isRTL } = useTranslate();
 
@@ -61,9 +64,17 @@ const ReelCard = memo(forwardRef(function ReelCard({ userData, reel, isActive, i
   const [viewed, setViewed] = useState(false);
 
   // Derived State
-  const isLiked = useMemo(() => reel?.likes?.includes(userData?._id), [reel?.likes, userData?._id]);
-  const isSaved = useMemo(() => userData?.savedReels?.some((r) => r?._id === reel?._id), [userData?.savedReels, reel?._id]);
-  const isOwner = reel?.owner?._id === userData?._id;
+  const currentUserId = user?._id || userData?._id;
+  const isLiked = useMemo(
+    () => reel?.likes?.some((likedBy) => (likedBy?._id || likedBy)?.toString() === currentUserId?.toString()),
+    [reel?.likes, currentUserId]
+  );
+  const savedReels = user?.savedReels?.length ? user.savedReels : userData?.savedReels || user?.savedReels;
+  const isSaved = useMemo(
+    () => savedReels?.some((savedReel) => (savedReel?._id || savedReel)?.toString() === reel?._id?.toString()),
+    [savedReels, reel?._id]
+  );
+  const isOwner = reel?.owner?._id?.toString() === currentUserId?.toString();
 
   // 🎬 Video Control Logic
   useEffect(() => {
@@ -81,7 +92,7 @@ const ReelCard = memo(forwardRef(function ReelCard({ userData, reel, isActive, i
       }
       setIsPlaying(true);
 
-      if (!viewed && userData) {
+      if (!viewed && currentUserId) {
         viewReel(reel?._id);
         setViewed(true);
       }
@@ -90,7 +101,7 @@ const ReelCard = memo(forwardRef(function ReelCard({ userData, reel, isActive, i
       setIsPlaying(false);
       videoEl.currentTime = 0; // Reset for next view
     }
-  }, [isActive, reel?._id, viewed, userData, viewReel]);
+  }, [isActive, reel?._id, viewed, currentUserId, viewReel]);
 
   // ⏸ Toggle Play/Pause manually
   const togglePlay = useCallback((e) => {
@@ -99,8 +110,7 @@ const ReelCard = memo(forwardRef(function ReelCard({ userData, reel, isActive, i
     if (!videoEl) return;
 
     if (videoEl.paused) {
-      videoEl.play();
-      setIsPlaying(true);
+      videoEl.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
     } else {
       videoEl.pause();
       setIsPlaying(false);
@@ -139,9 +149,10 @@ const ReelCard = memo(forwardRef(function ReelCard({ userData, reel, isActive, i
   }, [isLiked, handleLike]);
 
   const handleCopyLink = useCallback(() => {
-    const link = `${window.location.origin}/Pages/Reel/${reel?._id}`;
-    navigator.clipboard.writeText(link);
-    // You might want a toast here
+    const link = `${window.location.origin}/Pages/Reels#${reel?._id}`;
+    navigator.clipboard.writeText(link).catch((error) => {
+      console.error('Could not copy reel link:', error);
+    });
   }, [reel?._id]);
 
   return (
@@ -167,6 +178,7 @@ const ReelCard = memo(forwardRef(function ReelCard({ userData, reel, isActive, i
         <video
           ref={videoRef}
           src={reel?.videoUrl}
+          poster={reel?.thumbnailUrl || undefined}
           className={`w-full h-full object-cover transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
           loop
           muted={isMuted}
@@ -290,6 +302,10 @@ const ReelCard = memo(forwardRef(function ReelCard({ userData, reel, isActive, i
 
         {/* Right: Action Rail */}
         <div className={`flex flex-col gap-6 items-center pb-8 ${isRTL ? "order-first" : ""}`}>
+          <div className="flex flex-col items-center gap-1 text-white/90" aria-label={`${reel?.viewsCount ?? reel?.views?.length ?? 0} views`}>
+            <FaEye size={20} />
+            <span className="text-[10px] font-bold">{reel?.viewsCount ?? reel?.views?.length ?? 0}</span>
+          </div>
 
           {/* Like */}
           <ActionButton

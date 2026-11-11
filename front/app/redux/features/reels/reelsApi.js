@@ -3,7 +3,10 @@ import { baseApi } from '../../api/baseApi';
 export const reelsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getReels: builder.query({
-      query: ({ page = 1, limit = 10 } = {}) => `/reel?page=${page}&limit=${limit}`,
+      query: ({ page = 1, limit = 10 } = {}) => ({
+        url: '/reel',
+        params: { page, limit },
+      }),
       providesTags: (result) =>
         result?.reels && Array.isArray(result.reels)
           ? [...result.reels.map(({ _id }) => ({ type: 'Reel', id: _id })), { type: 'Reel', id: 'FEED' }]
@@ -36,6 +39,7 @@ export const reelsApi = baseApi.injectEndpoints({
         url: `/reel/view/${id}`,
         method: 'PUT',
       }),
+      invalidatesTags: (result, error, id) => [{ type: 'Reel', id }],
     }),
     shareReel: builder.mutation({
       query: (id) => ({

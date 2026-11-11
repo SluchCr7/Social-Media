@@ -4,6 +4,10 @@ const ReelSchema = new mongoose.Schema({
     type: String,
     required: true, // رابط الفيديو أو التخزين السحابي
   },
+  publicId: {
+    type: String,
+    default: "",
+  },
   thumbnailUrl: {
     type: String,
     default: "", // صورة مصغرة للفيديو
@@ -41,6 +45,9 @@ const ReelSchema = new mongoose.Schema({
 }, {
   timestamps: true,
 });
+
+ReelSchema.index({ createdAt: -1, _id: -1 });
+ReelSchema.index({ owner: 1, createdAt: -1 });
 
 const Reel = mongoose.model("Reel", ReelSchema);
 

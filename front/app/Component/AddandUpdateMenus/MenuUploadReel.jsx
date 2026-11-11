@@ -18,8 +18,8 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 
 const ReelUploadModal = () => {
-  const { uploadReel, setShowModelAddReel, showModelAddReel } = useReels();
-  const { showAlert } = useAlert();
+  const { uploadReel, setShowModelAddReel, showModelAddReel } = useReels({ autoFetch: false });
+  const { showToast } = useAlert();
   const { t } = useTranslation();
   const [videoFile, setVideoFile] = useState(null);
   const [caption, setCaption] = useState("");
@@ -28,15 +28,23 @@ const ReelUploadModal = () => {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    const handleEsc = (e) => e.key === "Escape" && setShowModelAddReel(false);
+    const handleEsc = (e) => {
+      if (e.key === "Escape" && !isUploading) setShowModelAddReel(false);
+    };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [setShowModelAddReel]);
+  }, [isUploading, setShowModelAddReel]);
+
+  useEffect(() => () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith("video")) return showAlert(t("Please upload a valid video file."));
+    if (!file.type.startsWith("video/")) return showToast(t("Please upload a valid video file."), 'error');
+    if (file.size > 100 * 1024 * 1024) return showToast(t("Video files must be 100 MB or smaller."), 'error');
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     setVideoFile(file);
     setPreviewUrl(URL.createObjectURL(file));
   };
@@ -45,28 +53,32 @@ const ReelUploadModal = () => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (!file) return;
-    if (!file.type.startsWith("video")) return showAlert(t("Please upload a valid video file."));
+    if (!file.type.startsWith("video/")) return showToast(t("Please upload a valid video file."), 'error');
+    if (file.size > 100 * 1024 * 1024) return showToast(t("Video files must be 100 MB or smaller."), 'error');
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     setVideoFile(file);
     setPreviewUrl(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!videoFile) return showAlert(t("Please select a video first."));
+    if (!videoFile) return showToast(t("Please select a video first."), 'error');
     setIsUploading(true);
+    let createdReel = null;
     try {
-      await uploadReel(videoFile, caption);
-      showAlert(t("Reel shared successfully!"));
+      createdReel = await uploadReel(videoFile, caption);
+      if (createdReel) {
+        setShowModelAddReel(false);
+      }
     } catch (error) {
       console.error(error);
-      showAlert(t("Failed to share reel."));
+      showToast(t("Failed to share reel."), 'error');
     } finally {
       setIsUploading(false);
       setVideoFile(null);
       setCaption("");
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
-      setShowModelAddReel(false);
     }
   };
 
@@ -93,8 +105,10 @@ const ReelUploadModal = () => {
                 </div>
               </div>
               <button
+                type="button"
+                disabled={isUploading}
                 onClick={() => setShowModelAddReel(false)}
-                className="rounded-full border border-white/10 bg-white/5 p-2 text-zinc-400 transition hover:bg-white/10 hover:text-white"
+                className="rounded-full border border-white/10 bg-white/5 p-2 text-zinc-400 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
               >
                 <X size={18} />
               </button>
@@ -112,6 +126,7 @@ const ReelUploadModal = () => {
                           type="button"
                           onClick={() => {
                             setVideoFile(null);
+                            if (previewUrl) URL.revokeObjectURL(previewUrl);
                             setPreviewUrl(null);
                           }}
                           className="absolute right-3 top-3 rounded-full bg-black/65 p-2 text-white transition hover:bg-rose-600"
@@ -131,7 +146,7 @@ const ReelUploadModal = () => {
                         </div>
                         <div>
                           <p className="text-xs font-semibold text-white sm:text-sm">{t('Upload your video')}</p>
-                          <p className="mt-0.5 text-[10px] text-zinc-500 sm:text-xs">{t('MP4 or MOV • up to 60 seconds')}</p>
+                          <p className="mt-0.5 text-[10px] text-zinc-500 sm:text-xs">                          {t('Video file • up to 100 MB')}</p>
                         </div>
                       </label>
                     )}
@@ -175,6 +190,7 @@ const ReelUploadModal = () => {
                   <button
                     type="button"
                     onClick={() => setShowModelAddReel(false)}
+                    disabled={isUploading}
                     className="w-full rounded-xl border border-zinc-700 px-4 py-3 text-xs font-semibold text-zinc-300 transition hover:border-zinc-500 hover:text-white sm:w-auto sm:py-2.5"
                   >
                     {t('Cancel')}

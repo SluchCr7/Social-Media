@@ -5,8 +5,15 @@ const notfound = (req, res, next) => {
 };
 
 const errorhandler = (err, req, res, next) => {
-    let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+    let statusCode = err.statusCode || (res.statusCode === 200 ? 500 : res.statusCode);
     let message = err.message;
+
+    if (err.code === 'LIMIT_FILE_SIZE') {
+        statusCode = 413;
+        message = 'Uploaded file is too large';
+    } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+        statusCode = 400;
+    }
 
     // Handle Mongoose Bad ObjectId (CastError)
     if (err.name === 'CastError' && err.kind === 'ObjectId') {

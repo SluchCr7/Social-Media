@@ -1,14 +1,18 @@
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
+const { getCloudinaryConfig } = require('./cloudinaryConfig');
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_NAME,
-  api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET_KEY,
-});
+const cloudinaryConfig = getCloudinaryConfig();
+cloudinary.config(cloudinaryConfig);
 
-// ✅ Cloudinary upload for videos (buffer -> stream)
+const ensureCloudinaryConfig = () => {
+  if (!cloudinaryConfig.cloud_name || !cloudinaryConfig.api_key || !cloudinaryConfig.api_secret) {
+    throw new Error('Cloudinary is not configured. Please configure the Cloudinary environment variables.');
+  }
+};
+
 const cloudUploadVideo = (file) => {
+  ensureCloudinaryConfig();
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
@@ -29,4 +33,9 @@ const cloudUploadVideo = (file) => {
   });
 };
 
-module.exports = { cloudUploadVideo };
+const cloudRemoveVideo = (publicId) => {
+  ensureCloudinaryConfig();
+  return cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
+};
+
+module.exports = { cloudUploadVideo, cloudRemoveVideo };

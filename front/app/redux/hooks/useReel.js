@@ -4,13 +4,13 @@ import { useCallback, useEffect, useRef, useMemo } from 'react';
 import api from '@/app/utils/api';
 import { useAuth } from './useAuth';
 import { useFeedback } from './useFeedback';
-import { checkUserStatus } from '@/app/utils/checkUserLog';
 import { useAppDispatch, useAppSelector, useAppStore } from '../hooks';
 import {
   selectReels,
   selectReelsPage,
   selectReelsHasMore,
   selectReelsLoading,
+  selectReelsError,
   selectShowModelAddReel,
 } from '../features/reels/reelsSelectors';
 import {
@@ -21,239 +21,241 @@ import {
   setPage as setReduxPage,
   setHasMore,
   setIsLoading,
+  setError,
   setShowModelAddReel as setReduxShowModelAddReel,
   optimisticLikeReel,
 } from '../features/reels/reelsSlice';
 
-
-
-export const useReels = () => {
+export const useReels = ({ autoFetch = true } = {}) => {
   const dispatch = useAppDispatch();
   const store = useAppStore();
   const { user } = useAuth();
-  const { showAlert } = useFeedback();
+  const { showToast } = useFeedback();
+  const requestId = useRef(0);
+  const controller = useRef();
+  const fetchingPage = useRef(false);
+  const loadingMore = useRef(false);
+  const observer = useRef();
 
   const reels = useAppSelector(selectReels);
   const page = useAppSelector(selectReelsPage);
   const hasMore = useAppSelector(selectReelsHasMore);
   const isLoading = useAppSelector(selectReelsLoading);
+  const error = useAppSelector(selectReelsError);
   const showModelAddReel = useAppSelector(selectShowModelAddReel);
 
   const setShowModelAddReel = useCallback(
-    (show) => {
-      dispatch(setReduxShowModelAddReel(show));
-    },
+    (show) => dispatch(setReduxShowModelAddReel(show)),
     [dispatch]
   );
+  const setPage = useCallback((nextPage) => dispatch(setReduxPage(nextPage)), [dispatch]);
 
-  const fetchReels = useCallback(
-    async (pageNum = 1) => {
-      if (!hasMore && pageNum !== 1) return;
+  const fetchReels = useCallback(async (pageNum = 1) => {
+    if (fetchingPage.current || (!selectReelsHasMore(store.getState()) && pageNum !== 1)) return;
 
-      dispatch(setIsLoading(true));
-      try {
-        const res = await api.get('/reel', { params: { page: pageNum, limit: 10 } });
-        const newReels = Array.isArray(res.data.reels) ? res.data.reels : [];
-        const currentReels = selectReels(store.getState());
-        const nextReels =
-          pageNum === 1
-            ? newReels
-            : [
-                ...currentReels,
-                ...newReels.filter(
-                  (newReel) => !currentReels.some((reel) => reel._id === newReel._id)
-                ),
-              ];
-        dispatch(setReduxReels(nextReels));
-        dispatch(setHasMore(pageNum < res.data.totalPages));
-      } catch (err) {
-        console.error(err);
-      } finally {
+    if (pageNum === 1 && selectReelsPage(store.getState()) !== 1) {
+      dispatch(setReduxPage(1));
+    }
+    fetchingPage.current = true;
+    const currentRequestId = ++requestId.current;
+    const currentController = new AbortController();
+    controller.current = currentController;
+    dispatch(setIsLoading(true));
+    dispatch(setError(null));
+
+    try {
+      const { data } = await api.get('/reel', {
+        params: { page: pageNum, limit: 10 },
+        signal: currentController.signal,
+      });
+      if (currentRequestId !== requestId.current) return;
+
+      const newReels = Array.isArray(data.reels) ? data.reels : [];
+      const currentReels = selectReels(store.getState());
+      const currentIds = new Set(currentReels.map((reel) => reel._id));
+      const nextReels = pageNum === 1
+        ? newReels
+        : [...currentReels, ...newReels.filter((reel) => !currentIds.has(reel._id))];
+
+      dispatch(setReduxReels(nextReels));
+      dispatch(setHasMore(pageNum < (Number(data.totalPages) || 0)));
+    } catch (err) {
+      if (
+        err.name !== 'CanceledError' &&
+        err.name !== 'AbortError' &&
+        currentRequestId === requestId.current
+      ) {
+        dispatch(setError(err.response?.data?.message || 'Could not load reels right now.'));
+        console.error('Error fetching reels:', err);
+      }
+    } finally {
+      if (currentRequestId === requestId.current) {
+        fetchingPage.current = false;
+        loadingMore.current = false;
+        controller.current = undefined;
         dispatch(setIsLoading(false));
       }
-    },
-    [hasMore, dispatch, store]
-  );
+    }
+  }, [dispatch, store]);
 
   useEffect(() => {
-    fetchReels(page);
-  }, [page, fetchReels]);
+    if (autoFetch) fetchReels(page);
+  }, [autoFetch, page, fetchReels]);
 
-  const uploadReel = useCallback(
-    async (file, caption = '') => {
-      if (!user?.token) return showAlert('You must be logged in to upload a reel.');
+  useEffect(() => () => {
+    requestId.current += 1;
+    if (controller.current) {
+      controller.current.abort();
+      dispatch(setIsLoading(false));
+    }
+  }, [dispatch]);
 
-      const tempId = `temp-${Date.now()}`;
-      const tempReel = {
-        _id: tempId,
-        videoUrl: URL.createObjectURL(file),
-        thumbnailUrl: URL.createObjectURL(file),
-        caption,
-        owner: user,
-        likes: [],
-        views: [],
-        comments: [],
-        createdAt: new Date().toISOString(),
-        isOptimistic: true,
-      };
+  const uploadReel = useCallback(async (file, caption = '') => {
+    if (!user?._id) {
+      showToast('You must be logged in to upload a reel.', 'error');
+      return null;
+    }
+    if (!file || !file.type?.startsWith('video/')) {
+      showToast('Choose a valid video file.', 'error');
+      return null;
+    }
+    if (file.size > 100 * 1024 * 1024) {
+      showToast('Video files must be 100 MB or smaller.', 'error');
+      return null;
+    }
+    if (typeof caption !== 'string' || caption.length > 2200) {
+      showToast('Caption must be 2200 characters or fewer.', 'error');
+      return null;
+    }
 
-      dispatch(addReelToState(tempReel));
-      dispatch(setReduxShowModelAddReel(false));
-      showAlert('Uploading reel...', 'loading');
+    const tempId = `temp-${Date.now()}`;
+    const previewUrl = URL.createObjectURL(file);
+    const tempReel = {
+      _id: tempId,
+      videoUrl: previewUrl,
+      thumbnailUrl: previewUrl,
+      caption,
+      owner: user,
+      likes: [],
+      views: [],
+      comments: [],
+      createdAt: new Date().toISOString(),
+      isOptimistic: true,
+    };
 
-      try {
-        const formData = new FormData();
-        formData.append('video', file);
-        formData.append('caption', caption);
+    dispatch(addReelToState(tempReel));
+    dispatch(setReduxShowModelAddReel(false));
+    const loadingToast = showToast('Uploading reel...', 'loading');
 
-        const res = await api.post('/reel', formData, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+    try {
+      const formData = new FormData();
+      formData.append('video', file);
+      formData.append('caption', caption);
 
-        const realReel = res.data.reel || res.data;
-        dispatch(removeReelFromState(tempId));
-        dispatch(addReelToState(realReel));
-        showAlert('Reel uploaded successfully!', 'success');
-      } catch (err) {
-        console.error(err);
-        dispatch(removeReelFromState(tempId));
-        showAlert(err?.response?.data?.message || 'Failed to upload reel.', 'error');
-      }
-    },
-    [user, showAlert, dispatch]
-  );
+      const { data } = await api.post('/reel', formData);
+      const realReel = data.reel || data;
+      dispatch(removeReelFromState(tempId));
+      dispatch(addReelToState(realReel));
+      showToast('Reel uploaded successfully!', 'success', { id: loadingToast });
+      return realReel;
+    } catch (err) {
+      dispatch(removeReelFromState(tempId));
+      showToast(err.response?.data?.message || 'Failed to upload reel.', 'error', { id: loadingToast });
+      console.error('Error uploading reel:', err);
+      return null;
+    } finally {
+      URL.revokeObjectURL(previewUrl);
+    }
+  }, [user, showToast, dispatch]);
 
-  const deleteReel = useCallback(
-    async (id) => {
-      if (!user?.token) return;
-
+  const deleteReel = useCallback(async (id) => {
+    if (!user?._id) return showToast('You must be logged in to delete a reel.', 'error');
+    try {
+      const { data } = await api.delete(`/reel/${id}`);
       dispatch(removeReelFromState(id));
+      showToast(data.message || 'Reel deleted successfully.', 'success');
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to delete reel.', 'error');
+      console.error('Error deleting reel:', err);
+    }
+  }, [user, showToast, dispatch]);
 
-      try {
-        const res = await api.delete(`/reel/${id}`, {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-        showAlert(res.data.message);
-      } catch (err) {
-        console.error(err);
-        showAlert('Failed to delete reel.');
-      }
-    },
-    [user, showAlert, dispatch]
-  );
-
-  const likeReel = useCallback(
-    async (id) => {
-      if (!user?.token) return;
-
+  const likeReel = useCallback(async (id) => {
+    if (!user?._id) return showToast('You must be logged in to like a reel.', 'error');
+    dispatch(optimisticLikeReel({ reelId: id, userId: user._id }));
+    try {
+      const { data } = await api.put(`/reel/like/${id}`);
+      dispatch(updateReelInState(data));
+      return data;
+    } catch (err) {
       dispatch(optimisticLikeReel({ reelId: id, userId: user._id }));
+      showToast(err.response?.data?.message || 'Failed to like reel.', 'error');
+      console.error('Error updating reel like:', err);
+      return null;
+    }
+  }, [user, showToast, dispatch]);
 
-      try {
-        const res = await api.put(
-          `/reel/like/${id}`,
-          {},
-          { headers: { Authorization: `Bearer ${user.token}` } }
-        );
-        dispatch(updateReelInState(res.data));
-      } catch (err) {
-        console.error(err);
-        showAlert('Failed to like reel.');
+  const viewReel = useCallback(async (id) => {
+    if (!user?._id) return null;
+    try {
+      const { data } = await api.put(`/reel/view/${id}`);
+      dispatch(updateReelInState(data));
+      return data;
+    } catch (err) {
+      console.error('Error recording reel view:', err);
+      return null;
+    }
+  }, [user, dispatch]);
+
+  const shareReel = useCallback(async (id) => {
+    if (!user?._id) return showToast('You must be logged in to share a reel.', 'error');
+    try {
+      const { data } = await api.post(`/reel/share/${id}`);
+      dispatch(addReelToState(data));
+      showToast('Reel shared successfully.', 'success');
+      return data;
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to share the reel.', 'error');
+      console.error('Error sharing reel:', err);
+      return null;
+    }
+  }, [user, showToast, dispatch]);
+
+  const lastReelRef = useCallback((node) => {
+    observer.current?.disconnect();
+    if (!node || !autoFetch || isLoading || error || !hasMore) return;
+
+    observer.current = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting && !loadingMore.current && !fetchingPage.current) {
+        loadingMore.current = true;
+        dispatch(setReduxPage(page + 1));
       }
-    },
-    [user, showAlert, dispatch]
-  );
+    }, { rootMargin: '200px' });
+    observer.current.observe(node);
+  }, [autoFetch, dispatch, error, hasMore, isLoading, page]);
 
-  const viewReel = useCallback(
-    async (id) => {
-      if (!user?.token) return;
-      try {
-        const res = await api.put(
-          `/reel/view/${id}`,
-          {},
-          { headers: { Authorization: `Bearer ${user.token}` } }
-        );
-        dispatch(updateReelInState(res.data));
-      } catch (err) {
-        console.error(err);
-      }
-    },
-    [user, dispatch]
-  );
+  useEffect(() => () => observer.current?.disconnect(), []);
 
-  const shareReel = useCallback(
-    async (id) => {
-      if (!checkUserStatus('Share Reel', showAlert, user)) return;
-
-      try {
-        const res = await api.post(
-          `/reel/share/${id}`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-          }
-        );
-
-        showAlert('✅ Reel shared successfully.');
-        dispatch(addReelToState(res.data));
-      } catch (err) {
-        console.error(err);
-        showAlert('❌ Failed to share the Reel.');
-      }
-    },
-    [user, showAlert, dispatch]
-  );
-
-  const observer = useRef();
-  const lastReelRef = useCallback(
-    (node) => {
-      if (isLoading) return;
-      if (observer.current) observer.current.disconnect();
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          const nextPage = page + 1;
-          dispatch(setReduxPage(nextPage));
-        }
-      });
-      if (node) observer.current.observe(node);
-    },
-    [isLoading, hasMore, page, dispatch]
-  );
-
-  return useMemo(
-    () => ({
-      reels,
-      fetchReels,
-      uploadReel,
-      deleteReel,
-      likeReel,
-      viewReel,
-      isLoading,
-      hasMore,
-      lastReelRef,
-      shareReel,
-      showModelAddReel,
-      setShowModelAddReel,
-    }),
-    [
-      reels,
-      fetchReels,
-      uploadReel,
-      deleteReel,
-      likeReel,
-      viewReel,
-      isLoading,
-      hasMore,
-      lastReelRef,
-      shareReel,
-      showModelAddReel,
-      setShowModelAddReel,
-    ]
-  );
+  return useMemo(() => ({
+    reels,
+    page,
+    fetchReels,
+    setPage,
+    uploadReel,
+    deleteReel,
+    likeReel,
+    viewReel,
+    isLoading,
+    error,
+    hasMore,
+    lastReelRef,
+    shareReel,
+    showModelAddReel,
+    setShowModelAddReel,
+  }), [
+    reels, page, fetchReels, setPage, uploadReel, deleteReel, likeReel, viewReel,
+    isLoading, error, hasMore, lastReelRef, shareReel, showModelAddReel, setShowModelAddReel,
+  ]);
 };
 
 export default useReels;

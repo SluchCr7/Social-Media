@@ -17,6 +17,8 @@ const DesignReels = ({
   currentIndex,
   reelRefs,
   isLoading,
+  error,
+  retry,
   lastReelRef,
   isMuted,
   setIsMuted
@@ -24,7 +26,7 @@ const DesignReels = ({
   const { t } = useTranslation();
   const { user } = useAuth();
   const { userData } = useGetData(user?._id);
-  const { setShowModelAddReel } = useReels();
+  const { setShowModelAddReel } = useReels({ autoFetch: false });
 
   const visibleReels = reels.filter(Boolean);
   const hasReels = visibleReels.length > 0;
@@ -72,6 +74,15 @@ const DesignReels = ({
         );
       })}
 
+      {error && hasReels && (
+        <div className="fixed bottom-20 left-1/2 z-[80] flex -translate-x-1/2 items-center gap-3 rounded-xl border border-rose-400/30 bg-black/90 px-4 py-3 text-sm text-white shadow-xl">
+          <span>{t(error)}</span>
+          <button type="button" onClick={retry} className="font-semibold text-indigo-300 hover:text-white">
+            {t('Retry')}
+          </button>
+        </div>
+      )}
+
       {isLoading && (
         <div className="snap-start w-full h-screen relative flex items-center justify-center bg-black z-10">
           <ReelSkeleton />
@@ -97,20 +108,32 @@ const DesignReels = ({
             </div>
 
             <h2 className="mb-3 text-2xl font-semibold text-white">
-              {t('No reels yet')}
+              {error ? t('Could not load reels') : t('No reels yet')}
             </h2>
             <p className="mb-8 text-sm leading-6 text-zinc-400">
-              {t('Start with a short video and share it with your audience in a clean, polished way.')}
+              {error
+                ? t(error)
+                : t('Start with a short video and share it with your audience in a clean, polished way.')}
             </p>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <button
-                onClick={openCreateReel}
-                className="flex items-center justify-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-indigo-500 hover:text-white"
-              >
-                <HiPlus size={16} />
-                {t('Create reel')}
-              </button>
+              {error ? (
+                <button
+                  type="button"
+                  onClick={retry}
+                  className="flex items-center justify-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-indigo-500 hover:text-white"
+                >
+                  {t('Try again')}
+                </button>
+              ) : (
+                <button
+                  onClick={openCreateReel}
+                  className="flex items-center justify-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-indigo-500 hover:text-white"
+                >
+                  <HiPlus size={16} />
+                  {t('Create reel')}
+                </button>
+              )}
 
               <Link
                 href="/"
