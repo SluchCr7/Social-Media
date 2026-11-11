@@ -1,61 +1,35 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { logoutSuccess } from '../features/auth/authSlice';
 import { API_BASE_URL } from '../../utils/backendUrl';
+import { refreshAuthSession } from '../../utils/authRefresh';
+import { advanceAuthSessionVersion, getAuthSessionVersion } from '../../utils/authSession';
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
   credentials: 'include',
-  prepareHeaders: (headers, { getState }) => {
-    const state = getState();
-    const token = state?.auth?.user?.token;
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
-    }
-    return headers;
-  },
 });
 
-// Mutex promise to serialize token refresh across concurrent 401 responses
-let refreshPromise = null;
+const isAuthEndpoint = (args) => {
+  const url = typeof args === 'string' ? args : args?.url || '';
+  return ['/auth/login', '/auth/register', '/auth/refresh']
+    .some((path) => url.includes(path));
+};
 
 const baseQueryWithReauth = async (args, api, extraOptions) => {
-  const isRefreshEndpoint =
-    typeof args === 'string'
-      ? args.includes('/auth/refresh')
-      : args?.url?.includes('/auth/refresh');
-
+  const authSessionVersion = getAuthSessionVersion();
   let result = await rawBaseQuery(args, api, extraOptions);
 
-  if (result.error && result.error.status === 401 && !isRefreshEndpoint) {
-    if (!refreshPromise) {
-      refreshPromise = (async () => {
-        try {
-          const refreshResult = await rawBaseQuery(
-            { url: '/auth/refresh', method: 'POST' },
-            api,
-            extraOptions
-          );
-          return refreshResult;
-        } finally {
-          refreshPromise = null;
-        }
-      })();
-    }
-
-    const refreshResult = await refreshPromise;
-
-    if (refreshResult && !refreshResult.error) {
-      // Token refresh succeeded: cookies updated, retry original request
+  if (result.error?.status === 401 && !isAuthEndpoint(args)) {
+    try {
+      await refreshAuthSession();
       result = await rawBaseQuery(args, api, extraOptions);
-    } else {
-      // Token refresh failed: user session is invalid
-      api.dispatch(logoutSuccess());
-      if (typeof window !== 'undefined') {
-        const publicPaths = ['/Pages/Login', '/Pages/Register', '/Pages/ForgotPassword'];
-        const isPublic = publicPaths.some((p) => window.location.pathname.includes(p));
-        if (!isPublic) {
-          window.location.href = '/Pages/Login';
-        }
+    } catch {
+      if (
+        getAuthSessionVersion() === authSessionVersion &&
+        api.getState()?.auth?.user
+      ) {
+        api.dispatch(logoutSuccess());
+        advanceAuthSessionVersion();
       }
     }
   }

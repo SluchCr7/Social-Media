@@ -1,5 +1,7 @@
 import axios from 'axios';
 import { API_BASE_URL } from './backendUrl';
+import { refreshAuthSession } from './authRefresh';
+import { getAuthSessionVersion } from './authSession';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,21 +11,14 @@ const api = axios.create({
   },
 });
 
-let isRefreshing = false;
-let failedQueue = [];
+const isAuthEndpoint = (url = '') =>
+  ['/auth/login', '/auth/register', '/auth/refresh'].some((path) => url.includes(path));
 
-const processQueue = (error, token = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-  failedQueue = [];
-};
+api.interceptors.request.use((config) => {
+  config.authSessionVersion = getAuthSessionVersion();
+  return config;
+});
 
-// Response interceptor with automatic token refresh
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -33,36 +28,25 @@ api.interceptors.response.use(
       error.response?.status === 401 &&
       originalRequest &&
       !originalRequest._retry &&
-      !originalRequest.url?.includes('/auth/refresh') &&
-      !originalRequest.url?.includes('/auth/login')
+      !isAuthEndpoint(originalRequest.url)
     ) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then(() => api(originalRequest))
-          .catch((err) => Promise.reject(err));
-      }
-
       originalRequest._retry = true;
-      isRefreshing = true;
 
       try {
-        await api.post('/auth/refresh');
-        processQueue(null);
+        await refreshAuthSession();
         return api(originalRequest);
       } catch (refreshErr) {
-        processQueue(refreshErr, null);
-        if (typeof window !== 'undefined') {
-          const publicPaths = ['/Pages/Login', '/Pages/Register', '/Pages/ForgotPassword'];
-          const isPublic = publicPaths.some((p) => window.location.pathname.includes(p));
-          if (!isPublic) {
-            window.location.href = '/Pages/Login';
-          }
+        if (
+          typeof window !== 'undefined' &&
+          originalRequest.authSessionVersion === getAuthSessionVersion()
+        ) {
+          window.dispatchEvent(
+            new CustomEvent('auth:session-expired', {
+              detail: { authSessionVersion: originalRequest.authSessionVersion },
+            })
+          );
         }
         return Promise.reject(refreshErr);
-      } finally {
-        isRefreshing = false;
       }
     }
 

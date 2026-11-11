@@ -20,6 +20,7 @@ import {
   logoutSuccess,
 } from '../features/auth/authSlice';
 import api from '@/app/utils/api';
+import { advanceAuthSessionVersion, getAuthSessionVersion } from '@/app/utils/authSession';
 import { useFeedback } from './useFeedback';
 import { MESSAGES } from '@/app/utils/messages';
 
@@ -73,6 +74,7 @@ export const useAuth = () => {
         }
 
         dispatch(setAuthUser(userData));
+        advanceAuthSessionVersion();
 
         showToast(res.data.message || MESSAGES.AUTH.LOGIN_SUCCESS, 'success', { id: loadingToast });
         if (res.data.verificationInfo?.verificationCode) {
@@ -103,11 +105,14 @@ export const useAuth = () => {
         await api.post('/auth/logout');
       } catch (error) {
         console.error('Logout error:', error);
+        showToast('Could not sign out. Please check your connection and try again.', 'error');
+        return;
       }
       dispatch(logoutSuccess());
+      advanceAuthSessionVersion();
       window.location.href = '/Pages/Login';
     }
-  }, [confirmAction, dispatch]);
+  }, [confirmAction, dispatch, showToast]);
 
   const registerNewUser = useCallback(
     async (username, email, password) => {
@@ -120,6 +125,7 @@ export const useAuth = () => {
 
         if (userData) {
           dispatch(setAuthUser(userData));
+          advanceAuthSessionVersion();
         }
 
         showToast(res.data.message || MESSAGES.AUTH.REGISTRATION_SUCCESS, 'success', { id: loadingToast });
@@ -152,31 +158,49 @@ export const useAuth = () => {
     let isMounted = true;
 
     const checkSession = async () => {
-      if (isAuthChecked) return;
-
       try {
         const res = await api.get('/auth/me');
-        if (isMounted && res.data?.user) {
+        if (isMounted && !selectIsAuthChecked(store.getState()) && res.data?.user) {
           dispatch(setAuthUser(res.data.user));
           dispatch(setIsLogin(true));
+          advanceAuthSessionVersion();
         }
       } catch (err) {
-        if (isMounted) {
+        if (isMounted && !selectIsAuthChecked(store.getState())) {
           dispatch(logoutSuccess());
+          advanceAuthSessionVersion();
         }
       } finally {
-        if (isMounted) {
+        if (isMounted && !selectIsAuthChecked(store.getState())) {
           dispatch(setIsAuthChecked(true));
+          advanceAuthSessionVersion();
         }
       }
     };
 
-    checkSession();
+    if (!isAuthChecked) {
+      checkSession();
+    }
 
     return () => {
       isMounted = false;
     };
-  }, [isAuthChecked, dispatch]);
+  }, [isAuthChecked, dispatch, store]);
+
+  useEffect(() => {
+    const handleSessionExpired = (event) => {
+      if (
+        selectCurrentUser(store.getState()) &&
+        getAuthSessionVersion() === event.detail?.authSessionVersion
+      ) {
+        dispatch(logoutSuccess());
+        advanceAuthSessionVersion();
+      }
+    };
+
+    window.addEventListener('auth:session-expired', handleSessionExpired);
+    return () => window.removeEventListener('auth:session-expired', handleSessionExpired);
+  }, [dispatch, store]);
 
   // Admin users fetch
   useEffect(() => {

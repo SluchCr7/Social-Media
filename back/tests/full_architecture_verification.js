@@ -11,6 +11,9 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const {
   ACCESS_TOKEN_SECRET,
   REFRESH_TOKEN_SECRET,
+  REFRESH_TOKEN_EXPIRY,
+  REFRESH_TOKEN_MAX_AGE,
+  REFRESH_COOKIE_MAX_AGE,
   hashToken,
   generateAccessToken,
   generateRefreshToken,
@@ -168,6 +171,9 @@ async function runTests() {
     assert.strictEqual(mockRes.cookies.accessToken.opts.httpOnly, true, 'accessToken must be httpOnly');
     assert.strictEqual(mockRes.cookies.refreshToken.opts.httpOnly, true, 'refreshToken must be httpOnly');
     assert.strictEqual(mockRes.cookies.accessToken.opts.path, '/', 'path must be /');
+    assert.strictEqual(REFRESH_TOKEN_EXPIRY, '30d', 'Refresh tokens should have a renewable 30-day lifetime');
+    assert.strictEqual(REFRESH_TOKEN_MAX_AGE, 30 * 24 * 60 * 60 * 1000, 'Refresh token database lifetime must be 30 days');
+    assert.strictEqual(mockRes.cookies.refreshToken.opts.maxAge, REFRESH_COOKIE_MAX_AGE, 'Refresh cookie must persist with the token');
   });
 
   // --- 6. Destructive Route Protection Check ---

@@ -1,4 +1,5 @@
 import { baseApi } from '../../api/baseApi';
+import { refreshAuthSession } from '../../../utils/authRefresh';
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -30,10 +31,19 @@ export const authApi = baseApi.injectEndpoints({
       invalidatesTags: ['Auth'],
     }),
     refreshSession: builder.mutation({
-      query: () => ({
-        url: '/auth/refresh',
-        method: 'POST',
-      }),
+      queryFn: async () => {
+        try {
+          const { data } = await refreshAuthSession();
+          return { data };
+        } catch (error) {
+          return {
+            error: {
+              status: error.response?.status || 'FETCH_ERROR',
+              data: error.response?.data || { message: error.message },
+            },
+          };
+        }
+      },
       invalidatesTags: ['Auth'],
     }),
     getAllUsers: builder.query({

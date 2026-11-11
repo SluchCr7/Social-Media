@@ -8,7 +8,14 @@ const {
   validateUserUpdate,
   validatePasswordUpdate,
 } = require('../Modules/User');
-const { hashToken, generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../utils/tokenUtils');
+const {
+  REFRESH_TOKEN_MAX_AGE,
+  REFRESH_TOKEN_ROTATION_GRACE_MS,
+  hashToken,
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} = require('../utils/tokenUtils');
 const { cloudUpload, cloudRemove } = require('../Config/cloudUpload');
 const { checkImageSensitivity } = require('../utils/ImgShield');
 const { sendNotificationHelper } = require('../utils/SendNotification');
@@ -29,6 +36,7 @@ const publicUser = (user) => {
   const userObj = user.toObject ? user.toObject() : { ...user._doc };
   delete userObj.password;
   delete userObj.refreshTokens;
+  delete userObj.consumedRefreshTokens;
   return userObj;
 };
 
@@ -48,7 +56,7 @@ const register = async ({ body, userAgent, ip }) => {
     user.refreshTokens = [{
       tokenHash: hashToken(refreshToken),
       createdAt: new Date(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE),
       userAgent: userAgent || '',
       ip: ip || '',
     }];
@@ -94,7 +102,7 @@ const login = async ({ body, userAgent, ip, forwardedFor, remoteAddress }) => {
   user.refreshTokens.push({
     tokenHash: hashToken(refreshToken),
     createdAt: now,
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE),
     userAgent: userAgent || '',
     ip: ip || forwardedFor || '',
   });
@@ -111,14 +119,14 @@ const logout = async ({ refreshToken }) => {
     await User.updateOne(
       { 'refreshTokens.tokenHash': hashed },
       { $pull: { refreshTokens: { tokenHash: hashed } } }
-    ).catch(() => {});
+    );
   }
   return result(200, { message: 'Logged out successfully' }, { clearAuthCookies: true });
 };
 
 const logoutAllSessions = async ({ userId }) => {
   if (userId) {
-    await User.updateOne({ _id: userId }, { $set: { refreshTokens: [] } }).catch(() => {});
+    await User.updateOne({ _id: userId }, { $set: { refreshTokens: [] } });
   }
   return result(200, { message: 'Logged out from all sessions successfully' }, { clearAuthCookies: true });
 };
@@ -135,17 +143,47 @@ const refreshSession = async ({ refreshToken, userAgent, ip, forwardedFor }) => 
   }
 
   const incomingTokenHash = hashToken(refreshToken);
+  const now = new Date();
   const matchedUser = await User.findOneAndUpdate(
     { _id: payload._id, 'refreshTokens.tokenHash': incomingTokenHash },
-    { $pull: { refreshTokens: { tokenHash: incomingTokenHash } } },
+    {
+      $pull: { refreshTokens: { tokenHash: incomingTokenHash } },
+      $push: {
+        consumedRefreshTokens: {
+          $each: [{
+            tokenHash: incomingTokenHash,
+            family: payload.family || '',
+            expiresAt: new Date(now.getTime() + REFRESH_TOKEN_ROTATION_GRACE_MS),
+          }],
+          $slice: -50,
+        },
+      },
+    },
     { new: false }
   );
   if (!matchedUser) {
+    const recentlyConsumed = await User.exists({
+      _id: payload._id,
+      consumedRefreshTokens: {
+        $elemMatch: {
+          tokenHash: incomingTokenHash,
+          expiresAt: { $gt: now },
+        },
+      },
+    });
+
+    if (recentlyConsumed) {
+      return result(409, {
+        message: 'A refresh request for this session is already in progress.',
+        code: 'REFRESH_ROTATION_IN_PROGRESS',
+      });
+    }
+
     if (payload.family) {
       await User.updateOne(
         { _id: payload._id },
         { $pull: { refreshTokens: { family: payload.family } } }
-      ).catch(() => {});
+      );
     }
     return result(403, {
       message: 'Security warning: refresh token reuse detected or session terminated. Please sign in again.',
@@ -168,7 +206,7 @@ const refreshSession = async ({ refreshToken, userAgent, ip, forwardedFor }) => 
   const newSessionRecord = {
     tokenHash: hashToken(newRefreshToken),
     createdAt: new Date(),
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE),
     userAgent: userAgent || '',
     ip: ip || forwardedFor || '',
     family: payload.family || '',

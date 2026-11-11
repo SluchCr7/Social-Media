@@ -242,6 +242,13 @@ const UserSchema = new mongoose.Schema({
             ip: { type: String, default: "" },
             family: { type: String, default: "" }
         }
+    ],
+    consumedRefreshTokens: [
+        {
+            tokenHash: { type: String, required: true },
+            family: { type: String, default: "" },
+            expiresAt: { type: Date, required: true }
+        }
     ]
 }, {
     timestamps: true,
