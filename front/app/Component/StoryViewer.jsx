@@ -268,7 +268,7 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
           {/* Header Info */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Link href={`/Pages/User/${story?.owner?._id}`} className="relative w-9 h-9 rounded-xl overflow-hidden border border-white/20">
+              <Link href={`/Pages/User/${encodeURIComponent(story?.owner?.username || '')}`} className="relative w-9 h-9 rounded-xl overflow-hidden border border-white/20">
                 <Image src={story?.owner?.profilePhoto?.url || '/default-profile.png'} fill alt="avatar" className="object-cover" />
               </Link>
               <div className="flex flex-col">
@@ -409,7 +409,7 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
             {story?.mentions?.length > 0 && (
               <div className="flex flex-wrap gap-1.5 justify-center">
                 {story.mentions.map(m => (
-                  <Link key={m._id} href={`/Pages/User/${m._id}`} className="px-2.5 py-1 bg-indigo-600/80 text-white rounded-lg text-[9px] font-bold">
+                  <Link key={m._id} href={`/Pages/User/${encodeURIComponent(m.username || '')}`} className="px-2.5 py-1 bg-indigo-600/80 text-white rounded-lg text-[9px] font-bold">
                     @{m.username}
                   </Link>
                 ))}
@@ -535,7 +535,7 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
                           <span className="text-white/40 text-[9px] uppercase font-medium">{v.profileName}</span>
                         </div>
                       </div>
-                      <Link href={`/Pages/User/${v._id}`} className="px-3 py-1 rounded-lg bg-indigo-600 text-white text-[9px] font-bold uppercase tracking-wider hover:bg-indigo-700 transition-all">
+                      <Link href={`/Pages/User/${encodeURIComponent(v.username || '')}`} className="px-3 py-1 rounded-lg bg-indigo-600 text-white text-[9px] font-bold uppercase tracking-wider hover:bg-indigo-700 transition-all">
                         {t("Profile")}
                       </Link>
                     </div>

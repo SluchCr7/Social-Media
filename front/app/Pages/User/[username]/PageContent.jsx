@@ -14,12 +14,16 @@ import { useStory } from '@/app/redux/hooks';
 import { useReport } from '@/app/redux/hooks';
 import { useProfilePosts } from "@/app/Custome/useProfilePosts"
 import { useState } from "react"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { useAdmin } from '@/app/redux/hooks';
 import { useUser } from '@/app/redux/hooks';
 import useDocumentTitle from '@/app/hooks/useDocumentTitle';
 
 const UserProfilePage = ({ params }) => {
-  const id = params.id
+  const username = params.username
+  const isLegacyProfileId = /^[a-f\d]{24}$/i.test(username)
+  const router = useRouter()
   const { user } = useAuth()
   const {followUser} = useUser()
   const { getUserStories } = useStory()
@@ -28,9 +32,15 @@ const UserProfilePage = ({ params }) => {
   const {
     combinedPosts, postYears, loading, loaderRef, userData,
     filters, setFilters, activeTab, setActiveTab, userHasMore
-  } = useProfilePosts(id)
+  } = useProfilePosts(username, [], true)
   const profileTitle = userData?.profileName || userData?.username
   useDocumentTitle(profileTitle ? `${profileTitle}'s profile` : null)
+
+  useEffect(() => {
+    if (isLegacyProfileId && userData?.username && userData.username !== username) {
+      router.replace(`/Pages/User/${encodeURIComponent(userData.username)}`)
+    }
+  }, [isLegacyProfileId, userData?.username, username, router])
 
   const [showFollowModal, setShowFollowModal] = useState(false)
   const [followModalType, setFollowModalType] = useState("followers")

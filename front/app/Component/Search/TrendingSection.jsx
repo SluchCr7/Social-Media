@@ -111,7 +111,7 @@ const UserCard = memo(({ user, index, t }) => {
                 </div>
             </div>
             <Link
-                href={`/Pages/Profile/${user._id}`}
+                href={`/Pages/User/${encodeURIComponent(user.username)}`}
                 className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-white/5 group-hover:bg-gradient-to-br group-hover:from-purple-500 group-hover:to-pink-550 text-slate-500 dark:text-slate-400 group-hover:text-white flex items-center justify-center transition-all shadow-sm group-hover:shadow-md"
             >
                 <HiChevronRight className="w-4.5 h-4.5 group-hover:translate-x-0.5 transition-transform" />

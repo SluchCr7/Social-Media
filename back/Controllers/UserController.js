@@ -69,6 +69,9 @@ const GetCurrentUser = endpoint('getCurrentUser', (req) => ({
 
 const getAllUsers = endpoint('getAllUsers');
 const getUserById = endpoint('getUserById', (req) => ({ id: req.params.id }));
+const getPublicUserByUsername = endpoint('getPublicUserByUsername', (req) => ({
+  username: req.params.username,
+}));
 const DeleteUser = endpoint('deleteUser');
 const verifyAccount = endpoint('verifyAccount', (req) => ({
   id: req.params.id,
@@ -147,6 +150,7 @@ module.exports = {
   GetCurrentUser,
   getAllUsers,
   getUserById,
+  getPublicUserByUsername,
   DeleteUser,
   verifyAccount,
   uploadPhoto,

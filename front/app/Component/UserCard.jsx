@@ -52,7 +52,7 @@ const UserCard = React.memo(({ user: targetUser, t, isCompact = false }) => {
                 whileHover={{ scale: 1.02, x: 5 }}
                 className="group p-4 flex items-center justify-between bg-white/50 dark:bg-white/[0.02] backdrop-blur-md rounded-[2rem] border border-gray-100 dark:border-white/5 hover:border-indigo-500/30 transition-all shadow-sm"
             >
-                <Link href={`/Pages/Profile/${targetUser._id}`} className="flex items-center gap-3 flex-1 min-w-0">
+                <Link href={`/Pages/User/${encodeURIComponent(targetUser.username)}`} className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="relative w-12 h-12 rounded-2xl overflow-hidden shadow-lg">
                         <Image
                             src={targetUser.profilePhoto?.url || '/default-avatar.png'}
@@ -100,7 +100,7 @@ const UserCard = React.memo(({ user: targetUser, t, isCompact = false }) => {
             {/* Background Accent */}
             <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 -z-10 group-hover:h-full transition-all duration-700" />
 
-            <Link href={`/Pages/Profile/${targetUser._id}`} className="contents">
+            <Link href={`/Pages/User/${encodeURIComponent(targetUser.username)}`} className="contents">
                 <div className="relative mb-6">
                     <div className="w-24 h-24 rounded-[2rem] overflow-hidden ring-4 ring-white dark:ring-gray-900 shadow-2xl">
                         <Image

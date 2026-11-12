@@ -73,7 +73,7 @@ const ProfileMenu = ({
               {/* 👤 Owner Actions */}
               {context === 'owner' && (
                 <>
-                  <Link href={`/Pages/User/${user?._id}`} onClick={() => setOpen(false)}>
+                  <Link href={`/Pages/User/${encodeURIComponent(user?.username || '')}`} onClick={() => setOpen(false)}>
                     <MenuItem icon={<IoEyeSharp />}>
                       {t('View as Visitor')}
                     </MenuItem>

@@ -105,7 +105,7 @@ const MemberRow = memo(({ member, currentUserId, handleMakeAdmin, handleRemoveMe
       layout
       className="group flex items-center justify-between p-5 rounded-[1.5rem] bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-blue-500/30 transition-all duration-500"
     >
-      <Link href={isMe ? '/Pages/Profile' : `/Pages/User/${member?._id}`} className="flex items-center gap-5">
+      <Link href={isMe ? '/Pages/Profile' : `/Pages/User/${encodeURIComponent(member?.username || '')}`} className="flex items-center gap-5">
         <div className="relative">
           <div className="w-16 h-16 rounded-2xl overflow-hidden ring-4 ring-white/5 group-hover:ring-blue-500/30 transition-all duration-500">
             <Image

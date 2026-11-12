@@ -45,7 +45,7 @@ export const renderTextWithMentionsHashtagsAndLinks = (
         rendered.push(
           <Link
             key={i}
-            href={`/Pages/User/${mentionedUser?._id}`}
+            href={`/Pages/User/${encodeURIComponent(mentionedUser?.username || '')}`}
             className="text-blue-500 font-semibold hover:underline"
           >
             @{mentionedUser?.username}

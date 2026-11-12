@@ -10,6 +10,10 @@ export const userApi = baseApi.injectEndpoints({
       query: (id) => `/auth/${id}`,
       providesTags: (result, error, id) => [{ type: 'User', id }],
     }),
+    getUserByUsername: builder.query({
+      query: (username) => `/auth/username/${encodeURIComponent(username)}`,
+      providesTags: (result, error, username) => [{ type: 'User', id: `username-${username}` }],
+    }),
     followUser: builder.mutation({
       query: (targetId) => ({
         url: `/auth/follow/${targetId}`,
@@ -105,6 +109,8 @@ export const {
   useGetSuggestedUsersQuery,
   useGetUserByIdQuery,
   useLazyGetUserByIdQuery,
+  useGetUserByUsernameQuery,
+  useLazyGetUserByUsernameQuery,
   useFollowUserMutation,
   useUpdatePhotoMutation,
   useUpdateCoverPhotoMutation,

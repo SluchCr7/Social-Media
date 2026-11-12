@@ -31,6 +31,7 @@ const { userOnePopulate } = require('../Populates/Populate');
 const { io } = require('../Config/socket');
 const Reel = require('../Modules/Reel');
 const { updateUserPoints } = require('../utils/PointsEngine');
+const generateUniqueUserCode = require('../utils/generateUserCode');
 
 const result = (status, body, options = {}) => ({ status, body, ...options });
 const errorResult = (status, message, options = {}) => result(status, { message, ...options });
@@ -41,6 +42,25 @@ const publicUser = (user) => {
   delete userObj.consumedRefreshTokens;
   return userObj;
 };
+const publicProfileUser = (user) => {
+  const userObj = publicUser(user);
+  [
+    'email',
+    'userCode',
+    'isAdmin',
+    'accountStatus',
+    'suspendedUntil',
+    'lastLogin',
+    'loginHistory',
+    'acceptedTerms',
+    'acceptedCookies',
+    'searchHistory',
+    'blockedUsers',
+    'BlockedNotificationFromUsers',
+    'savedPosts',
+  ].forEach((field) => delete userObj[field]);
+  return userObj;
+};
 
 const register = async ({ body, userAgent, ip }) => {
   try {
@@ -49,10 +69,15 @@ const register = async ({ body, userAgent, ip }) => {
     if (await User.findOne({ email: body.email })) {
       return result(400, { message: 'User already exists' });
     }
-
+    const userCode = generateUniqueUserCode()
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(body.password, salt);
-    const user = new User({ username: body.username, email: body.email, password: hashPassword });
+    const user = new User({
+      username: body.username,
+      email: body.email,
+      password: hashPassword,
+      userCode
+    });
     const familyId = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user, familyId);
@@ -326,6 +351,13 @@ const getAllUsers = async () => result(200, await User.find()
 const getUserById = async ({ id }) => {
   const user = await User.findById(id).populate(userOnePopulate);
   return user ? result(200, user) : errorResult(404, 'User Not Found');
+};
+
+const getPublicUserByUsername = async ({ username }) => {
+  const user = await User.findOne({ username }).populate(userOnePopulate);
+  return user
+    ? result(200, publicProfileUser(user))
+    : errorResult(404, 'User Not Found');
 };
 
 const deleteUser = async ({ userId }) => {
@@ -810,7 +842,7 @@ const getUserPointsHistory = async ({ id }) => {
 
 module.exports = {
   register, login, logout, logoutAllSessions, refreshSession, getCurrentUser,
-  getAllUsers, getUserById, deleteUser, verifyAccount, uploadImage, makeFollow,
+  getAllUsers, getUserById, getPublicUserByUsername, deleteUser, verifyAccount, uploadImage, makeFollow,
   updateProfile, updatePassword, pinPost, blockOrUnblockUser, updateLinksSocial,
   getSuggestedUsers, makeAccountPremiumVerify, togglePrivateAccount, makeUserAdmin,
   updateAccountStatus, getRelationship, updateRelationship, deleteAllUsers,

@@ -222,7 +222,7 @@ const UserCard = ({ user, index, handleFollow, isFollowing, t }) => {
 
         {/* Text Info */}
         <div className="relative z-10 flex-1 flex flex-col items-center w-full">
-          <Link href={`/Pages/User/${user._id}`} className="block mb-1">
+          <Link href={`/Pages/User/${encodeURIComponent(user.username)}`} className="block mb-1">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
               {user.username}
             </h3>

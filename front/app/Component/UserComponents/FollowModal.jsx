@@ -69,7 +69,7 @@ const FollowModal = memo(({ visible, onClose, type, list }) => {
                   <div className="flex flex-col gap-3">
                     {list.map((p, index) => (
                       <Link
-                        href={`/Pages/User/${p._id}`}
+                        href={`/Pages/User/${encodeURIComponent(p.username)}`}
                         key={p._id}
                         onClick={onClose}
                         className="

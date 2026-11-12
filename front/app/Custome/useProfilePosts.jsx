@@ -4,9 +4,9 @@ import { usePost } from '@/app/redux/hooks';
 import { useAuth } from '@/app/redux/hooks';
 import { useUser } from '@/app/redux/hooks';
 
-export const useProfilePosts = (userId, pinsPosts = []) => {
+export const useProfilePosts = (userId, pinsPosts = [], lookupByUsername = false) => {
   const { fetchUserPosts, userPosts, userHasMore, userIsLoading } = usePost()
-  const { getUserById } = useUser()
+  const { getUserById, getUserByUsername } = useUser()
 
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -19,11 +19,16 @@ export const useProfilePosts = (userId, pinsPosts = []) => {
   useEffect(() => {
     if (!userId) return
     setLoading(true)
-    getUserById(userId)
+    const fetchProfile = lookupByUsername ? getUserByUsername : getUserById
+    fetchProfile(userId)
+      .then(profile => {
+        if (profile || !lookupByUsername || !/^[a-f\d]{24}$/i.test(userId)) return profile
+        return getUserById(userId)
+      })
       .then(res => setUserData(res))
       .catch(err => console.log(err))
       .finally(() => setLoading(false))
-  }, [userId, getUserById])
+  }, [userId, lookupByUsername, getUserById, getUserByUsername])
 
   // أول تحميل للبوستات
   useEffect(() => {

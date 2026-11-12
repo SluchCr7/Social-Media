@@ -14,6 +14,12 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    userCode: {
+        type: String,
+        unique: true,
+        immutable: true,
+        required: true
+    },
     profileName: {
         type: String,
         default: "@User_sluchit",

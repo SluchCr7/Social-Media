@@ -44,7 +44,7 @@ const UserHoverCard = ({ userSelected, children, side = 'bottom' }) => {
   if (isMobile || !userSelected) {
     return (
       <Link
-        href={`/Pages/User/${userSelected?._id}`}
+        href={`/Pages/User/${encodeURIComponent(userSelected?.username || '')}`}
         className="font-medium hover:underline inline-block"
       >
         {children || userSelected?.username}
@@ -58,7 +58,7 @@ const UserHoverCard = ({ userSelected, children, side = 'bottom' }) => {
         <span className="cursor-pointer">
           {children || (
             <Link
-              href={`/Pages/User/${userSelected?._id}`}
+              href={`/Pages/User/${encodeURIComponent(userSelected?.username || '')}`}
               className="font-semibold hover:underline"
             >
               {userSelected?.username}
@@ -77,7 +77,7 @@ const UserHoverCard = ({ userSelected, children, side = 'bottom' }) => {
           <div className="flex flex-col gap-4">
             {/* Top: Avatar & Action */}
             <div className="flex items-start justify-between">
-              <Link href={`/Pages/User/${userSelected?._id}`}>
+              <Link href={`/Pages/User/${encodeURIComponent(userSelected?.username || '')}`}>
                 <Avatar
                   src={userSelected?.profilePhoto?.url}
                   alt={userSelected?.username}
@@ -103,7 +103,7 @@ const UserHoverCard = ({ userSelected, children, side = 'bottom' }) => {
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-1">
                 <Link
-                  href={`/Pages/User/${userSelected?._id}`}
+                  href={`/Pages/User/${encodeURIComponent(userSelected?.username || '')}`}
                   className="text-lg font-bold hover:underline decoration-2"
                 >
                   {userSelected?.username}
@@ -124,11 +124,11 @@ const UserHoverCard = ({ userSelected, children, side = 'bottom' }) => {
 
             {/* Stats */}
             <div className="flex items-center gap-4 pt-1">
-              <Link href={`/Pages/User/${userSelected?._id}/followers`} className="flex items-center gap-1 group">
+              <Link href={`/Pages/User/${encodeURIComponent(userSelected?.username || '')}/followers`} className="flex items-center gap-1 group">
                 <span className="font-bold text-gray-900 dark:text-white group-hover:underline">{followerCount}</span>
                 <span className="text-gray-500 text-[14px]">{t("Followers")}</span>
               </Link>
-              <Link href={`/Pages/User/${userSelected?._id}/following`} className="flex items-center gap-1 group">
+              <Link href={`/Pages/User/${encodeURIComponent(userSelected?.username || '')}/following`} className="flex items-center gap-1 group">
                 <span className="font-bold text-gray-900 dark:text-white group-hover:underline">{followingCount}</span>
                 <span className="text-gray-500 text-[14px]">{t("Following")}</span>
               </Link>

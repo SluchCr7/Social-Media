@@ -132,7 +132,7 @@ const InfoAboutUser = memo(({ user }) => {
                         {user.partner ? (
                           <>
                             {t("with")}{" "}
-                            <Link href={`/Pages/User/${user.partner._id}`} className="text-rose-500 hover:underline">
+                            <Link href={`/Pages/User/${encodeURIComponent(user.partner.username)}`} className="text-rose-500 hover:underline">
                               @{user.partner.username}
                             </Link>
                           </>

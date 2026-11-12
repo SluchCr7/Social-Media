@@ -141,7 +141,7 @@ const SluchitEntry = memo(forwardRef(({ post }, ref) => {
           <div className="flex gap-4">
              {/* Profile Avatar & Thread Line */}
              <div className="flex flex-col items-center shrink-0">
-                <Link href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${post?.owner?._id}`} className="transition-transform hover:scale-105">
+                <Link href={user?._id === post?.owner?._id ? '/Pages/Profile' : `/Pages/User/${encodeURIComponent(post?.owner?.username || '')}`} className="transition-transform hover:scale-105">
                   <Avatar src={post?.owner?.profilePhoto?.url} size="md" className="ring-2 ring-gray-100 dark:ring-neutral-800" />
                 </Link>
                 <div className="flex-1 w-0.5 bg-gray-100 dark:bg-neutral-800 my-3 rounded-full" />

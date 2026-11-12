@@ -244,7 +244,7 @@ const ReelCard = memo(forwardRef(function ReelCard({ userData, reel, isActive, i
         <div className={`flex flex-col gap-4 max-w-[80%] md:max-w-[70%] ${isRTL ? "text-right items-end" : "text-left items-start"}`}>
 
           {/* User Profile */}
-          <Link href={`/Pages/User/${reel?.originalPost?.owner?._id || reel?.owner?._id}`}
+          <Link href={`/Pages/User/${encodeURIComponent(reel?.originalPost?.owner?.username || reel?.owner?.username || '')}`}
             className="group flex items-center gap-3 bg-black/30 backdrop-blur-md p-2 pr-4 rounded-full border border-white/10 hover:bg-black/50 transition-all w-fit"
             onClick={(e) => e.stopPropagation()}
           >

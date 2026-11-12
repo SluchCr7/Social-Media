@@ -48,7 +48,7 @@ const SuggestionCard = memo(({ item, type, delay }) => {
   }, [item, userData?._id, isUserType]);
 
   const isOwner = useMemo(() => !isUserType && item?.owner?._id === userData?._id, [item, userData, isUserType]);
-  const hrefPath = useMemo(() => isUserType ? `/Pages/User/${item?._id}` : `/Pages/Community/${item?._id}`, [item?._id, isUserType]);
+  const hrefPath = useMemo(() => isUserType ? `/Pages/User/${encodeURIComponent(item?.username || '')}` : `/Pages/Community/${item?._id}`, [item?._id, item?.username, isUserType]);
 
   const followHandler = async (e) => {
     e.preventDefault();

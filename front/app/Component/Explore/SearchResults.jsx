@@ -75,7 +75,7 @@ const SearchResults = memo(({ searchResults, searchQuery, user, t, maxResults })
                 transition={{ delay: i * 0.03 }}
               >
                 <Link
-                  href={`/Pages/Profile/${u._id}`}
+                  href={`/Pages/User/${encodeURIComponent(u.username)}`}
                   className="group flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-white/[0.01] border border-slate-150 dark:border-white/5 hover:border-indigo-500/30 transition-all duration-300 shadow-sm hover:shadow-md"
                 >
                   <div className="w-12 h-12 relative flex-shrink-0">

@@ -10,6 +10,7 @@ const {
   makeUserAdmin,
   getAllUsers,
   getUserById,
+  getPublicUserByUsername,
   RegisterNewUser,
   LoginUser,
   LogoutUser,
@@ -55,6 +56,7 @@ route.route('/block/:id').put(verifyToken, blockOrUnblockUser);
 route.route('/me').get(verifyToken, GetCurrentUser);
 route.route('/refresh').post(RefreshToken);
 
+route.route('/username/:username').get(getPublicUserByUsername);
 route.route('/:id').get(getUserById);
 route.route('/delete').delete(verifyToken, DeleteUser);
 route.route('/login').post(authLimiter, LoginUser);

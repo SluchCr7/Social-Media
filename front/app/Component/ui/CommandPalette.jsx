@@ -34,7 +34,7 @@ const CommandPalette = () => {
 
   const actions = [
     { id: 'home', label: 'Go to Home', icon: Home, shortcut: 'H', action: () => router.push('/') },
-    { id: 'profile', label: 'View Profile', icon: User, shortcut: 'P', action: () => router.push(`/Pages/Profile/${user?._id}`) },
+    { id: 'profile', label: 'View Profile', icon: User, shortcut: 'P', action: () => router.push('/Pages/Profile') },
     { id: 'messenger', label: 'Messages', icon: MessageSquare, shortcut: 'M', action: () => router.push('/Pages/Messanger') },
     { id: 'explore', label: 'Explore', icon: Compass, shortcut: 'E', action: () => router.push('/Pages/Explore') },
     { id: 'notifications', label: 'Notifications', icon: Bell, shortcut: 'N', action: () => router.push('/Pages/Notification') },

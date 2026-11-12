@@ -58,7 +58,7 @@ const MenuFollowers = () => {
                   transition={{ delay: idx * 0.1 }}
                   className="group flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-300"
                 >
-                  <Link href={`/Pages/User/${follower._id}`} className="flex items-center gap-4 flex-1 min-w-0">
+                  <Link href={`/Pages/User/${encodeURIComponent(follower.username)}`} className="flex items-center gap-4 flex-1 min-w-0">
                     <div className="relative shrink-0">
                       <div className="w-12 h-12 rounded-[1.25rem] overflow-hidden ring-2 ring-white dark:ring-gray-900 shadow-sm transition-transform duration-500 group-hover:scale-110 bg-gray-100 dark:bg-gray-800">
                         <Image

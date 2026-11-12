@@ -19,7 +19,7 @@ const PostHeader = memo(({ post, user, isLogin, showMenu, setShowMenu, isCommuni
 
   const userProfileLink = user?._id === owner?._id
     ? '/Pages/Profile'
-    : `/Pages/User/${owner?._id}`;
+    : `/Pages/User/${encodeURIComponent(owner?.username || '')}`;
 
   return (
     <div className="flex items-center justify-between w-full group/header">

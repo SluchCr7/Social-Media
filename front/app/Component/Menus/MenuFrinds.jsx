@@ -31,7 +31,7 @@ const FriendCard = memo(({ userData, statusMessage, isFollowing, onFollowToggle 
       className="group flex items-center justify-between p-3 rounded-[1.75rem] hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-300"
     >
       {/* User Info */}
-      <Link href={`/Pages/User/${_id}`} className="flex items-center gap-3 flex-1 min-w-0">
+      <Link href={`/Pages/User/${encodeURIComponent(username)}`} className="flex items-center gap-3 flex-1 min-w-0">
         <div className="relative shrink-0">
           <motion.div
             whileHover={{ scale: 1.08 }}

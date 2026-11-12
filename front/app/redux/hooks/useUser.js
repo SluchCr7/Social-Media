@@ -268,6 +268,17 @@ export const useUser = () => {
     }
   }, []);
 
+  const getUserByUsername = useCallback(async (username) => {
+    if (!username) return null;
+    try {
+      const res = await api.get(`/auth/username/${encodeURIComponent(username)}`);
+      return res.data;
+    } catch (err) {
+      console.error('Fetch user by username error:', err);
+      return null;
+    }
+  }, []);
+
   const saveMusicInPlayList = useCallback(
     async (musicId) => {
       try {
@@ -397,6 +408,7 @@ export const useUser = () => {
       togglePrivateAccount,
       toggleShowOnlineStatus,
       getUserById,
+      getUserByUsername,
       updateCoverPhoto,
       saveMusicInPlayList,
       toggleBlockNotification,
@@ -417,6 +429,7 @@ export const useUser = () => {
       togglePrivateAccount,
       toggleShowOnlineStatus,
       getUserById,
+      getUserByUsername,
       updateCoverPhoto,
       saveMusicInPlayList,
       toggleBlockNotification,

@@ -40,7 +40,7 @@ const getLink = (notif) => {
   if (notif.actionModel === 'Post') return `/Pages/Post/${notif.actionRef}`;
   if (notif.actionModel === 'Comment') return `/Pages/Post/${notif.actionRef?.postId || notif.actionRef}#comment-${notif.actionRef}`;
   if (notif.actionModel === 'Message') return `/Pages/Messanger?userId=${notif.actionRef}`;
-  if (notif.actionModel === 'User') return `/Pages/User/${notif.actionRef}`;
+  if (notif.actionModel === 'User') return `/Pages/User/${encodeURIComponent(notif.sender?.username || notif.actionRef)}`;
   return '/';
 };
 

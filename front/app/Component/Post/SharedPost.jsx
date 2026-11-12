@@ -63,7 +63,7 @@ const SharedPost = memo(({
         >
             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 md:gap-4">
                 <Link
-                    href={user?._id === original?.owner?._id ? '/Pages/Profile' : `/Pages/User/${original?.owner?._id}`}
+                    href={user?._id === original?.owner?._id ? '/Pages/Profile' : `/Pages/User/${encodeURIComponent(original?.owner?.username || '')}`}
                     className="flex items-center gap-3 hover:underline"
                 >
                     <Image

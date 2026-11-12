@@ -160,7 +160,7 @@ const NotificationMenu = ({ showNotifications, setShowNotifications }) => {
                               : notif.actionModel === 'Message'
                                 ? `/Pages/Messanger?userId=${notif.actionRef}`
                                 : notif.actionModel === 'User'
-                                  ? `/Pages/User/${notif.actionRef}`
+                                  ? `/Pages/User/${encodeURIComponent(notif.sender?.username || notif.actionRef)}`
                                   : '/'
                         }
                         onClick={() => {
