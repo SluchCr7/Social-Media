@@ -62,9 +62,22 @@ io.use(async (socket, next) => {
             socket.request?.headers?.cookie
         );
 
-        const token = cookies.accessToken;
+        let token = socket.handshake?.auth?.token || socket.handshake?.auth?.accessToken;
+
+        if (!token && socket.handshake?.headers?.authorization) {
+            const authHeader = socket.handshake.headers.authorization;
+            if (authHeader.startsWith("Bearer ")) {
+                token = authHeader.split(" ")[1];
+            } else {
+                token = authHeader;
+            }
+        }
 
         if (!token) {
+            token = cookies.accessToken || cookies.token;
+        }
+
+        if (!token || token === "undefined" || token === "null") {
             return next(new Error("Authentication required"));
         }
 

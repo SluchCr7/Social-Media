@@ -1,25 +1,7 @@
-'use client';
-import React, { useEffect } from 'react';
-import { usePost } from '@/app/redux/hooks';
-import { useTranslation } from 'react-i18next';
-import MemoriesDesign from './Design';
-import Loading from '@/app/Component/Loading';
+import PageContent from './PageContent';
 
-const MemoriesPage = () => {
-    const { memories, memoriesLoading, fetchMemories } = usePost();
-    const { t } = useTranslation();
+export const metadata = { title: 'Memories' };
 
-    useEffect(() => {
-        fetchMemories();
-    }, [fetchMemories]);
-
-    return (
-        <MemoriesDesign
-            memories={memories}
-            isLoading={memoriesLoading}
-            t={t}
-        />
-    );
-};
-
-export default MemoriesPage;
+export default function Page() {
+  return <PageContent />;
+}

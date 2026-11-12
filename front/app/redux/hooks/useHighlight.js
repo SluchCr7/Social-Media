@@ -1,8 +1,7 @@
 'use client';
 
 import { useCallback, useMemo } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../utils/backendUrl';
+import api from '@/app/utils/api';
 import { useAuth } from './useAuth';
 import { useFeedback } from './useFeedback';
 import { useAppDispatch, useAppSelector } from '../hooks';
@@ -24,8 +23,6 @@ import {
   setSelectedHighlight as setReduxSelectedHighlight,
 } from '../features/highlights/highlightsSlice';
 
-
-
 export const useHighlights = () => {
   const dispatch = useAppDispatch();
   const { user } = useAuth();
@@ -37,24 +34,24 @@ export const useHighlights = () => {
   const openModal = useAppSelector(selectHighlightsOpenModal);
   const selectedHighlight = useAppSelector(selectSelectedHighlight);
 
-  const setOpenModal = useCallback(
-    (open) => {
-      dispatch(setReduxOpenModal(open));
-    },
-    [dispatch]
-  );
-
-  const setSelectedHighlight = useCallback(
-    (h) => {
-      dispatch(setReduxSelectedHighlight(h));
-    },
-    [dispatch]
-  );
-
   const setHighlights = useCallback(
-    (list) => {
-      dispatch(setReduxHighlights(list));
-    },
+    (data) => dispatch(setReduxHighlights(data)),
+    [dispatch]
+  );
+  const setLoading = useCallback(
+    (val) => dispatch(setReduxLoading(val)),
+    [dispatch]
+  );
+  const setError = useCallback(
+    (err) => dispatch(setReduxError(err)),
+    [dispatch]
+  );
+  const setOpenModal = useCallback(
+    (val) => dispatch(setReduxOpenModal(val)),
+    [dispatch]
+  );
+  const setSelectedHighlight = useCallback(
+    (hl) => dispatch(setReduxSelectedHighlight(hl)),
     [dispatch]
   );
 
@@ -64,12 +61,7 @@ export const useHighlights = () => {
       if (!userIdToFetch) return;
       dispatch(setReduxLoading(true));
       try {
-        const res = await axios.get(
-          `${API_BASE_URL}/highlight/user/${userIdToFetch}`,
-          {
-            headers: user?.token ? { Authorization: `Bearer ${user.token}` } : {},
-          }
-        );
+        const res = await api.get(`/highlight/user/${userIdToFetch}`);
         const sorted = (res.data || []).sort((a, b) => (a.order || 0) - (b.order || 0));
         dispatch(setReduxHighlights(sorted));
         dispatch(setReduxError(null));
@@ -80,12 +72,12 @@ export const useHighlights = () => {
         dispatch(setReduxLoading(false));
       }
     },
-    [user, dispatch]
+    [user?._id, dispatch]
   );
 
   const createHighlight = useCallback(
     async ({ title, cover, storyIds }) => {
-      if (!user?.token) return showAlert('You must be logged in first.');
+      if (!user?._id) return showAlert('You must be logged in first.');
 
       dispatch(setReduxLoading(true));
       try {
@@ -94,12 +86,7 @@ export const useHighlights = () => {
         formData.append('storyIds', JSON.stringify(storyIds || []));
         if (cover) formData.append('image', cover);
 
-        const res = await axios.post(`${API_BASE_URL}/highlight`, formData, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+        const res = await api.post('/highlight', formData);
 
         const newHighlight = res.data;
         dispatch(addHighlightToState(newHighlight));
@@ -114,18 +101,15 @@ export const useHighlights = () => {
         dispatch(setReduxLoading(false));
       }
     },
-    [user, showAlert, dispatch]
+    [user?._id, showAlert, dispatch]
   );
 
   const deleteHighlight = useCallback(
     async (id) => {
-      if (!user?.token) return showAlert('You must be logged in.');
+      if (!user?._id) return showAlert('You must be logged in.');
 
       try {
-        await axios.delete(`${API_BASE_URL}/highlight/${id}`, {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-
+        await api.delete(`/highlight/${id}`);
         dispatch(removeHighlightFromState(id));
         showAlert('🗑️ Highlight deleted successfully.');
       } catch (err) {
@@ -134,23 +118,16 @@ export const useHighlights = () => {
         showAlert(message);
       }
     },
-    [user, showAlert, dispatch]
+    [user?._id, showAlert, dispatch]
   );
 
   const addStoryToHighlight = useCallback(
     async (highlightId, storyIdOrIds) => {
-      if (!user?.token) return showAlert('You must be logged in.');
+      if (!user?._id) return showAlert('You must be logged in.');
 
       try {
         const payload = Array.isArray(storyIdOrIds) ? { storyIds: storyIdOrIds } : { storyId: storyIdOrIds };
-
-        const res = await axios.patch(
-          `${API_BASE_URL}/highlight/${highlightId}/stories`,
-          payload,
-          {
-            headers: { Authorization: `Bearer ${user.token}` },
-          }
-        );
+        const res = await api.patch(`/highlight/${highlightId}/stories`, payload);
 
         const updated = res.data?.highlight;
         if (updated) {
@@ -165,12 +142,12 @@ export const useHighlights = () => {
         throw err;
       }
     },
-    [user, showAlert, dispatch]
+    [user?._id, showAlert, dispatch]
   );
 
   const updateHighlight = useCallback(
     async (id, updates) => {
-      if (!user?.token) return showAlert('You must be logged in.');
+      if (!user?._id) return showAlert('You must be logged in.');
 
       dispatch(setReduxLoading(true));
       try {
@@ -180,12 +157,7 @@ export const useHighlights = () => {
         if (updates.isPublic !== undefined) formData.append('isPublic', updates.isPublic);
         if (updates.image) formData.append('image', updates.image);
 
-        const res = await axios.patch(`${API_BASE_URL}/highlight/${id}`, formData, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+        const res = await api.patch(`/highlight/${id}`, formData);
 
         const updated = res.data;
         dispatch(updateHighlightInState(updated));
@@ -198,20 +170,15 @@ export const useHighlights = () => {
         dispatch(setReduxLoading(false));
       }
     },
-    [user, showAlert, dispatch]
+    [user?._id, showAlert, dispatch]
   );
 
   const removeStoryFromHighlight = useCallback(
     async (highlightId, storyId) => {
-      if (!user?.token) return showAlert('You must be logged in.');
+      if (!user?._id) return showAlert('You must be logged in.');
 
       try {
-        const res = await axios.delete(
-          `${API_BASE_URL}/highlight/${highlightId}/stories/${storyId}`,
-          {
-            headers: { Authorization: `Bearer ${user.token}` },
-          }
-        );
+        const res = await api.delete(`/highlight/${highlightId}/stories/${storyId}`);
 
         const updated = res.data?.highlight;
         if (updated) {
@@ -226,18 +193,14 @@ export const useHighlights = () => {
         throw err;
       }
     },
-    [user, showAlert, dispatch]
+    [user?._id, showAlert, dispatch]
   );
 
   const reorderStoriesInHighlight = useCallback(
     async (highlightId, storyIds) => {
-      if (!user?.token) return;
+      if (!user?._id) return;
       try {
-        const res = await axios.patch(
-          `${API_BASE_URL}/highlight/${highlightId}/reorder-stories`,
-          { storyIds },
-          { headers: { Authorization: `Bearer ${user.token}` } }
-        );
+        const res = await api.patch(`/highlight/${highlightId}/reorder-stories`, { storyIds });
 
         const updated = res.data?.highlight;
         if (updated) {
@@ -248,24 +211,20 @@ export const useHighlights = () => {
         showAlert('❌ Failed to reorder stories.');
       }
     },
-    [user, showAlert, dispatch]
+    [user?._id, showAlert, dispatch]
   );
 
   const reorderHighlights = useCallback(
     async (highlightIds) => {
-      if (!user?.token) return;
+      if (!user?._id) return;
       try {
-        await axios.post(
-          `${API_BASE_URL}/highlight/reorder`,
-          { highlightIds },
-          { headers: { Authorization: `Bearer ${user.token}` } }
-        );
+        await api.post('/highlight/reorder', { highlightIds });
         showAlert('✅ Highlights reordered.');
       } catch (err) {
         showAlert('❌ Failed to reorder highlights.');
       }
     },
-    [user, showAlert]
+    [user?._id, showAlert]
   );
 
   return useMemo(
@@ -279,13 +238,15 @@ export const useHighlights = () => {
       addStoryToHighlight,
       updateHighlight,
       removeStoryFromHighlight,
-      reorderHighlights,
       reorderStoriesInHighlight,
+      reorderHighlights,
       openModal,
       setOpenModal,
       selectedHighlight,
       setSelectedHighlight,
       setHighlights,
+      setLoading,
+      setError,
     }),
     [
       highlights,
@@ -297,13 +258,15 @@ export const useHighlights = () => {
       addStoryToHighlight,
       updateHighlight,
       removeStoryFromHighlight,
-      reorderHighlights,
       reorderStoriesInHighlight,
+      reorderHighlights,
       openModal,
       setOpenModal,
       selectedHighlight,
       setSelectedHighlight,
       setHighlights,
+      setLoading,
+      setError,
     ]
   );
 };

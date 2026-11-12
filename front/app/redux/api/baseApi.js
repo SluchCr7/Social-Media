@@ -2,11 +2,18 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { logoutSuccess } from '../features/auth/authSlice';
 import { API_BASE_URL } from '../../utils/backendUrl';
 import { refreshAuthSession } from '../../utils/authRefresh';
-import { advanceAuthSessionVersion, getAuthSessionVersion } from '../../utils/authSession';
+import { getStoredAccessToken, clearStoredAuth } from '../../utils/authStorage';
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
   credentials: 'include',
+  prepareHeaders: (headers) => {
+    const token = getStoredAccessToken();
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+    return headers;
+  },
 });
 
 const isAuthEndpoint = (args) => {
@@ -16,7 +23,6 @@ const isAuthEndpoint = (args) => {
 };
 
 const baseQueryWithReauth = async (args, api, extraOptions) => {
-  const authSessionVersion = getAuthSessionVersion();
   let result = await rawBaseQuery(args, api, extraOptions);
 
   if (result.error?.status === 401 && !isAuthEndpoint(args)) {
@@ -24,12 +30,9 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       await refreshAuthSession();
       result = await rawBaseQuery(args, api, extraOptions);
     } catch {
-      if (
-        getAuthSessionVersion() === authSessionVersion &&
-        api.getState()?.auth?.user
-      ) {
+      clearStoredAuth();
+      if (api.getState()?.auth?.user) {
         api.dispatch(logoutSuccess());
-        advanceAuthSessionVersion();
       }
     }
   }

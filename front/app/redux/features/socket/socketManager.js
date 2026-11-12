@@ -1,5 +1,6 @@
 import { io } from 'socket.io-client';
 import { BACKEND_URL } from '../../../utils/backendUrl';
+import { getStoredAccessToken } from '../../../utils/authStorage';
 
 let socketInstance = null;
 
@@ -19,8 +20,10 @@ export const connectSocket = (userId) => {
   if (!userId) return null;
 
   const url = BACKEND_URL;
+  const token = getStoredAccessToken();
   socketInstance = io(url, {
     query: { userId },
+    auth: { token },
     withCredentials: true,
     transports: ['websocket', 'polling'],
   });

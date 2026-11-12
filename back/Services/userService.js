@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const Verification = require('../Modules/VerificationToken');
 const {
@@ -52,10 +53,12 @@ const register = async ({ body, userAgent, ip }) => {
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(body.password, salt);
     const user = new User({ username: body.username, email: body.email, password: hashPassword });
+    const familyId = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
     const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    const refreshToken = generateRefreshToken(user, familyId);
     user.refreshTokens = [{
       tokenHash: hashToken(refreshToken),
+      family: familyId,
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE),
       userAgent: userAgent || '',
@@ -64,7 +67,14 @@ const register = async ({ body, userAgent, ip }) => {
     await user.save();
     return result(201, {
       message: 'User registered successfully.',
-      user: publicUser(user),
+      accessToken,
+      refreshToken,
+      token: accessToken,
+      user: {
+        ...publicUser(user),
+        token: accessToken,
+        accessToken,
+      },
     }, { authCookies: { accessToken, refreshToken } });
   } catch (err) {
     return result(500, { message: err.message || 'Internal Server Error' });
@@ -96,12 +106,14 @@ const login = async ({ body, userAgent, ip, forwardedFor, remoteAddress }) => {
   });
   if (user.loginHistory.length > 20) user.loginHistory = user.loginHistory.slice(-20);
 
+  const familyId = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
   const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user);
+  const refreshToken = generateRefreshToken(user, familyId);
   const now = new Date();
   user.refreshTokens = (user.refreshTokens || []).filter((token) => token.expiresAt > now);
   user.refreshTokens.push({
     tokenHash: hashToken(refreshToken),
+    family: familyId,
     createdAt: now,
     expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE),
     userAgent: userAgent || '',
@@ -109,7 +121,17 @@ const login = async ({ body, userAgent, ip, forwardedFor, remoteAddress }) => {
   });
   if (user.refreshTokens.length > 10) user.refreshTokens = user.refreshTokens.slice(-10);
   await user.save();
-  return result(200, { message: 'Login successful', user: publicUser(user) }, {
+  return result(200, {
+    message: 'Login successful',
+    accessToken,
+    refreshToken,
+    token: accessToken,
+    user: {
+      ...publicUser(user),
+      token: accessToken,
+      accessToken,
+    },
+  }, {
     authCookies: { accessToken, refreshToken },
   });
 };
@@ -162,8 +184,10 @@ const refreshSession = async ({ refreshToken, userAgent, ip, forwardedFor }) => 
     },
     { new: false }
   );
+
   if (!matchedUser) {
-    const recentlyConsumed = await User.exists({
+    // Check if token was consumed within the grace period (concurrent request handling)
+    const recentlyConsumed = await User.findOne({
       _id: payload._id,
       consumedRefreshTokens: {
         $elemMatch: {
@@ -174,12 +198,55 @@ const refreshSession = async ({ refreshToken, userAgent, ip, forwardedFor }) => 
     });
 
     if (recentlyConsumed) {
-      return result(409, {
-        message: 'A refresh request for this session is already in progress.',
-        code: 'REFRESH_ROTATION_IN_PROGRESS',
+      if (recentlyConsumed.accountStatus === 'banned') {
+        return result(403, { message: 'Your account has been banned due to violations.' }, { clearAuthCookies: true });
+      }
+      if (recentlyConsumed.accountStatus === 'suspended' && recentlyConsumed.suspendedUntil && new Date(recentlyConsumed.suspendedUntil) > new Date()) {
+        return result(403, { message: `Your account is suspended until ${new Date(recentlyConsumed.suspendedUntil).toLocaleString()}.` }, { clearAuthCookies: true });
+      }
+
+      // Concurrency grace window: Issue valid access token smoothly without rejecting
+      const accessToken = generateAccessToken(recentlyConsumed);
+      const activeFamilyToken = (recentlyConsumed.refreshTokens || []).find(
+        (t) => t.family === payload.family && t.expiresAt > now
+      );
+
+      let newRefreshToken = refreshToken;
+      if (!activeFamilyToken) {
+        newRefreshToken = generateRefreshToken(recentlyConsumed, payload.family);
+        await User.updateOne(
+          { _id: recentlyConsumed._id },
+          {
+            $push: {
+              refreshTokens: {
+                tokenHash: hashToken(newRefreshToken),
+                createdAt: new Date(),
+                expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE),
+                userAgent: userAgent || '',
+                ip: ip || forwardedFor || '',
+                family: payload.family || '',
+              },
+            },
+          }
+        );
+      }
+
+      return result(200, {
+        message: 'Session refreshed successfully',
+        accessToken,
+        refreshToken: newRefreshToken,
+        token: accessToken,
+        user: {
+          ...publicUser(recentlyConsumed),
+          token: accessToken,
+          accessToken,
+        },
+      }, {
+        authCookies: { accessToken, refreshToken: newRefreshToken },
       });
     }
 
+    // Genuine reuse or revoked session: invalidate entire token family
     if (payload.family) {
       await User.updateOne(
         { _id: payload._id },
@@ -191,6 +258,7 @@ const refreshSession = async ({ refreshToken, userAgent, ip, forwardedFor }) => 
       code: 'TOKEN_REUSE_DETECTED',
     }, { clearAuthCookies: true });
   }
+
   if (matchedUser.accountStatus === 'banned') {
     return result(403, { message: 'Your account has been banned due to violations.' }, {
       clearAuthCookies: true,
@@ -219,16 +287,35 @@ const refreshSession = async ({ refreshToken, userAgent, ip, forwardedFor }) => 
       $pull: { refreshTokens: { expiresAt: { $lt: new Date() } } },
     }
   );
-  return result(200, { message: 'Session refreshed successfully' }, {
+  return result(200, {
+    message: 'Session refreshed successfully',
+    accessToken,
+    refreshToken: newRefreshToken,
+    token: accessToken,
+    user: {
+      ...publicUser(matchedUser),
+      token: accessToken,
+      accessToken,
+    },
+  }, {
     authCookies: { accessToken, refreshToken: newRefreshToken },
   });
 };
 
-const getCurrentUser = async ({ userId }) => {
+const getCurrentUser = async ({ userId, token }) => {
   if (!userId) return errorResult(401, 'Unauthorized', { code: 'UNAUTHORIZED' });
   const user = await User.findById(userId).select('-password -refreshTokens').populate(userOnePopulate);
   if (!user) return errorResult(404, 'User not found', { clearAuthCookies: true });
-  return result(200, { user: publicUser(user) });
+  const userObj = publicUser(user);
+  if (token) {
+    userObj.token = token;
+    userObj.accessToken = token;
+  }
+  return result(200, {
+    user: userObj,
+    token: token || undefined,
+    accessToken: token || undefined,
+  });
 };
 
 const getAllUsers = async () => result(200, await User.find()

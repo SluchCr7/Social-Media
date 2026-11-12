@@ -24,8 +24,13 @@ const cairo = Cairo({
   variable: "--font-arabic",
 });
 
+const appName = process.env.NEXT_PUBLIC_WEBSITE_NAME || "ThreadsV2";
+
 export const metadata = {
-  title: `${process.env.NEXT_PUBLIC_WEBSITE_NAME || 'Zociel'} - Home`,
+  title: {
+    default: appName,
+    template: `%s | ${appName}`,
+  },
   description: "Share your thoughts with the world and connect with others",
 };
 

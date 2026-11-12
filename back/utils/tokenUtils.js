@@ -19,7 +19,7 @@ const REFRESH_TOKEN_EXPIRY = '30d';
 const ACCESS_COOKIE_MAX_AGE = 15 * 60 * 1000; // 15 minutes
 const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 const REFRESH_COOKIE_MAX_AGE = REFRESH_TOKEN_MAX_AGE;
-const REFRESH_TOKEN_ROTATION_GRACE_MS = 30 * 1000;
+const REFRESH_TOKEN_ROTATION_GRACE_MS = 60 * 1000;
 
 /**
  * Hash a token string using SHA-256 for secure database storage
@@ -107,10 +107,12 @@ const verifyRefreshToken = (token) => {
  */
 const getCookieOptions = (isRefresh = false) => {
   const isProduction = process.env.NODE_ENV === 'production';
+  const isHttps = process.env.COOKIE_SECURE === 'true' ||
+    (isProduction && process.env.DOMAIN_NAME && String(process.env.DOMAIN_NAME).startsWith('https://'));
   return {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax',
+    secure: Boolean(isHttps),
+    sameSite: isHttps ? 'none' : 'lax',
     path: '/',
     maxAge: isRefresh ? REFRESH_COOKIE_MAX_AGE : ACCESS_COOKIE_MAX_AGE,
   };
@@ -135,10 +137,13 @@ const setAuthCookies = (res, accessToken, refreshToken) => {
  * Clear authentication cookies
  */
 const clearAuthCookies = (res) => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const isHttps = process.env.COOKIE_SECURE === 'true' ||
+    (isProduction && process.env.DOMAIN_NAME && String(process.env.DOMAIN_NAME).startsWith('https://'));
   const baseOpts = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: Boolean(isHttps),
+    sameSite: isHttps ? 'none' : 'lax',
     path: '/',
   };
 

@@ -7,15 +7,23 @@ const { User } = require('../Modules/User');
 const verifyToken = async (req, res, next) => {
   let token = null;
 
-  // 1. Primary: HTTP-Only cookie
-  if (req.cookies && (req.cookies.accessToken || req.cookies.token)) {
-    token = req.cookies.accessToken || req.cookies.token;
+  // 1. Check Bearer authorization header
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const candidate = authHeader.split(' ')[1];
+    if (candidate && candidate !== 'undefined' && candidate !== 'null') {
+      token = candidate;
+    }
+  } else if (authHeader && authHeader !== 'undefined' && authHeader !== 'null') {
+    token = authHeader;
   }
-  // 2. Secondary: Bearer authorization header
-  else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-    token = req.headers.authorization.split(' ')[1];
-  } else if (req.headers.authorization) {
-    token = req.headers.authorization;
+
+  // 2. Check HTTP-Only cookie fallback
+  if (!token && req.cookies) {
+    const candidate = req.cookies.accessToken || req.cookies.token;
+    if (candidate && candidate !== 'undefined' && candidate !== 'null') {
+      token = candidate;
+    }
   }
 
   if (!token) {
@@ -34,7 +42,7 @@ const verifyToken = async (req, res, next) => {
 
   try {
     // Check account status in DB
-    const user = await User.findById(payload._id).select('accountStatus suspendedUntil isAdmin');
+    const user = await User.findById(payload._id).select('accountStatus suspendedUntil isAdmin email username');
     if (!user) {
       return res.status(401).json({ message: 'User account not found', code: 'USER_NOT_FOUND' });
     }
@@ -50,11 +58,13 @@ const verifyToken = async (req, res, next) => {
       });
     }
 
+    req.token = token;
     req.user = {
       _id: String(user._id),
       id: String(user._id),
       isAdmin: Boolean(user.isAdmin),
-      email: payload.email,
+      email: user.email || payload.email,
+      username: user.username,
     };
 
     next();

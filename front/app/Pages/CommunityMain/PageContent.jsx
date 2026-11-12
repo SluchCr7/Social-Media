@@ -1,0 +1,138 @@
+'use client'
+
+import React, { useEffect, useMemo, useState } from 'react'
+import { useCommunity } from '@/app/redux/hooks';
+import MaidDesign from './MaidDesign'
+
+const CommunityPage = () => {
+  const { communities, isLoading, error, fetchCommunities, addCommunity } = useCommunity()
+
+  // ✅ استخدم useState فقط للحالات التفاعلية
+  const [activeCategory, setActiveCategory] = useState('All')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [sortBy, setSortBy] = useState('Newest')
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
+  const [form, setForm] = useState({
+    Name: '',
+    description: '',
+    Category: 'Technology',
+    isPrivate: false,
+    isForAdults: false,
+    tags: [],
+    newTag: '',
+    rules: [],
+    newRule: '',
+  })
+
+  // ✅ Debounce Search - يقلل re-render الناتج عن الكتابة
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 300)
+    return () => clearTimeout(t)
+  }, [searchTerm])
+
+  // ✅ استخدم useMemo لتوليد الفئات بدون إعادة حساب غير ضروري
+  const categories = useMemo(() => {
+    if (!communities?.length) return ['All']
+    const cats = new Set(communities.map(c => c.Category || c.category || 'Other'))
+    return ['All', ...Array.from(cats).slice(0, 12)]
+  }, [communities])
+
+  // ✅ فلترة وفرز البيانات - مكلفة => استخدم useMemo
+  const filtered = useMemo(() => {
+    if (!communities?.length) return []
+
+    const s = debouncedSearch.toLowerCase()
+
+    const results = communities
+      .filter(c => !activeCategory || activeCategory === 'All' || (c.Category || c.category) === activeCategory)
+      .filter(c => {
+        if (!s) return true
+        const name = (c.Name || c.name || '').toLowerCase()
+        const desc = (c.description || '').toLowerCase()
+        const cat = ((c.Category || c.category) || '').toLowerCase()
+        return name.includes(s) || desc.includes(s) || cat.includes(s)
+      })
+      .map(c => ({ ...c, _membersCount: c.membersCount ?? c.members?.length ?? 0 }))
+
+    // ✅ استخدم switch بدل ifs
+    switch (sortBy) {
+      case 'Most Members':
+        results.sort((a, b) => b._membersCount - a._membersCount)
+        break
+      case 'A-Z':
+        results.sort((a, b) =>
+          (a.Name || a.name || '').localeCompare(b.Name || b.name || '')
+        )
+        break
+      default:
+        results.sort(
+          (a, b) =>
+            new Date(b.createdAt || b.CreatedAt) - new Date(a.createdAt || a.CreatedAt)
+        )
+        break
+    }
+
+    return results
+  }, [communities, activeCategory, debouncedSearch, sortBy])
+
+  // ✅ تثبيت دالة الإنشاء عبر useCallback
+  const handleCreate = async (e) => {
+    e?.preventDefault?.()
+    if (!form.Name.trim() || !form.description.trim()) return
+
+    try {
+      setIsCreating(true)
+      await addCommunity?.({
+        Name: form.Name.trim(),
+        Category: form.Category,
+        description: form.description.trim(),
+        tags: form.tags,
+        rules: form.rules,
+        isPrivate: form.isPrivate,
+        isForAdults: form.isForAdults,
+      })
+      setForm({
+        Name: '',
+        description: '',
+        Category: 'Technology',
+        isPrivate: false,
+        isForAdults: false,
+        tags: [],
+        newTag: '',
+        rules: [],
+        newRule: '',
+      })
+      setShowCreateModal(false)
+    } catch (err) {
+      console.error('Create community error', err)
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
+  return (
+    <MaidDesign
+      categories={categories}
+      activeCategory={activeCategory}
+      setActiveCategory={setActiveCategory}
+      searchTerm={searchTerm}
+      setSearchTerm={setSearchTerm}
+      sortBy={sortBy}
+      setSortBy={setSortBy}
+      filtered={filtered}
+      isLoading={isLoading}
+      error={error}
+      onRetry={() => fetchCommunities({ force: true })}
+      showCreateModal={showCreateModal}
+      setShowCreateModal={setShowCreateModal}
+      form={form}
+      setForm={setForm}
+      handleCreate={handleCreate}
+      isCreating={isCreating}
+    />
+  )
+}
+
+export default CommunityPage

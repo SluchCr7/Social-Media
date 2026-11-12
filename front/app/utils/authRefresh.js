@@ -1,35 +1,45 @@
 import axios from 'axios';
 import { API_BASE_URL } from './backendUrl';
+import {
+  getStoredRefreshToken,
+  saveAuthSession,
+  getStoredUser,
+} from './authStorage';
 
-let refreshPromise;
-
-const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
-
-const postRefresh = () =>
-  axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true });
+let refreshPromise = null;
 
 export const refreshAuthSession = () => {
-  if (!refreshPromise) {
-    refreshPromise = (async () => {
-      for (let attempt = 0; ; attempt += 1) {
-        try {
-          return await postRefresh();
-        } catch (error) {
-          const isRotationInProgress =
-            error.response?.status === 409 &&
-            error.response?.data?.code === 'REFRESH_ROTATION_IN_PROGRESS';
-
-          if (!isRotationInProgress || attempt >= 4) {
-            throw error;
-          }
-
-          await wait(200 * (attempt + 1));
-        }
-      }
-    })().finally(() => {
-      refreshPromise = undefined;
-    });
+  if (refreshPromise) {
+    return refreshPromise;
   }
+
+  refreshPromise = (async () => {
+    try {
+      const storedRefreshToken = getStoredRefreshToken();
+
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/refresh`,
+        storedRefreshToken ? { refreshToken: storedRefreshToken } : {},
+        { withCredentials: true }
+      );
+
+      const data = response.data || {};
+      const newAccessToken = data.accessToken || data.token;
+      const newRefreshToken = data.refreshToken;
+      const currentUser = getStoredUser();
+      const updatedUser = data.user || currentUser;
+
+      saveAuthSession({
+        user: updatedUser,
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      });
+
+      return response;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
 
   return refreshPromise;
 };

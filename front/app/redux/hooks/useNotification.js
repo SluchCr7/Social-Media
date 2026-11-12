@@ -44,14 +44,14 @@ export const useNotify = () => {
 
   const addNotify = useCallback(
     async ({ content, type = 'custom', receiverId, actionRef, actionModel }) => {
-      if (!receiverId || receiverId === user?._id || !user?.token) return;
+      if (!receiverId || receiverId === user?._id || !user?._id) return;
       try {
         await api.post(`/notification/${receiverId}`, { content, type, actionRef, actionModel });
       } catch (err) {
         console.error('Failed to send notification:', err);
       }
     },
-    [user?._id, user?.token]
+    [user?._id]
   );
 
   const deleteNotify = useCallback(
@@ -98,31 +98,31 @@ export const useNotify = () => {
   }, [dispatch]);
 
   const fetchUserNotifications = useCallback(async () => {
-    if (!user?.token) return;
+    if (!user?._id) return;
     try {
       const res = await api.get('/notification/user');
       dispatch(setReduxNotifications(Array.isArray(res.data) ? res.data : []));
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
     }
-  }, [user?.token, dispatch]);
+  }, [user?._id, dispatch]);
 
   const fetchUnreadCount = useCallback(async () => {
-    if (!user?.token) return;
+    if (!user?._id) return;
     try {
       const res = await api.get('/notification/user/unread-count');
       dispatch(setReduxUnreadCount(res.data.unreadCount || 0));
     } catch (err) {
       console.error('Failed to fetch unread count:', err);
     }
-  }, [user?.token, dispatch]);
+  }, [user?._id, dispatch]);
 
   useEffect(() => {
-    if (user?.token) {
+    if (user?._id) {
       fetchUserNotifications();
       fetchUnreadCount();
     }
-  }, [user?.token, fetchUserNotifications, fetchUnreadCount]);
+  }, [user?._id, fetchUserNotifications, fetchUnreadCount]);
 
   return useMemo(
     () => ({

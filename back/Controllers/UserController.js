@@ -50,18 +50,21 @@ const LoginUser = endpoint('login', (req) => ({
   forwardedFor: req.headers['x-forwarded-for'],
   remoteAddress: req.connection?.remoteAddress,
 }));
-const LogoutUser = endpoint('logout');
+const LogoutUser = endpoint('logout', (req) => ({
+  refreshToken: req.cookies?.refreshToken || req.body?.refreshToken,
+}));
 const LogoutAllSessions = endpoint('logoutAllSessions', (req) => ({
   userId: req.user?._id || req.user?.id,
 }));
 const RefreshToken = endpoint('refreshSession', (req) => ({
-  refreshToken: req.cookies?.refreshToken || req.body?.refreshToken,
+  refreshToken: req.cookies?.refreshToken || req.body?.refreshToken || req.headers['x-refresh-token'],
   userAgent: req.headers['user-agent'],
   ip: req.ip,
   forwardedFor: req.headers['x-forwarded-for'],
 }));
 const GetCurrentUser = endpoint('getCurrentUser', (req) => ({
   userId: req.user?._id || req.user?.id,
+  token: req.token || req.cookies?.accessToken || req.cookies?.token,
 }));
 
 const getAllUsers = endpoint('getAllUsers');

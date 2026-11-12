@@ -57,7 +57,7 @@ export const useUser = () => {
         const { user: updatedCurrentUser, targetUser: updatedTargetUser } = res.data;
 
         setUsers((prev) => prev.map((u) => (u._id === targetId ? updatedTargetUser : u)));
-        updateLocalUser({ ...updatedCurrentUser, token: user.token });
+        updateLocalUser({ ...updatedCurrentUser, token: user?.token || updatedCurrentUser?.token });
 
         showToast(res.data.message, 'success');
         return { success: true, isFollowing: res.data.isFollowing };
@@ -201,7 +201,7 @@ export const useUser = () => {
       try {
         const res = await api.put('/auth/update', payload);
         const newUserData = res.data.user || res.data;
-        const updatedUser = { ...user, ...newUserData, token: user.token };
+        const updatedUser = { ...user, ...newUserData, token: user?.token || newUserData?.token };
 
         updateLocalUser(updatedUser);
         showToast(MESSAGES.USER.PROFILE_UPDATE_SUCCESS, 'success', { id: loadingToast });
@@ -371,7 +371,7 @@ export const useUser = () => {
 
   useEffect(() => {
     const fetchSuggested = async () => {
-      if (!user?.token) return;
+      if (!user?._id) return;
       try {
         const res = await api.get('/auth/suggested');
         dispatch(setReduxSuggestedUsers(Array.isArray(res.data) ? res.data : []));
@@ -380,7 +380,7 @@ export const useUser = () => {
       }
     };
     fetchSuggested();
-  }, [user?.token, dispatch]);
+  }, [user?._id, dispatch]);
 
   return useMemo(
     () => ({

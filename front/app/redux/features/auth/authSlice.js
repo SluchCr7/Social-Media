@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { setStoredUser, clearStoredAuth } from '../../../utils/authStorage';
 
 const initialState = {
   user: null,
@@ -18,6 +19,9 @@ export const authSlice = createSlice({
       state.isLogin = Boolean(action.payload);
       state.status = action.payload ? 'authenticated' : 'unauthenticated';
       state.isAuthChecked = true;
+      if (action.payload) {
+        setStoredUser(action.payload);
+      }
     },
     setUsers: (state, action) => {
       state.users = Array.isArray(action.payload) ? action.payload : [];
@@ -28,6 +32,7 @@ export const authSlice = createSlice({
       state.users = state.users.map((u) => (u._id === updatedUser._id ? { ...u, ...updatedUser } : u));
       if (state.user && state.user._id === updatedUser._id) {
         state.user = { ...state.user, ...updatedUser };
+        setStoredUser(state.user);
       }
     },
     removeUserFromList: (state, action) => {
@@ -52,6 +57,7 @@ export const authSlice = createSlice({
       state.isLogin = false;
       state.status = 'unauthenticated';
       state.isAuthChecked = true;
+      clearStoredAuth();
     },
   },
 });

@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../utils/backendUrl';
+import api from '@/app/utils/api';
 import { useAuth } from './useAuth';
 import { useFeedback } from './useFeedback';
 import { useAppDispatch, useAppSelector } from '../hooks';
@@ -42,14 +41,10 @@ export const useEvent = () => {
   );
 
   const fetchEvents = useCallback(async () => {
-    if (!user?.token) return;
+    if (!user?._id) return;
     dispatch(setReduxLoading(true));
     try {
-      const res = await axios.get(`${API_BASE_URL}/events/user/${user._id}`, {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
+      const res = await api.get(`/events/user/${user._id}`);
 
       if (res.data.success) {
         dispatch(setReduxEvents(res.data.events || []));
@@ -59,21 +54,16 @@ export const useEvent = () => {
     } finally {
       dispatch(setReduxLoading(false));
     }
-  }, [user?._id, user?.token, dispatch]);
+  }, [user?._id, dispatch]);
 
   const addEvent = useCallback(
     async (event) => {
-      if (!user?.token) return;
+      if (!user?._id) return;
       dispatch(setReduxIsCreating(true));
       try {
-        const res = await axios.post(
-          `${API_BASE_URL}/events`,
-          { ...event, repeatYearly: event.repeatYearly || false },
-          {
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-          }
+        const res = await api.post(
+          '/events',
+          { ...event, repeatYearly: event.repeatYearly || false }
         );
         if (res.data.success) {
           const newEvent = res.data.event;
@@ -88,19 +78,15 @@ export const useEvent = () => {
         dispatch(setReduxIsCreating(false));
       }
     },
-    [user?.token, showAlert, dispatch]
+    [user?._id, showAlert, dispatch]
   );
 
   const updateEvent = useCallback(
     async (event) => {
-      if (!user?.token) return;
+      if (!user?._id) return;
       dispatch(setReduxLoading(true));
       try {
-        const res = await axios.put(`${API_BASE_URL}/events/${event._id}`, event, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
+        const res = await api.put(`/events/${event._id}`, event);
         if (res.data.success) {
           dispatch(updateEventInState(res.data.event));
           showAlert('Event Updated Successfully');
@@ -113,19 +99,15 @@ export const useEvent = () => {
         dispatch(setReduxLoading(false));
       }
     },
-    [user?.token, showAlert, dispatch]
+    [user?._id, showAlert, dispatch]
   );
 
   const deleteEvent = useCallback(
     async (id) => {
-      if (!user?.token) return;
+      if (!user?._id) return;
       dispatch(setReduxLoading(true));
       try {
-        const res = await axios.delete(`${API_BASE_URL}/events/${id}`, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
+        const res = await api.delete(`/events/${id}`);
         if (res.data.success) {
           dispatch(removeEventFromState(id));
           showAlert('Event Deleted Successfully');
@@ -138,7 +120,7 @@ export const useEvent = () => {
         dispatch(setReduxLoading(false));
       }
     },
-    [user?.token, showAlert, dispatch]
+    [user?._id, showAlert, dispatch]
   );
 
   useEffect(() => {

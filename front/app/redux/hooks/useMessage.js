@@ -69,7 +69,7 @@ export const useMessage = () => {
   );
 
   const fetchUsers = useCallback(async () => {
-    if (!user?.token) return;
+    if (!user?._id) return;
     dispatch(setIsUserLoading(true));
 
     cancelSource.current?.cancel?.();
@@ -97,10 +97,10 @@ export const useMessage = () => {
     } finally {
       dispatch(setIsUserLoading(false));
     }
-  }, [user?.token, dispatch]);
+  }, [user?._id, dispatch]);
 
   const fetchMessagesBetweenUsers = useCallback(async () => {
-    if (!selectedUser?._id || !user?.token) return;
+    if (!selectedUser?._id || !user?._id) return;
     dispatch(setIsMessagesLoading(true));
 
     try {
@@ -111,17 +111,17 @@ export const useMessage = () => {
     } finally {
       dispatch(setIsMessagesLoading(false));
     }
-  }, [selectedUser?._id, user?.token, dispatch]);
+  }, [selectedUser?._id, user?._id, dispatch]);
 
   const fetchMessagesByUser = useCallback(async () => {
-    if (!user?._id || !user?.token) return;
+    if (!user?._id) return;
     try {
       const res = await api.get(`/message/user/${user._id}`);
       dispatch(setReduxMessagesByUser(Array.isArray(res.data) ? res.data : []));
     } catch (err) {
       console.error('Error fetching messages by user:', err);
     }
-  }, [user?._id, user?.token, dispatch]);
+  }, [user?._id, dispatch]);
 
   const fetchUnreadMessages = useCallback(async () => {
     if (!user?._id) return;
@@ -155,7 +155,7 @@ export const useMessage = () => {
 
   const AddNewMessage = useCallback(
     async (text, images, replyTo = null) => {
-      if (!selectedUser?._id || !user?.token) return;
+      if (!selectedUser?._id || !user?._id) return;
 
       const tempId = Date.now().toString();
       const tempPhotos = images?.map((img) => ({ url: URL.createObjectURL(img) })) || [];

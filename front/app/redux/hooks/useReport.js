@@ -67,7 +67,7 @@ export const useReport = () => {
 
   const getAllReports = useCallback(
     async ({ page = currentPage, perPage = limit } = {}) => {
-      if (!user?.token) return;
+      if (!user?._id) return;
       dispatch(setReduxLoading(true));
       try {
         const params = { page, limit: perPage };
@@ -75,10 +75,7 @@ export const useReport = () => {
         if (filterType) params.reportedOnType = filterType;
         if (filterSeverity) params.severity = filterSeverity;
 
-        const res = await api.get('/report', {
-          params,
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
+        const res = await api.get('/report', { params });
 
         dispatch(setReduxReports(res.data.reports || []));
         dispatch(setReduxTotalReports(res.data.total || 0));
@@ -90,12 +87,12 @@ export const useReport = () => {
         dispatch(setReduxLoading(false));
       }
     },
-    [user?.token, currentPage, limit, filterStatus, filterType, filterSeverity, dispatch]
+    [user?._id, currentPage, limit, filterStatus, filterType, filterSeverity, dispatch]
   );
 
   const addReport = useCallback(
     async ({ reportedOnType, targetId, text, reason = 'other' }) => {
-      if (!user?.token) return;
+      if (!user?._id) return;
 
       const payload = { text, reason, reportedOnType };
       if (reportedOnType === 'post') payload.postId = targetId;
@@ -104,9 +101,7 @@ export const useReport = () => {
 
       try {
         dispatch(setReduxActionLoading(true));
-        await api.post('/report/add', payload, {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
+        await api.post('/report/add', payload);
 
         showAlert('Report added successfully');
       } catch (err) {
@@ -117,19 +112,18 @@ export const useReport = () => {
         dispatch(setReduxActionLoading(false));
       }
     },
-    [user?.token, showAlert, dispatch]
+    [user?._id, showAlert, dispatch]
   );
 
   const updateReportStatus = useCallback(
     async (reportId, status, reviewNotes = '') => {
-      if (!user?.token) return;
+      if (!user?._id) return;
 
       try {
         dispatch(setReduxActionLoading(true));
         const res = await api.patch(
           `/report/status/${reportId}`,
-          { status, reviewNotes },
-          { headers: { Authorization: `Bearer ${user.token}` } }
+          { status, reviewNotes }
         );
 
         dispatch(updateReportInState({ _id: reportId, ...res.data.report }));
@@ -141,18 +135,16 @@ export const useReport = () => {
         dispatch(setReduxActionLoading(false));
       }
     },
-    [user?.token, showAlert, dispatch]
+    [user?._id, showAlert, dispatch]
   );
 
   const deleteReport = useCallback(
     async (reportId) => {
-      if (!user?.token) return;
+      if (!user?._id) return;
 
       try {
         dispatch(setReduxActionLoading(true));
-        await api.delete(`/report/delete/${reportId}`, {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
+        await api.delete(`/report/delete/${reportId}`);
 
         dispatch(removeReportFromState(reportId));
         showAlert('Report deleted successfully');
@@ -163,12 +155,12 @@ export const useReport = () => {
         dispatch(setReduxActionLoading(false));
       }
     },
-    [user?.token, showAlert, dispatch]
+    [user?._id, showAlert, dispatch]
   );
 
   useEffect(() => {
-    if (user?.token) getAllReports();
-  }, [user?.token, filterStatus, filterType, filterSeverity, getAllReports]);
+    if (user?._id) getAllReports();
+  }, [user?._id, filterStatus, filterType, filterSeverity, getAllReports]);
 
   return useMemo(
     () => ({

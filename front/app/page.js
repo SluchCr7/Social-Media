@@ -1,10 +1,11 @@
-'use client';
-import MainApp from "./Component/MainApp";
+import PageContent from './PageContent';
 
-export default function Home() {
-  return (
-    <div className="flex items-start gap-3 w-full">
-      <MainApp />
-    </div>
-  );
+const appName = process.env.NEXT_PUBLIC_WEBSITE_NAME || 'ThreadsV2';
+
+export const metadata = {
+  title: `Home | ${appName}`,
+};
+
+export default function HomePage() {
+  return <PageContent />;
 }

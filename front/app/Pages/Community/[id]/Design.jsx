@@ -1,7 +1,6 @@
 'use client';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import Head from 'next/head';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -217,10 +216,6 @@ const DesignCommunitySelect = memo(({
 
   return (
     <div className="min-h-screen w-full bg-[#050505] text-white selection:bg-blue-500/30 selection:text-white font-sans overflow-x-hidden">
-      <Head>
-        <title>{CommunitySelected?.Name} | Community</title>
-      </Head>
-
       {/* 🖼️ Hero Section (Premium) */}
       <section className="relative h-[45vh] lg:h-[60vh] min-h-[400px] w-full group">
         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-black/40 z-10" />

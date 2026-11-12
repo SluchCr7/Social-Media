@@ -61,7 +61,7 @@ export default function SocketBridge() {
       dispatch(updateSuggestedUser(updatedUser));
       const currentUser = userRef.current;
       if (currentUser && currentUser._id === updatedUser._id) {
-        dispatch(setUser({ ...currentUser, ...updatedUser, token: currentUser.token }));
+        dispatch(setUser({ ...currentUser, ...updatedUser, token: currentUser.token || currentUser.accessToken }));
       }
     };
     socket.on('user:update', handleUserUpdate);
@@ -77,7 +77,7 @@ export default function SocketBridge() {
             userLevelPoints: points,
             level,
             nextLevelPoints,
-            token: currentUser.token,
+            token: currentUser.token || currentUser.accessToken,
           })
         );
         if (levelChanged) {

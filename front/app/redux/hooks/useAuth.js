@@ -21,6 +21,13 @@ import {
 } from '../features/auth/authSlice';
 import api from '@/app/utils/api';
 import { advanceAuthSessionVersion, getAuthSessionVersion } from '@/app/utils/authSession';
+import {
+  getStoredUser,
+  getStoredAccessToken,
+  getStoredRefreshToken,
+  saveAuthSession,
+  clearStoredAuth,
+} from '@/app/utils/authStorage';
 import { useFeedback } from './useFeedback';
 import { MESSAGES } from '@/app/utils/messages';
 
@@ -68,12 +75,20 @@ export const useAuth = () => {
       try {
         const res = await api.post('/auth/login', { email, password });
         const userData = res.data.user;
+        const accessToken = res.data.accessToken || res.data.token;
+        const refreshToken = res.data.refreshToken;
 
         if (!userData) {
           throw new Error('Invalid response from server');
         }
 
-        dispatch(setAuthUser(userData));
+        const storedUser = saveAuthSession({
+          user: userData,
+          accessToken,
+          refreshToken,
+        });
+
+        dispatch(setAuthUser(storedUser || userData));
         advanceAuthSessionVersion();
 
         showToast(res.data.message || MESSAGES.AUTH.LOGIN_SUCCESS, 'success', { id: loadingToast });
@@ -102,17 +117,17 @@ export const useAuth = () => {
 
     if (isConfirmed) {
       try {
-        await api.post('/auth/logout');
+        await api.post('/auth/logout', { refreshToken: getStoredRefreshToken() });
       } catch (error) {
         console.error('Logout error:', error);
-        showToast('Could not sign out. Please check your connection and try again.', 'error');
-        return;
+      } finally {
+        clearStoredAuth();
+        dispatch(logoutSuccess());
+        advanceAuthSessionVersion();
+        window.location.href = '/Pages/Login';
       }
-      dispatch(logoutSuccess());
-      advanceAuthSessionVersion();
-      window.location.href = '/Pages/Login';
     }
-  }, [confirmAction, dispatch, showToast]);
+  }, [confirmAction, dispatch]);
 
   const registerNewUser = useCallback(
     async (username, email, password) => {
@@ -122,9 +137,16 @@ export const useAuth = () => {
       try {
         const res = await api.post('/auth/register', { username, email, password });
         const userData = res.data.user;
+        const accessToken = res.data.accessToken || res.data.token;
+        const refreshToken = res.data.refreshToken;
 
         if (userData) {
-          dispatch(setAuthUser(userData));
+          const storedUser = saveAuthSession({
+            user: userData,
+            accessToken,
+            refreshToken,
+          });
+          dispatch(setAuthUser(storedUser || userData));
           advanceAuthSessionVersion();
         }
 
@@ -153,27 +175,49 @@ export const useAuth = () => {
     }
   }, [dispatch]);
 
-  // Server-side session verification via HTTP-only cookie on mount
+  // Synchronize stored user on initial client mount to prevent logout on session close/refresh
+  useEffect(() => {
+    const cachedUser = getStoredUser();
+    if (cachedUser && !selectCurrentUser(store.getState())) {
+      dispatch(setAuthUser(cachedUser));
+      dispatch(setIsLogin(true));
+    }
+  }, [dispatch, store]);
+
+  // Server-side session verification via HTTP-only cookie and stored token
   useEffect(() => {
     let isMounted = true;
 
     const checkSession = async () => {
+      const cached = getStoredUser();
+      if (cached && !selectCurrentUser(store.getState())) {
+        dispatch(setAuthUser(cached));
+        dispatch(setIsLogin(true));
+      }
+
       try {
         const res = await api.get('/auth/me');
-        if (isMounted && !selectIsAuthChecked(store.getState()) && res.data?.user) {
-          dispatch(setAuthUser(res.data.user));
+        if (isMounted && res.data?.user) {
+          const userWithToken = {
+            ...res.data.user,
+            token: res.data.token || res.data.accessToken || cached?.token || getStoredAccessToken(),
+          };
+          saveAuthSession({
+            user: userWithToken,
+            accessToken: res.data.accessToken || res.data.token,
+          });
+          dispatch(setAuthUser(userWithToken));
           dispatch(setIsLogin(true));
           advanceAuthSessionVersion();
         }
       } catch (err) {
-        if (isMounted && !selectIsAuthChecked(store.getState())) {
+        if (isMounted && !getStoredUser()) {
           dispatch(logoutSuccess());
           advanceAuthSessionVersion();
         }
       } finally {
-        if (isMounted && !selectIsAuthChecked(store.getState())) {
+        if (isMounted) {
           dispatch(setIsAuthChecked(true));
-          advanceAuthSessionVersion();
         }
       }
     };
@@ -188,19 +232,15 @@ export const useAuth = () => {
   }, [isAuthChecked, dispatch, store]);
 
   useEffect(() => {
-    const handleSessionExpired = (event) => {
-      if (
-        selectCurrentUser(store.getState()) &&
-        getAuthSessionVersion() === event.detail?.authSessionVersion
-      ) {
-        dispatch(logoutSuccess());
-        advanceAuthSessionVersion();
-      }
+    const handleSessionExpired = () => {
+      clearStoredAuth();
+      dispatch(logoutSuccess());
+      advanceAuthSessionVersion();
     };
 
     window.addEventListener('auth:session-expired', handleSessionExpired);
     return () => window.removeEventListener('auth:session-expired', handleSessionExpired);
-  }, [dispatch, store]);
+  }, [dispatch]);
 
   // Admin users fetch
   useEffect(() => {
