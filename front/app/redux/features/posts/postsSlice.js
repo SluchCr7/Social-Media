@@ -15,6 +15,7 @@ const initialState = {
   userIsLoading: false,
   isLoading: false,
   isLoadingPostCreated: false,
+  error: null,
 };
 
 export const postsSlice = createSlice({
@@ -87,6 +88,9 @@ export const postsSlice = createSlice({
     setIsLoadingPostCreated: (state, action) => {
       state.isLoadingPostCreated = action.payload;
     },
+    setError: (state, action) => {
+      state.error = action.payload;
+    },
     optimisticLikePost: (state, action) => {
       const { postId, userId } = action.payload;
       const updateList = (list) =>
@@ -154,6 +158,7 @@ export const {
   setUserIsLoading,
   setIsLoading,
   setIsLoadingPostCreated,
+  setError,
   optimisticLikePost,
   optimisticHahaPost,
   optimisticSavePost,

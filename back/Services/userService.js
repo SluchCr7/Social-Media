@@ -413,8 +413,14 @@ const makeFollow = async ({ targetUserId, userId }) => {
     }
     await updateUserPoints(userId, 'FOLLOW_USER', user._id);
   }
-  const updatedCurrentUser = await User.findById(userId).populate(userOnePopulate);
-  const updatedTargetUser = await User.findById(targetUserId).populate(userOnePopulate);
+  const followUserPopulate = [
+    { path: 'following', select: 'username profileName profilePhoto coverPhoto isAccountWithPremiumVerify' },
+    { path: 'followers', select: 'username profileName profilePhoto coverPhoto isAccountWithPremiumVerify' }
+  ];
+  const [updatedCurrentUser, updatedTargetUser] = await Promise.all([
+    User.findById(userId).select('-password -refreshTokens -consumedRefreshTokens').populate(followUserPopulate),
+    User.findById(targetUserId).select('-password -refreshTokens -consumedRefreshTokens').populate(followUserPopulate),
+  ]);
   return result(200, {
     success: true,
     message: isFollowing ? 'Unfollowed successfully' : 'Followed successfully',

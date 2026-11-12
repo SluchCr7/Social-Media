@@ -13,7 +13,6 @@ const reelPopulate = [
 const storyPopulate = [
   { path: "owner", select: userSelect },
   { path: "loves", select: userSelect },
-  { path: "views", select: userSelect },
   { path: "mentions", select: userSelect },
   { path: "reactions.user", select: userSelect },
   { path: "originalStory", populate: { path: "owner", select: userSelect } },
@@ -55,7 +54,7 @@ const EventPopulate = [
 const postPopulate = [
   {
     path: "owner",
-    select: `username profileName profilePhoto coverPhoto isAccountWithPremiumVerify description followers following`,
+    select: "username profileName profilePhoto coverPhoto isAccountWithPremiumVerify description followersCount",
   },
   {
     path: "community",
@@ -63,10 +62,6 @@ const postPopulate = [
   },
   {
     path: "mentions",
-    select: userSelect,
-  },
-  {
-    path: "views",
     select: userSelect,
   },
   {
@@ -85,7 +80,8 @@ const postPopulate = [
   },
   {
     path: "comments",
-    select: "text owner likes",
+    select: "text owner likes isPinned createdAt",
+    options: { limit: 10, sort: { createdAt: -1 } },
     populate: {
       path: "owner",
       select: userSelect,
@@ -101,10 +97,10 @@ const postPopulate = [
   },
 ];
 
-
 const userOnePopulate = [
   {
     path: "audios",
+    select: "title artist cover url duration owner",
     populate: {
       path: "owner",
       model: "User",
@@ -141,22 +137,7 @@ const userOnePopulate = [
   },
   {
     path: "savedPosts",
-    populate: [
-      {
-        path: "owner",
-        model: "User",
-        select: userSelect,
-      },
-      {
-        path: "originalPost",
-        model: "Post",
-        populate: {
-          path: "owner",
-          model: "User",
-          select: userSelect,
-        },
-      },
-    ],
+    select: "_id",
   },
   {
     path: "partner",
@@ -164,47 +145,20 @@ const userOnePopulate = [
   },
   {
     path: "posts",
-    populate: [
-      {
-        path: "owner",
-        model: "User",
-        select: userSelect,
-      },
-      {
-        path: "comments",
-        model: "Comment",
-      },
-      {
-        path: "originalPost",
-        model: "Post",
-        populate: {
-          path: "owner",
-          model: "User",
-          select: userSelect,
-        },
-      },
-    ],
+    select: "_id",
   },
   {
     path: "comments",
-    populate: [
-      {
-        path: "owner",
-        model: "User",
-        select: userSelect,
-      },
-      {
-        path: "targetId",
-        populate: {
-          path: "owner",
-          model: "User",
-          select: userSelect,
-        },
-      },
-    ],
+    select: "text owner createdAt likes targetId",
+    populate: {
+      path: "owner",
+      model: "User",
+      select: userSelect,
+    },
   },
   {
     path: "pinsPosts",
+    select: "text Photos media links mentions Hashtags owner createdAt",
     populate: [
       {
         path: "owner",
@@ -224,6 +178,7 @@ const userOnePopulate = [
   },
   {
     path: "reels",
+    select: "videoUrl thumbnailUrl caption owner createdAt likes views",
     populate: {
       path: "owner",
       model: "User",

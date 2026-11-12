@@ -83,7 +83,7 @@ const DesignReels = ({
         </div>
       )}
 
-      {isLoading && (
+      {isLoading && !hasReels && (
         <div className="snap-start w-full h-screen relative flex items-center justify-center bg-black z-10">
           <ReelSkeleton />
         </div>

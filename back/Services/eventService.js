@@ -1,14 +1,91 @@
 const { Event, ValidateEvent, ValidateEventUpdate } = require("../Modules/Event");
+const { User } = require("../Modules/User");
 const { EventPopulate } = require("../Populates/Populate");
 const { sendNotificationHelper } = require("../utils/SendNotification");
-const { io } = require("../Config/socket");
+const { io, getReceiverSocketId } = require("../Config/socket");
 
 const result = (status, body) => ({ status, body });
+
+const getId = (value) => value?._id?.toString() || value?.toString();
+
+const isPublicEvent = (event) =>
+  event?.visibility === "public" && event?.isPrivate !== true;
+
+const getEventParticipantIds = (...events) => {
+  const ids = new Set();
+  events.forEach((event) => {
+    if (!event) return;
+    [event.createdBy, ...(event.invitedUsers || []), ...(event.attendees || []).map((attendee) => attendee.user)]
+      .map(getId)
+      .filter(Boolean)
+      .forEach((id) => ids.add(id));
+  });
+  return [...ids];
+};
+
+const emitToEventParticipants = (eventName, payload, ...events) => {
+  const socketIds = new Set();
+  getEventParticipantIds(...events).forEach((userId) => {
+    getReceiverSocketId(userId).forEach((socketId) => socketIds.add(socketId));
+  });
+  socketIds.forEach((socketId) => io.to(socketId).emit(eventName, payload));
+};
+
+const validateEventConsistency = (values = {}, existingEvent = null) => {
+  const startTime = values.startTime !== undefined ? values.startTime : existingEvent?.startTime;
+  const endTime = values.endTime !== undefined ? values.endTime : existingEvent?.endTime;
+  if (startTime && endTime) {
+    const toMinutes = (time) => {
+      const [hours, minutes] = time.split(":").map(Number);
+      return hours * 60 + minutes;
+    };
+    if (toMinutes(endTime) <= toMinutes(startTime)) {
+      return "End time must be after start time";
+    }
+  }
+
+  const date = values.date !== undefined ? new Date(values.date) : existingEvent?.date;
+  const repeatPattern =
+    values.repeatPattern !== undefined ? values.repeatPattern : existingEvent?.repeatPattern;
+  const repeatYearly =
+    values.repeatYearly !== undefined ? values.repeatYearly : existingEvent?.repeatYearly;
+  let repeatUntil = existingEvent?.repeatUntil;
+  if (values.repeatUntil !== undefined) {
+    repeatUntil = values.repeatUntil === null ? null : new Date(values.repeatUntil);
+  }
+  const isRecurring = (repeatPattern && repeatPattern !== "none") || repeatYearly;
+
+  if (isRecurring && repeatUntil && date && repeatUntil < date) {
+    return "Repeat-until date must be on or after the event date";
+  }
+  return null;
+};
+
+async function getVisibleEventFilter(userId) {
+  const followedUserIds = await User.find({ followers: userId }).distinct("_id");
+  return {
+    $or: [
+      { createdBy: userId },
+      { invitedUsers: userId },
+      { "attendees.user": userId },
+      { visibility: "public", isPrivate: { $ne: true } },
+      {
+        visibility: "followers",
+        isPrivate: { $ne: true },
+        createdBy: { $in: followedUserIds },
+      },
+    ],
+  };
+}
 
 async function createEvent(body, userId) {
   const { error } = ValidateEvent(body);
   if (error) {
     return result(400, { success: false, message: error.details[0].message });
+  }
+  const consistencyError = validateEventConsistency(body);
+  if (consistencyError) {
+    return result(400, { success: false, message: consistencyError });
   }
 
   const event = await Event.create({
@@ -35,7 +112,11 @@ async function createEvent(body, userId) {
     }
   }
 
-  io.emit("event:create", event);
+  if (isPublicEvent(event)) {
+    io.emit("event:create", event);
+  } else {
+    emitToEventParticipants("event:create", event, event);
+  }
   return result(201, {
     success: true,
     message: "Event created successfully",
@@ -43,28 +124,48 @@ async function createEvent(body, userId) {
   });
 }
 
-async function getEvents(filters) {
+async function getEvents(filters, userId) {
   const { type, status, priority, startDate, endDate } = filters;
-  const query = {};
+  const query = await getVisibleEventFilter(userId);
   if (type) query.type = type;
   if (status) query.status = status;
   if (priority) query.priority = priority;
   if (startDate || endDate) {
     query.date = {};
-    if (startDate) query.date.$gte = new Date(startDate);
-    if (endDate) query.date.$lte = new Date(endDate);
+    if (startDate) {
+      query.date.$gte = new Date(startDate);
+      if (Number.isNaN(query.date.$gte.getTime())) {
+        return result(400, { success: false, message: "Invalid start date" });
+      }
+    }
+    if (endDate) {
+      query.date.$lte = new Date(endDate);
+      if (Number.isNaN(query.date.$lte.getTime())) {
+        return result(400, { success: false, message: "Invalid end date" });
+      }
+    }
+    if (query.date.$gte && query.date.$lte && query.date.$gte > query.date.$lte) {
+      return result(400, { success: false, message: "Start date must be before end date" });
+    }
   }
   const events = await Event.find(query).populate(EventPopulate).sort({ date: 1 });
   return result(200, { success: true, events });
 }
 
-async function getEventById(id) {
-  const event = await Event.findById(id).populate(EventPopulate);
+async function getEventById(id, userId) {
+  const event = await Event.findOne({
+    _id: id,
+    ...(await getVisibleEventFilter(userId)),
+  }).populate(EventPopulate);
   if (!event) return result(404, { success: false, message: "Event not found" });
   return result(200, { success: true, event });
 }
 
-async function getEventsByUser(userId, filters) {
+async function getEventsByUser(userId, filters, requesterId) {
+  if (getId(userId) !== getId(requesterId)) {
+    return result(403, { success: false, message: "Not authorized to view these events" });
+  }
+
   const { upcoming, past, status } = filters;
   const query = {
     $or: [
@@ -85,12 +186,20 @@ async function getEventsByUser(userId, filters) {
 
 async function getUpcomingEvents(userId, filters) {
   const { days = 7 } = filters;
+  const dayCount = Number(days);
+  if (!Number.isInteger(dayCount) || dayCount < 1 || dayCount > 30) {
+    return result(400, { success: false, message: "Days must be between 1 and 30" });
+  }
   const startDate = new Date();
   const endDate = new Date();
-  endDate.setDate(endDate.getDate() + parseInt(days));
+  endDate.setDate(endDate.getDate() + dayCount);
 
   const events = await Event.find({
-    $or: [{ createdBy: userId }, { invitedUsers: userId }],
+    $or: [
+      { createdBy: userId },
+      { invitedUsers: userId },
+      { "attendees.user": userId },
+    ],
     date: { $gte: startDate, $lte: endDate },
     status: { $ne: "cancelled" },
   })
@@ -103,18 +212,17 @@ async function getUpcomingEvents(userId, filters) {
 
 async function searchEvents(userId, filters) {
   const { q, type, priority } = filters;
-  const query = {
-    $or: [{ createdBy: userId }, { invitedUsers: userId }],
-  };
+  const query = await getVisibleEventFilter(userId);
 
   if (q) {
+    const escapedQuery = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     query.$and = [
       {
         $or: [
-          { title: { $regex: q, $options: "i" } },
-          { description: { $regex: q, $options: "i" } },
-          { location: { $regex: q, $options: "i" } },
-          { tags: { $in: [new RegExp(q, "i")] } },
+          { title: { $regex: escapedQuery, $options: "i" } },
+          { description: { $regex: escapedQuery, $options: "i" } },
+          { location: { $regex: escapedQuery, $options: "i" } },
+          { tags: { $in: [new RegExp(escapedQuery, "i")] } },
         ],
       },
     ];
@@ -145,12 +253,22 @@ async function updateEvent(id, body, userId) {
       message: "Not authorized to update this event",
     });
   }
+  const consistencyError = validateEventConsistency(body, event);
+  if (consistencyError) {
+    return result(400, { success: false, message: consistencyError });
+  }
 
   const updatedEvent = await Event.findByIdAndUpdate(
     id,
     { $set: body },
     { new: true, runValidators: true }
   ).populate(EventPopulate);
+  if (isPublicEvent(updatedEvent)) {
+    io.emit("event:update", updatedEvent);
+  } else {
+    if (isPublicEvent(event)) io.emit("event:delete", id);
+    emitToEventParticipants("event:update", updatedEvent, event, updatedEvent);
+  }
   if (updatedEvent.invitedUsers?.length > 0) {
     for (const invitedUserId of updatedEvent.invitedUsers) {
       await sendNotificationHelper({
@@ -163,7 +281,6 @@ async function updateEvent(id, body, userId) {
       });
     }
   }
-  io.emit("event:update", updatedEvent);
   return result(200, { success: true, message: "Event updated", event: updatedEvent });
 }
 
@@ -178,7 +295,11 @@ async function deleteEvent(id, userId) {
   }
 
   await event.deleteOne();
-  io.emit("event:delete", id);
+  if (isPublicEvent(event)) {
+    io.emit("event:delete", id);
+  } else {
+    emitToEventParticipants("event:delete", id, event);
+  }
   return result(200, { success: true, message: "Event deleted" });
 }
 
@@ -188,7 +309,10 @@ async function respondToEvent(id, userId, status) {
   }
   const event = await Event.findById(id);
   if (!event) return result(404, { success: false, message: "Event not found" });
-  if (!event.invitedUsers.includes(userId)) {
+  const isInvited = event.invitedUsers.some(
+    (invitedUserId) => invitedUserId.toString() === userId.toString()
+  );
+  if (!isInvited) {
     return result(403, {
       success: false,
       message: "You are not invited to this event",
@@ -215,7 +339,7 @@ async function respondToEvent(id, userId, status) {
     actionRef: event._id,
     actionModel: "Event",
   });
-  io.emit("event:update", event);
+  emitToEventParticipants("event:update", event, event);
   return result(200, { success: true, message: "RSVP updated", event });
 }
 

@@ -1,7 +1,8 @@
 "use client";
+
 import React, { useState, useCallback, useMemo } from "react";
 import dayjs from "dayjs";
-import { motion } from "framer-motion";
+import { getEventOccurrencesInRange } from "@/app/utils/eventDate";
 import {
   FaBirthdayCake,
   FaUsers,
@@ -11,6 +12,7 @@ import {
   FaFlag,
 } from "react-icons/fa";
 import { useEvent } from '@/app/redux/hooks';
+import { useFeedback } from '@/app/redux/hooks/useFeedback';
 import DesignCalender from "./DesignCalender";
 import CalendarSkeleton from "@/app/Skeletons/CalenderSkeleton";
 
@@ -37,11 +39,22 @@ const Calendar = () => {
     notes: ""
   });
   const [showDayEvents, setShowDayEvents] = useState(null);
-  const [viewMode, setViewMode] = useState("month"); // month, week, agenda
+  const [viewMode, setViewMode] = useState("month");
   const [filterType, setFilterType] = useState("all");
   const [filterPriority, setFilterPriority] = useState("all");
 
-  const { events, loading, addEvent, updateEvent, deleteEvent, setIsCreating, isCreating } = useEvent();
+  const {
+    events,
+    loading,
+    error,
+    fetchEvents,
+    addEvent,
+    updateEvent,
+    deleteEvent,
+    isCreating,
+    isMutating,
+  } = useEvent();
+  const { confirmAction, showToast } = useFeedback();
 
   const typeIcons = useMemo(() => ({
     birthday: <FaBirthdayCake />,
@@ -61,17 +74,38 @@ const Calendar = () => {
     deadline: "bg-red-500/10 text-red-600 border-red-500/20",
   }), []);
 
-  const priorityColors = useMemo(() => ({
-    low: "bg-gray-500/10 text-gray-600",
-    medium: "bg-blue-500/10 text-blue-600",
-    high: "bg-orange-500/10 text-orange-600",
-    urgent: "bg-red-500/10 text-red-600",
-  }), []);
+  const days = useMemo(() => {
+    if (viewMode === "week") {
+      return Array.from({ length: 7 }, (_, index) =>
+        currentDate.startOf("week").add(index, "day")
+      );
+    }
+
+    const startDate = currentDate.startOf("month").startOf("week");
+    const endDate = currentDate.endOf("month").endOf("week");
+    const calendarDays = [];
+    for (let date = startDate; !date.isAfter(endDate, "day"); date = date.add(1, "day")) {
+      calendarDays.push(date);
+    }
+    return calendarDays;
+  }, [currentDate, viewMode]);
 
   const handleAddEvent = useCallback(async () => {
-    if (!newEvent.title) return;
-    const event = { ...newEvent, date: selectedDate.format("YYYY-MM-DD") };
-    await addEvent(event);
+    if (!newEvent.title.trim() || !selectedDate) return;
+    if (newEvent.startTime && newEvent.endTime && newEvent.endTime <= newEvent.startTime) {
+      showToast("End time must be after start time.", "error");
+      return;
+    }
+
+    const event = {
+      ...newEvent,
+      date: selectedDate.format("YYYY-MM-DD"),
+      repeatYearly: newEvent.repeatPattern === "yearly",
+      repeatUntil: newEvent.repeatUntil || undefined,
+    };
+    const createdEvent = await addEvent(event);
+    if (!createdEvent) return;
+
     setNewEvent({
       title: "",
       description: "",
@@ -91,111 +125,119 @@ const Calendar = () => {
       notes: ""
     });
     setSelectedDate(null);
-  }, [newEvent, selectedDate, addEvent]);
+  }, [newEvent, selectedDate, addEvent, showToast]);
 
   const handleUpdateEvent = useCallback(async () => {
-    if (!selectedEvent.title) return;
-    await updateEvent(selectedEvent);
-    setSelectedEvent(null);
-  }, [selectedEvent, updateEvent]);
+    if (!selectedEvent?.title?.trim()) return;
+    if (
+      selectedEvent.startTime &&
+      selectedEvent.endTime &&
+      selectedEvent.endTime <= selectedEvent.startTime
+    ) {
+      showToast("End time must be after start time.", "error");
+      return;
+    }
+
+    const eventToUpdate = { ...selectedEvent };
+    if (
+      selectedEvent.originalDate &&
+      selectedEvent.date === selectedEvent.occurrenceDate
+    ) {
+      eventToUpdate.date = selectedEvent.originalDate;
+    }
+    if (
+      !eventToUpdate.repeatPattern ||
+      (eventToUpdate.repeatPattern === "none" && eventToUpdate.repeatYearly)
+    ) {
+      eventToUpdate.repeatPattern = eventToUpdate.repeatYearly ? "yearly" : "none";
+    }
+    eventToUpdate.repeatYearly = eventToUpdate.repeatPattern === "yearly";
+    eventToUpdate.repeatUntil =
+      eventToUpdate.repeatPattern === "none"
+        ? null
+        : eventToUpdate.repeatUntil || null;
+
+    const updatedEvent = await updateEvent(eventToUpdate);
+    if (updatedEvent) setSelectedEvent(null);
+  }, [selectedEvent, updateEvent, showToast]);
 
   const handleDeleteEvent = useCallback(async () => {
-    if (!selectedEvent) return;
-    const originalId = selectedEvent._id?.split("_repeat_")[0] || selectedEvent._id;
-    await deleteEvent(originalId);
-    setSelectedEvent(null);
-  }, [selectedEvent, deleteEvent]);
-
-  const startOfMonth = currentDate.startOf("month");
-  const endOfMonth = currentDate.endOf("month");
-  const startDate = startOfMonth.startOf("week");
-  const endDate = endOfMonth.endOf("week");
-
-  const days = [];
-  let date = startDate;
-  while (date.isBefore(endDate) || date.isSame(endDate)) {
-    days.push(date);
-    date = date.add(1, "day");
-  }
-
-  // Generate recurring events
-  const expandedEvents = useMemo(() => {
-    return events.flatMap((ev) => {
-      if (!ev.repeatYearly && ev.repeatPattern === "none") return [ev];
-
-      const originalDate = dayjs(ev.date);
-      const startYear = dayjs().year();
-      const yearsToGenerate = 10;
-
-      const repeatedInstances = Array.from({ length: yearsToGenerate }, (_, i) => {
-        const year = startYear + i;
-        return {
-          ...ev,
-          date: originalDate.year(year).format("YYYY-MM-DD"),
-          _id: `${ev._id}_repeat_${year}`,
-        };
-      });
-
-      return [ev, ...repeatedInstances];
+    if (!selectedEvent?._id) return;
+    const isRecurring =
+      (selectedEvent.repeatPattern && selectedEvent.repeatPattern !== "none") ||
+      selectedEvent.repeatYearly;
+    const confirmed = await confirmAction({
+      title: isRecurring ? "Delete recurring event?" : "Delete event?",
+      text: isRecurring
+        ? "This will delete the event and all of its calendar occurrences."
+        : "This event will be permanently deleted.",
+      confirmButtonText: "Delete",
+      type: "danger",
     });
-  }, [events]);
+    if (!confirmed) return;
 
-  // Filter events
+    const deleted = await deleteEvent(selectedEvent._id);
+    if (deleted) setSelectedEvent(null);
+  }, [selectedEvent, confirmAction, deleteEvent]);
+
+  const rangeStart = viewMode === "agenda" ? currentDate.startOf("month") : days[0];
+  const rangeEnd = viewMode === "agenda" ? currentDate.endOf("month") : days[days.length - 1];
+  const expandedEvents = useMemo(
+    () => events.flatMap((event) => getEventOccurrencesInRange(event, rangeStart, rangeEnd)),
+    [events, rangeStart, rangeEnd]
+  );
+
   const filteredEvents = useMemo(() => {
     let filtered = expandedEvents;
-
-    if (filterType !== "all") {
-      filtered = filtered.filter(ev => ev.type === filterType);
-    }
-
+    if (filterType !== "all") filtered = filtered.filter((event) => event.type === filterType);
     if (filterPriority !== "all") {
-      filtered = filtered.filter(ev => ev.priority === filterPriority);
+      filtered = filtered.filter((event) => event.priority === filterPriority);
     }
-
     return filtered;
   }, [expandedEvents, filterType, filterPriority]);
 
-  const isToday = (d) => dayjs().isSame(d, "day");
+  const isToday = useCallback((date) => dayjs().isSame(date, "day"), []);
 
-  if (loading) return (
-    <div className="w-full">
-      <CalendarSkeleton />
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="w-full">
+        <CalendarSkeleton />
+      </div>
+    );
+  }
 
   return (
-    <>
-      <DesignCalender
-        setNewEvent={setNewEvent}
-        newEvent={newEvent}
-        setSelectedEvent={setSelectedEvent}
-        selectedEvent={selectedEvent}
-        currentDate={currentDate}
-        days={days}
-        isToday={isToday}
-        setSelectedDate={setSelectedDate}
-        typeIcons={typeIcons}
-        setCurrentDate={setCurrentDate}
-        showDayEvents={showDayEvents}
-        setShowDayEvents={setShowDayEvents}
-        loading={loading}
-        events={filteredEvents}
-        typeColors={typeColors}
-        priorityColors={priorityColors}
-        handleAddEvent={handleAddEvent}
-        handleUpdateEvent={handleUpdateEvent}
-        handleDeleteEvent={handleDeleteEvent}
-        selectedDate={selectedDate}
-        setIsCreating={setIsCreating}
-        isCreating={isCreating}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        filterType={filterType}
-        setFilterType={setFilterType}
-        filterPriority={filterPriority}
-        setFilterPriority={setFilterPriority}
-      />
-    </>
+    <DesignCalender
+      setNewEvent={setNewEvent}
+      newEvent={newEvent}
+      setSelectedEvent={setSelectedEvent}
+      selectedEvent={selectedEvent}
+      currentDate={currentDate}
+      days={days}
+      isToday={isToday}
+      setSelectedDate={setSelectedDate}
+      typeIcons={typeIcons}
+      setCurrentDate={setCurrentDate}
+      showDayEvents={showDayEvents}
+      setShowDayEvents={setShowDayEvents}
+      events={filteredEvents}
+      exportEvents={events}
+      typeColors={typeColors}
+      handleAddEvent={handleAddEvent}
+      handleUpdateEvent={handleUpdateEvent}
+      handleDeleteEvent={handleDeleteEvent}
+      selectedDate={selectedDate}
+      isCreating={isCreating}
+      isMutating={isMutating}
+      viewMode={viewMode}
+      setViewMode={setViewMode}
+      filterType={filterType}
+      setFilterType={setFilterType}
+      filterPriority={filterPriority}
+      setFilterPriority={setFilterPriority}
+      eventError={error}
+      onRetry={fetchEvents}
+    />
   );
 };
 

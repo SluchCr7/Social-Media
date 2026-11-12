@@ -46,7 +46,7 @@ const AddEventModal = ({
   const handleRemoveTag = (tag) => {
     setNewEvent({
       ...newEvent,
-      tags: newEvent.tags.filter(t => t !== tag)
+      tags: (newEvent.tags || []).filter(t => t !== tag)
     });
   };
 
@@ -63,7 +63,7 @@ const AddEventModal = ({
   const handleRemoveReminder = (minutes) => {
     setNewEvent({
       ...newEvent,
-      reminders: newEvent.reminders.filter(r => r.time !== minutes)
+      reminders: (newEvent.reminders || []).filter(r => r.time !== minutes)
     });
   };
 
@@ -92,6 +92,7 @@ const AddEventModal = ({
           </div>
           <button
             onClick={() => setSelectedDate(null)}
+            disabled={isCreating}
             className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
           >
             <X size={18} />
@@ -193,6 +194,15 @@ const AddEventModal = ({
               <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">{t("Meeting Settings")}</label>
               <div 
                 onClick={() => setNewEvent({ ...newEvent, isVirtual: !newEvent.isVirtual })}
+                role="switch"
+                aria-checked={Boolean(newEvent.isVirtual)}
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setNewEvent({ ...newEvent, isVirtual: !newEvent.isVirtual });
+                  }
+                }}
                 className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
                   newEvent.isVirtual 
                     ? 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/30' 
@@ -207,7 +217,52 @@ const AddEventModal = ({
                   <div className={`w-3.5 h-3.5 rounded-full bg-white transition-transform ${newEvent.isVirtual ? 'translate-x-3.5' : 'translate-x-0'}`} />
                 </div>
               </div>
+              {newEvent.isVirtual && (
+                <input
+                  type="url"
+                  placeholder={t("Meeting link")}
+                  value={newEvent.meetingLink || ''}
+                  onChange={(e) => setNewEvent({ ...newEvent, meetingLink: e.target.value })}
+                  className="mt-2 w-full bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl p-2.5 text-xs font-medium outline-none transition-all"
+                />
+              )}
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">
+                {t("Repeat")}
+              </label>
+              <select
+                value={newEvent.repeatPattern || 'none'}
+                onChange={(e) => setNewEvent({
+                  ...newEvent,
+                  repeatPattern: e.target.value,
+                  repeatYearly: e.target.value === 'yearly',
+                  repeatUntil: e.target.value === 'none' ? '' : newEvent.repeatUntil,
+                })}
+                className="w-full bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl p-2.5 text-xs font-semibold outline-none transition-all cursor-pointer"
+              >
+                {['none', 'daily', 'weekly', 'monthly', 'yearly'].map((pattern) => (
+                  <option key={pattern} value={pattern}>{t(pattern)}</option>
+                ))}
+              </select>
+            </div>
+            {newEvent.repeatPattern && newEvent.repeatPattern !== 'none' && (
+              <div>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1 block">
+                  {t("Repeat until")}
+                </label>
+                <input
+                  type="date"
+                  min={selectedDate.format('YYYY-MM-DD')}
+                  value={newEvent.repeatUntil || ''}
+                  onChange={(e) => setNewEvent({ ...newEvent, repeatUntil: e.target.value })}
+                  className="w-full bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl p-2.5 text-xs font-medium outline-none transition-all"
+                />
+              </div>
+            )}
           </div>
 
           {/* Reminders & Tags */}
@@ -281,7 +336,7 @@ const AddEventModal = ({
           <Button
             className="rounded-xl px-5 py-2 text-xs font-bold"
             isLoading={isCreating}
-            disabled={!newEvent.title}
+            disabled={!newEvent.title?.trim() || isCreating}
             onClick={handleAddEvent}
           >
             <Plus size={15} className="mr-1.5" />

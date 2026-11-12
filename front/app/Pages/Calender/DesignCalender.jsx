@@ -16,6 +16,7 @@ import {
 } from 'react-icons/hi2';
 import { motion, AnimatePresence } from 'framer-motion';
 import dayjs from 'dayjs';
+import { getEventDay } from '@/app/utils/eventDate';
 import { useTranslation } from 'react-i18next';
 import dynamic from 'next/dynamic';
 import { useDebounce } from '@/app/hooks/useDebounce';
@@ -28,8 +29,9 @@ const ShowAllEvents = dynamic(() => import('@/app/Component/AddandUpdateMenus/Sh
 const DesignCalender = React.memo(({
   setNewEvent, newEvent,
   currentDate, days, isToday, setSelectedDate, typeIcons, setCurrentDate, showDayEvents, selectedEvent, setSelectedEvent,
-  setShowDayEvents, loading, events, typeColors, priorityColors, handleAddEvent, handleUpdateEvent, handleDeleteEvent, selectedDate,
-  setIsCreating, isCreating, viewMode, setViewMode, filterType, setFilterType, filterPriority, setFilterPriority
+  setShowDayEvents, events, exportEvents, typeColors, handleAddEvent, handleUpdateEvent, handleDeleteEvent, selectedDate,
+  isCreating, isMutating, viewMode, setViewMode, filterType, setFilterType, filterPriority, setFilterPriority,
+  eventError, onRetry
 }) => {
   const { t } = useTranslation();
 
@@ -37,6 +39,9 @@ const DesignCalender = React.memo(({
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   const dayKey = useCallback((d) => d.format('YYYY-MM-DD'), []);
+  const heading = viewMode === 'week'
+    ? `${days[0]?.format('MMM D')} - ${days[6]?.format('MMM D, YYYY')}`
+    : currentDate?.format?.('MMMM YYYY');
 
   // Filter events by debounced search
   const visibleEvents = useMemo(() => {
@@ -48,9 +53,24 @@ const DesignCalender = React.memo(({
       ev.title?.toLowerCase().includes(queryLower) ||
       ev.description?.toLowerCase().includes(queryLower) ||
       ev.location?.toLowerCase().includes(queryLower) ||
-      ev.tags?.some(tag => tag.toLowerCase().includes(queryLower))
+      ev.tags?.some(tag => tag?.toLowerCase().includes(queryLower))
     );
   }, [events, debouncedSearchQuery]);
+
+  const eventsByDay = useMemo(() => {
+    const grouped = new Map();
+    visibleEvents.forEach((event) => {
+      const key = getEventDay(event.date).format('YYYY-MM-DD');
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key).push(event);
+    });
+    return grouped;
+  }, [visibleEvents]);
+
+  const sortedEvents = useMemo(
+    () => [...visibleEvents].sort((a, b) => getEventDay(a.date).valueOf() - getEventDay(b.date).valueOf()),
+    [visibleEvents]
+  );
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -70,8 +90,10 @@ const DesignCalender = React.memo(({
     visibleEvents.forEach(ev => {
       if (counts[ev.type] !== undefined) counts[ev.type]++;
 
-      const eventDate = dayjs(ev.date);
-      if (eventDate.isAfter(today)) counts.upcoming++;
+      const eventDate = getEventDay(ev.date);
+      const [hours, minutes] = (ev.startTime || '00:00').split(':').map(Number);
+      const eventDateTime = eventDate.hour(hours).minute(minutes);
+      if (eventDateTime.isAfter(today)) counts.upcoming++;
       if (eventDate.isSame(today, 'day')) counts.today++;
     });
 
@@ -80,12 +102,12 @@ const DesignCalender = React.memo(({
 
   const jumpMonth = useCallback((dir) => {
     if (!currentDate || !currentDate.add) return;
-    setCurrentDate(currentDate.add(dir, 'month'));
-  }, [currentDate, setCurrentDate]);
+    setCurrentDate(currentDate.add(dir, viewMode === 'week' ? 'week' : 'month'));
+  }, [currentDate, setCurrentDate, viewMode]);
 
   const handleExportJSON = useCallback(() => {
     try {
-      const blob = new Blob([JSON.stringify(events || [], null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(exportEvents || [], null, 2)], { type: 'application/json' });
       const href = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = href;
@@ -97,11 +119,13 @@ const DesignCalender = React.memo(({
     } catch (err) {
       console.error('Export failed', err);
     }
-  }, [events, currentDate]);
+  }, [exportEvents, currentDate]);
 
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === 'n' && !e.ctrlKey && !e.metaKey && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+      const target = e.target;
+      const isTyping = target?.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName);
+      if (e.key === 'n' && !e.ctrlKey && !e.metaKey && !isTyping) {
         setSelectedDate(dayjs());
       } else if (e.key === 'ArrowLeft' && e.altKey) {
         jumpMonth(-1);
@@ -123,12 +147,12 @@ const DesignCalender = React.memo(({
             <div className="w-1.5 h-9 bg-indigo-600 rounded-full" />
             <div>
               <motion.h1
-                key={currentDate?.format?.('MMMM YYYY')}
+                key={heading}
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-2xl sm:text-3xl font-black tracking-tight"
               >
-                {currentDate?.format?.('MMMM YYYY')}
+                {heading}
               </motion.h1>
               <div className="flex items-center gap-3 text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
                 <button 
@@ -146,6 +170,25 @@ const DesignCalender = React.memo(({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/5 p-1 rounded-xl">
+              {['month', 'week', 'agenda'].map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  aria-label={t(`${mode} view`)}
+                  aria-pressed={viewMode === mode}
+                  onClick={() => setViewMode(mode)}
+                  className={`px-2.5 py-2 rounded-lg text-[10px] font-bold capitalize transition-all ${
+                    viewMode === mode
+                      ? 'bg-white dark:bg-white/10 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                  }`}
+                >
+                  {t(mode)}
+                </button>
+              ))}
+            </div>
+
             {/* Search Input */}
             <div className="relative flex-1 sm:flex-none">
               <HiMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -163,14 +206,14 @@ const DesignCalender = React.memo(({
               <button
                 onClick={() => jumpMonth(-1)}
                 className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-all"
-                title={t('Previous Month')}
+                title={viewMode === 'week' ? t('Previous Week') : t('Previous Month')}
               >
                 <HiChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() => jumpMonth(1)}
                 className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-all"
-                title={t('Next Month')}
+                title={viewMode === 'week' ? t('Next Week') : t('Next Month')}
               >
                 <HiChevronRight className="w-4 h-4" />
               </button>
@@ -188,10 +231,64 @@ const DesignCalender = React.memo(({
           </div>
         </header>
 
+        {eventError && (
+          <div
+            role="alert"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300"
+          >
+            <span>{eventError}</span>
+            <button
+              type="button"
+              onClick={onRetry}
+              className="font-bold underline underline-offset-2"
+            >
+              {t('Retry')}
+            </button>
+          </div>
+        )}
+
         {/* Main Workspace Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Calendar Grid Container */}
           <div className="lg:col-span-3">
+            {viewMode === 'agenda' ? (
+              <div className="space-y-2">
+                {sortedEvents.length ? sortedEvents.map((event) => (
+                  <button
+                    key={event.occurrenceKey || event._id}
+                    type="button"
+                    onClick={() => setSelectedEvent(event)}
+                    className="w-full flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 text-left shadow-sm transition-colors hover:border-indigo-300 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-indigo-500/40"
+                  >
+                    <span className="w-12 shrink-0 text-center">
+                      <span className="block text-[10px] font-bold uppercase text-slate-400">
+                        {getEventDay(event.date).format('MMM')}
+                      </span>
+                      <span className="block text-xl font-black text-indigo-600 dark:text-indigo-400">
+                        {getEventDay(event.date).format('D')}
+                      </span>
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-bold text-slate-900 dark:text-white">
+                        {event.title}
+                      </span>
+                      <span className="block truncate text-xs text-slate-500 dark:text-slate-400">
+                        {[event.startTime, event.location].filter(Boolean).join(' · ') || t(event.type)}
+                      </span>
+                    </span>
+                    <span className={`rounded-lg border px-2 py-1 text-[10px] font-bold ${
+                      typeColors?.[event.type] || 'border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-300'
+                    }`}>
+                      {t(event.type)}
+                    </span>
+                  </button>
+                )) : (
+                  <div className="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-500 dark:border-white/10 dark:text-slate-400">
+                    {t('No events in this period')}
+                  </div>
+                )}
+              </div>
+            ) : (
             <div className="bg-white dark:bg-white/[0.03] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden">
               {/* Weekday Headers */}
               <div className="grid grid-cols-7 border-b border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02]">
@@ -214,11 +311,11 @@ const DesignCalender = React.memo(({
                 >
                   {days?.map((day, idx) => {
                     const dayStr = dayKey(day);
-                    const dayEvents = visibleEvents.filter(ev => dayjs(ev.date).format('YYYY-MM-DD') === dayStr);
+                    const dayEvents = eventsByDay.get(dayStr) || [];
                     const isTodayFlag = isToday(day);
                     const preview = dayEvents.slice(0, 2);
                     const moreCount = Math.max(0, dayEvents.length - preview.length);
-                    const isCurrentMonth = day.isSame(currentDate, 'month');
+                    const isCurrentMonth = viewMode === 'week' || day.isSame(currentDate, 'month');
 
                     return (
                       <div
@@ -277,9 +374,16 @@ const DesignCalender = React.memo(({
 
                         {/* More Events Counter */}
                         {moreCount > 0 && (
-                          <div className="hidden sm:block text-[9px] font-bold text-indigo-600 dark:text-indigo-400 mt-1">
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setShowDayEvents(dayEvents);
+                            }}
+                            className="hidden sm:block text-left text-[9px] font-bold text-indigo-600 dark:text-indigo-400 mt-1 hover:underline"
+                          >
                             +{moreCount} {t('more')}
-                          </div>
+                          </button>
                         )}
                       </div>
                     );
@@ -287,6 +391,7 @@ const DesignCalender = React.memo(({
                 </motion.div>
               </AnimatePresence>
             </div>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -382,7 +487,6 @@ const DesignCalender = React.memo(({
             setSelectedDate={setSelectedDate}
             handleAddEvent={handleAddEvent}
             isCreating={isCreating}
-            setIsCreating={setIsCreating}
           />
         )}
       </AnimatePresence>
@@ -394,6 +498,7 @@ const DesignCalender = React.memo(({
             handleDeleteEvent={handleDeleteEvent}
             selectedEvent={selectedEvent}
             setSelectedEvent={setSelectedEvent}
+            isMutating={isMutating}
           />
         )}
       </AnimatePresence>

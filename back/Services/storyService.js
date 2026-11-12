@@ -80,7 +80,8 @@ const getAllStories = async (user) => {
       isDeleted: false
     })
       .populate(storyPopulate)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     const filteredStories = stories.filter(story => {
       if (!story.isCloseFriends) return true;

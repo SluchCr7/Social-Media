@@ -1,6 +1,6 @@
 
 export const checkUserStatus = (action = "perform this action", showAlert, user) => {
-    if (!user || (!user._id && !user.token)) {
+    if (!user || !user._id) {
       if (typeof showAlert === 'function') {
         showAlert(`You must be logged in to ${action}.`);
       }

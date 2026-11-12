@@ -83,6 +83,7 @@ StorySchema.virtual('isExpired').get(function () {
 StorySchema.index({ owner: 1, expiresAt: -1 });
 StorySchema.index({ expiresAt: 1 });
 StorySchema.index({ highlightIds: 1 });
+StorySchema.index({ expiresAt: 1, isArchived: 1, isDeleted: 1 });
 
 const Story = mongoose.model('Story', StorySchema)
 

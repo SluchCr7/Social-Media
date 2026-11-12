@@ -110,6 +110,7 @@ const reportSchema = new mongoose.Schema({
 
 // 🔒 منع التكرار حسب نوع البلاغ والهدف
 reportSchema.index({ owner: 1, reportedOnType: 1, postId: 1, commentId: 1, reportedUserId: 1 }, { unique: true });
+reportSchema.index({ status: 1, createdAt: -1 });
 
 const Report = mongoose.model('Report', reportSchema);
 const ValidateReport = (data) => {

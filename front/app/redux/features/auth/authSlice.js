@@ -15,12 +15,18 @@ export const authSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action) => {
-      state.user = action.payload;
-      state.isLogin = Boolean(action.payload);
-      state.status = action.payload ? 'authenticated' : 'unauthenticated';
+      let safeUser = action.payload;
+      if (safeUser) {
+        safeUser = { ...safeUser };
+        delete safeUser.token;
+        delete safeUser.accessToken;
+      }
+      state.user = safeUser;
+      state.isLogin = Boolean(safeUser);
+      state.status = safeUser ? 'authenticated' : 'unauthenticated';
       state.isAuthChecked = true;
-      if (action.payload) {
-        setStoredUser(action.payload);
+      if (safeUser) {
+        setStoredUser(safeUser);
       }
     },
     setUsers: (state, action) => {

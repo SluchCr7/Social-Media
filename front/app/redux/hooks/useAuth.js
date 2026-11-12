@@ -198,15 +198,14 @@ export const useAuth = () => {
       try {
         const res = await api.get('/auth/me');
         if (isMounted && res.data?.user) {
-          const userWithToken = {
-            ...res.data.user,
-            token: res.data.token || res.data.accessToken || cached?.token || getStoredAccessToken(),
-          };
+          const freshUser = { ...res.data.user };
+          delete freshUser.token;
+          delete freshUser.accessToken;
           saveAuthSession({
-            user: userWithToken,
+            user: freshUser,
             accessToken: res.data.accessToken || res.data.token,
           });
-          dispatch(setAuthUser(userWithToken));
+          dispatch(setAuthUser(freshUser));
           dispatch(setIsLogin(true));
           advanceAuthSessionVersion();
         }

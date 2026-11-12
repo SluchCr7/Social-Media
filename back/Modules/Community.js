@@ -61,6 +61,7 @@ const communitySchema = new mongoose.Schema({
 communitySchema.index({ Category: 1 });
 communitySchema.index({ members: 1 });
 communitySchema.index({ isPrivate: 1 });
+communitySchema.index({ isPrivate: 1, owner: 1, members: 1 });
 
 const Community = mongoose.model('Community', communitySchema);
 

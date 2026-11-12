@@ -13,6 +13,7 @@ import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import Image from 'next/image'
 import MenuSkeleton from '@/app/Skeletons/MenuSkeleton'
+import { getEventDay } from '@/app/utils/eventDate'
 
 const typeIcons = {
   birthday: <HiCake className="text-pink-500" />,
@@ -76,7 +77,7 @@ const MenuUpComingEvents = () => {
             <div className="flex flex-col gap-1 max-h-[350px] overflow-y-auto pr-1">
               {events.map((event, idx) => (
                 <motion.div
-                  key={event._id}
+                  key={event.occurrenceKey || event._id}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.1 }}
@@ -94,12 +95,9 @@ const MenuUpComingEvents = () => {
                       </h3>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-[10px] font-black text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">
-                          {new Date(event.date).toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric'
-                          })}
+                          {getEventDay(event.date).format('MMM D')}
                         </span>
-                        {event.repeatYearly && (
+                        {(event.repeatYearly || (event.repeatPattern && event.repeatPattern !== 'none')) && (
                           <>
                             <span className="w-1 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
                             <span className="text-[10px] font-black text-purple-500 dark:text-purple-400 uppercase tracking-widest">

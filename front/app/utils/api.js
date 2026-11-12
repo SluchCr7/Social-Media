@@ -33,20 +33,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-let isRefreshing = false;
-let failedQueue = [];
-
-const processQueue = (error, token = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-  failedQueue = [];
-};
-
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -57,21 +43,7 @@ api.interceptors.response.use(
     }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((newToken) => {
-            if (newToken) {
-              originalRequest.headers.Authorization = `Bearer ${newToken}`;
-            }
-            return api(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
-      }
-
       originalRequest._retry = true;
-      isRefreshing = true;
 
       try {
         const refreshResponse = await refreshAuthSession();
@@ -80,21 +52,16 @@ api.interceptors.response.use(
           refreshResponse?.data?.token ||
           getStoredAccessToken();
 
-        processQueue(null, newToken);
-
         if (newToken) {
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
         }
         return api(originalRequest);
       } catch (refreshErr) {
-        processQueue(refreshErr, null);
         clearStoredAuth();
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('auth:session-expired'));
         }
         return Promise.reject(refreshErr);
-      } finally {
-        isRefreshing = false;
       }
     }
 

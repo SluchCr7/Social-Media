@@ -73,17 +73,63 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
-const optionalVerifyToken = (req, res, next) => {
-  const hasToken = Boolean(
-    (req.cookies && (req.cookies.accessToken || req.cookies.token)) ||
-    req.headers.authorization
-  );
+const optionalVerifyToken = async (req, res, next) => {
+  let token = null;
 
-  if (!hasToken) {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const candidate = authHeader.split(' ')[1];
+    if (candidate && candidate !== 'undefined' && candidate !== 'null') {
+      token = candidate;
+    }
+  } else if (authHeader && authHeader !== 'undefined' && authHeader !== 'null') {
+    token = authHeader;
+  }
+
+  if (!token && req.cookies) {
+    const candidate = req.cookies.accessToken || req.cookies.token;
+    if (candidate && candidate !== 'undefined' && candidate !== 'null') {
+      token = candidate;
+    }
+  }
+
+  if (!token) {
     return next();
   }
 
-  return verifyToken(req, res, next);
+  const { payload, expired, error } = verifyAccessToken(token);
+
+  if (expired || error || !payload?._id) {
+    // For optional routes, proceed as unauthenticated guest instead of rejecting with 401
+    return next();
+  }
+
+  try {
+    const user = await User.findById(payload._id)
+      .select('accountStatus suspendedUntil isAdmin email username')
+      .lean();
+
+    if (!user || user.accountStatus === 'banned') {
+      return next();
+    }
+
+    if (user.accountStatus === 'suspended' && user.suspendedUntil && new Date(user.suspendedUntil) > new Date()) {
+      return next();
+    }
+
+    req.token = token;
+    req.user = {
+      _id: String(user._id),
+      id: String(user._id),
+      isAdmin: Boolean(user.isAdmin),
+      email: user.email || payload.email,
+      username: user.username,
+    };
+
+    next();
+  } catch {
+    next();
+  }
 };
 
 // Verify admin

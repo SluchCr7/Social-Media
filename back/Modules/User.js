@@ -256,6 +256,15 @@ const UserSchema = new mongoose.Schema({
     toObject: { virtuals: true }
 });
 
+// 🚀 Performance Indexing
+UserSchema.index({ email: 1 }, { unique: true });
+UserSchema.index({ username: 1 });
+UserSchema.index({ followers: 1 });
+UserSchema.index({ "refreshTokens.tokenHash": 1 });
+UserSchema.index({ "consumedRefreshTokens.tokenHash": 1 });
+UserSchema.index({ accountStatus: 1 });
+UserSchema.index({ createdAt: -1 });
+
 // 🔹 Virtuals
 UserSchema.virtual("posts", {
     ref: "Post",

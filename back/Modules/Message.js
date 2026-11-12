@@ -41,6 +41,10 @@ const messageSchema = new mongoose.Schema({
     timestamps: true,
 });
 
+messageSchema.index({ sender: 1, receiver: 1, createdAt: -1 });
+messageSchema.index({ receiver: 1, sender: 1, createdAt: -1 });
+messageSchema.index({ receiver: 1, isRead: 1 });
+
 const Message = mongoose.model('Message', messageSchema)
 
 const ValidateMessage = (message) => {

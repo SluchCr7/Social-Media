@@ -52,6 +52,11 @@ const PostSchema = new mongoose.Schema({
 PostSchema.index({ createdAt: -1 });
 PostSchema.index({ owner: 1, createdAt: -1 });
 PostSchema.index({ community: 1, status: 1, createdAt: -1 });
+PostSchema.index({ status: 1, createdAt: -1 });
+PostSchema.index({ owner: 1, status: 1, createdAt: -1 });
+PostSchema.index({ status: 1, community: 1, createdAt: -1 });
+PostSchema.index({ "media.type": 1, status: 1, createdAt: -1 });
+PostSchema.index({ Hashtags: 1, status: 1, createdAt: -1 });
 
 // ✅ Virtuals
 PostSchema.virtual("comments", {

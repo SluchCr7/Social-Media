@@ -1,35 +1,26 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import SkeletonBlock from './SkeletonBlock';
 
-const CommentSkeleton = () => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      className="relative bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-white/20 dark:border-gray-700/30 w-full mb-4 overflow-hidden"
-    >
-      {/* Shimmer effect */}
-      <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
-      <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-300/50 to-gray-200/50 dark:from-gray-700/50 dark:to-gray-600/50 animate-pulse flex-shrink-0" />
-
-        <div className="flex-1 space-y-3">
-          <div className="w-32 h-4 bg-gradient-to-r from-gray-300/50 to-gray-200/50 dark:from-gray-700/50 dark:to-gray-600/50 rounded-full animate-pulse" />
-          <div className="w-full h-3 bg-gradient-to-r from-gray-300/50 to-gray-200/50 dark:from-gray-700/50 dark:to-gray-600/50 rounded-full animate-pulse" />
-          <div className="w-3/4 h-3 bg-gradient-to-r from-gray-300/50 to-gray-200/50 dark:from-gray-700/50 dark:to-gray-600/50 rounded-full animate-pulse" />
+const CommentSkeleton = () => (
+  <div
+    aria-hidden="true"
+    className="mb-4 w-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.03]"
+  >
+    <div className="flex items-start gap-3">
+      <SkeletonBlock className="h-10 w-10 shrink-0 rounded-full" />
+      <div className="min-w-0 flex-1 space-y-3">
+        <div className="flex items-center gap-2">
+          <SkeletonBlock className="h-4 w-28 max-w-[55%] rounded-full" />
+          <SkeletonBlock className="h-3 w-12 rounded-full" />
+        </div>
+        <SkeletonBlock className="h-3 w-full rounded-full" />
+        <SkeletonBlock className="h-3 w-3/4 max-w-full rounded-full" />
+        <div className="flex gap-4 pt-1">
+          <SkeletonBlock className="h-3 w-12 rounded-full" />
+          <SkeletonBlock className="h-3 w-14 rounded-full" />
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes shimmer {
-          100% {
-            transform: translateX(100%);
-          }
-        }
-      `}</style>
-    </motion.div>
-  );
-};
+    </div>
+  </div>
+);
 
 export default CommentSkeleton;

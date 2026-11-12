@@ -109,13 +109,17 @@ const deleteReel = async ({ id, userId }) => {
   return response(200, { message: "Reel deleted successfully" });
 };
 
-const getAllReels = async ({ page: pageQuery, limit: limitQuery }) => {
+const getAllReels = async ({ page: pageQuery, limit: limitQuery, cursor }) => {
   const page = parseBoundedInteger(pageQuery, 1, 1, MAX_PAGE);
   const limit = parseBoundedInteger(limitQuery, 10, 1, MAX_LIMIT);
-  const skip = (page - 1) * limit;
+  const query = {};
+  if (cursor && validId(cursor)) {
+    query._id = { $lt: cursor };
+  }
+  const skip = cursor ? 0 : (page - 1) * limit;
 
   const [reels, totalReels] = await Promise.all([
-    Reel.find()
+    Reel.find(query)
       .populate(reelPopulate)
       .sort({ createdAt: -1, _id: -1 })
       .skip(skip)
@@ -124,11 +128,14 @@ const getAllReels = async ({ page: pageQuery, limit: limitQuery }) => {
     Reel.countDocuments(),
   ]);
 
+  const nextCursor = reels.length === limit ? reels[reels.length - 1]._id : null;
+
   return response(200, {
     page,
     limit,
     totalReels,
     totalPages: Math.ceil(totalReels / limit),
+    nextCursor,
     reels,
   });
 };

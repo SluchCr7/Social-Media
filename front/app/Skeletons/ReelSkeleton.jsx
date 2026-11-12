@@ -1,20 +1,29 @@
-import React from 'react';
+import SkeletonBlock from './SkeletonBlock';
 
-const ReelSkeleton = () => {
-  return (
-    <div className="relative w-full h-[600px] rounded-3xl overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-300/50 to-gray-200/50 dark:from-gray-800/50 dark:to-gray-700/50 animate-pulse" />
-      <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+const ReelSkeleton = () => (
+  <div
+    role="status"
+    aria-label="Loading reel"
+    aria-busy="true"
+    className="absolute inset-0 flex h-full w-full items-center justify-center overflow-hidden bg-black"
+  >
+    <div className="relative h-full w-full overflow-hidden bg-zinc-950">
+      <SkeletonBlock tone="dark" className="absolute inset-0 h-full w-full" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
 
-      <style jsx>{`
-        @keyframes shimmer {
-          100% {
-            transform: translateX(100%);
-          }
-        }
-      `}</style>
+      <div className="absolute bottom-8 left-5 right-16 space-y-3 sm:bottom-10 sm:left-7">
+        <SkeletonBlock tone="dark" className="h-4 w-36 max-w-full rounded-full" />
+        <SkeletonBlock tone="dark" className="h-3 w-full max-w-sm rounded-full" />
+        <SkeletonBlock tone="dark" className="h-3 w-2/3 max-w-xs rounded-full" />
+      </div>
+
+      <div className="absolute bottom-10 right-5 flex flex-col items-center gap-5">
+        <SkeletonBlock tone="dark" className="h-11 w-11 rounded-full" />
+        <SkeletonBlock tone="dark" className="h-11 w-11 rounded-full" />
+        <SkeletonBlock tone="dark" className="h-11 w-11 rounded-full" />
+      </div>
     </div>
-  );
-};
+  </div>
+);
 
 export default ReelSkeleton;

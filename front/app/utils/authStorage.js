@@ -8,7 +8,13 @@ export const getStoredUser = () => {
   if (!isBrowser) return null;
   try {
     const raw = localStorage.getItem(AUTH_USER_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const user = JSON.parse(raw);
+    if (user) {
+      delete user.token;
+      delete user.accessToken;
+    }
+    return user;
   } catch (err) {
     console.warn('Failed to parse stored auth user:', err);
     return null;
@@ -19,7 +25,10 @@ export const setStoredUser = (user) => {
   if (!isBrowser) return;
   try {
     if (user) {
-      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+      const sanitized = { ...user };
+      delete sanitized.token;
+      delete sanitized.accessToken;
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(sanitized));
     } else {
       localStorage.removeItem(AUTH_USER_KEY);
     }
@@ -76,11 +85,9 @@ export const saveAuthSession = ({ user, accessToken, refreshToken }) => {
   if (accessToken) setStoredAccessToken(accessToken);
   if (refreshToken) setStoredRefreshToken(refreshToken);
   if (user) {
-    const userToStore = {
-      ...user,
-      token: accessToken || user.token || getStoredAccessToken(),
-      accessToken: accessToken || user.accessToken || getStoredAccessToken(),
-    };
+    const userToStore = { ...user };
+    delete userToStore.token;
+    delete userToStore.accessToken;
     setStoredUser(userToStore);
     return userToStore;
   }

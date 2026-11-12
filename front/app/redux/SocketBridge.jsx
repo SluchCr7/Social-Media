@@ -23,7 +23,7 @@ import { addStoryToState, updateStoryInState, removeStoryFromState } from './fea
 import { removeStoryFromAllHighlights } from './features/highlights/highlightsSlice';
 import { addReelToState, updateReelInState, removeReelFromState } from './features/reels/reelsSlice';
 import { addMusicToState, updateMusicInState, removeMusicFromState } from './features/music/musicSlice';
-import { addEventToState, updateEventInState, removeEventFromState } from './features/events/eventsSlice';
+import { addEventToState, removeEventFromState } from './features/events/eventsSlice';
 import toast from 'react-hot-toast';
 
 export default function SocketBridge() {
@@ -61,7 +61,7 @@ export default function SocketBridge() {
       dispatch(updateSuggestedUser(updatedUser));
       const currentUser = userRef.current;
       if (currentUser && currentUser._id === updatedUser._id) {
-        dispatch(setUser({ ...currentUser, ...updatedUser, token: currentUser.token || currentUser.accessToken }));
+        dispatch(setUser({ ...currentUser, ...updatedUser }));
       }
     };
     socket.on('user:update', handleUserUpdate);
@@ -77,7 +77,6 @@ export default function SocketBridge() {
             userLevelPoints: points,
             level,
             nextLevelPoints,
-            token: currentUser.token || currentUser.accessToken,
           })
         );
         if (levelChanged) {
@@ -225,12 +224,24 @@ export default function SocketBridge() {
 
     // Event events
     const handleEventCreate = (newEv) => {
-      const currentUserId = userRef.current?._id?.toString();
-      const creatorId = newEv?.createdBy?._id?.toString() || newEv?.createdBy?.toString();
-      if (currentUserId && creatorId === currentUserId) return;
       dispatch(addEventToState(newEv));
     };
-    const handleEventUpdate = (updated) => dispatch(updateEventInState(updated));
+    const handleEventUpdate = (updated) => {
+      const currentUserId = userRef.current?._id?.toString();
+      const eventUserIds = [
+        updated?.createdBy?._id || updated?.createdBy,
+        ...(updated?.invitedUsers || []).map((invitee) => invitee?._id || invitee),
+        ...(updated?.attendees || []).map((attendee) => attendee?.user?._id || attendee?.user),
+      ].map((id) => id?.toString());
+      const isVisible = updated?.visibility === 'public' && updated?.isPrivate !== true;
+
+      if (currentUserId && !isVisible && !eventUserIds.includes(currentUserId)) {
+        dispatch(removeEventFromState(updated?._id));
+        return;
+      }
+
+      dispatch(addEventToState(updated));
+    };
     const handleEventDelete = (id) => dispatch(removeEventFromState(id));
 
     socket.on('event:create', handleEventCreate);

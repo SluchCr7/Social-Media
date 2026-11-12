@@ -21,7 +21,7 @@ const MainApp = () => {
   const { markAllAsRead, unreadCount } = useNotify();
   const { isLogin } = useAuth();
   const { unReadedMessage } = useMessage();
-  const [activeTab, setActiveTab] = useState("following");
+  const [activeTab, setActiveTab] = useState("forYou");
   return (
     <div className="flex-1 w-full min-h-screen pr-6 pl-8 md:pl-12">
       {/* Container wrapper that aligns both Header and Main content */}
@@ -32,7 +32,7 @@ const MainApp = () => {
           setShowNotifications={setShowNotifications}
           unreadCount={unreadCount}
           markAllAsRead={markAllAsRead}
-          activeTab={isLogin ? activeTab : "forYou"} 
+          activeTab={activeTab} 
           setActiveTab={setActiveTab}
         />
 

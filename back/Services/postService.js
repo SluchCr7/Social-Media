@@ -39,23 +39,19 @@ const emitPostEvent = async (event, post, payload = post) => {
 };
 
 const communityVisibilityFilter = async (userId) => {
-  const [publicCommunityIds, memberCommunityIds] = await Promise.all([
-    Community.distinct("_id", {
-      $or: [{ isPrivate: false }, { isPrivate: { $exists: false } }],
-    }),
-    userId
-      ? Community.distinct("_id", {
-        isPrivate: true,
-        $or: [{ members: userId }, { owner: userId }],
-      })
-      : [],
-  ]);
-  return {
-    $or: [
-      { community: null },
-      { community: { $in: [...publicCommunityIds, ...memberCommunityIds] } },
-    ],
-  };
+  if (userId) {
+    const inaccessiblePrivateCommunityIds = await Community.distinct("_id", {
+      isPrivate: true,
+      owner: { $ne: userId },
+      members: { $ne: userId },
+    });
+    if (inaccessiblePrivateCommunityIds.length === 0) return {};
+    return { community: { $nin: inaccessiblePrivateCommunityIds } };
+  }
+
+  const allPrivateCommunityIds = await Community.distinct("_id", { isPrivate: true });
+  if (allPrivateCommunityIds.length === 0) return {};
+  return { community: { $nin: allPrivateCommunityIds } };
 };
 
 const uploadToCloudinary = (buffer) => new Promise((resolve, reject) => {
@@ -70,20 +66,23 @@ const uploadToCloudinary = (buffer) => new Promise((resolve, reject) => {
 });
 
 const getAllPosts = async ({ query, userId }) => {
-  const page = parseInt(query.page) || 1;
-  const limit = parseInt(query.limit) || 10;
+  const page = Math.max(parseInt(query.page, 10) || 1, 1);
+  const limit = Math.min(Math.max(parseInt(query.limit, 10) || 10, 1), 30);
   const skip = (page - 1) * limit;
+  const visibilityFilter = await communityVisibilityFilter(userId);
   const filter = {
     status: "published",
-    ...(await communityVisibilityFilter(userId)),
+    ...visibilityFilter,
   };
-  const posts = await Post.find(filter)
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .populate(postPopulate)
-    .lean();
-  const total = await Post.countDocuments(filter);
+  const [posts, total] = await Promise.all([
+    Post.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate(postPopulate)
+      .lean(),
+    Post.countDocuments(filter),
+  ]);
   return result(200, { posts, total, page, pages: Math.ceil(total / limit) });
 };
 
@@ -543,21 +542,24 @@ const viewPost = async ({ id, userId }) => {
 };
 
 const getPostsByUser = async ({ userId, viewerId, query }) => {
-  const page = parseInt(query.page) || 1;
-  const limit = parseInt(query.limit) || 10;
+  const page = Math.max(parseInt(query.page, 10) || 1, 1);
+  const limit = Math.min(Math.max(parseInt(query.limit, 10) || 10, 1), 30);
   const skip = (page - 1) * limit;
+  const visibilityFilter = await communityVisibilityFilter(viewerId);
   const filter = {
     owner: userId,
     status: "published",
-    ...(await communityVisibilityFilter(viewerId)),
+    ...visibilityFilter,
   };
-  const posts = await Post.find(filter)
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .populate(postPopulate)
-    .lean();
-  const total = await Post.countDocuments(filter);
+  const [posts, total] = await Promise.all([
+    Post.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate(postPopulate)
+      .lean(),
+    Post.countDocuments(filter),
+  ]);
   return result(200, { posts, total, page, pages: Math.ceil(total / limit) });
 };
 

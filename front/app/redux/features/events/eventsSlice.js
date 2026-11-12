@@ -1,46 +1,68 @@
 import { createSlice } from '@reduxjs/toolkit';
 import dayjs from 'dayjs';
-
-const processEventDate = (event) => {
-  if (event?.repeatYearly) {
-    const originalDate = dayjs(event.date);
-    const currentYearDate = originalDate.year(dayjs().year());
-    return { ...event, date: currentYearDate.toDate() };
-  }
-  return event;
-};
+import { getEventDay, getEventOccurrencesInRange } from '@/app/utils/eventDate';
 
 const initialState = {
   events: [],
   upcomingEvents: [],
   loading: false,
   isCreating: false,
+  isMutating: false,
 };
 
-export const eventsSlice = createSlice({
+const eventsSlice = createSlice({
   name: 'events',
   initialState,
   reducers: {
     setEvents: (state, action) => {
-      const raw = Array.isArray(action.payload) ? action.payload : [];
+      state.events = Array.isArray(action.payload) ? action.payload : [];
+    },
+    addEventToState: (state, action) => {
+      const newEvent = action.payload;
+      if (!newEvent?._id) return;
+
+      const index = state.events.findIndex((event) => event?._id === newEvent._id);
+      if (index === -1) {
+        state.events.push(newEvent);
+      } else {
+        state.events[index] = newEvent;
+      }
+    },
+    updateEventInState: (state, action) => {
+      const updatedEvent = action.payload;
+      const index = state.events.findIndex((event) => event?._id === updatedEvent?._id);
+      if (index !== -1) state.events[index] = updatedEvent;
+    },
+    removeEventFromState: (state, action) => {
+      const eventId = action.payload?.toString();
+      state.events = state.events.filter((event) => event?._id?.toString() !== eventId);
+      state.upcomingEvents = state.upcomingEvents.filter((event) => event?._id?.toString() !== eventId);
+    },
+    setUpcomingEvents: (state, action) => {
+      state.upcomingEvents = Array.isArray(action.payload) ? action.payload : [];
     },
     setLoading: (state, action) => {
-      state.loading = action.payload;
+      state.loading = Boolean(action.payload);
     },
     setIsCreating: (state, action) => {
-      state.isCreating = action.payload;
+      state.isCreating = Boolean(action.payload);
+    },
+    setIsMutating: (state, action) => {
+      state.isMutating = Boolean(action.payload);
     },
     checkUpcomingEventsAction: (state) => {
-      const today = dayjs();
-      const upcoming = [];
-      state.events.forEach((event) => {
-        const eventDate = dayjs(event.date);
-        const diff = eventDate.diff(today, 'day');
-        if (diff === 1) {
-          upcoming.push(event);
-        }
-      });
-      state.upcomingEvents = upcoming;
+      const now = dayjs();
+      const today = now.startOf('day');
+      const end = today.add(7, 'day');
+      state.upcomingEvents = state.events
+        .flatMap((event) => getEventOccurrencesInRange(event, today, end))
+        .filter((event) => {
+          const eventDate = getEventDay(event.date);
+          const [hours, minutes] = (event.startTime || '00:00').split(':').map(Number);
+          const eventDateTime = eventDate.hour(hours).minute(minutes);
+          return eventDateTime.isAfter(now);
+        })
+        .sort((a, b) => getEventDay(a.date).valueOf() - getEventDay(b.date).valueOf());
     },
   },
 });
@@ -53,6 +75,7 @@ export const {
   setUpcomingEvents,
   setLoading,
   setIsCreating,
+  setIsMutating,
   checkUpcomingEventsAction,
 } = eventsSlice.actions;
 

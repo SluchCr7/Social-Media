@@ -1,17 +1,12 @@
-import React from 'react';
+import SkeletonBlock from './SkeletonBlock';
 
-const StoriesSkeleton = () => {
-  return (
-    <div className="flex flex-col items-center gap-3 shrink-0 animate-pulse snap-start">
-      {/* Premium Skeleton Card */}
-      <div className="relative w-20 h-20 rounded-[2rem] p-[3px] bg-white/5 border border-white/5 shadow-lg">
-        <div className="w-full h-full rounded-[1.8rem] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-white/5 dark:to-white/10" />
-      </div>
-
-      {/* Label Placeholder */}
-      <div className="w-14 h-2 rounded-full bg-gray-200 dark:bg-white/5" />
+const StoriesSkeleton = () => (
+  <div aria-hidden="true" className="flex shrink-0 snap-start flex-col items-center gap-3">
+    <div className="rounded-[1.8rem] bg-gradient-to-tr from-indigo-500/30 via-purple-500/30 to-pink-500/30 p-[3px] md:rounded-[2.2rem]">
+      <SkeletonBlock className="h-16 w-16 rounded-[1.6rem] border border-white/10 md:h-20 md:w-20 md:rounded-[2rem]" />
     </div>
-  );
-};
+    <SkeletonBlock className="h-2.5 w-14 rounded-full" />
+  </div>
+);
 
 export default StoriesSkeleton;

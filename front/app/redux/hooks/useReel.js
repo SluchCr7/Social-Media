@@ -89,10 +89,10 @@ export const useReels = ({ autoFetch = true } = {}) => {
         console.error('Error fetching reels:', err);
       }
     } finally {
+      fetchingPage.current = false;
+      loadingMore.current = false;
+      controller.current = undefined;
       if (currentRequestId === requestId.current) {
-        fetchingPage.current = false;
-        loadingMore.current = false;
-        controller.current = undefined;
         dispatch(setIsLoading(false));
       }
     }
@@ -104,10 +104,13 @@ export const useReels = ({ autoFetch = true } = {}) => {
 
   useEffect(() => () => {
     requestId.current += 1;
+    fetchingPage.current = false;
+    loadingMore.current = false;
     if (controller.current) {
       controller.current.abort();
-      dispatch(setIsLoading(false));
+      controller.current = undefined;
     }
+    dispatch(setIsLoading(false));
   }, [dispatch]);
 
   const uploadReel = useCallback(async (file, caption = '') => {

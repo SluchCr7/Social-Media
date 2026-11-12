@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { UserPlus, Sparkles } from 'lucide-react';
 
 const Sluchits = ({ activeTab = 'following' }) => {
-  const { posts, isLoading, hasMore, setPage } = usePost();
+  const { posts, isLoading, hasMore, setPage, error, retry } = usePost({ autoFetch: true });
   const { user, users } = useAuth();
   const { setShowAllSuggestedUsers } = useUser();
   const { communities } = useCommunity();
@@ -207,6 +207,20 @@ const Sluchits = ({ activeTab = 'following' }) => {
 
   return (
     <div className="w-full flex flex-col gap-8">
+      {/* ⚠️ Error State with Instant Recovery */}
+      {error && combinedItems.length === 0 && !isLoading && (
+        <div className="flex flex-col items-center justify-center text-center py-12 px-6 my-4 bg-rose-500/10 border border-rose-500/20 rounded-[2rem] shadow-lg">
+          <p className="text-sm font-semibold text-rose-500 mb-3">{t(error)}</p>
+          <button
+            type="button"
+            onClick={retry}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md"
+          >
+            {t("Retry Loading Posts")}
+          </button>
+        </div>
+      )}
+
       {/* ⏳ Initial Loading State */}
       {combinedItems.length === 0 && isLoading && (
         Array.from({ length: 4 }).map((_, i) => (
@@ -241,7 +255,7 @@ const Sluchits = ({ activeTab = 'following' }) => {
           );
         })
       ) : (
-        !isLoading && (
+        !isLoading && !error && (
           /* 🚫 Professional Empty States (Tab Specific) */
           <div className="flex flex-col items-center justify-center text-center py-16 px-6 my-6 bg-white/70 dark:bg-white/[0.02] backdrop-blur-3xl border border-gray-100 dark:border-white/5 rounded-[2.5rem] shadow-xl">
             {activeTab === 'following' ? (

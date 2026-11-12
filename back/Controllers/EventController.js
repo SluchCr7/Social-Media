@@ -9,17 +9,21 @@ exports.createEvent = asyncHandler(async (req, res) => {
 });
 
 exports.getEvents = asyncHandler(async (req, res) => {
-  const result = await eventService.getEvents(req.query);
+  const result = await eventService.getEvents(req.query, req.user._id);
   sendResult(res, result);
 });
 
 exports.getEventById = asyncHandler(async (req, res) => {
-  const result = await eventService.getEventById(req.params.id);
+  const result = await eventService.getEventById(req.params.id, req.user._id);
   sendResult(res, result);
 });
 
 exports.getEventsByUser = asyncHandler(async (req, res) => {
-  const result = await eventService.getEventsByUser(req.params.id, req.query);
+  const result = await eventService.getEventsByUser(
+    req.params.id,
+    req.query,
+    req.user._id
+  );
   sendResult(res, result);
 });
 

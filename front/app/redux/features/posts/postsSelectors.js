@@ -16,3 +16,4 @@ export const selectUserPostsHasMore = createSelector([selectPostsState], (posts)
 export const selectUserPostsLoading = createSelector([selectPostsState], (posts) => Boolean(posts?.userIsLoading));
 export const selectPostsLoading = createSelector([selectPostsState], (posts) => Boolean(posts?.isLoading));
 export const selectPostCreatedLoading = createSelector([selectPostsState], (posts) => Boolean(posts?.isLoadingPostCreated));
+export const selectPostsError = createSelector([selectPostsState], (posts) => posts?.error || null);

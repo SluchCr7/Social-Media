@@ -1,88 +1,81 @@
-'use client';
+import SkeletonBlock from './SkeletonBlock';
 
-import React from 'react';
-import { motion } from 'framer-motion';
-
-const ProfileSkeleton = () => {
-  return (
-    <div className="w-full min-h-screen bg-[#0A0A0A] p-4 md:p-8">
-      <div className="relative w-full max-w-7xl mx-auto overflow-hidden rounded-[3rem] bg-[#0A0A0A] border border-white/5 shadow-2xl">
-
-        {/* Cover Skeleton */}
-        <div className="relative h-64 md:h-80 w-full bg-[#111] overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-white/[0.02] to-transparent animate-pulse" />
-          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0A0A0A] to-transparent" />
-        </div>
-
-        {/* Content Skeleton */}
-        <div className="relative px-8 pb-12 -mt-24 md:-mt-32">
-          <div className="flex flex-col md:flex-row items-end gap-8">
-
-            {/* Avatar Skeleton */}
-            <div className="relative shrink-0">
-              <div className="w-40 h-40 md:w-52 md:h-52 rounded-[3.5rem] bg-white/5 border-4 border-black animate-pulse shadow-2xl" />
-            </div>
-
-            {/* Meta Skeleton */}
-            <div className="flex-1 pb-4 flex flex-col gap-3">
-              <div className="h-10 md:h-14 w-64 bg-white/5 rounded-2xl animate-pulse" />
-              <div className="flex gap-4">
-                <div className="h-4 w-24 bg-white/5 rounded-full animate-pulse" />
-                <div className="h-4 w-24 bg-white/5 rounded-full animate-pulse" />
-                <div className="h-4 w-32 bg-white/5 rounded-full animate-pulse" />
+const ProfileSkeleton = () => (
+  <div
+    role="status"
+    aria-label="Loading profile"
+    aria-busy="true"
+    className="min-h-screen w-full bg-lightMode-bg px-3 py-6 text-lightMode-text dark:bg-darkMode-bg dark:text-darkMode-text sm:px-6 lg:px-8"
+  >
+    <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-5">
+      <section className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+        <SkeletonBlock className="h-48 w-full sm:h-64" />
+        <div className="px-4 pb-6 sm:px-8">
+          <div className="-mt-12 flex flex-col gap-5 sm:-mt-16 sm:flex-row sm:items-end">
+            <SkeletonBlock className="h-24 w-24 shrink-0 rounded-3xl border-4 border-white dark:border-[#0b0b0d] sm:h-32 sm:w-32" />
+            <div className="min-w-0 flex-1 space-y-3 pb-2">
+              <SkeletonBlock className="h-8 w-64 max-w-full rounded-xl" />
+              <div className="flex flex-wrap gap-3">
+                <SkeletonBlock className="h-3 w-24 rounded-full" />
+                <SkeletonBlock className="h-3 w-20 rounded-full" />
+                <SkeletonBlock className="h-3 w-28 rounded-full" />
               </div>
             </div>
-
-            {/* Action Button Skeleton */}
-            <div className="pb-6">
-              <div className="h-14 w-40 bg-white/5 rounded-2xl animate-pulse" />
-            </div>
+            <SkeletonBlock className="h-10 w-32 rounded-xl sm:mb-2" />
           </div>
 
-          {/* Bio Skeleton */}
-          <div className="mt-12 space-y-4">
-            <div className="h-6 w-full max-w-3xl bg-white/5 rounded-xl animate-pulse" />
-            <div className="h-6 w-2/3 max-w-xl bg-white/5 rounded-xl animate-pulse" />
-          </div>
-
-          {/* XP Dash Skeleton */}
-          <div className="mt-12 p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-white/5 animate-pulse" />
-                <div className="space-y-2">
-                  <div className="h-3 w-20 bg-white/5 rounded-full" />
-                  <div className="h-5 w-32 bg-white/5 rounded-full" />
-                </div>
-              </div>
-              <div className="text-right space-y-2">
-                <div className="h-6 w-24 bg-white/5 rounded-full ml-auto" />
-                <div className="h-2 w-16 bg-white/5 rounded-full ml-auto" />
-              </div>
-            </div>
-            <div className="w-full h-3 bg-white/5 rounded-full" />
-          </div>
-
-          {/* Stats Skeleton */}
-          <div className="flex flex-wrap gap-12 mt-12">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex flex-col gap-2">
-                <div className="h-8 w-16 bg-white/5 rounded-xl animate-pulse" />
-                <div className="h-3 w-20 bg-white/5 rounded-full animate-pulse" />
-              </div>
-            ))}
+          <div className="mt-6 max-w-3xl space-y-2">
+            <SkeletonBlock className="h-3 w-full rounded-full" />
+            <SkeletonBlock className="h-3 w-2/3 max-w-full rounded-full" />
           </div>
         </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.03] sm:p-5">
+        <div className="flex items-center gap-4 overflow-hidden">
+          {Array.from({ length: 6 }, (_, index) => (
+            <div key={index} className="flex shrink-0 flex-col items-center gap-2">
+              <SkeletonBlock className="h-14 w-14 rounded-2xl sm:h-16 sm:w-16" />
+              <SkeletonBlock className="h-2.5 w-12 rounded-full" />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+        <SkeletonBlock className="mb-4 h-4 w-36 rounded-full" />
+        <SkeletonBlock className="mb-2 h-3 w-full max-w-3xl rounded-full" />
+        <SkeletonBlock className="h-3 w-2/3 max-w-2xl rounded-full" />
+      </section>
+
+      <div className="flex gap-2 overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-2 dark:border-white/10 dark:bg-white/[0.03]">
+        {Array.from({ length: 4 }, (_, index) => (
+          <SkeletonBlock key={index} className="h-10 w-24 shrink-0 rounded-xl" />
+        ))}
       </div>
 
-      {/* Posts Section Skeleton */}
-      <div className="max-w-7xl mx-auto mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="h-64 bg-white/[0.02] border border-white/5 rounded-[2.5rem] animate-pulse" />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <SkeletonBlock className="h-10 w-full rounded-xl sm:w-72" />
+        <SkeletonBlock className="h-10 w-36 rounded-xl" />
+      </div>
+
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        {[0, 1].map((index) => (
+          <div key={index} className="rounded-3xl border border-slate-200/80 bg-white p-4 dark:border-white/10 dark:bg-white/[0.03] sm:p-6">
+            <div className="mb-5 flex items-center gap-3">
+              <SkeletonBlock className="h-11 w-11 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <SkeletonBlock className="h-3 w-32 rounded-full" />
+                <SkeletonBlock className="h-2.5 w-20 rounded-full" />
+              </div>
+            </div>
+            <SkeletonBlock className="mb-4 aspect-[4/3] w-full rounded-2xl" />
+            <SkeletonBlock className="h-3 w-2/3 max-w-full rounded-full" />
+          </div>
         ))}
       </div>
     </div>
-  );
-};
+  </div>
+);
 
 export default ProfileSkeleton;

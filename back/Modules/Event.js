@@ -149,6 +149,9 @@ const EventSchema = new mongoose.Schema(
 );
 
 // Virtual for checking if event is upcoming
+EventSchema.index({ createdBy: 1, date: 1 });
+EventSchema.index({ date: 1 });
+
 EventSchema.virtual('isUpcoming').get(function () {
   return this.date > new Date();
 });
@@ -175,7 +178,7 @@ function ValidateEvent(obj) {
     color: Joi.string().pattern(/^#[0-9A-Fa-f]{6}$/),
     repeatYearly: Joi.boolean(),
     repeatPattern: Joi.string().valid("none", "daily", "weekly", "monthly", "yearly"),
-    repeatUntil: Joi.date(),
+    repeatUntil: Joi.date().allow(null),
     invitedUsers: Joi.array().items(Joi.string()),
     reminders: Joi.array().items(Joi.object({
       time: Joi.number().min(0).required()
@@ -203,7 +206,7 @@ function ValidateEventUpdate(obj) {
     color: Joi.string().pattern(/^#[0-9A-Fa-f]{6}$/),
     repeatYearly: Joi.boolean(),
     repeatPattern: Joi.string().valid("none", "daily", "weekly", "monthly", "yearly"),
-    repeatUntil: Joi.date(),
+    repeatUntil: Joi.date().allow(null),
     invitedUsers: Joi.array().items(Joi.string()),
     reminders: Joi.array().items(Joi.object({
       time: Joi.number().min(0).required(),

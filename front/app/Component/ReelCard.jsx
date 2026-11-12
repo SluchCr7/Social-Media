@@ -161,15 +161,24 @@ const ReelCard = memo(forwardRef(function ReelCard({ userData, reel, isActive, i
       ref={ref}
       className="relative z-50 w-full h-screen bg-black overflow-hidden select-none"
     >
-      {/* Loading State */}
-      {!videoLoaded && (
-        <div className="absolute inset-0 z-0 bg-gray-900 animate-pulse">
-          <ReelSkeleton />
+      {/* 🖼️ Instant Thumbnail & Video Background */}
+      {reel?.thumbnailUrl && !videoLoaded && (
+        <div className="absolute inset-0 z-0">
+          <Image
+            src={reel.thumbnailUrl}
+            alt={reel?.caption || "Reel thumbnail"}
+            fill
+            priority={isActive}
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+          </div>
         </div>
       )}
 
       {/* 🎥 Video Player */}
-      {/* Click to Toggle Play, Double Click to Like (handled by wrapper or specific handlers) */}
       <div
         className="absolute inset-0 z-0 cursor-pointer"
         onClick={togglePlay}
@@ -179,12 +188,13 @@ const ReelCard = memo(forwardRef(function ReelCard({ userData, reel, isActive, i
           ref={videoRef}
           src={reel?.videoUrl}
           poster={reel?.thumbnailUrl || undefined}
-          className={`w-full h-full object-cover transition-opacity duration-500 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
+          className="w-full h-full object-cover transition-opacity duration-300"
           loop
           muted={isMuted}
           playsInline
-          preload="metadata"
+          preload={isActive ? "auto" : "metadata"}
           onLoadedData={() => setVideoLoaded(true)}
+          onCanPlay={() => setVideoLoaded(true)}
         />
       </div>
 

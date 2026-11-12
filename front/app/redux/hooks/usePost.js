@@ -18,6 +18,7 @@ import {
   selectUserPostsLoading,
   selectPostsLoading,
   selectPostCreatedLoading,
+  selectPostsError,
 } from '../features/posts/postsSelectors';
 import {
   setPosts as setReduxPosts,
@@ -37,6 +38,7 @@ import {
   setUserIsLoading,
   setIsLoading,
   setIsLoadingPostCreated,
+  setError,
   updatePostInState,
   removePostFromState,
   optimisticLikePost,
@@ -48,7 +50,7 @@ import { MESSAGES } from '@/app/utils/messages';
 
 
 
-export const usePost = () => {
+export const usePost = ({ autoFetch = false } = {}) => {
   const dispatch = useAppDispatch();
   const store = useAppStore();
   const { user } = useAuth();
@@ -67,6 +69,7 @@ export const usePost = () => {
   const userIsLoading = useAppSelector(selectUserPostsLoading);
   const isLoading = useAppSelector(selectPostsLoading);
   const isLoadingPostCreated = useAppSelector(selectPostCreatedLoading);
+  const error = useAppSelector(selectPostsError);
 
   const setPosts = useCallback(
     (p) => {
@@ -111,10 +114,11 @@ export const usePost = () => {
       const currentPostsState = store.getState().posts;
       if (
         currentPostsState?.isLoading ||
-        currentPostsState?.loadedPage >= pageNum
+        (currentPostsState?.loadedPage >= pageNum && currentPostsState?.posts?.length > 0)
       ) return;
 
       dispatch(setIsLoading(true));
+      dispatch(setError(null));
       try {
         const res = await api.get(`/post?page=${pageNum}&limit=10`);
         const fetchedPosts = Array.isArray(res.data.posts) ? res.data.posts : [];
@@ -124,6 +128,7 @@ export const usePost = () => {
         dispatch(setLoadedPage(pageNum));
       } catch (err) {
         console.error('Error fetching feed posts:', err.message);
+        dispatch(setError(err.response?.data?.message || 'Could not load posts. Please try again.'));
       } finally {
         dispatch(setIsLoading(false));
       }
@@ -383,8 +388,14 @@ export const usePost = () => {
   );
 
   useEffect(() => {
+    if (autoFetch) {
+      fetchPosts(page);
+    }
+  }, [autoFetch, page, fetchPosts]);
+
+  const retry = useCallback(() => {
     fetchPosts(page);
-  }, [page, fetchPosts]);
+  }, [fetchPosts, page]);
 
   return useMemo(
     () => ({
@@ -392,6 +403,8 @@ export const usePost = () => {
       setPosts,
       isLoading,
       isLoadingPostCreated,
+      error,
+      retry,
       imageView,
       setImageView,
       showPostModelEdit,
@@ -423,6 +436,8 @@ export const usePost = () => {
       setPosts,
       isLoading,
       isLoadingPostCreated,
+      error,
+      retry,
       imageView,
       setImageView,
       showPostModelEdit,

@@ -57,7 +57,7 @@ export const useUser = () => {
         const { user: updatedCurrentUser, targetUser: updatedTargetUser } = res.data;
 
         setUsers((prev) => prev.map((u) => (u._id === targetId ? updatedTargetUser : u)));
-        updateLocalUser({ ...updatedCurrentUser, token: user?.token || updatedCurrentUser?.token });
+        updateLocalUser(updatedCurrentUser);
 
         showToast(res.data.message, 'success');
         return { success: true, isFollowing: res.data.isFollowing };
@@ -201,7 +201,9 @@ export const useUser = () => {
       try {
         const res = await api.put('/auth/update', payload);
         const newUserData = res.data.user || res.data;
-        const updatedUser = { ...user, ...newUserData, token: user?.token || newUserData?.token };
+        const updatedUser = { ...user, ...newUserData };
+        delete updatedUser.token;
+        delete updatedUser.accessToken;
 
         updateLocalUser(updatedUser);
         showToast(MESSAGES.USER.PROFILE_UPDATE_SUCCESS, 'success', { id: loadingToast });

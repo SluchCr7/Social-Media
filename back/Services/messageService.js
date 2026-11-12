@@ -14,6 +14,7 @@ async function getUsersInSideBar(loggedUserId) {
   const messages = await Message.find({
     $or: [{ sender: loggedUserId }, { receiver: loggedUserId }],
   })
+    .select("sender receiver text Photos createdAt isRead")
     .sort({ createdAt: -1 })
     .lean();
 
@@ -73,7 +74,10 @@ async function getMessages(userToChatId, sender) {
       { sender, receiver: userToChatId },
       { sender: userToChatId, receiver: sender },
     ],
-  }).populate(messagePopulate);
+  })
+    .populate(messagePopulate)
+    .sort({ createdAt: 1 })
+    .lean();
 }
 
 async function sendMessage(body, files, userToChatId, sender) {
