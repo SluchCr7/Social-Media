@@ -28,7 +28,7 @@ const AuthShell = ({
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-indigo-700 shadow-lg shadow-black/10">
               <FiHexagon size={22} strokeWidth={2.4} />
             </span>
-            <span className="text-xl font-bold tracking-tight">Zociel</span>
+            <span className="text-xl font-bold tracking-tight">Zocial</span>
           </Link>
         </div>
 
@@ -67,7 +67,7 @@ const AuthShell = ({
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
                 <FiHexagon size={18} strokeWidth={2.4} />
               </span>
-              <span className="text-lg font-bold tracking-tight">Zociel</span>
+              <span className="text-lg font-bold tracking-tight">Zocial</span>
             </Link>
             <Link href="/" aria-label="Go to home" className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">
               <FiArrowUpRight size={19} />

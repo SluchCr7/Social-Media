@@ -43,7 +43,7 @@ const Login = () => {
       storyDescription="The conversations, ideas, and people you care about are right where you left them."
       footer={
         <p className="mt-8 text-center text-sm text-slate-500">
-          New to Zociel?{' '}
+          New to Zocial?{' '}
           <Link href="/Pages/Register" className="font-semibold text-indigo-700 transition hover:text-indigo-500">
             Create an account
           </Link>

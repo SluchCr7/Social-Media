@@ -24,7 +24,7 @@ const cairo = Cairo({
   variable: "--font-arabic",
 });
 
-const appName = process.env.NEXT_PUBLIC_WEBSITE_NAME || "ThreadsV2";
+const appName = process.env.NEXT_PUBLIC_WEBSITE_NAME || "Zocial";
 
 export const metadata = {
   title: {
