@@ -1,22 +1,21 @@
 'use client';
-import React, { useEffect } from 'react';
-import { usePost } from '@/app/redux/hooks';
+import React from 'react';
+import { useAuth } from '@/app/redux/hooks';
+import { useGetMemoriesQuery } from '@/app/redux/features/posts/postsApi';
 import { useTranslation } from 'react-i18next';
 import MemoriesDesign from './Design';
-import Loading from '@/app/Component/Loading';
 
 const MemoriesPage = () => {
-    const { memories, memoriesLoading, fetchMemories } = usePost();
+    const { user } = useAuth();
+    const { data: memories = [], isLoading } = useGetMemoriesQuery({
+        viewerId: user?._id || 'anonymous',
+    });
     const { t } = useTranslation();
-
-    useEffect(() => {
-        fetchMemories();
-    }, [fetchMemories]);
 
     return (
         <MemoriesDesign
             memories={memories}
-            isLoading={memoriesLoading}
+            isLoading={isLoading}
             t={t}
         />
     );

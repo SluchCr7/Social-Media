@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useReport } from '@/app/redux/hooks';
 import { useAuth } from '@/app/redux/hooks';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,7 +22,7 @@ import { useAdmin } from '@/app/redux/hooks';
 
 // ================== Main Page ==================
 const AdminReportsPage = () => {
-  const { reports, loading, getAllReports, deleteReport } = useReport();
+  const { reports, loading, getAllReports, deleteReport } = useReport({ loadReports: true });
   const { t } = useTranslation();
   const { user } = useAuth();
   const { deleteUser, updateAccountStatus } = useAdmin()
@@ -33,10 +33,6 @@ const AdminReportsPage = () => {
   const [modal, setModal] = useState({ open: false, action: null, report: null });
 
   const openModal = (action, report) => setModal({ open: true, action, report });
-  useEffect(() => {
-    getAllReports();
-  }, [getAllReports]);
-
   // const openModal = (action, id) => setModal({ open: true, action, id });
 
   const handleAction = async () => {

@@ -18,7 +18,13 @@ const Stories = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const { stories, isLoading, viewStory, setIsStory } = useStory();
-  const [viewerStories, setViewerStories] = useState(null);
+  const [viewerOwnerId, setViewerOwnerId] = useState(null);
+  const viewerStories = useMemo(
+    () => viewerOwnerId
+      ? stories.filter((story) => story?.owner?._id === viewerOwnerId)
+      : null,
+    [stories, viewerOwnerId]
+  );
 
   // Group stories by owner
   const groupedArray = useMemo(() => {
@@ -48,7 +54,7 @@ const Stories = () => {
   }, [stories, user?._id, user?.following]);
 
   const handleOpenViewer = (userStories) => {
-    setViewerStories(userStories);
+    setViewerOwnerId(userStories[0]?.owner?._id || null);
     userStories.forEach(story => viewStory(story._id));
   };
 
@@ -173,7 +179,7 @@ const Stories = () => {
           >
             <StoryViewer
               stories={viewerStories}
-              onClose={() => setViewerStories(null)}
+              onClose={() => setViewerOwnerId(null)}
             />
           </motion.div>
         )}

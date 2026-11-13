@@ -1,36 +1,45 @@
 import { baseApi } from '../../api/baseApi';
 
 export const reportsApi = baseApi.injectEndpoints({
-  endpoints: (builder) => ({
-    getReports: builder.query({
-      query: (params = {}) => ({
+  endpoints: (build) => ({
+    getReports: build.query({
+      query: ({ page, limit, status, reportedOnType, severity }) => ({
         url: '/report',
-        params,
+        params: {
+          page,
+          limit,
+          ...(status ? { status } : {}),
+          ...(reportedOnType ? { reportedOnType } : {}),
+          ...(severity ? { severity } : {}),
+        },
       }),
-      providesTags: ['Report'],
+      providesTags: (result) => [
+        { type: 'Report', id: 'LIST' },
+        ...(result?.reports || []).filter((report) => report?._id)
+          .map((report) => ({ type: 'Report', id: report._id })),
+      ],
     }),
-    createReport: builder.mutation({
-      query: (payload) => ({
-        url: '/report/add',
-        method: 'POST',
-        body: payload,
-      }),
-      invalidatesTags: ['Report'],
+    addReport: build.mutation({
+      query: (body) => ({ url: '/report/add', method: 'POST', body }),
+      invalidatesTags: [{ type: 'Report', id: 'LIST' }],
     }),
-    updateReportStatus: builder.mutation({
-      query: ({ reportId, status, reviewNotes = '' }) => ({
+    updateReportStatus: build.mutation({
+      query: ({ reportId, status, reviewNotes }) => ({
         url: `/report/status/${reportId}`,
         method: 'PATCH',
         body: { status, reviewNotes },
       }),
-      invalidatesTags: ['Report'],
+      invalidatesTags: (result, error, { reportId }) => [
+        { type: 'Report', id: reportId },
+        { type: 'Report', id: 'LIST' },
+      ],
     }),
-    deleteReport: builder.mutation({
-      query: (reportId) => ({
-        url: `/report/delete/${reportId}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: ['Report'],
+    deleteReport: build.mutation({
+      query: (reportId) => ({ url: `/report/delete/${reportId}`, method: 'DELETE' }),
+      invalidatesTags: (result, error, reportId) => [
+        { type: 'Report', id: reportId },
+        { type: 'Report', id: 'LIST' },
+      ],
     }),
   }),
 });
@@ -38,7 +47,7 @@ export const reportsApi = baseApi.injectEndpoints({
 export const {
   useGetReportsQuery,
   useLazyGetReportsQuery,
-  useCreateReportMutation,
+  useAddReportMutation,
   useUpdateReportStatusMutation,
   useDeleteReportMutation,
 } = reportsApi;

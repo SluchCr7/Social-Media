@@ -11,8 +11,8 @@ import { useTranslation } from 'react-i18next'
 import Image from 'next/image'
 import { MdEventAvailable } from 'react-icons/md'
 
-const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
-  const { setImageView, userIsLoading } = usePost()
+const TabsContent = ({ activeTab, combinedPosts, userSelected, filters, postsLoading = false }) => {
+  const { setImageView } = usePost()
   const { t } = useTranslation()
 
   // ✅ تحسين: فلترة وترتيب البوستات بميمو مع deep compare بسيطة للفلاتر
@@ -63,7 +63,7 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
       <AnimatePresence mode="wait" initial={false}>
         {activeTab === 'Posts' && (
           <motion.div key="posts" {...motionSettings} className="flex flex-col gap-4 w-full">
-            {userIsLoading && filteredPosts.length === 0 ? (
+            {postsLoading && filteredPosts.length === 0 ? (
               Array.from({ length: 3 }).map((_, i) => (
                 <PostSkeleton key={i} className="animate-pulse w-full" />
               ))
@@ -76,7 +76,7 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
               </div>
             )}
 
-            {userIsLoading && filteredPosts.length > 0 && (
+            {postsLoading && filteredPosts.length > 0 && (
               <PostSkeleton className="animate-pulse w-full" />
             )}
           </motion.div>
@@ -84,7 +84,7 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
 
         {activeTab === 'Comments' && (
           <motion.div key="comments" {...motionSettings} className="flex flex-col gap-4 w-full">
-            {userIsLoading ? (
+            {postsLoading ? (
               Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-24 bg-gray-100 dark:bg-white/5 rounded-2xl animate-pulse" />)
             ) : userSelected?.comments?.length > 0 ? (
               userSelected.comments.map((comment) => (
@@ -98,7 +98,7 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
 
         {activeTab === 'Reels' && (
           <motion.div key="reels" {...motionSettings} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-[95%] mx-auto">
-            {userIsLoading ? (
+            {postsLoading ? (
               Array.from({ length: 3 }).map((_, i) => <div key={i} className="aspect-[9/16] bg-gray-100 dark:bg-white/5 rounded-2xl animate-pulse" />)
             ) : userSelected?.reels?.length > 0 ? (
               userSelected.reels.map((reel) => (
@@ -119,7 +119,7 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
 
         {activeTab === 'Music' && (
           <motion.div key="music" {...motionSettings} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 w-[95%] mx-auto">
-            {userIsLoading ? (
+            {postsLoading ? (
               Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-48 bg-gray-100 dark:bg-white/5 rounded-2xl animate-pulse" />)
             ) : userSelected?.audios?.length > 0 ? (
               userSelected.audios.map((music) => <MusicCard key={music?._id} music={music} />)
@@ -133,7 +133,7 @@ const TabsContent = ({ activeTab, combinedPosts, userSelected, filters }) => {
 
         {activeTab === 'Photos' && (
           <motion.div key="photos" {...motionSettings} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 w-[95%] mx-auto">
-            {userIsLoading && filteredPosts.length === 0 ? (
+            {postsLoading && filteredPosts.length === 0 ? (
               Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-48 bg-gray-100 dark:bg-white/5 rounded-2xl animate-pulse" />)
             ) : filteredPosts?.some((p) => p?.Photos?.length > 0) ? (
               filteredPosts.flatMap((p) =>

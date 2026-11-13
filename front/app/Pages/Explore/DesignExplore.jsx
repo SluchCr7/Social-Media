@@ -96,8 +96,8 @@ const DesignExplore = ({
   const isInitialLoading = loading && posts.length === 0;
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 dark:bg-[#080b12] dark:text-white sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl space-y-8">
+    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 dark:bg-[#080b12] dark:text-white sm:px-6 lg:px-8 w-full">
+      <div className="mx-auto w-full max-w-6xl space-y-8">
         <header className="space-y-5">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>

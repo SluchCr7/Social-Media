@@ -1,8 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  stats: null,
-  loading: false,
   activeTab: 'Dashboard',
   usersPage: 1,
   usersSearch: '',
@@ -20,12 +18,6 @@ export const adminSlice = createSlice({
   name: 'admin',
   initialState,
   reducers: {
-    setAdminStats: (state, action) => {
-      state.stats = action.payload;
-    },
-    setAdminLoading: (state, action) => {
-      state.loading = action.payload;
-    },
     setActiveTab: (state, action) => {
       state.activeTab = action.payload;
     },
@@ -69,8 +61,6 @@ export const adminSlice = createSlice({
 });
 
 export const {
-  setAdminStats,
-  setAdminLoading,
   setActiveTab,
   setUsersPage,
   setUsersSearch,

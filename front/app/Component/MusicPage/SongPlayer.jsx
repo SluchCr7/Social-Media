@@ -47,7 +47,7 @@ const SongPlayer = React.memo(() => {
     seek
   } = useMusicPlayer()
 
-  const { likeMusic } = useMusic()
+  const { likeMusic } = useMusic({ autoFetch: false })
   const { user } = useAuth()
   const { t } = useTranslation()
 

@@ -3,8 +3,6 @@
 import { useMemo, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks';
 import {
-  selectAdminStats,
-  selectAdminLoading,
   selectAdminActiveTab,
   selectAdminUsersPage,
   selectAdminUsersSearch,
@@ -354,5 +352,4 @@ export const useAdmin = () => {
   );
 };
 
-export const useAdminUser = useAdmin;
 export default useAdmin;

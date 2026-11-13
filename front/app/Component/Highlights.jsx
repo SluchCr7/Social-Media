@@ -10,12 +10,11 @@ export default function HighlightsBar({
   onAddHighlight,
   isOwner = false
 }) {
-  const { setSelectedHighlight, reorderHighlights, setHighlights } = useHighlights();
+  const { setSelectedHighlight, reorderHighlights } = useHighlights();
 
   const handleReorder = (newOrder) => {
-    setHighlights(newOrder);
     if (isOwner) {
-      reorderHighlights(newOrder.map(h => h._id));
+      reorderHighlights(newOrder.map((highlight) => highlight._id));
     }
   };
 

@@ -28,9 +28,11 @@ const MessangerSluchit = () => {
 
     // ✅ لو مفيش بيانات، نجيبها من API
     getUserById(userId)
-      .then((res) => {
-        setSelectedUser(res.data);
-        setShowSidebar(false);
+      .then((profile) => {
+        if (profile) {
+          setSelectedUser(profile);
+          setShowSidebar(false);
+        }
       })
       .catch((err) => console.error('Failed to fetch user for chat:', err));
   }, [searchParams, selectedUser, getUserById, setSelectedUser]);

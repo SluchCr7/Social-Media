@@ -1,82 +1,73 @@
 'use client';
-import api from '@/app/utils/api';
+
 import { useCallback } from 'react';
+import {
+  useApproveCommunityJoinRequestMutation,
+  useJoinCommunityMutation,
+  useRejectCommunityJoinRequestMutation,
+  useSendCommunityJoinRequestMutation,
+} from '@/app/redux/features/communities/communitiesApi';
 
-const mergeCommunity = (previous, communityId, updatedCommunity) =>
-  previous.map((community) =>
-    community._id === communityId ? { ...community, ...updatedCommunity } : community
-  );
+const errorMessage = (error, fallback) => error?.data?.message || error?.message || fallback;
 
-export const useCommunityRequests = ({
-    setCommunities,
-    showAlert
-}) => {
-    const sendJoinRequest = useCallback(async (id) => {
-      try {
-        const res = await api.post(`/community/join-request/${id}`);
-        showAlert(res.data.message);
-        if (res.data.community) {
-          setCommunities((previous) => mergeCommunity(previous, id, res.data.community));
-        }
-        return true;
-      } catch (err) {
-        console.error(err);
-        showAlert(err?.response?.data?.message || 'Failed to send join request.');
-        return false;
-      }
-    }, [setCommunities, showAlert]);
+export const useCommunityRequests = ({ showAlert }) => {
+  const [sendRequest] = useSendCommunityJoinRequestMutation();
+  const [approveRequest] = useApproveCommunityJoinRequestMutation();
+  const [rejectRequest] = useRejectCommunityJoinRequestMutation();
+  const [joinRequest] = useJoinCommunityMutation();
+
+  const sendJoinRequest = useCallback(async (id) => {
+    try {
+      const data = await sendRequest(id).unwrap();
+      showAlert(data.message);
+      return true;
+    } catch (error) {
+      console.error(error);
+      showAlert(errorMessage(error, 'Failed to send join request.'));
+      return false;
+    }
+  }, [sendRequest, showAlert]);
 
   const approveJoinRequest = useCallback(async (communityId, userId) => {
     try {
-      const res = await api.put(`/community/join-request/approve/${communityId}/${userId}`);
-      showAlert(res.data.message);
-      if (res.data.community) {
-        setCommunities((previous) => mergeCommunity(previous, communityId, res.data.community));
-      }
+      const data = await approveRequest({ communityId, userId }).unwrap();
+      showAlert(data.message);
       return true;
-    } catch (err) {
-      console.error(err);
-      showAlert(err?.response?.data?.message || 'Failed to approve join request.');
+    } catch (error) {
+      console.error(error);
+      showAlert(errorMessage(error, 'Failed to approve join request.'));
       return false;
     }
-  }, [setCommunities, showAlert]);
+  }, [approveRequest, showAlert]);
 
-// 📌 رفض طلب انضمام
-  const rejectJoinRequest = useCallback( async (communityId, userId) => {
+  const rejectJoinRequest = useCallback(async (communityId, userId) => {
     try {
-      const res = await api.put(`/community/join-request/reject/${communityId}/${userId}`);
-      showAlert(res.data.message);
-      if (res.data.community) {
-        setCommunities((previous) => mergeCommunity(previous, communityId, res.data.community));
-      }
+      const data = await rejectRequest({ communityId, userId }).unwrap();
+      showAlert(data.message);
       return true;
-    } catch (err) {
-      console.error(err);
-      showAlert(err?.response?.data?.message || 'Failed to reject join request.');
+    } catch (error) {
+      console.error(error);
+      showAlert(errorMessage(error, 'Failed to reject join request.'));
       return false;
     }
-  }, [setCommunities, showAlert]);
+  }, [rejectRequest, showAlert]);
 
-
-  // 📌 الانضمام أو المغادرة
   const joinToCommunity = useCallback(async (id) => {
     try {
-      const res = await api.put(`/community/join/${id}`);
-      showAlert(res.data.message);
-      if (res.data.community) {
-        setCommunities((previous) => mergeCommunity(previous, id, res.data.community));
-      }
+      const data = await joinRequest(id).unwrap();
+      showAlert(data.message);
       return true;
-    } catch (err) {
-      console.error(err);
-      showAlert(err?.response?.data?.message || 'Error updating community membership.');
+    } catch (error) {
+      console.error(error);
+      showAlert(errorMessage(error, 'Error updating community membership.'));
       return false;
     }
-  }, [setCommunities, showAlert]);
-    return {
-        sendJoinRequest,
-        approveJoinRequest,
-        rejectJoinRequest,
-        joinToCommunity
-    }
+  }, [joinRequest, showAlert]);
+
+  return {
+    sendJoinRequest,
+    approveJoinRequest,
+    rejectJoinRequest,
+    joinToCommunity,
+  };
 };

@@ -22,7 +22,7 @@ const AddMusicModal = ({ isOpen, onClose }) => {
   const [tags, setTags] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { uploadMusic } = useMusic();
+  const { uploadMusic } = useMusic({ autoFetch: false });
 
   const resetState = useCallback(() => {
     setTitle('');

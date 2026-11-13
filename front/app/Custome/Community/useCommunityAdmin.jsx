@@ -1,126 +1,98 @@
-import api from "../../utils/api";
-import { useCallback } from "react";
+'use client';
 
-export const useCommunityAdmin = ({ setCommunities, showAlert }) => {
+import { useCallback } from 'react';
+import {
+  useEditCommunityMutation,
+  useRemoveCommunityMemberMutation,
+  useToggleCommunityAdminMutation,
+  useUpdateCommunityCoverMutation,
+  useUpdateCommunityPictureMutation,
+  useUpdateCommunityRulesMutation,
+} from '@/app/redux/features/communities/communitiesApi';
+
+const errorMessage = (error, fallback) => error?.data?.message || error?.message || fallback;
+
+export const useCommunityAdmin = ({ showAlert }) => {
+  const [editRequest] = useEditCommunityMutation();
+  const [pictureRequest] = useUpdateCommunityPictureMutation();
+  const [coverRequest] = useUpdateCommunityCoverMutation();
+  const [removeMemberRequest] = useRemoveCommunityMemberMutation();
+  const [adminRequest] = useToggleCommunityAdminMutation();
+  const [rulesRequest] = useUpdateCommunityRulesMutation();
+
   const editCommunity = useCallback(async (id, updatedData) => {
-    try {
-      if (!updatedData || Object.keys(updatedData).length === 0) {
-        showAlert("No changes to update.");
-        return null;
-      }
-
-      const res = await api.put(`/community/edit/${id}`, updatedData);
-      setCommunities((previous) =>
-        previous.map((community) =>
-          community._id === id ? { ...community, ...(res.data.community || {}) } : community
-        )
-      );
-      showAlert(res.data.message || "Community updated successfully.");
-      return res.data.community;
-    } catch (err) {
-      console.error("editCommunity error:", err);
-      showAlert(err.response?.data?.message || "Failed to update community.");
-      throw err;
+    if (!updatedData || Object.keys(updatedData).length === 0) {
+      showAlert('No changes to update.');
+      return null;
     }
-  }, [setCommunities, showAlert]);
+    try {
+      const data = await editRequest({ id, body: updatedData }).unwrap();
+      showAlert(data.message || 'Community updated successfully.');
+      return data.community;
+    } catch (error) {
+      console.error('editCommunity error:', error);
+      showAlert(errorMessage(error, 'Failed to update community.'));
+      throw error;
+    }
+  }, [editRequest, showAlert]);
 
   const updateCommunityPicture = useCallback(async (id, file) => {
+    const body = new FormData();
+    body.append('image', file);
     try {
-      const formData = new FormData();
-      formData.append("image", file);
-      const res = await api.post(`/community/update/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      setCommunities((previous) =>
-        previous.map((community) =>
-          community._id === id
-            ? { ...community, Picture: { url: res.data.url, publicId: res.data.publicId } }
-            : community
-        )
-      );
-      showAlert(res.data.message || "Picture updated successfully.");
-      return res.data;
-    } catch (err) {
-      console.error("updateCommunityPicture error:", err);
-      showAlert(err.response?.data?.message || "Failed to update picture.");
+      const data = await pictureRequest({ id, body }).unwrap();
+      showAlert(data.message || 'Picture updated successfully.');
+      return data;
+    } catch (error) {
+      console.error('updateCommunityPicture error:', error);
+      showAlert(errorMessage(error, 'Failed to update picture.'));
       return null;
     }
-  }, [setCommunities, showAlert]);
+  }, [pictureRequest, showAlert]);
 
   const updateCommunityCover = useCallback(async (id, file) => {
+    const body = new FormData();
+    body.append('image', file);
     try {
-      const formData = new FormData();
-      formData.append("image", file);
-      const res = await api.post(`/community/update-cover/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      setCommunities((previous) =>
-        previous.map((community) =>
-          community._id === id
-            ? { ...community, Cover: { url: res.data.url, publicId: res.data.publicId } }
-            : community
-        )
-      );
-      showAlert(res.data.message || "Cover updated successfully.");
-      return res.data;
-    } catch (err) {
-      console.error("updateCommunityCover error:", err);
-      showAlert(err.response?.data?.message || "Failed to update cover.");
+      const data = await coverRequest({ id, body }).unwrap();
+      showAlert(data.message || 'Cover updated successfully.');
+      return data;
+    } catch (error) {
+      console.error('updateCommunityCover error:', error);
+      showAlert(errorMessage(error, 'Failed to update cover.'));
       return null;
     }
-  }, [setCommunities, showAlert]);
+  }, [coverRequest, showAlert]);
 
   const removeMember = useCallback(async (communityId, userId) => {
     try {
-      const res = await api.put(`/community/remove/${communityId}/${userId}`);
-      showAlert(res.data.message || "Member removed successfully.");
-      if (res.data.community) {
-        setCommunities((previous) =>
-          previous.map((community) =>
-            community._id === communityId ? { ...community, ...res.data.community } : community
-          )
-        );
-      }
-    } catch (err) {
-      console.error("removeMember error:", err);
-      showAlert(err.response?.data?.message || "Failed to remove member.");
+      const data = await removeMemberRequest({ communityId, userId }).unwrap();
+      showAlert(data.message || 'Member removed successfully.');
+    } catch (error) {
+      console.error('removeMember error:', error);
+      showAlert(errorMessage(error, 'Failed to remove member.'));
     }
-  }, [setCommunities, showAlert]);
+  }, [removeMemberRequest, showAlert]);
 
   const makeAdmin = useCallback(async (communityId, userIdToMakeAdmin) => {
     try {
-      const res = await api.put(`/community/admin/${communityId}`, { userIdToMakeAdmin });
-      const { message, community: updatedCommunity } = res.data;
-      showAlert(message);
-      if (updatedCommunity) {
-        setCommunities((previous) =>
-          previous.map((community) =>
-            community._id === communityId ? { ...community, ...updatedCommunity } : community
-          )
-        );
-      }
-    } catch (err) {
-      console.error("makeAdmin error:", err);
-      showAlert(err.response?.data?.message || "Failed to update admin role.");
+      const data = await adminRequest({ communityId, userIdToMakeAdmin }).unwrap();
+      showAlert(data.message || 'Admin role updated successfully.');
+    } catch (error) {
+      console.error('makeAdmin error:', error);
+      showAlert(errorMessage(error, 'Failed to update admin role.'));
     }
-  }, [setCommunities, showAlert]);
+  }, [adminRequest, showAlert]);
 
   const updateCommunityRules = useCallback(async (id, rules) => {
     try {
-      const res = await api.put(`/community/rules/${id}`, { rules });
-      showAlert(res.data.message);
-      setCommunities((previous) =>
-        previous.map((community) =>
-          community._id === id ? { ...community, ...(res.data.community || { rules: res.data.rules }) } : community
-        )
-      );
-    } catch (err) {
-      console.error("updateCommunityRules error:", err);
-      showAlert(err.response?.data?.message || "Failed to update community rules.");
+      const data = await rulesRequest({ id, rules }).unwrap();
+      showAlert(data.message || 'Community rules updated.');
+    } catch (error) {
+      console.error('updateCommunityRules error:', error);
+      showAlert(errorMessage(error, 'Failed to update community rules.'));
     }
-  }, [setCommunities, showAlert]);
+  }, [rulesRequest, showAlert]);
 
   return {
     editCommunity,

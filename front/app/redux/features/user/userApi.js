@@ -1,130 +1,173 @@
 import { baseApi } from '../../api/baseApi';
 
+const userTag = (id) => ({ type: 'User', id });
+
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getSuggestedUsers: builder.query({
-      query: () => '/auth/suggested',
-      providesTags: ['User'],
-    }),
     getUserById: builder.query({
       query: (id) => `/auth/${id}`,
-      providesTags: (result, error, id) => [{ type: 'User', id }],
+      providesTags: (result, error, id) => [userTag(result?._id || id)],
     }),
-    getUserByUsername: builder.query({
+    getPublicUserByUsername: builder.query({
       query: (username) => ({
         url: '/auth/username',
         params: { username },
       }),
-      providesTags: (result, error, username) => [{ type: 'User', id: `username-${username}` }],
+      providesTags: (result) => result?._id ? [userTag(result._id)] : [],
+    }),
+    getSuggestedUsers: builder.query({
+      query: () => '/auth/suggested',
+      providesTags: (result) =>
+        result
+          ? [...result.map((user) => userTag(user._id)), userTag('SUGGESTED')]
+          : [userTag('SUGGESTED')],
+    }),
+    getUserPointsHistory: builder.query({
+      query: (id) => `/auth/${id}/points/history`,
+      providesTags: (result, error, id) => [userTag(id)],
+    }),
+    getRelationship: builder.query({
+      query: (id) => `/auth/relationship/${id}`,
+      providesTags: (result, error, id) => [userTag(id)],
+    }),
+    deleteCurrentUser: builder.mutation({
+      query: () => ({ url: '/auth/delete', method: 'DELETE' }),
+      invalidatesTags: ['Auth', userTag('SUGGESTED')],
     }),
     followUser: builder.mutation({
-      query: (targetId) => ({
+      query: ({ targetId }) => ({
         url: `/auth/follow/${targetId}`,
         method: 'PUT',
+        body: {},
       }),
-      invalidatesTags: (result, error, targetId) => [
-        { type: 'User', id: targetId },
-        { type: 'User', id: 'SUGGESTED' },
-        'Auth',
+      invalidatesTags: (result, error, { targetId, userId }) => [
+        userTag(targetId),
+        userTag(userId),
+        userTag('SUGGESTED'),
       ],
     }),
-    updatePhoto: builder.mutation({
-      query: (formData) => ({
+    uploadProfilePhoto: builder.mutation({
+      query: ({ formData }) => ({
         url: '/auth/photo',
         method: 'POST',
         body: formData,
       }),
-      invalidatesTags: ['Auth', 'User'],
+      invalidatesTags: (result, error, { userId }) => [userTag(userId)],
     }),
-    updateCoverPhoto: builder.mutation({
-      query: (formData) => ({
+    uploadCoverPhoto: builder.mutation({
+      query: ({ formData }) => ({
         url: '/auth/cover',
         method: 'POST',
         body: formData,
       }),
-      invalidatesTags: ['Auth', 'User'],
+      invalidatesTags: (result, error, { userId }) => [userTag(userId)],
     }),
-    updateProfile: builder.mutation({
-      query: (payload) => ({
+    updateUserProfile: builder.mutation({
+      query: ({ fields }) => ({
         url: '/auth/update',
         method: 'PUT',
-        body: payload,
+        body: fields,
       }),
-      invalidatesTags: ['Auth', 'User'],
+      invalidatesTags: (result, error, { userId, fields }) => [
+        userTag(userId),
+        userTag('SUGGESTED'),
+        ...(fields.partner ? [userTag(fields.partner)] : []),
+      ],
     }),
-    updatePassword: builder.mutation({
-      query: ({ oldPassword, newPassword }) => ({
+    updateUserPassword: builder.mutation({
+      query: (body) => ({
         url: '/auth/update/pass',
         method: 'PUT',
-        body: { oldPassword, newPassword },
+        body,
       }),
     }),
     togglePrivateAccount: builder.mutation({
       query: () => ({
         url: '/auth/account/private',
         method: 'PUT',
+        body: {},
       }),
-      invalidatesTags: ['Auth', 'User'],
+      invalidatesTags: (result, error, userId) => [userTag(userId), userTag('SUGGESTED')],
     }),
-    saveMusicInPlayList: builder.mutation({
-      query: (musicId) => ({
-        url: `/auth/save/music/${musicId}`,
+    toggleSongInPlaylist: builder.mutation({
+      query: ({ songId }) => ({
+        url: `/auth/save/music/${songId}`,
         method: 'PUT',
+        body: {},
       }),
-      invalidatesTags: ['Auth', 'Music'],
+      invalidatesTags: (result, error, { userId }) => [userTag(userId)],
     }),
     toggleBlockNotification: builder.mutation({
-      query: (targetUserId) => ({
+      query: ({ targetUserId }) => ({
         url: `/auth/block/notify/${targetUserId}`,
         method: 'POST',
+        body: {},
       }),
-      invalidatesTags: ['Auth'],
+      invalidatesTags: (result, error, { userId }) => [userTag(userId)],
     }),
-    toggleSaveReel: builder.mutation({
-      query: (reelId) => ({
+    saveReel: builder.mutation({
+      query: ({ reelId }) => ({
         url: `/auth/save/reel/${reelId}`,
         method: 'PUT',
+        body: {},
       }),
-      invalidatesTags: ['Auth', 'Reel'],
+      invalidatesTags: (result, error, { userId }) => [userTag(userId)],
     }),
     pinPost: builder.mutation({
-      query: (postId) => ({
+      query: ({ postId }) => ({
         url: `/auth/pin/${postId}`,
         method: 'PUT',
+        body: {},
       }),
-      invalidatesTags: ['Auth', 'Post'],
+      invalidatesTags: (result, error, { userId }) => [userTag(userId)],
     }),
-    blockUser: builder.mutation({
-      query: (targetUserId) => ({
+    toggleBlockUser: builder.mutation({
+      query: ({ targetUserId }) => ({
         url: `/auth/block/${targetUserId}`,
         method: 'PUT',
+        body: {},
       }),
-      invalidatesTags: ['Auth', 'User'],
+      invalidatesTags: (result, error, { targetUserId, userId }) => [
+        userTag(targetUserId),
+        userTag(userId),
+        userTag('SUGGESTED'),
+      ],
     }),
-    getPointsHistory: builder.query({
-      query: (userId) => `/auth/${userId}/points/history`,
-      providesTags: (result, error, userId) => [{ type: 'User', id: `points-${userId}` }],
+    updateRelationship: builder.mutation({
+      query: ({ userId, body }) => ({
+        url: `/auth/relationship/${userId}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: (result, error, { userId, body }) => [
+        userTag(userId),
+        ...(body.partnerId ? [userTag(body.partnerId)] : []),
+      ],
     }),
   }),
 });
 
 export const {
-  useGetSuggestedUsersQuery,
   useGetUserByIdQuery,
   useLazyGetUserByIdQuery,
-  useGetUserByUsernameQuery,
-  useLazyGetUserByUsernameQuery,
+  useGetPublicUserByUsernameQuery,
+  useLazyGetPublicUserByUsernameQuery,
+  useGetSuggestedUsersQuery,
+  useGetUserPointsHistoryQuery,
+  useLazyGetUserPointsHistoryQuery,
+  useGetRelationshipQuery,
+  useLazyGetRelationshipQuery,
+  useDeleteCurrentUserMutation,
   useFollowUserMutation,
-  useUpdatePhotoMutation,
-  useUpdateCoverPhotoMutation,
-  useUpdateProfileMutation,
-  useUpdatePasswordMutation,
+  useUploadProfilePhotoMutation,
+  useUploadCoverPhotoMutation,
+  useUpdateUserProfileMutation,
+  useUpdateUserPasswordMutation,
   useTogglePrivateAccountMutation,
-  useSaveMusicInPlayListMutation,
+  useToggleSongInPlaylistMutation,
   useToggleBlockNotificationMutation,
-  useToggleSaveReelMutation,
+  useSaveReelMutation,
   usePinPostMutation,
-  useBlockUserMutation,
-  useGetPointsHistoryQuery,
-  useLazyGetPointsHistoryQuery,
+  useToggleBlockUserMutation,
+  useUpdateRelationshipMutation,
 } = userApi;

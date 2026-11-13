@@ -1,33 +1,21 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useAppDispatch, useAppSelector } from './hooks';
+import { useAppDispatch, useAppSelector, useAppStore } from './hooks';
 import { selectCurrentUser } from './features/auth/authSelectors';
 import { connectSocket, disconnectSocket } from './features/socket/socketManager';
 import { setSocketConnected } from './features/socket/socketSlice';
-import { setOnlineUsers, updateSuggestedUser } from './features/user/userSlice';
-import { updateUserInUsersList, setUser } from './features/auth/authSlice';
-import { addPost, updatePostInState, removePostFromState } from './features/posts/postsSlice';
-import { insertComment, updateComment, deleteCommentFromState } from './features/comments/commentsSlice';
-import { addMessageToThread, updateUnreadOnNewMessage, removeMessageFromThread, updateMessageInThread } from './features/messages/messagesSlice';
-import {
-  addNotificationToState,
-  updateNotificationInState,
-  removeNotificationFromState,
-  markAllNotificationsAsReadState,
-  clearAllNotificationsState,
-  incrementUnreadCount,
-} from './features/notifications/notificationsSlice';
-import { addCommunityToState, updateCommunityInState, removeCommunityFromState, invalidateCommunities } from './features/communities/communitiesSlice';
-import { addStoryToState, updateStoryInState, removeStoryFromState } from './features/stories/storiesSlice';
-import { removeStoryFromAllHighlights } from './features/highlights/highlightsSlice';
-import { addReelToState, updateReelInState, removeReelFromState } from './features/reels/reelsSlice';
-import { addMusicToState, updateMusicInState, removeMusicFromState } from './features/music/musicSlice';
-import { addEventToState, removeEventFromState } from './features/events/eventsSlice';
+import { setOnlineUsers } from './features/user/userSlice';
+import { setUser } from './features/auth/authSlice';
+import { userApi } from './features/user/userApi';
+import { baseApi } from './api/baseApi';
+import { updateReelCache } from './features/reels/reelsApi';
+import { updateQueueTrack, removeQueueTrack } from './features/musicPlayer/musicPlayerSlice';
 import toast from 'react-hot-toast';
 
 export default function SocketBridge() {
   const dispatch = useAppDispatch();
+  const store = useAppStore();
   const user = useAppSelector(selectCurrentUser);
   const userRef = useRef(user);
 
@@ -57,8 +45,14 @@ export default function SocketBridge() {
 
     // User updates
     const handleUserUpdate = (updatedUser) => {
-      dispatch(updateUserInUsersList(updatedUser));
-      dispatch(updateSuggestedUser(updatedUser));
+      if (updatedUser?._id) {
+        dispatch(
+          userApi.util.invalidateTags([
+            { type: 'User', id: updatedUser._id },
+            { type: 'User', id: 'SUGGESTED' },
+          ])
+        );
+      }
       const currentUser = userRef.current;
       if (currentUser && currentUser._id === updatedUser._id) {
         dispatch(setUser({ ...currentUser, ...updatedUser }));
@@ -71,6 +65,7 @@ export default function SocketBridge() {
       const { points, level, levelChanged, pointsChange, action, nextLevelPoints } = data;
       const currentUser = userRef.current;
       if (currentUser) {
+        dispatch(userApi.util.invalidateTags([{ type: 'User', id: currentUser._id }]));
         dispatch(
           setUser({
             ...currentUser,
@@ -94,10 +89,17 @@ export default function SocketBridge() {
       const currentUserId = userRef.current?._id?.toString();
       const ownerId = newPost?.owner?._id?.toString() || newPost?.owner?.toString();
       if (currentUserId && ownerId === currentUserId) return;
-      dispatch(addPost(newPost));
+      dispatch(baseApi.util.invalidateTags([{ type: 'Post', id: 'LIST' }]));
     };
-    const handlePostUpdate = (updatedPost) => dispatch(updatePostInState(updatedPost));
-    const handlePostDelete = (postId) => dispatch(removePostFromState(postId));
+    const handlePostUpdate = (updatedPost) => {
+      if (updatedPost?._id) dispatch(baseApi.util.invalidateTags([{ type: 'Post', id: updatedPost._id }]));
+    };
+    const handlePostDelete = (postId) => {
+      dispatch(baseApi.util.invalidateTags([
+        { type: 'Post', id: postId },
+        { type: 'Post', id: 'LIST' },
+      ]));
+    };
 
     socket.on('post:create', handlePostCreate);
     socket.on('post:update', handlePostUpdate);
@@ -108,10 +110,20 @@ export default function SocketBridge() {
       const currentUserId = userRef.current?._id?.toString();
       const ownerId = newComment?.owner?._id?.toString() || newComment?.owner?.toString();
       if (currentUserId && ownerId === currentUserId) return;
-      dispatch(insertComment(newComment));
+      dispatch(baseApi.util.invalidateTags([
+        { type: 'Comment', id: `target-${newComment.targetType}-${newComment.targetId}` },
+        { type: 'Comment', id: `replies-${newComment.targetId}` },
+        { type: 'Comment', id: newComment.targetId },
+      ]));
     };
-    const handleCommentUpdate = (updatedComment) => dispatch(updateComment(updatedComment));
-    const handleCommentDelete = (commentId) => dispatch(deleteCommentFromState(commentId));
+    const handleCommentUpdate = (updatedComment) => {
+      if (updatedComment?._id) {
+        dispatch(baseApi.util.invalidateTags([{ type: 'Comment', id: updatedComment._id }]));
+      }
+    };
+    const handleCommentDelete = () => {
+      dispatch(baseApi.util.invalidateTags([{ type: 'Comment', id: 'LIST' }]));
+    };
 
     socket.on('comment:create', handleCommentCreate);
     socket.on('comment:update', handleCommentUpdate);
@@ -119,19 +131,30 @@ export default function SocketBridge() {
 
     // Message events
     const handleNewMessage = (message) => {
-      dispatch(addMessageToThread(message));
-      dispatch(updateUnreadOnNewMessage(message));
+      const currentUserId = userRef.current?._id?.toString();
+      const senderId = message?.sender?._id?.toString() || message?.sender?.toString();
+      const receiverId = message?.receiver?._id?.toString() || message?.receiver?.toString();
+      if (!currentUserId || (senderId !== currentUserId && receiverId !== currentUserId)) return;
+      const otherUserId = senderId === currentUserId ? receiverId : senderId;
+      dispatch(baseApi.util.invalidateTags([
+        { type: 'Message', id: `CONVERSATION-${otherUserId}` },
+        { type: 'Message', id: `BY-USER-${currentUserId}` },
+        { type: 'Message', id: 'USERS' },
+        { type: 'Message', id: 'UNREAD' },
+      ]));
     };
-    const handleMessageLike = ({ messageId, userId, action }) => {
-      dispatch(
-        updateMessageInThread({
-          _id: messageId,
-          likedAction: action,
-          likedUserId: userId,
-        })
-      );
+    const handleMessageLike = ({ messageId }) => {
+      if (messageId) dispatch(baseApi.util.invalidateTags([{ type: 'Message', id: messageId }]));
     };
-    const handleMessageDelete = (messageId) => dispatch(removeMessageFromThread(messageId));
+    const handleMessageDelete = (messageId) => {
+      if (messageId) {
+        dispatch(baseApi.util.invalidateTags([
+          { type: 'Message', id: messageId },
+          { type: 'Message', id: 'USERS' },
+          { type: 'Message', id: 'UNREAD' },
+        ]));
+      }
+    };
 
     socket.on('newMessage', handleNewMessage);
     socket.on('messageLikeUpdate', handleMessageLike);
@@ -139,14 +162,31 @@ export default function SocketBridge() {
 
     // Notification events
     const handleNotification = (notify) => {
-      dispatch(addNotificationToState(notify));
-      dispatch(incrementUnreadCount());
+      dispatch(baseApi.util.invalidateTags([
+        { type: 'Notification', id: 'LIST' },
+        { type: 'Notification', id: 'UNREAD' },
+      ]));
       toast(notify.content || 'You have a new notification!', { icon: '🔔' });
     };
-    const handleNotificationUpdate = (updated) => dispatch(updateNotificationInState(updated));
-    const handleNotificationDelete = (id) => dispatch(removeNotificationFromState(id));
-    const handleNotificationReadAll = () => dispatch(markAllNotificationsAsReadState());
-    const handleNotificationClearAll = () => dispatch(clearAllNotificationsState());
+    const handleNotificationUpdate = (updated) => {
+      dispatch(baseApi.util.invalidateTags([
+        ...(updated?._id ? [{ type: 'Notification', id: updated._id }] : []),
+        { type: 'Notification', id: 'UNREAD' },
+      ]));
+    };
+    const handleNotificationDelete = () => {
+      dispatch(baseApi.util.invalidateTags([
+        { type: 'Notification', id: 'LIST' },
+        { type: 'Notification', id: 'UNREAD' },
+      ]));
+    };
+    const handleNotificationReadAll = () => {
+      dispatch(baseApi.util.invalidateTags([
+        { type: 'Notification', id: 'LIST' },
+        { type: 'Notification', id: 'UNREAD' },
+      ]));
+    };
+    const handleNotificationClearAll = handleNotificationDelete;
 
     socket.on('notification', handleNotification);
     socket.on('notification:update', handleNotificationUpdate);
@@ -159,16 +199,19 @@ export default function SocketBridge() {
       const currentUserId = userRef.current?._id?.toString();
       const ownerId = newCom?.owner?._id?.toString() || newCom?.owner?.toString();
       if (currentUserId && ownerId === currentUserId) return;
-      dispatch(addCommunityToState(newCom));
-      dispatch(invalidateCommunities());
+      dispatch(baseApi.util.invalidateTags([{ type: 'Community', id: 'LIST' }]));
     };
     const handleCommunityUpdate = (updated) => {
-      dispatch(updateCommunityInState(updated));
-      dispatch(invalidateCommunities());
+      dispatch(baseApi.util.invalidateTags([
+        ...(updated?._id ? [{ type: 'Community', id: updated._id }] : []),
+        { type: 'Community', id: 'LIST' },
+      ]));
     };
     const handleCommunityDelete = (id) => {
-      dispatch(removeCommunityFromState(id));
-      dispatch(invalidateCommunities());
+      dispatch(baseApi.util.invalidateTags([
+        { type: 'Community', id },
+        { type: 'Community', id: 'LIST' },
+      ]));
     };
 
     socket.on('community:create', handleCommunityCreate);
@@ -180,13 +223,20 @@ export default function SocketBridge() {
       const currentUserId = userRef.current?._id?.toString();
       const ownerId = newStory?.owner?._id?.toString() || newStory?.owner?.toString();
       if (currentUserId && ownerId === currentUserId) return;
-      dispatch(addStoryToState(newStory));
+      dispatch(baseApi.util.invalidateTags([{ type: 'Story', id: 'LIST' }]));
     };
     const handleDeletedStory = (storyId) => {
-      dispatch(removeStoryFromState(storyId));
-      dispatch(removeStoryFromAllHighlights(storyId));
+      dispatch(baseApi.util.invalidateTags([
+        { type: 'Story', id: storyId },
+        { type: 'Story', id: 'LIST' },
+        { type: 'Highlight', id: 'LIST' },
+      ]));
     };
-    const handleUpdatedStory = (updatedStory) => dispatch(updateStoryInState(updatedStory));
+    const handleUpdatedStory = (updatedStory) => {
+      if (updatedStory?._id) {
+        dispatch(baseApi.util.invalidateTags([{ type: 'Story', id: updatedStory._id }]));
+      }
+    };
 
     socket.on('new-story', handleNewStory);
     socket.on('delete-story', handleDeletedStory);
@@ -197,11 +247,20 @@ export default function SocketBridge() {
       const currentUserId = userRef.current?._id?.toString();
       const ownerId = newReel?.owner?._id?.toString() || newReel?.owner?.toString();
       if (currentUserId && ownerId === currentUserId) return;
-      dispatch(addReelToState(newReel));
+      dispatch(baseApi.util.invalidateTags([{ type: 'Reel', id: 'LIST' }]));
     };
-    const handleReelUpdate = (updated) => dispatch(updateReelInState(updated));
-    const handleReelView = (viewResult) => dispatch(updateReelInState(viewResult));
-    const handleReelDelete = (id) => dispatch(removeReelFromState(id));
+    const handleReelUpdate = (updated) => {
+      if (updated?._id) dispatch(baseApi.util.invalidateTags([{ type: 'Reel', id: updated._id }]));
+    };
+    const handleReelView = (viewResult) => {
+      if (viewResult?._id) {
+        updateReelCache(dispatch, () => store.getState(), viewResult._id, (reel) => ({ ...reel, ...viewResult }));
+      }
+    };
+    const handleReelDelete = (id) => dispatch(baseApi.util.invalidateTags([
+      { type: 'Reel', id },
+      { type: 'Reel', id: 'LIST' },
+    ]));
 
     socket.on('reel:create', handleReelCreate);
     socket.on('reel:update', handleReelUpdate);
@@ -213,36 +272,42 @@ export default function SocketBridge() {
       const currentUserId = userRef.current?._id?.toString();
       const ownerId = newM?.owner?._id?.toString() || newM?.owner?.toString();
       if (currentUserId && ownerId === currentUserId) return;
-      dispatch(addMusicToState(newM));
+      dispatch(baseApi.util.invalidateTags([
+        { type: 'Music', id: 'LIST' },
+        { type: 'Music', id: 'TOP_CHARTS' },
+      ]));
     };
-    const handleMusicUpdate = (updated) => dispatch(updateMusicInState(updated));
-    const handleMusicDelete = (id) => dispatch(removeMusicFromState(id));
+    const handleMusicUpdate = (updated) => {
+      if (updated?._id) {
+        dispatch(baseApi.util.invalidateTags([{ type: 'Music', id: updated._id }]));
+        dispatch(updateQueueTrack(updated));
+      }
+    };
+    const handleMusicDelete = (id) => {
+      dispatch(baseApi.util.invalidateTags([
+        { type: 'Music', id },
+        { type: 'Music', id: 'LIST' },
+        { type: 'Music', id: 'TOP_CHARTS' },
+      ]));
+      dispatch(removeQueueTrack(id));
+    };
 
     socket.on('music:create', handleMusicCreate);
     socket.on('music:update', handleMusicUpdate);
     socket.on('music:delete', handleMusicDelete);
 
     // Event events
-    const handleEventCreate = (newEv) => {
-      dispatch(addEventToState(newEv));
-    };
+    const handleEventCreate = () => dispatch(baseApi.util.invalidateTags([{ type: 'Event', id: 'LIST' }]));
     const handleEventUpdate = (updated) => {
-      const currentUserId = userRef.current?._id?.toString();
-      const eventUserIds = [
-        updated?.createdBy?._id || updated?.createdBy,
-        ...(updated?.invitedUsers || []).map((invitee) => invitee?._id || invitee),
-        ...(updated?.attendees || []).map((attendee) => attendee?.user?._id || attendee?.user),
-      ].map((id) => id?.toString());
-      const isVisible = updated?.visibility === 'public' && updated?.isPrivate !== true;
-
-      if (currentUserId && !isVisible && !eventUserIds.includes(currentUserId)) {
-        dispatch(removeEventFromState(updated?._id));
-        return;
-      }
-
-      dispatch(addEventToState(updated));
+      dispatch(baseApi.util.invalidateTags([
+        ...(updated?._id ? [{ type: 'Event', id: updated._id }] : []),
+        { type: 'Event', id: 'LIST' },
+      ]));
     };
-    const handleEventDelete = (id) => dispatch(removeEventFromState(id));
+    const handleEventDelete = (id) => dispatch(baseApi.util.invalidateTags([
+      { type: 'Event', id },
+      { type: 'Event', id: 'LIST' },
+    ]));
 
     socket.on('event:create', handleEventCreate);
     socket.on('event:update', handleEventUpdate);
@@ -285,7 +350,7 @@ export default function SocketBridge() {
       socket.off('event:update', handleEventUpdate);
       socket.off('event:delete', handleEventDelete);
     };
-  }, [user?._id, dispatch]);
+  }, [user?._id, dispatch, store]);
 
   return null;
 }

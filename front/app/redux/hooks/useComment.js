@@ -1,205 +1,145 @@
 'use client';
 
 import { useCallback, useMemo } from 'react';
-import api from '@/app/utils/api';
 import { useAuth } from './useAuth';
 import { useFeedback } from './useFeedback';
 import { MESSAGES } from '@/app/utils/messages';
-import { useAppDispatch, useAppSelector, useAppStore } from '../hooks';
-import { selectComments, selectCommentsLoading } from '../features/comments/commentsSelectors';
 import {
-  setComments as setReduxComments,
-  appendComments,
-  insertComment,
-  updateComment as updateReduxComment,
-  deleteCommentFromState,
-  setIsLoading,
-  optimisticLikeComment,
-} from '../features/comments/commentsSlice';
+  useAddCommentMutation,
+  useDeleteCommentMutation,
+  useGetCommentsInfiniteQuery,
+  useLazyGetCommentsInfiniteQuery,
+  useLikeCommentMutation,
+  useUpdateCommentMutation,
+} from '../features/comments/commentsApi';
 
+const getErrorMessage = (error) =>
+  error?.data?.message || error?.response?.data?.message || error?.message;
 
-
-export const useComment = () => {
-  const dispatch = useAppDispatch();
-  const store = useAppStore();
+export const useComment = ({ targetId, targetType, enabled = true } = {}) => {
   const { user } = useAuth();
   const { showToast } = useFeedback();
+  const commentsQuery = useGetCommentsInfiniteQuery({
+    targetId,
+    targetType,
+    limit: 10,
+  }, {
+    skip: !enabled || !targetId || !targetType,
+  });
+  const {
+    fetchNextPage: fetchNextCommentsPage,
+    refetch: refetchComments,
+  } = commentsQuery;
+  const [loadComments] = useLazyGetCommentsInfiniteQuery();
+  const [addCommentRequest] = useAddCommentMutation();
+  const [deleteCommentRequest] = useDeleteCommentMutation();
+  const [updateCommentRequest] = useUpdateCommentMutation();
+  const [likeCommentRequest] = useLikeCommentMutation();
 
-  const comments = useAppSelector(selectComments);
-  const isLoading = useAppSelector(selectCommentsLoading);
-
-  const setComments = useCallback(
-    (c) => {
-      const currentComments = selectComments(store.getState());
-      dispatch(setReduxComments(typeof c === 'function' ? c(currentComments) : c));
-    },
-    [dispatch, store]
+  const comments = useMemo(
+    () => commentsQuery.data?.pages?.flatMap((page) => page?.comments || []) || [],
+    [commentsQuery.data]
   );
 
-  const fetchCommentsByTarget = useCallback(
-    async (targetId, targetType = 'Post', cursor = null) => {
-      if (!targetType || !targetId) return;
-      dispatch(setIsLoading(true));
-      try {
-        const res = await api.get(`/comment/${targetType}/${targetId}`, {
-          params: { cursor, limit: 10 },
-        });
-        const fetchedComments = Array.isArray(res.data.comments) ? res.data.comments : [];
-        dispatch(cursor ? appendComments(fetchedComments) : setReduxComments(fetchedComments));
-        return { nextCursor: res.data.nextCursor, hasMore: res.data.hasMore };
-      } catch (err) {
-        console.error('Error fetching comments:', err);
-      } finally {
-        dispatch(setIsLoading(false));
-      }
-    },
-    [dispatch]
-  );
-
-  const getRepliesForComment = useCallback(async (commentId, cursor = null) => {
-    try {
-      const res = await api.get(`/comment/${commentId}/replies`, {
-        params: { cursor, limit: 5 },
-      });
-      const fetchedReplies = Array.isArray(res.data.comments) ? res.data.comments : [];
-      const currentComments = selectComments(store.getState());
-      const findComment = (items) => {
-        for (const comment of items) {
-          if (comment._id === commentId) return comment;
-          const nested = findComment(comment.replies || []);
-          if (nested) return nested;
-        }
-        return null;
-      };
-      const currentComment = findComment(currentComments);
-      const existingIds = new Set((currentComment?.replies || []).map((reply) => reply._id));
-      const replies = cursor
-        ? [
-            ...(currentComment?.replies || []),
-            ...fetchedReplies.filter((reply) => !existingIds.has(reply._id)),
-          ]
-        : fetchedReplies;
-      dispatch(updateReduxComment({
-        _id: commentId,
-        replies,
-        replyCursor: res.data.nextCursor,
-        hasMoreReplies: res.data.hasMore,
-      }));
-      return { comments: replies, nextCursor: res.data.nextCursor, hasMore: res.data.hasMore };
-    } catch (err) {
-      console.error('Error fetching replies:', err);
+  const fetchCommentsByTarget = useCallback(async (id, type = 'Post', cursor = null) => {
+    if (!id || !type) return null;
+    let response;
+    if (String(id) === String(targetId) && type === targetType) {
+      response = cursor
+        ? await fetchNextCommentsPage()
+        : await refetchComments();
+    } else {
+      response = await loadComments({ targetId: id, targetType: type, limit: 10 }, true);
     }
-  }, [dispatch, store]);
+    const pages = response?.data?.pages || [];
+    const page = cursor ? pages[pages.length - 1] : pages[0];
+    return page ? { nextCursor: page.nextCursor, hasMore: page.hasMore } : null;
+  }, [
+    fetchNextCommentsPage,
+    refetchComments,
+    loadComments,
+    targetId,
+    targetType,
+  ]);
 
-  const AddComment = useCallback(
-    async ({ text, targetType, targetId }) => {
-      if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+  const AddComment = useCallback(async ({ text, targetType: type, targetId: id }) => {
+    if (!user) {
+      showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+      return null;
+    }
+    try {
+      const data = await addCommentRequest({ text, targetType: type, targetId: id }).unwrap();
+      const comment = data?.comment || data;
+      showToast(MESSAGES.COMMENT.ADD_SUCCESS, 'success');
+      return comment;
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      showToast(getErrorMessage(error) || MESSAGES.COMMENT.ADD_ERROR, 'error');
+      return null;
+    }
+  }, [addCommentRequest, showToast, user]);
 
-      const tempId = `temp-${Date.now()}`;
-      const tempComment = {
-        _id: tempId,
-        text,
-        owner: user,
-        targetType,
-        targetId,
-        likes: [],
-        replies: [],
-        replyCount: 0,
-        createdAt: new Date().toISOString(),
-        isOptimistic: true,
-      };
+  const deleteComment = useCallback(async (commentId) => {
+    try {
+      await deleteCommentRequest(commentId).unwrap();
+      showToast(MESSAGES.COMMENT.DELETE_SUCCESS, 'success');
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      showToast(getErrorMessage(error) || MESSAGES.COMMENT.DELETE_ERROR, 'error');
+    }
+  }, [deleteCommentRequest, showToast]);
 
-      dispatch(insertComment(tempComment));
+  const updateComment = useCallback(async (commentId, text) => {
+    try {
+      const data = await updateCommentRequest({ id: commentId, text }).unwrap();
+      showToast(MESSAGES.COMMENT.UPDATE_SUCCESS, 'success');
+      return data?.comment || data;
+    } catch (error) {
+      console.error('Error updating comment:', error);
+      showToast(getErrorMessage(error) || MESSAGES.COMMENT.UPDATE_ERROR, 'error');
+    }
+  }, [showToast, updateCommentRequest]);
 
-      try {
-        const res = await api.post('/comment', { text, targetType, targetId });
+  const likeComment = useCallback(async (commentId) => {
+    if (!user) {
+      showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+      return null;
+    }
+    try {
+      const data = await likeCommentRequest(commentId).unwrap();
+      return data?.comment || data;
+    } catch (error) {
+      console.error('Like comment error:', error);
+      showToast(getErrorMessage(error) || 'Failed to update like status.', 'error');
+      return null;
+    }
+  }, [likeCommentRequest, showToast, user]);
 
-        const newComment = res.data.comment || res.data;
-        dispatch(deleteCommentFromState(tempId));
-        dispatch(insertComment(newComment));
-        showToast(MESSAGES.COMMENT.ADD_SUCCESS, 'success');
-        return newComment;
-      } catch (err) {
-        console.error('Error adding comment:', err);
-        dispatch(deleteCommentFromState(tempId));
-        showToast(MESSAGES.COMMENT.ADD_ERROR, 'error');
-      }
-    },
-    [user, showToast, dispatch]
-  );
-
-  const deleteComment = useCallback(
-    async (commentId) => {
-      try {
-        await api.delete(`/comment/${commentId}`);
-        dispatch(deleteCommentFromState(commentId));
-        showToast(MESSAGES.COMMENT.DELETE_SUCCESS, 'success');
-      } catch (err) {
-        console.error('Error deleting comment:', err);
-        showToast(MESSAGES.COMMENT.DELETE_ERROR, 'error');
-      }
-    },
-    [dispatch, showToast]
-  );
-
-  const updateComment = useCallback(
-    async (commentId, text) => {
-      try {
-        const res = await api.put(`/comment/update/${commentId}`, { text });
-        const updated = res.data.comment || res.data;
-        dispatch(updateReduxComment(updated));
-        showToast(MESSAGES.COMMENT.UPDATE_SUCCESS, 'success');
-      } catch (err) {
-        console.error('Error updating comment:', err);
-        showToast(MESSAGES.COMMENT.UPDATE_ERROR, 'error');
-      }
-    },
-    [dispatch, showToast]
-  );
-
-  const likeComment = useCallback(
-    async (commentId) => {
-      if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
-
-      dispatch(optimisticLikeComment({ commentId, userId: user._id }));
-
-      try {
-        const res = await api.put(`/comment/like/${commentId}`, {});
-        const updatedComment = res.data.comment || res.data;
-        dispatch(updateReduxComment(updatedComment));
-        return updatedComment;
-      } catch (err) {
-        console.error('Like comment error:', err);
-        showToast(err?.response?.data?.message || 'Failed to update like status.', 'error');
-      }
-    },
-    [user, dispatch, showToast]
-  );
-
-  return useMemo(
-    () => ({
-      comments,
-      setComments,
-      isLoading,
-      AddComment,
-      deleteComment,
-      likeComment,
-      updateComment,
-      fetchCommentsByTarget,
-      getRepliesForComment,
-    }),
-    [
-      comments,
-      setComments,
-      isLoading,
-      AddComment,
-      deleteComment,
-      likeComment,
-      updateComment,
-      fetchCommentsByTarget,
-      getRepliesForComment,
-    ]
-  );
+  return useMemo(() => ({
+    comments,
+    isLoading: commentsQuery.isLoading,
+    isFetchingMore: commentsQuery.isFetchingNextPage,
+    hasMore: Boolean(commentsQuery.hasNextPage),
+    error: commentsQuery.error,
+    loadMoreComments: commentsQuery.fetchNextPage,
+    AddComment,
+    deleteComment,
+    likeComment,
+    updateComment,
+    fetchCommentsByTarget,
+  }), [
+    comments,
+    commentsQuery.isLoading,
+    commentsQuery.isFetchingNextPage,
+    commentsQuery.hasNextPage,
+    commentsQuery.error,
+    commentsQuery.fetchNextPage,
+    AddComment,
+    deleteComment,
+    likeComment,
+    updateComment,
+    fetchCommentsByTarget,
+  ]);
 };
 
 export default useComment;

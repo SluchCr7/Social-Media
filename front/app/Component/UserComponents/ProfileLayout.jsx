@@ -12,13 +12,12 @@ import TabsContent from "./TabsContent"
 import FilterBar from "./FilterBar"
 import PostSkeleton from "@/app/Skeletons/PostSkeleton"
 import HighlightsBar from "../Highlights"
-import { useHighlights } from '@/app/redux/hooks';
+import { useHighlights, useGetArchivedStoriesQuery, useGetUserStoriesQuery } from '@/app/redux/hooks';
 import { memo } from "react"
 import StickyProfileBar from "./StickyProfileBar"
 import AdultContentWarning from "../AdultAlert"
 import { useUser } from '@/app/redux/hooks';
 import { useAuth } from '@/app/redux/hooks';
-import { useStory } from '@/app/redux/hooks';
 
 const ProfileLayout = ({
   user,
@@ -31,6 +30,7 @@ const ProfileLayout = ({
   activeTab,
   setActiveTab,
   combinedPosts,
+  postsLoading,
   userHasMore,
   loaderRef,
   renderMenu,
@@ -47,9 +47,18 @@ const ProfileLayout = ({
 }) => {
   const { updateCoverPhoto } = useUser();
   const { user: currentUser } = useAuth();
-  const { getArchivedStories, getUserStories } = useStory();
-  const [profileStories, setProfileStories] = useState([]);
-  const { highlights, fetchHighlights, setOpenModal, selectedHighlight, setSelectedHighlight } = useHighlights();
+  const archivedStoriesQuery = useGetArchivedStoriesQuery(
+    { userId: user?._id },
+    { skip: !user?._id || !isOwner }
+  );
+  const userStoriesQuery = useGetUserStoriesQuery(
+    { userId: user?._id },
+    { skip: !user?._id || isOwner }
+  );
+  const profileStories = isOwner
+    ? archivedStoriesQuery.currentData || []
+    : userStoriesQuery.currentData || [];
+  const { highlights, setOpenModal, selectedHighlight, setSelectedHighlight } = useHighlights(user?._id);
 
   const [localUser, setLocalUser] = useState(user);
   const [localIsFollowing, setLocalIsFollowing] = useState(isFollowing);
@@ -61,20 +70,6 @@ const ProfileLayout = ({
   useEffect(() => {
     setLocalIsFollowing(isFollowing);
   }, [isFollowing]);
-
-  useEffect(() => {
-    let active = true;
-    if (!user?._id) return;
-
-    const loadProfileStories = async () => {
-      // If profile owner, load full archive so all past stories can be added to highlights
-      const fetched = isOwner ? await getArchivedStories(user._id) : await getUserStories(user._id);
-      if (active) setProfileStories(fetched || []);
-    };
-
-    loadProfileStories();
-    return () => { active = false; };
-  }, [user?._id, isOwner, getArchivedStories, getUserStories]);
 
   const handleOptimisticFollow = useCallback(async () => {
     const wasFollowing = localIsFollowing;
@@ -97,10 +92,6 @@ const ProfileLayout = ({
       if (onFollow) await onFollow();
     }
   }, [localIsFollowing, localUser, currentUser, onUnfollow, onFollow]);
-  useEffect(() => {
-    if (user?._id) fetchHighlights(user._id);
-  }, [user?._id, fetchHighlights]);
-
   const handleAddHighlight = useCallback(() => {
     setOpenModal(true);
   },[setOpenModal]);
@@ -176,6 +167,7 @@ const ProfileLayout = ({
                 combinedPosts={combinedPosts}
                 userSelected={user}
                 filters={filters}
+                postsLoading={postsLoading}
               />
 
               {userHasMore && (

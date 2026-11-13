@@ -40,7 +40,7 @@ export default function SavedPage() {
   const [query, setQuery] = useState('')
   const [openReel, setOpenReel] = useState(null)
 
-  const { posts, isLoading: postsLoading } = usePost()
+  const { posts, isLoading: postsLoading } = usePost({ autoFetch: true })
   const { current, playing, play, pause, setTrack, setSongs, setExpanded } = useMusicPlayer()
   const { user } = useAuth()
   const { userData, loading: userLoading } = useGetData(user?._id)

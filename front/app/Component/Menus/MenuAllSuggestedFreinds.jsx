@@ -8,11 +8,16 @@ import { useUser } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 
 const MenuAllSuggestedFriends = memo(() => {
-  const { user, users } = useAuth();
+  const { user } = useAuth();
   const { t } = useTranslation();
-  const { setShowAllSuggestedUsers, followUser, showAllSuggestedUsers } = useUser();
+  const {
+    suggestedUsers,
+    setShowAllSuggestedUsers,
+    followUser,
+    showAllSuggestedUsers,
+  } = useUser();
 
-  const computedSuggestedUsers = useMemo(() => users || [], [users]);
+  const computedSuggestedUsers = useMemo(() => suggestedUsers || [], [suggestedUsers]);
 
   return (
     <AnimatePresence>

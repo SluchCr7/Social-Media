@@ -1,77 +1,94 @@
 import { baseApi } from '../../api/baseApi';
 
+const messageTags = (result) => [
+  ...(Array.isArray(result) ? result.filter((message) => message?._id)
+    .map((message) => ({ type: 'Message', id: message._id })) : []),
+];
+
 export const messagesApi = baseApi.injectEndpoints({
-  endpoints: (builder) => ({
-    getConversationUsers: builder.query({
+  endpoints: (build) => ({
+    getConversationUsers: build.query({
       query: () => '/message/users',
-      providesTags: ['Message'],
+      providesTags: [{ type: 'Message', id: 'USERS' }],
     }),
-    getMessagesBetweenUsers: builder.query({
-      query: (userId) => `/message/messages/${userId}`,
-      providesTags: (result, error, userId) => [{ type: 'Message', id: `CONV_${userId}` }],
+    getMessages: build.query({
+      query: ({ targetUserId }) => `/message/messages/${targetUserId}`,
+      providesTags: (result, error, { targetUserId }) => [
+        { type: 'Message', id: `CONVERSATION-${targetUserId}` },
+        ...messageTags(result),
+      ],
     }),
-    getMessagesByUser: builder.query({
-      query: (userId) => `/message/user/${userId}`,
-      providesTags: (result, error, userId) => [{ type: 'Message', id: `USER_${userId}` }],
+    getMessagesByUser: build.query({
+      query: ({ userId }) => `/message/user/${userId}`,
+      providesTags: (result, error, { userId }) => [
+        { type: 'Message', id: `BY-USER-${userId}` },
+        ...messageTags(result),
+      ],
     }),
-    sendMessage: builder.mutation({
-      query: ({ userId, formData }) => ({
-        url: `/message/send/${userId}`,
+    getUnreadMessages: build.query({
+      query: () => '/message/messages/unread',
+      providesTags: (result) => [
+        { type: 'Message', id: 'UNREAD' },
+        ...messageTags(result),
+      ],
+    }),
+    sendMessage: build.mutation({
+      query: ({ targetUserId, formData }) => ({
+        url: `/message/send/${targetUserId}`,
         method: 'POST',
         body: formData,
       }),
-      invalidatesTags: (result, error, { userId }) => [
-        { type: 'Message', id: `CONV_${userId}` },
-        'Message',
+      invalidatesTags: (result, error, { targetUserId, currentUserId }) => [
+        { type: 'Message', id: `CONVERSATION-${targetUserId}` },
+        { type: 'Message', id: `BY-USER-${currentUserId}` },
+        { type: 'Message', id: 'USERS' },
+        { type: 'Message', id: 'UNREAD' },
       ],
     }),
-    toggleLikeMessage: builder.mutation({
-      query: (messageId) => ({
-        url: `/message/like/${messageId}`,
+    markConversationRead: build.mutation({
+      query: (targetUserId) => ({
+        url: `/message/read/${targetUserId}`,
         method: 'PATCH',
       }),
+      invalidatesTags: (result, error, targetUserId) => [
+        { type: 'Message', id: `CONVERSATION-${targetUserId}` },
+        { type: 'Message', id: 'UNREAD' },
+        { type: 'Message', id: 'USERS' },
+      ],
+    }),
+    likeMessage: build.mutation({
+      query: (messageId) => ({ url: `/message/like/${messageId}`, method: 'PATCH' }),
       invalidatesTags: (result, error, messageId) => [{ type: 'Message', id: messageId }],
     }),
-    deleteMessage: builder.mutation({
-      query: (messageId) => ({
-        url: `/message/delete/${messageId}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: (result, error, messageId) => [{ type: 'Message', id: messageId }],
+    deleteMessage: build.mutation({
+      query: ({ id }) => ({ url: `/message/delete/${id}`, method: 'DELETE' }),
+      invalidatesTags: (result, error, { id, targetUserId, currentUserId }) => [
+        { type: 'Message', id },
+        { type: 'Message', id: `CONVERSATION-${targetUserId}` },
+        { type: 'Message', id: `BY-USER-${currentUserId}` },
+        { type: 'Message', id: 'USERS' },
+      ],
     }),
-    deleteForMe: builder.mutation({
-      query: (messageId) => ({
-        url: `/message/deleteFor/${messageId}`,
-        method: 'PATCH',
-      }),
-      invalidatesTags: (result, error, messageId) => [{ type: 'Message', id: messageId }],
-    }),
-    markMessagesAsRead: builder.mutation({
-      query: (userId) => ({
-        url: `/message/read/${userId}`,
-        method: 'PATCH',
-      }),
-      invalidatesTags: (result, error, userId) => [{ type: 'Message', id: `CONV_${userId}` }, 'Message'],
-    }),
-    getUnreadMessagesCount: builder.query({
-      query: () => '/message/messages/unread',
-      providesTags: [{ type: 'Message', id: 'UNREAD' }],
+    deleteMessageForMe: build.mutation({
+      query: ({ id }) => ({ url: `/message/deleteFor/${id}`, method: 'PATCH' }),
+      invalidatesTags: (result, error, { id, targetUserId, currentUserId }) => [
+        { type: 'Message', id },
+        { type: 'Message', id: `CONVERSATION-${targetUserId}` },
+        { type: 'Message', id: `BY-USER-${currentUserId}` },
+        { type: 'Message', id: 'USERS' },
+      ],
     }),
   }),
 });
 
 export const {
   useGetConversationUsersQuery,
-  useLazyGetConversationUsersQuery,
-  useGetMessagesBetweenUsersQuery,
-  useLazyGetMessagesBetweenUsersQuery,
+  useGetMessagesQuery,
   useGetMessagesByUserQuery,
-  useLazyGetMessagesByUserQuery,
+  useGetUnreadMessagesQuery,
   useSendMessageMutation,
-  useToggleLikeMessageMutation,
+  useMarkConversationReadMutation,
+  useLikeMessageMutation,
   useDeleteMessageMutation,
-  useDeleteForMeMutation,
-  useMarkMessagesAsReadMutation,
-  useGetUnreadMessagesCountQuery,
-  useLazyGetUnreadMessagesCountQuery,
+  useDeleteMessageForMeMutation,
 } = messagesApi;

@@ -1,12 +1,13 @@
 'use client';
-import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/app/redux/hooks';
 import { useCommunity } from '@/app/redux/hooks';
 import { useFeedback } from '@/app/redux/hooks';
 import Loading from '@/app/Component/Loading';
 import DesignCommunitySelect from './Design';
-import api from '@/app/utils/api';
+import { useGetCommunityPostsInfiniteQuery } from '@/app/redux/features/posts/postsApi';
+import { useGetCommunityByIdQuery } from '@/app/redux/features/communities/communitiesApi';
 import Link from 'next/link';
 import useDocumentTitle from '@/app/hooks/useDocumentTitle';
 
@@ -34,8 +35,6 @@ const SkeletonCover = () => (
 const Page = ({ params }) => {
   const id = params?.id;
   const {
-    communities,
-    fetchCommunityById,
     joinToCommunity,
     sendJoinRequest,
     approveJoinRequest,
@@ -46,60 +45,22 @@ const Page = ({ params }) => {
   const { user } = useAuth();
   const { showAlert } = useFeedback();
   const { t } = useTranslation();
-
-  const [CommunitySelected, setCommunitySelected] = useState(null);
+  const communityQuery = useGetCommunityByIdQuery({
+    id,
+    viewerId: user?._id || 'anonymous',
+  }, { skip: !id });
+  const CommunitySelected = communityQuery.currentData || null;
   useDocumentTitle(CommunitySelected?.Name || null);
-  const [communityLoading, setCommunityLoading] = useState(true);
-  const [communityError, setCommunityError] = useState(null);
-  const [postsFiltered, setPostsFiltered] = useState([]);
-  const [postsLoading, setPostsLoading] = useState(false);
-  const [postsError, setPostsError] = useState(null);
-  const [postsPage, setPostsPage] = useState(1);
-  const [postsTotalPages, setPostsTotalPages] = useState(1);
-  const [postsTotal, setPostsTotal] = useState(0);
+  const communityLoading = communityQuery.isLoading || communityQuery.isFetching;
+  const communityError = communityQuery.error
+    ? communityQuery.error.data?.message || 'Could not load this community.'
+    : null;
   const [showEdit, setShowEdit] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
   const [showRequests, setShowRequests] = useState(false);
   const [showRules, setShowRules] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeMemberTab, setActiveMemberTab] = useState('all');
-  const postsRequest = useRef(null);
-
-  useEffect(() => {
-    let active = true;
-    setCommunitySelected(null);
-    setCommunityError(null);
-    setCommunityLoading(true);
-    fetchCommunityById(id)
-      .then((community) => {
-        if (active) setCommunitySelected(community);
-      })
-      .catch((error) => {
-        console.error('Could not load community:', error);
-        if (active) setCommunityError(error?.response?.data?.message || 'Could not load this community.');
-      })
-      .finally(() => {
-        if (active) setCommunityLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [fetchCommunityById, id]);
-
-  useEffect(() => {
-    const updated = communities.find((community) =>
-      community?._id === id && Array.isArray(community.members)
-    );
-    if (updated) setCommunitySelected(updated);
-  }, [communities, id]);
-
-  const communityUpdatedAt = communities.find((community) => community?._id === id)?.updatedAt;
-  useEffect(() => {
-    if (!CommunitySelected || !communityUpdatedAt || communityUpdatedAt === CommunitySelected.updatedAt) return;
-    fetchCommunityById(id)
-      .then(setCommunitySelected)
-      .catch((error) => console.error('Could not refresh community details:', error));
-  }, [CommunitySelected, communityUpdatedAt, fetchCommunityById, id]);
 
   const isJoined = useMemo(() => {
     const currentUserId = user?._id?.toString();
@@ -111,46 +72,37 @@ const Page = ({ params }) => {
     ));
   }, [CommunitySelected, user?._id]);
 
-  const loadCommunityPosts = useCallback(async (pageNum = 1) => {
-    postsRequest.current?.abort();
-    const controller = new AbortController();
-    postsRequest.current = controller;
-    setPostsLoading(true);
-    setPostsError(null);
-    try {
-      const { data } = await api.get(`/post/community/${id}`, {
-        params: { page: pageNum, limit: 10 },
-        signal: controller.signal,
-      });
-      if (postsRequest.current !== controller) return;
-      setPostsFiltered((current) => pageNum === 1 ? data.posts || [] : [...current, ...(data.posts || [])]);
-      setPostsPage(Number(data.page) || pageNum);
-      setPostsTotalPages(Number(data.pages) || 0);
-      setPostsTotal(Number(data.total) || 0);
-    } catch (error) {
-      if (controller.signal.aborted) return;
-      console.error('Could not load community posts:', error);
-      setPostsError(error?.response?.data?.message || 'Could not load community posts.');
-    } finally {
-      if (postsRequest.current === controller) {
-        postsRequest.current = null;
-        setPostsLoading(false);
-      }
-    }
-  }, [id]);
-
-  const hasCommunity = Boolean(CommunitySelected);
-  useEffect(() => {
-    if (hasCommunity && (!CommunitySelected.isPrivate || isJoined)) {
-      loadCommunityPosts(1);
-    } else {
-      setPostsFiltered([]);
-      setPostsTotal(0);
-    }
-    return () => postsRequest.current?.abort();
-  }, [hasCommunity, CommunitySelected?.isPrivate, isJoined, loadCommunityPosts]);
-
-  useEffect(() => () => postsRequest.current?.abort(), []);
+  const communityPostsQuery = useGetCommunityPostsInfiniteQuery({
+    communityId: id,
+    viewerId: user?._id || 'anonymous',
+    limit: 10,
+  }, {
+    skip: !CommunitySelected || (CommunitySelected.isPrivate && !isJoined),
+  });
+  const {
+    fetchNextPage: fetchNextCommunityPostsPage,
+    hasNextPage: hasMoreCommunityPosts,
+    refetch: refetchCommunityPosts,
+  } = communityPostsQuery;
+  const postsFiltered = useMemo(
+    () => communityPostsQuery.data?.pages?.flatMap((page) => page?.posts || []) || [],
+    [communityPostsQuery.data]
+  );
+  const lastPostsPage = communityPostsQuery.data?.pages?.[
+    communityPostsQuery.data.pages.length - 1
+  ];
+  const postsTotal = Number(lastPostsPage?.total) || 0;
+  const postsLoading = communityPostsQuery.isLoading || communityPostsQuery.isFetchingNextPage;
+  const postsError = communityPostsQuery.error?.data?.message
+    || (communityPostsQuery.error ? 'Could not load community posts.' : null);
+  const loadCommunityPosts = useCallback((pageNum = 1) => {
+    if (pageNum === 1) return refetchCommunityPosts();
+    if (hasMoreCommunityPosts) return fetchNextCommunityPostsPage();
+  }, [
+    fetchNextCommunityPostsPage,
+    hasMoreCommunityPosts,
+    refetchCommunityPosts,
+  ]);
 
   const ownerId = useMemo(
     () => CommunitySelected?.owner?._id || CommunitySelected?.owner,
@@ -196,28 +148,11 @@ const Page = ({ params }) => {
   const handleJoinToggle = useCallback(() => {
     if (!CommunitySelected || !user) return;
 
-    const action = isJoined
+    return isJoined
       ? joinToCommunity(CommunitySelected._id)
       : CommunitySelected.isPrivate
         ? sendJoinRequest(CommunitySelected._id)
         : joinToCommunity(CommunitySelected._id);
-    return action
-      .then((succeeded) => {
-        if (!succeeded) return;
-        if (!isJoined && CommunitySelected.isPrivate) {
-          setCommunitySelected((current) => ({ ...current, hasPendingRequest: true }));
-        } else if (isJoined && CommunitySelected.isPrivate) {
-          setCommunitySelected((current) => ({
-            ...current,
-            isMember: false,
-            hasPendingRequest: false,
-            members: undefined,
-            Admins: undefined,
-            joinRequests: undefined,
-          }));
-        }
-      })
-      .catch(() => {});
   }, [CommunitySelected, user, isJoined, joinToCommunity, sendJoinRequest]);
 
   const handleMakeAdmin = useCallback(
@@ -296,13 +231,12 @@ const Page = ({ params }) => {
       isAdmin={isAdmin}
       isOwner={isOwner}
       CommunitySelected={CommunitySelected}
-      setCommunitySelected={setCommunitySelected}
       postsFiltered={postsFiltered}
       postsLoading={postsLoading}
       postsError={postsError}
       postsTotal={postsTotal}
-      hasMorePosts={postsPage < postsTotalPages}
-      loadMorePosts={() => loadCommunityPosts(postsPage + 1)}
+      hasMorePosts={Boolean(communityPostsQuery.hasNextPage)}
+      loadMorePosts={() => loadCommunityPosts((lastPostsPage?.page || 1) + 1)}
       retryPosts={() => loadCommunityPosts(1)}
       onShare={handleShare}
       showEdit={showEdit}

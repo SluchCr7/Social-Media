@@ -1,568 +1,417 @@
 'use client';
 
-import { useEffect, useCallback, useMemo } from 'react';
-import api from '@/app/utils/api';
+import { useCallback, useMemo } from 'react';
 import { useAuth } from './useAuth';
-import { useAppDispatch, useAppSelector, useAppStore } from '../hooks';
+import { useAppDispatch, useAppSelector } from '../hooks';
 import {
-  selectPosts,
-  selectUserPosts,
-  selectMemories,
-  selectMemoriesLoading,
+  useAddPostMutation,
+  useDeletePostMutation,
+  useEditPostMutation,
+  useGetPostsInfiniteQuery,
+  useHahaPostMutation,
+  useLikePostMutation,
+  useLazyGetPostByIdQuery,
+  useSavePostMutation,
+  useSharePostMutation,
+  useViewPostMutation,
+} from '../features/posts/postsApi';
+import {
   selectImageView,
-  selectShowPostModelEdit,
-  selectPostIsEdit,
-  selectPostsPage,
-  selectPostsHasMore,
-  selectUserPostsHasMore,
-  selectUserPostsLoading,
-  selectPostsLoading,
+  selectOptimisticPosts,
   selectPostCreatedLoading,
-  selectPostsError,
+  selectPostIsEdit,
+  selectShowPostModelEdit,
 } from '../features/posts/postsSelectors';
 import {
-  setPosts as setReduxPosts,
-  appendPosts,
-  addPost as addReduxPost,
-  setUserPosts as setReduxUserPosts,
-  appendUserPosts,
-  setMemories as setReduxMemories,
-  setMemoriesLoading,
+  addOptimisticPost,
+  removeOptimisticPost,
   setImageView as setReduxImageView,
-  setShowPostModelEdit as setReduxShowPostModelEdit,
-  setPostIsEdit as setReduxPostIsEdit,
-  setPage as setReduxPage,
-  setHasMore,
-  setLoadedPage,
-  setUserHasMore,
-  setUserIsLoading,
-  setIsLoading,
   setIsLoadingPostCreated,
-  setError,
-  updatePostInState,
-  removePostFromState,
-  optimisticLikePost,
-  optimisticHahaPost,
-  optimisticSavePost,
+  setPostIsEdit as setReduxPostIsEdit,
+  setShowPostModelEdit as setReduxShowPostModelEdit,
 } from '../features/posts/postsSlice';
 import { useFeedback } from './useFeedback';
 import { MESSAGES } from '@/app/utils/messages';
 
-
+const getErrorMessage = (error, fallback) =>
+  error?.data?.message || error?.response?.data?.message || error?.message || fallback;
 
 export const usePost = ({ autoFetch = false } = {}) => {
   const dispatch = useAppDispatch();
-  const store = useAppStore();
   const { user } = useAuth();
   const { showToast } = useFeedback();
-
-  const posts = useAppSelector(selectPosts);
-  const userPosts = useAppSelector(selectUserPosts);
-  const memories = useAppSelector(selectMemories);
-  const memoriesLoading = useAppSelector(selectMemoriesLoading);
+  const optimisticPosts = useAppSelector(selectOptimisticPosts);
   const imageView = useAppSelector(selectImageView);
   const showPostModelEdit = useAppSelector(selectShowPostModelEdit);
   const postIsEdit = useAppSelector(selectPostIsEdit);
-  const page = useAppSelector(selectPostsPage);
-  const hasMore = useAppSelector(selectPostsHasMore);
-  const userHasMore = useAppSelector(selectUserPostsHasMore);
-  const userIsLoading = useAppSelector(selectUserPostsLoading);
-  const isLoading = useAppSelector(selectPostsLoading);
   const isLoadingPostCreated = useAppSelector(selectPostCreatedLoading);
-  const error = useAppSelector(selectPostsError);
 
-  const setPosts = useCallback(
-    (p) => {
-      const currentPosts = selectPosts(store.getState());
-      dispatch(setReduxPosts(typeof p === 'function' ? p(currentPosts) : p));
-    },
-    [dispatch, store]
+  const postsQuery = useGetPostsInfiniteQuery(
+    { viewerId: user?._id || 'anonymous', limit: 10 },
+    { skip: !autoFetch }
+  );
+  const {
+    fetchNextPage: fetchNextPostsPage,
+    hasNextPage: hasMorePosts,
+    isFetchingNextPage: isFetchingMorePosts,
+    refetch: refetchPosts,
+  } = postsQuery;
+  const [addPostRequest] = useAddPostMutation();
+  const [editPostRequest, editPostState] = useEditPostMutation();
+  const [deletePostRequest] = useDeletePostMutation();
+  const [likePostRequest] = useLikePostMutation();
+  const [hahaPostRequest] = useHahaPostMutation();
+  const [savePostRequest] = useSavePostMutation();
+  const [sharePostRequest] = useSharePostMutation();
+  const [viewPostRequest] = useViewPostMutation();
+  const [loadPostById] = useLazyGetPostByIdQuery();
+
+  const fetchedPosts = useMemo(
+    () => postsQuery.data?.pages?.flatMap((page) => page?.posts || []) || [],
+    [postsQuery.data]
+  );
+  const posts = useMemo(
+    () => [...optimisticPosts, ...fetchedPosts.filter((post) =>
+      !optimisticPosts.some((optimistic) => optimistic._id === post._id)
+    )],
+    [fetchedPosts, optimisticPosts]
   );
 
-  const setImageView = useCallback(
-    (view) => {
-      dispatch(setReduxImageView(view));
-    },
-    [dispatch]
-  );
-
+  const setImageView = useCallback((view) => dispatch(setReduxImageView(view)), [dispatch]);
   const setShowPostModelEdit = useCallback(
-    (show) => {
-      dispatch(setReduxShowPostModelEdit(show));
-    },
+    (show) => dispatch(setReduxShowPostModelEdit(show)),
     [dispatch]
   );
+  const setPostIsEdit = useCallback((item) => dispatch(setReduxPostIsEdit(item)), [dispatch]);
 
-  const setPostIsEdit = useCallback(
-    (item) => {
-      dispatch(setReduxPostIsEdit(item));
-    },
-    [dispatch]
-  );
+  const fetchPosts = useCallback(async (pageNum = 1) => {
+    if (!autoFetch) return;
+    if (pageNum === 1) return refetchPosts();
+    if (hasMorePosts) return fetchNextPostsPage();
+  }, [autoFetch, fetchNextPostsPage, hasMorePosts, refetchPosts]);
 
-  const setPage = useCallback(
-    (p) => {
-      const currentPage = selectPostsPage(store.getState());
-      dispatch(setReduxPage(typeof p === 'function' ? p(currentPage) : p));
-    },
-    [dispatch, store]
-  );
+  const loadMorePosts = useCallback(async () => {
+    if (!hasMorePosts || isFetchingMorePosts) return;
+    return fetchNextPostsPage();
+  }, [fetchNextPostsPage, hasMorePosts, isFetchingMorePosts]);
 
-  const fetchPosts = useCallback(
-    async (pageNum = 1) => {
-      if (pageNum !== 1 && !hasMore) return;
-      const currentPostsState = store.getState().posts;
-      if (
-        currentPostsState?.isLoading ||
-        (currentPostsState?.loadedPage >= pageNum && currentPostsState?.posts?.length > 0)
-      ) return;
-
-      dispatch(setIsLoading(true));
-      dispatch(setError(null));
-      try {
-        const res = await api.get(`/post?page=${pageNum}&limit=10`);
-        const fetchedPosts = Array.isArray(res.data.posts) ? res.data.posts : [];
-
-        dispatch(pageNum === 1 ? setReduxPosts(fetchedPosts) : appendPosts(fetchedPosts));
-        dispatch(setHasMore(pageNum < res.data.pages));
-        dispatch(setLoadedPage(pageNum));
-      } catch (err) {
-        console.error('Error fetching feed posts:', err.message);
-        dispatch(setError(err.response?.data?.message || 'Could not load posts. Please try again.'));
-      } finally {
-        dispatch(setIsLoading(false));
-      }
-    },
-    [hasMore, dispatch, store]
-  );
-
-  const fetchUserPosts = useCallback(
-    async (userId, pageNum = 1, limit = 5) => {
-      if (!userId || (pageNum !== 1 && userIsLoading)) return;
-
-      dispatch(setUserIsLoading(true));
-      try {
-        const res = await api.get(`/post/user/${userId}?page=${pageNum}&limit=${limit}`);
-        const fetchedPosts = Array.isArray(res.data.posts) ? res.data.posts : [];
-
-        dispatch(pageNum === 1 ? setReduxUserPosts(fetchedPosts) : appendUserPosts(fetchedPosts));
-        dispatch(setUserHasMore(pageNum < res.data.pages));
-      } catch (err) {
-        console.error('Error fetching profile posts:', err.message);
-      } finally {
-        dispatch(setUserIsLoading(false));
-      }
-    },
-    [userIsLoading, dispatch]
-  );
+  const retry = useCallback(() => refetchPosts(), [refetchPosts]);
 
   const getPostById = useCallback(async (id) => {
     if (!id) return null;
     try {
-      const res = await api.get(`/post/${id}`);
-      return res.data;
-    } catch (err) {
-      console.error('Error fetching post by ID:', err);
+      return await loadPostById(id).unwrap();
+    } catch (error) {
+      console.error('Error fetching post by ID:', error);
       return null;
     }
-  }, []);
+  }, [loadPostById]);
 
-  const fetchMemories = useCallback(async () => {
-    dispatch(setMemoriesLoading(true));
-    try {
-      const res = await api.get('/post/memories');
-      dispatch(setReduxMemories(Array.isArray(res.data) ? res.data : []));
-    } catch (err) {
-      console.error('Error fetching memories:', err.message);
-    } finally {
-      dispatch(setMemoriesLoading(false));
+  const AddPost = useCallback(async (
+    content,
+    mediaFiles = [],
+    Hashtags = [],
+    communityId = null,
+    mentions = [],
+    scheduledAt = null,
+    links = [],
+    privacy = 'public',
+    music = null
+  ) => {
+    if (!user) {
+      showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+      return null;
     }
-  }, [dispatch]);
 
-  const AddPost = useCallback(
-    async (
-      content,
-      mediaFiles = [],
-      Hashtags = [],
-      communityId = null,
-      mentions = [],
-      scheduledAt = null,
-      links = [],
-      privacy = 'public',
-      music = null
-    ) => {
-      if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+    const formData = new FormData();
+    formData.append('text', content);
+    mediaFiles.forEach((item) => formData.append('media', item.file));
+    Hashtags.forEach((tag) => formData.append('Hashtags', tag));
+    if (communityId) formData.append('community', communityId);
+    if (mentions.length > 0) formData.append('mentions', JSON.stringify(mentions));
+    if (scheduledAt) formData.append('scheduledAt', scheduledAt);
+    if (privacy) formData.append('privacy', privacy);
+    if (links.length > 0) formData.append('links', JSON.stringify(links));
+    if (music) formData.append('music', music);
 
-      const formData = new FormData();
-      formData.append('text', content);
-      mediaFiles.forEach((item) => formData.append('media', item.file));
-      Hashtags.forEach((tag) => formData.append('Hashtags', tag));
-      if (communityId) formData.append('community', communityId);
-      if (mentions.length > 0) formData.append('mentions', JSON.stringify(mentions));
-      if (scheduledAt) formData.append('scheduledAt', scheduledAt);
-      if (privacy) formData.append('privacy', privacy);
-      if (links.length > 0) formData.append('links', JSON.stringify(links));
-      if (music) formData.append('music', music);
-
-      const optimisticId = `temp-${Date.now()}`;
-      if (!scheduledAt) {
-        const optimisticPost = {
-          _id: optimisticId,
-          text: content,
-          media: mediaFiles.map((item) => ({
-            url: URL.createObjectURL(item.file),
+    const optimisticId = `temp-${Date.now()}`;
+    const objectUrls = [];
+    if (!scheduledAt) {
+      const optimisticPost = {
+        _id: optimisticId,
+        text: content,
+        media: mediaFiles.map((item) => {
+          const url = typeof URL.createObjectURL === 'function'
+            ? URL.createObjectURL(item.file)
+            : '';
+          if (url) objectUrls.push(url);
+          return {
+            url,
             type: item.type || (item.file.type.startsWith('video') ? 'video' : 'image'),
-            publicId: `temp-media-${Date.now()}`,
-          })),
-          owner: user,
-          createdAt: new Date().toISOString(),
-          likes: [],
-          hahas: [],
-          comments: [],
-          saved: [],
-          views: [],
-          Hashtags,
-          mentions,
-          isOptimistic: true,
-          status: 'published',
-          community: communityId,
-          links,
-          music,
-          privacy,
-          userLevelPoints: 0,
-        };
-        dispatch(addReduxPost(optimisticPost));
-      }
-
-      dispatch(setIsLoadingPostCreated(true));
-      const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
-
-      try {
-        const res = await api.post('/post/add', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-
-        const newPost = res.data?.post || res.data;
-
-        if (scheduledAt) {
-          showToast('Great! Your post has been scheduled.', 'success', { id: loadingToast });
-        } else {
-          showToast(MESSAGES.POST.CREATE_SUCCESS, 'success', { id: loadingToast });
-          dispatch(removePostFromState(optimisticId));
-          dispatch(addReduxPost(newPost));
-        }
-        return newPost;
-      } catch (err) {
-        console.error(err);
-        showToast(err.response?.data?.message || MESSAGES.POST.CREATE_ERROR, 'error', { id: loadingToast });
-        dispatch(removePostFromState(optimisticId));
-      } finally {
-        dispatch(setIsLoadingPostCreated(false));
-      }
-    },
-    [user, showToast, dispatch]
-  );
-
-  const editPost = useCallback(
-    async (id, data, mediaFiles = [], deletedMedia = []) => {
-      const formData = new FormData();
-      formData.append('text', data.text || '');
-      formData.append('privacy', data.privacy || 'public');
-
-      if (data.Hashtags) formData.append('Hashtags', JSON.stringify(data.Hashtags));
-      if (data.mentions) formData.append('mentions', JSON.stringify(data.mentions));
-      if (data.links) formData.append('links', JSON.stringify(data.links));
-      if (data.music) formData.append('music', data.music);
-      if (data.community?._id || data.community) {
-        formData.append('community', data.community?._id || data.community);
-      }
-      if (data.existingPhotos) {
-        formData.append('existingPhotos', JSON.stringify(data.existingPhotos));
-      }
-
-      (data.newPhotos || mediaFiles).forEach((file) => formData.append('newMedia', file));
-      if (deletedMedia.length > 0) {
-        formData.append('deletedMedia', JSON.stringify(deletedMedia));
-      }
-
-      dispatch(setIsLoading(true));
-      const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
-
-      try {
-        const res = await api.put(`/post/edit/${id}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-
-        const updatedPost = res.data?.post || res.data;
-        dispatch(updatePostInState(updatedPost));
-        showToast(MESSAGES.POST.UPDATE_SUCCESS, 'success', { id: loadingToast });
-        dispatch(setReduxShowPostModelEdit(false));
-      } catch (err) {
-        console.error(err);
-        showToast(MESSAGES.POST.UPDATE_ERROR, 'error', { id: loadingToast });
-      } finally {
-        dispatch(setIsLoading(false));
-      }
-    },
-    [dispatch, showToast]
-  );
-
-  const deletePost = useCallback(
-    async (id) => {
-      try {
-        const res = await api.delete(`/post/${id}`);
-        showToast(res.data.message || MESSAGES.POST.DELETE_SUCCESS, 'success');
-        dispatch(removePostFromState(id));
-      } catch (err) {
-        console.error(err);
-        showToast(MESSAGES.POST.DELETE_ERROR, 'error');
-      }
-    },
-    [dispatch, showToast]
-  );
-
-  const likePost = useCallback(
-    async (postId) => {
-      if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
-
-      dispatch(optimisticLikePost({ postId, userId: user._id }));
-
-      try {
-        const res = await api.put(`/post/like/${postId}`, {});
-        dispatch(updatePostInState(res.data));
-      } catch (err) {
-        console.error(err);
-        showToast(err?.response?.data?.message || 'Failed to update like status.', 'error');
-      }
-    },
-    [user, dispatch, showToast]
-  );
-
-  const hahaPost = useCallback(
-    async (postId) => {
-      if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
-
-      dispatch(optimisticHahaPost({ postId, userId: user._id }));
-
-      try {
-        const res = await api.put(`/post/haha/${postId}`, {});
-        dispatch(updatePostInState(res.data));
-      } catch (err) {
-        console.error(err);
-        showToast(err?.response?.data?.message || 'Failed to update haha status.', 'error');
-      }
-    },
-    [user, dispatch, showToast]
-  );
-
-  const savePost = useCallback(
-    async (id) => {
-      if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
-
-      dispatch(optimisticSavePost({ postId: id, userId: user._id }));
-
-      try {
-        const res = await api.put(`/post/save/${id}`, {});
-        dispatch(updatePostInState(res.data));
-        showToast(MESSAGES.POST.SAVE_SUCCESS, 'success');
-      } catch (err) {
-        console.error(err);
-        showToast(err?.response?.data?.message || 'Failed to save post.', 'error');
-      }
-    },
-    [user, dispatch, showToast]
-  );
-
-  const viewPost = useCallback(
-    async (id) => {
-      try {
-        const res = await api.put(`/post/view/${id}`, {});
-        if (res.data?._id) dispatch(updatePostInState(res.data));
-        return res.data;
-      } catch (err) {
-        console.error('Error recording post view:', err);
-        return null;
-      }
-    },
-    [dispatch]
-  );
-
-  const sharePost = useCallback(
-    async (postId, customText = '') => {
-      if (!user) {
-        showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
-        return null;
-      }
-      if (!postId) {
-        showToast('Could not find the post to share.', 'error');
-        return null;
-      }
-      if (typeof customText !== 'string' || customText.length > 300) {
-        showToast('Share text must be 300 characters or fewer.', 'error');
-        return null;
-      }
-
-      const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
-      try {
-        const res = await api.post(`/post/share/${postId}`, { customText });
-        const sharedPost = res.data;
-        if (!sharedPost?._id) throw new Error('The share request returned an invalid post.');
-
-        dispatch(addReduxPost(sharedPost));
-        const originalPost = selectPosts(store.getState()).find((post) => post?._id === postId);
-        if (originalPost) {
-          const shares = Array.isArray(originalPost.shares) ? originalPost.shares : [];
-          const alreadyShared = shares.some((share) =>
-            String(share?._id ?? share?.user?._id ?? share?.user ?? share) === String(user._id)
-          );
-          if (!alreadyShared) {
-            dispatch(updatePostInState({ ...originalPost, shares: [...shares, user._id] }));
-          }
-        }
-
-        showToast('Post shared successfully.', 'success', { id: loadingToast });
-        return sharedPost;
-      } catch (err) {
-        console.error('Error sharing post:', err);
-        showToast(
-          err?.response?.data?.message || 'Failed to share this post. Please try again.',
-          'error',
-          { id: loadingToast }
-        );
-        return null;
-      }
-    },
-    [user, showToast, dispatch, store]
-  );
-
-  const sharePostExternally = useCallback(
-    async (post) => {
-      const originalPost = post?.originalPost || post;
-      const postId = typeof originalPost === 'string' ? originalPost : originalPost?._id;
-      if (!postId || typeof window === 'undefined' || typeof navigator === 'undefined') {
-        showToast('Could not create a link for this post.', 'error');
-        return false;
-      }
-
-      const url = `${window.location.origin}/Pages/Post/${encodeURIComponent(postId)}`;
-      const shareData = {
-        title: originalPost?.owner?.profileName
-          ? `${originalPost.owner.profileName}'s post`
-          : 'Post',
-        text: originalPost?.text || undefined,
-        url,
+            publicId: `temp-media-${optimisticId}`,
+          };
+        }),
+        owner: user,
+        createdAt: new Date().toISOString(),
+        likes: [],
+        hahas: [],
+        comments: [],
+        saved: [],
+        views: [],
+        Hashtags,
+        mentions,
+        isOptimistic: true,
+        status: 'published',
+        community: communityId,
+        links,
+        music,
+        privacy,
+        userLevelPoints: 0,
       };
+      dispatch(addOptimisticPost(optimisticPost));
+    }
 
-      try {
-        if (navigator.share) {
-          try {
-            await navigator.share(shareData);
-            return true;
-          } catch (err) {
-            if (err?.name === 'AbortError') return false;
-            if (!navigator.clipboard?.writeText) throw err;
-          }
+    dispatch(setIsLoadingPostCreated(true));
+    const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
+    try {
+      const data = await addPostRequest(formData).unwrap();
+      const newPost = data?.post || data;
+      if (scheduledAt) {
+        showToast('Great! Your post has been scheduled.', 'success', { id: loadingToast });
+      } else {
+        dispatch(removeOptimisticPost(optimisticId));
+        showToast(MESSAGES.POST.CREATE_SUCCESS, 'success', { id: loadingToast });
+      }
+      return newPost;
+    } catch (error) {
+      console.error(error);
+      showToast(getErrorMessage(error, MESSAGES.POST.CREATE_ERROR), 'error', { id: loadingToast });
+      dispatch(removeOptimisticPost(optimisticId));
+      return null;
+    } finally {
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+      dispatch(setIsLoadingPostCreated(false));
+    }
+  }, [addPostRequest, dispatch, showToast, user]);
+
+  const editPost = useCallback(async (id, data, mediaFiles = [], deletedMedia = []) => {
+    const formData = new FormData();
+    formData.append('text', data.text || '');
+    formData.append('privacy', data.privacy || 'public');
+    if (data.Hashtags) formData.append('Hashtags', JSON.stringify(data.Hashtags));
+    if (data.mentions) formData.append('mentions', JSON.stringify(data.mentions));
+    if (data.links) formData.append('links', JSON.stringify(data.links));
+    if (data.music) formData.append('music', data.music);
+    if (data.community?._id || data.community) {
+      formData.append('community', data.community?._id || data.community);
+    }
+    if (data.existingPhotos) {
+      formData.append('existingPhotos', JSON.stringify(data.existingPhotos));
+    }
+    (data.newPhotos || mediaFiles).forEach((file) => formData.append('newMedia', file));
+    if (deletedMedia.length > 0) {
+      formData.append('deletedMedia', JSON.stringify(deletedMedia));
+    }
+
+    const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
+    try {
+      await editPostRequest({ id, formData }).unwrap();
+      showToast(MESSAGES.POST.UPDATE_SUCCESS, 'success', { id: loadingToast });
+      dispatch(setReduxShowPostModelEdit(false));
+    } catch (error) {
+      console.error(error);
+      showToast(getErrorMessage(error, MESSAGES.POST.UPDATE_ERROR), 'error', { id: loadingToast });
+    }
+  }, [dispatch, editPostRequest, showToast]);
+
+  const deletePost = useCallback(async (id) => {
+    try {
+      const data = await deletePostRequest(id).unwrap();
+      showToast(data?.message || MESSAGES.POST.DELETE_SUCCESS, 'success');
+    } catch (error) {
+      console.error(error);
+      showToast(getErrorMessage(error, MESSAGES.POST.DELETE_ERROR), 'error');
+    }
+  }, [deletePostRequest, showToast]);
+
+  const likePost = useCallback(async (postId) => {
+    if (!user) {
+      showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+      return;
+    }
+    try {
+      await likePostRequest(postId).unwrap();
+    } catch (error) {
+      console.error(error);
+      showToast(getErrorMessage(error, 'Failed to update like status.'), 'error');
+    }
+  }, [likePostRequest, showToast, user]);
+
+  const hahaPost = useCallback(async (postId) => {
+    if (!user) {
+      showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+      return;
+    }
+    try {
+      await hahaPostRequest(postId).unwrap();
+    } catch (error) {
+      console.error(error);
+      showToast(getErrorMessage(error, 'Failed to update haha status.'), 'error');
+    }
+  }, [hahaPostRequest, showToast, user]);
+
+  const savePost = useCallback(async (id) => {
+    if (!user) {
+      showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+      return;
+    }
+    try {
+      await savePostRequest(id).unwrap();
+      showToast(MESSAGES.POST.SAVE_SUCCESS, 'success');
+    } catch (error) {
+      console.error(error);
+      showToast(getErrorMessage(error, 'Failed to save post.'), 'error');
+    }
+  }, [savePostRequest, showToast, user]);
+
+  const viewPost = useCallback(async (id) => {
+    try {
+      return await viewPostRequest(id).unwrap();
+    } catch (error) {
+      console.error('Error recording post view:', error);
+      return null;
+    }
+  }, [viewPostRequest]);
+
+  const sharePost = useCallback(async (postId, customText = '') => {
+    if (!user) {
+      showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+      return null;
+    }
+    if (!postId) {
+      showToast('Could not find the post to share.', 'error');
+      return null;
+    }
+    if (typeof customText !== 'string' || customText.length > 300) {
+      showToast('Share text must be 300 characters or fewer.', 'error');
+      return null;
+    }
+
+    const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
+    try {
+      const sharedPost = await sharePostRequest({ id: postId, customText }).unwrap();
+      if (!sharedPost?._id) throw new Error('The share request returned an invalid post.');
+      showToast('Post shared successfully.', 'success', { id: loadingToast });
+      return sharedPost;
+    } catch (error) {
+      console.error('Error sharing post:', error);
+      showToast(
+        getErrorMessage(error, 'Failed to share this post. Please try again.'),
+        'error',
+        { id: loadingToast }
+      );
+      return null;
+    }
+  }, [sharePostRequest, showToast, user]);
+
+  const sharePostExternally = useCallback(async (post) => {
+    const originalPost = post?.originalPost || post;
+    const postId = typeof originalPost === 'string' ? originalPost : originalPost?._id;
+    if (!postId || typeof window === 'undefined' || typeof navigator === 'undefined') {
+      showToast('Could not create a link for this post.', 'error');
+      return false;
+    }
+
+    const url = `${window.location.origin}/Pages/Post/${encodeURIComponent(postId)}`;
+    const shareData = {
+      title: originalPost?.owner?.profileName
+        ? `${originalPost.owner.profileName}'s post`
+        : 'Post',
+      text: originalPost?.text || undefined,
+      url,
+    };
+
+    try {
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+          return true;
+        } catch (error) {
+          if (error?.name === 'AbortError') return false;
+          if (!navigator.clipboard?.writeText) throw error;
         }
-
-        if (!navigator.clipboard?.writeText) {
-          showToast('Sharing is not supported by this browser.', 'error');
-          return false;
-        }
-
-        await navigator.clipboard.writeText(url);
-        showToast('Post link copied to clipboard.', 'success');
-        return true;
-      } catch (err) {
-        console.error('Error sharing post link:', err);
-        showToast('Could not share this post. Please try again.', 'error');
+      }
+      if (!navigator.clipboard?.writeText) {
+        showToast('Sharing is not supported by this browser.', 'error');
         return false;
       }
-    },
-    [showToast]
-  );
-
-  useEffect(() => {
-    if (autoFetch) {
-      fetchPosts(page);
+      await navigator.clipboard.writeText(url);
+      showToast('Post link copied to clipboard.', 'success');
+      return true;
+    } catch (error) {
+      console.error('Error sharing post link:', error);
+      showToast('Could not share this post. Please try again.', 'error');
+      return false;
     }
-  }, [autoFetch, page, fetchPosts]);
+  }, [showToast]);
 
-  const retry = useCallback(() => {
-    fetchPosts(page);
-  }, [fetchPosts, page]);
+  const error = postsQuery.error?.data?.message
+    || (postsQuery.error ? 'Could not load posts. Please try again.' : null);
 
-  return useMemo(
-    () => ({
-      posts,
-      setPosts,
-      isLoading,
-      isLoadingPostCreated,
-      error,
-      retry,
-      imageView,
-      setImageView,
-      showPostModelEdit,
-      setShowPostModelEdit,
-      postIsEdit,
-      setPostIsEdit,
-      hasMore,
-      setPage,
-      page,
-      userPosts,
-      userHasMore,
-      userIsLoading,
-      memories,
-      memoriesLoading,
-      fetchPosts,
-      fetchUserPosts,
-      getPostById,
-      fetchMemories,
-      AddPost,
-      editPost,
-      deletePost,
-      likePost,
-      hahaPost,
-      savePost,
-      viewPost,
-      sharePost,
-      sharePostExternally,
-    }),
-    [
-      posts,
-      setPosts,
-      isLoading,
-      isLoadingPostCreated,
-      error,
-      retry,
-      imageView,
-      setImageView,
-      showPostModelEdit,
-      setShowPostModelEdit,
-      postIsEdit,
-      setPostIsEdit,
-      hasMore,
-      setPage,
-      page,
-      userPosts,
-      userHasMore,
-      userIsLoading,
-      memories,
-      memoriesLoading,
-      fetchPosts,
-      fetchUserPosts,
-      getPostById,
-      fetchMemories,
-      AddPost,
-      editPost,
-      deletePost,
-      likePost,
-      hahaPost,
-      savePost,
-      viewPost,
-      sharePost,
-      sharePostExternally,
-    ]
-  );
+  return useMemo(() => ({
+    posts,
+    isLoading: postsQuery.isLoading || postsQuery.isFetchingNextPage,
+    isLoadingPostCreated,
+    error,
+    retry,
+    imageView,
+    setImageView,
+    showPostModelEdit,
+    setShowPostModelEdit,
+    postIsEdit,
+    setPostIsEdit,
+    hasMore: Boolean(postsQuery.hasNextPage),
+    loadMorePosts,
+    fetchPosts,
+    getPostById,
+    AddPost,
+    editPost,
+    isEditingPost: editPostState.isLoading,
+    deletePost,
+    likePost,
+    hahaPost,
+    savePost,
+    viewPost,
+    sharePost,
+    sharePostExternally,
+  }), [
+    posts,
+    postsQuery.isLoading,
+    postsQuery.isFetchingNextPage,
+    postsQuery.hasNextPage,
+    isLoadingPostCreated,
+    error,
+    retry,
+    imageView,
+    setImageView,
+    showPostModelEdit,
+    setShowPostModelEdit,
+    postIsEdit,
+    setPostIsEdit,
+    loadMorePosts,
+    fetchPosts,
+    getPostById,
+    AddPost,
+    editPost,
+    editPostState.isLoading,
+    deletePost,
+    likePost,
+    hahaPost,
+    savePost,
+    viewPost,
+    sharePost,
+    sharePostExternally,
+  ]);
 };
 
 export default usePost;

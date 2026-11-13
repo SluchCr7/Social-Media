@@ -1,270 +1,195 @@
 'use client';
 
-import { useEffect, useCallback, useMemo } from 'react';
-import api from '../../utils/api';
+import { useCallback, useMemo } from 'react';
 import { useAuth } from './useAuth';
 import { useFeedback } from './useFeedback';
-import { useAppDispatch, useAppSelector } from '../hooks';
+import { useAppDispatch, useAppSelector, useAppStore } from '../hooks';
+import { baseApi } from '../api/baseApi';
+import { selectIsStoryModalOpen } from '../features/stories/storiesSelectors';
+import { setIsStory as setReduxIsStory } from '../features/stories/storiesSlice';
 import {
-  selectStories,
-  selectStoriesLoading,
-  selectIsStoryModalOpen,
-} from '../features/stories/storiesSelectors';
-import {
-  setStories as setReduxStories,
-  addStoryToState,
-  updateStoryInState,
-  removeStoryFromState,
-  setIsLoading,
-  setIsStory as setReduxIsStory,
-  optimisticLoveStory,
-  optimisticReactStory,
-} from '../features/stories/storiesSlice';
+  useAddStoryMutation,
+  useDeleteStoryMutation,
+  useGetStoriesQuery,
+  useReactToStoryMutation,
+  useShareStoryMutation,
+  useToggleLoveStoryMutation,
+  useViewStoryMutation,
+} from '../features/stories/storiesApi';
 
-let storiesFetchGeneration = 0;
+const patchStoryLists = (dispatch, getState, userId, update) => {
+  const entries = baseApi.util.selectInvalidatedBy(getState(), [{ type: 'Story', id: 'LIST' }]);
+  return entries
+    .filter(({ endpointName, originalArgs }) =>
+      endpointName !== 'getArchivedStories' &&
+      (endpointName !== 'getUserStories' || String(originalArgs?.userId) === String(userId))
+    )
+    .map(({ endpointName, originalArgs }) =>
+    dispatch(baseApi.util.updateQueryData(endpointName, originalArgs, (draft) => {
+      if (Array.isArray(draft)) update(draft);
+    }))
+  );
+};
+
+const getErrorMessage = (error) =>
+  error?.data?.message || error?.response?.data?.message || error?.message;
 
 export const useStory = () => {
   const dispatch = useAppDispatch();
+  const store = useAppStore();
   const { user } = useAuth();
   const { showAlert } = useFeedback();
-
-  const stories = useAppSelector(selectStories);
-  const isLoading = useAppSelector(selectStoriesLoading);
   const isStory = useAppSelector(selectIsStoryModalOpen);
+  const storiesQuery = useGetStoriesQuery({ viewerId: user?._id || 'anonymous' });
+  const { currentData, isLoading, refetch } = storiesQuery;
+  const [addStoryRequest] = useAddStoryMutation();
+  const [deleteStoryRequest] = useDeleteStoryMutation();
+  const [viewStoryRequest] = useViewStoryMutation();
+  const [toggleLoveRequest] = useToggleLoveStoryMutation();
+  const [reactToStoryRequest] = useReactToStoryMutation();
+  const [shareStoryRequest] = useShareStoryMutation();
 
   const setIsStory = useCallback(
-    (val) => {
-      dispatch(setReduxIsStory(val));
-    },
+    (value) => dispatch(setReduxIsStory(value)),
     [dispatch]
   );
+  const fetchStories = useCallback(
+    () => refetch().unwrap(),
+    [refetch]
+  );
 
-  const fetchStories = useCallback(async () => {
-    const fetchGeneration = ++storiesFetchGeneration;
-    dispatch(setIsLoading(true));
-    try {
-      const { data } = await api.get('/story');
-      if (fetchGeneration === storiesFetchGeneration) {
-        dispatch(setReduxStories(Array.isArray(data) ? data : []));
-      }
-    } catch (err) {
-      console.error('Error fetching stories:', err);
-    } finally {
-      dispatch(setIsLoading(false));
+  const addNewStory = useCallback(async (storyData) => {
+    const formData = new FormData();
+    if (storyData.text) formData.append('text', storyData.text);
+    if (storyData.file) formData.append('image', storyData.file);
+    if (!storyData.text && !storyData.file) {
+      showAlert('You must provide either text or an image.');
+      return null;
     }
-  }, [dispatch]);
+    if (storyData.collaborators) formData.append('collaborators', JSON.stringify(storyData.collaborators));
+    if (storyData.mentions) formData.append('mentions', JSON.stringify(storyData.mentions));
+    if (storyData.music) formData.append('music', JSON.stringify(storyData.music));
+    if (storyData.link) formData.append('link', JSON.stringify(storyData.link));
+    if (storyData.isCloseFriends !== undefined) formData.append('isCloseFriends', storyData.isCloseFriends);
 
-  useEffect(() => {
-    fetchStories();
-  }, [fetchStories]);
+    const tempId = `temp-${Date.now()}`;
+    const tempStory = {
+      _id: tempId,
+      text: storyData.text || '',
+      Photo: storyData.file ? [URL.createObjectURL(storyData.file)] : [],
+      owner: user,
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      loves: [],
+      views: [],
+      reactions: [],
+      isOptimistic: true,
+    };
+    const previewUrl = tempStory.Photo[0];
+    const patches = patchStoryLists(dispatch, () => store.getState(), user?._id, (list) => list.unshift(tempStory));
+    setIsStory(false);
+    showAlert('Posting story...', 'loading');
 
-  const addNewStory = useCallback(
-    async (storyData) => {
-      const formData = new FormData();
-      if (storyData.text) formData.append('text', storyData.text);
-      if (storyData.file) formData.append('image', storyData.file);
+    try {
+      const data = await addStoryRequest(formData).unwrap();
+      const newStory = data?.story || data;
+      patchStoryLists(dispatch, () => store.getState(), user?._id, (list) => {
+        const index = list.findIndex((story) => story._id === tempId);
+        if (index !== -1) list[index] = newStory;
+        else list.unshift(newStory);
+      });
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      showAlert('✅ Story published successfully.', 'success');
+      return newStory;
+    } catch (error) {
+      patches.forEach((patch) => patch.undo());
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      console.error(error);
+      showAlert(getErrorMessage(error) || '❌ Failed to add story.', 'error');
+      return null;
+    }
+  }, [addStoryRequest, dispatch, setIsStory, showAlert, store, user]);
 
-      if (!storyData.text && !storyData.file) {
-        showAlert('You must provide either text or an image.');
-        return;
-      }
+  const deleteStory = useCallback(async (storyId) => {
+    try {
+      await deleteStoryRequest(storyId).unwrap();
+      showAlert('Story deleted successfully.');
+    } catch (error) {
+      console.error(error);
+      showAlert(getErrorMessage(error) || 'Failed to delete story.', 'error');
+    }
+  }, [deleteStoryRequest, showAlert]);
 
-      if (storyData.collaborators) formData.append('collaborators', JSON.stringify(storyData.collaborators));
-      if (storyData.mentions) formData.append('mentions', JSON.stringify(storyData.mentions));
-      if (storyData.music) formData.append('music', JSON.stringify(storyData.music));
-      if (storyData.link) formData.append('link', JSON.stringify(storyData.link));
-      if (storyData.isCloseFriends !== undefined) formData.append('isCloseFriends', storyData.isCloseFriends);
+  const viewStory = useCallback(async (storyId) => {
+    if (!user?._id) return;
+    try {
+      return await viewStoryRequest(storyId).unwrap();
+    } catch (error) {
+      console.error('View story error:', error);
+    }
+  }, [user?._id, viewStoryRequest]);
 
-      const tempId = `temp-${Date.now()}`;
-      const tempStory = {
-        _id: tempId,
-        text: storyData.text || '',
-        Photo: storyData.file ? [URL.createObjectURL(storyData.file)] : [],
-        owner: user,
-        createdAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        loves: [],
-        views: [],
-        reactions: [],
-        isOptimistic: true,
-      };
+  const toggleLove = useCallback(async (storyId) => {
+    if (!user?._id) return;
+    try {
+      return await toggleLoveRequest(storyId).unwrap();
+    } catch (error) {
+      console.error(error);
+      showAlert('❌ Failed to toggle love.');
+    }
+  }, [showAlert, toggleLoveRequest, user?._id]);
 
-      storiesFetchGeneration += 1;
-      dispatch(addStoryToState(tempStory));
-      dispatch(setReduxIsStory(false));
-      showAlert('Posting story...', 'loading');
+  const reactToStory = useCallback(async (storyId, emoji) => {
+    if (!user?._id) return;
+    try {
+      return await reactToStoryRequest({ storyId, emoji }).unwrap();
+    } catch (error) {
+      console.error(error);
+      showAlert('❌ Failed to react.');
+    }
+  }, [reactToStoryRequest, showAlert, user?._id]);
 
-      try {
-        const res = await api.post('/story/add', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+  const shareStory = useCallback(async (id) => {
+    if (!user?._id) {
+      showAlert('You must be logged in.');
+      return null;
+    }
+    try {
+      const data = await shareStoryRequest(id).unwrap();
+      const sharedStory = data?.story || data;
+      showAlert('✅ Story shared successfully!');
+      return sharedStory;
+    } catch (error) {
+      showAlert(getErrorMessage(error) || '❌ Failed to share story.');
+      return null;
+    }
+  }, [shareStoryRequest, showAlert, user?._id]);
 
-        const newStory = res.data?.story || res.data;
-        storiesFetchGeneration += 1;
-        dispatch(removeStoryFromState(tempId));
-        dispatch(addStoryToState(newStory));
-        showAlert('✅ Story published successfully.', 'success');
-        return newStory;
-      } catch (err) {
-        console.error(err);
-        dispatch(removeStoryFromState(tempId));
-        showAlert('❌ Failed to add story.', 'error');
-        return null;
-      }
-    },
-    [user, showAlert, dispatch]
-  );
-
-  const deleteStory = useCallback(
-    async (storyId) => {
-      try {
-        await api.delete(`/story/delete/${storyId}`);
-        dispatch(removeStoryFromState(storyId));
-        showAlert('Story deleted successfully.');
-      } catch (err) {
-        showAlert('Failed to delete story.');
-      }
-    },
-    [showAlert, dispatch]
-  );
-
-  const viewStory = useCallback(
-    async (storyId) => {
-      if (!user) return;
-      try {
-        const { data } = await api.post(`/story/view/${storyId}`, {});
-        const updatedStory = data?.story || data;
-        dispatch(updateStoryInState(updatedStory));
-      } catch (err) {
-        console.error('View story error:', err);
-      }
-    },
-    [user, dispatch]
-  );
-
-  const toggleLove = useCallback(
-    async (storyId) => {
-      if (!user) return;
-
-      dispatch(optimisticLoveStory({ storyId, userId: user._id }));
-
-      try {
-        const { data } = await api.post(`/story/love/${storyId}`, {});
-        dispatch(updateStoryInState(data));
-      } catch (err) {
-        console.error(err);
-        showAlert('❌ Failed to toggle love.');
-      }
-    },
-    [user, showAlert, dispatch]
-  );
-
-  const reactToStory = useCallback(
-    async (storyId, emoji) => {
-      if (!user) return;
-
-      dispatch(optimisticReactStory({ storyId, userId: user._id, emoji }));
-
-      try {
-        const { data } = await api.post(`/story/react/${storyId}`, { emoji });
-        dispatch(updateStoryInState(data));
-      } catch (err) {
-        console.error(err);
-        showAlert('❌ Failed to react.');
-      }
-    },
-    [user, showAlert, dispatch]
-  );
-
-  const getStoryViewers = useCallback(
-    async (storyId) => {
-      if (!user) return [];
-      try {
-        const { data } = await api.get(`/story/viewers/${storyId}`);
-        return data;
-      } catch (err) {
-        console.error(err);
-        return [];
-      }
-    },
-    [user]
-  );
-
-  const shareStory = useCallback(
-    async (id) => {
-      if (!user) return showAlert('You must be logged in.');
-      try {
-        const res = await api.post(`/story/share/${id}`, {});
-        dispatch(addStoryToState(res.data));
-        showAlert('✅ Story shared successfully!');
-      } catch (err) {
-        showAlert('❌ Failed to share story.');
-      }
-    },
-    [user, showAlert, dispatch]
-  );
-
-  const getUserStories = useCallback(
-    async (userId) => {
-      if (!userId) return [];
-      try {
-        const { data } = await api.get(`/story/user/${userId}`);
-        return data;
-      } catch (err) {
-        return [];
-      }
-    },
-    []
-  );
-
-  const getArchivedStories = useCallback(
-    async (userId) => {
-      if (!userId) return [];
-      try {
-        const { data } = await api.get(`/story/user/${userId}/archive`);
-        return data;
-      } catch (err) {
-        console.error('Error fetching archived stories:', err);
-        return [];
-      }
-    },
-    []
-  );
-
-  return useMemo(
-    () => ({
-      stories,
-      isLoading,
-      isStory,
-      setIsStory,
-      addNewStory,
-      deleteStory,
-      viewStory,
-      toggleLove,
-      reactToStory,
-      getStoryViewers,
-      getUserStories,
-      getArchivedStories,
-      shareStory,
-    }),
-    [
-      stories,
-      isLoading,
-      isStory,
-      setIsStory,
-      addNewStory,
-      deleteStory,
-      viewStory,
-      toggleLove,
-      reactToStory,
-      getStoryViewers,
-      getUserStories,
-      getArchivedStories,
-      shareStory,
-    ]
-  );
+  return useMemo(() => ({
+    stories: currentData || [],
+    isLoading,
+    isStory,
+    setIsStory,
+    fetchStories,
+    addNewStory,
+    deleteStory,
+    viewStory,
+    toggleLove,
+    reactToStory,
+    shareStory,
+  }), [
+    currentData,
+    isLoading,
+    isStory,
+    setIsStory,
+    fetchStories,
+    addNewStory,
+    deleteStory,
+    viewStory,
+    toggleLove,
+    reactToStory,
+    shareStory,
+  ]);
 };
 
 export default useStory;

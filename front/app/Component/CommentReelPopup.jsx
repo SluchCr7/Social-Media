@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { FaTimes, FaPaperPlane } from 'react-icons/fa';
 import { useAuth } from '@/app/redux/hooks';
 import { useComment } from '@/app/redux/hooks';
@@ -14,48 +14,24 @@ import CommentSkeleton from '../Skeletons/CommentSkeleton';
 const CommentsPopup = ({ reelId, isOpen, onClose }) => {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const { comments, fetchCommentsByTarget, AddComment, isLoading, setComments } = useComment();
+  const {
+    comments,
+    AddComment,
+    isLoading,
+    hasMore,
+    isFetchingMore,
+    loadMoreComments,
+  } = useComment({
+    targetId: reelId,
+    targetType: 'Reel',
+    enabled: isOpen,
+  });
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Pagination State
-  const [nextCursor, setNextCursor] = useState(null);
-  const [hasMore, setHasMore] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-
-  // 🔄 Fetch Reel Comments
-  useEffect(() => {
-    if (!isOpen) {
-      setComments([]);
-      setNextCursor(null);
-      setHasMore(false);
-      return;
-    }
-
-    if (reelId) {
-      let isMounted = true;
-      fetchCommentsByTarget(reelId, 'Reel').then((res) => {
-        if (isMounted && res) {
-          setNextCursor(res.nextCursor);
-          setHasMore(res.hasMore);
-        }
-      });
-      return () => {
-        isMounted = false;
-      };
-    }
-  }, [isOpen, reelId, fetchCommentsByTarget, setComments]);
-
   const handleLoadMore = useCallback(async () => {
-    if (loadingMore || !hasMore || !reelId) return;
-    setLoadingMore(true);
-    const res = await fetchCommentsByTarget(reelId, 'Reel', nextCursor);
-    if (res) {
-      setNextCursor(res.nextCursor);
-      setHasMore(res.hasMore);
-    }
-    setLoadingMore(false);
-  }, [loadingMore, hasMore, nextCursor, reelId, fetchCommentsByTarget]);
+    if (!isFetchingMore && hasMore) await loadMoreComments();
+  }, [hasMore, isFetchingMore, loadMoreComments]);
 
   const handleAddComment = useCallback(async () => {
     if (!newComment.trim() || loading) return;
@@ -129,10 +105,10 @@ const CommentsPopup = ({ reelId, isOpen, onClose }) => {
                     <div className="flex justify-center pt-4">
                       <button
                         onClick={handleLoadMore}
-                        disabled={loadingMore}
+                        disabled={isFetchingMore}
                         className="text-[10px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-400 disabled:opacity-50"
                       >
-                        {loadingMore ? t('Refreshing Signals...') : t('Load More Discussions')}
+                        {isFetchingMore ? t('Refreshing Signals...') : t('Load More Discussions')}
                       </button>
                     </div>
                   )}

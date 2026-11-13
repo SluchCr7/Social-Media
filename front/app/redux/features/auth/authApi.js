@@ -62,7 +62,7 @@ export const authApi = baseApi.injectEndpoints({
             url: '/auth/logout',
             method: 'POST',
           }, api, extraOptions);
-          if (result.data) api.dispatch(logoutSuccess());
+          if (!result.error) api.dispatch(logoutSuccess());
           return result;
         }),
       invalidatesTags: ['Auth'],
@@ -91,26 +91,22 @@ export const authApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ['Auth'],
     }),
-    getAllUsers: builder.query({
-      query: () => '/auth',
-      providesTags: (result) =>
-        result && Array.isArray(result)
-          ? [...result.map(({ _id }) => ({ type: 'Auth', id: _id })), { type: 'Auth', id: 'LIST' }]
-          : [{ type: 'Auth', id: 'LIST' }],
-    }),
-    makeUserAdmin: builder.mutation({
-      query: (userId) => ({
-        url: `/auth/admin/${userId}`,
-        method: 'PUT',
+    resetPassword: builder.mutation({
+      query: ({ id, token, password }) => ({
+        url: `/password/reset-password/${id}/${token}`,
+        method: 'POST',
+        body: { password },
       }),
-      invalidatesTags: (result, error, userId) => [{ type: 'Auth', id: userId }, { type: 'Auth', id: 'LIST' }],
     }),
-    blockOrUnblockUser: builder.mutation({
-      query: (userId) => ({
-        url: `/auth/block/${userId}`,
-        method: 'PUT',
+    requestPasswordReset: builder.mutation({
+      query: (email) => ({
+        url: '/password/reset',
+        method: 'POST',
+        body: { email },
       }),
-      invalidatesTags: ['Auth', 'User'],
+    }),
+    verifyAccount: builder.query({
+      query: ({ id, token }) => `/auth/${id}/verify/${token}`,
     }),
     makeAccountPremiumVerify: builder.mutation({
       query: () => ({
@@ -118,21 +114,6 @@ export const authApi = baseApi.injectEndpoints({
         method: 'PUT',
       }),
       invalidatesTags: ['Auth', 'User'],
-    }),
-    updateAccountStatus: builder.mutation({
-      query: ({ userId, status, days }) => ({
-        url: `/auth/status/${userId}`,
-        method: 'PUT',
-        body: status === 'suspended' ? { accountStatus: status, days } : { accountStatus: status },
-      }),
-      invalidatesTags: (result, error, { userId }) => [{ type: 'Auth', id: userId }, { type: 'Auth', id: 'LIST' }],
-    }),
-    deleteUser: builder.mutation({
-      query: (userId) => ({
-        url: `/auth/delete/${userId}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: [{ type: 'Auth', id: 'LIST' }],
     }),
   }),
 });
@@ -144,10 +125,8 @@ export const {
   useRegisterMutation,
   useLogoutMutation,
   useRefreshSessionMutation,
-  useGetAllUsersQuery,
-  useMakeUserAdminMutation,
-  useBlockOrUnblockUserMutation,
+  useResetPasswordMutation,
+  useRequestPasswordResetMutation,
+  useLazyVerifyAccountQuery,
   useMakeAccountPremiumVerifyMutation,
-  useUpdateAccountStatusMutation,
-  useDeleteUserMutation,
 } = authApi;

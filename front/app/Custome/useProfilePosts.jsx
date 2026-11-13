@@ -1,52 +1,80 @@
 'use client'
 import { useState, useEffect, useMemo, useRef, useCallback } from "react"
-import { usePost } from '@/app/redux/hooks';
 import { useAuth } from '@/app/redux/hooks';
-import { useUser } from '@/app/redux/hooks';
+import {
+  useGetPublicUserByUsernameQuery,
+  useGetUserByIdQuery,
+} from '@/app/redux/features/user/userApi';
+import { useGetUserPostsInfiniteQuery } from '@/app/redux/features/posts/postsApi';
 
 export const useProfilePosts = (userId, pinsPosts = [], lookupByUsername = false) => {
-  const { fetchUserPosts, userPosts, userHasMore, userIsLoading } = usePost()
-  const { getUserById, getUserByUsername } = useUser()
+  const { user: currentUser } = useAuth()
+  const isObjectId = typeof userId === 'string' && /^[a-f\d]{24}$/i.test(userId)
+  let decodedUsername = userId
+  if (lookupByUsername && typeof userId === 'string') {
+    try {
+      decodedUsername = decodeURIComponent(userId)
+    } catch {
+      decodedUsername = userId
+    }
+  }
 
-  const [userData, setUserData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [page, setPage] = useState(1)
+  const usernameQuery = useGetPublicUserByUsernameQuery(decodedUsername, {
+    skip: !lookupByUsername || !userId,
+  })
+  const idFallbackQuery = useGetUserByIdQuery(userId, {
+    skip:
+      !lookupByUsername ||
+      !isObjectId ||
+      usernameQuery.isLoading ||
+      usernameQuery.isFetching ||
+      Boolean(usernameQuery.currentData),
+  })
+  const idQuery = useGetUserByIdQuery(userId, {
+    skip: lookupByUsername || !userId,
+  })
+  const userData = lookupByUsername
+    ? usernameQuery.currentData || idFallbackQuery.currentData || null
+    : idQuery.currentData || null
+  const loading = !userId || (lookupByUsername
+    ? usernameQuery.isLoading ||
+      usernameQuery.isFetching ||
+      (!usernameQuery.currentData && (idFallbackQuery.isLoading || idFallbackQuery.isFetching))
+    : idQuery.isLoading || idQuery.isFetching)
+  const error = lookupByUsername
+    ? idFallbackQuery.error || usernameQuery.error
+    : idQuery.error
+
+  const userPostsQuery = useGetUserPostsInfiniteQuery({
+    userId: userData?._id,
+    viewerId: currentUser?._id || 'anonymous',
+    limit: 10,
+  }, { skip: !userData?._id })
+  const {
+    fetchNextPage: fetchNextUserPostsPage,
+    hasNextPage: hasMoreUserPosts,
+    isFetchingNextPage: isFetchingMoreUserPosts,
+  } = userPostsQuery
+  const userPosts = useMemo(
+    () => userPostsQuery.data?.pages?.flatMap((page) => page?.posts || []) || [],
+    [userPostsQuery.data]
+  )
+
   const [filters, setFilters] = useState({ year: "all", month: "all", sort: "latest" })
   const [activeTab, setActiveTab] = useState("Posts")
   const loaderRef = useRef(null)
 
-  // جلب بيانات اليوزر
-  useEffect(() => {
-    if (!userId) return
-    setLoading(true)
-    const fetchProfile = lookupByUsername ? getUserByUsername : getUserById
-    fetchProfile(userId)
-      .then(profile => {
-        if (profile || !lookupByUsername || !/^[a-f\d]{24}$/i.test(userId)) return profile
-        return getUserById(userId)
-      })
-      .then(res => setUserData(res))
-      .catch(err => console.log(err))
-      .finally(() => setLoading(false))
-  }, [userId, lookupByUsername, getUserById, getUserByUsername])
-
-  // أول تحميل للبوستات
-  useEffect(() => {
-    if (userData?._id) {
-      setPage(1)
-      fetchUserPosts(userData._id, 1, 10, true) // reset = true
-    }
-  }, [userData?._id, fetchUserPosts])
-
-  // Infinite Scroll
+  // Infinite scroll
   const handleObserver = useCallback((entries) => {
     const target = entries[0]
-    if (target.isIntersecting && userHasMore && userData?._id && !userIsLoading) {
-      const nextPage = page + 1
-      setPage(nextPage)
-      fetchUserPosts(userData._id, nextPage, 10)
+    if (target.isIntersecting && hasMoreUserPosts && !isFetchingMoreUserPosts) {
+      fetchNextUserPostsPage()
     }
-  }, [page, userHasMore, userData?._id, fetchUserPosts, userIsLoading])
+  }, [
+    fetchNextUserPostsPage,
+    hasMoreUserPosts,
+    isFetchingMoreUserPosts,
+  ])
 
   useEffect(() => {
     const currentLoader = loaderRef?.current;
@@ -59,7 +87,7 @@ export const useProfilePosts = (userId, pinsPosts = [], lookupByUsername = false
     }
   }, [handleObserver])
 
-  // دمج pinned + الباقي
+  // Merge pinned posts with the paginated list.
   const combinedPosts = useMemo(() => {
     if (!userPosts && !userData?.pinsPosts) return []
 
@@ -80,7 +108,6 @@ export const useProfilePosts = (userId, pinsPosts = [], lookupByUsername = false
     })
   }, [userPosts, userData?.pinsPosts])
 
-  // استخراج السنوات
   const postYears = useMemo(() => {
     if (!combinedPosts || combinedPosts?.length === 0) return []
     const yearsSet = new Set(
@@ -93,12 +120,14 @@ export const useProfilePosts = (userId, pinsPosts = [], lookupByUsername = false
     combinedPosts,
     postYears,
     loading,
+    postsLoading: userPostsQuery.isLoading || userPostsQuery.isFetchingNextPage,
+    error,
     loaderRef,
     userData,
     filters,
     setFilters,
     activeTab,
     setActiveTab,
-    userHasMore
+    userHasMore: Boolean(userPostsQuery.hasNextPage)
   }
 }

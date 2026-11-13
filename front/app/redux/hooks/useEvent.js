@@ -1,27 +1,18 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import api from '@/app/utils/api';
+import { useCallback, useMemo } from 'react';
+import dayjs from 'dayjs';
+import { getEventDay, getEventOccurrencesInRange } from '@/app/utils/eventDate';
 import { useAuth } from './useAuth';
 import { useFeedback } from './useFeedback';
-import { useAppDispatch, useAppSelector } from '../hooks';
 import {
-  selectEvents,
-  selectUpcomingEvents,
-  selectEventsLoading,
-  selectIsCreatingEvent,
-  selectIsMutatingEvent,
-} from '../features/events/eventsSelectors';
-import {
-  setEvents as setReduxEvents,
-  addEventToState,
-  updateEventInState,
-  removeEventFromState,
-  setLoading as setReduxLoading,
-  setIsCreating as setReduxIsCreating,
-  setIsMutating as setReduxIsMutating,
-  checkUpcomingEventsAction,
-} from '../features/events/eventsSlice';
+  useCreateEventMutation,
+  useDeleteEventMutation,
+  useGetEventsByUserQuery,
+  useUpdateEventMutation,
+} from '../features/events/eventsApi';
+
+const EMPTY_EVENTS = [];
 
 const editableEventFields = [
   'title',
@@ -41,7 +32,7 @@ const editableEventFields = [
 ];
 
 const getErrorMessage = (error, fallback) =>
-  error?.response?.data?.message || error?.message || fallback;
+  error?.data?.message || error?.response?.data?.message || error?.message || fallback;
 
 const selectEditableEventFields = (event) =>
   editableEventFields.reduce((payload, field) => {
@@ -50,177 +41,130 @@ const selectEditableEventFields = (event) =>
   }, {});
 
 export const useEvent = () => {
-  const dispatch = useAppDispatch();
   const { user } = useAuth();
   const { showToast } = useFeedback();
-  const [error, setError] = useState(null);
-  const fetchRequestId = useRef(0);
+  const eventsQuery = useGetEventsByUserQuery(
+    { userId: user?._id },
+    { skip: !user?._id }
+  );
+  const [createEventRequest, createEventState] = useCreateEventMutation();
+  const [updateEventRequest, updateEventState] = useUpdateEventMutation();
+  const [deleteEventRequest, deleteEventState] = useDeleteEventMutation();
 
-  const events = useAppSelector(selectEvents);
-  const upcomingEvents = useAppSelector(selectUpcomingEvents);
-  const loading = useAppSelector(selectEventsLoading);
-  const isCreating = useAppSelector(selectIsCreatingEvent);
-  const isMutating = useAppSelector(selectIsMutatingEvent);
+  const events = eventsQuery.currentData || EMPTY_EVENTS;
+  const loading = eventsQuery.isLoading;
+  const error = getErrorMessage(eventsQuery.error, null);
+  const refetchEvents = eventsQuery.refetch;
+  const upcomingEvents = useMemo(() => {
+    const now = dayjs();
+    const today = now.startOf('day');
+    const end = today.add(7, 'day');
+    return events
+      .flatMap((event) => getEventOccurrencesInRange(event, today, end))
+      .filter((event) => {
+        const eventDate = getEventDay(event.date);
+        const [hours, minutes] = (event.startTime || '00:00').split(':').map(Number);
+        return eventDate.hour(hours).minute(minutes).isAfter(now);
+      })
+      .sort((a, b) => getEventDay(a.date).valueOf() - getEventDay(b.date).valueOf());
+  }, [events]);
 
   const fetchEvents = useCallback(async () => {
-    const requestId = ++fetchRequestId.current;
-    if (!user?._id) {
-      dispatch(setReduxEvents([]));
-      setError(null);
-      dispatch(setReduxLoading(false));
-      return [];
-    }
-
-    dispatch(setReduxLoading(true));
-    setError(null);
-
+    if (!user?._id) return [];
     try {
-      const response = await api.get(`/events/user/${user._id}`);
-      if (requestId !== fetchRequestId.current) return null;
-      if (!response.data?.success || !Array.isArray(response.data.events)) {
-        throw new Error(response.data?.message || 'Unable to load events.');
-      }
-
-      dispatch(setReduxEvents(response.data.events));
-      return response.data.events;
+      return await refetchEvents().unwrap();
     } catch (requestError) {
-      if (requestId !== fetchRequestId.current) return null;
       const message = getErrorMessage(requestError, 'Unable to load events.');
-      setError(message);
       showToast(message, 'error');
       return null;
-    } finally {
-      if (requestId === fetchRequestId.current) dispatch(setReduxLoading(false));
     }
-  }, [user?._id, dispatch, showToast]);
+  }, [refetchEvents, showToast, user?._id]);
 
-  const addEvent = useCallback(
-    async (event) => {
-      if (!user?._id) {
-        showToast('Sign in to create an event.', 'error');
-        return null;
+  const addEvent = useCallback(async (event) => {
+    if (!user?._id) {
+      showToast('Sign in to create an event.', 'error');
+      return null;
+    }
+    try {
+      const response = await createEventRequest({
+        ...event,
+        repeatYearly: event.repeatYearly || false,
+      }).unwrap();
+      if (!response?.success || !response.event?._id) {
+        throw new Error(response?.message || 'Unable to create the event.');
       }
+      showToast('Event added successfully.');
+      return response.event;
+    } catch (requestError) {
+      showToast(getErrorMessage(requestError, 'Unable to create the event.'), 'error');
+      return null;
+    }
+  }, [createEventRequest, showToast, user?._id]);
 
-      dispatch(setReduxIsCreating(true));
-      dispatch(setReduxIsMutating(true));
-      try {
-        const response = await api.post('/events', {
-          ...event,
-          repeatYearly: event.repeatYearly || false,
-        });
-        if (!response.data?.success || !response.data.event?._id) {
-          throw new Error(response.data?.message || 'Unable to create the event.');
-        }
-
-        dispatch(addEventToState(response.data.event));
-        showToast('Event added successfully.');
-        return response.data.event;
-      } catch (requestError) {
-        showToast(getErrorMessage(requestError, 'Unable to create the event.'), 'error');
-        return null;
-      } finally {
-        dispatch(setReduxIsCreating(false));
-        dispatch(setReduxIsMutating(false));
+  const updateEvent = useCallback(async (event) => {
+    const eventId = event?._id?.toString();
+    if (!user?._id || !eventId) {
+      showToast('Unable to update this event.', 'error');
+      return null;
+    }
+    try {
+      const response = await updateEventRequest({
+        id: eventId,
+        changes: selectEditableEventFields(event),
+      }).unwrap();
+      if (!response?.success || !response.event?._id) {
+        throw new Error(response?.message || 'Unable to update the event.');
       }
-    },
-    [user?._id, showToast, dispatch]
-  );
+      showToast('Event updated successfully.');
+      return response.event;
+    } catch (requestError) {
+      showToast(getErrorMessage(requestError, 'Unable to update the event.'), 'error');
+      return null;
+    }
+  }, [showToast, updateEventRequest, user?._id]);
 
-  const updateEvent = useCallback(
-    async (event) => {
-      const eventId = event?._id?.toString();
-      if (!user?._id || !eventId) {
-        showToast('Unable to update this event.', 'error');
-        return null;
+  const deleteEvent = useCallback(async (id) => {
+    if (!user?._id || !id) {
+      showToast('Unable to delete this event.', 'error');
+      return false;
+    }
+    try {
+      const response = await deleteEventRequest(id).unwrap();
+      if (!response?.success) {
+        throw new Error(response?.message || 'Unable to delete the event.');
       }
+      showToast('Event deleted successfully.');
+      return true;
+    } catch (requestError) {
+      showToast(getErrorMessage(requestError, 'Unable to delete the event.'), 'error');
+      return false;
+    }
+  }, [deleteEventRequest, showToast, user?._id]);
 
-      dispatch(setReduxIsMutating(true));
-      try {
-        const response = await api.put(
-          `/events/${eventId}`,
-          selectEditableEventFields(event)
-        );
-        if (!response.data?.success || !response.data.event?._id) {
-          throw new Error(response.data?.message || 'Unable to update the event.');
-        }
-
-        dispatch(updateEventInState(response.data.event));
-        showToast('Event updated successfully.');
-        return response.data.event;
-      } catch (requestError) {
-        showToast(getErrorMessage(requestError, 'Unable to update the event.'), 'error');
-        return null;
-      } finally {
-        dispatch(setReduxIsMutating(false));
-      }
-    },
-    [user?._id, showToast, dispatch]
-  );
-
-  const deleteEvent = useCallback(
-    async (id) => {
-      if (!user?._id || !id) {
-        showToast('Unable to delete this event.', 'error');
-        return false;
-      }
-
-      dispatch(setReduxIsMutating(true));
-      try {
-        const response = await api.delete(`/events/${id}`);
-        if (!response.data?.success) {
-          throw new Error(response.data?.message || 'Unable to delete the event.');
-        }
-
-        dispatch(removeEventFromState(id));
-        showToast('Event deleted successfully.');
-        return true;
-      } catch (requestError) {
-        showToast(getErrorMessage(requestError, 'Unable to delete the event.'), 'error');
-        return false;
-      } finally {
-        dispatch(setReduxIsMutating(false));
-      }
-    },
-    [user?._id, showToast, dispatch]
-  );
-
-  useEffect(() => {
-    fetchEvents();
-    return () => {
-      fetchRequestId.current += 1;
-    };
-  }, [fetchEvents]);
-
-  useEffect(() => {
-    dispatch(checkUpcomingEventsAction());
-  }, [events, dispatch]);
-
-  return useMemo(
-    () => ({
-      events,
-      loading,
-      error,
-      fetchEvents,
-      addEvent,
-      updateEvent,
-      deleteEvent,
-      upcomingEvents,
-      isCreating,
-      isMutating,
-    }),
-    [
-      events,
-      loading,
-      error,
-      fetchEvents,
-      addEvent,
-      updateEvent,
-      deleteEvent,
-      upcomingEvents,
-      isCreating,
-      isMutating,
-    ]
-  );
+  return useMemo(() => ({
+    events,
+    loading,
+    error,
+    fetchEvents,
+    addEvent,
+    updateEvent,
+    deleteEvent,
+    upcomingEvents,
+    isCreating: createEventState.isLoading,
+    isMutating: createEventState.isLoading || updateEventState.isLoading || deleteEventState.isLoading,
+  }), [
+    events,
+    loading,
+    error,
+    fetchEvents,
+    addEvent,
+    updateEvent,
+    deleteEvent,
+    upcomingEvents,
+    createEventState.isLoading,
+    updateEventState.isLoading,
+    deleteEventState.isLoading,
+  ]);
 };
 
 export default useEvent;

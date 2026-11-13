@@ -23,7 +23,6 @@ const initialLang = getInitialLang();
 const initialState = {
   language: initialLang,
   isRTL: isRTLCode(initialLang),
-  loading: false,
 };
 
 export const translateSlice = createSlice({
@@ -45,12 +44,9 @@ export const translateSlice = createSlice({
         }
       }
     },
-    setTranslateLoading: (state, action) => {
-      state.loading = action.payload;
-    },
   },
 });
 
-export const { setLanguage, setTranslateLoading } = translateSlice.actions;
+export const { setLanguage } = translateSlice.actions;
 
 export default translateSlice.reducer;

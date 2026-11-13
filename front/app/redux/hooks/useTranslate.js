@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
-import api from '@/app/utils/api';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from './useAuth';
 import { languageMap } from '@/app/utils/Data';
@@ -9,12 +8,11 @@ import { useAppDispatch, useAppSelector } from '../hooks';
 import {
   selectCurrentLanguage,
   selectIsRTL,
-  selectTranslateLoading,
 } from '../features/translate/translateSelectors';
 import {
   setLanguage as setReduxLanguage,
-  setTranslateLoading,
 } from '../features/translate/translateSlice';
+import { useTranslateTextMutation } from '../features/translate/translateApi';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 const normalizeLanguageCode = (code) => {
@@ -27,10 +25,10 @@ export const useTranslate = () => {
   const dispatch = useAppDispatch();
   const { i18n } = useTranslation();
   const { user } = useAuth();
+  const [translateText, { isLoading: loading }] = useTranslateTextMutation();
 
   const language = useAppSelector(selectCurrentLanguage);
   const isRTL = useAppSelector(selectIsRTL);
-  const loading = useAppSelector(selectTranslateLoading);
 
   const applyDirection = useCallback((langCode) => {
     const isRightToLeft = ['ar', 'fa', 'he', 'ur'].includes(langCode);
@@ -73,21 +71,18 @@ export const useTranslate = () => {
   const translate = useCallback(
     async (text, targetLang = language || 'en') => {
       if (!text) return '';
-      dispatch(setTranslateLoading(true));
       try {
-        const res = await api.post('/translate', {
+        const res = await translateText({
           text,
           targetLang,
-        });
-        return res.data.translatedText;
+        }).unwrap();
+        return res.translatedText;
       } catch (err) {
         console.error('Translation error:', err);
         return text;
-      } finally {
-        dispatch(setTranslateLoading(false));
       }
     },
-    [language, dispatch]
+    [language, translateText]
   );
 
   return useMemo(

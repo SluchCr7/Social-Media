@@ -19,7 +19,7 @@ import { Maximize2, Minimize2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSwipeable } from 'react-swipeable';
-import { useStory } from '@/app/redux/hooks';
+import { useStory, useGetStoryViewersQuery } from '@/app/redux/hooks';
 import { useAuth } from '@/app/redux/hooks';
 import { useMessage } from '@/app/redux/hooks';
 import { useAlert } from '@/app/redux/hooks';
@@ -36,10 +36,8 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [showViewers, setShowViewers] = useState(false);
-  const [viewersList, setViewersList] = useState([]);
-  const [isViewersLoading, setIsViewersLoading] = useState(false);
 
-  const { viewStory, toggleLove, reactToStory, getStoryViewers, shareStory, deleteStory } = useStory();
+  const { viewStory, toggleLove, reactToStory, shareStory, deleteStory } = useStory();
   const { user } = useAuth();
   const { AddNewMessage, setSelectedUser } = useMessage();
   const { t } = useTranslation();
@@ -51,6 +49,11 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
   const progressRef = useRef(0);
 
   const story = useMemo(() => stories[currentIndex] || null, [stories, currentIndex]);
+  const viewersQuery = useGetStoryViewersQuery(story?._id, {
+    skip: !showViewers || !story?._id,
+  });
+  const viewersList = viewersQuery.currentData || [];
+  const isViewersLoading = viewersQuery.isFetching;
 
   const photoUrl = useMemo(() => {
     if (!story) return null;
@@ -70,12 +73,8 @@ const StoryViewer = ({ stories = [], onClose = () => { }, initialFit = 'contain'
     setShowViewers(false);
   }, [currentIndex, story, viewStory, setSelectedUser]);
 
-  const handleOpenViewers = async () => {
+  const handleOpenViewers = () => {
     setIsPaused(true);
-    setIsViewersLoading(true);
-    const list = await getStoryViewers(story._id);
-    setViewersList(list);
-    setIsViewersLoading(false);
     setShowViewers(true);
   };
 

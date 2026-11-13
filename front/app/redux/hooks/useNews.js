@@ -1,48 +1,20 @@
 'use client';
 
-import { useEffect, useCallback, useMemo } from 'react';
-import api from '@/app/utils/api';
-import { useAppDispatch, useAppSelector } from '../hooks';
-import { selectNews, selectNewsLoading, selectNewsError } from '../features/news/newsSelectors';
-import { setNews, setLoading, setError } from '../features/news/newsSlice';
+import { useCallback, useMemo } from 'react';
+import { useGetNewsQuery } from '../features/news/newsApi';
 
-
-
-export const useNews = () => {
-  const dispatch = useAppDispatch();
-  const news = useAppSelector(selectNews);
-  const loading = useAppSelector(selectNewsLoading);
-  const error = useAppSelector(selectNewsError);
-
-  const fetchAllNews = useCallback(
-    async (params = {}) => {
-      try {
-        dispatch(setLoading(true));
-        const response = await api.get('/news', { params });
-        dispatch(setNews(response.data.articles || []));
-        dispatch(setError(null));
-      } catch (err) {
-        console.error('Error fetching news:', err);
-        dispatch(setError('Failed to load news'));
-      } finally {
-        dispatch(setLoading(false));
-      }
-    },
-    [dispatch]
-  );
-
-  useEffect(() => {
-    fetchAllNews();
-  }, [fetchAllNews]);
+export const useNews = (params = {}) => {
+  const { data = [], isLoading, isFetching, error, refetch } = useGetNewsQuery(params);
+  const fetchAllNews = useCallback(() => refetch(), [refetch]);
 
   return useMemo(
     () => ({
-      news,
-      loading,
-      error,
+      news: data,
+      loading: isLoading || isFetching,
+      error: error?.data?.message || null,
       fetchAllNews,
     }),
-    [news, loading, error, fetchAllNews]
+    [data, isLoading, isFetching, error, fetchAllNews]
   );
 };
 

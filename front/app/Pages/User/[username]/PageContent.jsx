@@ -10,7 +10,7 @@ const FollowModal = dynamic(() => import("@/app/Component/UserComponents/FollowM
 });
 import ProfileSkeleton from "@/app/Skeletons/ProfileSkeleton"
 import { useAuth } from '@/app/redux/hooks';
-import { useStory } from '@/app/redux/hooks';
+import { useGetUserStoriesQuery } from '@/app/redux/hooks';
 import { useReport } from '@/app/redux/hooks';
 import { useProfilePosts } from "@/app/Custome/useProfilePosts"
 import { useState } from "react"
@@ -26,14 +26,18 @@ const UserProfilePage = ({ params }) => {
   const router = useRouter()
   const { user } = useAuth()
   const {followUser} = useUser()
-  const { getUserStories } = useStory()
   const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport()
   const {blockOrUnblockUser} = useAdmin()
   const {
-    combinedPosts, postYears, loading, loaderRef, userData,
+    combinedPosts, postYears, loading, postsLoading, loaderRef, userData,
     filters, setFilters, activeTab, setActiveTab, userHasMore
   } = useProfilePosts(username, [], true)
   const profileTitle = userData?.profileName || userData?.username
+  const storiesQuery = useGetUserStoriesQuery(
+    { userId: userData?._id },
+    { skip: !userData?._id }
+  )
+  const userStories = storiesQuery.currentData || []
   useDocumentTitle(profileTitle ? `${profileTitle}'s profile` : null)
 
   useEffect(() => {
@@ -44,18 +48,13 @@ const UserProfilePage = ({ params }) => {
 
   const [showFollowModal, setShowFollowModal] = useState(false)
   const [followModalType, setFollowModalType] = useState("followers")
-  const [userStories, setUserStories] = useState([])
   const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [openMenu, setOpenMenu] = useState(false)
 
   if (loading) return <ProfileSkeleton />
 
-  const handleProfileClick = async () => {
-    const fetchedStories = await getUserStories(userData._id)
-    if (fetchedStories.length > 0) {
-      setUserStories(fetchedStories)
-      setIsViewerOpen(true)
-    }
+  const handleProfileClick = () => {
+    if (userStories.length > 0) setIsViewerOpen(true)
   }
 
   const handleReport = () => {
@@ -79,6 +78,7 @@ const UserProfilePage = ({ params }) => {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         combinedPosts={combinedPosts}
+        postsLoading={postsLoading}
         userHasMore={userHasMore}
         loaderRef={loaderRef}
         // ⬇️ مرر الدوال هنا

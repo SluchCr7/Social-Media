@@ -12,8 +12,8 @@ import { useTranslation } from 'react-i18next';
 import MenuSkeleton from '@/app/Skeletons/MenuSkeleton';
 
 const SuggestedFriendsPage = () => {
-  const { user, users } = useAuth();
-  const { followUser } = useUser();
+  const { user } = useAuth();
+  const { followUser, suggestedUsers } = useUser();
   const { userData, loading } = useGetData(user?._id);
   const { t } = useTranslation();
 
@@ -22,8 +22,8 @@ const SuggestedFriendsPage = () => {
   const handleFollow = useCallback((id) => followUser(id), [followUser]);
 
   const suggestions = useMemo(() => {
-    if (!Array.isArray(users)) return [];
-    const base = users.filter(
+    if (!Array.isArray(suggestedUsers)) return [];
+    const base = suggestedUsers.filter(
       (friend) =>
         friend?._id !== userData?._id &&
         !userData?.following?.some((f) => f?._id === friend?._id)
@@ -32,7 +32,7 @@ const SuggestedFriendsPage = () => {
     return base.filter((f) =>
       f.username?.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [users, userData, searchTerm]);
+  }, [suggestedUsers, userData, searchTerm]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-[#0A0A0A] dark:via-[#0F0F0F] dark:to-[#0A0A0A] transition-colors duration-300 w-full">

@@ -56,11 +56,13 @@ const getAllUsers = async () => result(200, await User.find()
   .populate({ path: 'followers', select: 'profilePhoto username profileName' })
   .populate('posts')
   .populate('comments')
-  .then((users) => users.map(publicUser)));
+  .then((users) => users.map(publicProfileUser)));
 
-const getUserById = async ({ id }) => {
+const getUserById = async ({ id, requesterId }) => {
   const user = await User.findById(id).populate(userOnePopulate);
-  return user ? result(200, publicUser(user)) : errorResult(404, 'User Not Found');
+  if (!user) return errorResult(404, 'User Not Found');
+  const isSelf = requesterId && String(requesterId) === String(user._id);
+  return result(200, isSelf ? publicUser(user) : publicProfileUser(user));
 };
 
 const getPublicUserByUsername = async ({ username }) => {
@@ -178,7 +180,7 @@ const updateProfile = async ({ userId, body }) => {
   if (error) return errorResult(400, error.details[0].message);
   const {
     username, description, profileName, country, city, phone, socialLinks, gender,
-    dateOfBirth, relationshipStatus, partner, interests, preferedLanguage,
+    dateOfBirth, relationshipStatus, partner, interests, preferedLanguage, showOnlineStatus,
   } = body;
   if (partner) {
     const partnerUser = await User.findById(partner);
@@ -193,6 +195,7 @@ const updateProfile = async ({ userId, body }) => {
   const updateData = {
     username, description, profileName, country, city, phone, socialLinks, gender,
     dateOfBirth, relationshipStatus, partner: partner || null, interests, preferedLanguage,
+    showOnlineStatus,
   };
   const updatedUser = await User.findByIdAndUpdate(userId, { $set: updateData }, { new: true }).populate(userOnePopulate);
   if (!updatedUser) return errorResult(404, 'User not found');

@@ -11,7 +11,7 @@ const Page = ({ params }) => {
   const [postsRelated, setPostsRelated] = useState([])
   const [sortBy, setSortBy] = useState('recent') // recent, popular, trending
   const [viewMode, setViewMode] = useState('grid') // grid, list
-  const { posts } = usePost()
+  const { posts } = usePost({ autoFetch: true })
   const text = params.text
   const { t } = useTranslation()
 

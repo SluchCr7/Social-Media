@@ -245,45 +245,6 @@ export function SettingsSection({ title, description, children }) {
 // ==========================================
 // 4. SettingsCard
 // ==========================================
-export function SettingsCard({ title, description, icon: Icon, children, className, onClick }) {
-  const { t } = useTranslation();
-
-  const isClickable = !!onClick;
-  const CardWrapper = isClickable ? 'button' : 'div';
-
-  return (
-    <CardWrapper
-      onClick={onClick}
-      className={clsx(
-        "w-full text-left rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#090d16] p-5 sm:p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden group select-none",
-        isClickable && "hover:border-indigo-500 dark:hover:border-indigo-400/50 hover:shadow-md transition-all active:scale-[0.99] cursor-pointer",
-        className
-      )}
-    >
-      <div className="flex gap-4 items-start min-w-0">
-        {Icon && (
-          <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 flex items-center justify-center text-slate-500 dark:text-slate-400 shrink-0 group-hover:scale-105 transition-transform duration-300">
-            <Icon size={18} />
-          </div>
-        )}
-        <div className="space-y-1 min-w-0">
-          {title && (
-            <h3 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-wide leading-tight">
-              {t(title)}
-            </h3>
-          )}
-          {description && (
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold leading-relaxed">
-              {t(description)}
-            </p>
-          )}
-        </div>
-      </div>
-      <div className="flex items-center shrink-0 w-full md:w-auto md:justify-end">{children}</div>
-    </CardWrapper>
-  );
-}
-
 // ==========================================
 // 5. ToggleSwitch
 // ==========================================
@@ -376,44 +337,6 @@ export const InputField = React.memo(function InputField({
 // ==========================================
 // 7. SelectDropdown
 // ==========================================
-export const SelectDropdown = React.memo(function SelectDropdown({
-  label,
-  description,
-  options = [],
-  value,
-  onChange,
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <div className="space-y-2 w-full select-none">
-      {label && (
-        <div className="flex flex-col">
-          <span className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            {t(label)}
-          </span>
-          {description && (
-            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">
-              {t(description)}
-            </span>
-          )}
-        </div>
-      )}
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full h-11 px-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold outline-none rounded-xl focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-400 text-slate-800 dark:text-slate-200 transition-all cursor-pointer"
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#090d16]">
-            {t(opt.label || opt.name)}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-});
-
 // ==========================================
 // 8. Buttons
 // ==========================================

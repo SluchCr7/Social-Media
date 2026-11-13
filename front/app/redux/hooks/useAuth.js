@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector, useAppStore } from '../hooks';
 import {
   selectCurrentUser,
-  selectUsers,
   selectIsLogin,
   selectIsAuthChecked,
   selectAuthLoading,
@@ -13,16 +12,16 @@ import {
 } from '../features/auth/authSelectors';
 import {
   setUser as setAuthUser,
-  setAuthSession,
-  setUsers as setAuthUsers,
   setIsLoading,
-  logoutSuccess,
 } from '../features/auth/authSlice';
-import api from '@/app/utils/api';
 import { baseApi } from '../api/baseApi';
 import { useFeedback } from './useFeedback';
 import { MESSAGES } from '@/app/utils/messages';
-import { runAuthTransition } from '@/app/utils/authRefresh';
+import {
+  useLoginMutation,
+  useLogoutMutation,
+  useRegisterMutation,
+} from '../features/auth/authApi';
 
 
 
@@ -31,9 +30,11 @@ export const useAuth = () => {
   const store = useAppStore();
   const router = useRouter();
   const { showToast, confirmAction } = useFeedback();
+  const [loginRequest] = useLoginMutation();
+  const [logoutRequest] = useLogoutMutation();
+  const [registerRequest] = useRegisterMutation();
 
   const user = useAppSelector(selectCurrentUser);
-  const users = useAppSelector(selectUsers);
   const isLogin = useAppSelector(selectIsLogin);
   const isAuthChecked = useAppSelector(selectIsAuthChecked);
   const isLoading = useAppSelector(selectAuthLoading);
@@ -43,14 +44,6 @@ export const useAuth = () => {
     (userData) => {
       const currentUser = selectCurrentUser(store.getState());
       dispatch(setAuthUser(typeof userData === 'function' ? userData(currentUser) : userData));
-    },
-    [dispatch, store]
-  );
-
-  const setUsers = useCallback(
-    (usersData) => {
-      const currentUsers = selectUsers(store.getState());
-      dispatch(setAuthUsers(typeof usersData === 'function' ? usersData(currentUsers) : usersData));
     },
     [dispatch, store]
   );
@@ -66,29 +59,24 @@ export const useAuth = () => {
       const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
 
       try {
-        const res = await runAuthTransition(async () => {
-          const response = await api.post('/auth/login', { email, password });
-          const userData = response.data.user;
-          if (!userData) throw new Error('Invalid response from server');
-          dispatch(baseApi.util.resetApiState());
-          dispatch(setAuthSession(userData));
-          return response;
-        });
+        const res = await loginRequest({ email, password }).unwrap();
+        if (!res.user) throw new Error('Invalid response from server');
+        dispatch(baseApi.util.resetApiState());
 
-        showToast(res.data.message || MESSAGES.AUTH.LOGIN_SUCCESS, 'success', { id: loadingToast });
-        if (res.data.verificationInfo?.verificationCode) {
-          showToast(`Verify code: ${res.data.verificationInfo.verificationCode}`, 'info');
+        showToast(res.message || MESSAGES.AUTH.LOGIN_SUCCESS, 'success', { id: loadingToast });
+        if (res.verificationInfo?.verificationCode) {
+          showToast(`Verify code: ${res.verificationInfo.verificationCode}`, 'info');
         }
 
         router.replace('/');
       } catch (err) {
-        const errorMessage = err.response?.data?.message || err.message || MESSAGES.AUTH.LOGIN_ERROR;
+        const errorMessage = err.data?.message || err.message || MESSAGES.AUTH.LOGIN_ERROR;
         showToast(errorMessage, 'error', { id: loadingToast });
       } finally {
         dispatch(setIsLoading(false));
       }
     },
-    [dispatch, showToast, router]
+    [dispatch, showToast, router, loginRequest]
   );
 
   const logout = useCallback(async () => {
@@ -101,18 +89,14 @@ export const useAuth = () => {
 
     if (isConfirmed) {
       try {
-        await runAuthTransition(async () => {
-          await api.post('/auth/logout');
-          dispatch(logoutSuccess());
-          dispatch(baseApi.util.resetApiState());
-        });
+        await logoutRequest().unwrap();
         window.location.href = '/Pages/Login';
       } catch (error) {
         console.error('Logout error:', error);
         showToast('Unable to sign out. Please check your connection and try again.', 'error');
       }
     }
-  }, [confirmAction, dispatch, showToast]);
+  }, [confirmAction, showToast, logoutRequest]);
 
   const registerNewUser = useCallback(
     async (username, email, password) => {
@@ -120,68 +104,44 @@ export const useAuth = () => {
       const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
 
       try {
-        const res = await runAuthTransition(async () => {
-          const response = await api.post('/auth/register', { username, email, password });
-          const userData = response.data.user;
-          if (userData) {
-            dispatch(baseApi.util.resetApiState());
-            dispatch(setAuthSession(userData));
-          }
-          return response;
-        });
+        const res = await registerRequest({ username, email, password }).unwrap();
+        if (res.user) {
+          dispatch(baseApi.util.resetApiState());
+        }
 
-        if (!res.data.user) {
+        if (!res.user) {
           throw new Error('Invalid response from server');
         }
 
-        showToast(res.data.message || MESSAGES.AUTH.REGISTRATION_SUCCESS, 'success', { id: loadingToast });
-        if (res.data.verificationCode) {
-          showToast(`Verify code: ${res.data.verificationCode}`, 'info');
+        showToast(res.message || MESSAGES.AUTH.REGISTRATION_SUCCESS, 'success', { id: loadingToast });
+        if (res.verificationCode) {
+          showToast(`Verify code: ${res.verificationCode}`, 'info');
         }
 
         router.replace('/');
       } catch (err) {
-        const errorMessage = err.response?.data?.message || MESSAGES.AUTH.REGISTRATION_ERROR;
+        const errorMessage = err.data?.message || MESSAGES.AUTH.REGISTRATION_ERROR;
         showToast(errorMessage, 'error', { id: loadingToast });
       } finally {
         dispatch(setIsLoading(false));
       }
     },
-    [dispatch, showToast, router]
+    [dispatch, showToast, router, registerRequest]
   );
-
-  const fetchUsers = useCallback(async () => {
-    try {
-      const res = await api.get('/auth');
-      dispatch(setAuthUsers(Array.isArray(res.data) ? res.data : []));
-    } catch (err) {
-      console.error('Failed to fetch users:', err);
-    }
-  }, [dispatch]);
-
-  // Admin users fetch
-  useEffect(() => {
-    if (isLogin && isAuthChecked && user?.isAdmin) {
-      fetchUsers();
-    }
-  }, [isLogin, isAuthChecked, user?.isAdmin, fetchUsers]);
 
   return useMemo(
     () => ({
       user,
-      users,
       isLogin,
       isAuthChecked,
       isLoading,
       status,
       setUser,
-      setUsers,
       login,
       logout,
       registerNewUser,
-      fetchUsers,
     }),
-    [user, users, isLogin, isAuthChecked, isLoading, status, setUser, setUsers, login, logout, registerNewUser, fetchUsers]
+    [user, isLogin, isAuthChecked, isLoading, status, setUser, login, logout, registerNewUser]
   );
 };
 

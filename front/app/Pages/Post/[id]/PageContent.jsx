@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { usePost } from '@/app/redux/hooks';
 import { useAuth } from '@/app/redux/hooks';
 import { useComment } from '@/app/redux/hooks';
+import { useGetPostByIdQuery } from '@/app/redux/features/posts/postsApi';
 import Loading from '@/app/Component/Loading';
 import { renderTextWithMentionsHashtagsAndLinks } from '@/app/utils/CheckText';
 import useDocumentTitle from '@/app/hooks/useDocumentTitle';
@@ -13,7 +14,6 @@ const PostPage = ({ params }) => {
   const id = params.id;
   const { user, isLogin } = useAuth();
   const {
-    posts,
     likePost,
     savePost,
     sharePost,
@@ -21,38 +21,23 @@ const PostPage = ({ params }) => {
     setImageView,
     viewPost,
     hahaPost,
-    getPostById,
   } = usePost();
-  const { comments, AddComment, isLoading, fetchCommentsByTarget } = useComment();
+  const postQuery = useGetPostByIdQuery(id, { skip: !id });
+  const post = postQuery.currentData || null;
+  const {
+    comments,
+    AddComment,
+    isLoading,
+    hasMore,
+    isFetchingMore,
+    loadMoreComments,
+  } = useComment({ targetId: id, targetType: 'Post' });
   const [openModel, setOpenModel] = useState(false);
-  const [post, setPost] = useState(null);
   const [commentText, setCommentText] = useState('');
   const [showMenu, setShowMenu] = useState(false);
   useDocumentTitle(post?.owner?.username ? `${post.owner.username}'s post` : null);
 
-  // Pagination State
-  const [nextCursor, setNextCursor] = useState(null);
-  const [hasMore, setHasMore] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
   const viewRequests = useRef(new Set());
-
-  useEffect(() => {
-    let active = true;
-    setPost(null);
-
-    getPostById(id).then((fetchedPost) => {
-      if (active && fetchedPost?._id === id) setPost(fetchedPost);
-    });
-
-    return () => {
-      active = false;
-    };
-  }, [id, getPostById]);
-
-  useEffect(() => {
-    const matchedPost = posts.find((item) => item?._id === id);
-    if (matchedPost) setPost(matchedPost);
-  }, [id, posts]);
 
   useEffect(() => {
     if (!user?._id || post?._id !== id || post.owner?._id === user._id) return;
@@ -61,39 +46,12 @@ const PostPage = ({ params }) => {
     if (viewRequests.current.has(requestKey)) return;
     viewRequests.current.add(requestKey);
 
-    viewPost(id).then((viewResult) => {
-      if (viewResult && viewResult._id === id) {
-        setPost((currentPost) =>
-          currentPost?._id === id ? { ...currentPost, viewsCount: viewResult.viewsCount } : currentPost
-        );
-      }
-    });
+    viewPost(id);
   }, [id, post, user?._id, viewPost]);
 
-  // Initial Fetch
-  useEffect(() => {
-    if (!post?._id) return;
-    const load = async () => {
-      const res = await fetchCommentsByTarget(post._id, 'Post');
-      if (res) {
-        setNextCursor(res.nextCursor);
-        setHasMore(res.hasMore);
-      }
-    };
-    load();
-  }, [post?._id, fetchCommentsByTarget]);
-
-  // Load More Handler
   const handleLoadMore = useCallback(async () => {
-    if (loadingMore || !hasMore || !post?._id) return;
-    setLoadingMore(true);
-    const res = await fetchCommentsByTarget(post._id, 'Post', nextCursor);
-    if (res) {
-      setNextCursor(res.nextCursor);
-      setHasMore(res.hasMore);
-    }
-    setLoadingMore(false);
-  }, [loadingMore, hasMore, nextCursor, post?._id, fetchCommentsByTarget]);
+    if (!isFetchingMore && hasMore) await loadMoreComments();
+  }, [hasMore, isFetchingMore, loadMoreComments]);
 
   const handleAddComment = useCallback(async () => {
     if (!commentText.trim() || !post?._id) return;
@@ -107,7 +65,14 @@ const PostPage = ({ params }) => {
   }, [commentText, post?._id, AddComment]);
 
 
-  if (!post) return <Loading />;
+  if (!post) {
+    if (postQuery.isError) {
+      return <div role="alert" className="p-8 text-center text-red-500">
+        {postQuery.error?.data?.message || 'Could not load this post.'}
+      </div>;
+    }
+    return <Loading />;
+  }
 
   const isShared = post.isShared && post.originalPost;
   const original = post.originalPost;
@@ -151,7 +116,7 @@ const PostPage = ({ params }) => {
       canComment={canComment}
       hasMore={hasMore}
       handleLoadMore={handleLoadMore}
-      loadingMore={loadingMore}
+      loadingMore={isFetchingMore}
     />
   );
 };

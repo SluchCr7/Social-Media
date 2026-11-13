@@ -7,9 +7,10 @@ export const newsApi = baseApi.injectEndpoints({
         url: '/news',
         params,
       }),
+      transformResponse: (response) => response?.articles || [],
       providesTags: ['News'],
     }),
   }),
 });
 
-export const { useGetNewsQuery, useLazyGetNewsQuery } = newsApi;
+export const { useGetNewsQuery } = newsApi;

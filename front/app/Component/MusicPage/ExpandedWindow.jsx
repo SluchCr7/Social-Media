@@ -25,7 +25,7 @@ const ExpandedWindow = () => {
     volume, setVolume, muted, setMuted, setProgress
   } = useMusicPlayer()
 
-  const { likeMusic } = useMusic()
+  const { likeMusic } = useMusic({ autoFetch: false })
   const { user } = useAuth()
 
   const [accentColor, setAccentColor] = useState('#4f46e5')

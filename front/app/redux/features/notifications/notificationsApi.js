@@ -1,64 +1,65 @@
 import { baseApi } from '../../api/baseApi';
 
 export const notificationsApi = baseApi.injectEndpoints({
-  endpoints: (builder) => ({
-    getUserNotifications: builder.query({
+  endpoints: (build) => ({
+    getNotifications: build.query({
       query: () => '/notification/user',
-      providesTags: (result) =>
-        result && Array.isArray(result)
-          ? [...result.map(({ _id }) => ({ type: 'Notification', id: _id })), { type: 'Notification', id: 'LIST' }]
-          : [{ type: 'Notification', id: 'LIST' }],
+      providesTags: (result) => [
+        { type: 'Notification', id: 'LIST' },
+        ...(Array.isArray(result) ? result.filter((item) => item?._id)
+          .map((item) => ({ type: 'Notification', id: item._id })) : []),
+      ],
     }),
-    getUnreadCount: builder.query({
+    getUnreadNotificationCount: build.query({
       query: () => '/notification/user/unread-count',
-      providesTags: [{ type: 'Notification', id: 'COUNT' }],
+      providesTags: [{ type: 'Notification', id: 'UNREAD' }],
     }),
-    createNotification: builder.mutation({
-      query: ({ receiverId, content, type = 'custom', actionRef, actionModel }) => ({
+    addNotification: build.mutation({
+      query: ({ receiverId, content, type, actionRef, actionModel }) => ({
         url: `/notification/${receiverId}`,
         method: 'POST',
         body: { content, type, actionRef, actionModel },
       }),
     }),
-    deleteNotification: builder.mutation({
-      query: (id) => ({
-        url: `/notification/${id}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: (result, error, id) => [{ type: 'Notification', id }, { type: 'Notification', id: 'COUNT' }],
+    deleteNotification: build.mutation({
+      query: (id) => ({ url: `/notification/${id}`, method: 'DELETE' }),
+      invalidatesTags: (result, error, id) => [
+        { type: 'Notification', id },
+        { type: 'Notification', id: 'LIST' },
+        { type: 'Notification', id: 'UNREAD' },
+      ],
     }),
-    clearAllNotifications: builder.mutation({
-      query: () => ({
-        url: '/notification/clear',
-        method: 'DELETE',
-      }),
-      invalidatesTags: [{ type: 'Notification', id: 'LIST' }, { type: 'Notification', id: 'COUNT' }],
+    clearNotifications: build.mutation({
+      query: () => ({ url: '/notification/clear', method: 'DELETE' }),
+      invalidatesTags: [
+        { type: 'Notification', id: 'LIST' },
+        { type: 'Notification', id: 'UNREAD' },
+      ],
     }),
-    markNotificationAsRead: builder.mutation({
-      query: (id) => ({
-        url: `/notification/${id}/read`,
-        method: 'PATCH',
-      }),
-      invalidatesTags: (result, error, id) => [{ type: 'Notification', id }, { type: 'Notification', id: 'COUNT' }],
+    markNotificationRead: build.mutation({
+      query: (id) => ({ url: `/notification/${id}/read`, method: 'PATCH', body: {} }),
+      invalidatesTags: (result, error, id) => [
+        { type: 'Notification', id },
+        { type: 'Notification', id: 'LIST' },
+        { type: 'Notification', id: 'UNREAD' },
+      ],
     }),
-    markAllNotificationsAsRead: builder.mutation({
-      query: () => ({
-        url: '/notification/read-all',
-        method: 'PATCH',
-      }),
-      invalidatesTags: [{ type: 'Notification', id: 'LIST' }, { type: 'Notification', id: 'COUNT' }],
+    markAllNotificationsRead: build.mutation({
+      query: () => ({ url: '/notification/read-all', method: 'PATCH', body: {} }),
+      invalidatesTags: [
+        { type: 'Notification', id: 'LIST' },
+        { type: 'Notification', id: 'UNREAD' },
+      ],
     }),
   }),
 });
 
 export const {
-  useGetUserNotificationsQuery,
-  useLazyGetUserNotificationsQuery,
-  useGetUnreadCountQuery,
-  useLazyGetUnreadCountQuery,
-  useCreateNotificationMutation,
+  useGetNotificationsQuery,
+  useGetUnreadNotificationCountQuery,
+  useAddNotificationMutation,
   useDeleteNotificationMutation,
-  useClearAllNotificationsMutation,
-  useMarkNotificationAsReadMutation,
-  useMarkAllNotificationsAsReadMutation,
+  useClearNotificationsMutation,
+  useMarkNotificationReadMutation,
+  useMarkAllNotificationsReadMutation,
 } = notificationsApi;

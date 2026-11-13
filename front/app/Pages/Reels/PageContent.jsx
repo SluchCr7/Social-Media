@@ -5,7 +5,7 @@ import { useReels } from '@/app/redux/hooks';
 import DesignReels from './Design';
 
 const ReelsPage = () => {
-  const { reels, isLoading, error, lastReelRef, fetchReels, setPage, page } = useReels();
+  const { reels, isLoading, error, lastReelRef, fetchReels, page } = useReels();
 
   const containerRef = useRef(null);
   const reelRefs = useRef([]);

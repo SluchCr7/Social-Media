@@ -23,7 +23,7 @@ const ProfilePage = () => {
   const { user: authUser } = useAuth()
   const { updatePhoto, togglePrivateAccount } = useUser()
   const {
-    combinedPosts, postYears, loading, loaderRef, userData,
+    combinedPosts, postYears, loading, postsLoading, loaderRef, userData,
     filters, setFilters, activeTab, setActiveTab, userHasMore
   } = useProfilePosts(authUser?._id)
   const profileTitle = userData?.profileName || userData?.username
@@ -52,6 +52,7 @@ const ProfilePage = () => {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         combinedPosts={combinedPosts}
+        postsLoading={postsLoading}
         userHasMore={userHasMore}
         loaderRef={loaderRef}
         onImageChange={(e) => updatePhoto(e.target.files[0])}

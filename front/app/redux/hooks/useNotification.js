@@ -1,157 +1,135 @@
 'use client';
 
-import { useEffect, useCallback, useMemo } from 'react';
-import api from '@/app/utils/api';
+import { useCallback, useMemo } from 'react';
 import { useAuth } from './useAuth';
 import { useFeedback } from './useFeedback';
-import { useAppDispatch, useAppSelector } from '../hooks';
 import {
-  selectNotifications,
-  selectUnreadNotificationsCount,
-} from '../features/notifications/notificationsSelectors';
-import {
-  setNotificationsByUser as setReduxNotifications,
-  setUnreadCount as setReduxUnreadCount,
-  removeNotificationFromState,
-  clearAllNotificationsState,
-  markNotificationAsReadState,
-  markAllNotificationsAsReadState,
-} from '../features/notifications/notificationsSlice';
+  useAddNotificationMutation,
+  useClearNotificationsMutation,
+  useDeleteNotificationMutation,
+  useGetNotificationsQuery,
+  useGetUnreadNotificationCountQuery,
+  useMarkAllNotificationsReadMutation,
+  useMarkNotificationReadMutation,
+} from '../features/notifications/notificationsApi';
 
-
+const getErrorMessage = (error) =>
+  error?.data?.message || error?.response?.data?.message || error?.message;
+const EMPTY_NOTIFICATIONS = [];
 
 export const useNotify = () => {
-  const dispatch = useAppDispatch();
   const { user } = useAuth();
   const { showToast } = useFeedback();
-
-  const notificationsByUser = useAppSelector(selectNotifications);
-  const unreadCount = useAppSelector(selectUnreadNotificationsCount);
-
-  const setNotificationsByUser = useCallback(
-    (data) => {
-      dispatch(setReduxNotifications(data));
-    },
-    [dispatch]
+  const notificationsQuery = useGetNotificationsQuery(
+    { userId: user?._id },
+    { skip: !user?._id }
   );
-
-  const setUnreadCount = useCallback(
-    (count) => {
-      dispatch(setReduxUnreadCount(count));
-    },
-    [dispatch]
+  const unreadQuery = useGetUnreadNotificationCountQuery(
+    { userId: user?._id },
+    { skip: !user?._id }
   );
+  const [addNotificationRequest] = useAddNotificationMutation();
+  const [deleteNotificationRequest] = useDeleteNotificationMutation();
+  const [clearNotificationsRequest] = useClearNotificationsMutation();
+  const [markReadRequest] = useMarkNotificationReadMutation();
+  const [markAllReadRequest] = useMarkAllNotificationsReadMutation();
+  const refetchNotifications = notificationsQuery.refetch;
+  const refetchUnread = unreadQuery.refetch;
 
-  const addNotify = useCallback(
-    async ({ content, type = 'custom', receiverId, actionRef, actionModel }) => {
-      if (!receiverId || receiverId === user?._id || !user?._id) return;
-      try {
-        await api.post(`/notification/${receiverId}`, { content, type, actionRef, actionModel });
-      } catch (err) {
-        console.error('Failed to send notification:', err);
-      }
-    },
-    [user?._id]
-  );
+  const notificationsByUser = notificationsQuery.currentData || EMPTY_NOTIFICATIONS;
+  const unreadCount = Number(unreadQuery.currentData?.unreadCount) || 0;
 
-  const deleteNotify = useCallback(
-    async (id) => {
-      try {
-        await api.delete(`/notification/${id}`);
-        dispatch(removeNotificationFromState(id));
-      } catch (err) {
-        console.error('Failed to delete notification:', err);
-      }
-    },
-    [dispatch]
-  );
+  const addNotify = useCallback(async ({
+    content,
+    type = 'custom',
+    receiverId,
+    actionRef,
+    actionModel,
+  }) => {
+    if (!receiverId || receiverId === user?._id || !user?._id) return;
+    try {
+      await addNotificationRequest({ receiverId, content, type, actionRef, actionModel }).unwrap();
+    } catch (error) {
+      console.error('Failed to send notification:', error);
+    }
+  }, [addNotificationRequest, user?._id]);
+
+  const deleteNotify = useCallback(async (id) => {
+    try {
+      await deleteNotificationRequest(id).unwrap();
+    } catch (error) {
+      console.error('Failed to delete notification:', error);
+    }
+  }, [deleteNotificationRequest]);
 
   const clearAllNotifications = useCallback(async () => {
     try {
-      await api.delete('/notification/clear');
-      dispatch(clearAllNotificationsState());
+      await clearNotificationsRequest().unwrap();
       showToast('Notifications cleared successfully.', 'success');
-    } catch (err) {
-      console.error('Failed to clear notifications:', err);
+    } catch (error) {
+      console.error('Failed to clear notifications:', error);
+      showToast(getErrorMessage(error) || 'Failed to clear notifications.', 'error');
     }
-  }, [dispatch, showToast]);
+  }, [clearNotificationsRequest, showToast]);
 
-  const markAsRead = useCallback(
-    async (id) => {
-      try {
-        await api.patch(`/notification/${id}/read`, {});
-        dispatch(markNotificationAsReadState(id));
-      } catch (err) {
-        console.error('Failed to mark notification as read:', err);
-      }
-    },
-    [dispatch]
-  );
+  const markAsRead = useCallback(async (id) => {
+    try {
+      await markReadRequest(id).unwrap();
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
+  }, [markReadRequest]);
 
   const markAllAsRead = useCallback(async () => {
     try {
-      await api.patch('/notification/read-all', {});
-      dispatch(markAllNotificationsAsReadState());
-    } catch (err) {
-      console.error('Failed to mark all notifications as read:', err);
+      await markAllReadRequest().unwrap();
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
     }
-  }, [dispatch]);
+  }, [markAllReadRequest]);
 
   const fetchUserNotifications = useCallback(async () => {
-    if (!user?._id) return;
+    if (!user?._id) return [];
     try {
-      const res = await api.get('/notification/user');
-      dispatch(setReduxNotifications(Array.isArray(res.data) ? res.data : []));
-    } catch (err) {
-      console.error('Failed to fetch notifications:', err);
+      return await refetchNotifications().unwrap();
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+      return [];
     }
-  }, [user?._id, dispatch]);
+  }, [refetchNotifications, user?._id]);
 
   const fetchUnreadCount = useCallback(async () => {
-    if (!user?._id) return;
+    if (!user?._id) return 0;
     try {
-      const res = await api.get('/notification/user/unread-count');
-      dispatch(setReduxUnreadCount(res.data.unreadCount || 0));
-    } catch (err) {
-      console.error('Failed to fetch unread count:', err);
+      const result = await refetchUnread().unwrap();
+      return Number(result?.unreadCount) || 0;
+    } catch (error) {
+      console.error('Failed to fetch unread count:', error);
+      return 0;
     }
-  }, [user?._id, dispatch]);
+  }, [refetchUnread, user?._id]);
 
-  useEffect(() => {
-    if (user?._id) {
-      fetchUserNotifications();
-      fetchUnreadCount();
-    }
-  }, [user?._id, fetchUserNotifications, fetchUnreadCount]);
-
-  return useMemo(
-    () => ({
-      notificationsByUser,
-      unreadCount,
-      addNotify,
-      deleteNotify,
-      clearAllNotifications,
-      markAsRead,
-      markAllAsRead,
-      fetchUserNotifications,
-      fetchUnreadCount,
-      setNotificationsByUser,
-      setUnreadCount,
-    }),
-    [
-      notificationsByUser,
-      unreadCount,
-      addNotify,
-      deleteNotify,
-      clearAllNotifications,
-      markAsRead,
-      markAllAsRead,
-      fetchUserNotifications,
-      fetchUnreadCount,
-      setNotificationsByUser,
-      setUnreadCount,
-    ]
-  );
+  return useMemo(() => ({
+    notificationsByUser,
+    unreadCount,
+    addNotify,
+    deleteNotify,
+    clearAllNotifications,
+    markAsRead,
+    markAllAsRead,
+    fetchUserNotifications,
+    fetchUnreadCount,
+  }), [
+    notificationsByUser,
+    unreadCount,
+    addNotify,
+    deleteNotify,
+    clearAllNotifications,
+    markAsRead,
+    markAllAsRead,
+    fetchUserNotifications,
+    fetchUnreadCount,
+  ]);
 };
 
 export default useNotify;

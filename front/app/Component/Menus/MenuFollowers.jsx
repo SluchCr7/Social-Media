@@ -1,23 +1,17 @@
 'use client';
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useAuth } from '@/app/redux/hooks';
 import Link from 'next/link';
-import { useUser } from '@/app/redux/hooks';
+import { useGetData } from '@/app/Custome/useGetData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiUserGroup, HiChevronRight } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 
 const MenuFollowers = () => {
-  const { user, users } = useAuth();
-  const [myUser, setMyUser] = useState(null);
-  const { followUser } = useUser();
+  const { user } = useAuth();
+  const { userData: myUser } = useGetData(user?._id);
   const { t } = useTranslation();
-
-  useEffect(() => {
-    const currentUser = users.find((userObj) => userObj._id === user?._id);
-    setMyUser(currentUser);
-  }, [users, user]);
 
   const followers = Array.isArray(myUser?.followers)
     ? [...myUser.followers].sort(() => Math.random() - 0.5).slice(0, 4)

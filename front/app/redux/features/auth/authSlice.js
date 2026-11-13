@@ -11,7 +11,6 @@ const withoutTokens = (user) => {
 
 const initialState = {
   user: null,
-  users: [],
   isLogin: false,
   status: 'initializing',
   isAuthChecked: false,
@@ -38,21 +37,6 @@ export const authSlice = createSlice({
       applyUser(state, action.payload);
       state.sessionVersion += 1;
     },
-    setUsers: (state, action) => {
-      state.users = Array.isArray(action.payload) ? action.payload.map(withoutTokens) : [];
-    },
-    updateUserInUsersList: (state, action) => {
-      const updatedUser = withoutTokens(action.payload);
-      if (!updatedUser?._id) return;
-      state.users = state.users.map((u) => (u._id === updatedUser._id ? { ...u, ...updatedUser } : u));
-      if (state.user && state.user._id === updatedUser._id) {
-        state.user = { ...state.user, ...updatedUser };
-      }
-    },
-    removeUserFromList: (state, action) => {
-      const userId = action.payload;
-      state.users = state.users.filter((u) => u._id !== userId);
-    },
     setIsLogin: (state, action) => {
       state.isLogin = action.payload;
       state.status = action.payload ? 'authenticated' : 'unauthenticated';
@@ -71,7 +55,6 @@ export const authSlice = createSlice({
     },
     logoutSuccess: (state) => {
       state.user = null;
-      state.users = [];
       state.isLogin = false;
       state.status = 'unauthenticated';
       state.isAuthChecked = true;
@@ -83,9 +66,6 @@ export const authSlice = createSlice({
 export const {
   setUser,
   setAuthSession,
-  setUsers,
-  updateUserInUsersList,
-  removeUserFromList,
   setIsLogin,
   setIsAuthChecked,
   setIsLoading,

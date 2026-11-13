@@ -1,377 +1,279 @@
 'use client';
 
-import { useEffect, useCallback, useRef, useMemo } from 'react';
-import api from '@/app/utils/api';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from './useAuth';
 import { useFeedback } from './useFeedback';
-import { usePost } from './usePost';
 import { useAppDispatch, useAppSelector } from '../hooks';
+import { selectMusicGenre, selectMusicSearchQuery, selectShowModelAddMusic } from '../features/music/musicSelectors';
 import {
-  selectMusicList,
-  selectTopCharts,
-  selectMusicPage,
-  selectMusicHasMore,
-  selectMusicLoading,
-  selectMusicHasLoadedOnce,
-  selectMusicError,
-  selectMusicGenre,
-  selectMusicSearchQuery,
-  selectShowModelAddMusic,
-  selectCurrentMusic,
-} from '../features/music/musicSelectors';
-import {
-  setMusic as setReduxMusic,
-  appendMusic,
-  addMusicToState,
-  updateMusicInState,
-  removeMusicFromState,
-  setTopCharts as setReduxTopCharts,
-  setPage as setReduxPage,
-  setHasMore,
-  setIsLoading,
-  setHasLoadedOnce,
-  setMusicError,
   setGenre as setReduxGenre,
   setSearchQuery as setReduxSearchQuery,
   setShowModelAddMusic as setReduxShowModelAddMusic,
-  setCurrentMusic as setReduxCurrentMusic,
-  normalizeMusicItem,
-  normalizeMusicList,
 } from '../features/music/musicSlice';
+import { removeQueueTrack, updateQueueTrack } from '../features/musicPlayer/musicPlayerSlice';
+import {
+  useAddMusicListenMutation,
+  useDeleteMusicMutation,
+  useGetMusicInfiniteQuery,
+  useSearchMusicQuery,
+  useGetTopMusicChartsQuery,
+  useLikeMusicMutation,
+  useShareMusicAsPostMutation,
+  useUploadMusicMutation,
+  useViewMusicMutation,
+} from '../features/music/musicApi';
 
+const errorMessage = (error) => error?.data?.message || error?.message || null;
 
-
-export const useMusic = () => {
+export const useMusic = ({ autoFetch = true } = {}) => {
   const dispatch = useAppDispatch();
   const { user } = useAuth();
   const { showAlert } = useFeedback();
-  const { setPosts } = usePost();
-
-  const music = useAppSelector(selectMusicList);
-  const topCharts = useAppSelector(selectTopCharts);
-  const page = useAppSelector(selectMusicPage);
-  const hasMore = useAppSelector(selectMusicHasMore);
-  const isLoading = useAppSelector(selectMusicLoading);
-  const hasLoadedOnce = useAppSelector(selectMusicHasLoadedOnce);
-  const error = useAppSelector(selectMusicError);
+  const observer = useRef();
+  const [activeSearch, setActiveSearch] = useState('');
   const genre = useAppSelector(selectMusicGenre);
   const searchQuery = useAppSelector(selectMusicSearchQuery);
   const showModelAddMusic = useAppSelector(selectShowModelAddMusic);
-  const currentMusic = useAppSelector(selectCurrentMusic);
-  const observer = useRef();
-  const requestId = useRef(0);
-  const loadingMore = useRef(false);
-  const controller = useRef(null);
+  const musicQuery = useGetMusicInfiniteQuery({ genre }, {
+    skip: !autoFetch || Boolean(activeSearch),
+  });
+  const {
+    currentData: musicData,
+    isLoading: musicIsLoading,
+    isFetchingNextPage: isFetchingNextMusicPage,
+    hasNextPage: hasNextMusicPage,
+    fetchNextPage: fetchNextMusicPage,
+    refetch: refetchMusic,
+  } = musicQuery;
+  const searchMusicQuery = useSearchMusicQuery({ query: activeSearch }, {
+    skip: !autoFetch || !activeSearch,
+  });
+  const {
+    currentData: searchedMusic,
+    isLoading: searchIsLoading,
+    isFetching: isFetchingSearch,
+    error: searchError,
+    refetch: refetchSearch,
+  } = searchMusicQuery;
+  const topChartsQuery = useGetTopMusicChartsQuery(undefined, { skip: !autoFetch });
+  const [uploadRequest] = useUploadMusicMutation();
+  const [deleteRequest] = useDeleteMusicMutation();
+  const [likeRequest] = useLikeMusicMutation();
+  const [viewRequest] = useViewMusicMutation();
+  const [listenRequest] = useAddMusicListenMutation();
+  const [shareRequest] = useShareMusicAsPostMutation();
 
-  const setGenre = useCallback(
-    (newGenre) => {
-      dispatch(setReduxGenre(newGenre));
-    },
-    [dispatch]
+  const music = useMemo(() => (
+    activeSearch
+      ? searchedMusic || []
+      : (musicData?.pages || []).flatMap((page) => page.music || [])
+  ), [activeSearch, musicData, searchedMusic]);
+  const isSearching = Boolean(activeSearch);
+  const isLoading = isSearching
+    ? searchIsLoading || isFetchingSearch
+    : musicIsLoading || isFetchingNextMusicPage;
+  const hasLoadedOnce = isSearching ? searchMusicQuery.isSuccess : musicQuery.isSuccess;
+  const error = errorMessage(isSearching ? searchError : musicQuery.error);
+  const hasMore = !isSearching && Boolean(hasNextMusicPage);
+  const page = musicData?.pages?.length || 1;
+  const topCharts = useMemo(
+    () => topChartsQuery.currentData || { trending: [], popular: [] },
+    [topChartsQuery.currentData]
   );
 
-  const setSearchQuery = useCallback(
-    (query) => {
-      dispatch(setReduxSearchQuery(query));
-    },
-    [dispatch]
-  );
-
-  const setShowModelAddMusic = useCallback(
-    (show) => {
-      dispatch(setReduxShowModelAddMusic(show));
-    },
-    [dispatch]
-  );
-
-  const setCurrentMusic = useCallback(
-    (song) => {
-      dispatch(setReduxCurrentMusic(song));
-    },
-    [dispatch]
-  );
-
-  const fetchMusic = useCallback(
-    async (pageNum = 1, currentGenre = 'All') => {
-      controller.current?.abort();
-      const requestController = new AbortController();
-      controller.current = requestController;
-      const currentRequestId = ++requestId.current;
-      dispatch(setIsLoading(true));
-      dispatch(setMusicError(null));
-
-      try {
-        const res = await api.get('/music', {
-          params: { page: pageNum, limit: 12, genre: currentGenre },
-          signal: requestController.signal,
-        });
-        if (currentRequestId !== requestId.current) return;
-        const nextMusic = normalizeMusicList(Array.isArray(res?.data?.music) ? res.data.music : []);
-
-        dispatch(pageNum === 1 ? setReduxMusic(nextMusic) : appendMusic(nextMusic));
-        dispatch(setHasMore(pageNum < (Number(res?.data?.totalPages) || 0)));
-      } catch (err) {
-        if (currentRequestId === requestId.current) {
-          console.error('Music library request failed:', err);
-          dispatch(setMusicError(err.response?.data?.message || 'Could not load music right now.'));
-        }
-      } finally {
-        if (currentRequestId === requestId.current) {
-          loadingMore.current = false;
-          controller.current = null;
-          dispatch(setIsLoading(false));
-          dispatch(setHasLoadedOnce(true));
-        }
-      }
-    },
-    [dispatch]
-  );
-
-  const fetchTopCharts = useCallback(async () => {
-    try {
-      const { data } = await api.get('/music/top-charts');
-      dispatch(
-        setReduxTopCharts({
-          trending: normalizeMusicList(Array.isArray(data?.trending) ? data.trending : []),
-          popular: normalizeMusicList(Array.isArray(data?.popular) ? data.popular : []),
-        })
-      );
-    } catch (err) {
-      console.error('Top Charts Error:', err);
-      dispatch(setReduxTopCharts({ trending: [], popular: [] }));
-    }
-  }, [dispatch]);
-
-  const searchMusic = useCallback(
-    async (query) => {
-      const trimmedQuery = query?.trim() || '';
-
-      if (!trimmedQuery) {
-        dispatch(setReduxSearchQuery(''));
-        dispatch(setReduxPage(1));
-        fetchMusic(1, genre);
-        return;
-      }
-
-      const currentRequestId = ++requestId.current;
-      controller.current?.abort();
-      const requestController = new AbortController();
-      controller.current = requestController;
-      dispatch(setIsLoading(true));
-      dispatch(setMusicError(null));
-      try {
-        const { data } = await api.get(`/music/search?q=${encodeURIComponent(trimmedQuery)}`, {
-          signal: requestController.signal,
-        });
-        if (currentRequestId !== requestId.current) return;
-        const nextMusic = normalizeMusicList(Array.isArray(data) ? data : []);
-        dispatch(setReduxMusic(nextMusic));
-        dispatch(setHasMore(false));
-        dispatch(setHasLoadedOnce(true));
-      } catch (err) {
-        if (currentRequestId === requestId.current) {
-          console.error('Music search failed:', err);
-          dispatch(setMusicError(err.response?.data?.message || 'Music search failed. Try again.'));
-        }
-      } finally {
-        if (currentRequestId === requestId.current) {
-          loadingMore.current = false;
-          controller.current = null;
-          dispatch(setIsLoading(false));
-        }
-      }
-    },
-    [genre, fetchMusic, dispatch]
-  );
-
-  const retryMusic = useCallback(() => {
-    if (searchQuery.trim()) return searchMusic(searchQuery);
-    return fetchMusic(1, genre);
-  }, [searchQuery, searchMusic, fetchMusic, genre]);
-
-  useEffect(() => {
-    dispatch(setReduxPage(1));
+  const setGenre = useCallback((value) => {
+    dispatch(setReduxGenre(value));
     dispatch(setReduxSearchQuery(''));
-    fetchMusic(1, genre);
-  }, [genre, fetchMusic, dispatch]);
-
-  useEffect(() => {
-    fetchTopCharts();
-  }, [fetchTopCharts]);
-
-  useEffect(() => () => {
-    requestId.current += 1;
-    controller.current?.abort();
-    observer.current?.disconnect();
-  }, []);
-
-  const uploadMusic = useCallback(
-    async (formData) => {
-      try {
-        const res = await api.post('/music', formData);
-        const normalized = normalizeMusicItem(res?.data);
-        if (normalized) {
-          dispatch(addMusicToState(normalized));
-        }
-        showAlert('Music uploaded successfully!');
-        dispatch(setReduxShowModelAddMusic(false));
-      } catch (err) {
-        console.error(err);
-        const message = err?.response?.data?.message || err?.message || 'Failed to upload Music.';
-        showAlert(message);
-        throw err;
-      }
-    },
-    [showAlert, dispatch]
+    setActiveSearch('');
+  }, [dispatch]);
+  const setSearchQuery = useCallback(
+    (value) => dispatch(setReduxSearchQuery(value)),
+    [dispatch]
   );
-
-  const deleteMusic = useCallback(
-    async (id) => {
-      if (!user) return;
-      try {
-        const res = await api.delete(`/music/${id}`);
-        dispatch(removeMusicFromState(id));
-        showAlert(res.data.message);
-      } catch (err) {
-        console.error(err);
-        showAlert('Failed to delete Music.');
-      }
-    },
-    [user, showAlert, dispatch]
-  );
-
-  const likeMusic = useCallback(
-    async (id) => {
-      if (!user) return showAlert('Please login to like music');
-      try {
-        const res = await api.put(`/music/like/${id}`);
-        const updatedMusic = normalizeMusicItem(res?.data?.music);
-        if (!updatedMusic) return;
-
-        dispatch(updateMusicInState(updatedMusic));
-      } catch (err) {
-        console.error(err);
-        showAlert('Failed to like music.');
-      }
-    },
-    [user, showAlert, dispatch]
-  );
-
-  const viewMusic = useCallback(
-    async (id) => {
-      try {
-        const res = await api.put(`/music/view/${id}`);
-        const updated = normalizeMusicItem(res?.data);
-        if (!updated) return;
-        dispatch(updateMusicInState(updated));
-      } catch (err) {
-        console.error(err);
-      }
-    },
+  const setShowModelAddMusic = useCallback(
+    (value) => dispatch(setReduxShowModelAddMusic(value)),
     [dispatch]
   );
 
-  const addListen = useCallback(
-    async (musicId) => {
-      if (!user) return;
-      try {
-        const { data } = await api.post(`/music/listen/${musicId}`);
-        const updated = normalizeMusicItem(data);
-        if (!updated) return data;
-        dispatch(updateMusicInState(updated));
-        return updated;
-      } catch (error) {
-        console.error('Error adding listen:', error);
+  const fetchMusic = useCallback(async (pageNum = 1, currentGenre = genre) => {
+    if (!autoFetch) return;
+    if (currentGenre !== genre) {
+      dispatch(setReduxGenre(currentGenre));
+      return;
+    }
+    if (activeSearch) return refetchSearch().unwrap();
+    if (pageNum <= 1) return refetchMusic().unwrap();
+    let result;
+    for (let nextPage = page + 1; nextPage <= pageNum && hasNextMusicPage; nextPage += 1) {
+      result = await fetchNextMusicPage().unwrap();
+    }
+    return result;
+  }, [
+    activeSearch,
+    autoFetch,
+    dispatch,
+    fetchNextMusicPage,
+    genre,
+    hasNextMusicPage,
+    page,
+    refetchMusic,
+    refetchSearch,
+  ]);
+  const searchMusic = useCallback((query) => {
+    const trimmed = query?.trim() || '';
+    dispatch(setReduxSearchQuery(trimmed));
+    setActiveSearch(trimmed);
+    return undefined;
+  }, [dispatch]);
+  const retryMusic = useCallback(
+    () => activeSearch ? refetchSearch() : refetchMusic(),
+    [activeSearch, refetchMusic, refetchSearch]
+  );
+
+  const uploadMusic = useCallback(async (formData) => {
+    try {
+      const musicItem = await uploadRequest(formData).unwrap();
+      showAlert('Music uploaded successfully!');
+      setShowModelAddMusic(false);
+      return musicItem;
+    } catch (requestError) {
+      console.error(requestError);
+      showAlert(errorMessage(requestError) || 'Failed to upload Music.');
+      throw requestError;
+    }
+  }, [setShowModelAddMusic, showAlert, uploadRequest]);
+
+  const deleteMusic = useCallback(async (id) => {
+    if (!user) return;
+    try {
+      const data = await deleteRequest(id).unwrap();
+      dispatch(removeQueueTrack(id));
+      showAlert(data.message || 'Music deleted successfully.');
+    } catch (requestError) {
+      console.error(requestError);
+      showAlert(errorMessage(requestError) || 'Failed to delete Music.');
+    }
+  }, [deleteRequest, dispatch, showAlert, user]);
+
+  const likeMusic = useCallback(async (id) => {
+    if (!user) {
+      showAlert('Please login to like music');
+      return;
+    }
+    try {
+      const updated = await likeRequest(id).unwrap();
+      if (updated) dispatch(updateQueueTrack(updated));
+      return updated;
+    } catch (requestError) {
+      console.error(requestError);
+      showAlert(errorMessage(requestError) || 'Failed to like music.');
+    }
+  }, [dispatch, likeRequest, showAlert, user]);
+
+  const viewMusic = useCallback(async (id) => {
+    try {
+      const updated = await viewRequest(id).unwrap();
+      if (updated) dispatch(updateQueueTrack(updated));
+      return updated;
+    } catch (requestError) {
+      console.error(requestError);
+    }
+  }, [dispatch, viewRequest]);
+
+  const addListen = useCallback(async (musicId) => {
+    if (!user) return;
+    try {
+      const updated = await listenRequest(musicId).unwrap();
+      if (updated) dispatch(updateQueueTrack(updated));
+      return updated;
+    } catch (requestError) {
+      console.error('Error adding listen:', requestError);
+    }
+  }, [dispatch, listenRequest, user]);
+
+  const shareMusicAsPost = useCallback(async (musicId, customText = '') => {
+    if (!user) {
+      showAlert('You must be logged in to share music.');
+      return;
+    }
+    try {
+      const data = await shareRequest({ musicId, customText }).unwrap();
+      showAlert('Shared successfully as a post!');
+      return data.post;
+    } catch (requestError) {
+      console.error('Error sharing music:', requestError);
+      showAlert(errorMessage(requestError) || 'Failed to share music.');
+    }
+  }, [shareRequest, showAlert, user]);
+
+  const lastMusicRef = useCallback((node) => {
+    observer.current?.disconnect();
+    if (!node || !autoFetch || isSearching || isLoading || !hasMore ||
+      typeof IntersectionObserver === 'undefined') return;
+    observer.current = new IntersectionObserver((entries) => {
+        if (entries[0]?.isIntersecting && !isFetchingNextMusicPage) {
+          fetchNextMusicPage();
       }
-    },
-    [user, dispatch]
-  );
+    }, { rootMargin: '240px' });
+    observer.current.observe(node);
+  }, [
+    autoFetch,
+    hasMore,
+    isLoading,
+    isSearching,
+    fetchNextMusicPage,
+    isFetchingNextMusicPage,
+  ]);
 
-  const shareMusicAsPost = useCallback(
-    async (musicId, customText = '') => {
-      if (!user) return showAlert('You must be logged in to share music.');
-      try {
-        const { data } = await api.post(`/music/share/${musicId}`, { customText });
-        setPosts((prev) => [data.post, ...prev]);
-        showAlert('Shared successfully as a post!');
-        return data.post;
-      } catch (error) {
-        console.error('Error sharing music:', error);
-        showAlert('Failed to share music.');
-      }
-    },
-    [user, setPosts, showAlert]
-  );
+  useEffect(() => () => observer.current?.disconnect(), []);
 
-  const lastMusicRef = useCallback(
-    (node) => {
-      if (observer.current) observer.current.disconnect();
-      if (!node || isLoading || !hasMore || typeof IntersectionObserver === 'undefined') return;
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0]?.isIntersecting && !loadingMore.current) {
-          loadingMore.current = true;
-          const nextPage = page + 1;
-          dispatch(setReduxPage(nextPage));
-          fetchMusic(nextPage, genre);
-        }
-      }, { rootMargin: '240px' });
-      observer.current.observe(node);
-    },
-    [isLoading, hasMore, page, fetchMusic, genre, dispatch]
-  );
-
-  return useMemo(
-    () => ({
-      music,
-      topCharts,
-      isLoading,
-      hasMore,
-      hasLoadedOnce,
-      error,
-      genre,
-      setGenre,
-      searchQuery,
-      setSearchQuery,
-      searchMusic,
-      retryMusic,
-      uploadMusic,
-      deleteMusic,
-      likeMusic,
-      viewMusic,
-      addListen,
-      shareMusicAsPost,
-      lastMusicRef,
-      showModelAddMusic,
-      setShowModelAddMusic,
-      currentMusic,
-      setCurrentMusic,
-    }),
-    [
-      music,
-      topCharts,
-      isLoading,
-      hasMore,
-      hasLoadedOnce,
-      error,
-      genre,
-      setGenre,
-      searchQuery,
-      setSearchQuery,
-      searchMusic,
-      retryMusic,
-      uploadMusic,
-      deleteMusic,
-      likeMusic,
-      viewMusic,
-      addListen,
-      shareMusicAsPost,
-      lastMusicRef,
-      showModelAddMusic,
-      setShowModelAddMusic,
-      currentMusic,
-      setCurrentMusic,
-    ]
-  );
+  return useMemo(() => ({
+    music,
+    topCharts,
+    isLoading,
+    hasMore,
+    hasLoadedOnce,
+    error,
+    genre,
+    setGenre,
+    searchQuery,
+    setSearchQuery,
+    searchMusic,
+    retryMusic,
+    fetchMusic,
+    uploadMusic,
+    deleteMusic,
+    likeMusic,
+    viewMusic,
+    addListen,
+    shareMusicAsPost,
+    lastMusicRef,
+    showModelAddMusic,
+    setShowModelAddMusic,
+  }), [
+    music,
+    topCharts,
+    isLoading,
+    hasMore,
+    hasLoadedOnce,
+    error,
+    genre,
+    setGenre,
+    searchQuery,
+    setSearchQuery,
+    searchMusic,
+    retryMusic,
+    fetchMusic,
+    uploadMusic,
+    deleteMusic,
+    likeMusic,
+    viewMusic,
+    addListen,
+    shareMusicAsPost,
+    lastMusicRef,
+    showModelAddMusic,
+    setShowModelAddMusic,
+  ]);
 };
 
 export default useMusic;

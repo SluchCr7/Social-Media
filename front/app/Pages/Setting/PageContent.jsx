@@ -13,8 +13,14 @@ import i18n from '@/app/i18n'; // ✅ تأكد من صحة المسار
 export default function SettingsContainer() {
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
-  const { deleteUser, makeAccountPremiumVerify } = useAdmin();
-  const { togglePrivateAccount, updatePassword, toggleBlockNotification, toggleShowOnlineStatus } = useUser();
+  const { makeAccountPremiumVerify } = useAdmin();
+  const {
+    deleteAccount,
+    togglePrivateAccount,
+    updatePassword,
+    toggleBlockNotification,
+    toggleShowOnlineStatus,
+  } = useUser();
   const { userData } = useGetData(user?._id);
   const { language, handleLanguageChange } = useTranslate();
 
@@ -38,8 +44,8 @@ export default function SettingsContainer() {
   );
 
   const handleDeleteAccount = useCallback(() => {
-    if (user?._id) deleteUser(user._id);
-  }, [user?._id, deleteUser]);
+    if (user?._id) deleteAccount();
+  }, [user?._id, deleteAccount]);
 
   const handleMakePremiumVerify = useCallback(
     (v) => makeAccountPremiumVerify(v),

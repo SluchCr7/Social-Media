@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 
 const EditPostModal = ({ post, onClose }) => {
-  const { editPost, isLoading } = usePost();
+  const { editPost, isEditingPost: isLoading } = usePost();
   const { communities } = useCommunity();
   const { user } = useAuth();
   const { t } = useTranslation();

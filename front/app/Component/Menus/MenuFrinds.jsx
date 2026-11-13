@@ -79,8 +79,8 @@ const FriendCard = memo(({ userData, statusMessage, isFollowing, onFollowToggle 
 FriendCard.displayName = 'FriendCard';
 
 const MenuFriends = memo(() => {
-  const { user, users } = useAuth();
-  const { followUser } = useUser();
+  const { user } = useAuth();
+  const { followUser, suggestedUsers } = useUser();
   const { userData, loading } = useGetData(user?._id);
   const { t } = useTranslation();
   const router = useRouter();
@@ -111,9 +111,9 @@ const MenuFriends = memo(() => {
 
   // Pro Recommendation Engine (filtering ONLY unfollowed users, ranked by relevance score)
   const recommendedUsers = useMemo(() => {
-    if (!Array.isArray(users) || users.length === 0) return [];
+    if (!Array.isArray(suggestedUsers) || suggestedUsers.length === 0) return [];
 
-    return users
+    return suggestedUsers
       .filter((candidate) => {
         if (!candidate || !candidate._id) return false;
         const candidateId = candidate._id.toString();
@@ -174,7 +174,7 @@ const MenuFriends = memo(() => {
         };
       })
       .sort((a, b) => b.score - a.score);
-  }, [users, currentUserId, myFollowingSet, t]);
+  }, [suggestedUsers, currentUserId, myFollowingSet, t]);
 
   const handleFollowToggle = useCallback(
     async (targetId) => {

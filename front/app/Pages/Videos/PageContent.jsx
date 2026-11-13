@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { HiVideoCamera, HiSparkles } from 'react-icons/hi2'
-import api from '@/app/utils/api'
 import SluchitEntry from '@/app/Component/SluchitEntry'
 import Loading from '@/app/Component/Loading'
+import { useAuth } from '@/app/redux/hooks'
+import { useGetVideoPostsInfiniteQuery } from '@/app/redux/features/posts/postsApi'
 
 const normalizeVideoPost = (post) => {
   const media = Array.isArray(post.media) ? post.media : []
@@ -26,49 +27,33 @@ const normalizeVideoPost = (post) => {
 
 const Page = () => {
   const { t } = useTranslation()
-  const [videoPosts, setVideoPosts] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
-  const [error, setError] = useState(null)
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const requestController = useRef(null)
-
-  const fetchVideos = useCallback(async (pageNum = 1) => {
-    requestController.current?.abort()
-    const controller = new AbortController()
-    requestController.current = controller
-    const setLoading = pageNum === 1 ? setIsLoading : setIsLoadingMore
-
-    setLoading(true)
-    setError(null)
-    try {
-      const { data } = await api.get('/post/videos', {
-        params: { page: pageNum, limit: 10 },
-        signal: controller.signal,
-      })
-      if (requestController.current !== controller) return
-
-      const fetchedPosts = Array.isArray(data?.posts) ? data.posts.map(normalizeVideoPost) : []
-      setVideoPosts((current) => pageNum === 1 ? fetchedPosts : [...current, ...fetchedPosts])
-      setPage(pageNum)
-      setTotalPages(Number(data?.pages) || 0)
-    } catch (requestError) {
-      if (controller.signal.aborted) return
-      console.error('Could not load video posts:', requestError)
-      setError(requestError.response?.data?.message || t('Could not load videos. Please try again.'))
-    } finally {
-      if (requestController.current === controller) {
-        requestController.current = null
-        setLoading(false)
-      }
-    }
-  }, [t])
-
-  useEffect(() => {
-    fetchVideos()
-    return () => requestController.current?.abort()
-  }, [fetchVideos])
+  const { user } = useAuth()
+  const videosQuery = useGetVideoPostsInfiniteQuery({
+    viewerId: user?._id || 'anonymous',
+    limit: 10,
+  })
+  const {
+    fetchNextPage: fetchNextVideosPage,
+    hasNextPage: hasMoreVideos,
+    refetch: refetchVideos,
+  } = videosQuery
+  const videoPosts = useMemo(
+    () => videosQuery.data?.pages?.flatMap((page) =>
+      (Array.isArray(page?.posts) ? page.posts : []).map(normalizeVideoPost)
+    ) || [],
+    [videosQuery.data]
+  )
+  const lastPage = videosQuery.data?.pages?.[videosQuery.data.pages.length - 1]
+  const page = Number(lastPage?.page) || 1
+  const totalPages = Number(lastPage?.pages) || 0
+  const isLoading = videosQuery.isLoading
+  const isLoadingMore = videosQuery.isFetchingNextPage
+  const error = videosQuery.error?.data?.message
+    || (videosQuery.error ? t('Could not load videos. Please try again.') : null)
+  const fetchVideos = useCallback((pageNum = 1) => {
+    if (pageNum === 1) return refetchVideos()
+    if (hasMoreVideos) return fetchNextVideosPage()
+  }, [fetchNextVideosPage, hasMoreVideos, refetchVideos])
 
   return (
     <div className="relative w-full min-h-screen bg-[#fafafa] dark:bg-[#080808] transition-colors duration-700">
@@ -157,7 +142,7 @@ const Page = () => {
         {!isLoading && videoPosts.length > 0 && (
           <div className="mt-20 text-center">
             <div className="inline-block px-8 py-px bg-gradient-to-r from-transparent via-gray-200 dark:via-white/10 to-transparent w-full mb-8" />
-            {page < totalPages ? (
+            {videosQuery.hasNextPage && page <= totalPages ? (
               <button
                 type="button"
                 onClick={() => fetchVideos(page + 1)}

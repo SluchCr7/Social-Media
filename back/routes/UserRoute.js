@@ -32,7 +32,7 @@ const {
 } = require('../Controllers/UserController');
 
 const photoUpload = require('../Middelwares/uploadPhoto');
-const { verifyToken, verifyAdmin } = require('../Middelwares/verifyToken');
+const { verifyToken, optionalVerifyToken, verifyAdmin } = require('../Middelwares/verifyToken');
 
 // User routes
 route.route('/').get(getAllUsers);
@@ -40,7 +40,7 @@ route.route('/suggested').get(verifyToken, getSuggestedUsers);
 route.route('/block/:id').put(verifyToken, blockOrUnblockUser);
 route.route('/username').get(getPublicUserByUsername);
 route.route('/username/:username').get(getPublicUserByUsername);
-route.route('/:id').get(getUserById);
+route.route('/:id').get(optionalVerifyToken, getUserById);
 route.route('/delete').delete(verifyToken, DeleteUser);
 route.route('/admin/:id').put(verifyAdmin, makeUserAdmin);
 route.route('/:id/verify/:token').get(verifyAccount);

@@ -188,8 +188,6 @@ const LayoutComponent = ({ children }) => {
           <ReelUploadModal />
           {viewMusicPlayer && pathname !== '/Pages/Music' && <SongPlayer />}
           <AddStoryModel isStory={isStory} setIsStory={setIsStory} />
-          {/* <CookieConsent/> */}
-          {/* <FloatingDock onOpenMusicPlayer={() => setViewMusicPlayer(!viewMusicPlayer)} /> */}
           <ExpandedWindow />
           <CommandPalette />
         </div>

@@ -1,86 +1,113 @@
 import { baseApi } from '../../api/baseApi';
+import { normalizeMusicItem, normalizeMusicList } from './musicSlice';
+
+const musicTags = (items) => [
+  ...(Array.isArray(items) ? items.filter((music) => music?._id)
+    .map((music) => ({ type: 'Music', id: music._id })) : []),
+];
 
 export const musicApi = baseApi.injectEndpoints({
-  endpoints: (builder) => ({
-    getMusicList: builder.query({
-      query: ({ page = 1, limit = 12, genre = 'All' } = {}) => ({
+  endpoints: (build) => ({
+    getMusic: build.infiniteQuery({
+      infiniteQueryOptions: {
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) =>
+          lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
+      },
+      query: ({ queryArg, pageParam }) => ({
         url: '/music',
-        params: { page, limit, genre },
+        params: { page: pageParam, limit: 12, genre: queryArg.genre },
       }),
-      providesTags: (result) =>
-        result?.music && Array.isArray(result.music)
-          ? [...result.music.map(({ _id }) => ({ type: 'Music', id: _id })), { type: 'Music', id: 'LIST' }]
-          : [{ type: 'Music', id: 'LIST' }],
+      transformResponse: (response) => ({
+        ...response,
+        music: normalizeMusicList(response?.music),
+      }),
+      providesTags: (result) => [
+        { type: 'Music', id: 'LIST' },
+        ...(result?.pages || []).flatMap((page) => musicTags(page?.music)),
+      ],
     }),
-    getTopCharts: builder.query({
+    searchMusic: build.query({
+      query: ({ query }) => ({ url: '/music/search', params: { q: query } }),
+      transformResponse: (response) => normalizeMusicList(response),
+      providesTags: (result, error, { query }) => [
+        { type: 'Music', id: 'SEARCH' },
+        { type: 'Music', id: `SEARCH-${query.toLowerCase()}` },
+        ...musicTags(result),
+      ],
+    }),
+    getTopMusicCharts: build.query({
       query: () => '/music/top-charts',
-      providesTags: [{ type: 'Music', id: 'TOP_CHARTS' }],
-    }),
-    searchMusic: builder.query({
-      query: (query) => `/music/search?q=${encodeURIComponent(query)}`,
-      providesTags: [{ type: 'Music', id: 'SEARCH' }],
-    }),
-    uploadMusic: builder.mutation({
-      query: (formData) => ({
-        url: '/music',
-        method: 'POST',
-        body: formData,
+      transformResponse: (response) => ({
+        trending: normalizeMusicList(response?.trending),
+        popular: normalizeMusicList(response?.popular),
       }),
-      invalidatesTags: [{ type: 'Music', id: 'LIST' }, { type: 'Music', id: 'TOP_CHARTS' }],
+      providesTags: (result) => [
+        { type: 'Music', id: 'TOP_CHARTS' },
+        ...musicTags(result?.trending),
+        ...musicTags(result?.popular),
+      ],
     }),
-    deleteMusic: builder.mutation({
-      query: (id) => ({
-        url: `/music/${id}`,
-        method: 'DELETE',
-      }),
+    uploadMusic: build.mutation({
+      query: (formData) => ({ url: '/music', method: 'POST', body: formData }),
+      transformResponse: (response) => normalizeMusicItem(response),
+      invalidatesTags: [
+        { type: 'Music', id: 'LIST' },
+        { type: 'Music', id: 'TOP_CHARTS' },
+        { type: 'Music', id: 'SEARCH' },
+      ],
+    }),
+    deleteMusic: build.mutation({
+      query: (id) => ({ url: `/music/${id}`, method: 'DELETE' }),
       invalidatesTags: (result, error, id) => [
         { type: 'Music', id },
         { type: 'Music', id: 'LIST' },
         { type: 'Music', id: 'TOP_CHARTS' },
+        { type: 'Music', id: 'SEARCH' },
       ],
     }),
-    likeMusic: builder.mutation({
-      query: (id) => ({
-        url: `/music/like/${id}`,
-        method: 'PUT',
-      }),
-      invalidatesTags: (result, error, id) => [{ type: 'Music', id }, { type: 'Music', id: 'TOP_CHARTS' }],
+    likeMusic: build.mutation({
+      query: (id) => ({ url: `/music/like/${id}`, method: 'PUT' }),
+      transformResponse: (response) => normalizeMusicItem(response?.music),
+      invalidatesTags: (result, error, id) => [
+        { type: 'Music', id },
+        { type: 'Music', id: 'LIST' },
+        { type: 'Music', id: 'TOP_CHARTS' },
+        { type: 'Music', id: 'SEARCH' },
+      ],
     }),
-    viewMusic: builder.mutation({
-      query: (id) => ({
-        url: `/music/view/${id}`,
-        method: 'PUT',
-      }),
+    viewMusic: build.mutation({
+      query: (id) => ({ url: `/music/view/${id}`, method: 'PUT' }),
+      transformResponse: (response) => normalizeMusicItem(response),
       invalidatesTags: (result, error, id) => [{ type: 'Music', id }],
     }),
-    addListen: builder.mutation({
-      query: (musicId) => ({
-        url: `/music/listen/${musicId}`,
-        method: 'POST',
-      }),
+    addMusicListen: build.mutation({
+      query: (id) => ({ url: `/music/listen/${id}`, method: 'POST' }),
+      transformResponse: (response) => normalizeMusicItem(response),
+      invalidatesTags: (result, error, id) => [
+        { type: 'Music', id },
+        { type: 'Music', id: 'TOP_CHARTS' },
+      ],
     }),
-    shareMusicAsPost: builder.mutation({
-      query: ({ musicId, customText = '' }) => ({
+    shareMusicAsPost: build.mutation({
+      query: ({ musicId, customText }) => ({
         url: `/music/share/${musicId}`,
         method: 'POST',
         body: { customText },
       }),
-      invalidatesTags: ['Post'],
+      invalidatesTags: [{ type: 'Post', id: 'LIST' }],
     }),
   }),
 });
 
 export const {
-  useGetMusicListQuery,
-  useLazyGetMusicListQuery,
-  useGetTopChartsQuery,
-  useLazyGetTopChartsQuery,
+  useGetMusicInfiniteQuery,
   useSearchMusicQuery,
-  useLazySearchMusicQuery,
+  useGetTopMusicChartsQuery,
   useUploadMusicMutation,
   useDeleteMusicMutation,
   useLikeMusicMutation,
   useViewMusicMutation,
-  useAddListenMutation,
+  useAddMusicListenMutation,
   useShareMusicAsPostMutation,
 } = musicApi;

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import { useAuth } from '@/app/redux/hooks';
-import { usePost } from '@/app/redux/hooks';
+import { useGetUserPostsInfiniteQuery } from '@/app/redux/features/posts/postsApi'
 import AnalyticsPresentation from './AnalyticsPresentation'
 import AnalyticsSkeleton from '../../Skeletons/AnalyticsSkeleton'
 import { useUser } from '@/app/redux/hooks';
@@ -10,20 +10,27 @@ import { useGetData } from '@/app/Custome/useGetData'
 
 export default function AnalyticsContainer() {
   const { user } = useAuth()
-  const { fetchUserPosts, userPosts = [] } = usePost()
   const [followers, setFollowers] = useState([])
   const [following, setFollowing] = useState([])
   const [period, setPeriod] = useState('30')
   const [exporting, setExporting] = useState(false)
   const { userData, loading } = useGetData(user._id)
+  const postsQuery = useGetUserPostsInfiniteQuery({
+    userId: userData?._id,
+    viewerId: user?._id || 'anonymous',
+    limit: 30,
+  }, { skip: !userData?._id })
+  const userPosts = useMemo(
+    () => postsQuery.data?.pages?.flatMap((page) => page?.posts || []) || [],
+    [postsQuery.data]
+  )
 
-  // Fetch posts
+  // Keep the follower snapshots local to this report view.
   useEffect(() => {
     if (!userData?._id) return
-    fetchUserPosts(userData._id, 1, 200, true)
     if (userData.followers) setFollowers(userData.followers)
     if (userData.following) setFollowing(userData.following)
-  }, [userData, fetchUserPosts])
+  }, [userData])
 
   // Derived metrics
   const stats = useMemo(() => {

@@ -17,9 +17,9 @@ import { useTranslation } from 'react-i18next';
 import { UserPlus, Sparkles } from 'lucide-react';
 
 const Sluchits = ({ activeTab = 'following' }) => {
-  const { posts, isLoading, hasMore, setPage, error, retry } = usePost({ autoFetch: true });
-  const { user, users } = useAuth();
-  const { setShowAllSuggestedUsers } = useUser();
+  const { posts, isLoading, hasMore, loadMorePosts, error, retry } = usePost({ autoFetch: true });
+  const { user } = useAuth();
+  const { setShowAllSuggestedUsers, suggestedUsers } = useUser();
   const { communities } = useCommunity();
   const { userData } = useGetData(user?._id);
   const { t } = useTranslation();
@@ -136,15 +136,15 @@ const Sluchits = ({ activeTab = 'following' }) => {
 
   // 🔹 Filter suggested users (exclude self & already followed)
   const filteredUsers = useMemo(() => {
-    if (!Array.isArray(users) || !currentUserId) return [];
+    if (!Array.isArray(suggestedUsers) || !currentUserId) return [];
 
-    return users.filter((u) => {
+    return suggestedUsers.filter((u) => {
       if (!u || !u._id) return false;
       const uId = u._id.toString();
       if (uId === currentUserId) return false;
       return !followingIds.has(uId);
     });
-  }, [users, followingIds, currentUserId]);
+  }, [suggestedUsers, followingIds, currentUserId]);
 
   // 🔹 Filter suggested communities
   const filteredCommunities = useMemo(() => {
@@ -197,12 +197,12 @@ const Sluchits = ({ activeTab = 'following' }) => {
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMore) {
-          setPage((prev) => prev + 1);
+          loadMorePosts();
         }
       });
       if (node) observer.current.observe(node);
     },
-    [isLoading, hasMore, setPage]
+    [isLoading, hasMore, loadMorePosts]
   );
 
   return (

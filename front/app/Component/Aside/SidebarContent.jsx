@@ -141,7 +141,7 @@ const SidebarContent = memo(({ isCollapsed, setIsCollapsed, isMobile, setIsMobil
                 {user?.username || t("Guest")}
               </p>
               <p className="text-[12px] font-medium text-gray-500 dark:text-gray-400 truncate">
-                @{user?.profileName || "syncing"}
+                {user?.profileName || "syncing"}
               </p>
             </div>
           )}

@@ -1,34 +1,68 @@
 'use client';
 
-import { useEffect, useCallback, useMemo } from 'react';
-import api from '@/app/utils/api';
+import { useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../hooks';
 import { useAuth } from './useAuth';
 import { useFeedback } from './useFeedback';
 import { MESSAGES } from '@/app/utils/messages';
+import { baseApi } from '../api/baseApi';
+import { logoutSuccess } from '../features/auth/authSlice';
 import {
-  selectSuggestedUsers,
   selectOnlineUsers,
-  selectUserLoading,
-  selectUpdateProfileLoading,
+  selectShowAllSuggestedUsers,
 } from '../features/user/userSelectors';
+import { setShowAllSuggestedUsers as setShowSuggestedUsers } from '../features/user/userSlice';
 import {
-  setSuggestedUsers as setReduxSuggestedUsers,
-  setUserLoading,
-  setUpdateProfileLoading,
-} from '../features/user/userSlice';
-
-
+  useFollowUserMutation,
+  useGetSuggestedUsersQuery,
+  useLazyGetUserByIdQuery,
+  useLazyGetPublicUserByUsernameQuery,
+  useLazyGetUserPointsHistoryQuery,
+  useLazyGetRelationshipQuery,
+  useDeleteCurrentUserMutation,
+  useUploadProfilePhotoMutation,
+  useUploadCoverPhotoMutation,
+  useUpdateUserProfileMutation,
+  useUpdateUserPasswordMutation,
+  useTogglePrivateAccountMutation,
+  useToggleSongInPlaylistMutation,
+  useToggleBlockNotificationMutation,
+  useSaveReelMutation,
+  usePinPostMutation,
+  useToggleBlockUserMutation,
+  useUpdateRelationshipMutation,
+} from '../features/user/userApi';
 
 export const useUser = () => {
   const dispatch = useAppDispatch();
-  const { user, setUser, setUsers } = useAuth();
-  const { showToast } = useFeedback();
+  const router = useRouter();
+  const { user, setUser } = useAuth();
+  const { showToast, confirmAction } = useFeedback();
 
-  const suggestedUsers = useAppSelector(selectSuggestedUsers);
+  const [followRequest, { isLoading: loading }] = useFollowUserMutation();
+  const [uploadProfilePhoto] = useUploadProfilePhotoMutation();
+  const [uploadCoverPhoto] = useUploadCoverPhotoMutation();
+  const [updateUserProfile, { isLoading: updateProfileLoading }] = useUpdateUserProfileMutation();
+  const [updateUserPassword] = useUpdateUserPasswordMutation();
+  const [togglePrivateAccountRequest] = useTogglePrivateAccountMutation();
+  const [toggleSongInPlaylist] = useToggleSongInPlaylistMutation();
+  const [toggleBlockNotificationRequest] = useToggleBlockNotificationMutation();
+  const [saveReel] = useSaveReelMutation();
+  const [pinUserPost] = usePinPostMutation();
+  const [toggleBlockUserRequest] = useToggleBlockUserMutation();
+  const [updateRelationshipRequest] = useUpdateRelationshipMutation();
+  const [deleteCurrentUserRequest] = useDeleteCurrentUserMutation();
+  const [fetchUserById] = useLazyGetUserByIdQuery();
+  const [fetchPublicUserByUsername] = useLazyGetPublicUserByUsernameQuery();
+  const [fetchPointsHistory] = useLazyGetUserPointsHistoryQuery();
+  const [fetchRelationship] = useLazyGetRelationshipQuery();
+
+  const { data: suggestedUsers = [] } = useGetSuggestedUsersQuery(user?._id, {
+    skip: !user?._id,
+  });
   const onlineUsers = useAppSelector(selectOnlineUsers);
-  const loading = useAppSelector(selectUserLoading);
-  const updateProfileLoading = useAppSelector(selectUpdateProfileLoading);
+  const showAllSuggestedUsers = useAppSelector(selectShowAllSuggestedUsers);
 
   const updateLocalUser = useCallback(
     (updatedUserData) => {
@@ -37,54 +71,50 @@ export const useUser = () => {
     [setUser]
   );
 
+  const setShowAllSuggestedUsers = useCallback(
+    (show) => dispatch(setShowSuggestedUsers(show)),
+    [dispatch]
+  );
+
   const followUser = useCallback(
     async (targetId) => {
-      if (!user) return showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+      if (!user?._id) {
+        showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+        return { success: false };
+      }
 
-      const isCurrentlyFollowing = user.following?.some(
-        (u) => (typeof u === 'string' ? u : u._id) === targetId
+      const currentFollowing = user.following || [];
+      const isCurrentlyFollowing = currentFollowing.some(
+        (item) => (typeof item === 'string' ? item : item?._id) === targetId
       );
-
       const optimisticFollowing = isCurrentlyFollowing
-        ? user.following.filter((u) => (typeof u === 'string' ? u : u._id) !== targetId)
-        : [...(user.following || []), targetId];
+        ? currentFollowing.filter((item) => (typeof item === 'string' ? item : item?._id) !== targetId)
+        : [...currentFollowing, targetId];
 
       updateLocalUser({ ...user, following: optimisticFollowing });
-
-      dispatch(setUserLoading(true));
       try {
-        const res = await api.put(`/auth/follow/${targetId}`, {});
-        const { user: updatedCurrentUser, targetUser: updatedTargetUser } = res.data;
-
-        setUsers((prev) => prev.map((u) => (u._id === targetId ? updatedTargetUser : u)));
-        updateLocalUser(updatedCurrentUser);
-
-        showToast(res.data.message, 'success');
-        return { success: true, isFollowing: res.data.isFollowing };
-      } catch (err) {
-        updateLocalUser({ ...user, following: user.following });
-        console.error('Follow error:', err);
-        showToast(err.response?.data?.message || MESSAGES.COMMON.ERROR_OCCURRED, 'error');
-        return { success: false, error: err.response?.data?.message };
-      } finally {
-        dispatch(setUserLoading(false));
+        const result = await followRequest({ targetId, userId: user._id }).unwrap();
+        if (result.user) updateLocalUser(result.user);
+        showToast(result.message, 'success');
+        return { success: true, isFollowing: result.isFollowing };
+      } catch (error) {
+        updateLocalUser(user);
+        const message = error.data?.message || MESSAGES.COMMON.ERROR_OCCURRED;
+        console.error('Follow error:', error);
+        showToast(message, 'error');
+        return { success: false, error: message };
       }
     },
-    [user, setUsers, showToast, updateLocalUser, dispatch]
+    [user, followRequest, updateLocalUser, showToast]
   );
 
   const updatePhoto = useCallback(
     async (photoFile, customText = '') => {
-      if (!photoFile) return;
+      if (!photoFile || !user?._id) return;
 
       const localPreviewUrl = URL.createObjectURL(photoFile);
       const previousPhoto = user.profilePhoto;
-
-      const optimisticUser = {
-        ...user,
-        profilePhoto: localPreviewUrl,
-      };
-      updateLocalUser(optimisticUser);
+      updateLocalUser({ ...user, profilePhoto: localPreviewUrl });
 
       const formData = new FormData();
       formData.append('image', photoFile);
@@ -92,39 +122,27 @@ export const useUser = () => {
 
       const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
       try {
-        const res = await api.post('/auth/photo', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-
-        const serverPhotoUrl = res.data?.profilePhoto || res.data;
-        const updatedUser = {
-          ...user,
-          profilePhoto: serverPhotoUrl,
-        };
-
-        updateLocalUser(updatedUser);
+        const result = await uploadProfilePhoto({ userId: user._id, formData }).unwrap();
+        updateLocalUser({ ...user, profilePhoto: result.profilePhoto || result });
         showToast(MESSAGES.USER.PHOTO_UPDATE_SUCCESS, 'success', { id: loadingToast });
-      } catch (err) {
-        console.error('Photo update error:', err);
+      } catch (error) {
+        console.error('Photo update error:', error);
         updateLocalUser({ ...user, profilePhoto: previousPhoto });
-        showToast(MESSAGES.USER.PHOTO_UPDATE_ERROR, 'error', { id: loadingToast });
+        showToast(error.data?.message || MESSAGES.USER.PHOTO_UPDATE_ERROR, 'error', { id: loadingToast });
+      } finally {
+        URL.revokeObjectURL(localPreviewUrl);
       }
     },
-    [user, showToast, updateLocalUser]
+    [user, uploadProfilePhoto, showToast, updateLocalUser]
   );
 
   const updateCoverPhoto = useCallback(
     async (photoFile, customText = '') => {
-      if (!photoFile) return;
+      if (!photoFile || !user?._id) return;
 
       const localPreviewUrl = URL.createObjectURL(photoFile);
       const previousCover = user.coverPhoto;
-
-      const optimisticUser = {
-        ...user,
-        coverPhoto: localPreviewUrl,
-      };
-      updateLocalUser(optimisticUser);
+      updateLocalUser({ ...user, coverPhoto: localPreviewUrl });
 
       const formData = new FormData();
       formData.append('image', photoFile);
@@ -132,29 +150,24 @@ export const useUser = () => {
 
       const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
       try {
-        const res = await api.post('/auth/cover', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-
-        const serverCoverUrl = res.data?.coverPhoto || res.data;
-        const updatedUser = {
-          ...user,
-          coverPhoto: serverCoverUrl,
-        };
-
-        updateLocalUser(updatedUser);
+        const result = await uploadCoverPhoto({ userId: user._id, formData }).unwrap();
+        updateLocalUser({ ...user, coverPhoto: result.coverPhoto || result });
         showToast('Cover photo updated successfully.', 'success', { id: loadingToast });
-      } catch (err) {
-        console.error('Cover photo update error:', err);
+      } catch (error) {
+        console.error('Cover photo update error:', error);
         updateLocalUser({ ...user, coverPhoto: previousCover });
-        showToast('Failed to update cover photo.', 'error', { id: loadingToast });
+        showToast(error.data?.message || 'Failed to update cover photo.', 'error', { id: loadingToast });
+      } finally {
+        URL.revokeObjectURL(localPreviewUrl);
       }
     },
-    [user, showToast, updateLocalUser]
+    [user, uploadCoverPhoto, showToast, updateLocalUser]
   );
 
   const updateProfile = useCallback(
     async (fields) => {
+      if (!user?._id) return;
+
       const payload = {};
       const allowedFields = [
         'username',
@@ -170,151 +183,144 @@ export const useUser = () => {
 
       allowedFields.forEach((key) => {
         const newValue = typeof fields[key] === 'string' ? fields[key].trim() : fields[key];
-        if (newValue !== undefined && newValue !== user[key]) {
-          payload[key] = newValue;
-        }
+        if (newValue !== undefined && newValue !== user[key]) payload[key] = newValue;
       });
 
       if (fields.dateOfBirth && fields.dateOfBirth !== user.dateOfBirth) {
         payload.dateOfBirth = fields.dateOfBirth;
       }
-
       if (fields.partner !== undefined && fields.partner !== user.partner) {
         payload.partner = fields.partner || null;
       }
-
-      if (Array.isArray(fields.interests)) {
-        payload.interests = fields.interests;
-      }
-
-      if (fields.socialLinks) {
-        payload.socialLinks = { ...user.socialLinks, ...fields.socialLinks };
-      }
+      if (Array.isArray(fields.interests)) payload.interests = fields.interests;
+      if (fields.socialLinks) payload.socialLinks = { ...user.socialLinks, ...fields.socialLinks };
 
       if (Object.keys(payload).length === 0) {
-        return showToast('No changes detected.', 'info');
+        showToast('No changes detected.', 'info');
+        return;
       }
 
-      dispatch(setUpdateProfileLoading(true));
       const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
-
       try {
-        const res = await api.put('/auth/update', payload);
-        const newUserData = res.data.user || res.data;
-        const updatedUser = { ...user, ...newUserData };
+        const result = await updateUserProfile({ userId: user._id, fields: payload }).unwrap();
+        const updatedUser = { ...user, ...(result.user || result) };
         delete updatedUser.token;
         delete updatedUser.accessToken;
-
         updateLocalUser(updatedUser);
         showToast(MESSAGES.USER.PROFILE_UPDATE_SUCCESS, 'success', { id: loadingToast });
-      } catch (err) {
-        console.error('Profile update error:', err);
-        showToast(MESSAGES.USER.PROFILE_UPDATE_ERROR, 'error', { id: loadingToast });
-      } finally {
-        dispatch(setUpdateProfileLoading(false));
+      } catch (error) {
+        console.error('Profile update error:', error);
+        showToast(error.data?.message || MESSAGES.USER.PROFILE_UPDATE_ERROR, 'error', { id: loadingToast });
       }
     },
-    [user, showToast, updateLocalUser, dispatch]
+    [user, updateUserProfile, showToast, updateLocalUser]
   );
 
   const updatePassword = useCallback(
     async ({ oldPassword, newPassword }) => {
       const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
       try {
-        const res = await api.put('/auth/update/pass', { oldPassword, newPassword });
-        showToast(res.data.message || MESSAGES.AUTH.PASSWORD_UPDATE_SUCCESS, 'success', { id: loadingToast });
+        const result = await updateUserPassword({ oldPassword, newPassword }).unwrap();
+        showToast(result.message || MESSAGES.AUTH.PASSWORD_UPDATE_SUCCESS, 'success', { id: loadingToast });
         return { success: true };
-      } catch (err) {
-        showToast(err.response?.data?.message || MESSAGES.AUTH.PASSWORD_UPDATE_ERROR, 'error', { id: loadingToast });
-        return { error: err.response?.data?.message };
+      } catch (error) {
+        const message = error.data?.message || MESSAGES.AUTH.PASSWORD_UPDATE_ERROR;
+        showToast(message, 'error', { id: loadingToast });
+        return { error: message };
       }
     },
-    [showToast]
+    [updateUserPassword, showToast]
   );
 
   const toggleShowOnlineStatus = useCallback(async () => {
-    if (!user) return;
+    if (!user?._id) return;
     try {
-      const res = await api.put('/auth/update', { showOnlineStatus: !user.showOnlineStatus });
-      const updatedUser = { ...user, showOnlineStatus: !user.showOnlineStatus };
-      updateLocalUser(updatedUser);
+      const result = await updateUserProfile({
+        userId: user._id,
+        fields: { showOnlineStatus: !user.showOnlineStatus },
+      }).unwrap();
+      updateLocalUser(result.user || { ...user, showOnlineStatus: !user.showOnlineStatus });
       showToast('Activity status updated.', 'success');
-      return res.data;
-    } catch (err) {
-      showToast('Failed to update activity status.', 'error');
+      return result;
+    } catch (error) {
+      showToast(error.data?.message || 'Failed to update activity status.', 'error');
     }
-  }, [user, updateLocalUser, showToast]);
+  }, [user, updateUserProfile, updateLocalUser, showToast]);
 
   const togglePrivateAccount = useCallback(async () => {
-    if (!user) return;
+    if (!user?._id) return;
     try {
-      await api.put('/auth/account/private', {});
-      const isPrivate = !user.isPrivate;
+      const result = await togglePrivateAccountRequest(user._id).unwrap();
+      const isPrivate = result.isPrivate ?? !user.isPrivate;
       updateLocalUser({ ...user, isPrivate });
       showToast(MESSAGES.USER.PRIVACY_UPDATE(isPrivate), 'success');
-    } catch (err) {
-      showToast('Failed to update privacy settings.', 'error');
+      return result;
+    } catch (error) {
+      showToast(error.data?.message || 'Failed to update privacy settings.', 'error');
     }
-  }, [user, showToast, updateLocalUser]);
+  }, [user, togglePrivateAccountRequest, showToast, updateLocalUser]);
 
-  const getUserById = useCallback(async (id) => {
-    if (!id) return null;
-    try {
-      const res = await api.get(`/auth/${id}`);
-      return res.data;
-    } catch (err) {
-      console.error('Fetch user error:', err);
-      return null;
-    }
-  }, []);
+  const getUserById = useCallback(
+    async (id) => {
+      if (!id) return null;
+      try {
+        return await fetchUserById(id).unwrap();
+      } catch (error) {
+        console.error('Fetch user error:', error);
+        return null;
+      }
+    },
+    [fetchUserById]
+  );
 
-  const getUserByUsername = useCallback(async (username) => {
-    if (!username) return null;
-    try {
-      const decodedUsername = decodeURIComponent(username);
-      const res = await api.get('/auth/username', {
-        params: { username: decodedUsername },
-      });
-      return res.data;
-    } catch (err) {
-      console.error('Fetch user by username error:', err);
-      return null;
-    }
-  }, []);
+  const getUserByUsername = useCallback(
+    async (username) => {
+      if (!username) return null;
+      try {
+        return await fetchPublicUserByUsername(decodeURIComponent(username)).unwrap();
+      } catch (error) {
+        console.error('Fetch user by username error:', error);
+        return null;
+      }
+    },
+    [fetchPublicUserByUsername]
+  );
 
   const saveMusicInPlayList = useCallback(
     async (musicId) => {
       try {
-        const res = await api.put(`/auth/save/music/${musicId}`, {});
-        showToast(res.data.message || MESSAGES.COMMON.SAVED, 'success');
-        if (user && Array.isArray(res.data.playlist)) {
-          updateLocalUser({ ...user, myMusicPlaylist: res.data.playlist });
+        const result = await toggleSongInPlaylist({ songId: musicId, userId: user?._id }).unwrap();
+        showToast(result.message || MESSAGES.COMMON.SAVED, 'success');
+        if (user && Array.isArray(result.playlist)) {
+          updateLocalUser({ ...user, myMusicPlaylist: result.playlist });
         }
-        return res.data;
-      } catch (err) {
-        showToast('Failed to save music.', 'error');
+        return result;
+      } catch (error) {
+        showToast(error.data?.message || 'Failed to save music.', 'error');
         return null;
       }
     },
-    [user, updateLocalUser, showToast]
+    [user, toggleSongInPlaylist, updateLocalUser, showToast]
   );
 
   const toggleBlockNotification = useCallback(
     async (targetUserId) => {
       try {
-        const res = await api.post(`/auth/block/notify/${targetUserId}`, {});
-        const updatedUser = {
+        const result = await toggleBlockNotificationRequest({
+          targetUserId,
+          userId: user?._id,
+        }).unwrap();
+        updateLocalUser({
           ...user,
-          BlockedNotificationFromUsers: res.data.blockedUsers || [],
-        };
-        updateLocalUser(updatedUser);
-        showToast(res.data.message || 'Preferences updated.', 'success');
-        return res.data;
-      } catch (err) {
-        showToast('Failed to update notification settings.', 'error');
+          BlockedNotificationFromUsers: result.blockedUsers || [],
+        });
+        showToast(result.message || 'Preferences updated.', 'success');
+        return result;
+      } catch (error) {
+        showToast(error.data?.message || 'Failed to update notification settings.', 'error');
       }
     },
-    [user, updateLocalUser, showToast]
+    [user, toggleBlockNotificationRequest, updateLocalUser, showToast]
   );
 
   const toggleSaveReel = useCallback(
@@ -324,79 +330,120 @@ export const useUser = () => {
         return null;
       }
       try {
-        const res = await api.put(`/auth/save/reel/${reelId}`, {});
-        showToast(res.data.message || MESSAGES.COMMON.SAVED, 'success');
-        if (Array.isArray(res.data.savedReels)) {
-          updateLocalUser((currentUser) => currentUser
-            ? { ...currentUser, savedReels: res.data.savedReels }
-            : currentUser);
+        const result = await saveReel({ reelId, userId: user._id }).unwrap();
+        showToast(result.message || MESSAGES.COMMON.SAVED, 'success');
+        if (Array.isArray(result.savedReels)) {
+          updateLocalUser((currentUser) =>
+            currentUser ? { ...currentUser, savedReels: result.savedReels } : currentUser
+          );
         }
-        return res.data;
-      } catch (err) {
-        showToast(err.response?.data?.message || 'Failed to update reel status.', 'error');
+        return result;
+      } catch (error) {
+        showToast(error.data?.message || 'Failed to update reel status.', 'error');
         return null;
       }
     },
-    [user, updateLocalUser, showToast]
+    [user, saveReel, updateLocalUser, showToast]
   );
 
   const pinPost = useCallback(
     async (postId) => {
       try {
-        const res = await api.put(`/auth/pin/${postId}`, {});
-        showToast(res.data.message || MESSAGES.POST.PIN_SUCCESS, 'success');
-        if (res.data.pinsPosts) {
-          updateLocalUser({ ...user, pinsPosts: res.data.pinsPosts });
-        }
-      } catch (err) {
-        showToast('Failed to pin post.', 'error');
+        const result = await pinUserPost({ postId, userId: user?._id }).unwrap();
+        showToast(result.message || MESSAGES.POST.PIN_SUCCESS, 'success');
+        if (result.pinsPosts) updateLocalUser({ ...user, pinsPosts: result.pinsPosts });
+        return result;
+      } catch (error) {
+        showToast(error.data?.message || 'Failed to pin post.', 'error');
+        return null;
       }
     },
-    [user, updateLocalUser, showToast]
+    [user, pinUserPost, updateLocalUser, showToast]
   );
 
   const blockUser = useCallback(
     async (targetUserId) => {
       try {
-        const res = await api.put(`/auth/block/${targetUserId}`, {});
-        if (res.data.blockedUsers) {
+        const result = await toggleBlockUserRequest({
+          targetUserId,
+          userId: user?._id,
+        }).unwrap();
+        if (result.blockedUsers) {
           updateLocalUser({
             ...user,
-            blockedUsers: res.data.blockedUsers,
-            following: res.data.following || user.following,
+            blockedUsers: result.blockedUsers,
+            following: result.following || user.following,
           });
         }
-        showToast(res.data.message || 'Action completed.', 'success');
-        return res.data;
-      } catch (err) {
-        showToast(err.response?.data?.message || 'Failed to block user.', 'error');
+        showToast(result.message || 'Action completed.', 'success');
+        return result;
+      } catch (error) {
+        showToast(error.data?.message || 'Failed to block user.', 'error');
+        return null;
       }
     },
-    [user, updateLocalUser, showToast]
+    [user, toggleBlockUserRequest, updateLocalUser, showToast]
   );
 
-  const getPointsHistory = useCallback(async (userId) => {
-    try {
-      const res = await api.get(`/auth/${userId}/points/history`);
-      return res.data;
-    } catch (err) {
-      console.error('Fetch points history error:', err);
-      return [];
-    }
-  }, []);
-
-  useEffect(() => {
-    const fetchSuggested = async () => {
-      if (!user?._id) return;
+  const getPointsHistory = useCallback(
+    async (userId) => {
+      if (!userId) return [];
       try {
-        const res = await api.get('/auth/suggested');
-        dispatch(setReduxSuggestedUsers(Array.isArray(res.data) ? res.data : []));
-      } catch (err) {
-        console.error('Suggested users fetch error:', err);
+        return await fetchPointsHistory(userId).unwrap();
+      } catch (error) {
+        console.error('Fetch points history error:', error);
+        return [];
       }
-    };
-    fetchSuggested();
-  }, [user?._id, dispatch]);
+    },
+    [fetchPointsHistory]
+  );
+
+  const getRelationship = useCallback(
+    async (userId) => {
+      if (!userId) return null;
+      try {
+        return await fetchRelationship(userId).unwrap();
+      } catch (error) {
+        console.error('Fetch relationship error:', error);
+        return null;
+      }
+    },
+    [fetchRelationship]
+  );
+
+  const updateRelationship = useCallback(
+    async (userId, body) => {
+      try {
+        return await updateRelationshipRequest({ userId, body }).unwrap();
+      } catch (error) {
+        showToast(error.data?.message || 'Failed to update relationship.', 'error');
+        return null;
+      }
+    },
+    [updateRelationshipRequest, showToast]
+  );
+
+  const deleteAccount = useCallback(async () => {
+    const confirmed = await confirmAction({
+      title: 'Delete Account Permanently',
+      text: 'This will permanently delete your account and its data. This action cannot be undone.',
+      confirmButtonText: 'Delete Account',
+      type: 'danger',
+    });
+    if (!confirmed) return false;
+
+    try {
+      const result = await deleteCurrentUserRequest().unwrap();
+      dispatch(logoutSuccess());
+      dispatch(baseApi.util.resetApiState());
+      showToast(result.message || 'Account deleted successfully.', 'success');
+      router.replace('/Pages/Login');
+      return true;
+    } catch (error) {
+      showToast(error.data?.message || 'Failed to delete your account.', 'error');
+      return false;
+    }
+  }, [confirmAction, deleteCurrentUserRequest, dispatch, router, showToast]);
 
   return useMemo(
     () => ({
@@ -404,6 +451,8 @@ export const useUser = () => {
       onlineUsers,
       loading,
       updateProfileLoading,
+      showAllSuggestedUsers,
+      setShowAllSuggestedUsers,
       followUser,
       updatePhoto,
       updateProfile,
@@ -419,12 +468,17 @@ export const useUser = () => {
       pinPost,
       blockUser,
       getPointsHistory,
+      getRelationship,
+      updateRelationship,
+      deleteAccount,
     }),
     [
       suggestedUsers,
       onlineUsers,
       loading,
       updateProfileLoading,
+      showAllSuggestedUsers,
+      setShowAllSuggestedUsers,
       followUser,
       updatePhoto,
       updateProfile,
@@ -440,6 +494,9 @@ export const useUser = () => {
       pinPost,
       blockUser,
       getPointsHistory,
+      getRelationship,
+      updateRelationship,
+      deleteAccount,
     ]
   );
 };

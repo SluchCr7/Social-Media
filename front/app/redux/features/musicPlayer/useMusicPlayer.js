@@ -3,9 +3,8 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { audioEngine } from '../../services/audioEngine';
-import api from '@/app/utils/api';
-import { updateMusicInState } from '../music/musicSlice';
 import { selectCurrentUser } from '../auth/authSelectors';
+import { useViewMusicMutation } from '../music/musicApi';
 import {
   selectSongs,
   selectCurrentTrack,
@@ -35,12 +34,14 @@ import {
   setViewMusicPlayer,
   nextTrack,
   prevTrack,
+  updateQueueTrack,
 } from './musicPlayerSlice';
 
 export const useMusicPlayer = () => {
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectCurrentUser);
   const viewedTracks = useRef(new Set());
+  const [recordMusicView] = useViewMusicMutation();
 
   const songs = useAppSelector(selectSongs);
   const current = useAppSelector(selectCurrentTrack);
@@ -69,11 +70,12 @@ export const useMusicPlayer = () => {
     audioEngine.load(track.url, true, track._id);
     if (user?._id && !viewedTracks.current.has(track._id)) {
       viewedTracks.current.add(track._id);
-      api.put(`/music/view/${track._id}`)
-        .then(({ data }) => dispatch(updateMusicInState(data)))
+      recordMusicView(track._id)
+        .unwrap()
+        .then((updated) => dispatch(updateQueueTrack(updated)))
         .catch((error) => console.error('Could not record music view:', error));
     }
-  }, [songs, user?._id, dispatch]);
+  }, [songs, user?._id, dispatch, recordMusicView]);
 
   const play = useCallback((track) => {
     if (track) selectTrack(track);

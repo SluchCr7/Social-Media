@@ -2,14 +2,14 @@ import { baseApi } from '../../api/baseApi';
 
 export const translateApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    translate: builder.mutation({
-      query: ({ text, targetLang }) => ({
+    translateText: builder.mutation({
+      query: (body) => ({
         url: '/translate',
         method: 'POST',
-        body: { text, targetLang },
+        body,
       }),
     }),
   }),
 });
 
-export const { useTranslateMutation } = translateApi;
+export const { useTranslateTextMutation } = translateApi;

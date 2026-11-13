@@ -3,9 +3,9 @@
 import { useEffect, useRef } from 'react';
 import { useAppDispatch, useAppSelector, useAppStore } from '../../hooks';
 import { audioEngine } from '../../services/audioEngine';
-import api from '@/app/utils/api';
-import { updateMusicInState } from '../music/musicSlice';
 import { selectCurrentUser } from '../auth/authSelectors';
+import { useAddMusicListenMutation } from '../music/musicApi';
+import { updateQueueTrack } from './musicPlayerSlice';
 import {
   selectCurrentTrack,
   selectIsPlaying,
@@ -20,6 +20,7 @@ export default function AudioBridge() {
   const playing = useAppSelector(selectIsPlaying);
   const volume = useAppSelector(selectTrackVolume);
   const muted = useAppSelector(selectIsMuted);
+  const [recordMusicListen] = useAddMusicListenMutation();
 
   const prevTrackId = useRef(null);
 
@@ -34,13 +35,14 @@ export default function AudioBridge() {
     const handleTrackEnded = () => {
       const trackId = audioEngine.currentTrackId || selectCurrentTrack(store.getState())?._id;
       if (!trackId || !selectCurrentUser(store.getState())?._id) return;
-      api.post(`/music/listen/${trackId}`)
-        .then(({ data }) => dispatch(updateMusicInState(data)))
+      recordMusicListen(trackId)
+        .unwrap()
+        .then((updated) => dispatch(updateQueueTrack(updated)))
         .catch((error) => console.error('Could not record completed music playback:', error));
     };
     audio.addEventListener('ended', handleTrackEnded);
     return () => audio.removeEventListener('ended', handleTrackEnded);
-  }, [dispatch, store]);
+  }, [dispatch, recordMusicListen, store]);
 
   // Sync track changes
   useEffect(() => {

@@ -13,8 +13,9 @@ import { usePost } from '@/app/redux/hooks';
 import { useCommunity } from '@/app/redux/hooks';
 import { useMusic } from '@/app/redux/hooks';
 import { useFeedback } from '@/app/redux/hooks';
-import api from '@/app/utils/api'
 import Loading from '@/app/Component/Loading'
+import { useDebounce } from '@/app/hooks/useDebounce'
+import { useGetSearchResultsQuery } from '@/app/redux/features/search/searchApi'
 
 // ✅ Lazy Load for better initial bundle size
 const NewPostPresenter = React.lazy(() => import('./Design'))
@@ -39,8 +40,6 @@ const NewPostContainer = () => {
   const [mentionBoxPos, setMentionBoxPos] = useState({ top: 0, left: 0 })
   const [selectedMusic, setSelectedMusic] = useState(null)
   const [activeMentionIndex, setActiveMentionIndex] = useState(0)
-  const [filteredUsers, setFilteredUsers] = useState([])
-  const [isSearchingUsers, setIsSearchingUsers] = useState(false)
 
   const textareaRef = useRef(null)
 
@@ -49,6 +48,22 @@ const NewPostContainer = () => {
   const { communities } = useCommunity()
   const { music: musicList, isLoading: isMusicLoading } = useMusic() || { music: [], isLoading: false }
   const { showToast } = useFeedback()
+  const debouncedMentionQuery = useDebounce(mentionQuery, 250)
+  const mentionSearch = useGetSearchResultsQuery({
+    q: debouncedMentionQuery,
+    type: 'users',
+    page: 1,
+    sortBy: 'relevance',
+    dateRange: 'all',
+    hasMedia: false,
+    verifiedOnly: false,
+    viewerId: user?._id || 'anonymous',
+  }, { skip: !debouncedMentionQuery })
+  const filteredUsers = useMemo(
+    () => (mentionSearch.currentData?.users || []).filter((item) => item._id !== user?._id),
+    [mentionSearch.currentData?.users, user?._id]
+  )
+  const isSearchingUsers = mentionSearch.isFetching
 
   /* ------------------------- 🧠 Memoized helpers ------------------------- */
 
@@ -145,35 +160,6 @@ const NewPostContainer = () => {
   )
 
   /* ------------------------- 🧩 Mentions Search Logic ------------------------- */
-  useEffect(() => {
-    let active = true
-    const searchUsers = async () => {
-      if (!mentionQuery) {
-        setFilteredUsers([])
-        return
-      }
-
-      setIsSearchingUsers(true)
-      try {
-        const res = await api.get(`/search?q=${mentionQuery}`)
-        if (active) {
-          const users = res.data?.users || []
-          setFilteredUsers(users.filter(u => u._id !== user?._id))
-        }
-      } catch (err) {
-        console.error('Mention search error:', err)
-      } finally {
-        if (active) setIsSearchingUsers(false)
-      }
-    }
-
-    const timer = setTimeout(searchUsers, 250)
-    return () => {
-      active = false
-      clearTimeout(timer)
-    }
-  }, [mentionQuery, user?._id])
-
   // Sync selectedMentions with current text
   useEffect(() => {
     if (selectedMentions.length === 0) return

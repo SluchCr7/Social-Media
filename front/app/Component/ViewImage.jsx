@@ -3,7 +3,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { IoClose, IoDownloadOutline } from 'react-icons/io5';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import Link from 'next/link';
+import Image from 'next/image';
 const ViewImage = ({ imageView, setImageView }) => {
   const videoRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,7 +51,7 @@ const ViewImage = ({ imageView, setImageView }) => {
         {/* Top Floating Control Bar */}
         <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-3 z-[100001]">
           {imageView.url && (
-            <a
+            <Link
               href={imageView.url}
               target="_blank"
               rel="noopener noreferrer"
@@ -60,7 +61,7 @@ const ViewImage = ({ imageView, setImageView }) => {
               title="Download Media"
             >
               <IoDownloadOutline size={22} />
-            </a>
+            </Link>
           )}
           <button
             onClick={(e) => {
@@ -104,7 +105,9 @@ const ViewImage = ({ imageView, setImageView }) => {
             </div>
           ) : (
             <div className="relative w-full h-full flex items-center justify-center bg-black/40 p-2">
-              <img
+              <Image
+                  width={imageView.width || 800}
+                  height={imageView.height || 600}
                 src={imageView.url}
                 alt="Media Preview"
                 className="max-w-full max-h-[88vh] w-auto h-auto object-contain rounded-2xl shadow-2xl"

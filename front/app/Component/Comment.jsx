@@ -13,6 +13,7 @@ import { HiBadgeCheck } from 'react-icons/hi';
 import { useTranslation } from 'react-i18next';
 import { formatRelativeTime } from '@/app/utils/FormatDataCreatedAt';
 import CommentSkeleton from '../Skeletons/CommentSkeleton';
+import { useGetCommentRepliesInfiniteQuery } from '@/app/redux/features/comments/commentsApi';
 
 const Comment = ({ comment }) => {
   const [isReplying, setIsReplying] = useState(false);
@@ -24,35 +25,46 @@ const Comment = ({ comment }) => {
 
   // New States for Lazy Replies
   const [expanded, setExpanded] = useState(false);
-  const [loadingReplies, setLoadingReplies] = useState(false);
 
   const { t } = useTranslation();
   const {
     likeComment,
     deleteComment,
     AddComment,
-    updateComment,
-    getRepliesForComment
+    updateComment
   } = useComment();
+  const repliesQuery = useGetCommentRepliesInfiniteQuery({
+    commentId: comment._id,
+    limit: 5,
+  }, {
+    skip: !expanded || !comment.replyCount,
+  });
+  const {
+    fetchNextPage: fetchNextReplyPage,
+    hasNextPage: hasMoreReplies,
+    isFetchingNextPage: isFetchingMoreReplies,
+  } = repliesQuery;
+  const replies = useMemo(() => {
+    const fetched = repliesQuery.data?.pages?.flatMap((page) => page?.comments || []) || [];
+    const byId = new Map((comment.replies || []).map((reply) => [reply._id, reply]));
+    fetched.forEach((reply) => byId.set(reply._id, reply));
+    return Array.from(byId.values());
+  }, [comment.replies, repliesQuery.data]);
+  const loadingReplies = repliesQuery.isLoading || repliesQuery.isFetchingNextPage;
   const { setIsTargetId, setShowMenuReport, setReportedOnType } = useReport();
   const { user } = useAuth();
 
   // --- Handlers ---
 
   const handleToggleExpand = useCallback(async () => {
-    if (!expanded && (!comment.replies || comment.replies.length === 0) && comment.replyCount > 0) {
-      setLoadingReplies(true);
-      await getRepliesForComment(comment._id);
-      setLoadingReplies(false);
-    }
     setExpanded(!expanded);
-  }, [expanded, comment._id, comment.replies, comment.replyCount, getRepliesForComment]);
+  }, [expanded]);
 
   const handleLoadMoreReplies = useCallback(async () => {
-    setLoadingReplies(true);
-    await getRepliesForComment(comment._id, comment.replyCursor);
-    setLoadingReplies(false);
-  }, [comment._id, comment.replyCursor, getRepliesForComment]);
+    if (hasMoreReplies && !isFetchingMoreReplies) {
+      await fetchNextReplyPage();
+    }
+  }, [fetchNextReplyPage, hasMoreReplies, isFetchingMoreReplies]);
 
   const handleSendReply = useCallback(async () => {
     if (!replyText.trim()) return;
@@ -256,7 +268,7 @@ const Comment = ({ comment }) => {
                 className="mt-6 space-y-6"
               >
                 <div className="space-y-6">
-                  {comment.replies?.map((reply) => (
+                  {replies.map((reply) => (
                     <Comment key={reply._id} comment={reply} />
                   ))}
 
@@ -266,7 +278,7 @@ const Comment = ({ comment }) => {
                     </div>
                   )}
 
-                  {comment.hasMoreReplies && !loadingReplies && (
+                  {repliesQuery.hasNextPage && !loadingReplies && (
                     <button
                       onClick={handleLoadMoreReplies}
                       className="text-xs font-black uppercase tracking-widest text-blue-500 hover:text-blue-400 py-2 ml-12"

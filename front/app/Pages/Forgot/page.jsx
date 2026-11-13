@@ -1,23 +1,23 @@
-'use client'
-import React, { useState, useEffect } from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import { useVerify } from '@/app/redux/hooks';
 
-
-const Login = () => {
-  const [email, setEmail] = useState("");
+const ForgotPassword = () => {
+  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { ForgetEmail } = useVerify();
 
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault();
     setLoading(true);
     setError('');
+
     setTimeout(() => {
       setLoading(false);
       if (email) {
-        ForgetEmail(email)
+        ForgetEmail(email);
       } else {
         setError('Invalid email');
       }
@@ -41,12 +41,11 @@ const Login = () => {
               id="email"
               placeholder="you@example.com"
               value={email}
-              onChange={(e)=> setEmail(e.target.value)}
+              onChange={(event) => setEmail(event.target.value)}
               required
               className="w-full px-4 py-3 rounded-lg bg-white/80 dark:bg-white/10 text-black dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
@@ -68,4 +67,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ForgotPassword;

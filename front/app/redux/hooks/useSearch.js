@@ -1,261 +1,191 @@
 'use client';
 
-import { useEffect, useCallback, useMemo } from 'react';
-import api from '../../utils/api';
+import { useCallback, useMemo } from 'react';
+import { useDebounce } from '@/app/hooks/useDebounce';
 import { useAuth } from './useAuth';
-import { useAppDispatch, useAppSelector, useAppStore } from '../hooks';
+import { useAppDispatch, useAppSelector } from '../hooks';
 import {
-  selectSearchQuery,
-  selectSearchResults,
-  selectSearchHistory,
-  selectSearchLoading,
-  selectSearchError,
-  selectSearchSortBy,
+  EMPTY_RESULTS,
+  useAddSearchHistoryMutation,
+  useClearSearchHistoryMutation,
+  useGetSearchHistoryQuery,
+  useGetSearchResultsQuery,
+  useLazyGetSearchResultsQuery,
+} from '../features/search/searchApi';
+import {
   selectSearchDateRange,
   selectSearchHasMedia,
+  selectSearchQuery,
+  selectSearchSortBy,
   selectSearchVerifiedOnly,
-  selectSearchPagination,
 } from '../features/search/searchSelectors';
 import {
   setSearchQuery as setReduxSearchQuery,
-  setSearchResults as setReduxSearchResults,
-  setSearchHistory as setReduxSearchHistory,
-  setLoading as setReduxLoading,
-  setError as setReduxError,
   setSortBy as setReduxSortBy,
   setDateRange as setReduxDateRange,
   setHasMedia as setReduxHasMedia,
   setVerifiedOnly as setReduxVerifiedOnly,
-  setPagination as setReduxPagination,
-  resetSearch,
 } from '../features/search/searchSlice';
 
-let latestSearchRequest = 0;
-let activeSearchController;
+const getErrorMessage = (error) =>
+  error?.data?.message || error?.response?.data?.message || error?.message;
+const EMPTY_PAGINATION = {};
 
 export const useSearch = ({ autoSearch = true } = {}) => {
   const dispatch = useAppDispatch();
-  const store = useAppStore();
   const { user } = useAuth();
-
   const searchQuery = useAppSelector(selectSearchQuery);
-  const searchResults = useAppSelector(selectSearchResults);
-  const searchHistory = useAppSelector(selectSearchHistory);
-  const loading = useAppSelector(selectSearchLoading);
-  const error = useAppSelector(selectSearchError);
   const sortBy = useAppSelector(selectSearchSortBy);
   const dateRange = useAppSelector(selectSearchDateRange);
   const hasMedia = useAppSelector(selectSearchHasMedia);
   const verifiedOnly = useAppSelector(selectSearchVerifiedOnly);
-  const pagination = useAppSelector(selectSearchPagination);
+  const debouncedQuery = useDebounce(searchQuery.trim(), 300);
+  const queryArgs = {
+    q: debouncedQuery,
+    type: 'all',
+    page: 1,
+    sortBy,
+    dateRange,
+    hasMedia,
+    verifiedOnly,
+    viewerId: user?._id || 'anonymous',
+  };
+  const resultsQuery = useGetSearchResultsQuery(queryArgs, {
+    skip: debouncedQuery.length < 2,
+  });
+  const historyQuery = useGetSearchHistoryQuery(
+    { userId: user?._id },
+    { skip: !autoSearch || !user?._id }
+  );
+  const [triggerSearch, searchRequest] = useLazyGetSearchResultsQuery();
+  const [addHistoryRequest] = useAddSearchHistoryMutation();
+  const [clearHistoryRequest] = useClearSearchHistoryMutation();
 
-  const setSearchQuery = useCallback((query) => dispatch(setReduxSearchQuery(query)), [dispatch]);
+  const setSearchQuery = useCallback(
+    (query) => dispatch(setReduxSearchQuery(query)),
+    [dispatch]
+  );
   const setSortBy = useCallback((value) => dispatch(setReduxSortBy(value)), [dispatch]);
   const setDateRange = useCallback((value) => dispatch(setReduxDateRange(value)), [dispatch]);
   const setHasMedia = useCallback((value) => dispatch(setReduxHasMedia(value)), [dispatch]);
-  const setVerifiedOnly = useCallback((value) => dispatch(setReduxVerifiedOnly(value)), [dispatch]);
+  const setVerifiedOnly = useCallback(
+    (value) => dispatch(setReduxVerifiedOnly(value)),
+    [dispatch]
+  );
 
-  const fetchSearchHistory = useCallback(async () => {
-    if (!user) return;
+  const performSearch = useCallback(async (query, type = 'all', pageNum = 1) => {
+    const trimmed = query?.trim() || '';
+    if (trimmed.length < 2) return null;
     try {
-      const { data } = await api.get('/search/history');
-      dispatch(setReduxSearchHistory(data));
-    } catch (err) {
-      console.error('Error fetching search history:', err);
+      return await triggerSearch({
+        q: trimmed,
+        type,
+        page: pageNum,
+        sortBy,
+        dateRange,
+        hasMedia,
+        verifiedOnly,
+        viewerId: user?._id || 'anonymous',
+      }).unwrap();
+    } catch (error) {
+      console.error('Search API Error:', error);
+      return null;
     }
-  }, [user, dispatch]);
+  }, [
+    dateRange,
+    hasMedia,
+    sortBy,
+    triggerSearch,
+    verifiedOnly,
+    user?._id,
+  ]);
 
-  const addToHistory = useCallback(
-    async (query, searchType = 'text', refId = null) => {
-      if (!user || !query?.trim()) return;
-      try {
-        const { data } = await api.post('/search/history', {
-          query: query.trim(),
-          searchType,
-          refId,
-        });
-        dispatch(setReduxSearchHistory(data));
-      } catch (err) {
-        console.error('Error adding to search history:', err);
-      }
-    },
-    [user, dispatch]
-  );
+  const addToHistory = useCallback(async (query, searchType = 'text', refId = null) => {
+    const trimmedQuery = query?.trim();
+    if (!user?._id || !trimmedQuery) return;
+    try {
+      await addHistoryRequest({
+        query: trimmedQuery,
+        searchType,
+        refId,
+        userId: user._id,
+      }).unwrap();
+    } catch (error) {
+      console.error('Error adding to search history:', error);
+    }
+  }, [addHistoryRequest, user?._id]);
 
-  const removeFromHistory = useCallback(
-    async (id) => {
-      if (!user || !id) return;
-      try {
-        const { data } = await api.delete('/search/history', { params: { id } });
-        dispatch(setReduxSearchHistory(data.searchHistory));
-      } catch (err) {
-        console.error('Error removing search history item:', err);
-      }
-    },
-    [user, dispatch]
-  );
+  const removeFromHistory = useCallback(async (id) => {
+    if (!user?._id || !id) return;
+    try {
+      await clearHistoryRequest({ id, userId: user._id }).unwrap();
+    } catch (error) {
+      console.error('Error removing search history item:', error);
+    }
+  }, [clearHistoryRequest, user?._id]);
 
   const clearAllHistory = useCallback(async () => {
-    if (!user) return;
+    if (!user?._id) return;
     try {
-      await api.delete('/search/history');
-      dispatch(setReduxSearchHistory([]));
-    } catch (err) {
-      console.error('Error clearing search history:', err);
+      await clearHistoryRequest({ userId: user._id }).unwrap();
+    } catch (error) {
+      console.error('Error clearing search history:', error);
     }
-  }, [user, dispatch]);
+  }, [clearHistoryRequest, user?._id]);
 
-  const performSearch = useCallback(
-    async (query, type = 'all', pageNum = 1) => {
-      const trimmed = query.trim();
-      if (trimmed.length < 2) {
-        latestSearchRequest += 1;
-        activeSearchController?.abort();
-        dispatch(resetSearch());
-        dispatch(setReduxLoading(false));
-        return;
-      }
+  const searchResults = resultsQuery.currentData || EMPTY_RESULTS;
+  const pagination = searchResults.pagination || EMPTY_PAGINATION;
+  const loading = resultsQuery.isFetching || searchRequest.isFetching;
+  const error = getErrorMessage(resultsQuery.error || searchRequest.error) || null;
 
-      const requestId = ++latestSearchRequest;
-      activeSearchController?.abort();
-      const controller = new AbortController();
-      activeSearchController = controller;
-      dispatch(setReduxLoading(true));
-      dispatch(setReduxError(null));
+  const loadMore = useCallback(async (type) => {
+    if (loading || !pagination[type]?.hasMore) return;
+    await performSearch(searchQuery, type, (Number(pagination[type].page) || 1) + 1);
+  }, [loading, pagination, performSearch, searchQuery]);
 
-      try {
-        const { data } = await api.get('/search', {
-          params: {
-            q: trimmed,
-            type,
-            sortBy,
-            dateRange,
-            hasMedia,
-            verifiedOnly,
-            page: pageNum,
-            limit: 12,
-          },
-          signal: controller.signal,
-        });
-
-        if (requestId !== latestSearchRequest) return;
-
-        const currentResults = selectSearchResults(store.getState());
-        const nextResults = { ...currentResults };
-        const resultTypes = type === 'all' ? ['users', 'posts', 'communities', 'hashtags'] : [type];
-
-        for (const resultType of resultTypes) {
-          const incoming = Array.isArray(data[resultType]) ? data[resultType] : [];
-          nextResults[resultType] =
-            pageNum === 1 ? incoming : [...(currentResults[resultType] || []), ...incoming];
-        }
-
-        dispatch(setReduxSearchResults(nextResults));
-
-        const currentPagination = selectSearchPagination(store.getState());
-        dispatch(
-          setReduxPagination({
-            ...currentPagination,
-            ...Object.fromEntries(
-              resultTypes
-                .filter((resultType) => data.pagination?.[resultType])
-                .map((resultType) => [resultType, data.pagination[resultType]])
-            ),
-          })
-        );
-      } catch (err) {
-        if (err.name !== 'CanceledError' && err.name !== 'AbortError' && requestId === latestSearchRequest) {
-          dispatch(setReduxError(err.response?.data?.message || 'Search is temporarily unavailable.'));
-          console.error('Search API Error:', err);
-        }
-      } finally {
-        if (requestId === latestSearchRequest) {
-          dispatch(setReduxLoading(false));
-          activeSearchController = undefined;
-        }
-      }
-    },
-    [sortBy, dateRange, hasMedia, verifiedOnly, dispatch, store]
-  );
-
-  const loadMore = useCallback(
-    async (type) => {
-      if (loading) return;
-      const currentPagination = pagination[type];
-      if (currentPagination?.hasMore) {
-        await performSearch(searchQuery, type, currentPagination.page + 1);
-      }
-    },
-    [pagination, loading, performSearch, searchQuery]
-  );
-
-  useEffect(() => {
-    if (autoSearch) {
-      if (searchQuery.trim().length < 2) {
-        latestSearchRequest += 1;
-        activeSearchController?.abort();
-        activeSearchController = undefined;
-        dispatch(resetSearch());
-        dispatch(setReduxLoading(false));
-        return undefined;
-      }
-
-      const handler = setTimeout(() => performSearch(searchQuery, 'all', 1), 300);
-      return () => clearTimeout(handler);
-    }
-    return undefined;
-  }, [autoSearch, searchQuery, sortBy, dateRange, hasMedia, verifiedOnly, performSearch, dispatch]);
-
-  useEffect(() => {
-    if (autoSearch && user) fetchSearchHistory();
-  }, [autoSearch, user, fetchSearchHistory]);
-
-  return useMemo(
-    () => ({
-      searchQuery,
-      setSearchQuery,
-      searchResults,
-      searchHistory,
-      loading,
-      error,
-      sortBy,
-      setSortBy,
-      dateRange,
-      setDateRange,
-      hasMedia,
-      setHasMedia,
-      verifiedOnly,
-      setVerifiedOnly,
-      pagination,
-      addToHistory,
-      removeFromHistory,
-      clearAllHistory,
-      performSearch,
-      loadMore,
-    }),
-    [
-      searchQuery,
-      setSearchQuery,
-      searchResults,
-      searchHistory,
-      loading,
-      error,
-      sortBy,
-      setSortBy,
-      dateRange,
-      setDateRange,
-      hasMedia,
-      setHasMedia,
-      verifiedOnly,
-      setVerifiedOnly,
-      pagination,
-      addToHistory,
-      removeFromHistory,
-      clearAllHistory,
-      performSearch,
-      loadMore,
-    ]
-  );
+  return useMemo(() => ({
+    searchQuery,
+    setSearchQuery,
+    searchResults,
+    searchHistory: historyQuery.currentData || [],
+    loading,
+    error,
+    sortBy,
+    setSortBy,
+    dateRange,
+    setDateRange,
+    hasMedia,
+    setHasMedia,
+    verifiedOnly,
+    setVerifiedOnly,
+    pagination,
+    addToHistory,
+    removeFromHistory,
+    clearAllHistory,
+    performSearch,
+    loadMore,
+  }), [
+    searchQuery,
+    setSearchQuery,
+    searchResults,
+    historyQuery.currentData,
+    loading,
+    error,
+    sortBy,
+    setSortBy,
+    dateRange,
+    setDateRange,
+    hasMedia,
+    setHasMedia,
+    verifiedOnly,
+    setVerifiedOnly,
+    pagination,
+    addToHistory,
+    removeFromHistory,
+    clearAllHistory,
+    performSearch,
+    loadMore,
+  ]);
 };
 
 export default useSearch;

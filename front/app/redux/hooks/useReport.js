@@ -1,219 +1,176 @@
 'use client';
 
-import React, { useEffect, useCallback, useMemo } from 'react';
-import api from '@/app/utils/api';
+import { useCallback, useMemo } from 'react';
 import { useAuth } from './useAuth';
 import { useFeedback } from './useFeedback';
 import { useAppDispatch, useAppSelector } from '../hooks';
 import {
-  selectReports,
-  selectReportsLoading,
-  selectActionLoading,
-  selectShowMenuReport,
-  selectIsTargetId,
-  selectReportedOnType,
   selectCurrentReportPage,
-  selectReportLimit,
-  selectTotalReports,
+  selectFilterSeverity,
   selectFilterStatus,
   selectFilterType,
-  selectFilterSeverity,
+  selectIsTargetId,
+  selectReportedOnType,
+  selectReportLimit,
+  selectShowMenuReport,
 } from '../features/reports/reportsSelectors';
 import {
-  setReports as setReduxReports,
-  setLoading as setReduxLoading,
-  setActionLoading as setReduxActionLoading,
-  setShowMenuReport as setReduxShowMenuReport,
-  setIsTargetId as setReduxIsTargetId,
-  setReportedOnType as setReduxReportedOnType,
   setCurrentPage as setReduxCurrentPage,
-  setLimit as setReduxLimit,
-  setTotalReports as setReduxTotalReports,
+  setFilterSeverity as setReduxFilterSeverity,
   setFilterStatus as setReduxFilterStatus,
   setFilterType as setReduxFilterType,
-  setFilterSeverity as setReduxFilterSeverity,
-  updateReportInState,
-  removeReportFromState,
+  setIsTargetId as setReduxIsTargetId,
+  setLimit as setReduxLimit,
+  setReportedOnType as setReduxReportedOnType,
+  setShowMenuReport as setReduxShowMenuReport,
 } from '../features/reports/reportsSlice';
+import {
+  useAddReportMutation,
+  useDeleteReportMutation,
+  useGetReportsQuery,
+  useLazyGetReportsQuery,
+  useUpdateReportStatusMutation,
+} from '../features/reports/reportsApi';
 
+const errorMessage = (error, fallback) => error?.data?.message || error?.message || fallback;
 
-
-export const useReport = () => {
+export const useReport = ({ loadReports = false } = {}) => {
   const dispatch = useAppDispatch();
   const { user } = useAuth();
   const { showAlert } = useFeedback();
-
-  const reports = useAppSelector(selectReports);
-  const loading = useAppSelector(selectReportsLoading);
-  const actionLoading = useAppSelector(selectActionLoading);
   const showMenuReport = useAppSelector(selectShowMenuReport);
   const isTargetId = useAppSelector(selectIsTargetId);
   const reportedOnType = useAppSelector(selectReportedOnType);
   const currentPage = useAppSelector(selectCurrentReportPage);
   const limit = useAppSelector(selectReportLimit);
-  const totalReports = useAppSelector(selectTotalReports);
   const filterStatus = useAppSelector(selectFilterStatus);
   const filterType = useAppSelector(selectFilterType);
   const filterSeverity = useAppSelector(selectFilterSeverity);
 
-  const setShowMenuReport = useCallback((val) => dispatch(setReduxShowMenuReport(val)), [dispatch]);
-  const setIsTargetId = useCallback((val) => dispatch(setReduxIsTargetId(val)), [dispatch]);
-  const setReportedOnType = useCallback((val) => dispatch(setReduxReportedOnType(val)), [dispatch]);
-  const setCurrentPage = useCallback((val) => dispatch(setReduxCurrentPage(val)), [dispatch]);
-  const setLimit = useCallback((val) => dispatch(setReduxLimit(val)), [dispatch]);
-  const setFilterStatus = useCallback((val) => dispatch(setReduxFilterStatus(val)), [dispatch]);
-  const setFilterType = useCallback((val) => dispatch(setReduxFilterType(val)), [dispatch]);
-  const setFilterSeverity = useCallback((val) => dispatch(setReduxFilterSeverity(val)), [dispatch]);
+  const queryArgs = {
+    page: currentPage,
+    limit,
+    status: filterStatus,
+    reportedOnType: filterType,
+    severity: filterSeverity,
+  };
+  const reportsQuery = useGetReportsQuery(queryArgs, {
+    skip: !loadReports || !user?._id,
+  });
+  const [loadReportPage] = useLazyGetReportsQuery();
+  const [addReportRequest, addState] = useAddReportMutation();
+  const [updateStatusRequest, updateState] = useUpdateReportStatusMutation();
+  const [deleteReportRequest, deleteState] = useDeleteReportMutation();
 
-  const getAllReports = useCallback(
-    async ({ page = currentPage, perPage = limit } = {}) => {
-      if (!user?._id) return;
-      dispatch(setReduxLoading(true));
-      try {
-        const params = { page, limit: perPage };
-        if (filterStatus) params.status = filterStatus;
-        if (filterType) params.reportedOnType = filterType;
-        if (filterSeverity) params.severity = filterSeverity;
+  const setShowMenuReport = useCallback((value) => dispatch(setReduxShowMenuReport(value)), [dispatch]);
+  const setIsTargetId = useCallback((value) => dispatch(setReduxIsTargetId(value)), [dispatch]);
+  const setReportedOnType = useCallback((value) => dispatch(setReduxReportedOnType(value)), [dispatch]);
+  const setCurrentPage = useCallback((value) => dispatch(setReduxCurrentPage(value)), [dispatch]);
+  const setLimit = useCallback((value) => dispatch(setReduxLimit(value)), [dispatch]);
+  const setFilterStatus = useCallback((value) => dispatch(setReduxFilterStatus(value)), [dispatch]);
+  const setFilterType = useCallback((value) => dispatch(setReduxFilterType(value)), [dispatch]);
+  const setFilterSeverity = useCallback((value) => dispatch(setReduxFilterSeverity(value)), [dispatch]);
 
-        const res = await api.get('/report', { params });
+  const getAllReports = useCallback(async ({ page = currentPage, perPage = limit } = {}) => {
+    if (!user?._id) return;
+    return loadReportPage({
+      page,
+      limit: perPage,
+      status: filterStatus,
+      reportedOnType: filterType,
+      severity: filterSeverity,
+    }).unwrap();
+  }, [currentPage, filterSeverity, filterStatus, filterType, limit, loadReportPage, user?._id]);
 
-        dispatch(setReduxReports(res.data.reports || []));
-        dispatch(setReduxTotalReports(res.data.total || 0));
-        dispatch(setReduxCurrentPage(res.data.page || 1));
-        dispatch(setReduxLimit(res.data.limit || 20));
-      } catch (err) {
-        console.error('Error fetching reports:', err);
-      } finally {
-        dispatch(setReduxLoading(false));
-      }
-    },
-    [user?._id, currentPage, limit, filterStatus, filterType, filterSeverity, dispatch]
-  );
+  const addReport = useCallback(async ({ reportedOnType: reportType, targetId, text, reason = 'other' }) => {
+    if (!user?._id) return;
+    const payload = { text, reason, reportedOnType: reportType };
+    if (reportType === 'post') payload.postId = targetId;
+    else if (reportType === 'comment') payload.commentId = targetId;
+    else if (reportType === 'user') payload.reportedUserId = targetId;
+    try {
+      await addReportRequest(payload).unwrap();
+      showAlert('Report added successfully');
+    } catch (error) {
+      console.error('Error adding report:', error);
+      showAlert(errorMessage(error, 'Failed to add report'));
+      throw error;
+    }
+  }, [addReportRequest, showAlert, user?._id]);
 
-  const addReport = useCallback(
-    async ({ reportedOnType, targetId, text, reason = 'other' }) => {
-      if (!user?._id) return;
+  const updateReportStatus = useCallback(async (reportId, status, reviewNotes = '') => {
+    if (!user?._id) return;
+    try {
+      await updateStatusRequest({ reportId, status, reviewNotes }).unwrap();
+      showAlert('Report updated successfully');
+    } catch (error) {
+      console.error('Error updating report status:', error);
+      showAlert(errorMessage(error, 'Failed to update report'));
+    }
+  }, [showAlert, updateStatusRequest, user?._id]);
 
-      const payload = { text, reason, reportedOnType };
-      if (reportedOnType === 'post') payload.postId = targetId;
-      else if (reportedOnType === 'comment') payload.commentId = targetId;
-      else if (reportedOnType === 'user') payload.reportedUserId = targetId;
+  const deleteReport = useCallback(async (reportId) => {
+    if (!user?._id) return;
+    try {
+      await deleteReportRequest(reportId).unwrap();
+      showAlert('Report deleted successfully');
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      showAlert(errorMessage(error, 'Failed to delete report'));
+    }
+  }, [deleteReportRequest, showAlert, user?._id]);
 
-      try {
-        dispatch(setReduxActionLoading(true));
-        await api.post('/report/add', payload);
-
-        showAlert('Report added successfully');
-      } catch (err) {
-        console.error('Error adding report:', err);
-        showAlert(err?.response?.data?.message || 'Failed to add report');
-        throw err;
-      } finally {
-        dispatch(setReduxActionLoading(false));
-      }
-    },
-    [user?._id, showAlert, dispatch]
-  );
-
-  const updateReportStatus = useCallback(
-    async (reportId, status, reviewNotes = '') => {
-      if (!user?._id) return;
-
-      try {
-        dispatch(setReduxActionLoading(true));
-        const res = await api.patch(
-          `/report/status/${reportId}`,
-          { status, reviewNotes }
-        );
-
-        dispatch(updateReportInState({ _id: reportId, ...res.data.report }));
-        showAlert('Report updated successfully');
-      } catch (err) {
-        console.error('Error updating report status:', err);
-        showAlert(err?.response?.data?.message || 'Failed to update report');
-      } finally {
-        dispatch(setReduxActionLoading(false));
-      }
-    },
-    [user?._id, showAlert, dispatch]
-  );
-
-  const deleteReport = useCallback(
-    async (reportId) => {
-      if (!user?._id) return;
-
-      try {
-        dispatch(setReduxActionLoading(true));
-        await api.delete(`/report/delete/${reportId}`);
-
-        dispatch(removeReportFromState(reportId));
-        showAlert('Report deleted successfully');
-      } catch (err) {
-        console.error('Error deleting report:', err);
-        showAlert(err?.response?.data?.message || 'Failed to delete report');
-      } finally {
-        dispatch(setReduxActionLoading(false));
-      }
-    },
-    [user?._id, showAlert, dispatch]
-  );
-
-  useEffect(() => {
-    if (user?._id) getAllReports();
-  }, [user?._id, filterStatus, filterType, filterSeverity, getAllReports]);
-
-  return useMemo(
-    () => ({
-      reports,
-      loading,
-      actionLoading,
-      getAllReports,
-      addReport,
-      updateReportStatus,
-      deleteReport,
-      showMenuReport,
-      setShowMenuReport,
-      isTargetId,
-      setIsTargetId,
-      currentPage,
-      setCurrentPage,
-      limit,
-      totalReports,
-      filterStatus,
-      setFilterStatus,
-      filterType,
-      setFilterType,
-      filterSeverity,
-      setFilterSeverity,
-      reportedOnType,
-      setReportedOnType,
-    }),
-    [
-      reports,
-      loading,
-      actionLoading,
-      getAllReports,
-      addReport,
-      updateReportStatus,
-      deleteReport,
-      showMenuReport,
-      setShowMenuReport,
-      isTargetId,
-      setIsTargetId,
-      currentPage,
-      setCurrentPage,
-      limit,
-      totalReports,
-      filterStatus,
-      setFilterStatus,
-      filterType,
-      setFilterType,
-      filterSeverity,
-      setFilterSeverity,
-      reportedOnType,
-      setReportedOnType,
-    ]
-  );
+  return useMemo(() => ({
+    reports: reportsQuery.currentData?.reports || [],
+    loading: reportsQuery.isLoading || reportsQuery.isFetching,
+    actionLoading: addState.isLoading || updateState.isLoading || deleteState.isLoading,
+    getAllReports,
+    addReport,
+    updateReportStatus,
+    deleteReport,
+    showMenuReport,
+    setShowMenuReport,
+    isTargetId,
+    setIsTargetId,
+    currentPage,
+    setCurrentPage,
+    limit,
+    totalReports: reportsQuery.currentData?.total || 0,
+    filterStatus,
+    setFilterStatus,
+    filterType,
+    setFilterType,
+    filterSeverity,
+    setFilterSeverity,
+    reportedOnType,
+    setReportedOnType,
+  }), [
+    reportsQuery.currentData,
+    reportsQuery.isLoading,
+    reportsQuery.isFetching,
+    addState.isLoading,
+    updateState.isLoading,
+    deleteState.isLoading,
+    getAllReports,
+    addReport,
+    updateReportStatus,
+    deleteReport,
+    showMenuReport,
+    setShowMenuReport,
+    isTargetId,
+    setIsTargetId,
+    currentPage,
+    setCurrentPage,
+    limit,
+    filterStatus,
+    setFilterStatus,
+    filterType,
+    setFilterType,
+    filterSeverity,
+    setFilterSeverity,
+    reportedOnType,
+    setReportedOnType,
+  ]);
 };
 
 export default useReport;

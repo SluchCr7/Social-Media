@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { removeMusicFromState, updateMusicInState } from '../music/musicSlice';
 
 const initialState = {
   songs: [],
@@ -72,6 +71,27 @@ export const musicPlayerSlice = createSlice({
     setViewMusicPlayer: (state, action) => {
       state.viewMusicPlayer = action.payload;
     },
+    updateQueueTrack: (state, action) => {
+      const updated = action.payload;
+      if (!updated?._id) return;
+      state.songs = state.songs.map((song) =>
+        song._id === updated._id ? { ...song, ...updated } : song
+      );
+      if (state.current?._id === updated._id) {
+        state.current = { ...state.current, ...updated };
+      }
+    },
+    removeQueueTrack: (state, action) => {
+      const id = action.payload;
+      state.songs = state.songs.filter((song) => song._id !== id);
+      if (state.current?._id === id) {
+        state.current = null;
+        state.currentIndex = 0;
+        state.playing = false;
+      } else if (state.current) {
+        state.currentIndex = state.songs.findIndex((song) => song._id === state.current._id);
+      }
+    },
     nextTrack: (state) => {
       if (!state.songs.length) return;
       if (state.shuffle) {
@@ -95,25 +115,6 @@ export const musicPlayerSlice = createSlice({
       state.isReady = false;
     },
   },
-  extraReducers: (builder) => {
-    builder
-      .addCase(updateMusicInState, (state, action) => {
-        if (state.current?._id === action.payload?._id) state.current = action.payload;
-        state.songs = state.songs.map((song) =>
-          song._id === action.payload?._id ? action.payload : song
-        );
-      })
-      .addCase(removeMusicFromState, (state, action) => {
-        state.songs = state.songs.filter((song) => song._id !== action.payload);
-        if (state.current?._id === action.payload) {
-          state.current = null;
-          state.currentIndex = 0;
-          state.playing = false;
-        } else if (state.current) {
-          state.currentIndex = state.songs.findIndex((song) => song._id === state.current._id);
-        }
-      });
-  },
 });
 
 export const {
@@ -130,6 +131,8 @@ export const {
   setRepeatMode,
   setExpanded,
   setViewMusicPlayer,
+  updateQueueTrack,
+  removeQueueTrack,
   nextTrack,
   prevTrack,
 } = musicPlayerSlice.actions;
