@@ -2,20 +2,13 @@ const asyncHandler = require('express-async-handler');
 const {
   User,
   validateUserLinks,
-  LoginValidate,
-  ValidateUser,
   validateUserUpdate,
   validatePasswordUpdate,
 } = require('../Modules/User');
 const userService = require('../Services/userService');
-const { setAuthCookies, clearAuthCookies } = require('../utils/tokenUtils');
 
 const sendResult = (res, operationResult) => {
   if (!operationResult) return undefined;
-  if (operationResult.clearAuthCookies) clearAuthCookies(res);
-  if (operationResult.authCookies) {
-    setAuthCookies(res, operationResult.authCookies.accessToken, operationResult.authCookies.refreshToken);
-  }
   if (operationResult.body === undefined) return undefined;
   return res.status(operationResult.status).json(operationResult.body);
 };
@@ -28,44 +21,12 @@ const requestContext = (req) => ({
   userAgent: req.headers['user-agent'],
   ip: req.ip,
   forwardedFor: req.headers['x-forwarded-for'],
-  remoteAddress: req.connection?.remoteAddress,
-  refreshToken: req.cookies?.refreshToken,
   file: req.file,
 });
 
 const endpoint = (operation, select = requestContext) => asyncHandler(async (req, res) => (
   sendResult(res, await userService[operation](select(req)))
 ));
-
-const RegisterNewUser = async (req, res) => sendResult(res, await userService.register({
-  body: req.body,
-  userAgent: req.headers['user-agent'],
-  ip: req.ip || req.headers['x-forwarded-for'] || '',
-}));
-
-const LoginUser = endpoint('login', (req) => ({
-  body: req.body,
-  userAgent: req.headers['user-agent'],
-  ip: req.ip,
-  forwardedFor: req.headers['x-forwarded-for'],
-  remoteAddress: req.connection?.remoteAddress,
-}));
-const LogoutUser = endpoint('logout', (req) => ({
-  refreshToken: req.cookies?.refreshToken || req.body?.refreshToken,
-}));
-const LogoutAllSessions = endpoint('logoutAllSessions', (req) => ({
-  userId: req.user?._id || req.user?.id,
-}));
-const RefreshToken = endpoint('refreshSession', (req) => ({
-  refreshToken: req.cookies?.refreshToken || req.body?.refreshToken || req.headers['x-refresh-token'],
-  userAgent: req.headers['user-agent'],
-  ip: req.ip,
-  forwardedFor: req.headers['x-forwarded-for'],
-}));
-const GetCurrentUser = endpoint('getCurrentUser', (req) => ({
-  userId: req.user?._id || req.user?.id,
-  token: req.token || req.cookies?.accessToken || req.cookies?.token,
-}));
 
 const getAllUsers = endpoint('getAllUsers');
 const getUserById = endpoint('getUserById', (req) => ({ id: req.params.id }));
@@ -138,16 +99,8 @@ const saveReel = endpoint('saveReel', (req) => ({
 module.exports = {
   User,
   validateUserLinks,
-  LoginValidate,
-  ValidateUser,
   validateUserUpdate,
   validatePasswordUpdate,
-  RegisterNewUser,
-  LoginUser,
-  LogoutUser,
-  LogoutAllSessions,
-  RefreshToken,
-  GetCurrentUser,
   getAllUsers,
   getUserById,
   getPublicUserByUsername,

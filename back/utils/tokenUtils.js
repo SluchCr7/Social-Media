@@ -20,6 +20,11 @@ const ACCESS_COOKIE_MAX_AGE = 15 * 60 * 1000; // 15 minutes
 const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 const REFRESH_COOKIE_MAX_AGE = REFRESH_TOKEN_MAX_AGE;
 const REFRESH_TOKEN_ROTATION_GRACE_MS = 60 * 1000;
+const AUTH_COOKIE_SAME_SITE = String(process.env.AUTH_COOKIE_SAME_SITE || 'lax').toLowerCase();
+
+if (!['strict', 'lax', 'none'].includes(AUTH_COOKIE_SAME_SITE)) {
+  throw new Error('AUTH_COOKIE_SAME_SITE must be one of: strict, lax, none.');
+}
 
 /**
  * Hash a token string using SHA-256 for secure database storage
@@ -31,7 +36,7 @@ const hashToken = (token) => {
 /**
  * Generate short-lived Access Token
  */
-const generateAccessToken = (user) => {
+const generateAccessToken = (user, familyId = null) => {
   const jti = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
   return jwt.sign(
     {
@@ -39,6 +44,8 @@ const generateAccessToken = (user) => {
       isAdmin: Boolean(user.isAdmin),
       email: user.email,
       typ: 'access',
+      tokenVersion: Number(user.tokenVersion) || 0,
+      sid: familyId || user.sid || undefined,
       jti,
     },
     ACCESS_TOKEN_SECRET,
@@ -56,6 +63,7 @@ const generateRefreshToken = (user, familyId = null) => {
     {
       _id: String(user._id || user.id),
       typ: 'refresh',
+      tokenVersion: Number(user.tokenVersion) || 0,
       jti,
       family,
     },
@@ -70,7 +78,7 @@ const generateRefreshToken = (user, familyId = null) => {
 const verifyAccessToken = (token) => {
   try {
     const payload = jwt.verify(token, ACCESS_TOKEN_SECRET);
-    if (payload.typ && payload.typ !== 'access') {
+    if (payload.typ !== 'access') {
       return { payload: null, expired: false, error: 'Invalid token type' };
     }
     return { payload, expired: false };
@@ -89,7 +97,7 @@ const verifyAccessToken = (token) => {
 const verifyRefreshToken = (token) => {
   try {
     const payload = jwt.verify(token, REFRESH_TOKEN_SECRET);
-    if (payload.typ && payload.typ !== 'refresh') {
+    if (payload.typ !== 'refresh') {
       return { payload: null, expired: false, error: 'Invalid token type' };
     }
     return { payload, expired: false };
@@ -106,13 +114,13 @@ const verifyRefreshToken = (token) => {
  * Determine cookie options based on deployment environment
  */
 const getCookieOptions = (isRefresh = false) => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const isHttps = process.env.COOKIE_SECURE === 'true' ||
-    (isProduction && process.env.DOMAIN_NAME && String(process.env.DOMAIN_NAME).startsWith('https://'));
+  const secure = process.env.NODE_ENV === 'production' ||
+    process.env.COOKIE_SECURE === 'true' ||
+    AUTH_COOKIE_SAME_SITE === 'none';
   return {
     httpOnly: true,
-    secure: Boolean(isHttps),
-    sameSite: isHttps ? 'none' : 'lax',
+    secure,
+    sameSite: AUTH_COOKIE_SAME_SITE,
     path: '/',
     maxAge: isRefresh ? REFRESH_COOKIE_MAX_AGE : ACCESS_COOKIE_MAX_AGE,
   };
@@ -126,8 +134,6 @@ const setAuthCookies = (res, accessToken, refreshToken) => {
   const refreshOpts = getCookieOptions(true);
 
   res.cookie('accessToken', accessToken, accessOpts);
-  res.cookie('token', accessToken, accessOpts); // backward compatibility fallback for old consumers
-
   if (refreshToken) {
     res.cookie('refreshToken', refreshToken, refreshOpts);
   }
@@ -137,19 +143,10 @@ const setAuthCookies = (res, accessToken, refreshToken) => {
  * Clear authentication cookies
  */
 const clearAuthCookies = (res) => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const isHttps = process.env.COOKIE_SECURE === 'true' ||
-    (isProduction && process.env.DOMAIN_NAME && String(process.env.DOMAIN_NAME).startsWith('https://'));
-  const baseOpts = {
-    httpOnly: true,
-    secure: Boolean(isHttps),
-    sameSite: isHttps ? 'none' : 'lax',
-    path: '/',
-  };
-
+  const baseOpts = { ...getCookieOptions() };
+  delete baseOpts.maxAge;
   res.clearCookie('accessToken', baseOpts);
   res.clearCookie('refreshToken', baseOpts);
-  res.clearCookie('token', baseOpts);
 };
 
 module.exports = {
@@ -161,6 +158,7 @@ module.exports = {
   REFRESH_TOKEN_ROTATION_GRACE_MS,
   ACCESS_COOKIE_MAX_AGE,
   REFRESH_COOKIE_MAX_AGE,
+  AUTH_COOKIE_SAME_SITE,
   hashToken,
   generateAccessToken,
   generateRefreshToken,

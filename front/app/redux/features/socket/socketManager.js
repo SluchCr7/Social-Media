@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 import { BACKEND_URL } from '../../../utils/backendUrl';
-import { getStoredAccessToken } from '../../../utils/authStorage';
+import { refreshAuthSession } from '../../../utils/authRefresh';
 
 let socketInstance = null;
 
@@ -20,10 +20,7 @@ export const connectSocket = (userId) => {
   if (!userId) return null;
 
   const url = BACKEND_URL;
-  const token = getStoredAccessToken();
   socketInstance = io(url, {
-    query: { userId },
-    auth: { token },
     withCredentials: true,
     transports: ['websocket', 'polling'],
   });
@@ -36,6 +33,35 @@ export const connectSocket = (userId) => {
 
   socketInstance.on('disconnect', () => {
     console.log('🔴 Redux Socket disconnected');
+  });
+
+  socketInstance.on('connect_error', (error) => {
+    const authErrors = [
+      'Authentication required',
+      'Invalid or expired authentication',
+      'Authentication session revoked',
+      'Authentication failed',
+      'Account access denied',
+    ];
+    if (!authErrors.includes(error?.message)) return;
+
+    const currentSocket = socketInstance;
+    refreshAuthSession()
+      .then(() => {
+        if (socketInstance === currentSocket && !currentSocket.connected) {
+          currentSocket.connect();
+        }
+      })
+      .catch((refreshError) => {
+        const status = refreshError.response?.status;
+        if (
+          socketInstance === currentSocket &&
+          typeof window !== 'undefined' &&
+          (status === 401 || status === 403)
+        ) {
+          window.dispatchEvent(new CustomEvent('auth:session-expired'));
+        }
+      });
   });
 
   return socketInstance;

@@ -6,5 +6,5 @@ export const selectUsers = createSelector([selectAuth], (auth) => auth?.users ||
 export const selectIsLogin = createSelector([selectAuth], (auth) => Boolean(auth?.isLogin));
 export const selectIsAuthChecked = createSelector([selectAuth], (auth) => Boolean(auth?.isAuthChecked));
 export const selectAuthLoading = createSelector([selectAuth], (auth) => Boolean(auth?.isLoading));
-export const selectAuthStatus = createSelector([selectAuth], (auth) => auth?.status || 'idle');
+export const selectAuthStatus = createSelector([selectAuth], (auth) => auth?.status || 'initializing');
 export const selectIsAdmin = createSelector([selectCurrentUser], (user) => Boolean(user?.isAdmin));

@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL } from './backendUrl';
 import { refreshAuthSession } from './authRefresh';
-import { getStoredAccessToken, clearStoredAuth } from './authStorage';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -11,16 +10,13 @@ const api = axios.create({
   },
 });
 
-const isAuthEndpoint = (url = '') =>
-  ['/auth/login', '/auth/register', '/auth/refresh'].some((path) => url.includes(path));
+const isAuthEndpoint = (url = '') => {
+  const path = url.split('?')[0].replace(/^\/api(?=\/|$)/, '');
+  return ['/auth/login', '/auth/register', '/auth/refresh', '/auth/logout'].includes(path);
+};
 
 api.interceptors.request.use(
   (config) => {
-    const token = getStoredAccessToken();
-    if (token && !config.headers.Authorization) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
     if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
       if (config.headers?.delete) {
         config.headers.delete('Content-Type');
@@ -46,23 +42,19 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshResponse = await refreshAuthSession();
-        const newToken =
-          refreshResponse?.data?.accessToken ||
-          refreshResponse?.data?.token ||
-          getStoredAccessToken();
-
-        if (newToken) {
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
-        }
+        await refreshAuthSession();
         return api(originalRequest);
       } catch (refreshErr) {
-        clearStoredAuth();
-        if (typeof window !== 'undefined') {
+        const status = refreshErr.response?.status;
+        if (typeof window !== 'undefined' && (status === 401 || status === 403)) {
           window.dispatchEvent(new CustomEvent('auth:session-expired'));
         }
         return Promise.reject(refreshErr);
       }
+    }
+
+    if (error.response?.status === 401 && originalRequest._retry && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('auth:session-expired'));
     }
 
     return Promise.reject(error);

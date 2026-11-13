@@ -8,7 +8,7 @@ const { Report } = require('../Modules/Report');
 const { Notification } = require('../Modules/Notification');
 const { Story } = require('../Modules/Story');
 const { AdminLog } = require('../Modules/AdminLog');
-const { io } = require('../Config/socket');
+const { io, disconnectUserSockets } = require('../Config/socket');
 const os = require('os');
 
 /**
@@ -193,7 +193,7 @@ const getAdminUsers = async ({ page = 1, limit = 10, search = '', role = 'all', 
   const [total, users] = await Promise.all([
     User.countDocuments(filter),
     User.find(filter)
-      .select('-password -refreshTokens')
+      .select('-password -refreshTokens -consumedRefreshTokens')
       .sort(sortOption)
       .skip(skip)
       .limit(limitNum)
@@ -213,25 +213,25 @@ const getAdminUsers = async ({ page = 1, limit = 10, search = '', role = 'all', 
  * 3. Update User Status (Active, Suspended, Banned)
  */
 const updateUserStatus = async (adminId, targetUserId, { status, days = 7, reason = '', ip = '' }) => {
-  const user = await User.findById(targetUserId);
+  const user = await User.findById(targetUserId).select('+tokenVersion');
   if (!user) throw new Error('Target user not found');
 
   const oldStatus = user.accountStatus;
   user.accountStatus = status;
+  user.tokenVersion = (Number(user.tokenVersion) || 0) + 1;
+  user.refreshTokens = [];
 
   if (status === 'suspended') {
     const suspendDays = parseInt(days, 10) || 7;
     user.suspendedUntil = new Date(Date.now() + suspendDays * 24 * 60 * 60 * 1000);
-    // Invalidate refresh tokens to force immediate logout
-    user.refreshTokens = [];
   } else if (status === 'banned') {
     user.suspendedUntil = null;
-    user.refreshTokens = [];
   } else if (status === 'active') {
     user.suspendedUntil = null;
   }
 
   await user.save();
+  disconnectUserSockets(targetUserId);
 
   // Log action
   await AdminLog.create({
@@ -314,11 +314,13 @@ const toggleUserVerification = async (adminId, targetUserId, ip = '') => {
  * 6. Force Logout / Session Invalidation
  */
 const forceLogoutUser = async (adminId, targetUserId, ip = '') => {
-  const user = await User.findById(targetUserId);
+  const user = await User.findById(targetUserId).select('+tokenVersion');
   if (!user) throw new Error('Target user not found');
 
   user.refreshTokens = [];
+  user.tokenVersion = (Number(user.tokenVersion) || 0) + 1;
   await user.save();
+  disconnectUserSockets(targetUserId);
 
   await AdminLog.create({
     admin: adminId,

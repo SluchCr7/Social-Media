@@ -1,23 +1,12 @@
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
 const mongoose = require('mongoose');
 const Verification = require('../Modules/VerificationToken');
 const {
   User,
   validateUserLinks,
-  LoginValidate,
-  ValidateUser,
   validateUserUpdate,
   validatePasswordUpdate,
 } = require('../Modules/User');
-const {
-  REFRESH_TOKEN_MAX_AGE,
-  REFRESH_TOKEN_ROTATION_GRACE_MS,
-  hashToken,
-  generateAccessToken,
-  generateRefreshToken,
-  verifyRefreshToken,
-} = require('../utils/tokenUtils');
 const { cloudUpload, cloudRemove } = require('../Config/cloudUpload');
 const { checkImageSensitivity } = require('../utils/ImgShield');
 const { sendNotificationHelper } = require('../utils/SendNotification');
@@ -31,15 +20,15 @@ const { userOnePopulate } = require('../Populates/Populate');
 const { io } = require('../Config/socket');
 const Reel = require('../Modules/Reel');
 const { updateUserPoints } = require('../utils/PointsEngine');
-const generateUniqueUserCode = require('../utils/generateUserCode');
 
 const result = (status, body, options = {}) => ({ status, body, ...options });
 const errorResult = (status, message, options = {}) => result(status, { message, ...options });
 const publicUser = (user) => {
-  const userObj = user.toObject ? user.toObject() : { ...user._doc };
+  const userObj = user.toObject ? user.toObject() : { ...user };
   delete userObj.password;
   delete userObj.refreshTokens;
   delete userObj.consumedRefreshTokens;
+  delete userObj.tokenVersion;
   return userObj;
 };
 const publicProfileUser = (user) => {
@@ -62,295 +51,16 @@ const publicProfileUser = (user) => {
   return userObj;
 };
 
-const register = async ({ body, userAgent, ip }) => {
-  try {
-    const { error } = ValidateUser(body);
-    if (error) return result(400, { message: error.details[0].message });
-    if (await User.findOne({ email: body.email })) {
-      return result(400, { message: 'User already exists' });
-    }
-    const userCode = generateUniqueUserCode()
-    const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(body.password, salt);
-    const user = new User({
-      username: body.username,
-      email: body.email,
-      password: hashPassword,
-      userCode
-    });
-    const familyId = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user, familyId);
-    user.refreshTokens = [{
-      tokenHash: hashToken(refreshToken),
-      family: familyId,
-      createdAt: new Date(),
-      expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE),
-      userAgent: userAgent || '',
-      ip: ip || '',
-    }];
-    await user.save();
-    return result(201, {
-      message: 'User registered successfully.',
-      accessToken,
-      refreshToken,
-      token: accessToken,
-      user: {
-        ...publicUser(user),
-        token: accessToken,
-        accessToken,
-      },
-    }, { authCookies: { accessToken, refreshToken } });
-  } catch (err) {
-    return result(500, { message: err.message || 'Internal Server Error' });
-  }
-};
-
-const login = async ({ body, userAgent, ip, forwardedFor, remoteAddress }) => {
-  const { error } = LoginValidate(body);
-  if (error) return result(400, { message: error.details[0].message });
-  const user = await User.findOne({ email: body.email })
-    .populate('following', 'username profileName profilePhoto')
-    .populate('followers', 'username profileName profilePhoto');
-  if (!user) return errorResult(400, 'Email or Password are not correct');
-  if (!await bcrypt.compare(body.password, user.password)) {
-    return errorResult(400, 'Email or Password are not correct');
-  }
-  if (user.accountStatus === 'banned') {
-    return errorResult(403, 'Your account has been banned due to violations.');
-  }
-  if (user.accountStatus === 'suspended' && user.suspendedUntil && new Date(user.suspendedUntil) > new Date()) {
-    return errorResult(403, `Your account is suspended until ${new Date(user.suspendedUntil).toLocaleString()}.`);
-  }
-
-  user.lastLogin = new Date();
-  user.loginHistory.push({
-    date: new Date(),
-    ip: ip || forwardedFor || remoteAddress,
-    device: userAgent,
-  });
-  if (user.loginHistory.length > 20) user.loginHistory = user.loginHistory.slice(-20);
-
-  const familyId = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user, familyId);
-  const now = new Date();
-  user.refreshTokens = (user.refreshTokens || []).filter((token) => token.expiresAt > now);
-  user.refreshTokens.push({
-    tokenHash: hashToken(refreshToken),
-    family: familyId,
-    createdAt: now,
-    expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE),
-    userAgent: userAgent || '',
-    ip: ip || forwardedFor || '',
-  });
-  if (user.refreshTokens.length > 10) user.refreshTokens = user.refreshTokens.slice(-10);
-  await user.save();
-  return result(200, {
-    message: 'Login successful',
-    accessToken,
-    refreshToken,
-    token: accessToken,
-    user: {
-      ...publicUser(user),
-      token: accessToken,
-      accessToken,
-    },
-  }, {
-    authCookies: { accessToken, refreshToken },
-  });
-};
-
-const logout = async ({ refreshToken }) => {
-  if (refreshToken) {
-    const hashed = hashToken(refreshToken);
-    await User.updateOne(
-      { 'refreshTokens.tokenHash': hashed },
-      { $pull: { refreshTokens: { tokenHash: hashed } } }
-    );
-  }
-  return result(200, { message: 'Logged out successfully' }, { clearAuthCookies: true });
-};
-
-const logoutAllSessions = async ({ userId }) => {
-  if (userId) {
-    await User.updateOne({ _id: userId }, { $set: { refreshTokens: [] } });
-  }
-  return result(200, { message: 'Logged out from all sessions successfully' }, { clearAuthCookies: true });
-};
-
-const refreshSession = async ({ refreshToken, userAgent, ip, forwardedFor }) => {
-  if (!refreshToken) {
-    return result(401, { message: 'No refresh token provided', code: 'NO_REFRESH_TOKEN' });
-  }
-  const { payload, expired } = verifyRefreshToken(refreshToken);
-  if (expired || !payload) {
-    return result(401, { message: 'Refresh token expired or invalid', code: 'REFRESH_TOKEN_EXPIRED' }, {
-      clearAuthCookies: true,
-    });
-  }
-
-  const incomingTokenHash = hashToken(refreshToken);
-  const now = new Date();
-  const matchedUser = await User.findOneAndUpdate(
-    { _id: payload._id, 'refreshTokens.tokenHash': incomingTokenHash },
-    {
-      $pull: { refreshTokens: { tokenHash: incomingTokenHash } },
-      $push: {
-        consumedRefreshTokens: {
-          $each: [{
-            tokenHash: incomingTokenHash,
-            family: payload.family || '',
-            expiresAt: new Date(now.getTime() + REFRESH_TOKEN_ROTATION_GRACE_MS),
-          }],
-          $slice: -50,
-        },
-      },
-    },
-    { new: false }
-  );
-
-  if (!matchedUser) {
-    // Check if token was consumed within the grace period (concurrent request handling)
-    const recentlyConsumed = await User.findOne({
-      _id: payload._id,
-      consumedRefreshTokens: {
-        $elemMatch: {
-          tokenHash: incomingTokenHash,
-          expiresAt: { $gt: now },
-        },
-      },
-    });
-
-    if (recentlyConsumed) {
-      if (recentlyConsumed.accountStatus === 'banned') {
-        return result(403, { message: 'Your account has been banned due to violations.' }, { clearAuthCookies: true });
-      }
-      if (recentlyConsumed.accountStatus === 'suspended' && recentlyConsumed.suspendedUntil && new Date(recentlyConsumed.suspendedUntil) > new Date()) {
-        return result(403, { message: `Your account is suspended until ${new Date(recentlyConsumed.suspendedUntil).toLocaleString()}.` }, { clearAuthCookies: true });
-      }
-
-      // Concurrency grace window: Issue valid access token smoothly without rejecting
-      const accessToken = generateAccessToken(recentlyConsumed);
-      const activeFamilyToken = (recentlyConsumed.refreshTokens || []).find(
-        (t) => t.family === payload.family && t.expiresAt > now
-      );
-
-      let newRefreshToken = refreshToken;
-      if (!activeFamilyToken) {
-        newRefreshToken = generateRefreshToken(recentlyConsumed, payload.family);
-        await User.updateOne(
-          { _id: recentlyConsumed._id },
-          {
-            $push: {
-              refreshTokens: {
-                tokenHash: hashToken(newRefreshToken),
-                createdAt: new Date(),
-                expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE),
-                userAgent: userAgent || '',
-                ip: ip || forwardedFor || '',
-                family: payload.family || '',
-              },
-            },
-          }
-        );
-      }
-
-      return result(200, {
-        message: 'Session refreshed successfully',
-        accessToken,
-        refreshToken: newRefreshToken,
-        token: accessToken,
-        user: {
-          ...publicUser(recentlyConsumed),
-          token: accessToken,
-          accessToken,
-        },
-      }, {
-        authCookies: { accessToken, refreshToken: newRefreshToken },
-      });
-    }
-
-    // Genuine reuse or revoked session: invalidate entire token family
-    if (payload.family) {
-      await User.updateOne(
-        { _id: payload._id },
-        { $pull: { refreshTokens: { family: payload.family } } }
-      );
-    }
-    return result(403, {
-      message: 'Security warning: refresh token reuse detected or session terminated. Please sign in again.',
-      code: 'TOKEN_REUSE_DETECTED',
-    }, { clearAuthCookies: true });
-  }
-
-  if (matchedUser.accountStatus === 'banned') {
-    return result(403, { message: 'Your account has been banned due to violations.' }, {
-      clearAuthCookies: true,
-    });
-  }
-  if (matchedUser.accountStatus === 'suspended' && matchedUser.suspendedUntil && new Date(matchedUser.suspendedUntil) > new Date()) {
-    return result(403, {
-      message: `Your account is suspended until ${new Date(matchedUser.suspendedUntil).toLocaleString()}.`,
-    }, { clearAuthCookies: true });
-  }
-
-  const accessToken = generateAccessToken(matchedUser);
-  const newRefreshToken = generateRefreshToken(matchedUser, payload.family);
-  const newSessionRecord = {
-    tokenHash: hashToken(newRefreshToken),
-    createdAt: new Date(),
-    expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE),
-    userAgent: userAgent || '',
-    ip: ip || forwardedFor || '',
-    family: payload.family || '',
-  };
-  await User.updateOne(
-    { _id: matchedUser._id },
-    {
-      $push: { refreshTokens: newSessionRecord },
-      $pull: { refreshTokens: { expiresAt: { $lt: new Date() } } },
-    }
-  );
-  return result(200, {
-    message: 'Session refreshed successfully',
-    accessToken,
-    refreshToken: newRefreshToken,
-    token: accessToken,
-    user: {
-      ...publicUser(matchedUser),
-      token: accessToken,
-      accessToken,
-    },
-  }, {
-    authCookies: { accessToken, refreshToken: newRefreshToken },
-  });
-};
-
-const getCurrentUser = async ({ userId, token }) => {
-  if (!userId) return errorResult(401, 'Unauthorized', { code: 'UNAUTHORIZED' });
-  const user = await User.findById(userId).select('-password -refreshTokens').populate(userOnePopulate);
-  if (!user) return errorResult(404, 'User not found', { clearAuthCookies: true });
-  const userObj = publicUser(user);
-  if (token) {
-    userObj.token = token;
-    userObj.accessToken = token;
-  }
-  return result(200, {
-    user: userObj,
-    token: token || undefined,
-    accessToken: token || undefined,
-  });
-};
-
 const getAllUsers = async () => result(200, await User.find()
+  .select('-password -refreshTokens -consumedRefreshTokens')
   .populate({ path: 'followers', select: 'profilePhoto username profileName' })
   .populate('posts')
-  .populate('comments'));
+  .populate('comments')
+  .then((users) => users.map(publicUser)));
 
 const getUserById = async ({ id }) => {
   const user = await User.findById(id).populate(userOnePopulate);
-  return user ? result(200, user) : errorResult(404, 'User Not Found');
+  return user ? result(200, publicUser(user)) : errorResult(404, 'User Not Found');
 };
 
 const getPublicUserByUsername = async ({ username }) => {
@@ -406,7 +116,7 @@ const uploadImage = async ({ file, userId, customText, imageType }) => {
     });
     await post.save();
     await post.save();
-    io.emit('user:update', user);
+    io.emit('user:update', publicUser(user));
     return result(200, {
       message: imageType === 'cover' ? 'Cover photo updated' : 'Profile photo updated',
       [photoKey]: user[photoKey],
@@ -486,13 +196,13 @@ const updateProfile = async ({ userId, body }) => {
   };
   const updatedUser = await User.findByIdAndUpdate(userId, { $set: updateData }, { new: true }).populate(userOnePopulate);
   if (!updatedUser) return errorResult(404, 'User not found');
-  io.emit('user:update', updatedUser);
+  io.emit('user:update', publicUser(updatedUser));
   const fullUserCheck = await User.findById(userId).select('pointsHistory profilePhoto description');
   const hasAward = fullUserCheck.pointsHistory.some((entry) => entry.action === 'PROFILE_COMPLETION');
   if (!hasAward && fullUserCheck.profilePhoto && fullUserCheck.description) {
     await updateUserPoints(userId, 'PROFILE_COMPLETION', userId);
   }
-  return result(200, { message: 'Profile updated successfully', user: updatedUser });
+  return result(200, { message: 'Profile updated successfully', user: publicUser(updatedUser) });
 };
 
 const updatePassword = async ({ userId, body }) => {
@@ -631,11 +341,16 @@ const updateAccountStatus = async ({ userId, body }) => {
     } else {
       updateFields.suspendedUntil = null;
     }
-    const user = await User.findByIdAndUpdate(userId, updateFields, { new: true });
+    updateFields.refreshTokens = [];
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateFields, $inc: { tokenVersion: 1 } },
+      { new: true }
+    );
     if (!user) return errorResult(404, 'User not found');
     return result(200, {
       message: accountStatus === 'suspended' ? `User suspended for ${days} days` : `User status updated to ${accountStatus}`,
-      user,
+      user: publicUser(user),
     });
   } catch (error) {
     console.error(error);
@@ -841,7 +556,6 @@ const getUserPointsHistory = async ({ id }) => {
 };
 
 module.exports = {
-  register, login, logout, logoutAllSessions, refreshSession, getCurrentUser,
   getAllUsers, getUserById, getPublicUserByUsername, deleteUser, verifyAccount, uploadImage, makeFollow,
   updateProfile, updatePassword, pinPost, blockOrUnblockUser, updateLinksSocial,
   getSuggestedUsers, makeAccountPremiumVerify, togglePrivateAccount, makeUserAdmin,

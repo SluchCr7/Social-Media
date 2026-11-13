@@ -14,20 +14,11 @@ import {
 import {
   setUser as setAuthUser,
   setUsers as setAuthUsers,
-  setIsLogin,
-  setIsAuthChecked,
   setIsLoading,
   logoutSuccess,
 } from '../features/auth/authSlice';
 import api from '@/app/utils/api';
-import { advanceAuthSessionVersion, getAuthSessionVersion } from '@/app/utils/authSession';
-import {
-  getStoredUser,
-  getStoredAccessToken,
-  getStoredRefreshToken,
-  saveAuthSession,
-  clearStoredAuth,
-} from '@/app/utils/authStorage';
+import { baseApi } from '../api/baseApi';
 import { useFeedback } from './useFeedback';
 import { MESSAGES } from '@/app/utils/messages';
 
@@ -75,21 +66,13 @@ export const useAuth = () => {
       try {
         const res = await api.post('/auth/login', { email, password });
         const userData = res.data.user;
-        const accessToken = res.data.accessToken || res.data.token;
-        const refreshToken = res.data.refreshToken;
 
         if (!userData) {
           throw new Error('Invalid response from server');
         }
 
-        const storedUser = saveAuthSession({
-          user: userData,
-          accessToken,
-          refreshToken,
-        });
-
-        dispatch(setAuthUser(storedUser || userData));
-        advanceAuthSessionVersion();
+        dispatch(baseApi.util.resetApiState());
+        dispatch(setAuthUser(userData));
 
         showToast(res.data.message || MESSAGES.AUTH.LOGIN_SUCCESS, 'success', { id: loadingToast });
         if (res.data.verificationInfo?.verificationCode) {
@@ -117,17 +100,16 @@ export const useAuth = () => {
 
     if (isConfirmed) {
       try {
-        await api.post('/auth/logout', { refreshToken: getStoredRefreshToken() });
+        await api.post('/auth/logout');
+        dispatch(logoutSuccess());
+        dispatch(baseApi.util.resetApiState());
+        window.location.href = '/Pages/Login';
       } catch (error) {
         console.error('Logout error:', error);
-      } finally {
-        clearStoredAuth();
-        dispatch(logoutSuccess());
-        advanceAuthSessionVersion();
-        window.location.href = '/Pages/Login';
+        showToast('Unable to sign out. Please check your connection and try again.', 'error');
       }
     }
-  }, [confirmAction, dispatch]);
+  }, [confirmAction, dispatch, showToast]);
 
   const registerNewUser = useCallback(
     async (username, email, password) => {
@@ -137,17 +119,10 @@ export const useAuth = () => {
       try {
         const res = await api.post('/auth/register', { username, email, password });
         const userData = res.data.user;
-        const accessToken = res.data.accessToken || res.data.token;
-        const refreshToken = res.data.refreshToken;
 
         if (userData) {
-          const storedUser = saveAuthSession({
-            user: userData,
-            accessToken,
-            refreshToken,
-          });
-          dispatch(setAuthUser(storedUser || userData));
-          advanceAuthSessionVersion();
+          dispatch(baseApi.util.resetApiState());
+          dispatch(setAuthUser(userData));
         }
 
         showToast(res.data.message || MESSAGES.AUTH.REGISTRATION_SUCCESS, 'success', { id: loadingToast });
@@ -173,72 +148,6 @@ export const useAuth = () => {
     } catch (err) {
       console.error('Failed to fetch users:', err);
     }
-  }, [dispatch]);
-
-  // Synchronize stored user on initial client mount to prevent logout on session close/refresh
-  useEffect(() => {
-    const cachedUser = getStoredUser();
-    if (cachedUser && !selectCurrentUser(store.getState())) {
-      dispatch(setAuthUser(cachedUser));
-      dispatch(setIsLogin(true));
-    }
-  }, [dispatch, store]);
-
-  // Server-side session verification via HTTP-only cookie and stored token
-  useEffect(() => {
-    let isMounted = true;
-
-    const checkSession = async () => {
-      const cached = getStoredUser();
-      if (cached && !selectCurrentUser(store.getState())) {
-        dispatch(setAuthUser(cached));
-        dispatch(setIsLogin(true));
-      }
-
-      try {
-        const res = await api.get('/auth/me');
-        if (isMounted && res.data?.user) {
-          const freshUser = { ...res.data.user };
-          delete freshUser.token;
-          delete freshUser.accessToken;
-          saveAuthSession({
-            user: freshUser,
-            accessToken: res.data.accessToken || res.data.token,
-          });
-          dispatch(setAuthUser(freshUser));
-          dispatch(setIsLogin(true));
-          advanceAuthSessionVersion();
-        }
-      } catch (err) {
-        if (isMounted && !getStoredUser()) {
-          dispatch(logoutSuccess());
-          advanceAuthSessionVersion();
-        }
-      } finally {
-        if (isMounted) {
-          dispatch(setIsAuthChecked(true));
-        }
-      }
-    };
-
-    if (!isAuthChecked) {
-      checkSession();
-    }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [isAuthChecked, dispatch, store]);
-
-  useEffect(() => {
-    const handleSessionExpired = () => {
-      clearStoredAuth();
-      dispatch(logoutSuccess());
-      advanceAuthSessionVersion();
-    };
-
-    window.addEventListener('auth:session-expired', handleSessionExpired);
-    return () => window.removeEventListener('auth:session-expired', handleSessionExpired);
   }, [dispatch]);
 
   // Admin users fetch

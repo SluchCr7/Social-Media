@@ -255,7 +255,12 @@ const UserSchema = new mongoose.Schema({
             family: { type: String, default: "" },
             expiresAt: { type: Date, required: true }
         }
-    ]
+    ],
+    tokenVersion: {
+        type: Number,
+        default: 0,
+        select: false
+    }
 }, {
     timestamps: true,
     toJSON: { virtuals: true },
@@ -373,23 +378,6 @@ UserSchema.methods.updateLevelRank = function () {
 const User = mongoose.model('User', UserSchema)
 
 // ================== Joi Validations ==================
-const LoginValidate = (user) => {
-    const schema = joi.object({
-        email: joi.string().email().required(),
-        password: joi.string().min(6).required(),
-    })
-    return schema.validate(user)
-}
-
-const ValidateUser = (user) => {
-    const schema = joi.object({
-        username: joi.string().min(3).max(30).required(),
-        email: joi.string().email().required(),
-        password: joi.string().min(6).required(),
-    })
-    return schema.validate(user)
-}
-
 const validateUserUpdate = (user) => {
     const schema = joi.object({
         username: joi.string().min(3).max(30),
@@ -449,9 +437,7 @@ const validateUserLinks = (user) => {
 module.exports = {
     User,
     validateUserLinks,
-    LoginValidate,
     validateEmail,
-    ValidateUser,
     validateUserUpdate,
     validatePasswordUpdate
 }

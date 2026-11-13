@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
+router.use("/auth", require("./AuthRoute"));
 router.use("/auth", require("./UserRoute"));
 router.use("/message", require("./MessageRoute"));
 router.use("/notification", require("./NotificationRoute"));

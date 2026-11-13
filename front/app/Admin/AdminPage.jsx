@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   HiChartBar,
@@ -16,6 +17,7 @@ import {
 } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import { useAdmin } from '@/app/redux/hooks/useAdmin';
+import { useAuth } from '@/app/redux/hooks';
 
 import dynamic from 'next/dynamic';
 
@@ -29,7 +31,7 @@ const LogsTab = dynamic(() => import('../Component/Admin/Logs/LogsTab'), { ssr: 
 const SettingsTab = dynamic(() => import('../Component/Admin/Settings/SettingsTab'), { ssr: false });
 const MobileSidebar = dynamic(() => import('../Component/Admin/MobileAside'), { ssr: false });
 
-const Admin = () => {
+const AdminDashboardContent = () => {
   const {
     stats,
     loading,
@@ -279,6 +281,26 @@ const Admin = () => {
       </main>
     </div>
   );
+};
+
+const Admin = () => {
+  const { user, isLogin, isAuthChecked } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthChecked && !isLogin) router.replace('/Pages/Login');
+    else if (isAuthChecked && !user?.isAdmin) router.replace('/');
+  }, [isAuthChecked, isLogin, user?.isAdmin, router]);
+
+  if (!isAuthChecked || !isLogin || !user?.isAdmin) {
+    return (
+      <div role="status" className="flex min-h-screen items-center justify-center bg-gray-950 text-indigo-400">
+        Loading...
+      </div>
+    );
+  }
+
+  return <AdminDashboardContent />;
 };
 
 export default Admin;

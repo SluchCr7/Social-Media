@@ -1,30 +1,8 @@
 const { verifyAccessToken } = require('../utils/tokenUtils');
 const { User } = require('../Modules/User');
 
-/**
- * Verify access token from HTTP-only cookie or Authorization header.
- */
 const verifyToken = async (req, res, next) => {
-  let token = null;
-
-  // 1. Check Bearer authorization header
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const candidate = authHeader.split(' ')[1];
-    if (candidate && candidate !== 'undefined' && candidate !== 'null') {
-      token = candidate;
-    }
-  } else if (authHeader && authHeader !== 'undefined' && authHeader !== 'null') {
-    token = authHeader;
-  }
-
-  // 2. Check HTTP-Only cookie fallback
-  if (!token && req.cookies) {
-    const candidate = req.cookies.accessToken || req.cookies.token;
-    if (candidate && candidate !== 'undefined' && candidate !== 'null') {
-      token = candidate;
-    }
-  }
+  const token = req.cookies?.accessToken;
 
   if (!token) {
     return res.status(401).json({ message: 'No authentication token provided', code: 'NO_TOKEN' });
@@ -42,9 +20,16 @@ const verifyToken = async (req, res, next) => {
 
   try {
     // Check account status in DB
-    const user = await User.findById(payload._id).select('accountStatus suspendedUntil isAdmin email username');
+    const user = await User.findById(payload._id)
+      .select('+tokenVersion accountStatus suspendedUntil isAdmin email username refreshTokens.family');
     if (!user) {
       return res.status(401).json({ message: 'User account not found', code: 'USER_NOT_FOUND' });
+    }
+    if ((Number(payload.tokenVersion) || 0) !== (Number(user.tokenVersion) || 0)) {
+      return res.status(401).json({ message: 'Authentication session revoked', code: 'SESSION_REVOKED' });
+    }
+    if (payload.sid && !(user.refreshTokens || []).some((session) => session.family === payload.sid)) {
+      return res.status(401).json({ message: 'Authentication session revoked', code: 'SESSION_REVOKED' });
     }
 
     if (user.accountStatus === 'banned') {
@@ -74,24 +59,7 @@ const verifyToken = async (req, res, next) => {
 };
 
 const optionalVerifyToken = async (req, res, next) => {
-  let token = null;
-
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const candidate = authHeader.split(' ')[1];
-    if (candidate && candidate !== 'undefined' && candidate !== 'null') {
-      token = candidate;
-    }
-  } else if (authHeader && authHeader !== 'undefined' && authHeader !== 'null') {
-    token = authHeader;
-  }
-
-  if (!token && req.cookies) {
-    const candidate = req.cookies.accessToken || req.cookies.token;
-    if (candidate && candidate !== 'undefined' && candidate !== 'null') {
-      token = candidate;
-    }
-  }
+  const token = req.cookies?.accessToken;
 
   if (!token) {
     return next();
@@ -106,10 +74,13 @@ const optionalVerifyToken = async (req, res, next) => {
 
   try {
     const user = await User.findById(payload._id)
-      .select('accountStatus suspendedUntil isAdmin email username')
+      .select('+tokenVersion accountStatus suspendedUntil isAdmin email username refreshTokens.family')
       .lean();
 
-    if (!user || user.accountStatus === 'banned') {
+    if (!user ||
+        (Number(payload.tokenVersion) || 0) !== (Number(user.tokenVersion) || 0) ||
+        (payload.sid && !(user.refreshTokens || []).some((session) => session.family === payload.sid)) ||
+        user.accountStatus === 'banned') {
       return next();
     }
 

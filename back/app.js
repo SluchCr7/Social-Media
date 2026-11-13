@@ -49,11 +49,21 @@ app.use(cookieParser());
 app.use(compression());
 
 // CORS
-const allowedOrigin = process.env.DOMAIN_NAME || "http://localhost:3000";
+const allowedOrigins = (process.env.DOMAIN_NAME || "http://localhost:3000")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+    .map((origin) => {
+        try {
+            return new URL(origin).origin;
+        } catch {
+            throw new Error(`Invalid DOMAIN_NAME origin: ${origin}`);
+        }
+    });
 
 app.use(
     cors({
-        origin: allowedOrigin,
+        origin: allowedOrigins,
         credentials: true,
     })
 );
@@ -64,12 +74,19 @@ app.use((req, res, next) => {
 
     if (["POST", "PUT", "DELETE", "PATCH"].includes(method)) {
         const origin = req.headers.origin || req.headers.referer;
+        const hasAuthCookie = Boolean(req.cookies?.accessToken || req.cookies?.refreshToken);
+
+        if (!origin && hasAuthCookie) {
+            return res.status(403).json({
+                message: "CSRF protection: request origin is required",
+            });
+        }
 
         if (origin) {
             try {
                 const requestOrigin = new URL(origin).origin;
 
-                if (requestOrigin !== allowedOrigin) {
+                if (!allowedOrigins.includes(requestOrigin)) {
                     return res.status(403).json({
                         message: "CSRF protection: request origin not authorized",
                     });
