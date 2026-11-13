@@ -11,7 +11,10 @@ export const userApi = baseApi.injectEndpoints({
       providesTags: (result, error, id) => [{ type: 'User', id }],
     }),
     getUserByUsername: builder.query({
-      query: (username) => `/auth/username/${encodeURIComponent(username)}`,
+      query: (username) => ({
+        url: '/auth/username',
+        params: { username },
+      }),
       providesTags: (result, error, username) => [{ type: 'User', id: `username-${username}` }],
     }),
     followUser: builder.mutation({

@@ -31,7 +31,7 @@ const endpoint = (operation, select = requestContext) => asyncHandler(async (req
 const getAllUsers = endpoint('getAllUsers');
 const getUserById = endpoint('getUserById', (req) => ({ id: req.params.id }));
 const getPublicUserByUsername = endpoint('getPublicUserByUsername', (req) => ({
-  username: req.params.username,
+  username: req.query.username ?? req.params.username,
 }));
 const DeleteUser = endpoint('deleteUser');
 const verifyAccount = endpoint('verifyAccount', (req) => ({

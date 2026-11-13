@@ -15,6 +15,9 @@ import { useTranslation } from "react-i18next";
 import { MdInfo } from "react-icons/md";
 import SensitiveImage from "@/app/Component/Post/SensitiveImage";
 
+const DEFAULT_PROFILE_PHOTO = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+const DEFAULT_COVER_PHOTO = "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop";
+
 const StatItem = ({ label, value, onClick }) => (
   <div
     onClick={onClick}
@@ -84,7 +87,7 @@ const ProfileHeader = ({
       {/* Dynamic Cover Section */}
       <div className="group/cover relative h-64 w-full overflow-hidden bg-slate-200/80 md:h-80 dark:bg-[#111]">
         <SensitiveImage
-          src={profileUser?.coverPhoto?.url || profileUser?.profilePhoto?.url || "/default-profile.png"}
+          src={profileUser?.coverPhoto?.url || profileUser?.profilePhoto?.url || DEFAULT_COVER_PHOTO}
           fill
           priority
           isSensitive={profileUser?.coverPhoto?.isSensitive}
@@ -141,7 +144,7 @@ const ProfileHeader = ({
             >
               <div className="group relative h-full w-full overflow-hidden rounded-[3rem] border-4 border-white bg-white dark:border-black dark:bg-black">
                 <SensitiveImage
-                  src={preview || profileUser?.profilePhoto?.url || "/default-profile.png"}
+                  src={preview || profileUser?.profilePhoto?.url || DEFAULT_PROFILE_PHOTO}
                   alt="profile"
                   fill
                   priority

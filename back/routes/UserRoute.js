@@ -38,6 +38,7 @@ const { verifyToken, verifyAdmin } = require('../Middelwares/verifyToken');
 route.route('/').get(getAllUsers);
 route.route('/suggested').get(verifyToken, getSuggestedUsers);
 route.route('/block/:id').put(verifyToken, blockOrUnblockUser);
+route.route('/username').get(getPublicUserByUsername);
 route.route('/username/:username').get(getPublicUserByUsername);
 route.route('/:id').get(getUserById);
 route.route('/delete').delete(verifyToken, DeleteUser);

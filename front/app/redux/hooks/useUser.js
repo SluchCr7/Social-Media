@@ -271,7 +271,10 @@ export const useUser = () => {
   const getUserByUsername = useCallback(async (username) => {
     if (!username) return null;
     try {
-      const res = await api.get(`/auth/username/${encodeURIComponent(username)}`);
+      const decodedUsername = decodeURIComponent(username);
+      const res = await api.get('/auth/username', {
+        params: { username: decodedUsername },
+      });
       return res.data;
     } catch (err) {
       console.error('Fetch user by username error:', err);

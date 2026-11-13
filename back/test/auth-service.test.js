@@ -526,6 +526,56 @@ test('the refresh route has no access-token middleware', () => {
   assert.equal(refreshLayer.route.stack.length, 1);
 });
 
+test('public profile username lookup accepts query names and preserves the legacy path route', async (t) => {
+  const userService = require('../Services/userService');
+  const originalLookup = userService.getPublicUserByUsername;
+  const { getPublicUserByUsername } = require('../Controllers/UserController');
+  const userRoute = require('../routes/UserRoute');
+  const usernames = [];
+
+  t.after(() => {
+    userService.getPublicUserByUsername = originalLookup;
+  });
+
+  userService.getPublicUserByUsername = async ({ username }) => {
+    usernames.push(username);
+    return { status: 200, body: { username } };
+  };
+
+  const invoke = async (request) => {
+    let responseBody;
+    const response = {
+      status(status) {
+        assert.equal(status, 200);
+        return this;
+      },
+      json(body) {
+        responseBody = body;
+        return this;
+      },
+    };
+    await getPublicUserByUsername(request, response, (error) => {
+      throw error;
+    });
+    return responseBody;
+  };
+
+  assert.deepEqual(await invoke({
+    query: { username: 'Jane Example' },
+    params: {},
+    headers: {},
+  }), { username: 'Jane Example' });
+  assert.deepEqual(await invoke({
+    query: {},
+    params: { username: 'Jane Example' },
+    headers: {},
+  }), { username: 'Jane Example' });
+  assert.deepEqual(usernames, ['Jane Example', 'Jane Example']);
+  assert.ok(userRoute.stack.some((layer) =>
+    layer.route?.path === '/username' && layer.route.methods.get
+  ));
+});
+
 test('a valid access cookie authenticates the user and active session family', async (t) => {
   const originalFindById = User.findById;
   const userId = '507f1f77bcf86cd799439011';
