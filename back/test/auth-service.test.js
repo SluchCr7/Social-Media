@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { execFileSync } = require('node:child_process');
+const { execFileSync, spawnSync } = require('node:child_process');
 const path = require('node:path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -9,6 +9,7 @@ process.env.ACCESS_TOKEN_SECRET = 'auth-service-test-access-secret';
 process.env.REFRESH_TOKEN_SECRET = 'auth-service-test-refresh-secret';
 process.env.AUTH_COOKIE_SAME_SITE = 'lax';
 process.env.NODE_ENV = 'test';
+process.env.DOMAIN_NAME = 'https://zocial-zeta.vercel.app';
 
 const { User } = require('../Modules/User');
 const authService = require('../Services/authService');
@@ -333,28 +334,59 @@ test('registration controller sends both cookies without exposing tokens in JSON
   assert.equal(JSON.stringify(response.body).includes(refreshToken), false);
 });
 
-test('production cookies stay secure and only use SameSite=None when configured', () => {
+test('production cookies default to cross-site settings and clear with matching attributes', () => {
   const output = execFileSync(process.execPath, ['-e', `
     process.env.ACCESS_TOKEN_SECRET = 'production-cookie-test-access-secret';
     process.env.REFRESH_TOKEN_SECRET = 'production-cookie-test-refresh-secret';
     process.env.NODE_ENV = 'production';
     delete process.env.AUTH_COOKIE_SAME_SITE;
     const tokenUtilsPath = require.resolve('./utils/tokenUtils');
-    const defaultOptions = require(tokenUtilsPath).getCookieOptions();
-    process.env.AUTH_COOKIE_SAME_SITE = 'none';
-    delete require.cache[tokenUtilsPath];
-    const configuredOptions = require(tokenUtilsPath).getCookieOptions();
-    process.stdout.write(JSON.stringify({ defaultOptions, configuredOptions }));
+    const utils = require(tokenUtilsPath);
+    const cookies = {};
+    const clearedCookies = {};
+    const response = {
+      cookie(name, value, options) {
+        cookies[name] = options;
+      },
+      clearCookie(name, options) {
+        clearedCookies[name] = options;
+      },
+    };
+    utils.setAuthCookies(response, 'access-token', 'refresh-token');
+    utils.clearAuthCookies(response);
+    process.stdout.write(JSON.stringify({ cookies, clearedCookies }));
   `], {
     cwd: path.resolve(__dirname, '..'),
     encoding: 'utf8',
   });
-  const { defaultOptions, configuredOptions } = JSON.parse(output);
+  const { cookies, clearedCookies } = JSON.parse(output);
 
-  assert.equal(defaultOptions.sameSite, 'lax');
-  assert.equal(defaultOptions.secure, true);
-  assert.equal(configuredOptions.sameSite, 'none');
-  assert.equal(configuredOptions.secure, true);
+  for (const name of ['accessToken', 'refreshToken']) {
+    assert.equal(cookies[name].httpOnly, true);
+    assert.equal(cookies[name].secure, true);
+    assert.equal(cookies[name].sameSite, 'none');
+    assert.equal(cookies[name].path, '/');
+    assert.equal(cookies[name].domain, undefined);
+    const expectedClearOptions = { ...cookies[name] };
+    delete expectedClearOptions.maxAge;
+    assert.deepEqual(clearedCookies[name], expectedClearOptions);
+  }
+
+  const misconfiguredProduction = spawnSync(process.execPath, ['-e', `
+    process.env.ACCESS_TOKEN_SECRET = 'production-cookie-test-access-secret';
+    process.env.REFRESH_TOKEN_SECRET = 'production-cookie-test-refresh-secret';
+    process.env.NODE_ENV = 'production';
+    process.env.AUTH_COOKIE_SAME_SITE = 'lax';
+    require('./utils/tokenUtils');
+  `], {
+    cwd: path.resolve(__dirname, '..'),
+    encoding: 'utf8',
+  });
+  assert.notEqual(misconfiguredProduction.status, 0);
+  assert.match(
+    misconfiguredProduction.stderr,
+    /Production cross-site auth cookies require AUTH_COOKIE_SAME_SITE=none\./
+  );
 });
 
 test('authentication middleware does not accept a token from Authorization headers', async () => {
@@ -388,7 +420,7 @@ test('authentication middleware does not accept a token from Authorization heade
 
 test('CSRF checks reject unapproved origins and allow the configured frontend origin', () => {
   const createCsrfProtection = require('../Middelwares/csrfProtection');
-  const middleware = createCsrfProtection(['https://app.example.test']);
+  const middleware = createCsrfProtection(['https://zocial-zeta.vercel.app']);
   const invoke = (request) => {
     let nextCalled = false;
     let responseStatus;
@@ -412,7 +444,7 @@ test('CSRF checks reject unapproved origins and allow the configured frontend or
 
   const allowed = invoke({
     method: 'POST',
-    headers: { origin: 'https://app.example.test' },
+    headers: { origin: 'https://zocial-zeta.vercel.app' },
     cookies: { refreshToken: 'redacted' },
   });
   assert.equal(allowed.nextCalled, true);
@@ -438,6 +470,50 @@ test('CSRF checks reject unapproved origins and allow the configured frontend or
     headers: {},
     cookies: {},
   }).nextCalled, true);
+});
+
+test('CORS allows only the configured production frontend and covers preflight and auth errors', async (t) => {
+  const app = require('../app');
+  const server = app.listen(0, '127.0.0.1');
+  t.after(() => {
+    server.closeAllConnections();
+    return new Promise((resolve, reject) => {
+      server.close((error) => error ? reject(error) : resolve());
+    });
+  });
+  await new Promise((resolve) => server.once('listening', resolve));
+
+  const origin = 'https://zocial-zeta.vercel.app';
+  const url = `http://127.0.0.1:${server.address().port}/api/auth/refresh`;
+  const preflight = await fetch(url, {
+    method: 'OPTIONS',
+    headers: {
+      Origin: origin,
+      'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'content-type',
+    },
+  });
+  assert.equal(preflight.status, 204);
+  assert.equal(preflight.headers.get('access-control-allow-origin'), origin);
+  assert.equal(preflight.headers.get('access-control-allow-credentials'), 'true');
+
+  const refresh = await fetch(url, {
+    method: 'POST',
+    headers: { Origin: origin, 'Content-Type': 'application/json' },
+    body: '{}',
+  });
+  assert.equal(refresh.status, 401);
+  assert.equal(refresh.headers.get('access-control-allow-origin'), origin);
+  assert.equal(refresh.headers.get('access-control-allow-credentials'), 'true');
+
+  const untrustedPreflight = await fetch(url, {
+    method: 'OPTIONS',
+    headers: {
+      Origin: 'https://untrusted.example.test',
+      'Access-Control-Request-Method': 'POST',
+    },
+  });
+  assert.equal(untrustedPreflight.headers.get('access-control-allow-origin'), null);
 });
 
 test('the refresh route has no access-token middleware', () => {

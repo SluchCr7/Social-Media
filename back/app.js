@@ -23,6 +23,26 @@ app.use(
     })
 );
 
+// CORS must run before middleware that can end a request with an error response.
+const allowedOrigins = (process.env.DOMAIN_NAME || "http://localhost:3000")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+    .map((origin) => {
+        try {
+            return new URL(origin).origin;
+        } catch {
+            throw new Error(`Invalid DOMAIN_NAME origin: ${origin}`);
+        }
+    });
+
+app.use(
+    cors({
+        origin: allowedOrigins,
+        credentials: true,
+    })
+);
+
 // Request Logging
 if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"));
@@ -48,26 +68,6 @@ app.use(cookieParser());
 
 // Performance
 app.use(compression());
-
-// CORS
-const allowedOrigins = (process.env.DOMAIN_NAME || "http://localhost:3000")
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean)
-    .map((origin) => {
-        try {
-            return new URL(origin).origin;
-        } catch {
-            throw new Error(`Invalid DOMAIN_NAME origin: ${origin}`);
-        }
-    });
-
-app.use(
-    cors({
-        origin: allowedOrigins,
-        credentials: true,
-    })
-);
 
 app.use(createCsrfProtection(allowedOrigins));
 

@@ -20,10 +20,17 @@ const ACCESS_COOKIE_MAX_AGE = 15 * 60 * 1000; // 15 minutes
 const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 const REFRESH_COOKIE_MAX_AGE = REFRESH_TOKEN_MAX_AGE;
 const REFRESH_TOKEN_ROTATION_GRACE_MS = 60 * 1000;
-const AUTH_COOKIE_SAME_SITE = String(process.env.AUTH_COOKIE_SAME_SITE || 'lax').toLowerCase();
+const defaultAuthCookieSameSite = process.env.NODE_ENV === 'production' ? 'none' : 'lax';
+const AUTH_COOKIE_SAME_SITE = String(
+  process.env.AUTH_COOKIE_SAME_SITE || defaultAuthCookieSameSite
+).toLowerCase();
 
 if (!['strict', 'lax', 'none'].includes(AUTH_COOKIE_SAME_SITE)) {
   throw new Error('AUTH_COOKIE_SAME_SITE must be one of: strict, lax, none.');
+}
+
+if (process.env.NODE_ENV === 'production' && AUTH_COOKIE_SAME_SITE !== 'none') {
+  throw new Error('Production cross-site auth cookies require AUTH_COOKIE_SAME_SITE=none.');
 }
 
 /**
