@@ -367,12 +367,21 @@ const savePost = async ({ id, userId }) => {
 };
 
 const sharePost = async ({ id, userId, body }) => {
+  if (body?.customText != null && typeof body.customText !== "string") {
+    return result(400, { message: "Share text must be a string" });
+  }
+  const customText = body?.customText?.trim() || "";
+  if (customText.length > 300) {
+    return result(400, { message: "Share text must be 300 characters or fewer" });
+  }
+
   const originalPost = await Post.findById(id);
   if (!originalPost) return result(404, { message: "Post not found" });
   if (!(await canViewPost(originalPost, userId))) return result(404, { message: "Post not found" });
   await originalPost.populate("owner", "username profileName profilePhoto");
+  const originalOwnerId = originalPost.owner?._id ?? originalPost.owner;
   const sharedPost = new Post({
-    text: body.customText || "",
+    text: customText,
     owner: userId,
     community: originalPost.community,
     Photos: originalPost.Photos,
@@ -381,25 +390,32 @@ const sharePost = async ({ id, userId, body }) => {
     originalPost: originalPost._id,
     isShared: true,
   });
-  const postOwner = await User.findById(originalPost.owner).select("BlockedNotificationFromUsers");
-  if (
-    !originalPost.owner.equals(userId) &&
-    !postOwner.BlockedNotificationFromUsers
-      .map(blockedId => blockedId.toString())
-      .includes(userId.toString())
-  ) {
-    await sendNotificationHelper({
-      sender: userId,
-      receiver: originalPost.owner,
-      content: "shared your post",
-      type: "share",
-      actionRef: sharedPost._id,
-      actionModel: "Post",
-    });
+  if (String(originalOwnerId) !== String(userId)) {
+    const postOwner = await User.findById(originalOwnerId).select("BlockedNotificationFromUsers");
+    const blockedNotificationFromUsers = postOwner?.BlockedNotificationFromUsers || [];
+    if (!blockedNotificationFromUsers.map(String).includes(String(userId))) {
+      await sendNotificationHelper({
+        sender: userId,
+        receiver: originalOwnerId,
+        content: "shared your post",
+        type: "share",
+        actionRef: sharedPost._id,
+        actionModel: "Post",
+      });
+    }
   }
   await sharedPost.save();
   await sharedPost.populate(postPopulate);
   await updateUserPoints(userId, "SHARE_POST", sharedPost._id);
+
+  const updatedOriginalPost = await Post.findByIdAndUpdate(
+    id,
+    { $addToSet: { shares: userId } },
+    { new: true }
+  ).populate(postPopulate);
+  await emitPostEvent("post:update", originalPost, updatedOriginalPost);
+  await emitPostEvent("post:create", sharedPost);
+
   return result(201, sharedPost);
 };
 

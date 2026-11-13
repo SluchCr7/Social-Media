@@ -387,6 +387,100 @@ export const usePost = ({ autoFetch = false } = {}) => {
     [dispatch]
   );
 
+  const sharePost = useCallback(
+    async (postId, customText = '') => {
+      if (!user) {
+        showToast(MESSAGES.COMMON.UNAUTHORIZED, 'error');
+        return null;
+      }
+      if (!postId) {
+        showToast('Could not find the post to share.', 'error');
+        return null;
+      }
+      if (typeof customText !== 'string' || customText.length > 300) {
+        showToast('Share text must be 300 characters or fewer.', 'error');
+        return null;
+      }
+
+      const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
+      try {
+        const res = await api.post(`/post/share/${postId}`, { customText });
+        const sharedPost = res.data;
+        if (!sharedPost?._id) throw new Error('The share request returned an invalid post.');
+
+        dispatch(addReduxPost(sharedPost));
+        const originalPost = selectPosts(store.getState()).find((post) => post?._id === postId);
+        if (originalPost) {
+          const shares = Array.isArray(originalPost.shares) ? originalPost.shares : [];
+          const alreadyShared = shares.some((share) =>
+            String(share?._id ?? share?.user?._id ?? share?.user ?? share) === String(user._id)
+          );
+          if (!alreadyShared) {
+            dispatch(updatePostInState({ ...originalPost, shares: [...shares, user._id] }));
+          }
+        }
+
+        showToast('Post shared successfully.', 'success', { id: loadingToast });
+        return sharedPost;
+      } catch (err) {
+        console.error('Error sharing post:', err);
+        showToast(
+          err?.response?.data?.message || 'Failed to share this post. Please try again.',
+          'error',
+          { id: loadingToast }
+        );
+        return null;
+      }
+    },
+    [user, showToast, dispatch, store]
+  );
+
+  const sharePostExternally = useCallback(
+    async (post) => {
+      const originalPost = post?.originalPost || post;
+      const postId = typeof originalPost === 'string' ? originalPost : originalPost?._id;
+      if (!postId || typeof window === 'undefined' || typeof navigator === 'undefined') {
+        showToast('Could not create a link for this post.', 'error');
+        return false;
+      }
+
+      const url = `${window.location.origin}/Pages/Post/${encodeURIComponent(postId)}`;
+      const shareData = {
+        title: originalPost?.owner?.profileName
+          ? `${originalPost.owner.profileName}'s post`
+          : 'Post',
+        text: originalPost?.text || undefined,
+        url,
+      };
+
+      try {
+        if (navigator.share) {
+          try {
+            await navigator.share(shareData);
+            return true;
+          } catch (err) {
+            if (err?.name === 'AbortError') return false;
+            if (!navigator.clipboard?.writeText) throw err;
+          }
+        }
+
+        if (!navigator.clipboard?.writeText) {
+          showToast('Sharing is not supported by this browser.', 'error');
+          return false;
+        }
+
+        await navigator.clipboard.writeText(url);
+        showToast('Post link copied to clipboard.', 'success');
+        return true;
+      } catch (err) {
+        console.error('Error sharing post link:', err);
+        showToast('Could not share this post. Please try again.', 'error');
+        return false;
+      }
+    },
+    [showToast]
+  );
+
   useEffect(() => {
     if (autoFetch) {
       fetchPosts(page);
@@ -430,6 +524,8 @@ export const usePost = ({ autoFetch = false } = {}) => {
       hahaPost,
       savePost,
       viewPost,
+      sharePost,
+      sharePostExternally,
     }),
     [
       posts,
@@ -463,6 +559,8 @@ export const usePost = ({ autoFetch = false } = {}) => {
       hahaPost,
       savePost,
       viewPost,
+      sharePost,
+      sharePostExternally,
     ]
   );
 };

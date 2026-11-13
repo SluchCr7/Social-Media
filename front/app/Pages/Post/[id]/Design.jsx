@@ -35,6 +35,7 @@ const DesignPostSelect = memo(({
   setShowMenu,
   likePost,
   sharePost,
+  sharePostExternally,
   hahaPost,
   savePost,
   setImageView,
@@ -94,7 +95,7 @@ const DesignPostSelect = memo(({
         post={post}
         isOpen={openModel}
         onClose={() => setOpenModel(false)}
-        onShare={(id, customText) => sharePost(id, post?.owner?._id, customText)}
+        onShare={(id, customText) => sharePost(id, customText)}
       />
 
       <div className="w-full space-y-8">
@@ -227,7 +228,7 @@ const DesignPostSelect = memo(({
                   user={user}
                   likePost={likePost}
                   hahaPost={hahaPost}
-                  sharePost={sharePost}
+                  sharePostExternally={sharePostExternally}
                   savePost={savePost}
                   setOpenModel={setOpenModel}
                 />
@@ -324,7 +325,7 @@ const DesignPostSelect = memo(({
                       whileTap={{ scale: 0.95 }}
                       onClick={handleLoadMore}
                       disabled={loadingMore}
-                      className="px-8 py-3 rounded-2xl bg-white/[0.03] border border-white/10 text-gray-400 hover:text-white hover:border-indigo-500/50 transition-all text-xs font-black uppercase tracking-widest disabled:opacity-50"
+                      className="px-8 py-3 rounded-2xl bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white hover:border-indigo-500/50 transition-all text-xs font-black uppercase tracking-widest disabled:opacity-50"
                     >
                       {loadingMore ? t("Syncing...") : t("Load More Discussion")}
                     </motion.button>

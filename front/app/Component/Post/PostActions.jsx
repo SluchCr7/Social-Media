@@ -47,11 +47,13 @@ const ActionButton = memo(({ onClick, icon: Icon, label, active, color, activeCo
 
 ActionButton.displayName = 'ActionButton';
 
-const PostActions = memo(({ post, user, likePost, hahaPost, sharePost, savePost, setOpenModel }) => {
+const PostActions = memo(({ post, user, likePost, hahaPost, sharePostExternally, savePost, setOpenModel }) => {
   const userId = user?._id;
   const isLiked = post?.likes?.includes(userId);
   const isSaved = post?.saved?.includes(userId);
-  const isShared = post?.shares?.some(s => s.user === userId);
+  const isShared = post?.shares?.some((share) =>
+    String(share?._id ?? share?.user?._id ?? share?.user ?? share) === String(userId)
+  );
 
   return (
     <div className="flex items-center justify-between w-full">
@@ -88,7 +90,7 @@ const PostActions = memo(({ post, user, likePost, hahaPost, sharePost, savePost,
         
         {/* External Share */}
         <ActionButton
-          onClick={() => sharePost(post?.originalPost ? post.originalPost._id : post._id, post?.owner?._id)}
+          onClick={() => sharePostExternally(post?.originalPost || post)}
           icon={Share2}
         />
       </div>

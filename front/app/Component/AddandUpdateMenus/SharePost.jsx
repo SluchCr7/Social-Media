@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import {
   Share,
@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from '@/app/redux/hooks';
-import { usePost } from '@/app/redux/hooks';
 import { useTranslation } from "react-i18next";
 import React from "react";
 import { Button } from "../ui/Button";
@@ -74,28 +73,35 @@ PostPreview.displayName = 'PostPreview';
  */
 export function ShareModal({ post, isOpen, onClose, onShare }) {
   const [customText, setCustomText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
-  const { isLoading } = usePost();
   const { t } = useTranslation();
 
-  const handleKey = (e) => {
-    if (e.key === "Escape" && !isLoading) onClose();
-  };
-
-  const handleSubmit = () => {
-    if (!post?._id || isLoading) return;
-    const targetId = post?.originalPost ? post?.originalPost?._id : post?._id;
-    onShare(targetId, customText);
-  };
+  const handleSubmit = useCallback(async () => {
+    if (!post?._id || isSubmitting) return;
+    const targetId = post?.originalPost?._id || post?.originalPost || post?._id;
+    setIsSubmitting(true);
+    try {
+      const sharedPost = await onShare(targetId, customText);
+      if (sharedPost) {
+        setCustomText("");
+        onClose();
+      }
+    } catch (err) {
+      console.error("Could not share post:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [post, isSubmitting, onShare, customText, onClose]);
 
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e) => {
-      if (e.key === "Escape" && !isLoading) onClose();
+      if (e.key === "Escape" && !isSubmitting) onClose();
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, isLoading, onClose]);
+  }, [isOpen, isSubmitting, onClose]);
 
   if (!isOpen) return null;
 
@@ -106,7 +112,7 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={() => !isLoading && onClose()}
+        onClick={() => !isSubmitting && onClose()}
       >
         <motion.div
           initial={{ y: 15, scale: 0.98, opacity: 0 }}
@@ -132,7 +138,7 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
             </div>
             <button
               onClick={onClose}
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
             >
               <X size={20} />
@@ -146,7 +152,7 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
               <Avatar src={user?.profilePhoto?.url} size="md" className="shrink-0" />
               <div className="flex-1 space-y-3">
                 <textarea
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                   autoFocus
                   className="w-full bg-transparent border-none text-gray-900 dark:text-white placeholder-gray-400 focus:ring-0 text-base font-normal resize-none min-h-[90px] focus:outline-none"
                   maxLength={300}
@@ -179,14 +185,14 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
           <div className="px-6 py-4 bg-gray-50/50 dark:bg-neutral-900/40 border-t border-gray-100 dark:border-neutral-800 flex items-center justify-end gap-3">
             <button
               onClick={onClose}
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="px-5 py-2.5 rounded-full text-gray-600 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-neutral-800 font-medium text-sm transition-colors"
             >
               {t("Cancel")}
             </button>
             <Button
               onClick={handleSubmit}
-              isLoading={isLoading}
+              isLoading={isSubmitting}
               className="rounded-full px-6 py-2.5 text-sm font-semibold tracking-tight bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-all"
             >
               <Send size={16} className="mr-2" />
@@ -196,7 +202,7 @@ export function ShareModal({ post, isOpen, onClose, onShare }) {
 
           {/* Loading Overlay */}
           <AnimatePresence>
-            {isLoading && (
+            {isSubmitting && (
               <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="absolute inset-0 bg-white/70 dark:bg-black/70 backdrop-blur-xs flex flex-col items-center justify-center z-50"

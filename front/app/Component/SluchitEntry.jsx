@@ -37,7 +37,14 @@ const PostMusicPlayer = dynamic(() => import('./Post/PostMusic'), { ssr: false }
 const ShowSensitiveContent = dynamic(() => import('./Post/ShowSensitiveContent'), { ssr: false });
 
 const SluchitEntry = memo(forwardRef(({ post }, ref) => {
-  const { likePost, hahaPost, savePost, sharePost, setImageView } = usePost();
+  const {
+    likePost,
+    hahaPost,
+    savePost,
+    sharePost,
+    sharePostExternally,
+    setImageView,
+  } = usePost();
   const { user, isLogin } = useAuth();
   const { t } = useTranslation();
   const { translate, loading, language } = useTranslate();
@@ -96,7 +103,7 @@ const SluchitEntry = memo(forwardRef(({ post }, ref) => {
           post={post}
           isOpen={openModel}
           onClose={() => setOpenModel(false)}
-          onShare={(id, customText) => sharePost(id, post?.owner?._id, customText)}
+          onShare={(id, customText) => sharePost(id, customText)}
         />
       )}
 
@@ -212,7 +219,7 @@ const SluchitEntry = memo(forwardRef(({ post }, ref) => {
                       user={user}
                       likePost={likePost}
                       hahaPost={hahaPost}
-                      sharePost={sharePost}
+                      sharePostExternally={sharePostExternally}
                       savePost={savePost}
                       setOpenModel={setOpenModel}
                     />

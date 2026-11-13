@@ -97,7 +97,7 @@ const Comment = ({ comment }) => {
               alt="avatar"
               width={44}
               height={44}
-              className="relative rounded-2xl object-cover w-10 h-10 sm:w-11 sm:h-11 border-2 border-white/10 dark:border-white/5 shadow-sm"
+              className="relative rounded-2xl object-cover w-10 h-10 sm:w-11 sm:h-11 border-2 border-gray-200 dark:border-white/10 shadow-sm"
             />
           </motion.div>
           {/* Thread Line */}
@@ -108,18 +108,18 @@ const Comment = ({ comment }) => {
 
         <div className="flex-1 min-w-0">
           {/* Comment Bubble */}
-          <div className="relative overflow-hidden rounded-[1.5rem] bg-white/[0.03] dark:bg-black/20 backdrop-blur-xl border border-white/10 dark:border-white/5 group-hover:border-blue-500/30 transition-all duration-300">
+          <div className="relative overflow-hidden rounded-[1.5rem] bg-white dark:bg-black/20 backdrop-blur-xl border border-gray-200 dark:border-white/10 group-hover:border-blue-500/30 transition-all duration-300">
             <div className="p-4 sm:px-6">
               {/* Header */}
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center gap-2 flex-wrap min-w-0">
-                  <span className="font-black text-sm uppercase tracking-wider text-gray-500 truncate">
+                  <span className="font-black text-sm uppercase tracking-wider text-gray-700 dark:text-gray-300 truncate">
                     {comment.owner.username}
                   </span>
                   {comment.owner.isAccountWithPremiumVerify && (
                     <HiBadgeCheck className="text-blue-500 text-lg flex-shrink-0" />
                   )}
-                  <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tighter">
                     · {formatRelativeTime(comment?.createdAt)}
                   </span>
                   {comment?.isEdited && (
@@ -133,15 +133,15 @@ const Comment = ({ comment }) => {
                 <div className="flex items-center gap-1 opacity-10 sm:opacity-0 group-hover:opacity-100 transition-all">
                   {user?._id === comment?.owner?._id ? (
                     <>
-                      <button onClick={() => setIsEditing(true)} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                      <button onClick={() => setIsEditing(true)} className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white transition-colors">
                         <FaRegEdit size={14} />
                       </button>
-                      <button onClick={() => deleteComment(comment._id)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-500 transition-colors">
+                      <button onClick={() => deleteComment(comment._id)} className="p-1.5 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-500/10 dark:hover:text-red-500 transition-colors">
                         <MdOutlineDelete size={14} />
                       </button>
                     </>
                   ) : (
-                    <button onClick={() => { setIsTargetId(comment._id); setReportedOnType('comment'); setShowMenuReport(true); }} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                    <button onClick={() => { setIsTargetId(comment._id); setReportedOnType('comment'); setShowMenuReport(true); }} className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white transition-colors">
                       <MdOutlineReport size={14} />
                     </button>
                   )}
@@ -155,17 +155,17 @@ const Comment = ({ comment }) => {
                     value={editText}
                     onChange={(e) => setEditText(e.target.value)}
                     dir={/[\u0600-\u06FF]/.test(editText) ? 'rtl' : 'ltr'}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white resize-none h-24 focus:ring-1 focus:ring-blue-500 outline-none"
+                    className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-xl p-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 resize-none h-24 focus:ring-1 focus:ring-blue-500 outline-none"
                   />
                   <div className="flex gap-2 justify-end">
-                    <button onClick={() => setIsEditing(false)} className="text-xs font-bold uppercase text-gray-500 hover:text-white p-2">{t('Cancel')}</button>
+                    <button onClick={() => setIsEditing(false)} className="text-xs font-bold uppercase text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white p-2">{t('Cancel')}</button>
                     <button onClick={handleUpdateComment} disabled={loadingEdit} className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase py-2 px-6 rounded-xl transition-all disabled:opacity-50">
                       {loadingEdit ? t('Saving...') : t('Update')}
                     </button>
                   </div>
                 </div>
               ) : (
-                <p className="text-sm sm:text-base text-gray-300 leading-relaxed break-words" dir={/[\u0600-\u06FF]/.test(comment.text) ? 'rtl' : 'ltr'}>
+                <p className="text-sm sm:text-base text-gray-800 dark:text-gray-300 leading-relaxed break-words" dir={/[\u0600-\u06FF]/.test(comment.text) ? 'rtl' : 'ltr'}>
                   {comment.text}
                 </p>
               )}
@@ -179,23 +179,23 @@ const Comment = ({ comment }) => {
               onClick={() => likeComment(comment._id)}
               className="flex items-center gap-2 text-xs font-bold uppercase group/like"
             >
-              <div className="w-8 h-8 rounded-full bg-white/[0.03] flex items-center justify-center group-hover/like:bg-red-500/10 transition-colors">
+              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/[0.03] flex items-center justify-center group-hover/like:bg-red-500/10 transition-colors">
                 {comment?.likes?.includes(user?._id) ? (
                   <IoIosHeart className="text-red-500 text-lg" />
                 ) : (
-                  <CiHeart className="text-gray-500 text-xl group-hover/like:text-red-500" />
+                  <CiHeart className="text-gray-500 dark:text-gray-400 text-xl group-hover/like:text-red-500" />
                 )}
               </div>
-              <span className={comment?.likes?.includes(user?._id) ? "text-red-500" : "text-gray-500"}>
+              <span className={comment?.likes?.includes(user?._id) ? "text-red-500" : "text-gray-600 dark:text-gray-400"}>
                 {comment?.likes?.length || 0}
               </span>
             </motion.button>
 
             <button
               onClick={() => setIsReplying(!isReplying)}
-              className="flex items-center gap-2 text-xs font-bold uppercase text-gray-500 hover:text-blue-400 group/reply"
+              className="flex items-center gap-2 text-xs font-bold uppercase text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 group/reply"
             >
-              <div className="w-8 h-8 rounded-full bg-white/[0.03] flex items-center justify-center group-hover/reply:bg-blue-500/10 transition-colors">
+              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/[0.03] flex items-center justify-center group-hover/reply:bg-blue-500/10 transition-colors">
                 <FaRegCommentDots className="text-base" />
               </div>
               {t('Reply')}
@@ -229,7 +229,7 @@ const Comment = ({ comment }) => {
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleSendReply()}
-                      className="w-full bg-white/5 border border-white/10 rounded-full px-5 py-3 text-sm text-white focus:ring-1 focus:ring-blue-500 outline-none"
+                      className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-full px-5 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-1 focus:ring-blue-500 outline-none"
                     />
                   </div>
                   <motion.button

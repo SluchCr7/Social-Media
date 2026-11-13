@@ -12,7 +12,17 @@ import DesignPostSelect from './Design';
 const PostPage = ({ params }) => {
   const id = params.id;
   const { user, isLogin } = useAuth();
-  const { posts, likePost, savePost, sharePost, setImageView, viewPost, hahaPost, getPostById } = usePost();
+  const {
+    posts,
+    likePost,
+    savePost,
+    sharePost,
+    sharePostExternally,
+    setImageView,
+    viewPost,
+    hahaPost,
+    getPostById,
+  } = usePost();
   const { comments, AddComment, isLoading, fetchCommentsByTarget } = useComment();
   const [openModel, setOpenModel] = useState(false);
   const [post, setPost] = useState(null);
@@ -127,6 +137,7 @@ const PostPage = ({ params }) => {
       likePost={likePost}
       hahaPost={hahaPost}
       sharePost={sharePost}
+      sharePostExternally={sharePostExternally}
       savePost={savePost}
       setImageView={setImageView}
       renderTextWithMentionsAndHashtags={renderTextWithMentionsHashtagsAndLinks}
