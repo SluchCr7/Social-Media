@@ -1,6 +1,10 @@
 import { baseApi } from '../../api/baseApi';
-import { refreshAuthSession } from '../../../utils/authRefresh';
-import { setUser, logoutSuccess, setIsAuthChecked } from './authSlice';
+import {
+  isTerminalAuthFailure,
+  refreshAuthSession,
+  runAuthTransition,
+} from '../../../utils/authRefresh';
+import { setAuthSession, logoutSuccess, setIsAuthChecked } from './authSlice';
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -12,12 +16,11 @@ export const authApi = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled;
           if ((getState().auth?.sessionVersion || 0) === sessionVersion) {
-            dispatch(setUser(data.user));
+            dispatch(setAuthSession(data.user));
           }
         } catch (rejection) {
           if ((getState().auth?.sessionVersion || 0) === sessionVersion) {
-            const status = rejection?.error?.status;
-            if ([401, 403, 404].includes(status)) {
+            if (isTerminalAuthFailure(rejection?.error) || rejection?.error?.status === 404) {
               dispatch(logoutSuccess());
             } else {
               dispatch(setIsAuthChecked(true));
@@ -27,47 +30,45 @@ export const authApi = baseApi.injectEndpoints({
       },
     }),
     login: builder.mutation({
-      query: (credentials) => ({
-        url: '/auth/login',
-        method: 'POST',
-        body: credentials,
-      }),
+      queryFn: (credentials, api, extraOptions, baseQuery) =>
+        runAuthTransition(async () => {
+          const result = await baseQuery({
+            url: '/auth/login',
+            method: 'POST',
+            body: credentials,
+          }, api, extraOptions);
+          if (result.data?.user) api.dispatch(setAuthSession(result.data.user));
+          return result;
+        }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setUser(data.user));
-        } catch {
-          // The caller handles credential errors.
-        }
-      },
     }),
     register: builder.mutation({
-      query: (userData) => ({
-        url: '/auth/register',
-        method: 'POST',
-        body: userData,
-      }),
+      queryFn: (userData, api, extraOptions, baseQuery) =>
+        runAuthTransition(async () => {
+          const result = await baseQuery({
+            url: '/auth/register',
+            method: 'POST',
+            body: userData,
+          }, api, extraOptions);
+          if (result.data?.user) api.dispatch(setAuthSession(result.data.user));
+          return result;
+        }),
       invalidatesTags: ['Auth'],
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setUser(data.user));
-        } catch {
-          // The caller handles validation errors.
-        }
-      },
     }),
     logout: builder.mutation({
-      query: () => ({
-        url: '/auth/logout',
-        method: 'POST',
-      }),
+      queryFn: (arg, api, extraOptions, baseQuery) =>
+        runAuthTransition(async () => {
+          const result = await baseQuery({
+            url: '/auth/logout',
+            method: 'POST',
+          }, api, extraOptions);
+          if (result.data) api.dispatch(logoutSuccess());
+          return result;
+        }),
       invalidatesTags: ['Auth'],
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
-          dispatch(logoutSuccess());
           dispatch(baseApi.util.resetApiState());
         } catch {
           return;

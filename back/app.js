@@ -11,6 +11,7 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 
 const xssProtection = require("./Middelwares/xssProtection");
+const createCsrfProtection = require("./Middelwares/csrfProtection");
 const { notfound, errorhandler } = require("./Middelwares/errorHandler");
 
 const { app } = require("./Config/socket");
@@ -68,39 +69,7 @@ app.use(
     })
 );
 
-// CSRF Protection
-app.use((req, res, next) => {
-    const method = req.method.toUpperCase();
-
-    if (["POST", "PUT", "DELETE", "PATCH"].includes(method)) {
-        const origin = req.headers.origin || req.headers.referer;
-        const hasAuthCookie = Boolean(req.cookies?.accessToken || req.cookies?.refreshToken);
-
-        if (!origin && hasAuthCookie) {
-            return res.status(403).json({
-                message: "CSRF protection: request origin is required",
-            });
-        }
-
-        if (origin) {
-            try {
-                const requestOrigin = new URL(origin).origin;
-
-                if (!allowedOrigins.includes(requestOrigin)) {
-                    return res.status(403).json({
-                        message: "CSRF protection: request origin not authorized",
-                    });
-                }
-            } catch {
-                return res.status(403).json({
-                    message: "Invalid request origin",
-                });
-            }
-        }
-    }
-
-    next();
-});
+app.use(createCsrfProtection(allowedOrigins));
 
 // Homepage
 app.get("/", (req, res) => {

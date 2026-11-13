@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 import { BACKEND_URL } from '../../../utils/backendUrl';
-import { refreshAuthSession } from '../../../utils/authRefresh';
+import { isTerminalAuthFailure, refreshAuthSession } from '../../../utils/authRefresh';
 
 let socketInstance = null;
 
@@ -20,22 +20,24 @@ export const connectSocket = (userId) => {
   if (!userId) return null;
 
   const url = BACKEND_URL;
-  socketInstance = io(url, {
+  const socket = io(url, {
     withCredentials: true,
     transports: ['websocket', 'polling'],
   });
 
-  socketInstance.userId = userId;
+  socketInstance = socket;
+  socket.userId = userId;
 
-  socketInstance.on('connect', () => {
-    console.log('🟢 Redux Socket connected:', socketInstance.id);
+  socket.on('connect', () => {
+    console.log('🟢 Redux Socket connected:', socket.id);
   });
 
-  socketInstance.on('disconnect', () => {
+  socket.on('disconnect', () => {
     console.log('🔴 Redux Socket disconnected');
   });
 
-  socketInstance.on('connect_error', (error) => {
+  socket.on('connect_error', (error) => {
+    if (socketInstance !== socket) return;
     const authErrors = [
       'Authentication required',
       'Invalid or expired authentication',
@@ -45,19 +47,17 @@ export const connectSocket = (userId) => {
     ];
     if (!authErrors.includes(error?.message)) return;
 
-    const currentSocket = socketInstance;
     refreshAuthSession()
       .then(() => {
-        if (socketInstance === currentSocket && !currentSocket.connected) {
-          currentSocket.connect();
+        if (socketInstance === socket && !socket.connected) {
+          socket.connect();
         }
       })
       .catch((refreshError) => {
-        const status = refreshError.response?.status;
         if (
-          socketInstance === currentSocket &&
+          socketInstance === socket &&
           typeof window !== 'undefined' &&
-          (status === 401 || status === 403)
+          isTerminalAuthFailure(refreshError)
         ) {
           window.dispatchEvent(new CustomEvent('auth:session-expired'));
         }

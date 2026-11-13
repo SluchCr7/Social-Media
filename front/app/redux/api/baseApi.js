@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { logoutSuccess } from '../features/auth/authSlice';
 import { API_BASE_URL } from '../../utils/backendUrl';
-import { refreshAuthSession } from '../../utils/authRefresh';
+import { isTerminalAuthFailure, refreshAuthSession } from '../../utils/authRefresh';
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
@@ -15,19 +15,23 @@ const isAuthEndpoint = (args) => {
 };
 
 const baseQueryWithReauth = async (args, api, extraOptions) => {
+  const sessionVersion = api.getState().auth?.sessionVersion || 0;
+  const isSameSession = () =>
+    (api.getState().auth?.sessionVersion || 0) === sessionVersion;
   let result = await rawBaseQuery(args, api, extraOptions);
 
-  if (result.error?.status === 401 && !isAuthEndpoint(args)) {
+  if (result.error?.status === 401 && !isAuthEndpoint(args) && isSameSession()) {
     try {
       await refreshAuthSession();
+      if (!isSameSession()) return result;
       result = await rawBaseQuery(args, api, extraOptions);
-      if (result.error?.status === 401) {
+      if (result.error?.status === 401 && isSameSession()) {
         api.dispatch(logoutSuccess());
         api.dispatch(baseApi.util.resetApiState());
       }
     } catch (refreshError) {
       const status = refreshError.response?.status;
-      if (status === 401 || status === 403) {
+      if (isTerminalAuthFailure(refreshError) && isSameSession()) {
         api.dispatch(logoutSuccess());
         api.dispatch(baseApi.util.resetApiState());
       } else {

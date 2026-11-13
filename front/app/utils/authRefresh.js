@@ -1,8 +1,45 @@
 import { API_BASE_URL } from './backendUrl';
 
 let refreshPromise = null;
+let authTransitionPromise = null;
 
 const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+export const runAuthTransition = async (operation) => {
+  if (authTransitionPromise) {
+    await authTransitionPromise;
+    return runAuthTransition(operation);
+  }
+
+  let releaseTransition;
+  const transition = new Promise((resolve) => {
+    releaseTransition = resolve;
+  });
+  authTransitionPromise = transition;
+
+  try {
+    if (refreshPromise) {
+      await refreshPromise.catch(() => undefined);
+    }
+    return await operation();
+  } finally {
+    authTransitionPromise = null;
+    releaseTransition();
+  }
+};
+
+export const isTerminalAuthFailure = (failure) => {
+  const status = failure?.response?.status ?? failure?.status;
+  const data = failure?.response?.data ?? failure?.data;
+  const terminalCodes = [
+    'TOKEN_REUSE_DETECTED',
+    'ACCOUNT_ACCESS_DENIED',
+    'ACCOUNT_BANNED',
+    'ACCOUNT_SUSPENDED',
+  ];
+
+  return status === 401 || (status === 403 && terminalCodes.includes(data?.code));
+};
 
 const requestRefresh = async () => {
   for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -32,6 +69,12 @@ const requestRefresh = async () => {
 
 export const refreshAuthSession = () => {
   if (!refreshPromise) {
+    if (authTransitionPromise) {
+      const error = new Error('Authentication is changing; skip this stale refresh request.');
+      error.code = 'AUTH_TRANSITION_IN_PROGRESS';
+      return Promise.reject(error);
+    }
+
     refreshPromise = requestRefresh().finally(() => {
       refreshPromise = null;
     });

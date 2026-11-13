@@ -13,6 +13,7 @@ import {
 } from '../features/auth/authSelectors';
 import {
   setUser as setAuthUser,
+  setAuthSession,
   setUsers as setAuthUsers,
   setIsLoading,
   logoutSuccess,
@@ -21,6 +22,7 @@ import api from '@/app/utils/api';
 import { baseApi } from '../api/baseApi';
 import { useFeedback } from './useFeedback';
 import { MESSAGES } from '@/app/utils/messages';
+import { runAuthTransition } from '@/app/utils/authRefresh';
 
 
 
@@ -64,15 +66,14 @@ export const useAuth = () => {
       const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
 
       try {
-        const res = await api.post('/auth/login', { email, password });
-        const userData = res.data.user;
-
-        if (!userData) {
-          throw new Error('Invalid response from server');
-        }
-
-        dispatch(baseApi.util.resetApiState());
-        dispatch(setAuthUser(userData));
+        const res = await runAuthTransition(async () => {
+          const response = await api.post('/auth/login', { email, password });
+          const userData = response.data.user;
+          if (!userData) throw new Error('Invalid response from server');
+          dispatch(baseApi.util.resetApiState());
+          dispatch(setAuthSession(userData));
+          return response;
+        });
 
         showToast(res.data.message || MESSAGES.AUTH.LOGIN_SUCCESS, 'success', { id: loadingToast });
         if (res.data.verificationInfo?.verificationCode) {
@@ -100,9 +101,11 @@ export const useAuth = () => {
 
     if (isConfirmed) {
       try {
-        await api.post('/auth/logout');
-        dispatch(logoutSuccess());
-        dispatch(baseApi.util.resetApiState());
+        await runAuthTransition(async () => {
+          await api.post('/auth/logout');
+          dispatch(logoutSuccess());
+          dispatch(baseApi.util.resetApiState());
+        });
         window.location.href = '/Pages/Login';
       } catch (error) {
         console.error('Logout error:', error);
@@ -117,12 +120,18 @@ export const useAuth = () => {
       const loadingToast = showToast(MESSAGES.COMMON.LOADING, 'loading');
 
       try {
-        const res = await api.post('/auth/register', { username, email, password });
-        const userData = res.data.user;
+        const res = await runAuthTransition(async () => {
+          const response = await api.post('/auth/register', { username, email, password });
+          const userData = response.data.user;
+          if (userData) {
+            dispatch(baseApi.util.resetApiState());
+            dispatch(setAuthSession(userData));
+          }
+          return response;
+        });
 
-        if (userData) {
-          dispatch(baseApi.util.resetApiState());
-          dispatch(setAuthUser(userData));
+        if (!res.data.user) {
+          throw new Error('Invalid response from server');
         }
 
         showToast(res.data.message || MESSAGES.AUTH.REGISTRATION_SUCCESS, 'success', { id: loadingToast });

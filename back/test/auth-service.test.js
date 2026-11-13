@@ -1,5 +1,9 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const { execFileSync } = require('node:child_process');
+const path = require('node:path');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 process.env.ACCESS_TOKEN_SECRET = 'auth-service-test-access-secret';
 process.env.REFRESH_TOKEN_SECRET = 'auth-service-test-refresh-secret';
@@ -13,6 +17,7 @@ const {
   generateRefreshToken,
   hashToken,
   setAuthCookies,
+  clearAuthCookies,
 } = require('../utils/tokenUtils');
 
 test('refresh rotates the hash atomically and never returns token values in JSON', async (t) => {
@@ -56,11 +61,16 @@ test('refresh rotates the hash atomically and never returns token values in JSON
     throw new Error('A concurrent rotation must not revoke the active family');
   };
 
-  const duplicate = await authService.refreshSession({ refreshToken });
-  assert.equal(duplicate.status, 409);
-  assert.equal(duplicate.body.code, 'TOKEN_ROTATED');
-  assert.equal(duplicate.authCookies, undefined);
-  assert.equal(JSON.stringify(duplicate.body).includes(refreshToken), false);
+  const duplicates = await Promise.all([
+    authService.refreshSession({ refreshToken }),
+    authService.refreshSession({ refreshToken }),
+  ]);
+  for (const duplicate of duplicates) {
+    assert.equal(duplicate.status, 409);
+    assert.equal(duplicate.body.code, 'TOKEN_ROTATED');
+    assert.equal(duplicate.authCookies, undefined);
+    assert.equal(JSON.stringify(duplicate.body).includes(refreshToken), false);
+  }
 
   User.exists = async () => false;
   let familyRevocation;
@@ -73,6 +83,171 @@ test('refresh rotates the hash atomically and never returns token values in JSON
   assert.equal(reuse.clearAuthCookies, true);
   assert.equal(familyRevocation.filter._id, userId);
   assert.equal(familyRevocation.update.$pull.refreshTokens.family, family);
+});
+
+test('registration persists only a refresh-token hash and returns no raw tokens', async (t) => {
+  const originalFindOne = User.findOne;
+  const originalExists = User.exists;
+  const originalSave = User.prototype.save;
+  let savedUser;
+
+  t.after(() => {
+    User.findOne = originalFindOne;
+    User.exists = originalExists;
+    User.prototype.save = originalSave;
+  });
+
+  User.findOne = async () => null;
+  User.exists = async () => false;
+  User.prototype.save = async function saveUser() {
+    savedUser = this;
+    return this;
+  };
+
+  const registration = await authService.register({
+    body: { username: 'test-user', email: 'registration@example.com', password: 'secure-password' },
+  });
+
+  assert.equal(registration.status, 201);
+  assert.equal(registration.body.user.email, 'registration@example.com');
+  assert.equal(registration.body.user.refreshTokens, undefined);
+  assert.equal(JSON.stringify(registration.body).includes(registration.authCookies.refreshToken), false);
+  assert.equal(
+    savedUser.refreshTokens[0].tokenHash,
+    hashToken(registration.authCookies.refreshToken)
+  );
+  assert.equal(
+    require('../utils/tokenUtils').verifyAccessToken(registration.authCookies.accessToken).payload.sid,
+    savedUser.refreshTokens[0].family
+  );
+});
+
+test('login stores a hashed session and returns only public user data', async (t) => {
+  const originalFindOne = User.findOne;
+  const originalSave = User.prototype.save;
+  const password = 'secure-password';
+  const user = new User({
+    username: 'login-user',
+    email: 'login@example.com',
+    password: await bcrypt.hash(password, 4),
+    userCode: 'LOGIN-TEST',
+  });
+  user.accountStatus = 'active';
+  user.tokenVersion = 0;
+  let savedUser;
+  const query = {
+    select() { return this; },
+    populate() { return this; },
+    then(resolve, reject) { return Promise.resolve(user).then(resolve, reject); },
+  };
+
+  t.after(() => {
+    User.findOne = originalFindOne;
+    User.prototype.save = originalSave;
+  });
+
+  User.findOne = () => query;
+  User.prototype.save = async function saveUser() {
+    savedUser = this;
+    return this;
+  };
+
+  const login = await authService.login({
+    body: { email: 'login@example.com', password },
+    userAgent: 'test-agent',
+  });
+
+  assert.equal(login.status, 200);
+  assert.equal(login.body.user.password, undefined);
+  assert.equal(login.body.user.refreshTokens, undefined);
+  assert.equal(JSON.stringify(login.body).includes(login.authCookies.accessToken), false);
+  assert.equal(
+    savedUser.refreshTokens[0].tokenHash,
+    hashToken(login.authCookies.refreshToken)
+  );
+  assert.equal(
+    require('../utils/tokenUtils').verifyRefreshToken(login.authCookies.refreshToken).payload.family,
+    savedUser.refreshTokens[0].family
+  );
+});
+
+test('missing, malformed, and expired refresh tokens return 401 without database writes', async () => {
+  const missing = await authService.refreshSession({});
+  const malformed = await authService.refreshSession({ refreshToken: 'not-a-jwt' });
+  const expired = jwt.sign({
+    _id: '507f1f77bcf86cd799439011',
+    typ: 'refresh',
+    jti: 'expired-jti',
+    family: 'expired-family',
+    iat: Math.floor(Date.now() / 1000) - 60,
+  }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1s' });
+  const expiredResult = await authService.refreshSession({ refreshToken: expired });
+
+  for (const result of [missing, malformed, expiredResult]) {
+    assert.equal(result.status, 401);
+    assert.equal(result.clearAuthCookies, true);
+  }
+  assert.equal(missing.body.code, 'NO_REFRESH_TOKEN');
+  assert.equal(malformed.body.code, 'REFRESH_TOKEN_EXPIRED');
+  assert.equal(expiredResult.body.code, 'REFRESH_TOKEN_EXPIRED');
+});
+
+test('refresh returns an explicit terminal code for banned or suspended accounts', async (t) => {
+  const originalFindOneAndUpdate = User.findOneAndUpdate;
+  const originalUpdateOne = User.updateOne;
+  const refreshToken = generateRefreshToken(
+    { _id: '507f1f77bcf86cd799439011', tokenVersion: 0 },
+    'restricted-family'
+  );
+
+  t.after(() => {
+    User.findOneAndUpdate = originalFindOneAndUpdate;
+    User.updateOne = originalUpdateOne;
+  });
+
+  User.findOneAndUpdate = () => ({
+    select: () => Promise.resolve({ _id: '507f1f77bcf86cd799439011', accountStatus: 'banned' }),
+  });
+  User.updateOne = async () => ({ modifiedCount: 1 });
+
+  const banned = await authService.refreshSession({ refreshToken });
+  assert.equal(banned.status, 403);
+  assert.equal(banned.body.code, 'ACCOUNT_ACCESS_DENIED');
+  assert.equal(banned.clearAuthCookies, true);
+});
+
+test('logout revokes the matching session family and logout-all invalidates every session', async (t) => {
+  const originalUpdateOne = User.updateOne;
+  const originalFindByIdAndUpdate = User.findByIdAndUpdate;
+  const userId = '507f1f77bcf86cd799439011';
+  const family = 'logout-family';
+  const refreshToken = generateRefreshToken({ _id: userId }, family);
+  let logoutFilter;
+  let logoutAllUpdate;
+
+  t.after(() => {
+    User.updateOne = originalUpdateOne;
+    User.findByIdAndUpdate = originalFindByIdAndUpdate;
+  });
+
+  User.updateOne = async (filter) => {
+    logoutFilter = filter;
+    return { modifiedCount: 1 };
+  };
+  User.findByIdAndUpdate = async (_id, update) => {
+    logoutAllUpdate = update;
+    return { _id };
+  };
+
+  const logout = await authService.logout({ refreshToken });
+  const logoutAll = await authService.logoutAllSessions({ userId });
+
+  assert.equal(logout.status, 200);
+  assert.equal(logout.clearAuthCookies, true);
+  assert.equal(logoutFilter['refreshTokens.family'], family);
+  assert.equal(logoutAll.status, 200);
+  assert.deepEqual(logoutAllUpdate.$set.refreshTokens, []);
+  assert.equal(logoutAllUpdate.$inc.tokenVersion, 1);
 });
 
 test('access tokens are bound to a revocable session family', () => {
@@ -89,8 +264,12 @@ test('access tokens are bound to a revocable session family', () => {
 test('auth cookies are HttpOnly and never use a JavaScript-readable token alias', () => {
   const response = {
     cookies: {},
+    clearedCookies: {},
     cookie(name, value, options) {
       this.cookies[name] = { value, options };
+    },
+    clearCookie(name, options) {
+      this.clearedCookies[name] = options;
     },
   };
 
@@ -100,6 +279,82 @@ test('auth cookies are HttpOnly and never use a JavaScript-readable token alias'
   assert.equal(response.cookies.accessToken.options.httpOnly, true);
   assert.equal(response.cookies.refreshToken.options.httpOnly, true);
   assert.equal(response.cookies.accessToken.options.sameSite, 'lax');
+  assert.equal(response.cookies.accessToken.options.domain, undefined);
+
+  clearAuthCookies(response);
+  assert.deepEqual(Object.keys(response.clearedCookies).sort(), ['accessToken', 'refreshToken']);
+  assert.equal(response.clearedCookies.accessToken.path, response.cookies.accessToken.options.path);
+  assert.equal(response.clearedCookies.accessToken.sameSite, response.cookies.accessToken.options.sameSite);
+  assert.equal(response.clearedCookies.accessToken.secure, response.cookies.accessToken.options.secure);
+  assert.equal(response.clearedCookies.accessToken.domain, response.cookies.accessToken.options.domain);
+});
+
+test('registration controller sends both cookies without exposing tokens in JSON', async (t) => {
+  const originalRegister = authService.register;
+  const accessToken = 'test-access-token';
+  const refreshToken = 'test-refresh-token';
+  const response = {
+    cookies: {},
+    statusCode: null,
+    body: null,
+    cookie(name, value, options) {
+      this.cookies[name] = { value, options };
+    },
+    status(status) {
+      this.statusCode = status;
+      return this;
+    },
+    json(body) {
+      this.body = body;
+      return this;
+    },
+  };
+
+  t.after(() => {
+    authService.register = originalRegister;
+  });
+
+  authService.register = async () => ({
+    status: 201,
+    body: { message: 'registered', user: { _id: 'public-user-id' } },
+    authCookies: { accessToken, refreshToken },
+  });
+
+  const { RegisterNewUser } = require('../Controllers/AuthController');
+  await RegisterNewUser({ body: {}, headers: {}, ip: '127.0.0.1' }, response);
+
+  assert.equal(response.statusCode, 201);
+  assert.deepEqual(Object.keys(response.cookies).sort(), ['accessToken', 'refreshToken']);
+  assert.equal(response.cookies.accessToken.value, accessToken);
+  assert.equal(response.cookies.refreshToken.value, refreshToken);
+  assert.equal(response.cookies.accessToken.options.httpOnly, true);
+  assert.equal(response.cookies.refreshToken.options.httpOnly, true);
+  assert.equal(JSON.stringify(response.body).includes(accessToken), false);
+  assert.equal(JSON.stringify(response.body).includes(refreshToken), false);
+});
+
+test('production cookies stay secure and only use SameSite=None when configured', () => {
+  const output = execFileSync(process.execPath, ['-e', `
+    process.env.ACCESS_TOKEN_SECRET = 'production-cookie-test-access-secret';
+    process.env.REFRESH_TOKEN_SECRET = 'production-cookie-test-refresh-secret';
+    process.env.NODE_ENV = 'production';
+    delete process.env.AUTH_COOKIE_SAME_SITE;
+    const tokenUtilsPath = require.resolve('./utils/tokenUtils');
+    const defaultOptions = require(tokenUtilsPath).getCookieOptions();
+    process.env.AUTH_COOKIE_SAME_SITE = 'none';
+    delete require.cache[tokenUtilsPath];
+    const configuredOptions = require(tokenUtilsPath).getCookieOptions();
+    process.stdout.write(JSON.stringify({ defaultOptions, configuredOptions }));
+  `], {
+    cwd: path.resolve(__dirname, '..'),
+    encoding: 'utf8',
+  });
+  const { defaultOptions, configuredOptions } = JSON.parse(output);
+
+  assert.equal(defaultOptions.sameSite, 'lax');
+  assert.equal(defaultOptions.secure, true);
+  assert.equal(configuredOptions.sameSite, 'none');
+  assert.equal(configuredOptions.secure, true);
 });
 
 test('authentication middleware does not accept a token from Authorization headers', async () => {
@@ -129,4 +384,101 @@ test('authentication middleware does not accept a token from Authorization heade
   assert.equal(responseStatus, 401);
   assert.equal(responseBody.code, 'NO_TOKEN');
   assert.equal(nextCalled, false);
+});
+
+test('CSRF checks reject unapproved origins and allow the configured frontend origin', () => {
+  const createCsrfProtection = require('../Middelwares/csrfProtection');
+  const middleware = createCsrfProtection(['https://app.example.test']);
+  const invoke = (request) => {
+    let nextCalled = false;
+    let responseStatus;
+    let responseBody;
+    const response = {
+      status(status) {
+        responseStatus = status;
+        return this;
+      },
+      json(body) {
+        responseBody = body;
+      },
+    };
+
+    middleware(request, response, () => {
+      nextCalled = true;
+    });
+
+    return { nextCalled, responseStatus, responseBody };
+  };
+
+  const allowed = invoke({
+    method: 'POST',
+    headers: { origin: 'https://app.example.test' },
+    cookies: { refreshToken: 'redacted' },
+  });
+  assert.equal(allowed.nextCalled, true);
+
+  const missingOrigin = invoke({
+    method: 'POST',
+    headers: {},
+    cookies: { refreshToken: 'redacted' },
+  });
+  assert.equal(missingOrigin.responseStatus, 403);
+  assert.equal(missingOrigin.responseBody.code, 'CSRF_ORIGIN_REQUIRED');
+
+  const unapprovedOrigin = invoke({
+    method: 'POST',
+    headers: { origin: 'https://untrusted.example.test' },
+    cookies: {},
+  });
+  assert.equal(unapprovedOrigin.responseStatus, 403);
+  assert.equal(unapprovedOrigin.responseBody.code, 'CSRF_ORIGIN_NOT_ALLOWED');
+
+  assert.equal(invoke({
+    method: 'OPTIONS',
+    headers: {},
+    cookies: {},
+  }).nextCalled, true);
+});
+
+test('the refresh route has no access-token middleware', () => {
+  const authRoute = require('../routes/AuthRoute');
+  const refreshLayer = authRoute.stack.find(
+    (layer) => layer.route?.path === '/refresh' && layer.route.methods.post
+  );
+
+  assert.ok(refreshLayer);
+  assert.equal(refreshLayer.route.stack.length, 1);
+});
+
+test('a valid access cookie authenticates the user and active session family', async (t) => {
+  const originalFindById = User.findById;
+  const userId = '507f1f77bcf86cd799439011';
+  const family = 'middleware-family';
+  const token = generateAccessToken({ _id: userId, tokenVersion: 0 }, family);
+  const user = {
+    _id: userId,
+    tokenVersion: 0,
+    accountStatus: 'active',
+    isAdmin: false,
+    username: 'test-user',
+    refreshTokens: [{ family }],
+  };
+
+  t.after(() => {
+    User.findById = originalFindById;
+  });
+
+  User.findById = () => ({
+    select: () => Promise.resolve(user),
+  });
+
+  const { verifyToken } = require('../Middelwares/verifyToken');
+  const request = { cookies: { accessToken: token } };
+  let nextCalled = false;
+  await verifyToken(request, {}, () => {
+    nextCalled = true;
+  });
+
+  assert.equal(nextCalled, true);
+  assert.equal(request.user._id, userId);
 });

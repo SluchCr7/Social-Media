@@ -215,7 +215,10 @@ const refreshSession = async ({ refreshToken, userAgent, ip, forwardedFor }) => 
         { _id: user._id },
         { $pull: { refreshTokens: { family: payload.family } } }
       );
-      return result(403, { message: 'Account access denied' }, { clearAuthCookies: true });
+      return result(403, {
+        message: 'Account access denied',
+        code: 'ACCOUNT_ACCESS_DENIED',
+      }, { clearAuthCookies: true });
     }
 
     return result(200, { message: 'Session refreshed successfully' }, {

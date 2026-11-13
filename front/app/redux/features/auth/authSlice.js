@@ -19,16 +19,23 @@ const initialState = {
   sessionVersion: 0,
 };
 
+const applyUser = (state, user) => {
+  const safeUser = withoutTokens(user);
+  state.user = safeUser;
+  state.isLogin = Boolean(safeUser);
+  state.status = safeUser ? 'authenticated' : 'unauthenticated';
+  state.isAuthChecked = true;
+};
+
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
     setUser: (state, action) => {
-      const safeUser = withoutTokens(action.payload);
-      state.user = safeUser;
-      state.isLogin = Boolean(safeUser);
-      state.status = safeUser ? 'authenticated' : 'unauthenticated';
-      state.isAuthChecked = true;
+      applyUser(state, action.payload);
+    },
+    setAuthSession: (state, action) => {
+      applyUser(state, action.payload);
       state.sessionVersion += 1;
     },
     setUsers: (state, action) => {
@@ -75,6 +82,7 @@ export const authSlice = createSlice({
 
 export const {
   setUser,
+  setAuthSession,
   setUsers,
   updateUserInUsersList,
   removeUserFromList,
