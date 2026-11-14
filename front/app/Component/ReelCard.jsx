@@ -249,13 +249,25 @@ const ReelCard = memo(forwardRef(function ReelCard({ userData, reel, isActive, i
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative">
-              <Image
-                src={reel?.originalPost?.owner?.profilePhoto?.url || reel?.owner?.profilePhoto?.url || '/default-avatar.png'}
-                alt="avatar"
-                width={44}
-                height={44}
-                className="w-11 h-11 rounded-full object-cover border-2 border-white/20"
-              />
+              {
+                reel?.originalPost ? (
+                  <Image
+                    src={reel?.originalPost?.owner?.profilePhoto?.url || '/default-avatar.png'}
+                    alt="avatar"
+                    width={44}
+                    height={44}
+                    className="w-11 h-11 rounded-full object-cover border-2 border-white/20"
+                  />
+                ) : (
+                  <Image
+                    src={reel?.owner?.profilePhoto?.url || '/default-avatar.png'}
+                    alt="avatar"
+                    width={44}
+                    height={44}
+                    className="w-11 h-11 rounded-full object-cover border-2 border-white/20"
+                  />
+                )
+              }
               {/* Reshare Indicator Small Badge */}
               {reel?.originalPost && (
                 <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1 border border-black">
@@ -266,7 +278,9 @@ const ReelCard = memo(forwardRef(function ReelCard({ userData, reel, isActive, i
             <div className="flex flex-col">
               <div className="flex items-center gap-1">
                 <span className="font-bold text-white text-sm tracking-wide group-hover:text-blue-400 transition-colors">
-                  {reel?.originalPost?.owner?.username || reel?.owner?.username}
+                  {
+                    reel?.originalPost ? reel?.originalPost?.owner?.username : reel?.owner?.username
+                  }
                 </span>
                 {/* Verified Badge Mockup if available in data */}
                 <MdVerified className="text-blue-500 text-xs" />

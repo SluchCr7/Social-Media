@@ -1,10 +1,9 @@
 'use client';
 
-import React, { memo } from 'react';
+import {React, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HiHeart, HiBookmark, HiShare, HiArrowsPointingOut } from 'react-icons/hi2';
 import { motion } from 'framer-motion';
-
 const PlayerHeader = memo(({ current, likeMusic, shareMusicAsPost, saveMusicInPlayList, userData, myPlaylist, setExpanded }) => {
   const { t } = useTranslation();
   const isLiked = current?.likes?.some((likedUser) =>
@@ -23,11 +22,11 @@ const PlayerHeader = memo(({ current, likeMusic, shareMusicAsPost, saveMusicInPl
         <div className="flex items-center gap-3">
           <span className="truncate text-sm font-medium text-indigo-200">{current?.artist || t('Unknown Artist')}</span>
           <span className="h-1 w-1 rounded-full bg-white/20" />
-          <span className="truncate text-sm text-zinc-500">{current?.album || 'Single'}</span>
+          <span className="truncate text-sm text-zinc-400">{current?.album || 'Single'}</span>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center flex-wrap gap-3">
         {/* زر الإعجاب */}
         <motion.button
           whileHover={{ scale: 1.1 }}
@@ -37,7 +36,7 @@ const PlayerHeader = memo(({ current, likeMusic, shareMusicAsPost, saveMusicInPl
           className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all border ${
             isLiked 
               ? 'bg-red-500 border-red-400 text-white shadow-[0_0_20px_rgba(239,68,68,0.4)]' 
-              : 'bg-white/[0.03] border-white/5 text-white/70 hover:text-red-500 hover:bg-white/[0.05]'
+              : 'bg-zinc-800/80 border-zinc-700/65 text-white hover:text-red-400 hover:bg-zinc-700 shadow-md'
           }`}
         >
           <HiHeart size={20} fill={isLiked ? "currentColor" : "none"} />
@@ -52,7 +51,7 @@ const PlayerHeader = memo(({ current, likeMusic, shareMusicAsPost, saveMusicInPl
           className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all border ${
             isSaved 
               ? 'bg-indigo-500 border-indigo-400 text-white shadow-[0_0_20px_rgba(99,102,241,0.4)]' 
-              : 'bg-white/[0.03] border-white/5 text-white/70 hover:text-indigo-500 hover:bg-white/[0.05]'
+              : 'bg-zinc-800/80 border-zinc-700/65 text-white hover:text-indigo-400 hover:bg-zinc-700 shadow-md'
           }`}
         >
           <HiBookmark size={20} fill={isSaved ? "currentColor" : "none"} />
@@ -64,12 +63,14 @@ const PlayerHeader = memo(({ current, likeMusic, shareMusicAsPost, saveMusicInPl
           whileTap={{ scale: 0.9 }}
           onClick={() => current?._id && shareMusicAsPost(current._id)}
           aria-label={t('Share track')}
-          className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/[0.03] border border-white/5 text-white/70 hover:text-white hover:bg-white/[0.05] transition-all"
+          className="w-12 h-12 rounded-2xl flex items-center justify-center bg-zinc-800/80 border border-zinc-700/65 text-white hover:bg-zinc-700 transition-all shadow-md"
         >
           <HiShare size={20} />
         </motion.button>
-        <div className="w-px h-8 bg-white/5 mx-1" />
 
+        <div className="w-px h-8 bg-white/10 mx-1 hidden sm:block" />
+
+        {/* زر التكبير */}
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
