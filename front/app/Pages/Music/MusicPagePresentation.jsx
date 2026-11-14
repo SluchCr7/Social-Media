@@ -10,7 +10,7 @@ import SidebarPlaylist from '../../Component/MusicPage/SidebarPlayList';
 import AllSongsFeed from '../../Component/MusicPage/AllSongsFeed';
 import SidebarQueue from '../../Component/MusicPage/SidebarQueue';
 import SidebarNowPlaying from '../../Component/MusicPage/SidebarNowPlaying';
-import { ArrowUpRight, Headphones, Music2, Sparkles, Upload } from 'lucide-react';
+import { Upload, Music2, TrendingUp, AlertCircle, RefreshCw } from 'lucide-react';
 
 const GENRES = ['All', 'Pop', 'Rock', 'HipHop', 'Jazz', 'Classical', 'Lo-Fi', 'Electronic', 'Ambient', 'Trap', 'Other'];
 
@@ -28,8 +28,11 @@ function MusicPagePresentation(props) {
   const hasMusic = Array.isArray(songs) && songs.length > 0;
 
   return (
-    <div className="relative min-h-screen w-full overflow-x-clip bg-[#09090d] text-zinc-100">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[34rem] bg-[radial-gradient(ellipse_at_55%_0%,rgba(99,102,241,0.2),transparent_58%)]" />
+    <div className="relative min-h-screen w-full overflow-x-clip bg-[#08080f] text-zinc-100">
+
+      {/* Ambient bg glow */}
+      <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 h-[500px] bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(99,102,241,0.14),transparent)]" />
+
       <AddMusicModal isOpen={openModel} onClose={() => setOpenModel(false)} />
 
       <HeaderMusic
@@ -39,44 +42,53 @@ function MusicPagePresentation(props) {
         userData={userData}
       />
 
-      <main className="relative mx-auto flex w-full max-w-7xl flex-col gap-7 px-4 py-6 pb-16 sm:px-6 lg:px-8">
-        <section className="relative overflow-hidden rounded-[2rem] border border-white/[0.08] bg-gradient-to-br from-[#17172a] via-[#11111a] to-[#101016] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.24)] sm:p-9">
-          <div aria-hidden="true" className="absolute -right-16 -top-28 h-80 w-80 rounded-full bg-indigo-500/15 blur-3xl" />
-          <div aria-hidden="true" className="absolute bottom-[-8rem] right-[22%] h-64 w-64 rounded-full bg-fuchsia-500/10 blur-3xl" />
-          <div className="relative flex flex-col justify-between gap-8 md:flex-row md:items-end">
-            <div className="max-w-2xl">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-300/15 bg-indigo-300/[0.08] px-3 py-1.5 text-xs font-medium text-indigo-200">
-                <Sparkles size={14} />
-                A little space for your sound
+      <main className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 pb-24 sm:px-6 lg:px-8">
+
+        {/* ── Hero Banner ── */}
+        <section className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-br from-[#1a1a2e] via-[#13131f] to-[#0f0f19] p-6 sm:p-8">
+          {/* Decorative orbs */}
+          <div aria-hidden="true" className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-indigo-600/10 blur-3xl" />
+          <div aria-hidden="true" className="absolute bottom-0 left-1/4 h-48 w-48 rounded-full bg-purple-600/8 blur-3xl" />
+
+          <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+            <div className="max-w-lg">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-400/10 px-3 py-1.5 text-xs font-semibold text-indigo-300">
+                <Music2 size={12} />
+                Your Music Space
               </div>
-              <h1 className="max-w-xl text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-                Find your next <span className="text-indigo-300">favorite</span> track.
+              <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
+                Discover & stream{' '}
+                <span className="text-indigo-400">great music</span>
               </h1>
-              <p className="mt-3 max-w-lg text-sm leading-6 text-zinc-400 sm:text-base">
-                Explore new releases, follow the mood, and keep your listening in one simple place.
+              <p className="mt-2 text-sm text-zinc-500 max-w-sm">
+                Explore the library, follow the mood, and keep your listening in one place.
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="hidden items-center gap-3 rounded-2xl border border-white/[0.08] bg-black/20 px-4 py-3 sm:flex">
-                <Headphones className="text-indigo-300" size={19} />
+
+            <div className="flex items-center gap-3 shrink-0">
+              {/* Track count chip */}
+              <div className="hidden sm:flex items-center gap-2.5 rounded-xl border border-white/[0.07] bg-white/[0.04] px-4 py-2.5">
+                <Music2 size={16} className="text-indigo-400" />
                 <div>
-                  <p className="text-sm font-semibold text-white">{songs?.length || 0}</p>
-                  <p className="text-[11px] text-zinc-500">Tracks in view</p>
+                  <p className="text-sm font-bold text-white leading-none">{songs?.length || 0}</p>
+                  <p className="text-[11px] text-zinc-600 mt-0.5">tracks</p>
                 </div>
               </div>
+
+              {/* Upload button */}
               <button
                 type="button"
                 onClick={() => setOpenModel(true)}
-                className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-indigo-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-zinc-900 transition-all hover:bg-indigo-500 hover:text-white shadow-lg shadow-black/20"
               >
-                <Upload size={16} />
-                Share a track
-                <ArrowUpRight size={15} />
+                <Upload size={15} />
+                Upload Track
               </button>
             </div>
           </div>
         </section>
 
+        {/* ── Genre Chips ── */}
         <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {GENRES.map((g) => (
             <button
@@ -84,22 +96,29 @@ function MusicPagePresentation(props) {
               type="button"
               aria-pressed={genre === g}
               onClick={() => setGenre(g)}
-              className={`shrink-0 rounded-full border px-4 py-2 text-xs font-medium transition-colors ${genre === g
-                ? 'border-indigo-300/30 bg-indigo-300/15 text-indigo-100'
-                : 'border-white/[0.08] bg-white/[0.025] text-zinc-400 hover:border-white/20 hover:text-white'}`}
+              className={`shrink-0 rounded-full border px-4 py-1.5 text-xs font-semibold transition-all ${
+                genre === g
+                  ? 'border-indigo-400/40 bg-indigo-500/20 text-indigo-200'
+                  : 'border-zinc-800 bg-transparent text-zinc-500 hover:border-zinc-600 hover:text-zinc-200'
+              }`}
             >
               {g}
             </button>
           ))}
         </div>
 
+        {/* ── Skeleton ── */}
         {showSkeleton ? (
           <MusicSkeleton />
         ) : (
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-            <div className="min-w-0 space-y-6">
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
+
+            {/* ─── Main Column ─── */}
+            <div className="min-w-0 space-y-5">
+
+              {/* Now Playing Player */}
               {hasMusic || current ? (
-                <section className="overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-[#111117] shadow-[0_20px_70px_rgba(0,0,0,0.18)]">
+                <section className="overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0f0f19] shadow-[0_16px_60px_rgba(0,0,0,0.3)]">
                   <NowPlaying
                     current={current}
                     playing={playing}
@@ -130,94 +149,109 @@ function MusicPagePresentation(props) {
                   />
                 </section>
               ) : (
-                <section className="rounded-3xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 p-6 sm:p-8">
-                  <div className="flex items-center gap-3 text-indigo-400">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-500/10">
-                      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 18V5l12-2v13" />
-                        <circle cx="6" cy="18" r="3" />
-                        <circle cx="18" cy="16" r="3" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-white">Your listening space is ready</p>
-                      <p className="text-sm text-zinc-500">Explore the library or share a track of your own.</p>
-                    </div>
+                /* Empty player state */
+                <section className="flex items-center gap-4 rounded-2xl border border-dashed border-zinc-800 bg-zinc-900/30 p-5">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
+                    <Music2 size={20} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-zinc-200">Your listening space is ready</p>
+                    <p className="text-xs text-zinc-600 mt-0.5">Pick a track from the library below to start playing.</p>
                   </div>
                 </section>
               )}
 
+              {/* Trending Songs */}
               {topCharts.trending?.length > 0 && genre === 'All' && !search && (
-                <section className="rounded-[1.75rem] border border-white/[0.08] bg-[#111117] p-4 sm:p-6">
+                <section className="rounded-2xl border border-white/[0.07] bg-[#0f0f19] p-5">
                   <TrendingSongs songs={topCharts.trending} setTrack={setTrack} />
                 </section>
               )}
 
-              <section className="rounded-[1.75rem] border border-white/[0.08] bg-[#111117] p-4 sm:p-6">
-                <div className="mb-4 flex items-center justify-between">
+              {/* Library Feed */}
+              <section className="rounded-2xl border border-white/[0.07] bg-[#0f0f19] overflow-hidden">
+
+                {/* Library header */}
+                <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.05]">
                   <div>
-                    <div className="mb-1 flex items-center gap-2 text-xs font-medium text-indigo-300">
-                      <Music2 size={14} />
-                      LISTEN YOUR WAY
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <TrendingUp size={13} className="text-indigo-400" />
+                      <span className="text-[11px] font-bold uppercase tracking-widest text-indigo-400">Library</span>
                     </div>
-                    <h2 className="text-xl font-semibold tracking-tight text-white">
-                      {search ? 'Search results' : genre === 'All' ? 'Your library' : `${genre} picks`}
+                    <h2 className="text-base font-bold text-white">
+                      {search ? 'Search Results' : genre === 'All' ? 'All Tracks' : `${genre} Picks`}
                     </h2>
-                    <p className="text-sm text-zinc-500">
-                      {songs?.length || 0} {songs?.length === 1 ? 'track' : 'tracks'}
-                    </p>
                   </div>
-                  {isLoading && hasLoadedOnce && (
-                    <span className="text-xs text-zinc-500" role="status">Updating library…</span>
-                  )}
+                  <div className="flex items-center gap-3">
+                    {isLoading && hasLoadedOnce && (
+                      <RefreshCw size={14} className="text-zinc-600 animate-spin" />
+                    )}
+                    <span className="text-xs text-zinc-600 font-medium">
+                      {songs?.length || 0} {songs?.length === 1 ? 'track' : 'tracks'}
+                    </span>
+                  </div>
                 </div>
 
+                {/* Error banner */}
                 {error && (
-                  <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rose-400/15 bg-rose-400/[0.06] px-4 py-3">
-                    <p className="text-sm text-rose-200">{error}</p>
-                    <button type="button" onClick={retryMusic} className="rounded-full border border-rose-300/20 px-3 py-1.5 text-xs font-medium text-rose-100 hover:bg-rose-300/10">
-                      Try again
+                  <div className="mx-5 mt-4 flex items-center justify-between gap-3 rounded-xl border border-rose-500/20 bg-rose-500/8 px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle size={15} className="text-rose-400 shrink-0" />
+                      <p className="text-sm text-rose-300">{error}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={retryMusic}
+                      className="shrink-0 rounded-lg border border-rose-400/20 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-500/15 transition-colors"
+                    >
+                      Retry
                     </button>
                   </div>
                 )}
 
-                {!hasMusic ? (
-                  <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-zinc-800 bg-zinc-950/70 px-6 py-14 text-center">
-                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400">
-                      <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 18V5l12-2v13" />
-                        <circle cx="6" cy="18" r="3" />
-                        <circle cx="18" cy="16" r="3" />
-                      </svg>
+                {/* Songs list / empty state */}
+                <div className="p-5">
+                  {!hasMusic ? (
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-800 py-16 text-center">
+                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400">
+                        <Music2 size={28} />
+                      </div>
+                      <h3 className="text-base font-bold text-white">
+                        {search ? 'No matching tracks' : 'Nothing here yet'}
+                      </h3>
+                      <p className="mt-2 max-w-xs text-sm text-zinc-600">
+                        {search
+                          ? 'Try another artist, title, or keyword.'
+                          : 'Try another genre or be the first to add a track.'}
+                      </p>
+                      <button
+                        onClick={() => setOpenModel(true)}
+                        className="mt-5 rounded-xl bg-white px-5 py-2 text-sm font-semibold text-zinc-900 transition-all hover:bg-indigo-500 hover:text-white shadow-lg shadow-black/20"
+                      >
+                        Upload Music
+                      </button>
                     </div>
-                    <h3 className="text-lg font-semibold text-white">{search ? 'No matching tracks' : 'Nothing here yet'}</h3>
-                    <p className="mt-2 max-w-md text-sm text-zinc-500">
-                      {search ? 'Try another artist, title, or keyword.' : 'Try another genre or add the first track to your library.'}
-                    </p>
-                    <button
-                      onClick={() => setOpenModel(true)}
-                      className="mt-5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-zinc-900 transition hover:bg-indigo-500 hover:text-white"
-                    >
-                      Upload music
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <AllSongsFeed
-                      filtered={songs}
-                      current={current}
-                      playing={playing}
-                      setTrack={setTrack}
-                    />
-                    <div ref={lastMusicRef} className="mt-4 flex justify-center">
-                      {isLoading && <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500/30 border-t-indigo-500" />}
-                    </div>
-                  </>
-                )}
+                  ) : (
+                    <>
+                      <AllSongsFeed
+                        filtered={songs}
+                        current={current}
+                        playing={playing}
+                        setTrack={setTrack}
+                      />
+                      <div ref={lastMusicRef} className="mt-4 flex justify-center">
+                        {isLoading && (
+                          <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-500/30 border-t-indigo-500" />
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
               </section>
             </div>
 
-            <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
+            {/* ─── Sidebar ─── */}
+            <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start xl:max-h-[calc(100vh-7rem)] xl:overflow-y-auto xl:[scrollbar-width:none] xl:[&::-webkit-scrollbar]:hidden">
               {hasMusic ? (
                 <>
                   <SidebarNowPlaying current={current} />
@@ -225,10 +259,10 @@ function MusicPagePresentation(props) {
                   <SidebarQueue queue={queue} setTrack={setTrack} />
                 </>
               ) : (
-                <section className="rounded-3xl border border-zinc-800 bg-zinc-900/70 p-5 text-sm text-zinc-500">
-                  <p className="font-semibold text-zinc-300">No active queue yet</p>
-                  <p className="mt-2">Once music is available, your listening queue and playlist will appear here.</p>
-                </section>
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
+                  <p className="text-sm font-semibold text-zinc-300">Queue &amp; Playlist</p>
+                  <p className="mt-2 text-xs text-zinc-600 leading-relaxed">Your queue and saved playlist will appear here once music is available.</p>
+                </div>
               )}
             </aside>
           </div>

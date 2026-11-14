@@ -2,28 +2,36 @@
 
 import Image from 'next/image';
 import React, { memo } from 'react';
-import { HiPlay, HiArrowTrendingUp } from 'react-icons/hi2';
+import { TrendingUp, Play } from 'lucide-react';
 
 const SongCard = memo(({ song, index, setTrack, songs }) => {
   return (
     <button
       onClick={() => setTrack(song, index, songs)}
-      className="group flex items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-2 text-left transition hover:border-indigo-500/40 hover:bg-zinc-900"
+      className="group relative flex items-center gap-3 rounded-2xl border border-zinc-800/60 bg-zinc-900/50 p-3 text-left transition-all hover:border-indigo-500/30 hover:bg-zinc-800/80"
     >
-      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl">
+      {/* Rank number */}
+      <span className="absolute top-2.5 left-2.5 text-[10px] font-black text-zinc-700 leading-none select-none">
+        {String(index + 1).padStart(2, '0')}
+      </span>
+
+      {/* Cover */}
+      <div className="relative ml-5 h-11 w-11 shrink-0 overflow-hidden rounded-xl">
         <Image src={song.cover || '/default-music.jpg'} alt={song.title} fill className="object-cover" />
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-sm font-semibold text-white">{song.title}</p>
-          <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">0{index + 1}</span>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Play size={14} className="text-white ml-0.5" />
         </div>
-        <p className="truncate text-xs text-zinc-500">{song.artist}</p>
       </div>
 
-      <div className="rounded-full bg-zinc-800 p-2 text-zinc-200 transition group-hover:bg-indigo-500 group-hover:text-white">
-        <HiPlay size={14} />
+      {/* Info */}
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-white group-hover:text-indigo-200 transition-colors">{song.title}</p>
+        <p className="truncate text-xs text-zinc-500 mt-0.5">{song.artist}</p>
+      </div>
+
+      {/* Play button hint */}
+      <div className="shrink-0 w-8 h-8 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-500 group-hover:border-indigo-500 group-hover:text-indigo-400 transition-all">
+        <Play size={12} className="ml-0.5" />
       </div>
     </button>
   );
@@ -36,9 +44,12 @@ const TrendingSongs = memo(({ songs, setTrack }) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-sm font-semibold text-indigo-400">
-        <HiArrowTrendingUp size={16} />
-        <span>Trending now</span>
+      <div className="flex items-center gap-2">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/15">
+          <TrendingUp size={14} className="text-indigo-400" />
+        </div>
+        <h3 className="text-sm font-semibold text-white">Trending Now</h3>
+        <span className="text-xs text-zinc-600">· {songs.length} tracks</span>
       </div>
       <div className="grid gap-2 sm:grid-cols-2">
         {songs.map((s, i) => (

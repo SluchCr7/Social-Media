@@ -20,7 +20,7 @@ const ActionButton = memo(({ onClick, icon: Icon, label, active, color, activeCo
     onClick={onClick}
     className={`
       group flex items-center gap-2 p-2 rounded-full transition-all
-      ${active ? activeColor : 'text-gray-500 dark:text-white/40 hover:bg-gray-50 dark:hover:bg-white/5'}
+      ${active ? activeColor : 'text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-white/5'}
     `}
   >
     <div className="relative">
@@ -38,7 +38,7 @@ const ActionButton = memo(({ onClick, icon: Icon, label, active, color, activeCo
       )}
     </div>
     {label !== undefined && (
-      <span className={`text-[13px] font-bold ${active ? color : 'text-gray-500 dark:text-white/40 group-hover:text-black dark:group-hover:text-white'}`}>
+      <span className={`text-[13px] font-bold ${active ? color : 'text-gray-500 dark:text-zinc-400 group-hover:text-black dark:group-hover:text-white'}`}>
         {label}
       </span>
     )}

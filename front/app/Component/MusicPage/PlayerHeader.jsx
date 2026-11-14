@@ -1,9 +1,10 @@
 'use client';
 
-import {React, memo } from 'react';
+import { React, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { HiHeart, HiBookmark, HiShare, HiArrowsPointingOut } from 'react-icons/hi2';
+import { Heart, Bookmark, Share2, Maximize2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+
 const PlayerHeader = memo(({ current, likeMusic, shareMusicAsPost, saveMusicInPlayList, userData, myPlaylist, setExpanded }) => {
   const { t } = useTranslation();
   const isLiked = current?.likes?.some((likedUser) =>
@@ -14,71 +15,77 @@ const PlayerHeader = memo(({ current, likeMusic, shareMusicAsPost, saveMusicInPl
   );
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 w-full">
-      <div className="space-y-1">
-        <h2 className="mb-2 max-w-2xl break-words text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 w-full">
+      {/* Title + Artist */}
+      <div className="flex-1 min-w-0 space-y-1.5">
+        <h2 className="text-2xl sm:text-3xl font-bold leading-tight text-white truncate">
           {current?.title || t('Silence...')}
         </h2>
-        <div className="flex items-center gap-3">
-          <span className="truncate text-sm font-medium text-indigo-200">{current?.artist || t('Unknown Artist')}</span>
-          <span className="h-1 w-1 rounded-full bg-white/20" />
-          <span className="truncate text-sm text-zinc-400">{current?.album || 'Single'}</span>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm font-medium text-indigo-300 truncate">{current?.artist || t('Unknown Artist')}</span>
+          <span className="h-1 w-1 rounded-full bg-white/20 shrink-0" />
+          <span className="text-sm text-zinc-500 truncate">{current?.album || 'Single'}</span>
         </div>
       </div>
 
-      <div className="flex items-center flex-wrap gap-3">
-        {/* زر الإعجاب */}
+      {/* Action Buttons */}
+      <div className="flex items-center gap-2 shrink-0">
+        {/* Like */}
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
           onClick={() => current?._id && likeMusic(current?._id)}
           aria-label={isLiked ? t('Unlike track') : t('Like track')}
-          className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all border ${
-            isLiked 
-              ? 'bg-red-500 border-red-400 text-white shadow-[0_0_20px_rgba(239,68,68,0.4)]' 
-              : 'bg-zinc-800/80 border-zinc-700/65 text-white hover:text-red-400 hover:bg-zinc-700 shadow-md'
+          title={isLiked ? t('Unlike') : t('Like')}
+          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border ${
+            isLiked
+              ? 'bg-rose-500 border-rose-400 text-white shadow-[0_0_16px_rgba(239,68,68,0.35)]'
+              : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-rose-500/50 hover:text-rose-400 hover:bg-zinc-700'
           }`}
         >
-          <HiHeart size={20} fill={isLiked ? "currentColor" : "none"} />
+          <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} strokeWidth={2} />
         </motion.button>
 
-        {/* زر الحفظ */}
+        {/* Save */}
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
           onClick={() => current?._id && saveMusicInPlayList(current?._id)}
           aria-label={isSaved ? t('Remove from saved tracks') : t('Save track')}
-          className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all border ${
-            isSaved 
-              ? 'bg-indigo-500 border-indigo-400 text-white shadow-[0_0_20px_rgba(99,102,241,0.4)]' 
-              : 'bg-zinc-800/80 border-zinc-700/65 text-white hover:text-indigo-400 hover:bg-zinc-700 shadow-md'
+          title={isSaved ? t('Saved') : t('Save')}
+          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border ${
+            isSaved
+              ? 'bg-indigo-500 border-indigo-400 text-white shadow-[0_0_16px_rgba(99,102,241,0.35)]'
+              : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-indigo-500/50 hover:text-indigo-400 hover:bg-zinc-700'
           }`}
         >
-          <HiBookmark size={20} fill={isSaved ? "currentColor" : "none"} />
+          <Bookmark size={18} fill={isSaved ? 'currentColor' : 'none'} strokeWidth={2} />
         </motion.button>
 
-        {/* زر المشاركة */}
+        {/* Share */}
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
           onClick={() => current?._id && shareMusicAsPost(current._id)}
           aria-label={t('Share track')}
-          className="w-12 h-12 rounded-2xl flex items-center justify-center bg-zinc-800/80 border border-zinc-700/65 text-white hover:bg-zinc-700 transition-all shadow-md"
+          title={t('Share')}
+          className="w-10 h-10 rounded-xl flex items-center justify-center transition-all border bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white hover:bg-zinc-700"
         >
-          <HiShare size={20} />
+          <Share2 size={18} strokeWidth={2} />
         </motion.button>
 
-        <div className="w-px h-8 bg-white/10 mx-1 hidden sm:block" />
+        <div className="w-px h-6 bg-white/10 mx-0.5 hidden sm:block" />
 
-        {/* زر التكبير */}
+        {/* Expand */}
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
           onClick={() => setExpanded(true)}
           aria-label={t('Open expanded player')}
-          className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white text-black hover:bg-indigo-500 hover:text-white transition-all shadow-xl shadow-black/40"
+          title={t('Fullscreen')}
+          className="w-10 h-10 rounded-xl flex items-center justify-center bg-white text-zinc-900 hover:bg-indigo-500 hover:text-white transition-all shadow-lg shadow-black/30"
         >
-          <HiArrowsPointingOut size={20} />
+          <Maximize2 size={16} strokeWidth={2.5} />
         </motion.button>
       </div>
     </div>

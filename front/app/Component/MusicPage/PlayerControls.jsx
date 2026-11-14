@@ -1,10 +1,12 @@
 'use client';
 
 import React, { memo } from 'react';
-import { HiPlay, HiPause, HiForward, HiBackward, HiArrowsRightLeft, HiArrowPath, HiSpeakerWave, HiSpeakerXMark } from 'react-icons/hi2';
+import {
+  Play, Pause, SkipForward, SkipBack,
+  Shuffle, Repeat, Repeat1, Volume2, VolumeX
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProgressBar from './ProgressBar';
-import { formatTime } from '@/app/utils/formatTime';
 
 const PlayerControls = memo(({
   togglePlay, playing, prev, next, shuffle, setShuffle,
@@ -15,120 +17,135 @@ const PlayerControls = memo(({
 
   const isBuffering = playing && !isReady;
 
+  const cycleRepeat = () => {
+    setRepeatMode(repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off');
+  };
+
   return (
-    <div className="space-y-6">
-      {/* 🛠️ Primary Toolbar */}
-      <div className="flex flex-col md:flex-row items-center gap-8">
+    <div className="space-y-5">
+      {/* Progress */}
+      <div dir="ltr">
+        <ProgressBar progress={progress} duration={duration} seek={setProgress} />
+      </div>
 
-        {/* Playback Actions */}
-        <div className="flex items-center gap-6">
-          <button
-            onClick={() => setShuffle(!shuffle)}
-            aria-label={shuffle ? 'Disable shuffle' : 'Enable shuffle'}
-            aria-pressed={shuffle}
-            className={`p-3 rounded-xl transition-all ${shuffle ? 'text-indigo-500 bg-indigo-500/10' : 'text-white/20 hover:text-white'}`}
-            title="Shuffle"
-          >
-            <HiArrowsRightLeft size={20} />
-          </button>
+      {/* Controls Row */}
+      <div className="flex items-center justify-between gap-3">
 
-          <button
-            onClick={prev}
-            aria-label="Previous track"
-            className="p-3 text-white/40 hover:text-white transition-all transform hover:-translate-x-1"
-            title="Previous Track"
-          >
-            <HiBackward size={28} />
-          </button>
+        {/* Shuffle */}
+        <button
+          onClick={() => setShuffle(!shuffle)}
+          aria-label={shuffle ? 'Disable shuffle' : 'Enable shuffle'}
+          aria-pressed={shuffle}
+          title="Shuffle"
+          className={`p-2 rounded-lg transition-all ${
+            shuffle
+              ? 'text-indigo-400 bg-indigo-500/15'
+              : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/5'
+          }`}
+        >
+          <Shuffle size={17} strokeWidth={2} />
+        </button>
 
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={!isBuffering ? togglePlay : undefined}
-            disabled={isBuffering}
-            aria-label={playing ? 'Pause' : 'Play'}
-            className={`relative w-16 h-16 rounded-[1.5rem] flex items-center justify-center transition-all ${isBuffering
+        {/* Prev */}
+        <button
+          onClick={prev}
+          aria-label="Previous track"
+          className="p-2 text-zinc-400 hover:text-white transition-all hover:-translate-x-0.5"
+        >
+          <SkipBack size={22} strokeWidth={2} />
+        </button>
+
+        {/* Play / Pause */}
+        <motion.button
+          whileHover={{ scale: 1.06 }}
+          whileTap={{ scale: 0.94 }}
+          onClick={!isBuffering ? togglePlay : undefined}
+          disabled={isBuffering}
+          aria-label={playing ? 'Pause' : 'Play'}
+          className={`relative w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
+            isBuffering
               ? 'bg-white/5 cursor-not-allowed'
-              : 'bg-white text-black shadow-[0_15px_30px_-5px_rgba(255,255,255,0.2)]'
-              }`}
-          >
-            <AnimatePresence mode="wait">
-              {isBuffering ? (
-                <motion.div
-                  key="loader"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"
-                />
-              ) : (
-                <motion.div
-                  key={playing ? 'pause' : 'play'}
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                >
-                  {playing ? <HiPause size={32} /> : <HiPlay size={32} className="ml-1" />}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.button>
+              : 'bg-white text-zinc-900 shadow-[0_8px_24px_-4px_rgba(255,255,255,0.2)] hover:bg-indigo-100'
+          }`}
+        >
+          <AnimatePresence mode="wait">
+            {isBuffering ? (
+              <motion.div
+                key="loader"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"
+              />
+            ) : (
+              <motion.div
+                key={playing ? 'pause' : 'play'}
+                initial={{ scale: 0.6, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.6, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                {playing
+                  ? <Pause size={24} strokeWidth={2.5} />
+                  : <Play size={24} className="ml-0.5" strokeWidth={2.5} />
+                }
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.button>
 
-          <button
-            onClick={next}
-            aria-label="Next track"
-            className="p-3 text-white/40 hover:text-white transition-all transform hover:translate-x-1"
-            title="Next Track"
-          >
-            <HiForward size={28} />
-          </button>
+        {/* Next */}
+        <button
+          onClick={next}
+          aria-label="Next track"
+          className="p-2 text-zinc-400 hover:text-white transition-all hover:translate-x-0.5"
+        >
+          <SkipForward size={22} strokeWidth={2} />
+        </button>
 
-          <button
-            onClick={() => setRepeatMode(repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off')}
-            aria-label={`Repeat ${repeatMode}`}
-            aria-pressed={repeatMode !== 'off'}
-            className={`p-3 rounded-xl transition-all ${repeatMode !== 'off' ? 'text-indigo-500 bg-indigo-500/10' : 'text-white/20 hover:text-white'}`}
-            title={`Repeat: ${repeatMode}`}
-          >
-            <HiArrowPath size={20} className={repeatMode === 'one' ? 'animate-spin-slow' : ''} />
-          </button>
-        </div>
+        {/* Repeat */}
+        <button
+          onClick={cycleRepeat}
+          aria-label={`Repeat mode: ${repeatMode}`}
+          aria-pressed={repeatMode !== 'off'}
+          title={`Repeat: ${repeatMode}`}
+          className={`p-2 rounded-lg transition-all ${
+            repeatMode !== 'off'
+              ? 'text-indigo-400 bg-indigo-500/15'
+              : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/5'
+          }`}
+        >
+          {repeatMode === 'one'
+            ? <Repeat1 size={17} strokeWidth={2} />
+            : <Repeat size={17} strokeWidth={2} />
+          }
+        </button>
 
-        {/* 🔊 Pro Volume Module */}
-        <div className="hidden lg:flex items-center gap-4 pl-8 border-l border-white/5 flex-1 max-w-[200px]">
+        {/* Volume — desktop only */}
+        <div className="hidden lg:flex items-center gap-3 pl-4 border-l border-white/[0.07]">
           <button
             onClick={() => setMuted(!muted)}
             aria-label={muted ? 'Unmute' : 'Mute'}
             aria-pressed={muted}
-            className="p-2 text-white/40 hover:text-white transition-all"
+            className="p-1.5 text-zinc-500 hover:text-white transition-all"
           >
-            {muted ? <HiSpeakerXMark size={20} /> : <HiSpeakerWave size={20} />}
+            {muted ? <VolumeX size={18} strokeWidth={2} /> : <Volume2 size={18} strokeWidth={2} />}
           </button>
-          <div className="relative flex-1 group">
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={volume}
-              onChange={(e) => setVolume(parseFloat(e.target.value))}
-              className="w-full h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-white hover:accent-indigo-500 transition-all"
-              disabled={muted}
-            />
-          </div>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.02"
+            value={muted ? 0 : volume}
+            onChange={(e) => setVolume(parseFloat(e.target.value))}
+            className="w-24 h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-indigo-400 transition-all"
+            disabled={muted}
+          />
         </div>
       </div>
-
-      {/* 🎢 Precision Progress Bar */}
-      <div className="space-y-4" dir="ltr">
-        <ProgressBar
-          progress={progress}
-          duration={duration}
-          seek={setProgress}
-        />
-      </div>
     </div>
-  )
-})
+  );
+});
 
 PlayerControls.displayName = 'PlayerControls';
 export default PlayerControls;

@@ -4,46 +4,53 @@ import Image from 'next/image';
 import React, { memo } from 'react';
 import { formatTime } from '@/app/utils/formatTime';
 import { useTranslation } from 'react-i18next';
-import { HiHeart, HiFolderOpen } from 'react-icons/hi2';
+import { Heart, FolderOpen } from 'lucide-react';
 
 const SidebarPlaylist = memo(({ myPlaylist, setTrack }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="rounded-3xl border border-zinc-800 bg-zinc-900/80 p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-zinc-500">
-          <HiHeart size={14} className="text-red-500" />
-          {t('Personal Core')}
+    <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/60 overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800/60">
+        <div className="flex items-center gap-2">
+          <Heart size={13} className="text-rose-500 fill-rose-500" />
+          <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500">
+            {t('Saved Tracks')}
+          </span>
         </div>
-        <span className="text-xs text-zinc-500">{myPlaylist?.length || 0} saved</span>
+        <span className="text-[11px] text-zinc-600 font-medium">{myPlaylist?.length || 0}</span>
       </div>
 
-      {myPlaylist?.length ? (
-        <div className="space-y-2">
-          {myPlaylist.map((s, i) => (
-            <button
-              key={s._id}
-              onClick={() => setTrack(s, i, myPlaylist)}
-              className="flex w-full items-center gap-3 rounded-2xl border border-transparent bg-zinc-950/70 px-2 py-2 text-left transition hover:border-zinc-700 hover:bg-zinc-800"
-            >
-              <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl">
-                <Image src={s.cover || '/default-music.jpg'} alt={s.title} fill className="object-cover" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-white">{s.title}</p>
-                <p className="truncate text-xs text-zinc-500">{s.artist}</p>
-              </div>
-              <span className="text-[10px] text-zinc-500">{formatTime(s.duration)}</span>
-            </button>
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-800 py-8 text-center">
-          <HiFolderOpen size={24} className="mb-2 text-zinc-600" />
-          <p className="text-sm font-semibold text-zinc-300">Your saved tracks will appear here</p>
-        </div>
-      )}
+      {/* List */}
+      <div className="p-3 max-h-64 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {myPlaylist?.length ? (
+          <div className="space-y-1">
+            {myPlaylist.map((s, i) => (
+              <button
+                key={s._id}
+                onClick={() => setTrack(s, i, myPlaylist)}
+                className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-all hover:bg-white/[0.05] group"
+              >
+                <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-zinc-800">
+                  <Image src={s.cover || '/default-music.jpg'} alt={s.title} fill className="object-cover" sizes="36px" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-semibold text-zinc-200 group-hover:text-white transition-colors">{s.title}</p>
+                  <p className="truncate text-[11px] text-zinc-600">{s.artist}</p>
+                </div>
+                <span className="text-[10px] text-zinc-700 font-mono shrink-0">{formatTime(s.duration)}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <FolderOpen size={22} className="mb-2 text-zinc-700" />
+            <p className="text-xs font-medium text-zinc-500">{t('No saved tracks yet')}</p>
+            <p className="text-[11px] text-zinc-700 mt-1">{t('Hit the bookmark icon to save tracks')}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 });
