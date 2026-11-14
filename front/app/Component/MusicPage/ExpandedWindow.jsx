@@ -155,7 +155,7 @@ const ExpandedWindow = () => {
                 </div>
 
                 {/* Progress Bar Container */}
-                <div className="w-full space-y-4">
+                <div className="w-full space-y-4" dir="ltr">
                   <input
                     type="range"
                     aria-label={t('Track progress')}

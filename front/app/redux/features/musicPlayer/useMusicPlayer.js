@@ -155,6 +155,7 @@ export const useMusicPlayer = () => {
       pause,
       togglePlay,
       seek,
+      setProgress: seek,
       next,
       prev,
       setTrack,

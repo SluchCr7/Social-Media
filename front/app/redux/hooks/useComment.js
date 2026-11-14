@@ -1,14 +1,15 @@
 'use client';
 
 import { useCallback, useMemo } from 'react';
+import { useAppDispatch } from '../hooks';
 import { useAuth } from './useAuth';
 import { useFeedback } from './useFeedback';
 import { MESSAGES } from '@/app/utils/messages';
+import { commentsApi } from '../features/comments/commentsApi';
 import {
   useAddCommentMutation,
   useDeleteCommentMutation,
   useGetCommentsInfiniteQuery,
-  useLazyGetCommentsInfiniteQuery,
   useLikeCommentMutation,
   useUpdateCommentMutation,
 } from '../features/comments/commentsApi';
@@ -17,6 +18,7 @@ const getErrorMessage = (error) =>
   error?.data?.message || error?.response?.data?.message || error?.message;
 
 export const useComment = ({ targetId, targetType, enabled = true } = {}) => {
+  const dispatch = useAppDispatch();
   const { user } = useAuth();
   const { showToast } = useFeedback();
   const commentsQuery = useGetCommentsInfiniteQuery({
@@ -30,7 +32,6 @@ export const useComment = ({ targetId, targetType, enabled = true } = {}) => {
     fetchNextPage: fetchNextCommentsPage,
     refetch: refetchComments,
   } = commentsQuery;
-  const [loadComments] = useLazyGetCommentsInfiniteQuery();
   const [addCommentRequest] = useAddCommentMutation();
   const [deleteCommentRequest] = useDeleteCommentMutation();
   const [updateCommentRequest] = useUpdateCommentMutation();
@@ -49,7 +50,10 @@ export const useComment = ({ targetId, targetType, enabled = true } = {}) => {
         ? await fetchNextCommentsPage()
         : await refetchComments();
     } else {
-      response = await loadComments({ targetId: id, targetType: type, limit: 10 }, true);
+      response = await dispatch(commentsApi.endpoints.getComments.initiate(
+        { targetId: id, targetType: type, limit: 10 },
+        { subscribe: false, forceRefetch: true }
+      ));
     }
     const pages = response?.data?.pages || [];
     const page = cursor ? pages[pages.length - 1] : pages[0];
@@ -57,7 +61,7 @@ export const useComment = ({ targetId, targetType, enabled = true } = {}) => {
   }, [
     fetchNextCommentsPage,
     refetchComments,
-    loadComments,
+    dispatch,
     targetId,
     targetType,
   ]);

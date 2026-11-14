@@ -184,7 +184,7 @@ const SongPlayer = React.memo(() => {
                 </button>
               </div>
 
-              <div className="w-full flex items-center gap-3">
+              <div className="w-full flex items-center gap-3" dir="ltr">
                 <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 tabular-nums w-10 text-right">{formatTime(progress)}</span>
                 <div className="flex-1 px-1">
                   <Slider
@@ -270,8 +270,8 @@ const SongPlayer = React.memo(() => {
             </div>
 
             {/* Mobile Progress Bar (Strip at bottom) */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 sm:hidden bg-gray-200 dark:bg-white/5 rounded-b-[2rem]">
-              <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-b-[2rem] transition-all" style={{ width: `${progressPercent}%` }} />
+            <div className="absolute bottom-0 left-0 right-0 h-1 sm:hidden bg-gray-200 dark:bg-white/5 rounded-b-[2rem] overflow-hidden" dir="ltr">
+              <div className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-b-[2rem] transition-all" style={{ width: `${progressPercent}%` }} />
             </div>
           </div>
         </div>

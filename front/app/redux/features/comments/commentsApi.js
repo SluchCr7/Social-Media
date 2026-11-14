@@ -128,7 +128,6 @@ export const commentsApi = baseApi.injectEndpoints({
 
 export const {
   useGetCommentsInfiniteQuery,
-  useLazyGetCommentsInfiniteQuery,
   useGetCommentRepliesInfiniteQuery,
   useAddCommentMutation,
   useDeleteCommentMutation,

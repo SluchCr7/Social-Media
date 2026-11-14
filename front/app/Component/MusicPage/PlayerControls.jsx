@@ -119,7 +119,7 @@ const PlayerControls = memo(({
       </div>
 
       {/* 🎢 Precision Progress Bar */}
-      <div className="space-y-4">
+      <div className="space-y-4" dir="ltr">
         <ProgressBar
           progress={progress}
           duration={duration}
