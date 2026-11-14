@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const Verification = require('../Modules/VerificationToken');
 const {
   User,
+  PREFERRED_LANGUAGES,
   validateUserLinks,
   validateUserUpdate,
   validatePasswordUpdate,
@@ -225,51 +226,229 @@ const uploadImage = async ({ file, userId, customText, imageType }) => {
 };
 
 
+// const makeFollow = async ({ targetUserId, userId }) => {
+//   const user = await User.findById(targetUserId).select('username profilePhoto BlockedNotificationFromUsers followers');
+//   const currentUser = await User.findById(userId).select('username profilePhoto following');
+//   if (!user) return errorResult(404, 'User not found');
+//   const isFollowing = user.followers.includes(userId);
+//   const action = isFollowing ? 'unfollow' : 'follow';
+//   if (isFollowing) {
+//     await User.findByIdAndUpdate(user._id, { $pull: { followers: userId } });
+//     await User.findByIdAndUpdate(currentUser._id, { $pull: { following: user._id } });
+//     await updateUserPoints(userId, 'UNFOLLOW_USER', user._id);
+//   } else {
+//     await User.findByIdAndUpdate(user._id, { $push: { followers: userId } });
+//     await User.findByIdAndUpdate(currentUser._id, { $push: { following: user._id } });
+//     if (!user._id.equals(currentUser._id)) {
+//       const isBlocked = user.BlockedNotificationFromUsers?.some((blockedId) => blockedId.equals(currentUser._id));
+//       if (!isBlocked) {
+//         await sendNotificationHelper({
+//           sender: currentUser._id,
+//           receiver: user._id,
+//           content: `${currentUser.username} started following you 👥`,
+//           type: 'follow',
+//           actionRef: currentUser._id,
+//           actionModel: 'User',
+//         });
+//       }
+//     }
+//     await updateUserPoints(userId, 'FOLLOW_USER', user._id);
+//   }
+//   const followUserPopulate = [
+//     { path: 'following', select: 'username profileName profilePhoto coverPhoto isAccountWithPremiumVerify' },
+//     { path: 'followers', select: 'username profileName profilePhoto coverPhoto isAccountWithPremiumVerify' }
+//   ];
+//   const [updatedCurrentUser, updatedTargetUser] = await Promise.all([
+//     User.findById(userId).select('-password -refreshTokens -consumedRefreshTokens').populate(followUserPopulate),
+//     User.findById(targetUserId).select('-password -refreshTokens -consumedRefreshTokens').populate(followUserPopulate),
+//   ]);
+//   return result(200, {
+//     success: true,
+//     message: isFollowing ? 'Unfollowed successfully' : 'Followed successfully',
+//     action,
+//     user: updatedCurrentUser,
+//     targetUser: updatedTargetUser,
+//     isFollowing: !isFollowing,
+//   });
+// };
+
+
 const makeFollow = async ({ targetUserId, userId }) => {
-  const user = await User.findById(targetUserId).select('username profilePhoto BlockedNotificationFromUsers followers');
-  const currentUser = await User.findById(userId).select('username profilePhoto following');
-  if (!user) return errorResult(404, 'User not found');
-  const isFollowing = user.followers.includes(userId);
-  const action = isFollowing ? 'unfollow' : 'follow';
-  if (isFollowing) {
-    await User.findByIdAndUpdate(user._id, { $pull: { followers: userId } });
-    await User.findByIdAndUpdate(currentUser._id, { $pull: { following: user._id } });
-    await updateUserPoints(userId, 'UNFOLLOW_USER', user._id);
-  } else {
-    await User.findByIdAndUpdate(user._id, { $push: { followers: userId } });
-    await User.findByIdAndUpdate(currentUser._id, { $push: { following: user._id } });
-    if (!user._id.equals(currentUser._id)) {
-      const isBlocked = user.BlockedNotificationFromUsers?.some((blockedId) => blockedId.equals(currentUser._id));
-      if (!isBlocked) {
-        await sendNotificationHelper({
+  // Prevent following yourself
+  if (String(targetUserId) === String(userId)) {
+    return errorResult(400, 'You cannot follow yourself');
+  }
+
+  const session = await User.startSession();
+
+  let action;
+  let currentUser;
+  let targetUser;
+  let notFound = false;
+
+  try {
+    await session.withTransaction(async () => {
+      // Get both users inside the transaction
+      const [target, current] = await Promise.all([
+        User.findById(targetUserId)
+          .select('username profilePhoto BlockedNotificationFromUsers followers')
+          .session(session),
+
+        User.findById(userId)
+          .select('username profilePhoto following')
+          .session(session),
+      ]);
+
+      if (!target || !current) {
+        notFound = true;
+        return;
+      }
+
+      targetUser = target;
+      currentUser = current;
+
+      const isFollowing = target.followers.some(
+        (id) => String(id) === String(userId)
+      );
+
+      action = isFollowing ? 'unfollow' : 'follow';
+
+      if (isFollowing) {
+        // Unfollow: remove relationships and decrement counts
+        await Promise.all([
+          User.updateOne(
+            {
+              _id: targetUserId,
+              followers: userId,
+            },
+            {
+              $pull: { followers: userId },
+              $inc: { followersCount: -1 },
+            },
+            { session }
+          ),
+
+          User.updateOne(
+            {
+              _id: userId,
+              following: targetUserId,
+            },
+            {
+              $pull: { following: targetUserId },
+              $inc: { followingCount: -1 },
+            },
+            { session }
+          ),
+        ]);
+      } else {
+        // Follow: add relationships and increment counts
+        await Promise.all([
+          User.updateOne(
+            {
+              _id: targetUserId,
+              followers: { $ne: userId },
+            },
+            {
+              $addToSet: { followers: userId },
+              $inc: { followersCount: 1 },
+            },
+            { session }
+          ),
+
+          User.updateOne(
+            {
+              _id: userId,
+              following: { $ne: targetUserId },
+            },
+            {
+              $addToSet: { following: targetUserId },
+              $inc: { followingCount: 1 },
+            },
+            { session }
+          ),
+        ]);
+      }
+    });
+  } finally {
+    await session.endSession();
+  }
+
+  if (notFound) {
+    return errorResult(404, 'User not found');
+  }
+
+  // Handle notifications and points after transaction succeeds
+  const tasks = [
+    updateUserPoints(
+      userId,
+      action === 'follow' ? 'FOLLOW_USER' : 'UNFOLLOW_USER',
+      targetUser._id
+    ),
+  ];
+
+  if (action === 'follow') {
+    const isBlocked = targetUser.BlockedNotificationFromUsers?.some(
+      (blockedId) => String(blockedId) === String(currentUser._id)
+    );
+
+    if (!isBlocked) {
+      tasks.push(
+        sendNotificationHelper({
           sender: currentUser._id,
-          receiver: user._id,
+          receiver: targetUser._id,
           content: `${currentUser.username} started following you 👥`,
           type: 'follow',
           actionRef: currentUser._id,
           actionModel: 'User',
-        });
-      }
+        })
+      );
     }
-    await updateUserPoints(userId, 'FOLLOW_USER', user._id);
   }
+
+  // A notification or points failure shouldn't undo a successful follow
+  const taskResults = await Promise.allSettled(tasks);
+
+  taskResults.forEach((task) => {
+    if (task.status === 'rejected') {
+      console.error('Follow side effect error:', task.reason);
+    }
+  });
+
+  // Populate updated users
   const followUserPopulate = [
-    { path: 'following', select: 'username profileName profilePhoto coverPhoto isAccountWithPremiumVerify' },
-    { path: 'followers', select: 'username profileName profilePhoto coverPhoto isAccountWithPremiumVerify' }
+    {
+      path: 'following',
+      select: 'username profileName profilePhoto coverPhoto isAccountWithPremiumVerify',
+    },
+    {
+      path: 'followers',
+      select: 'username profileName profilePhoto coverPhoto isAccountWithPremiumVerify',
+    },
   ];
+
   const [updatedCurrentUser, updatedTargetUser] = await Promise.all([
-    User.findById(userId).select('-password -refreshTokens -consumedRefreshTokens').populate(followUserPopulate),
-    User.findById(targetUserId).select('-password -refreshTokens -consumedRefreshTokens').populate(followUserPopulate),
+    User.findById(userId)
+      .select('-password -refreshTokens -consumedRefreshTokens')
+      .populate(followUserPopulate),
+
+    User.findById(targetUserId)
+      .select('-password -refreshTokens -consumedRefreshTokens')
+      .populate(followUserPopulate),
   ]);
+
   return result(200, {
     success: true,
-    message: isFollowing ? 'Unfollowed successfully' : 'Followed successfully',
+    message:
+      action === 'follow'
+        ? 'Followed successfully'
+        : 'Unfollowed successfully',
     action,
     user: updatedCurrentUser,
     targetUser: updatedTargetUser,
-    isFollowing: !isFollowing,
+    isFollowing: action === 'follow',
   });
 };
+
 
 const updateProfile = async ({ userId, body }) => {
   const { error } = validateUserUpdate(body);
@@ -288,11 +467,29 @@ const updateProfile = async ({ userId, body }) => {
       await User.findByIdAndUpdate(partner, { relationshipStatus, partner: userId });
     }
   }
-  const updateData = {
-    username, description, profileName, country, city, phone, socialLinks, gender,
-    dateOfBirth, relationshipStatus, partner: partner || null, interests, preferedLanguage,
-    showOnlineStatus,
-  };
+  const updateData = {};
+  if (username !== undefined) updateData.username = username;
+  if (description !== undefined) updateData.description = description;
+  if (profileName !== undefined) updateData.profileName = profileName;
+  if (country !== undefined) updateData.country = country;
+  if (city !== undefined) updateData.city = city;
+  if (phone !== undefined) updateData.phone = phone;
+  if (socialLinks !== undefined) updateData.socialLinks = socialLinks;
+  if (gender !== undefined) updateData.gender = gender;
+  if (dateOfBirth !== undefined) updateData.dateOfBirth = dateOfBirth;
+  if (relationshipStatus !== undefined) updateData.relationshipStatus = relationshipStatus;
+  if (partner !== undefined) updateData.partner = partner || null;
+  if (interests !== undefined) updateData.interests = interests;
+  if (showOnlineStatus !== undefined) updateData.showOnlineStatus = showOnlineStatus;
+
+  if (preferedLanguage !== undefined) {
+    if (PREFERRED_LANGUAGES.includes(preferedLanguage)) {
+      updateData.preferedLanguage = preferedLanguage;
+    } else if (preferedLanguage === '' || preferedLanguage === null) {
+      updateData.preferedLanguage = 'English';
+    }
+  }
+
   const updatedUser = await User.findByIdAndUpdate(userId, { $set: updateData }, { new: true }).populate(userOnePopulate);
   if (!updatedUser) return errorResult(404, 'User not found');
   io.emit('user:update', publicUser(updatedUser));

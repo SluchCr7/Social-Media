@@ -15,9 +15,10 @@ import {
   HiUsers,
   HiMusicalNote,
   HiInboxStack,
+  HiLanguage,
 } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
-import { SOCIAL_GRIDS } from '@/app/utils/Data';
+import { SOCIAL_GRIDS, PREFERRED_LANGUAGES } from '@/app/utils/Data';
 // 💎 Modern Prism Card for Info Items
 const InfoItem = memo(({ icon, label, value, colorClass }) => (
   <motion.div
@@ -62,6 +63,10 @@ const InfoAboutUser = memo(({ user }) => {
 
   const dateOfBirth = useMemo(() => user?.dateOfBirth ? dayjs(user.dateOfBirth).format("MMMM D, YYYY") : null, [user?.dateOfBirth]);
   const createdAt = useMemo(() => user?.createdAt ? dayjs(user.createdAt).format("MMMM D, YYYY") : null, [user?.createdAt]);
+  const preferredLang = useMemo(
+    () => PREFERRED_LANGUAGES.find(l => l.value === user?.preferedLanguage) || (user?.preferedLanguage ? { value: user.preferedLanguage, label: user.preferedLanguage, flag: '🌐', nativeName: user.preferedLanguage } : PREFERRED_LANGUAGES[0]),
+    [user?.preferedLanguage]
+  );
 
   return (
     <motion.div
@@ -107,6 +112,14 @@ const InfoAboutUser = memo(({ user }) => {
               )}
               {dateOfBirth && <InfoItem icon={<HiCake />} label={t("Temporal Origin")} value={dateOfBirth} colorClass="bg-yellow-500 text-yellow-500" />}
               {createdAt && <InfoItem icon={<HiCalendarDays />} label={t("Node Initialized")} value={createdAt} colorClass="bg-indigo-500 text-indigo-500" />}
+              {preferredLang && (
+                <InfoItem
+                  icon={<span className="text-2xl leading-none">{preferredLang.flag}</span>}
+                  label={t("Preferred Language")}
+                  value={`${preferredLang.label} — ${preferredLang.nativeName}`}
+                  colorClass="bg-purple-500 text-purple-500"
+                />
+              )}
             </div>
           </section>
 
@@ -179,7 +192,7 @@ const InfoAboutUser = memo(({ user }) => {
                 {t("Network Links")}
               </h3>
               <div className="grid grid-cols-3 gap-4">
-                {socialGrids.map(({ key, icon, label, gradient }) => (
+                {SOCIAL_GRIDS.map(({ key, icon, label, gradient }) => (
                   user.socialLinks[key] ? (
                     <SocialIcon key={key} href={user.socialLinks[key]} icon={icon} label={label} gradient={gradient} />
                   ) : null

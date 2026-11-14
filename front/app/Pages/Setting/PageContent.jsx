@@ -9,6 +9,7 @@ import { useGetData } from '@/app/Custome/useGetData';
 import { useTranslate } from '@/app/redux/hooks';
 import SettingsView from './Design';
 import i18n from '@/app/i18n'; // ✅ تأكد من صحة المسار
+import { langCodeToEnum } from '@/app/utils/Data';
 
 export default function SettingsContainer() {
   const { theme, toggleTheme } = useTheme();
@@ -20,9 +21,21 @@ export default function SettingsContainer() {
     updatePassword,
     toggleBlockNotification,
     toggleShowOnlineStatus,
+    updateProfile,
   } = useUser();
   const { userData } = useGetData(user?._id);
   const { language, handleLanguageChange } = useTranslate();
+
+  const handleSettingLanguageChange = useCallback(
+    (code) => {
+      handleLanguageChange(code);
+      const enumVal = langCodeToEnum(code);
+      if (user?._id && enumVal) {
+        updateProfile({ preferedLanguage: enumVal });
+      }
+    },
+    [handleLanguageChange, user?._id, updateProfile]
+  );
 
   const [activeTab, setActiveTab] = useState('appearance');
 
@@ -85,7 +98,7 @@ export default function SettingsContainer() {
       onMakePremiumVerify={handleMakePremiumVerify}
       onTogglePrivate={handleTogglePrivate}
       language={language}
-      handleLanguageChange={handleLanguageChange}
+      handleLanguageChange={handleSettingLanguageChange}
       onToggleNotificationBlock={handleToggleNotificationBlock}
       onToggleShowOnlineStatus={handleToggleShowOnlineStatus}
     />

@@ -6,6 +6,7 @@ import { HiCheckBadge, HiMapPin, HiUserPlus, HiUserMinus } from 'react-icons/hi2
 import { motion } from 'framer-motion';
 import { useUser } from '@/app/redux/hooks';
 import { useAuth } from '@/app/redux/hooks';
+import { PREFERRED_LANGUAGES } from '@/app/utils/Data';
 
 const UserCard = React.memo(({ user: targetUser, t, isCompact = false }) => {
     const { followUser, loading } = useUser();
@@ -70,9 +71,19 @@ const UserCard = React.memo(({ user: targetUser, t, isCompact = false }) => {
                                 <HiCheckBadge className="text-indigo-500 w-4 h-4 flex-shrink-0" />
                             )}
                         </div>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">
-                            @{targetUser.username}
-                        </p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">
+                                @{targetUser.username}
+                            </p>
+                            {targetUser.preferedLanguage && (() => {
+                                const lang = PREFERRED_LANGUAGES.find(l => l.value === targetUser.preferedLanguage);
+                                return lang ? (
+                                    <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/10 px-1.5 py-0.2 rounded" title={lang.label}>
+                                        {lang.flag}
+                                    </span>
+                                ) : null;
+                            })()}
+                        </div>
                     </div>
                 </Link>
 
@@ -124,9 +135,20 @@ const UserCard = React.memo(({ user: targetUser, t, isCompact = false }) => {
                             <HiCheckBadge className="text-indigo-500 w-5 h-5" />
                         )}
                     </div>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                        @{targetUser.username}
-                    </p>
+                    <div className="flex items-center justify-center gap-2">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                            @{targetUser.username}
+                        </p>
+                        {targetUser.preferedLanguage && (() => {
+                            const lang = PREFERRED_LANGUAGES.find(l => l.value === targetUser.preferedLanguage);
+                            return lang ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/50 dark:border-indigo-800/40 px-2 py-0.5 rounded-full" title={lang.label}>
+                                    <span>{lang.flag}</span>
+                                    <span>{lang.nativeName || lang.label}</span>
+                                </span>
+                            ) : null;
+                        })()}
+                    </div>
                 </div>
 
                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-6 line-clamp-2 px-4 italic">

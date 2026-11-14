@@ -7,9 +7,6 @@ import {
   Pin, 
   Share, 
   Languages, 
-  MoreHorizontal,
-  ChevronRight,
-  ShieldAlert
 } from 'lucide-react';
 import { usePost } from '@/app/redux/hooks';
 import { useAuth } from '@/app/redux/hooks';

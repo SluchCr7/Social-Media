@@ -1,6 +1,17 @@
 const mongoose = require('mongoose')
 const joi = require('joi')
 
+const PREFERRED_LANGUAGES = Object.freeze([
+    'English',
+    'Arabic',
+    'Spanish',
+    'French',
+    'German',
+    'Chinese',
+    'Japanese',
+    'Russian'
+]);
+
 const UserSchema = new mongoose.Schema({
     username: {
         type: String,
@@ -85,6 +96,10 @@ const UserSchema = new mongoose.Schema({
     followersCount: {
         type: Number,
         default: 0
+    },
+    followingCount: {
+        type: Number,
+        default : 0
     },
     followers: [
         {
@@ -185,6 +200,7 @@ const UserSchema = new mongoose.Schema({
     },
     preferedLanguage: {
         type: String,
+        enum: PREFERRED_LANGUAGES,
         default: "English"
     },
     interests: {
@@ -398,7 +414,7 @@ const validateUserUpdate = (user) => {
         partner: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null),
         interests: joi.array().items(joi.string()).allow(null),
         showOnlineStatus: joi.boolean().allow(null),
-        preferedLanguage: joi.string().allow('', null),
+        preferedLanguage: joi.string().valid(...PREFERRED_LANGUAGES).allow('', null),
     })
 
     return schema.validate(user)
@@ -435,6 +451,7 @@ const validateUserLinks = (user) => {
 
 module.exports = {
     User,
+    PREFERRED_LANGUAGES,
     validateUserLinks,
     validateEmail,
     validateUserUpdate,

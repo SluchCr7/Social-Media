@@ -45,6 +45,9 @@ export const useTranslate = () => {
     (langCode) => {
       if (!langCode) return;
       const normalizedLang = normalizeLanguageCode(langCode);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('language', normalizedLang);
+      }
       i18n.changeLanguage(normalizedLang);
       dispatch(setReduxLanguage(normalizedLang));
       applyDirection(normalizedLang);

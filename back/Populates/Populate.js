@@ -54,7 +54,7 @@ const EventPopulate = [
 const postPopulate = [
   {
     path: "owner",
-    select: "username profileName profilePhoto coverPhoto isAccountWithPremiumVerify description followersCount",
+    select: "username profileName profilePhoto coverPhoto isAccountWithPremiumVerify description followersCount followingCount",
   },
   {
     path: "community",

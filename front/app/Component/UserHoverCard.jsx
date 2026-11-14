@@ -8,6 +8,7 @@ import { useUser } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next'
 import { Avatar } from './ui/Avatar'
 import { Button } from './ui/Button'
+import { PREFERRED_LANGUAGES } from '@/app/utils/Data'
 
 const UserHoverCard = ({ userSelected, children, side = 'bottom' }) => {
   const { user } = useAuth()
@@ -25,9 +26,10 @@ const UserHoverCard = ({ userSelected, children, side = 'bottom' }) => {
     );
   }, [user, userSelected]);
 
-  const followerCount = useMemo(() => userSelected?.followers?.length || 0, [userSelected?.followers]);
-  const followingCount = useMemo(() => userSelected?.following?.length || 0, [userSelected?.following]);
-
+  // const followerCount = useMemo(() => userSelected?.followers?.length || 0, [userSelected?.followers]);
+  // const followingCount = useMemo(() => userSelected?.following?.length || 0, [userSelected?.following]);
+  const followerCount = userSelected?.followersCount ?? 0;
+  const followingCount = userSelected?.followingCount ?? 0;
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768)
     checkMobile()
@@ -112,7 +114,18 @@ const UserHoverCard = ({ userSelected, children, side = 'bottom' }) => {
                   <CheckCircle2 size={16} className="text-blue-500 fill-blue-500 text-white" />
                 )}
               </div>
-              <p className="text-gray-500 text-[15px]">@{userSelected?.profileName || userSelected?.username}</p>
+              <div className="flex items-center justify-between gap-1">
+                <p className="text-gray-500 text-[15px]">@{userSelected?.profileName || userSelected?.username}</p>
+                {userSelected?.preferedLanguage && (() => {
+                  const lang = PREFERRED_LANGUAGES.find(l => l.value === userSelected.preferedLanguage);
+                  return lang ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/10 px-2 py-0.5 rounded-full">
+                      <span>{lang.flag}</span>
+                      <span>{lang.label}</span>
+                    </span>
+                  ) : null;
+                })()}
+              </div>
             </div>
 
             {/* Bio */}
@@ -124,13 +137,28 @@ const UserHoverCard = ({ userSelected, children, side = 'bottom' }) => {
 
             {/* Stats */}
             <div className="flex items-center gap-4 pt-1">
-              <Link href={`/Pages/User/${encodeURIComponent(userSelected?.username || '')}/followers`} className="flex items-center gap-1 group">
-                <span className="font-bold text-gray-900 dark:text-white group-hover:underline">{followerCount}</span>
-                <span className="text-gray-500 text-[14px]">{t("Followers")}</span>
+              <Link
+                href={`/Pages/User/${encodeURIComponent(userSelected?.username || '')}/followers`}
+                className="flex items-center gap-1 group"
+              >
+                <span className="font-bold text-gray-900 dark:text-white group-hover:underline">
+                  {followerCount.toLocaleString()}
+                </span>
+                <span className="text-gray-500 text-[14px]">
+                  {t('Followers')}
+                </span>
               </Link>
-              <Link href={`/Pages/User/${encodeURIComponent(userSelected?.username || '')}/following`} className="flex items-center gap-1 group">
-                <span className="font-bold text-gray-900 dark:text-white group-hover:underline">{followingCount}</span>
-                <span className="text-gray-500 text-[14px]">{t("Following")}</span>
+
+              <Link
+                href={`/Pages/User/${encodeURIComponent(userSelected?.username || '')}/following`}
+                className="flex items-center gap-1 group"
+              >
+                <span className="font-bold text-gray-900 dark:text-white group-hover:underline">
+                  {followingCount.toLocaleString()}
+                </span>
+                <span className="text-gray-500 text-[14px]">
+                  {t('Following')}
+                </span>
               </Link>
             </div>
 

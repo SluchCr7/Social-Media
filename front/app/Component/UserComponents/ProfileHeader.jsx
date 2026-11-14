@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri";
 import { FaSpinner, FaCamera, FaAward, FaFire } from "react-icons/fa";
@@ -14,6 +14,7 @@ import { useUser } from '@/app/redux/hooks';
 import { useTranslation } from "react-i18next";
 import { MdInfo } from "react-icons/md";
 import SensitiveImage from "@/app/Component/Post/SensitiveImage";
+import { PREFERRED_LANGUAGES } from "@/app/utils/Data";
 
 const DEFAULT_PROFILE_PHOTO = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
 const DEFAULT_COVER_PHOTO = "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop";
@@ -55,13 +56,33 @@ const ProfileHeader = ({
   const { loading } = useUser();
   const { t } = useTranslation();
   const [preview, setPreview] = useState(null);
-
+  
+  // Ref خاص بحاوية المنيو والزرار العلوي فقط لقفل المنيو عند الضغط خارجها
+  const menuContainerRef = useRef(null);
+  
   useEffect(() => {
     if (!image) return;
     const objectUrl = URL.createObjectURL(image);
     setPreview(objectUrl);
     return () => URL.revokeObjectURL(objectUrl);
   }, [image]);
+
+  // تفعيل استشعار الضغط خارج المنيو لغلقها تلقائياً
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuContainerRef.current && !menuContainerRef.current.contains(event.target)) {
+        setOpenMenu(false);
+      }
+    };
+
+    if (openMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openMenu, setOpenMenu]);
 
   const levelPercent = useMemo(() => {
     const points = profileUser?.userLevelPoints || 0;
@@ -112,8 +133,8 @@ const ProfileHeader = ({
           </label>
         )}
 
-        {/* Floating Action Bar on Cover */}
-        <div className="absolute right-6 top-6 z-20 flex gap-3">
+        {/* Floating Action Bar on Cover (Attached with menuContainerRef) */}
+        <div ref={menuContainerRef} className="absolute right-6 top-6 z-20 flex gap-3">
           {isOwner && (
             <Link href="/Pages/Analytics" className="rounded-2xl border border-slate-200/80 bg-white/70 p-3 text-slate-700 backdrop-blur-md transition-all hover:bg-white hover:text-slate-900 dark:border-white/10 dark:bg-black/40 dark:text-white/60 dark:hover:text-white">
               <SiGoogleanalytics size={20} />
@@ -142,7 +163,7 @@ const ProfileHeader = ({
               className={`relative h-40 w-40 rounded-[3.5rem] p-1.5 transition-all md:h-52 md:w-52 ${profileUser?.activeStories?.length > 0 ? 'bg-gradient-to-tr from-indigo-500 via-purple-600 to-pink-500' : 'bg-slate-200/80 dark:bg-white/10'}`}
               onClick={!isOwner ? onProfileClick : undefined}
             >
-              <div className="group relative h-full w-full overflow-hidden rounded-[3rem] border-4 border-white bg-white dark:border-black dark:bg-black">
+              <div className="group z-20 relative h-full w-full overflow-hidden rounded-[3rem] border-4 border-white bg-white dark:border-black dark:bg-black">
                 <SensitiveImage
                   src={preview || profileUser?.profilePhoto?.url || DEFAULT_PROFILE_PHOTO}
                   alt="profile"
@@ -152,7 +173,7 @@ const ProfileHeader = ({
                   className="w-full h-full object-cover"
                 />
                 {isOwner && (
-                  <label className="absolute inset-0 z-30 flex cursor-pointer flex-col items-center justify-center bg-black/60 opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100">
+                  <label className="absolute inset-0 z-40 flex cursor-pointer flex-col items-center justify-center bg-black/60 opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100">
                     <FaCamera size={32} className="mb-2 text-white" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-white">{t("Change Identity")}</span>
                     <input type="file" accept="image/*" className="hidden" onChange={onImageChange} />
@@ -163,7 +184,7 @@ const ProfileHeader = ({
             {isOwner && (
               <button
                 onClick={onAddStory}
-                className="absolute bottom-2 right-2 flex h-10 w-10 items-center justify-center rounded-2xl border-4 border-white bg-slate-900 text-white shadow-2xl transition-transform hover:scale-110 dark:border-black dark:bg-white dark:text-black"
+                className="absolute z-40 bottom-2 right-2 flex h-10 w-10 items-center justify-center rounded-2xl border-4 border-white bg-slate-900 text-white shadow-2xl transition-transform hover:scale-110 dark:border-black dark:bg-white dark:text-black"
               >
                 <IoAdd size={24} />
               </button>
@@ -187,6 +208,18 @@ const ProfileHeader = ({
                 <IoCalendarClearOutline className="text-indigo-500" />
                 {t("Joined")} {profileUser?.createdAt ? new Date(profileUser.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : t('Unknown')}
               </span>
+              {profileUser?.preferedLanguage && (() => {
+                const lang = PREFERRED_LANGUAGES.find(l => l.value === profileUser.preferedLanguage);
+                return lang ? (
+                  <span
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 backdrop-blur-sm shadow-sm"
+                    title={`${t('Preferred Language')}: ${lang.label}`}
+                  >
+                    <span className="text-sm leading-none">{lang.flag}</span>
+                    <span>{lang.nativeName || lang.label}</span>
+                  </span>
+                ) : null;
+              })()}
             </div>
           </div>
 
@@ -212,8 +245,6 @@ const ProfileHeader = ({
             <p className="max-w-4xl text-xl font-medium leading-relaxed italic text-slate-600 dark:text-white/60 md:text-2xl">
               {`"${profileUser?.description || t("A visionary user exploring the Zocial universe. No formal broadcast yet.")}"`}
             </p>
-
-
 
             {/* Advanced Level Dash */}
             <div className="group relative overflow-hidden rounded-[2.5rem] border border-slate-200/80 bg-slate-50/80 p-8 transition-colors duration-300 dark:border-white/5 dark:bg-white/[0.02]">

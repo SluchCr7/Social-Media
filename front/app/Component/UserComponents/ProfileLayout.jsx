@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 
 const HighlightViewerModal = dynamic(() => import('../HighlightView'), { ssr: false });
 const AddHighlightMenu = dynamic(() => import('../AddandUpdateMenus/AddHighlight'), { ssr: false });
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import ProfileHeader from "./ProfileHeader"
 import InfoAboutUser from "./InfoAboutUser"

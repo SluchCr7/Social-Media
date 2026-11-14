@@ -243,14 +243,17 @@ export const months = [
 
 
 export const availableLanguages = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'ar', name: 'العربية', flag: '🇸🇦' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-  { code: 'it', name: 'Italiano', flag: '🇮🇹' },
-  { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
-  { code: 'fa', name: 'الفارسيه', flag: '🇮🇷' },
+  { code: 'en', name: 'English', flag: '🇺🇸', nativeName: 'English' },
+  { code: 'ar', name: 'العربية', flag: '🇸🇦', nativeName: 'العربية' },
+  { code: 'es', name: 'Español', flag: '🇪🇸', nativeName: 'Español' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷', nativeName: 'Français' },
+  { code: 'de', name: 'Deutsch', flag: '🇩🇪', nativeName: 'Deutsch' },
+  { code: 'zh', name: 'Chinese', flag: '🇨🇳', nativeName: '中文' },
+  { code: 'ja', name: 'Japanese', flag: '🇯🇵', nativeName: '日本語' },
+  { code: 'ru', name: 'Russian', flag: '🇷🇺', nativeName: 'Русский' },
+  { code: 'it', name: 'Italiano', flag: '🇮🇹', nativeName: 'Italiano' },
+  { code: 'tr', name: 'Türkçe', flag: '🇹🇷', nativeName: 'Türkçe' },
+  { code: 'fa', name: 'الفارسيه', flag: '🇮🇷', nativeName: 'فارسی' },
 ];
 
 export const chartData = [
@@ -362,6 +365,38 @@ export const savedReels = [
   { id: 'r2', thumbnail: '/reels/thumb2.jpg', video: '/video2.mp4', title: 'Street Photography - 60s' },
 ]
 
+
+// Preferred language options — must match the backend enum exactly
+export const PREFERRED_LANGUAGES = [
+  { value: 'English',  label: 'English',  code: 'en', flag: '🇺🇸', nativeName: 'English', dir: 'ltr' },
+  { value: 'Arabic',   label: 'Arabic',   code: 'ar', flag: '🇸🇦', nativeName: 'العربية', dir: 'rtl' },
+  { value: 'Spanish',  label: 'Spanish',  code: 'es', flag: '🇪🇸', nativeName: 'Español', dir: 'ltr' },
+  { value: 'French',   label: 'French',   code: 'fr', flag: '🇫🇷', nativeName: 'Français', dir: 'ltr' },
+  { value: 'German',   label: 'German',   code: 'de', flag: '🇩🇪', nativeName: 'Deutsch', dir: 'ltr' },
+  { value: 'Chinese',  label: 'Chinese',  code: 'zh', flag: '🇨🇳', nativeName: '中文',     dir: 'ltr' },
+  { value: 'Japanese', label: 'Japanese', code: 'ja', flag: '🇯🇵', nativeName: '日本語',   dir: 'ltr' },
+  { value: 'Russian',  label: 'Russian',  code: 'ru', flag: '🇷🇺', nativeName: 'Русский', dir: 'ltr' },
+];
+
+export const getPreferredLanguage = (val) => {
+  if (!val) return PREFERRED_LANGUAGES[0];
+  const found = PREFERRED_LANGUAGES.find(
+    (l) => l.value.toLowerCase() === String(val).toLowerCase() || l.code.toLowerCase() === String(val).toLowerCase()
+  );
+  return found || PREFERRED_LANGUAGES[0];
+};
+
+export const langCodeToEnum = (code) => {
+  if (!code) return 'English';
+  const match = PREFERRED_LANGUAGES.find((l) => l.code.toLowerCase() === String(code).toLowerCase());
+  return match ? match.value : 'English';
+};
+
+export const enumToLangCode = (enumVal) => {
+  if (!enumVal) return 'en';
+  const match = PREFERRED_LANGUAGES.find((l) => l.value.toLowerCase() === String(enumVal).toLowerCase());
+  return match ? match.code : 'en';
+};
 
 // قم بنقلها خارج المكونات لتجنب إعادة إنشائها في كل مرة يتم فيها تصيير الصفحة
 export const SOCIAL_GRIDS = [

@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const { User } = require('../Modules/User');
+const { User, PREFERRED_LANGUAGES } = require('../Modules/User');
 const { validateLogin, validateRegistration } = require('../Modules/Auth/authValidation');
 const {
   REFRESH_TOKEN_MAX_AGE,
@@ -42,6 +42,9 @@ const register = async ({ body, userAgent, ip }) => {
       email: body.email,
       password,
       userCode,
+      ...(body.preferedLanguage && PREFERRED_LANGUAGES.includes(body.preferedLanguage)
+        ? { preferedLanguage: body.preferedLanguage }
+        : {}),
     });
 
     const family = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');

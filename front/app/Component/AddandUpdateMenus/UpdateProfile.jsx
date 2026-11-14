@@ -11,13 +11,16 @@ import {
   Plus, 
   Calendar,
   Languages,
-  Heart
+  Heart,
+  ChevronDown,
+  Sparkles
 } from 'lucide-react';
-import { useUser } from '@/app/redux/hooks';
+import { useUser, useTranslate } from '@/app/redux/hooks';
 import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
 import { Avatar } from '../ui/Avatar';
 import { Button } from '../ui/Button';
+import { PREFERRED_LANGUAGES } from '@/app/utils/Data';
 
 const SectionHeader = ({ icon: Icon, title }) => (
   <div className="flex items-center gap-2 mb-4 pt-4 border-t border-slate-200/80 dark:border-white/10 first:border-t-0 first:pt-0">
@@ -49,6 +52,7 @@ const InputGroup = ({ label, name, value, onChange, placeholder, icon: Icon, typ
 
 const UpdateProfile = ({ user }) => {
   const { updateProfile, updateProfileLoading, updatePhoto, updateCoverPhoto } = useUser();
+  const { handleLanguageChange } = useTranslate();
   const { t } = useTranslation();
 
   const [formData, setFormData] = useState({
@@ -117,6 +121,12 @@ const UpdateProfile = ({ user }) => {
     const payload = { ...formData };
     delete payload.newInterest;
     await updateProfile(payload);
+    if (formData.preferedLanguage) {
+      const langObj = PREFERRED_LANGUAGES.find(l => l.value === formData.preferedLanguage);
+      if (langObj?.code) {
+        handleLanguageChange(langObj.code);
+      }
+    }
   };
 
   return (
@@ -230,7 +240,75 @@ const UpdateProfile = ({ user }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <InputGroup label={t('Country')} name="country" value={formData.country} onChange={handleChange} icon={Globe} />
                 <InputGroup label={t('City')} name="city" value={formData.city} onChange={handleChange} icon={MapPin} />
-                <InputGroup label={t('Language')} name="preferedLanguage" value={formData.preferedLanguage} onChange={handleChange} icon={Languages} />
+
+                {/* Preferred Language — enum select with quick chips */}
+                <div className="flex flex-col gap-1.5 sm:col-span-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+                      <Languages size={14} className="text-indigo-500" />
+                      <span>{t('Preferred Language')}</span>
+                    </label>
+                    {formData.preferedLanguage && (() => {
+                      const lang = PREFERRED_LANGUAGES.find(l => l.value === formData.preferedLanguage);
+                      return lang ? (
+                        <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/50 dark:border-indigo-800/40 px-2 py-0.5 rounded-full flex items-center gap-1.5">
+                          <span>{lang.flag}</span>
+                          <span>{lang.nativeName}</span>
+                          <span className="text-[10px] text-slate-400 uppercase tracking-wider">({lang.code})</span>
+                        </span>
+                      ) : null;
+                    })()}
+                  </div>
+
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                      <Languages size={16} />
+                    </span>
+                    <select
+                      name="preferedLanguage"
+                      value={formData.preferedLanguage}
+                      onChange={handleChange}
+                      className="w-full bg-slate-100 dark:bg-white/5 border border-transparent focus:border-indigo-500/50 rounded-xl py-2.5 pl-9 pr-10 text-xs sm:text-sm font-semibold outline-none transition-all cursor-pointer appearance-none text-slate-900 dark:text-white"
+                    >
+                      <option value="">{t('Select language (Default: English)')}</option>
+                      {PREFERRED_LANGUAGES.map(({ value, label, flag, nativeName, code }) => (
+                        <option key={value} value={value} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                          {flag} {label} — {nativeName} ({code.toUpperCase()})
+                        </option>
+                      ))}
+                    </select>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                      <ChevronDown size={16} />
+                    </span>
+                  </div>
+
+                  {/* Quick-pick language pills */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mr-1 flex items-center gap-1">
+                      <Sparkles size={11} className="text-amber-500" />
+                      {t('Popular')}:
+                    </span>
+                    {PREFERRED_LANGUAGES.map(({ value, label, flag }) => {
+                      const isSelected = formData.preferedLanguage === value;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, preferedLanguage: value }))}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                            isSelected
+                              ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/30 ring-2 ring-indigo-500/40'
+                              : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300'
+                          }`}
+                        >
+                          <span className="leading-none">{flag}</span>
+                          <span className="text-[11px]">{label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <InputGroup label={t('Phone')} name="phone" value={formData.phone} onChange={handleChange} icon={Phone} />
               </div>
             </section>
@@ -273,6 +351,23 @@ const UpdateProfile = ({ user }) => {
                   <p className="text-sm font-black text-slate-900 dark:text-white">{user?.following?.length || 0}</p>
                 </div>
               </div>
+              {formData.preferedLanguage && (() => {
+                const lang = PREFERRED_LANGUAGES.find(l => l.value === formData.preferedLanguage);
+                return lang ? (
+                  <div className="w-full p-3 rounded-xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-transparent border border-indigo-500/20 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-2xl leading-none">{lang.flag}</span>
+                      <div className="flex flex-col text-left">
+                        <span className="text-[9px] font-black uppercase tracking-wider text-indigo-500">{t('Preferred Language')}</span>
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-100">{lang.label}</span>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-semibold text-slate-400 bg-white/60 dark:bg-white/10 px-2 py-0.5 rounded-full">
+                      {lang.nativeName}
+                    </span>
+                  </div>
+                ) : null;
+              })()}
             </div>
           </div>
         </div>
