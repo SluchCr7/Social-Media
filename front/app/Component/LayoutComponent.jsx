@@ -16,7 +16,8 @@ import React, { useEffect, useState } from 'react';
 import Loader from './Loader';
 import Aside from './Aside/Aside';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/app/redux/hooks';
+import { useAppDispatch, useAuth } from '@/app/redux/hooks';
+import { authApi } from '@/app/redux/features/auth/authApi';
 import Alert from './Alert';
 import { usePost } from '@/app/redux/hooks';
 import { useReport } from '@/app/redux/hooks';
@@ -26,8 +27,7 @@ import NProgress from 'nprogress'
 import '@/styles/nprogress.css'
 import { useStory } from '@/app/redux/hooks';
 const LayoutComponent = ({ children }) => {
-  const [loading, setLoading] = useState(true); // للتحكم في الـ Loader
-
+  const dispatch = useAppDispatch();
   const {
     showPostModelEdit,
     setShowPostModelEdit,
@@ -37,7 +37,7 @@ const LayoutComponent = ({ children }) => {
     setImageView
   } = usePost();
 
-  const { isLogin, isAuthChecked } = useAuth();
+  const { isLogin, isAuthChecked, status: authStatus } = useAuth();
   const { showMenuReport, setShowMenuReport, isPostId, isTargetId, reportedOnType } = useReport();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -106,21 +106,27 @@ const LayoutComponent = ({ children }) => {
       NProgress.done()
     }
   }, [pathname])
-  // تشغيل الـ Loader فقط في أول مرة يدخل فيها المستخدم الموقع
-  useEffect(() => {
-    const hasVisited = sessionStorage.getItem("hasVisited");
-    if (hasVisited) {
-      setLoading(false);
-    } else {
-      sessionStorage.setItem("hasVisited", "true");
-      const timer = setTimeout(() => {
-        setLoading(false);
-      }, 1000); // مدة التحميل
-      return () => clearTimeout(timer);
-    }
-  }, []);
+  if (!isAuthChecked && authStatus === 'error') {
+    return (
+      <div role="alert" className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-6 text-center dark:bg-black">
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          Unable to verify your session. Check your connection and try again.
+        </p>
+        <button
+          type="button"
+          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+          onClick={() => dispatch(authApi.endpoints.getMe.initiate(undefined, {
+            forceRefetch: true,
+            subscribe: false,
+          }))}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
-  if (loading) {
+  if (!isAuthChecked) {
     return (
       <div className="flex items-center justify-center w-screen h-screen bg-white dark:bg-black">
         <Loader />

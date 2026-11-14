@@ -4,6 +4,7 @@ let refreshPromise = null;
 let authTransitionPromise = null;
 
 const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+const MAX_ROTATION_RETRIES = 5;
 
 export const runAuthTransition = async (operation) => {
   if (authTransitionPromise) {
@@ -42,7 +43,7 @@ export const isTerminalAuthFailure = (failure) => {
 };
 
 const requestRefresh = async () => {
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+  for (let attempt = 0; attempt < MAX_ROTATION_RETRIES; attempt += 1) {
     const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
@@ -50,8 +51,12 @@ const requestRefresh = async () => {
     });
     const data = await response.json().catch(() => ({}));
 
-    if (response.status === 409 && data.code === 'TOKEN_ROTATED' && attempt < 2) {
-      await wait(150 * (attempt + 1));
+    if (
+      response.status === 409 &&
+      data.code === 'TOKEN_ROTATED' &&
+      attempt < MAX_ROTATION_RETRIES - 1
+    ) {
+      await wait(Math.min(100 * (2 ** attempt), 800));
       continue;
     }
 

@@ -12,14 +12,29 @@
   --text-muted: #475569;
   --border: #e2e8f0;
   --border-strong: #cbd5e1;
-  --brand-primary: #2f5de8;
-  --brand-accent: #5144e5;
+  --brand-primary: #047286;
+  --brand-accent: #047286;
+  --user-accent: #06b6d4;
+  --user-accent-50: 240 248 249;
+  --user-accent-100: 225 240 243;
+  --user-accent-200: 190 223 228;
+  --user-accent-300: 140 198 208;
+  --user-accent-400: 6 182 212;
+  --user-accent-500: 4 130 152;
+  --user-accent-600: 4 114 134;
+  --user-accent-700: 3 94 109;
+  --user-accent-800: 2 73 85;
+  --user-accent-900: 2 52 61;
+  --user-accent-950: 1 34 40;
+  --accent-action: #047286;
+  --accent-action-foreground: #ffffff;
+  --accent-soft: color-mix(in srgb, var(--user-accent) 10%, white);
   --shadow-soft: 0 20px 55px rgba(15, 23, 42, 0.08);
   --shadow-card: 0 24px 80px rgba(15, 23, 42, 0.08);
   --radius: 1.75rem;
   --radius-sm: 1rem;
   --radius-pill: 9999px;
-  --focus-ring: rgba(81, 68, 229, 0.4);
+  --focus-ring: rgba(6, 182, 212, 0.4);
   --skeleton-base: #e2e8f0;
   --skeleton-highlight: rgba(255, 255, 255, 0.8);
 }
@@ -34,8 +49,11 @@
   --text-muted: #a1a1aa;
   --border: #27272c;
   --border-strong: #3f3f46;
-  --brand-primary: #6094ff;
-  --brand-accent: #8580ff;
+  --brand-primary: #06b6d4;
+  --brand-accent: #06b6d4;
+  --accent-action: #06b6d4;
+  --accent-action-foreground: #000000;
+  --accent-soft: color-mix(in srgb, var(--user-accent) 18%, #090d16);
   --shadow-soft: 0 20px 55px rgba(0, 0, 0, 0.32);
   --shadow-card: 0 24px 80px rgba(0, 0, 0, 0.32);
   --skeleton-base: #27272c;
@@ -113,7 +131,7 @@ a {
 }
 
 ::selection {
-  background: rgb(81 68 229 / 0.2);
+  background: color-mix(in srgb, var(--user-accent) 20%, transparent);
   color: var(--text);
 }
 
@@ -148,6 +166,41 @@ a {
 
 .card-radius {
   border-radius: var(--radius);
+}
+
+@layer utilities {
+  .accent-text {
+    color: var(--brand-primary);
+  }
+
+  .accent-action {
+    background-color: var(--accent-action);
+    color: var(--accent-action-foreground);
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--user-accent) 24%, transparent);
+  }
+
+  .accent-soft {
+    background-color: var(--accent-soft);
+  }
+
+  .accent-border {
+    border-color: color-mix(in srgb, var(--user-accent) 42%, var(--border));
+  }
+
+  .accent-selected {
+    border-color: var(--brand-primary);
+    background-color: var(--accent-soft);
+    color: var(--brand-primary);
+  }
+
+  .accent-input:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 2px var(--focus-ring);
+  }
+
+  .accent-ring {
+    --tw-ring-color: var(--brand-primary);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -324,7 +377,7 @@ a {
 }
 
 .aside_scroll::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #284acb, #4336ca);
+  background: var(--brand-accent);
 }
 
 @media (max-width: 640px) {

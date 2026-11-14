@@ -3,7 +3,6 @@
 import React, { useState, useCallback } from 'react';
 import { ShieldCheck, Lock, Shield, Trash2, Download, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Avatar } from '@/app/Component/ui/Avatar';
 import { SettingsSection, ToggleSwitch, DangerButton, ConfirmationModal } from '@/app/Component/Setting/SettingsComponents';
 
 const AccountTab = React.memo(({

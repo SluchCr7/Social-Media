@@ -97,37 +97,133 @@ const verifyAccount = async ({ id, token }) => {
 };
 
 const uploadImage = async ({ file, userId, customText, imageType }) => {
-  if (!file) return errorResult(400, imageType === 'cover' ? 'No cover image uploaded' : 'No image uploaded');
+  if (!file) {
+    return errorResult(
+      400,
+      imageType === 'cover'
+        ? 'No cover image uploaded'
+        : 'No image uploaded'
+    );
+  }
+
+  if (!['cover', 'profile'].includes(imageType)) {
+    return errorResult(400, 'Invalid image type');
+  }
+
+  let upload = null;
+  let shouldRemoveUploadedImage = true;
+
   try {
-    const upload = await cloudUpload(file);
     const user = await User.findById(userId);
-    if (!user) return errorResult(404, 'User not found');
-    const photoKey = imageType === 'cover' ? 'coverPhoto' : 'profilePhoto';
+
+    if (!user) {
+      return errorResult(404, 'User not found');
+    }
+
+    const photoKey =
+      imageType === 'cover' ? 'coverPhoto' : 'profilePhoto';
+
     const oldPhoto = user[photoKey];
-    if (oldPhoto?.publicId) await cloudRemove(oldPhoto.publicId);
-    const isSensitive = await checkImageSensitivity(upload.secure_url);
-    user[photoKey] = { url: upload.secure_url, publicId: upload.public_id, isSensitive };
+
+    // Upload the new image
+    upload = await cloudUpload(file);
+
+    // Check image sensitivity
+    const isSensitive = await checkImageSensitivity(
+      upload.secure_url
+    );
+
+    // Update user photo
+    user[photoKey] = {
+      url: upload.secure_url,
+      publicId: upload.public_id,
+      isSensitive,
+    };
+
     await user.save();
-    const postText = `🖼 ${user.username} has updated their ${imageType === 'cover' ? 'cover' : 'profile'} photo. ${customText || ''}`;
+
+    // The new image is now safely referenced by the user
+    shouldRemoveUploadedImage = false;
+
+    // Generate an appropriate post message
+    const postText =
+      imageType === 'cover'
+        ? `🎨 ${user.username} gave their profile a fresh new look!`
+        : `📸 ${user.username} updated their profile picture!`;
+
+    const finalPostText = customText
+      ? `${postText}\n\n${customText}`
+      : postText;
+
+    // Automatically create a feed post
     const post = new Post({
-      text: postText,
+      text: finalPostText,
       owner: userId,
-      Photos: [{ url: user[photoKey].url, publicId: user[photoKey].publicId, isSensitive }],
-      media: [{ type: 'image', url: user[photoKey].url, publicId: user[photoKey].publicId, isSensitive }],
+      Photos: [
+        {
+          url: upload.secure_url,
+          publicId: upload.public_id,
+          isSensitive,
+        },
+      ],
+      media: [
+        {
+          type: 'image',
+          url: upload.secure_url,
+          publicId: upload.public_id,
+          isSensitive,
+        },
+      ],
       privacy: 'public',
     });
+
     await post.save();
-    await post.save();
-    io.emit('user:update', publicUser(user));
+
+    // Notify connected clients
+    try {
+      io.emit('user:update', publicUser(user));
+    } catch (socketError) {
+      console.error('Socket notification failed:', socketError);
+    }
+
+    // Remove the old image after everything succeeds
+    if (oldPhoto?.publicId) {
+      try {
+        await cloudRemove(oldPhoto.publicId);
+      } catch (cleanupError) {
+        console.error('Old image cleanup failed:', cleanupError);
+      }
+    }
+
     return result(200, {
-      message: imageType === 'cover' ? 'Cover photo updated' : 'Profile photo updated',
+      message:
+        imageType === 'cover'
+          ? 'Cover photo updated'
+          : 'Profile photo updated',
       [photoKey]: user[photoKey],
     });
   } catch (err) {
-    console.error('Cloud upload failed:', err);
-    return errorResult(500, imageType === 'cover' ? 'Error uploading cover photo' : 'Error uploading image');
+    console.error('Image upload failed:', err);
+
+    // Remove the newly uploaded image if the update failed
+    // before the user document was successfully updated
+    if (upload?.public_id && shouldRemoveUploadedImage) {
+      try {
+        await cloudRemove(upload.public_id);
+      } catch (cleanupError) {
+        console.error('New image cleanup failed:', cleanupError);
+      }
+    }
+
+    return errorResult(
+      500,
+      imageType === 'cover'
+        ? 'Error uploading cover photo'
+        : 'Error uploading image'
+    );
   }
 };
+
 
 const makeFollow = async ({ targetUserId, userId }) => {
   const user = await User.findById(targetUserId).select('username profilePhoto BlockedNotificationFromUsers followers');

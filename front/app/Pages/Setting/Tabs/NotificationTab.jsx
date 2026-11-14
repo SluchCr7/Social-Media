@@ -48,7 +48,7 @@ const NotificationTab = memo(({ user, onToggleNotificationBlock, loading = false
                           {blockedUser?.profileName || blockedUser?.username || t('Unknown Entity')}
                         </span>
                         <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider truncate mt-0.5">
-                          @{blockedUser.username}
+                          {blockedUser.username}
                         </span>
                       </div>
                     </div>

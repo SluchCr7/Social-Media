@@ -16,11 +16,13 @@ import { useFeedback } from '@/app/redux/hooks';
 import Loading from '@/app/Component/Loading'
 import { useDebounce } from '@/app/hooks/useDebounce'
 import { useGetSearchResultsQuery } from '@/app/redux/features/search/searchApi'
+import { useRouter } from 'next/navigation'
 
 // ✅ Lazy Load for better initial bundle size
 const NewPostPresenter = React.lazy(() => import('./Design'))
 
 const NewPostContainer = () => {
+  const router = useRouter()
   const [postText, setPostText] = useState('')
   const [media, setMedia] = useState([])
   const [selectedCommunity, setSelectedCommunity] = useState('')
@@ -305,6 +307,7 @@ const NewPostContainer = () => {
       setScheduleDate('')
       setSelectedMusic(null)
       localStorage.removeItem('post_draft')
+      router.push('/') // Navigate to home after posting
     } finally {
       setLoading(false)
     }

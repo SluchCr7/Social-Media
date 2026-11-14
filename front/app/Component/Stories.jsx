@@ -87,32 +87,33 @@ const Stories = () => {
     <div className="w-full py-4 md:py-8 select-none">
       <div className="flex items-center gap-4 md:gap-7 overflow-x-auto no-scrollbar snap-x px-4 md:px-0">
 
-        {/* CREATE STORY TRIGGER */}
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setIsStory(true)}
-          className="flex flex-col items-center gap-3 cursor-pointer shrink-0 snap-start group"
-        >
-          <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-[1.8rem] md:rounded-[2.2rem] p-[3px] bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 shadow-lg shadow-indigo-500/10">
-            <div className="w-full h-full rounded-[1.6rem] md:rounded-[2rem] bg-[#0A0A0A] flex items-center justify-center border border-white/10 group-hover:border-white/20 transition-all overflow-hidden relative">
-              {user?.profilePhoto?.url ? (
-                <Image src={user.profilePhoto.url} fill alt="user" className="object-cover opacity-40 blur-[1px] group-hover:scale-110 transition-transform duration-500" />
-              ) : null}
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-              <div className="relative z-10 w-8 h-8 md:w-10 md:h-10 rounded-2xl bg-white text-black flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                <FiPlus size={20} className="md:size-[24px]" />
-              </div>
-            </div>
-          </div>
-          <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-white/60 transition-colors">{t("Start")}</span>
-        </motion.div>
+        
 
         {/* LOADING STATE */}
         {isLoading ? (
           Array.from({ length: 6 }).map((_, i) => <StorySkeleton key={i} />)
         ) : (
           <AnimatePresence mode="popLayout">
+            {/* CREATE STORY TRIGGER */}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setIsStory(true)}
+              className="flex flex-col items-center gap-3 cursor-pointer shrink-0 snap-start group"
+            >
+              <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-[1.8rem] md:rounded-[2.2rem] p-[3px] bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 shadow-lg shadow-indigo-500/10">
+                <div className="w-full h-full rounded-[1.6rem] md:rounded-[2rem] bg-[#0A0A0A] flex items-center justify-center border border-white/10 group-hover:border-white/20 transition-all overflow-hidden relative">
+                  {user?.profilePhoto?.url ? (
+                    <Image src={user.profilePhoto.url} fill alt="user" className="object-cover opacity-40 blur-[1px] group-hover:scale-110 transition-transform duration-500" />
+                  ) : null}
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                  <div className="relative z-10 w-8 h-8 md:w-10 md:h-10 rounded-2xl bg-white text-black flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                    <FiPlus size={20} className="md:size-[24px]" />
+                  </div>
+                </div>
+              </div>
+              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-white/60 transition-colors">{t("Start")}</span>
+            </motion.div>
             {groupedArray.map((group, index) => {
               const isMine = group.user?._id === user?._id;
               const unseen = hasUnseen(group.stories);

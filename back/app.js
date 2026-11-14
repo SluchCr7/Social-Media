@@ -24,7 +24,12 @@ app.use(
 );
 
 // CORS must run before middleware that can end a request with an error response.
-const allowedOrigins = (process.env.DOMAIN_NAME || "http://localhost:3000")
+const configuredOrigins = process.env.DOMAIN_NAME;
+if (process.env.NODE_ENV === "production" && !configuredOrigins?.trim()) {
+    throw new Error("DOMAIN_NAME must contain the allowed frontend origin(s) in production.");
+}
+
+const allowedOrigins = (configuredOrigins || "http://localhost:3000")
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean)

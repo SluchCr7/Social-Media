@@ -206,7 +206,7 @@ const NewPostPresenter = (props) => {
   const charCount = postText?.length || 0
   const isRTL = useMemo(() => /[\u0600-\u06FF]/.test(postText || ''), [postText])
   const canPost = (postText?.trim() || media.length > 0) && !loading && !errorText
-
+  const isDraftDisabled = !postText || postText.trim().length === 0;
   const filteredMusic = useMemo(() => {
     if (!musicList) return [];
     if (!musicQuery) return musicList.slice(0, 10);
@@ -238,13 +238,16 @@ const NewPostPresenter = (props) => {
                 <HiSparkles className="text-indigo-500" /> {t("Configuration")}
               </h3>
 
-              <div className="space-y-8">
-                <ControlGroup label={t("Visibility")}>
-                  <PostPrivacySelector defaultValue={privacy} onChange={(v) => setPrivacy(v)} />
-                </ControlGroup>
+              <div className="space-y-8 relative">
+                {/* إضافة relative هنا لضمان تمركز الـ Dropdown داخله بشكل صحيح */}
+                <div className="relative z-30">
+                  <ControlGroup label={t("Visibility")}>
+                    <PostPrivacySelector defaultValue={privacy} onChange={(v) => setPrivacy(v)} />
+                  </ControlGroup>
+                </div>
 
                 <ControlGroup label={t("Transmission Channel")}>
-                  <div className="relative group">
+                  <div className="relative group z-10">
                     <HiUsers className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-indigo-500 transition-colors" size={16} />
                     <select
                       value={selectedCommunity}
@@ -262,13 +265,14 @@ const NewPostPresenter = (props) => {
                   </div>
                 </ControlGroup>
 
-                <div className="pt-6 space-y-3">
+                <div className="pt-6 space-y-3 relative z-10">
                   <motion.button
-                    whileHover={{ y: -2 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={!isDraftDisabled ? { y: -2 } : {}}
+                    whileTap={!isDraftDisabled ? { scale: 0.98 } : {}}
                     type="button"
+                    disabled={isDraftDisabled}
                     onClick={handleSaveDraft}
-                    className="w-full flex items-center justify-center gap-3 py-3.5 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl text-[11px] font-black uppercase tracking-widest text-gray-500 hover:text-indigo-600 transition-all shadow-sm"
+                    className="w-full flex items-center justify-center gap-3 py-3.5 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl text-[11px] font-black uppercase tracking-widest text-gray-500 hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-500 transition-all shadow-sm"
                   >
                     <HiInboxArrowDown size={16} /> {t("Drafts")}
                   </motion.button>

@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { DEFAULT_ACCENT_COLOR, normalizeAccentColor } from '../../../utils/accentColor';
 
 const getInitialTheme = () => {
   if (typeof window !== 'undefined') {
@@ -13,6 +14,14 @@ const getInitialTheme = () => {
 
 const initialState = {
   theme: getInitialTheme(),
+  accentColor: (() => {
+    if (typeof window === 'undefined') return DEFAULT_ACCENT_COLOR;
+    try {
+      return normalizeAccentColor(localStorage.getItem('accentColor')) || DEFAULT_ACCENT_COLOR;
+    } catch {
+      return DEFAULT_ACCENT_COLOR;
+    }
+  })(),
 };
 
 export const themeSlice = createSlice({
@@ -42,9 +51,21 @@ export const themeSlice = createSlice({
         root.setAttribute('data-theme', nextTheme);
       }
     },
+    setAccentColor: (state, action) => {
+      const accentColor = normalizeAccentColor(action.payload);
+      if (!accentColor) return;
+      state.accentColor = accentColor;
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('accentColor', accentColor);
+        } catch (error) {
+          console.warn('Unable to persist the selected accent color:', error);
+        }
+      }
+    },
   },
 });
 
-export const { setTheme, toggleTheme } = themeSlice.actions;
+export const { setTheme, toggleTheme, setAccentColor } = themeSlice.actions;
 
 export default themeSlice.reducer;

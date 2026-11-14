@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "node --import ./test/register-extensionless-loader.mjs --test ./test/authentication.test.mjs ./test/accent-color.test.mjs"
   },
   "dependencies": {
     "@radix-ui/react-hover-card": "^1.1.15",

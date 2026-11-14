@@ -389,6 +389,25 @@ test('production cookies default to cross-site settings and clear with matching 
   );
 });
 
+test('production requires explicit frontend origins instead of falling back to localhost', () => {
+  const missingOrigins = spawnSync(process.execPath, ['-e', "require('./app')"], {
+    cwd: path.resolve(__dirname, '..'),
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      NODE_ENV: 'production',
+      DOMAIN_NAME: '',
+      AUTH_COOKIE_SAME_SITE: 'none',
+    },
+  });
+
+  assert.notEqual(missingOrigins.status, 0);
+  assert.match(
+    missingOrigins.stderr,
+    /DOMAIN_NAME must contain the allowed frontend origin\(s\) in production\./
+  );
+});
+
 test('authentication middleware does not accept a token from Authorization headers', async () => {
   const { verifyToken } = require('../Middelwares/verifyToken');
   const _id = '507f1f77bcf86cd799439011';

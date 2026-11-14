@@ -4,7 +4,7 @@ import {
   refreshAuthSession,
   runAuthTransition,
 } from '../../../utils/authRefresh';
-import { setAuthSession, logoutSuccess, setIsAuthChecked } from './authSlice';
+import { setAuthSession, logoutSuccess, setAuthStatus } from './authSlice';
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -13,17 +13,21 @@ export const authApi = baseApi.injectEndpoints({
       providesTags: ['Auth'],
       async onQueryStarted(arg, { dispatch, getState, queryFulfilled }) {
         const sessionVersion = getState().auth?.sessionVersion || 0;
+        if (!getState().auth?.isAuthChecked) {
+          dispatch(setAuthStatus('initializing'));
+        }
         try {
           const { data } = await queryFulfilled;
           if ((getState().auth?.sessionVersion || 0) === sessionVersion) {
             dispatch(setAuthSession(data.user));
           }
         } catch (rejection) {
-          if ((getState().auth?.sessionVersion || 0) === sessionVersion) {
+          const authState = getState().auth;
+          if ((authState?.sessionVersion || 0) === sessionVersion) {
             if (isTerminalAuthFailure(rejection?.error) || rejection?.error?.status === 404) {
               dispatch(logoutSuccess());
-            } else {
-              dispatch(setIsAuthChecked(true));
+            } else if (!authState?.isAuthChecked) {
+              dispatch(setAuthStatus('error'));
             }
           }
         }

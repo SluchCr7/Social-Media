@@ -1,25 +1,19 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Palette, Monitor, Sun, Moon, Sparkles, Layers, Eye, Check } from 'lucide-react';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT_COLORS } from '@/app/utils/Data';
 import { Avatar } from '@/app/Component/ui/Avatar';
 import { SettingsSection } from '@/app/Component/Setting/SettingsComponents';
+import { useTheme } from '@/app/redux/hooks';
+import { getAccentTextColor } from '@/app/utils/accentColor';
 
-const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = DEFAULT_COLORS[0].value }) => {
+const AppearanceTab = React.memo(({ darkMode, toggleTheme, user }) => {
   const { t } = useTranslation();
-  const [backgroundValue, setBackgroundValue] = useState(initialColor);
-  const [customColor, setCustomColor] = useState('');
+  const { accentColor, setAccentColor } = useTheme();
   const [layout, setLayout] = useState('relaxed');
-
-  const colors = useMemo(() => DEFAULT_COLORS, []);
-
-  const handleBackgroundChange = useCallback((type, value) => {
-    setBackgroundValue(value);
-    if (type === 'custom') setCustomColor(value);
-  }, []);
 
   return (
     <SettingsSection
@@ -45,15 +39,15 @@ const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = 
               className={clsx(
                 'group relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl border p-5 text-center transition-all duration-300 cursor-pointer',
                 !darkMode
-                  ? 'border-indigo-500 bg-indigo-50 shadow-sm dark:bg-slate-900'
+                ? 'accent-selected shadow-sm'
                   : 'border-slate-200 bg-white/70 hover:border-indigo-500/50 dark:border-slate-800 dark:bg-transparent'
               )}
             >
-              <div className={clsx('rounded-xl p-2.5 transition-colors', !darkMode ? 'bg-indigo-500 text-white' : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-400')}>
+              <div className={clsx('rounded-xl p-2.5 transition-colors', !darkMode ? 'accent-action' : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-400')}>
                 <Sun size={20} />
               </div>
               <span className="text-[11px] font-black uppercase tracking-[0.25em]">{t('Light')}</span>
-              {!darkMode && <div className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-indigo-500" />}
+                {!darkMode && <div className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full accent-action" />}
             </button>
 
             <button
@@ -61,15 +55,15 @@ const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = 
               className={clsx(
                 'group relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl border p-5 text-center transition-all duration-300 cursor-pointer',
                 darkMode
-                  ? 'border-indigo-500 bg-indigo-50 shadow-sm dark:bg-slate-900'
+                  ? 'accent-selected shadow-sm'
                   : 'border-slate-200 bg-white/70 hover:border-indigo-500/50 dark:border-slate-800 dark:bg-transparent'
               )}
             >
-              <div className={clsx('rounded-xl p-2.5 transition-colors', darkMode ? 'bg-indigo-500 text-white' : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-400')}>
+              <div className={clsx('rounded-xl p-2.5 transition-colors', darkMode ? 'accent-action' : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-400')}>
                 <Moon size={20} />
               </div>
               <span className="text-[11px] font-black uppercase tracking-[0.25em]">{t('Dark')}</span>
-              {darkMode && <div className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-indigo-500" />}
+              {darkMode && <div className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full accent-action" />}
             </button>
           </div>
         </div>
@@ -87,21 +81,27 @@ const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = 
           </div>
 
           <div className="grid grid-cols-4 sm:grid-cols-7 gap-3">
-            {colors.map((c) => (
+            {DEFAULT_COLORS.map((c) => (
               <button
                 key={c.value}
-                onClick={() => handleBackgroundChange('color', c.value)}
+                type="button"
+                onClick={() => setAccentColor(c.value)}
+                aria-pressed={accentColor === c.value}
                 className={clsx(
-                  "w-10 h-10 rounded-xl transition-all duration-200 relative shrink-0 cursor-pointer shadow-sm",
-                  backgroundValue === c.value
-                    ? "scale-105 ring-2 ring-indigo-500 dark:ring-indigo-400 ring-offset-2 dark:ring-offset-[#090d16]"
+                  "w-10 h-10 rounded-xl transition-all duration-200 relative shrink-0 cursor-pointer shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 accent-ring",
+                  accentColor === c.value
+                    ? "scale-105 ring-2 ring-offset-2 dark:ring-offset-[#090d16]"
                     : "hover:scale-105"
                 )}
                 style={{ backgroundColor: c.value }}
                 title={c.name}
+                aria-label={t('Choose {{color}} accent', { color: c.name })}
               >
-                {backgroundValue === c.value && (
-                  <div className="absolute inset-0 flex items-center justify-center text-white">
+                {accentColor === c.value && (
+                  <div
+                    className="absolute inset-0 flex items-center justify-center"
+                    style={{ color: getAccentTextColor(c.value) }}
+                  >
                     <Check size={16} strokeWidth={3} />
                   </div>
                 )}
@@ -110,11 +110,12 @@ const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = 
             <label className="relative w-10 h-10 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center cursor-pointer hover:border-indigo-500 dark:hover:border-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all shrink-0">
               <input
                 type="color"
-                value={customColor || '#6366f1'}
-                onChange={(e) => handleBackgroundChange('custom', e.target.value)}
+                value={accentColor}
+                onChange={(e) => setAccentColor(e.target.value)}
+                aria-label={t('Choose a custom accent color')}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
-              <Palette size={16} className="text-slate-400 hover:text-indigo-500" />
+              <Palette size={16} className="text-slate-400 hover:accent-text" />
             </label>
           </div>
         </div>
@@ -137,24 +138,24 @@ const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = 
               className={clsx(
                 "w-full flex items-center justify-between p-3.5 px-4 rounded-xl border text-xs font-bold transition-all cursor-pointer",
                 layout === 'compact'
-                  ? "bg-slate-50 dark:bg-slate-900 border-indigo-500 text-indigo-600 dark:text-indigo-400"
+                  ? "accent-selected"
                   : "bg-transparent border-slate-200 dark:border-slate-800 hover:border-indigo-500/50"
               )}
             >
               <span>{t('Compact Mode')}</span>
-              {layout === 'compact' && <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400" />}
+              {layout === 'compact' &&               <div className="w-1.5 h-1.5 rounded-full accent-action" />}
             </button>
             <button
               onClick={() => setLayout('relaxed')}
               className={clsx(
                 "w-full flex items-center justify-between p-3.5 px-4 rounded-xl border text-xs font-bold transition-all cursor-pointer",
                 layout === 'relaxed'
-                  ? "bg-slate-50 dark:bg-slate-900 border-indigo-500 text-indigo-600 dark:text-indigo-400"
+                  ? "accent-selected"
                   : "bg-transparent border-slate-200 dark:border-slate-800 hover:border-indigo-500/50"
               )}
             >
               <span>{t('Relaxed Flow')}</span>
-              {layout === 'relaxed' && <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400" />}
+              {layout === 'relaxed' &&               <div className="w-1.5 h-1.5 rounded-full accent-action" />}
             </button>
           </div>
         </div>
@@ -187,8 +188,11 @@ const AppearanceTab = React.memo(({ darkMode, toggleTheme, user, initialColor = 
 
             <div className="flex gap-2 pt-1">
               <div
-                className="px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest text-white shadow-sm"
-                style={{ backgroundColor: backgroundValue }}
+                className="px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm"
+                style={{
+                  backgroundColor: accentColor,
+                  color: getAccentTextColor(accentColor),
+                }}
               >
                 Action
               </div>
