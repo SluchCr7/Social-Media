@@ -28,36 +28,46 @@ const PlayerHeader = memo(({ current, likeMusic, shareMusicAsPost, saveMusicInPl
       </div>
 
       <div className="flex items-center gap-3">
+        {/* زر الإعجاب */}
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => current?._id && likeMusic(current?._id)}
           aria-label={isLiked ? t('Unlike track') : t('Like track')}
-          className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all border ${isLiked ? 'bg-red-500 border-red-400 text-white shadow-[0_0_20px_rgba(239,68,68,0.4)]' : 'bg-white/[0.03] border-white/5 text-white/40 hover:text-red-500 hover:bg-white/[0.05]'}`}
+          className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all border ${
+            isLiked 
+              ? 'bg-red-500 border-red-400 text-white shadow-[0_0_20px_rgba(239,68,68,0.4)]' 
+              : 'bg-white/[0.03] border-white/5 text-white/70 hover:text-red-500 hover:bg-white/[0.05]'
+          }`}
         >
           <HiHeart size={20} fill={isLiked ? "currentColor" : "none"} />
         </motion.button>
 
+        {/* زر الحفظ */}
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => current?._id && saveMusicInPlayList(current?._id)}
           aria-label={isSaved ? t('Remove from saved tracks') : t('Save track')}
-          className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all border ${isSaved ? 'bg-indigo-500 border-indigo-400 text-white shadow-[0_0_20px_rgba(99,102,241,0.4)]' : 'bg-white/[0.03] border-white/5 text-white/40 hover:text-indigo-500 hover:bg-white/[0.05]'}`}
+          className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all border ${
+            isSaved 
+              ? 'bg-indigo-500 border-indigo-400 text-white shadow-[0_0_20px_rgba(99,102,241,0.4)]' 
+              : 'bg-white/[0.03] border-white/5 text-white/70 hover:text-indigo-500 hover:bg-white/[0.05]'
+          }`}
         >
           <HiBookmark size={20} fill={isSaved ? "currentColor" : "none"} />
         </motion.button>
 
+        {/* زر المشاركة */}
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => current?._id && shareMusicAsPost(current._id)}
           aria-label={t('Share track')}
-          className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/[0.03] border border-white/5 text-white/40 hover:text-white hover:bg-white/[0.05] transition-all"
+          className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/[0.03] border border-white/5 text-white/70 hover:text-white hover:bg-white/[0.05] transition-all"
         >
           <HiShare size={20} />
         </motion.button>
-
         <div className="w-px h-8 bg-white/5 mx-1" />
 
         <motion.button
